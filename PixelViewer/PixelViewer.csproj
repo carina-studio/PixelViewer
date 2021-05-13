@@ -18,6 +18,9 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Styles\Light.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.3" />
     <PackageReference Include="Avalonia.Desktop" Version="0.10.3" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.3" />
@@ -50,9 +53,25 @@
 		<AvaloniaResource Include="Resources/AppIcon_64px.png" />
 		<AvaloniaResource Include="Resources/AppIcon.ico" />
 		<AvaloniaResource Include="Resources/Dark/Error_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Add_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Close_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Error_96px.png" />
+		<AvaloniaResource Include="Resources/Light/FitToScreen_96px.png" />
+		<AvaloniaResource Include="Resources/Light/NewSession_96px.png" />
+		<AvaloniaResource Include="Resources/Light/OpenFile_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Options_96px.png" />
+		<AvaloniaResource Include="Resources/Light/RotateLeft_96px.png" />
+		<AvaloniaResource Include="Resources/Light/RotateRight_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Save_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Settings_96px.png" />
+		<AvaloniaResource Include="Resources/Light/ZoomIn_96px.png" />
+		<AvaloniaResource Include="Resources/Light/ZoomOut_96px.png" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
 		<AvaloniaResource Include="Styles/Dark.xaml" />
+		<AvaloniaResource Include="Styles\Light.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</AvaloniaResource>
 	</ItemGroup>
   <ItemGroup>
     <None Update="NLog.config">
