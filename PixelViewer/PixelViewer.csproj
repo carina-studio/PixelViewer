@@ -1,0 +1,84 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+		<AssemblyVersion>0.9.3.512</AssemblyVersion>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+    <RootNamespace>Carina.PixelViewer</RootNamespace>
+    <StartupObject>Carina.PixelViewer.App</StartupObject>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+    <NoWin32Manifest>true</NoWin32Manifest>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DefineConstants>DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="0.10.3" />
+    <PackageReference Include="Avalonia.Desktop" Version="0.10.3" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.3" />
+    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.3" />
+    <PackageReference Include="NLog" Version="4.7.9" />
+    <PackageReference Include="ReactiveUI" Version="13.2.18" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
+  </ItemGroup>
+	<ItemGroup>
+		<AvaloniaResource Include="Resources/Default.xaml" />
+		<AvaloniaResource Include="Resources/Dark/OpenFile_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Add_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Close_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/FitToScreen_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/RotateLeft_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/RotateRight_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Settings_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/ZoomIn_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/ZoomOut_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/NewSession_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Options_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Save_96px.png" />
+		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
+		<AvaloniaResource Include="Resources/AppIcon_128px.png" />
+		<AvaloniaResource Include="Resources/AppIcon_16px.png" />
+		<AvaloniaResource Include="Resources/AppIcon_256px.png" />
+		<AvaloniaResource Include="Resources/AppIcon_32px.png" />
+		<AvaloniaResource Include="Resources/AppIcon_512px.png" />
+		<AvaloniaResource Include="Resources/AppIcon_64px.png" />
+		<AvaloniaResource Include="Resources/AppIcon.ico" />
+		<AvaloniaResource Include="Resources/Dark/Error_96px.png" />
+		<AvaloniaResource Include="Strings/Default.xaml" />
+		<AvaloniaResource Include="Strings/zh-TW.xaml" />
+		<AvaloniaResource Include="Styles/Dark.xaml" />
+	</ItemGroup>
+  <ItemGroup>
+    <None Update="NLog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Strings\Default.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <None Update="Strings\zh-TW.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+  </ItemGroup>
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>$(AssemblyName).Test</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+	<ItemGroup>
+	  <Compile Update="Settings.Designer.cs">
+	    <DesignTimeSharedInput>True</DesignTimeSharedInput>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Settings.settings</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+</Project>

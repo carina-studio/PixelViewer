@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.Controls.TextInputDialog"
+				Classes="Dialog"
+				SizeToContent="Height"
+				Width="{StaticResource Double.TextInputDialog.Width}">
+
+	<Border Classes="Dialog">
+		<Grid RowDefinitions="Auto,*,Auto">
+
+			<!-- Label -->
+			<TextBlock Margin="{StaticResource Thickness.Dialog.Label.Vertical.First}" Text="{Binding $parent[Window].Description}"/>
+
+			<!-- Text input -->
+			<TextBox x:Name="textBox" Grid.Row="1" HorizontalAlignment="Stretch" MaxLength="{Binding $parent[Window].MaxTextLength}" VerticalAlignment="Center"/>
+
+			<!-- Control buttons -->
+			<StackPanel Grid.Row="2" HorizontalAlignment="Center" Orientation="Horizontal">
+				<Button Classes="Dialog_ControlButton" Click="OnOKClick" Content="{DynamicResource String.Common.OK}" IsDefault="True"/>
+				<Button Classes="Dialog_ControlButton" Click="OnCancelClick" Content="{DynamicResource String.Common.Cancel}"/>
+			</StackPanel>
+
+		</Grid>
+	</Border>
+
+</Window>

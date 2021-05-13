@@ -1,0 +1,57 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+				xmlns:app="clr-namespace:Carina.PixelViewer"
+				xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
+				xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.MainWindow"
+				Icon="/Resources/AppIcon.ico"
+        Title="PixelViewer">
+
+	<!-- Data templates -->
+	<Window.DataTemplates>
+		<DataTemplate DataType="{x:Type appViewModels:Session}">
+			<StackPanel Background="{x:Static Brushes.Transparent}" DragDrop.AllowDrop="True" Margin="{StaticResource Thickness.MainWindow.MainTabItem.Header.Padding}" Orientation="Horizontal">
+				<TextBlock MaxLines="1" MaxWidth="400" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SourceFileName}" VerticalAlignment="Center"/>
+				<Button Classes="Mainwindow_CloseTab" Command="{Binding $parent[Window].CloseSessionCommand}" CommandParameter="{Binding $parent[TabItem]}" ToolTip.Tip="{DynamicResource String.MainWindow.CloseSession}">
+					<Image Classes="Mainwindow_CloseTab"/>
+				</Button>
+			</StackPanel>
+		</DataTemplate>
+	</Window.DataTemplates>
+
+	<!-- Layout -->
+	<Grid Opacity="{Binding $parent[Window].HasDialog, Converter={x:Static app:MainWindow.HasDialogToControlOpacityConverter}}">
+
+		<!-- Transitions -->
+		<Grid.Transitions>
+			<Transitions>
+				<DoubleTransition Property="Opacity" Duration="0:0:0.3"/>
+			</Transitions>
+		</Grid.Transitions>
+
+		<!-- Main content -->
+		<TabControl x:Name="tabControl" Padding="0">
+
+			<!-- Options tab -->
+			<TabItem>
+				<TabItem.Header>
+					<Image Classes="Mainwindow_OptionsTab" ToolTip.Tip="{DynamicResource String.Common.Options}"/>
+				</TabItem.Header>
+				<appControls:AppOptionsControl/>
+			</TabItem>
+
+			<!-- New tab stub -->
+			<TabItem>
+				<TabItem.Header>
+					<Image Classes="Mainwindow_NewTab" DragDrop.AllowDrop="True" ToolTip.Tip="{DynamicResource String.MainWindow.NewSession}"/>
+				</TabItem.Header>
+			</TabItem>
+			
+		</TabControl>
+
+	</Grid>
+	
+</Window>

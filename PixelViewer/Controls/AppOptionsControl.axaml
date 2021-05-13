@@ -1,0 +1,135 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+						 xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
+						 xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
+						 xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
+						 xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Carina.PixelViewer.Controls.AppOptionsControl">
+
+	<ScrollViewer HorizontalContentAlignment="Center">
+		<StackPanel Margin="{StaticResource Thickness.AppOptionsControl.Padding}" MaxWidth="{StaticResource Double.AppOptionsControl.MaxContentWidth}" Orientation="Vertical">
+
+			<!-- App logo -->
+			<Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
+				<Image x:Name="appIcon" Height="{StaticResource Double.AppOptionsControl.AppIcon.Size}" Margin="{StaticResource Thickness.AppOptionsControl.AppIcon.Margin}" VerticalAlignment="Center" Width="{StaticResource Double.AppOptionsControl.AppIcon.Size}"/>
+				<StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
+					<TextBlock FontSize="{StaticResource Double.AppOptionsControl.AppName.FontSize}" FontWeight="Bold" Margin="{StaticResource Thickness.AppOptionsControl.AppName.Margin}" Text="PixelViewer"/>
+					<TextBlock Text="{Binding VersionString}"/>
+					<TextBlock Text="©2021 Carina Studio"/>
+				</StackPanel>
+			</Grid>
+
+			<!-- Attributions -->
+			<StackPanel Margin="{StaticResource Thickness.AppOptionsControl.Attributions.Margin}" Orientation="Vertical">
+
+				<!-- Framework -->
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.Framework.Section1}"/>
+					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://dotnet.microsoft.com/" Text=".NET Core"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.Framework.Section2}"/>
+					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://avaloniaui.net/" Text="Avalonia UI Framework"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.Framework.Section3}"/>
+				</StackPanel>
+
+				<!-- Icon -->
+				<StackPanel Orientation="Horizontal">
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.AppIcon.Section1}"/>
+					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://www.freepik.com/" Text="Freepik"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.AppIcon.Section2}"/>
+					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://www.flaticon.com/" Text="Flaticon"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.AppIcon.Section3}"/>
+				</StackPanel>
+
+			</StackPanel>
+
+			<!-- Image format -->
+			<StackPanel Classes="AppOptionsControl_Group">
+
+				<!-- Header -->
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.ImageFormat}"/>
+
+				<!-- Default renderer -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DefaultImageRendererFormatName}"/>
+				<ComboBox Classes="AppOptionsControl_ItemValue" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
+					<ComboBox.DataTemplates>
+						<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
+							<TextBlock Text="{Binding Format.DisplayName}"/>
+						</DataTemplate>
+					</ComboBox.DataTemplates>
+				</ComboBox>
+
+				<!-- Reset renderer after opening file -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile}"/>
+				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>
+
+				<!-- YUV conversion mode -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.YuvConversionMode}"/>
+				<ComboBox Classes="AppOptionsControl_ItemValue" Items="{Binding YuvConversionModes}" SelectedItem="{Binding YuvConversionMode, Mode=TwoWay}">
+					<ComboBox.DataTemplates>
+						<DataTemplate DataType="appMedia:YuvConversionMode">
+							<TextBlock Text="{Binding Converter={x:Static appConverters:YuvConversionModeToStringConverter.Default}}"/>
+						</DataTemplate>
+					</ComboBox.DataTemplates>
+				</ComboBox>
+				<TextBlock Classes="AppOptionsControl_ItemDescription_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://en.wikipedia.org/wiki/YUV" Text="{DynamicResource String.Common.KnowMoreAbout}"/>
+				
+			</StackPanel>
+
+			<!-- Image dimensions evaluation -->
+			<StackPanel Classes="AppOptionsControl_Group">
+
+				<!-- Header -->
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.ImageDimensionsEvaluation}"/>
+
+				<!-- Default aspect ratio -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio}"/>
+				<ComboBox Classes="AppOptionsControl_ItemValue" Items="{Binding AspectRatios}" SelectedItem="{Binding DefaultImageDimensionsEvaluationAspectRatio, Mode=TwoWay}">
+					<ComboBox.DataTemplates>
+						<DataTemplate DataType="appMedia:AspectRatio">
+							<TextBlock Text="{Binding Converter={x:Static appConverters:AspectRatioToStringConverter.Default}}"/>
+						</DataTemplate>
+					</ComboBox.DataTemplates>
+				</ComboBox>
+				<TextBlock Classes="AppOptionsControl_ItemDescription" Text="{DynamicResource String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description}"/>
+
+				<!-- Evaluate after opening file -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile}"/>
+				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding EvaluateImageDimensionsAfterOpeningSourceFile, Mode=TwoWay}"/>
+
+				<!-- Evaluate after changing renderer -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer}"/>
+				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
+				
+			</StackPanel>
+
+			<!-- User interface -->
+			<StackPanel Classes="AppOptionsControl_Group">
+
+				<!-- Header -->
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.UserInterface}"/>
+
+				<!-- Select language automatically -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.AutoSelectLanguage}"/>
+				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding AutoSelectLanguage, Mode=TwoWay}"/>
+				
+			</StackPanel>
+
+			<!-- Memory usage -->
+			<StackPanel Classes="AppOptionsControl_Group">
+
+				<!-- Header -->
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.MemoryUsage}"/>
+
+				<!-- Max rendered images memory usage -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.MaxRenderedImagesMemoryUsage}"/>
+				<NumericUpDown Classes="AppOptionsControl_ItemValue" Maximum="8192" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
+
+			</StackPanel>
+			
+		</StackPanel>
+	</ScrollViewer>
+
+</UserControl>
