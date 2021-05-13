@@ -14,7 +14,7 @@
 
 	<!-- Styles -->
 	<Application.Styles>
-		<StyleInclude Source="/Styles/Dark.xaml"/>
+		<!--StyleInclude Source="/Styles/Dark.xaml"/-->
 	</Application.Styles>
 	
 </Application>

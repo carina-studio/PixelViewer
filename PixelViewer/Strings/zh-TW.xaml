@@ -11,6 +11,7 @@
 	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section2" xml:space="preserve">以及</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section3" xml:space="preserve">開發完成。</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.AutoSelectLanguage">自動選取語言</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.DarkMode">深色模式</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.DefaultImageRendererFormatName">預設格式</sys:String>
@@ -20,6 +21,7 @@
 	<sys:String x:Key="String.AppOptionsControl.ImageFormat">影像格式</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MaxRenderedImagesMemoryUsage">影像輸出記憶體使用上限 (MB)</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MemoryUsage">記憶體使用</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.RestartAppNeeded">需要重新啟動應用程式以生效</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UserInterface">使用者介面</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.VersionName">版本 {0}</sys:String>

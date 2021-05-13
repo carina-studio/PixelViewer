@@ -15,6 +15,10 @@ namespace Carina.PixelViewer.ViewModels
 	/// </summary>
 	class AppOptions : BaseViewModel
 	{
+		// Fields.
+		readonly bool isOriginallyDarkMode;
+
+
 		/// <summary>
 		/// Initialize new <see cref="AppOptions"/> instance.
 		/// </summary>
@@ -22,6 +26,9 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// create command
 			this.OpenLinkCommand = ReactiveCommand.Create<string>(this.OpenLink);
+
+			// get initial settings state
+			this.isOriginallyDarkMode = this.Settings.DarkMode;
 
 			// get version name
 			this.UpdateVersionString();
@@ -41,6 +48,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.AutoSelectLanguage;
 			set => this.Settings.AutoSelectLanguage = value;
+		}
+
+
+		/// <summary>
+		/// Use dark interface mode.
+		/// </summary>
+		public bool DarkMode
+		{
+			get => this.Settings.DarkMode;
+			set => this.Settings.DarkMode = value;
 		}
 
 
@@ -90,6 +107,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether restarting application is needed to apply dark mode change or not.
+		/// </summary>
+		public bool IsRestartingAppNeededToApplyDarkMode { get; private set; } = false;
+
+
+		/// <summary>
 		/// Maximum memory usage for rendering images.
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
@@ -108,6 +131,11 @@ namespace Carina.PixelViewer.ViewModels
 				case nameof(Settings.AutoSelectLanguage):
 					this.OnPropertyChanged(nameof(this.AutoSelectLanguage));
 					this.UpdateVersionString();
+					break;
+				case nameof(Settings.DarkMode):
+					this.OnPropertyChanged(nameof(this.DarkMode));
+					this.IsRestartingAppNeededToApplyDarkMode = (this.Settings.DarkMode != this.isOriginallyDarkMode);
+					this.OnPropertyChanged(nameof(this.IsRestartingAppNeededToApplyDarkMode));
 					break;
 				case nameof(Settings.DefaultImageDimensionsEvaluationAspectRatio):
 					this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));

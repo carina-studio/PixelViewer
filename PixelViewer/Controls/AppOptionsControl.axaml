@@ -111,6 +111,11 @@
 				<!-- Header -->
 				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.UserInterface}"/>
 
+				<!-- Dark mode -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DarkMode}"/>
+				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding DarkMode, Mode=TwoWay}"/>
+				<TextBlock Classes="AppOptionsControl_ItemDescription_Warning" IsVisible="{Binding IsRestartingAppNeededToApplyDarkMode}" Text="{DynamicResource String.AppOptionsControl.RestartAppNeeded}"/>
+
 				<!-- Select language automatically -->
 				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.AutoSelectLanguage}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding AutoSelectLanguage, Mode=TwoWay}"/>

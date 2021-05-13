@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
+using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
 using NLog;
 using System;
@@ -96,6 +97,17 @@ namespace Carina.PixelViewer
 
 			// load strings
 			this.UpdateStringResources();
+
+			// load styles
+			var style = new StyleInclude(new Uri("avares://PixelViewer/")).Also((it) =>
+			{
+				it.Source = this.Settings.DarkMode switch
+				{
+					true => new Uri("avares://PixelViewer/Styles/Dark.xaml"),
+					_ => new Uri("avares://PixelViewer/Styles/Light.xaml"),
+				};
+			});
+			this.Styles.Add(style);
 		}
 
 

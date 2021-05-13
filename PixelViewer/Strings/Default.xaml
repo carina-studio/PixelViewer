@@ -11,6 +11,7 @@
 	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section2" xml:space="preserve">and</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section3" xml:space="preserve">.</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.AutoSelectLanguage">Select language automatically</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.DarkMode">Dark mode</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.DefaultImageRendererFormatName">Default format</sys:String>
@@ -20,6 +21,7 @@
 	<sys:String x:Key="String.AppOptionsControl.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MemoryUsage">Memory usage</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.RestartAppNeeded">Need to restart application to take effect</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UserInterface">User interface</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.VersionName">Version {0}</sys:String>
