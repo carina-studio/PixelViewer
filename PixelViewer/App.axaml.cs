@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
+using Carina.PixelViewer.ViewModels;
 using NLog;
 using System;
 using System.Diagnostics;
@@ -25,6 +26,7 @@ namespace Carina.PixelViewer
 		// Fields.
 		ResourceInclude? stringResources;
 		ResourceInclude? stringResourcesLinux;
+		Workspace? workspace;
 
 
 		// Avalonia configuration, don't remove; also used by visual designer.
@@ -125,8 +127,14 @@ namespace Carina.PixelViewer
 		public static void Main(string[] args)
 		{
 			Logger.Info("Start");
+
+			// build app
 			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-			App.Current.Settings.Save();
+			App.Current.Let((app) =>
+			{
+				app.workspace?.Dispose();
+				app.Settings.Save();
+			});
 		}
 
 
@@ -134,7 +142,13 @@ namespace Carina.PixelViewer
 		public override void OnFrameworkInitializationCompleted()
 		{
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-				desktop.MainWindow = new MainWindow();
+			{
+				this.workspace = new Workspace();
+				desktop.MainWindow = new MainWindow()
+				{
+					DataContext = this.workspace,
+				};
+			}
 			base.OnFrameworkInitializationCompleted();
 		}
 

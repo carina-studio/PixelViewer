@@ -8,14 +8,14 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
 				Icon="/Resources/AppIcon.ico"
-        Title="PixelViewer">
+        Title="{Binding Title}">
 
 	<!-- Data templates -->
 	<Window.DataTemplates>
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
 			<StackPanel Background="{x:Static Brushes.Transparent}" DragDrop.AllowDrop="True" Margin="{StaticResource Thickness.MainWindow.MainTabItem.Header.Padding}" Orientation="Horizontal">
 				<TextBlock MaxLines="1" MaxWidth="400" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SourceFileName}" VerticalAlignment="Center"/>
-				<Button Classes="Mainwindow_CloseTab" Command="{Binding $parent[Window].CloseSessionCommand}" CommandParameter="{Binding $parent[TabItem]}" ToolTip.Tip="{DynamicResource String.MainWindow.CloseSession}">
+				<Button Classes="Mainwindow_CloseTab" Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" ToolTip.Tip="{DynamicResource String.MainWindow.CloseSession}">
 					<Image Classes="Mainwindow_CloseTab"/>
 				</Button>
 			</StackPanel>
@@ -36,11 +36,11 @@
 		<TabControl x:Name="tabControl" Padding="0">
 
 			<!-- Options tab -->
-			<TabItem>
+			<TabItem DataContext="{Binding AppOptions}">
 				<TabItem.Header>
 					<Image Classes="Mainwindow_OptionsTab" ToolTip.Tip="{DynamicResource String.Common.Options}"/>
 				</TabItem.Header>
-				<appControls:AppOptionsControl/>
+				<appControls:AppOptionsControl DataContext="{Binding AppOptions}"/>
 			</TabItem>
 
 			<!-- New tab stub -->

@@ -15,6 +15,7 @@ using ReactiveUI;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Threading;
 using System.Windows.Input;
 
@@ -44,12 +45,14 @@ namespace Carina.PixelViewer
 
 
 		// Fields.
+		IDisposable? activatedSessionToken;
 		readonly List<Dialog> dialogs = new List<Dialog>();
 		bool isClosed;
 		bool isConstructing = true;
 		readonly TabControl mainTabControl;
 		readonly IList mainTabItems;
 		readonly ScheduledOperation saveWindowSizeOperation;
+		Workspace? workspace;
 
 
 		/// <summary>
@@ -58,8 +61,7 @@ namespace Carina.PixelViewer
 		public MainWindow()
 		{
 			// create commands
-			this.CloseSessionCommand = ReactiveCommand.Create((TabItem tabItem) => this.CloseSession(tabItem));
-			this.NewSessionCommand = ReactiveCommand.Create(this.NewSession);
+			this.CloseMainTabItemCommand = ReactiveCommand.Create((TabItem tabItem) => this.CloseMainTabItem(tabItem));
 
 			// create scheduled operations
 			this.saveWindowSizeOperation = new ScheduledOperation(() =>
@@ -94,74 +96,81 @@ namespace Carina.PixelViewer
 			});
 			this.mainTabItems = (IList)this.mainTabControl.Items;
 
-			// create app options view-model
-			(this.mainTabItems[0] as TabItem)?.Let((tabItem) =>
-			{
-				var appOptions = new AppOptions();
-				tabItem.DataContext = appOptions;
-				(tabItem.Content as IControl)?.Let((it) =>
-				{
-					it.DataContext = appOptions;
-				});
-			});
-
-			// create first session
-			this.NewSession();
-
 			// update state
 			this.isConstructing = false;
 		}
 
 
-		// Close given session.
-		void CloseSession(TabItem tabItem)
+		// Create tab item for given session.
+		TabItem AttachTabItemToSession(Session session)
+		{
+			// create session control
+			var sessionControl = new SessionControl()
+			{
+				DataContext = session,
+			};
+
+			// create tab item header
+			var header = this.DataTemplates[0].Build(session);
+
+			// create tab item
+			var tabItem = new TabItem()
+			{
+				Content = sessionControl,
+				DataContext = session,
+				Header = header,
+			};
+			return tabItem;
+		}
+
+
+		// Close given tab item.
+		void CloseMainTabItem(TabItem tabItem)
 		{
 			// check session
-			if (!(tabItem.DataContext is Session session))
+			if (tabItem.DataContext is not Session session)
 				return;
 
-			// remove tab
-			var index = this.mainTabItems.IndexOf(tabItem);
-			if (index >= 0)
-			{
-				if (this.mainTabItems.Count == 3 && !this.isClosed)
-					this.NewSession();
-				else if (this.mainTabControl.SelectedIndex == index)
-				{
-					if (index > 1)
-						this.mainTabControl.SelectedIndex = index - 1;
-					else
-						this.mainTabControl.SelectedIndex = index + 1;
-				}
-				this.mainTabItems.RemoveAt(index);
-			}
-
-			// remove data context
-			tabItem.DataContext = null;
-			(tabItem.Content as IControl)?.Let((it) =>
-			{
-				it.DataContext = null;
-			});
-
-			// dispose session
-			session.Dispose();
+			// close session
+			this.workspace?.CloseSession(session);
 		}
 
 
 		/// <summary>
-		/// Command for closing given session.
+		/// Command for closing given tab item.
 		/// </summary>
-		public ICommand CloseSessionCommand { get; }
+		public ICommand CloseMainTabItemCommand { get; }
 
 
-		// Find index of main tab contains dragging point.
-		int FindMainTabIndex(DragEventArgs e)
+		// Detach tab item from session.
+		void DetachTabItemFromSession(TabItem tabItem)
 		{
-			for (int i = this.mainTabItems.Count - 1; i > 0; --i)
+			(tabItem.Header as IControl)?.Let((it) => it.DataContext = null);
+			(tabItem.Content as IControl)?.Let((it) => it.DataContext = null);
+			tabItem.DataContext = null;
+		}
+
+
+		// Find index of main tab item contains dragging point.
+		int FindMainTabItemIndex(DragEventArgs e)
+		{
+			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
 			{
 				if (!((this.mainTabItems[i] as TabItem)?.Header is IVisual headerVisual))
 					continue;
 				if (e.IsContainedBy(headerVisual))
+					return i;
+			}
+			return -1;
+		}
+
+
+		// Find index of main tab item attached to given session.
+		int FindMainTabItemIndex(Session session)
+		{
+			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
+			{
+				if ((this.mainTabItems[i] as TabItem)?.DataContext == session)
 					return i;
 			}
 			return -1;
@@ -181,60 +190,11 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Create new session.
-		Session NewSession()
-		{
-			// create session
-			var session = new Session();
-
-			// create session control
-			var sessionControl = new SessionControl()
-			{
-				DataContext = session,
-			};
-
-			// create tab item header
-			var header = this.DataTemplates[0].Build(session);
-
-			// create tab item
-			var tabItem = new TabItem()
-			{
-				Content = sessionControl,
-				DataContext = session,
-				Header = header,
-			};
-			var index = this.mainTabItems.Count - 1;
-			this.mainTabItems.Insert(index, tabItem);
-			this.mainTabControl.SelectedIndex = index;
-
-			// complete
-			return session;
-		}
-
-
-		/// <summary>
-		/// Command for creating new session.
-		/// </summary>
-		public ICommand NewSessionCommand { get; }
-
-
 		// Called when window closed.
 		protected override void OnClosed(EventArgs e)
 		{
 			// update state
 			this.isClosed = true;
-
-			// close all sessions
-			foreach (var item in new object[this.mainTabItems.Count].Also((it) => this.mainTabItems.CopyTo(it, 0)))
-			{
-				if (item is TabItem tabItem)
-				{
-					if (tabItem.DataContext is AppOptions appOptions)
-						appOptions.Dispose();
-					else
-						this.CloseSession(tabItem);
-				}
-			}
 
 			// disable drag-drop
 			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
@@ -279,7 +239,7 @@ namespace Carina.PixelViewer
 				e.DragEffects = DragDropEffects.None;
 				return;
 			}
-			int mainTabIndex = this.FindMainTabIndex(e);
+			int mainTabIndex = this.FindMainTabItemIndex(e);
 			if (mainTabIndex < 0)
 			{
 				e.DragEffects = DragDropEffects.None;
@@ -299,7 +259,7 @@ namespace Carina.PixelViewer
 			e.Data.GetSingleFileName()?.Let((fileName) =>
 			{
 				// find tab
-				int mainTabIndex = this.FindMainTabIndex(e);
+				int mainTabIndex = this.FindMainTabItemIndex(e);
 				if (mainTabIndex < 0)
 					return;
 
@@ -308,7 +268,7 @@ namespace Carina.PixelViewer
 				if (mainTabIndex < this.mainTabItems.Count - 1)
 					session = (this.mainTabItems[mainTabIndex] as TabItem)?.DataContext as Session;
 				else
-					session = this.NewSession();
+					session = this.workspace?.CreateSession();
 				if (session == null)
 					return;
 
@@ -330,10 +290,18 @@ namespace Carina.PixelViewer
 		// Called when selection of main tab control changed.
 		void OnMainTabControlSelectionChanged()
 		{
+			// deactivate session
+			this.activatedSessionToken = this.activatedSessionToken.DisposeAndReturnNull();
+
+			// move to new tab
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.isClosed)
-				this.NewSession();
+				this.workspace?.CreateSession();
 			else
 			{
+				// activate session
+				if (this.mainTabControl.SelectedItem is TabItem tabItem && tabItem.DataContext is Session session)
+					this.activatedSessionToken = this.workspace?.ActivateSession(session);
+
 				// focus on content later to make sure that view has been attached to visual tree
 				SynchronizationContext.Current?.Post(() =>
 				{
@@ -362,6 +330,53 @@ namespace Carina.PixelViewer
 			if (this.isConstructing)
 				return;
 			var property = change.Property;
+			if (property == Window.DataContextProperty)
+			{
+				if (change.OldValue.Value is Workspace prevWorkspace && prevWorkspace == this.workspace)
+				{
+					// deactivate session
+					this.activatedSessionToken = this.activatedSessionToken.DisposeAndReturnNull();
+
+					// clear tab items
+					this.mainTabControl.SelectedIndex = 0;
+					for (var i = this.mainTabItems.Count - 1; i > 0; --i)
+					{
+						if (this.mainTabItems[i] is not TabItem tabItem)
+							continue;
+						this.DetachTabItemFromSession(tabItem);
+						this.mainTabItems.RemoveAt(i);
+					}
+
+					// detach from workspace
+					(prevWorkspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
+				}
+				if (change.NewValue.Value is Workspace newWorkspace)
+				{
+					// keep reference
+					this.workspace = newWorkspace;
+
+					// create tab items
+					foreach (var session in newWorkspace.Sessions)
+					{
+						var tabItem = this.AttachTabItemToSession(session);
+						this.mainTabItems.Insert(this.mainTabItems.Count - 1, tabItem);
+					}
+
+					// attach to workspace
+					(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
+
+					// create first session or select first session
+					if (newWorkspace.Sessions.IsEmpty())
+						newWorkspace.CreateSession();
+					else
+						this.mainTabControl.SelectedIndex = 1;
+				}
+				else
+				{
+					this.workspace = null;
+					this.mainTabControl.SelectedIndex = 0;
+				}
+			}
 			if (property == Window.HeightProperty || property == Window.WidthProperty)
 				this.saveWindowSizeOperation.Schedule(SaveWindowSizeDelay);
 			else if (property == Window.WindowStateProperty)
@@ -369,6 +384,52 @@ namespace Carina.PixelViewer
 				var state = this.WindowState;
 				if (state != WindowState.Minimized)
 					this.Settings.MainWindowState = state;
+			}
+		}
+
+
+		// Called when collection of sessions has been changed.
+		void OnSessionsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			switch (e.Action)
+			{
+				case NotifyCollectionChangedAction.Add:
+					{
+						var tabIndex = e.NewStartingIndex + 1;
+						foreach (Session? session in e.NewItems)
+						{
+							if (session == null)
+								continue;
+							var tabItem = this.AttachTabItemToSession(session);
+							this.mainTabItems.Insert(tabIndex, tabItem);
+							this.mainTabControl.SelectedIndex = tabIndex++;
+						}
+						break;
+					}
+				case NotifyCollectionChangedAction.Remove:
+					{
+						foreach (Session? session in e.OldItems)
+						{
+							if (session == null)
+								continue;
+							var tabIndex = this.FindMainTabItemIndex(session);
+							if (tabIndex < 0 || this.mainTabItems[tabIndex] is not TabItem tabItem)
+								continue;
+							if (tabIndex > 1)
+								this.mainTabControl.SelectedIndex = (tabIndex - 1);
+							else if (tabIndex < this.mainTabItems.Count - 2)
+								this.mainTabControl.SelectedIndex = (tabIndex + 1);
+							else
+								this.mainTabControl.SelectedIndex = 0;
+							this.mainTabItems.RemoveAt(tabIndex);
+						}
+						this.workspace?.Let((it) =>
+						{
+							if (it.Sessions.IsEmpty() && !this.isClosed)
+								it.CreateSession();
+						});
+						break;
+					}
 			}
 		}
 
