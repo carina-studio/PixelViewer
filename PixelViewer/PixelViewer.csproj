@@ -65,6 +65,12 @@
 		<AvaloniaResource Include="Resources/Light/ZoomOut_96px.png" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
+		<AvaloniaResource Include="Strings/Default-Linux.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</AvaloniaResource>
+		<AvaloniaResource Include="Strings\zh-TW-Linux.xaml">
+		  <Generator>MSBuild:Compile</Generator>
+		</AvaloniaResource>
 		<AvaloniaResource Include="Styles/Dark.xaml" />
 		<AvaloniaResource Include="Styles/Light.xaml">
 		  <Generator>MSBuild:Compile</Generator>

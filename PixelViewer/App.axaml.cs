@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 
 namespace Carina.PixelViewer
 {
@@ -23,6 +24,7 @@ namespace Carina.PixelViewer
 
 		// Fields.
 		ResourceInclude? stringResources;
+		ResourceInclude? stringResourcesLinux;
 
 
 		// Avalonia configuration, don't remove; also used by visual designer.
@@ -96,6 +98,13 @@ namespace Carina.PixelViewer
 			this.Settings.PropertyChanged += (_, e) => this.OnSettingsChanged(e.PropertyName);
 
 			// load strings
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+			{
+				this.Resources.MergedDictionaries.Add(new ResourceInclude()
+				{
+					Source = new Uri($"avares://PixelViewer/Strings/Default-Linux.xaml")
+				});
+			}
 			this.UpdateStringResources();
 
 			// load styles
@@ -153,19 +162,22 @@ namespace Carina.PixelViewer
 		{
 			if (this.Settings.AutoSelectLanguage)
 			{
+				// base resources
+				var localeName = this.CultureInfo.Name;
 				if (this.stringResources == null)
 				{
-					var localeName = this.CultureInfo.Name;
 					try
 					{
 						this.stringResources = new ResourceInclude()
 						{
 							Source = new Uri($"avares://PixelViewer/Strings/{localeName}.xaml")
 						};
+						_ = this.stringResources.Loaded; // trigger error if resource not found
 						Logger.Info($"Load strings for {localeName}.");
 					}
 					catch
 					{
+						this.stringResources = null;
 						Logger.Warn($"No strings for {localeName}.");
 						return;
 					}
@@ -173,9 +185,40 @@ namespace Carina.PixelViewer
 				}
 				else if (!this.Resources.MergedDictionaries.Contains(this.stringResources))
 					this.Resources.MergedDictionaries.Add(this.stringResources);
+
+				// resources for specific OS
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+				{
+					if (this.stringResourcesLinux == null)
+					{
+						try
+						{
+							this.stringResourcesLinux = new ResourceInclude()
+							{
+								Source = new Uri($"avares://PixelViewer/Strings/{localeName}-Linux.xaml")
+							};
+							_ = this.stringResourcesLinux.Loaded; // trigger error if resource not found
+							Logger.Info($"Load strings (Linux) for {localeName}.");
+						}
+						catch
+						{
+							this.stringResourcesLinux = null;
+							Logger.Warn($"No strings (Linux) for {localeName}.");
+							return;
+						}
+						this.Resources.MergedDictionaries.Add(this.stringResourcesLinux);
+					}
+					else if (!this.Resources.MergedDictionaries.Contains(this.stringResourcesLinux))
+						this.Resources.MergedDictionaries.Add(this.stringResourcesLinux);
+				}
 			}
-			else if (this.stringResources != null)
-				this.Resources.MergedDictionaries.Remove(this.stringResources);
+			else
+			{
+				if (this.stringResources != null)
+					this.Resources.MergedDictionaries.Remove(this.stringResources);
+				if (this.stringResourcesLinux != null)
+					this.Resources.MergedDictionaries.Remove(this.stringResourcesLinux);
+			}
 		}
 	}
 }
