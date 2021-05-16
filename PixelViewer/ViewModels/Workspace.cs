@@ -10,25 +10,6 @@ namespace Carina.PixelViewer.ViewModels
 	/// </summary>
 	class Workspace : BaseViewModel
 	{
-		// Token for session activation.
-		class SessionActivation : IDisposable
-		{
-			// Fields.
-			readonly Session session;
-			readonly Workspace workspace;
-
-			// Constructor.
-			public SessionActivation(Workspace workspace, Session session)
-			{
-				this.workspace = workspace;
-				this.session = session;
-			}
-
-			// Dispose.
-			public void Dispose() => this.workspace.DeactivateSession(this.session);
-		}
-
-
 		// Fields.
 		readonly ObservableCollection<Session> activatedSessions = new ObservableCollection<Session>();
 		readonly ReadOnlyObservableCollection<Session> readOnlyActivatedSessions;
@@ -68,8 +49,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Activate given session.
 		/// </summary>
 		/// <param name="session">Session to activate.</param>
-		/// <returns><see cref="IDisposable"/> represent token of activation.</returns>
-		public IDisposable ActivateSession(Session session)
+		public void ActivateSession(Session session)
 		{
 			// check state
 			this.VerifyAccess();
@@ -77,13 +57,12 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.sessions.Contains(session))
 				throw new ArgumentException($"Invalid session: {session}.");
 			if (this.activatedSessions.Contains(session))
-				throw new InvalidOperationException($"Session {session} is already activated.");
+				return;
 
 			// activate
 			this.activatedSessions.Add(session);
 			this.Logger.Debug($"Activate session {session}, count: {this.activatedSessions.Count}");
 			this.updateTitleOperation.Schedule();
-			return new SessionActivation(this, session);
 		}
 
 
@@ -137,8 +116,11 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
-		// Deactivate session.
-		void DeactivateSession(Session session)
+		/// <summary>
+		/// Deactivate given session.
+		/// </summary>
+		/// <param name="session"><see cref="Session"/> to deactivate.</param>
+		public void DeactivateSession(Session session)
 		{
 			this.VerifyAccess();
 			if (!this.activatedSessions.Remove(session))

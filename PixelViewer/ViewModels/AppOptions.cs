@@ -16,7 +16,7 @@ namespace Carina.PixelViewer.ViewModels
 	class AppOptions : BaseViewModel
 	{
 		// Fields.
-		readonly bool isOriginallyDarkMode;
+		bool isOriginallyDarkMode;
 
 
 		/// <summary>
@@ -26,6 +26,13 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// create command
 			this.OpenLinkCommand = ReactiveCommand.Create<string>(this.OpenLink);
+			this.RestartMainWindowCommand = ReactiveCommand.Create(() =>
+			{
+				App.Current.RestartMainWindow();
+				this.isOriginallyDarkMode = this.Settings.DarkMode;
+				this.IsRestartingMainWindowNeededToApplyDarkMode = false;
+				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
+			});
 
 			// get initial settings state
 			this.isOriginallyDarkMode = this.Settings.DarkMode;
@@ -107,9 +114,9 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Check whether restarting application is needed to apply dark mode change or not.
+		/// Check whether restarting main window is needed to apply dark mode change or not.
 		/// </summary>
-		public bool IsRestartingAppNeededToApplyDarkMode { get; private set; } = false;
+		public bool IsRestartingMainWindowNeededToApplyDarkMode { get; private set; } = false;
 
 
 		/// <summary>
@@ -134,8 +141,8 @@ namespace Carina.PixelViewer.ViewModels
 					break;
 				case nameof(Settings.DarkMode):
 					this.OnPropertyChanged(nameof(this.DarkMode));
-					this.IsRestartingAppNeededToApplyDarkMode = (this.Settings.DarkMode != this.isOriginallyDarkMode);
-					this.OnPropertyChanged(nameof(this.IsRestartingAppNeededToApplyDarkMode));
+					this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.DarkMode != this.isOriginallyDarkMode);
+					this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
 					break;
 				case nameof(Settings.DefaultImageDimensionsEvaluationAspectRatio):
 					this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
@@ -187,6 +194,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to open given URI in browser.
 		/// </summary>
 		public ICommand OpenLinkCommand { get; }
+
+
+		/// <summary>
+		/// Command to restart main window.
+		/// </summary>
+		public ICommand RestartMainWindowCommand { get; }
 
 
 		// Update version string.

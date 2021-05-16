@@ -21,7 +21,7 @@
 	<sys:String x:Key="String.AppOptionsControl.ImageFormat">影像格式</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MaxRenderedImagesMemoryUsage">影像輸出記憶體使用上限 (MB)</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MemoryUsage">記憶體使用</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.RestartAppNeeded">需要重新啟動應用程式以生效</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.RestartMainWindowToTakeEffect">重新啟動視窗以生效</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UserInterface">使用者介面</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.VersionName">版本 {0}</sys:String>

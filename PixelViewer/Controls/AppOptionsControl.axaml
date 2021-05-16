@@ -114,7 +114,7 @@
 				<!-- Dark mode -->
 				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DarkMode}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding DarkMode, Mode=TwoWay}"/>
-				<TextBlock Classes="AppOptionsControl_ItemDescription_Warning" IsVisible="{Binding IsRestartingAppNeededToApplyDarkMode}" Text="{DynamicResource String.AppOptionsControl.RestartAppNeeded}"/>
+				<TextBlock Classes="AppOptionsControl_ItemDescription_Link" IsVisible="{Binding IsRestartingMainWindowNeededToApplyDarkMode}" PointerReleased="OnLinkTextBlockPointerReleased" Tag="{Binding RestartMainWindowCommand}" Text="{DynamicResource String.AppOptionsControl.RestartMainWindowToTakeEffect}"/>
 
 				<!-- Select language automatically -->
 				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.AutoSelectLanguage}"/>

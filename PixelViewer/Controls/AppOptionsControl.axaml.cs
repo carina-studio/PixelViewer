@@ -8,6 +8,7 @@ using Avalonia.Platform;
 using Carina.PixelViewer.ViewModels;
 using System;
 using System.Reflection;
+using System.Windows.Input;
 
 namespace Carina.PixelViewer.Controls
 {
@@ -62,19 +63,14 @@ namespace Carina.PixelViewer.Controls
 		{
 			if (e.InitialPressMouseButton != MouseButton.Left)
 				return;
-			if (sender is TextBlock textBlock)
-				this.OpenLink(textBlock);
-		}
-
-
-		// Open link by text block.
-		void OpenLink(TextBlock textBlock)
-		{
-			if (!(textBlock.Tag is string uri))
+			if (sender is not TextBlock textBlock)
 				return;
-			if (!(this.DataContext is AppOptions appOptions))
+			if (this.DataContext is not AppOptions appOptions)
 				return;
-			appOptions.OpenLinkCommand.Execute(uri);
+			if (textBlock.Tag is string uri)
+				appOptions.OpenLinkCommand.Execute(uri);
+			else if (textBlock.Tag is ICommand command)
+				command.Execute(null);
 		}
 	}
 }

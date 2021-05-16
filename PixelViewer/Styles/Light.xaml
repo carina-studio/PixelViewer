@@ -44,11 +44,6 @@
 		<Setter Property="Foreground" Value="#0094ff"/>
 		<Setter Property="Margin" Value="{StaticResource Thickness.AppOptionsControl.Item.Description.Margin}"/>
 	</Style>
-	<Style Selector="TextBlock.AppOptionsControl_ItemDescription_Warning">
-		<Setter Property="Cursor" Value="Hand"/>
-		<Setter Property="Foreground" Value="#ff3f3f"/>
-		<Setter Property="Margin" Value="{StaticResource Thickness.AppOptionsControl.Item.Description.Margin}"/>
-	</Style>
 	<Style Selector="TextBlock.AppOptionsControl_Attribution">
 		<Setter Property="Margin" Value="{StaticResource Thickness.AppOptionsControl.Attributions.TextSection.Margin}"/>
 	</Style>

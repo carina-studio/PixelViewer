@@ -45,7 +45,6 @@ namespace Carina.PixelViewer
 
 
 		// Fields.
-		IDisposable? activatedSessionToken;
 		readonly List<Dialog> dialogs = new List<Dialog>();
 		bool isClosed;
 		bool isConstructing = true;
@@ -290,17 +289,22 @@ namespace Carina.PixelViewer
 		// Called when selection of main tab control changed.
 		void OnMainTabControlSelectionChanged()
 		{
-			// deactivate session
-			this.activatedSessionToken = this.activatedSessionToken.DisposeAndReturnNull();
-
-			// move to new tab
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.isClosed)
 				this.workspace?.CreateSession();
 			else
 			{
-				// activate session
-				if (this.mainTabControl.SelectedItem is TabItem tabItem && tabItem.DataContext is Session session)
-					this.activatedSessionToken = this.workspace?.ActivateSession(session);
+				// update activated session
+				var selectedSession = (this.mainTabControl.SelectedItem as IControl)?.DataContext as Session;
+				this.workspace?.Let((workspace) =>
+				{
+					for (var i = workspace.ActivatedSessions.Count - 1; i >= 0; --i)
+					{
+						if (workspace.ActivatedSessions[i] != selectedSession)
+							workspace.DeactivateSession(workspace.ActivatedSessions[i]);
+					}
+					if (selectedSession != null)
+						workspace.ActivateSession(selectedSession);
+				});
 
 				// focus on content later to make sure that view has been attached to visual tree
 				SynchronizationContext.Current?.Post(() =>
@@ -334,9 +338,6 @@ namespace Carina.PixelViewer
 			{
 				if (change.OldValue.Value is Workspace prevWorkspace && prevWorkspace == this.workspace)
 				{
-					// deactivate session
-					this.activatedSessionToken = this.activatedSessionToken.DisposeAndReturnNull();
-
 					// clear tab items
 					this.mainTabControl.SelectedIndex = 0;
 					for (var i = this.mainTabItems.Count - 1; i > 0; --i)
@@ -365,11 +366,21 @@ namespace Carina.PixelViewer
 					// attach to workspace
 					(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
 
-					// create first session or select first session
-					if (newWorkspace.Sessions.IsEmpty())
-						newWorkspace.CreateSession();
+					// make sure that at most 1 session has been activated
+					for (var i = newWorkspace.ActivatedSessions.Count - 1; i > 1; --i)
+						newWorkspace.DeactivateSession(newWorkspace.ActivatedSessions[i]);
+
+					// select tab item according to activated session
+					if (newWorkspace.ActivatedSessions.IsNotEmpty())
+					{
+						var tabIndex = this.FindMainTabItemIndex(newWorkspace.ActivatedSessions[0]);
+						if (tabIndex > 0)
+							this.mainTabControl.SelectedIndex = tabIndex;
+						else
+							this.mainTabControl.SelectedIndex = 0;
+					}
 					else
-						this.mainTabControl.SelectedIndex = 1;
+						this.mainTabControl.SelectedIndex = 0;
 				}
 				else
 				{

@@ -4,6 +4,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
+using Carina.PixelViewer.Threading;
 using Carina.PixelViewer.ViewModels;
 using NLog;
 using System;
@@ -11,21 +12,27 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Carina.PixelViewer
 {
 	/// <summary>
 	/// Application.
 	/// </summary>
-	class App : Application
+	class App : Application, IThreadDependent
 	{
 		// Static fields.
 		static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
 
 		// Fields.
+		bool isRestartMainWindowRequested;
+		MainWindow? mainWindow;
 		ResourceInclude? stringResources;
 		ResourceInclude? stringResourcesLinux;
+		StyleInclude? stylesDark;
+		StyleInclude? stylesLight;
+		volatile SynchronizationContext? syncContext;
 		Workspace? workspace;
 
 
@@ -108,17 +115,6 @@ namespace Carina.PixelViewer
 				});
 			}
 			this.UpdateStringResources();
-
-			// load styles
-			var style = new StyleInclude(new Uri("avares://PixelViewer/")).Also((it) =>
-			{
-				it.Source = this.Settings.DarkMode switch
-				{
-					true => new Uri("avares://PixelViewer/Styles/Dark.xaml"),
-					_ => new Uri("avares://PixelViewer/Styles/Light.xaml"),
-				};
-			});
-			this.Styles.Add(style);
 		}
 
 
@@ -128,28 +124,62 @@ namespace Carina.PixelViewer
 		{
 			Logger.Info("Start");
 
-			// build app
+			// start application
 			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-			App.Current.Let((app) =>
-			{
-				app.workspace?.Dispose();
-				app.Settings.Save();
-			});
+
+			// dispose workspace
+			App.Current.workspace?.Dispose();
 		}
 
 
 		// Called when framework initialization completed.
 		public override void OnFrameworkInitializationCompleted()
 		{
+			this.syncContext = SynchronizationContext.Current;
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 			{
-				this.workspace = new Workspace();
-				desktop.MainWindow = new MainWindow()
+				desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
+				this.workspace = new Workspace().Also((it) =>
 				{
-					DataContext = this.workspace,
-				};
+					// create first session
+					it.ActivateSession(it.CreateSession());
+				});
+				this.SynchronizationContext.Post(this.ShowMainWindow);
 			}
 			base.OnFrameworkInitializationCompleted();
+		}
+
+
+		// Called when main window closed.
+		void OnMainWindowClosed()
+		{
+			Logger.Warn("Main window closed");
+
+			// detach from main window
+			this.mainWindow = this.mainWindow?.Let((it) =>
+			{
+				it.DataContext = null;
+				return (MainWindow?)null;
+			});
+
+			// save settings
+			this.Settings.Save();
+
+			// restart main window
+			if(this.isRestartMainWindowRequested)
+			{
+				Logger.Warn("Restart main window");
+				this.isRestartMainWindowRequested = false;
+				this.SynchronizationContext.Post(this.ShowMainWindow);
+				return;
+			}
+
+			// shut down application
+			if (App.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
+			{
+				Logger.Warn("Shut down");
+				desktopLifetime.Shutdown();
+			}
 		}
 
 
@@ -166,9 +196,61 @@ namespace Carina.PixelViewer
 
 
 		/// <summary>
+		/// Restart main window.
+		/// </summary>
+		public void RestartMainWindow()
+		{
+			this.VerifyAccess();
+			if (this.isRestartMainWindowRequested)
+				return;
+			if (this.mainWindow != null)
+			{
+				Logger.Warn("Request restarting main window");
+				this.isRestartMainWindowRequested = true;
+				this.mainWindow.Close();
+			}
+			else
+			{
+				Logger.Warn("No main window to restart, show directly");
+				this.ShowMainWindow();
+			}
+		}
+
+
+		/// <summary>
 		/// Get application settings.
 		/// </summary>
 		public Settings Settings { get; } = Settings.Default;
+
+
+		// Create and show main window.
+		void ShowMainWindow()
+		{
+			// check state
+			if (this.mainWindow != null)
+			{
+				Logger.Error("Already shown main window");
+				return;
+			}
+
+			// update styles
+			this.UpdateStyles();
+
+			// show main window
+			this.mainWindow = new MainWindow().Also((it) =>
+			{
+				it.DataContext = this.workspace;
+				it.Closed += (_, e) => this.OnMainWindowClosed();
+			});
+			Logger.Warn("Show main window");
+			this.mainWindow.Show();
+		}
+
+
+		/// <summary>
+		/// Synchronization context.
+		/// </summary>
+		public SynchronizationContext SynchronizationContext { get => this.syncContext ?? throw new InvalidOperationException("Application is not ready yet."); }
 
 
 		// Update string resource according to settings.
@@ -233,6 +315,37 @@ namespace Carina.PixelViewer
 				if (this.stringResourcesLinux != null)
 					this.Resources.MergedDictionaries.Remove(this.stringResourcesLinux);
 			}
+		}
+
+
+		// Update styles according to settings.
+		void UpdateStyles()
+		{
+			// select style
+			var addingStyle = this.Settings.DarkMode switch
+			{
+				true => this.stylesDark ?? new StyleInclude(new Uri("avares://PixelViewer/")).Also((it) =>
+				{
+					it.Source = new Uri("avares://PixelViewer/Styles/Dark.xaml");
+					this.stylesDark = it;
+				}),
+				_ => this.stylesLight ?? new StyleInclude(new Uri("avares://PixelViewer/")).Also((it) =>
+				{
+					it.Source = new Uri("avares://PixelViewer/Styles/Light.xaml");
+					this.stylesLight = it;
+				}),
+			};
+			var removingStyle = this.Settings.DarkMode switch
+			{
+				true => this.stylesLight,
+				_ => this.stylesDark,
+			};
+
+			// update style
+			if (removingStyle != null)
+				this.Styles.Remove(removingStyle);
+			if (!this.Styles.Contains(addingStyle))
+				this.Styles.Add(addingStyle);
 		}
 	}
 }
