@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-		<AssemblyVersion>0.9.3.512</AssemblyVersion>
+		<AssemblyVersion>0.9.4.516</AssemblyVersion>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Nullable>enable</Nullable>
