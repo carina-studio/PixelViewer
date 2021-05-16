@@ -68,7 +68,7 @@
 		<AvaloniaResource Include="Strings/Default-Linux.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</AvaloniaResource>
-		<AvaloniaResource Include="Strings\zh-TW-Linux.xaml">
+		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml">
 		  <Generator>MSBuild:Compile</Generator>
 		</AvaloniaResource>
 		<AvaloniaResource Include="Styles/Dark.xaml" />
@@ -77,6 +77,9 @@
 		</AvaloniaResource>
 	</ItemGroup>
   <ItemGroup>
+    <None Update="AppIcon_128px.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -84,10 +87,10 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <None Update="Strings\Default.xaml">
+    <None Update="Strings/Default.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
-    <None Update="Strings\zh-TW.xaml">
+    <None Update="Strings/zh-TW.xaml">
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
