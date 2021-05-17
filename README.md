@@ -1,6 +1,8 @@
 # PixelViewer
 PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB pixels data from file and rendering it. Currently it is still under development, but most of functions are ready.
 
+<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Dark_Thumb.png" alt="Main window (dark)" width="400"/>  <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Light_Thumb.png" alt="Main window (light)" width="400"/>
+
 ## Supported formats
 * Luminance
   * L8
