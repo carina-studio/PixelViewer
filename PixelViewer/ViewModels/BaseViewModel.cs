@@ -35,6 +35,10 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Static fields.
+		static volatile int nextIdIndex = 1;
+
+
 		// Fields.
 		readonly App app = App.Current;
 		bool isDisposed;
@@ -47,7 +51,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		protected BaseViewModel()
 		{
-			this.Logger = LogManager.GetLogger(this.GetType().Name);
+			lock (typeof(BaseViewModel))
+			{
+				this.Id = $"{this.GetType().Name}({nextIdIndex++:x4})";
+			}
+			this.Logger = LogManager.GetLogger(this.Id);
 			this.Settings.PropertyChanged += this.OnSettingsChanged;
 		}
 
@@ -104,6 +112,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// <param name="defaultValue">Default value.</param>
 		/// <returns>String or default value.</returns>
 		protected string GetStringNonNull(string key, string defaultValue = "") => this.app.GetStringNonNull(key, defaultValue);
+
+
+		/// <summary>
+		/// Get unique ID of the instance.
+		/// </summary>
+		public string Id { get; }
 
 
 		/// <summary>
@@ -172,5 +186,9 @@ namespace Carina.PixelViewer.ViewModels
 			if (this.isDisposed)
 				throw new ObjectDisposedException(this.GetType().Name);
 		}
+
+
+		// Get readable string.
+		public override string ToString() => this.Id;
 	}
 }
