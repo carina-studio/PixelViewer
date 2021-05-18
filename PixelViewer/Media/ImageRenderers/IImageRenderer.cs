@@ -177,13 +177,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					if (alignment == 0)
 						return it;
-					return it - (it % alignment);
+					return Math.Max(1, it - (it % alignment));
 				}),
 				height.Let((it) =>
 				{
 					if (alignment == 0)
 						return it;
-					return it - (it % alignment);
+					return Math.Max(1, it - (it % alignment));
 				})
 			);
 		}
