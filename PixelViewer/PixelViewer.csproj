@@ -1,10 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-		<AssemblyVersion>0.9.4.516</AssemblyVersion>
+    <AssemblyVersion>0.9.4.516</AssemblyVersion>
+    <Version>0.9.4.516</Version>
+    <Authors>Carina Studio</Authors>
+    <Company>Carina Studio</Company>
+    <Copyright>©2021 Carina Studio</Copyright>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
+    <LangVersion>latest</LangVersion>
     <RootNamespace>Carina.PixelViewer</RootNamespace>
     <StartupObject>Carina.PixelViewer.App</StartupObject>
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
