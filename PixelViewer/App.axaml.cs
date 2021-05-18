@@ -4,15 +4,20 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
+using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Threading;
 using Carina.PixelViewer.ViewModels;
 using NLog;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer
 {
@@ -21,13 +26,21 @@ namespace Carina.PixelViewer
 	/// </summary>
 	class App : Application, IThreadDependent
 	{
+		// Constants.
+		const string PIPE_NAME = "PixelViewer-Pipe";
+
+
 		// Static fields.
+		static string[] Arguments = new string[0];
 		static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
 
 
 		// Fields.
 		bool isRestartMainWindowRequested;
+		bool isServer;
 		MainWindow? mainWindow;
+		readonly CancellationTokenSource pipeServerCancellationTokenSource = new CancellationTokenSource();
+		NamedPipeServerStream? pipeServerStream;
 		ResourceInclude? stringResources;
 		ResourceInclude? stringResourcesLinux;
 		StyleInclude? stylesDark;
@@ -55,6 +68,26 @@ namespace Carina.PixelViewer
 		public static new App Current
 		{
 			get => (App)Application.Current;
+		}
+
+
+		// Create server pipe stream.
+		bool CreatePipeServerStream(bool printErrorLog = true)
+		{
+			if (this.pipeServerStream != null)
+				return true;
+			try
+			{
+				this.pipeServerStream = new NamedPipeServerStream(PIPE_NAME, PipeDirection.In, 1);
+				Logger.Warn("Pipe server stream created");
+				return true;
+			}
+			catch (Exception ex)
+			{
+				if (printErrorLog)
+					Logger.Error(ex, "Unable to create pipe server stream");
+				return false;
+			}
 		}
 
 
@@ -87,6 +120,64 @@ namespace Carina.PixelViewer
 		public string GetStringNonNull(string key, string defaultValue = "") => this.GetString(key) ?? defaultValue;
 
 
+		// Handle client connection from pipe.
+		async void HandlePipeClientConnection()
+		{
+			if (this.pipeServerStream == null)
+			{
+				Logger.Error("No pipe server stream");
+				return;
+			}
+			try
+			{
+				// wait for connection
+				Logger.Warn("Start waiting for pipe client connection");
+				await this.pipeServerStream.WaitForConnectionAsync(this.pipeServerCancellationTokenSource.Token);
+
+				// read arguments from client
+				Logger.Warn("Start reading arguments from pipe client");
+				var args = await Task.Run(() =>
+				{
+					using var reader = new BinaryReader(this.pipeServerStream, Encoding.UTF8);
+					var argCount = Math.Max(0, reader.ReadInt32());
+					var argList = new List<string>(argCount);
+					for (var i = argCount; i > 0; --i)
+						argList.Add(reader.ReadString());
+					return argList.ToArray();
+				});
+
+				// activate main window
+				this.mainWindow?.Let((mainWindow) =>
+				{
+					if (mainWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
+						mainWindow.WindowState = this.Settings.MainWindowState;
+					mainWindow.ActivateAndBringToFront();
+				});
+			}
+			catch (Exception ex)
+			{
+				if (!this.pipeServerCancellationTokenSource.IsCancellationRequested)
+					Logger.Error(ex, "Error occurred while waiting for pipe client connection");
+			}
+			finally
+			{
+				// close server stream
+				this.pipeServerStream.Close();
+				this.pipeServerStream = null;
+
+				// handle next connection
+				if (!this.pipeServerCancellationTokenSource.IsCancellationRequested)
+				{
+					this.SynchronizationContext.Post(() =>
+					{
+						if (this.CreatePipeServerStream())
+							this.HandlePipeClientConnection();
+					});
+				}
+			}
+		}
+
+
 		// Initialize.
 		public override void Initialize()
 		{
@@ -99,6 +190,31 @@ namespace Carina.PixelViewer
 				else
 					Logger.Fatal($"***** Unhandled application exception ***** {exceptionObj}");
 			};
+
+			// start pipe server or send arguments to server
+			if (this.CreatePipeServerStream(false))
+			{
+				this.isServer = true;
+				this.HandlePipeClientConnection();
+			}
+			else
+			{
+				Logger.Warn("Send application arguments to pipe server");
+				try
+				{
+					using var clientStream = new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.Out);
+					clientStream.Connect();
+					using var writer = new BinaryWriter(clientStream);
+					writer.Write(Arguments.Length);
+					foreach (var arg in Arguments)
+						writer.Write(arg);
+				}
+				catch (Exception ex)
+				{
+					Logger.Error(ex, "Unable to send application arguments to pipe server");
+				}
+				return;
+			}
 
 			// load XAML
 			AvaloniaXamlLoader.Load(this);
@@ -125,10 +241,27 @@ namespace Carina.PixelViewer
 			Logger.Info("Start");
 
 			// start application
+			Arguments = args;
 			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
 
-			// dispose workspace
-			App.Current.workspace?.Dispose();
+			// release app resources
+			App.Current.Let((app) =>
+			{
+				// dispose workspace
+				app.workspace?.Dispose();
+
+				// close pipe server
+				app.pipeServerCancellationTokenSource.Cancel();
+				try
+				{
+					app.pipeServerStream?.Close();
+				}
+				catch
+				{ }
+				app.pipeServerStream = null;
+			});
+
+			Logger.Info("Stop");
 		}
 
 
@@ -138,13 +271,24 @@ namespace Carina.PixelViewer
 			this.syncContext = SynchronizationContext.Current;
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 			{
+				// setup shutdown mode
 				desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
-				this.workspace = new Workspace().Also((it) =>
+
+				// show main window
+				if (this.isServer)
 				{
-					// create first session
-					it.ActivateSession(it.CreateSession());
-				});
-				this.SynchronizationContext.Post(this.ShowMainWindow);
+					this.workspace = new Workspace().Also((it) =>
+					{
+						// create first session
+						it.ActivateSession(it.CreateSession());
+					});
+					this.SynchronizationContext.Post(this.ShowMainWindow);
+				}
+				else
+				{
+					Logger.Warn("Process is not a server, shutdown now");
+					this.SynchronizationContext.Post(() => desktop.Shutdown());
+				}
 			}
 			base.OnFrameworkInitializationCompleted();
 		}
@@ -174,10 +318,10 @@ namespace Carina.PixelViewer
 				return;
 			}
 
-			// shut down application
+			// shutdown application
 			if (App.Current.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopLifetime)
 			{
-				Logger.Warn("Shut down");
+				Logger.Warn("Shutdown");
 				desktopLifetime.Shutdown();
 			}
 		}
