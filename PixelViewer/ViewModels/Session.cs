@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -60,7 +61,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Implementation of Profile.
-		class ProfileImpl : IProfile
+		class ProfileImpl : INotifyPropertyChanged, IProfile
 		{
 			// Fields.
 			public readonly int[] EffectiveBits = new int[4];
@@ -72,6 +73,11 @@ namespace Carina.PixelViewer.ViewModels
 			public int Width;
 
 			// Constructor.
+			public ProfileImpl() // Constructor for default profile
+			{
+				this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
+				App.Current.Settings.PropertyChanged += this.OnSettingsChanged;
+			}
 			public ProfileImpl(string name)
 			{
 				this.Name = name;
@@ -88,15 +94,23 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// Name.
-			public string Name { get; }
+			public string Name { get; private set; }
+
+			// Called when settings changed.
+			void OnSettingsChanged(object sender, PropertyChangedEventArgs e)
+			{
+				if (e.PropertyName == nameof(Carina.PixelViewer.Settings.AutoSelectLanguage) && this == DefaultProfile)
+				{
+					this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
+					this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Name)));
+				}
+			}
+
+			// Raised when property changed.
+			public event PropertyChangedEventHandler? PropertyChanged;
 
 			// To readable string.
-			public override string ToString()
-			{
-				if (this == DefaultProfile)
-					return App.Current.GetStringNonNull("SessionControl.DefaultProfile");
-				return this.Name;
-			}
+			public override string ToString() => this.Name;
 		}
 
 
@@ -125,7 +139,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Default profile.
 		/// </summary>
-		public static readonly IProfile DefaultProfile = new ProfileImpl("");
+		public static readonly IProfile DefaultProfile = new ProfileImpl();
 
 
 		// Constants.

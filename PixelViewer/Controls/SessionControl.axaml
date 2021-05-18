@@ -202,7 +202,13 @@
 
 					<!-- Profile -->
 					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.Profile}"/>
-					<ComboBox Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}"/>
+					<ComboBox Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
+						<ComboBox.DataTemplates>
+							<DataTemplate>
+								<TextBlock Text="{Binding Name}"/>
+							</DataTemplate>
+						</ComboBox.DataTemplates>
+					</ComboBox>
 					<Border Classes="SessionControl_OptionsPanel_Separator"/>
 
 					<!-- Image renderer -->
