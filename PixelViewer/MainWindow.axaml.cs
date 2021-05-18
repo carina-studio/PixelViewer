@@ -196,6 +196,7 @@ namespace Carina.PixelViewer
 			this.isClosed = true;
 
 			// disable drag-drop
+			this.RemoveHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
 			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.RemoveHandler(DragDrop.DropEvent, this.OnDrop);
 
@@ -225,6 +226,13 @@ namespace Carina.PixelViewer
 			this.dialogs.Add(dialog);
 			if (this.dialogs.Count == 1)
 				this.SetValue<bool>(HasDialogProperty, true);
+		}
+
+
+		// Called when drag enter.
+		void OnDragEnter(object? sender, DragEventArgs e)
+		{
+			this.ActivateAndBringToFront();
 		}
 
 
@@ -322,6 +330,7 @@ namespace Carina.PixelViewer
 			base.OnOpened(e);
 
 			// enable drag-drop
+			this.AddHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
 			this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
 		}
