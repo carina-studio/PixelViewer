@@ -1,0 +1,2 @@
+﻿# GUID for application
+46b1c106-0e7b-45c2-85b4-f84e31176742
