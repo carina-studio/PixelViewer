@@ -5,6 +5,7 @@ using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Collections;
+using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Data.Converters;
 using Carina.PixelViewer.Input;
@@ -67,8 +68,8 @@ namespace Carina.PixelViewer
 			{
 				if (this.WindowState == WindowState.Normal)
 				{
-					this.Settings.MainWindowWidth = (int)(this.Width + 0.5);
-					this.Settings.MainWindowHeight = (int)(this.Height + 0.5);
+					this.Settings[Settings.MainWindowWidth] = (int)(this.Width + 0.5);
+					this.Settings[Settings.MainWindowHeight] = (int)(this.Height + 0.5);
 				}
 			});
 
@@ -79,9 +80,9 @@ namespace Carina.PixelViewer
 #endif
 
 			// setup window state and size
-			this.WindowState = this.Settings.MainWindowState;
-			var windowWidth = this.Settings.MainWindowWidth;
-			var windowHeight = this.Settings.MainWindowHeight;
+			this.WindowState = this.Settings.GetValue<WindowState>(Settings.MainWindowState);
+			var windowWidth = this.Settings.GetValue<int>(Settings.MainWindowWidth);
+			var windowHeight = this.Settings.GetValue<int>(Settings.MainWindowHeight);
 			if (windowWidth > 0 && windowHeight > 0)
 			{
 				this.Width = windowWidth;
@@ -409,7 +410,7 @@ namespace Carina.PixelViewer
 			{
 				var state = this.WindowState;
 				if (state != WindowState.Minimized)
-					this.Settings.MainWindowState = state;
+					this.Settings[Settings.MainWindowState] = state;
 			}
 		}
 

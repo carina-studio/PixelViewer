@@ -1,4 +1,5 @@
-﻿using Carina.PixelViewer.Media;
+﻿using Carina.PixelViewer.Configuration;
+using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using ReactiveUI;
 using System;
@@ -29,13 +30,13 @@ namespace Carina.PixelViewer.ViewModels
 			this.RestartMainWindowCommand = ReactiveCommand.Create(() =>
 			{
 				App.Current.RestartMainWindow();
-				this.isOriginallyDarkMode = this.Settings.DarkMode;
+				this.isOriginallyDarkMode = this.Settings.GetValue<bool>(Settings.DarkMode);
 				this.IsRestartingMainWindowNeededToApplyDarkMode = false;
 				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
 			});
 
 			// get initial settings state
-			this.isOriginallyDarkMode = this.Settings.DarkMode;
+			this.isOriginallyDarkMode = this.Settings.GetValue<bool>(Settings.DarkMode);
 
 			// get version name
 			this.UpdateVersionString();
@@ -53,8 +54,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool AutoSelectLanguage
 		{
-			get => this.Settings.AutoSelectLanguage;
-			set => this.Settings.AutoSelectLanguage = value;
+			get => this.Settings.GetValue<bool>(Settings.AutoSelectLanguage);
+			set => this.Settings[Settings.AutoSelectLanguage] = value;
 		}
 
 
@@ -63,8 +64,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool DarkMode
 		{
-			get => this.Settings.DarkMode;
-			set => this.Settings.DarkMode = value;
+			get => this.Settings.GetValue<bool>(Settings.DarkMode);
+			set => this.Settings[Settings.DarkMode] = value;
 		}
 
 
@@ -73,8 +74,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
 		{
-			get => this.Settings.DefaultImageDimensionsEvaluationAspectRatio;
-			set => this.Settings.DefaultImageDimensionsEvaluationAspectRatio = value;
+			get => this.Settings.GetValue<AspectRatio>(Settings.DefaultImageDimensionsEvaluationAspectRatio);
+			set => this.Settings[Settings.DefaultImageDimensionsEvaluationAspectRatio] = value;
 		}
 
 
@@ -85,11 +86,11 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get
 			{
-				if (ImageRenderers.TryFindByFormatName(this.Settings.DefaultImageRendererFormatName, out var renderer))
+				if (ImageRenderers.TryFindByFormatName(this.Settings.GetValue<string>(Settings.DefaultImageRendererFormatName), out var renderer))
 					return renderer.EnsureNonNull();
 				return ImageRenderers.All[0];
 			}
-			set => this.Settings.DefaultImageRendererFormatName = value.Format.Name;
+			set => this.Settings[Settings.DefaultImageRendererFormatName] = value.Format.Name;
 		}
 
 
@@ -98,8 +99,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterChangingRenderer
 		{
-			get => this.Settings.EvaluateImageDimensionsAfterChangingRenderer;
-			set => this.Settings.EvaluateImageDimensionsAfterChangingRenderer = value;
+			get => this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterChangingRenderer);
+			set => this.Settings[Settings.EvaluateImageDimensionsAfterChangingRenderer] = value;
 		}
 
 
@@ -108,8 +109,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterOpeningSourceFile
 		{
-			get => this.Settings.EvaluateImageDimensionsAfterOpeningSourceFile;
-			set => this.Settings.EvaluateImageDimensionsAfterOpeningSourceFile = value;
+			get => this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterOpeningSourceFile);
+			set => this.Settings[Settings.EvaluateImageDimensionsAfterOpeningSourceFile] = value;
 		}
 
 
@@ -124,8 +125,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
 		{
-			get => this.Settings.MaxRenderedImagesMemoryUsageMB;
-			set => this.Settings.MaxRenderedImagesMemoryUsageMB = value;
+			get => this.Settings.GetValue<long>(Settings.MaxRenderedImagesMemoryUsageMB);
+			set => this.Settings[Settings.MaxRenderedImagesMemoryUsageMB] = value;
 		}
 
 
@@ -135,31 +136,31 @@ namespace Carina.PixelViewer.ViewModels
 			base.OnSettingsChanged(propertyName);
 			switch (propertyName)
 			{
-				case nameof(Settings.AutoSelectLanguage):
+				case Settings.AutoSelectLanguage:
 					this.OnPropertyChanged(nameof(this.AutoSelectLanguage));
 					this.UpdateVersionString();
 					break;
-				case nameof(Settings.DarkMode):
+				case Settings.DarkMode:
 					this.OnPropertyChanged(nameof(this.DarkMode));
-					this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.DarkMode != this.isOriginallyDarkMode);
+					this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.GetValue<bool>(Settings.DarkMode) != this.isOriginallyDarkMode);
 					this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
 					break;
-				case nameof(Settings.DefaultImageDimensionsEvaluationAspectRatio):
+				case Settings.DefaultImageDimensionsEvaluationAspectRatio:
 					this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 					break;
-				case nameof(Settings.DefaultImageRendererFormatName):
+				case Settings.DefaultImageRendererFormatName:
 					this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
 					break;
-				case nameof(Settings.EvaluateImageDimensionsAfterChangingRenderer):
+				case Settings.EvaluateImageDimensionsAfterChangingRenderer:
 					this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
 					break;
-				case nameof(Settings.EvaluateImageDimensionsAfterOpeningSourceFile):
+				case Settings.EvaluateImageDimensionsAfterOpeningSourceFile:
 					this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
 					break;
-				case nameof(Settings.MaxRenderedImagesMemoryUsageMB):
+				case Settings.MaxRenderedImagesMemoryUsageMB:
 					this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 					break;
-				case nameof(Settings.YuvConversionMode):
+				case Settings.YuvConversionMode:
 					this.OnPropertyChanged(nameof(this.YuvConversionMode));
 					break;
 			}
@@ -216,8 +217,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool UseDefaultImageRendererAfterOpeningSourceFile
 		{
-			get => this.Settings.UseDefaultImageRendererAfterOpeningSourceFile;
-			set => this.Settings.UseDefaultImageRendererAfterOpeningSourceFile = value;
+			get => this.Settings.GetValue<bool>(Settings.UseDefaultImageRendererAfterOpeningSourceFile);
+			set => this.Settings[Settings.UseDefaultImageRendererAfterOpeningSourceFile] = value;
 		}
 
 
@@ -232,8 +233,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public YuvConversionMode YuvConversionMode
 		{
-			get => this.Settings.YuvConversionMode;
-			set => this.Settings.YuvConversionMode = value;
+			get => this.Settings.GetValue<YuvConversionMode>(Settings.YuvConversionMode);
+			set => this.Settings[Settings.YuvConversionMode] = value;
 		}
 
 

@@ -1,4 +1,5 @@
-﻿using Carina.PixelViewer.Threading;
+﻿using Carina.PixelViewer.Configuration;
+using Carina.PixelViewer.Threading;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -171,7 +172,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get application settings.
 		/// </summary>
-		protected Settings Settings { get; } = Settings.Default;
+		protected Settings Settings { get; } = App.Current.Settings;
 
 
 		// Synchronization context.

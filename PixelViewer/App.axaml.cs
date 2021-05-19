@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
 using Carina.PixelViewer.Collections;
+using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.Threading;
@@ -66,6 +67,8 @@ namespace Carina.PixelViewer
 		MainWindow? mainWindow;
 		readonly CancellationTokenSource pipeServerCancellationTokenSource = new CancellationTokenSource();
 		NamedPipeServerStream? pipeServerStream;
+		volatile Settings? settings;
+		string settingsFilePath = "";
 		ResourceInclude? stringResources;
 		ResourceInclude? stringResourcesLinux;
 		StyleInclude? stylesDark;
@@ -177,7 +180,7 @@ namespace Carina.PixelViewer
 				this.mainWindow?.Let((mainWindow) =>
 				{
 					if (mainWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
-						mainWindow.WindowState = this.Settings.MainWindowState;
+						mainWindow.WindowState = this.Settings.GetValue<Avalonia.Controls.WindowState>(Settings.MainWindowState);
 					mainWindow.ActivateAndBringToFront();
 				});
 
@@ -266,19 +269,6 @@ namespace Carina.PixelViewer
 
 			// load XAML
 			AvaloniaXamlLoader.Load(this);
-
-			// attach to settings
-			this.Settings.PropertyChanged += (_, e) => this.OnSettingsChanged(e.PropertyName);
-
-			// load strings
-			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-			{
-				this.Resources.MergedDictionaries.Add(new ResourceInclude()
-				{
-					Source = new Uri($"avares://PixelViewer/Strings/Default-Linux.xaml")
-				});
-			}
-			this.UpdateStringResources();
 		}
 
 
@@ -314,9 +304,35 @@ namespace Carina.PixelViewer
 
 
 		// Called when framework initialization completed.
-		public override void OnFrameworkInitializationCompleted()
+		public override async void OnFrameworkInitializationCompleted()
 		{
+			// call base
+			base.OnFrameworkInitializationCompleted();
+
+			// get synchronization context
 			this.syncContext = SynchronizationContext.Current;
+
+			// load settings
+			Logger.Warn("Start loading settings");
+			this.settingsFilePath = Path.Combine(this.Directory, "Settings.json");
+			this.settings = new Settings();
+			await this.settings.LoadAsync(this.settingsFilePath);
+			Logger.Warn("Settings loaded");
+
+			// attach to settings
+			this.Settings.PropertyChanged += (_, e) => this.OnSettingsChanged(e.PropertyName);
+
+			// load strings
+			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+			{
+				this.Resources.MergedDictionaries.Add(new ResourceInclude()
+				{
+					Source = new Uri($"avares://PixelViewer/Strings/Default-Linux.xaml")
+				});
+			}
+			this.UpdateStringResources();
+
+			// show main window
 			if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
 			{
 				// setup shutdown mode
@@ -342,12 +358,11 @@ namespace Carina.PixelViewer
 					this.SynchronizationContext.Post(() => desktop.Shutdown());
 				}
 			}
-			base.OnFrameworkInitializationCompleted();
 		}
 
 
 		// Called when main window closed.
-		void OnMainWindowClosed()
+		async void OnMainWindowClosed()
 		{
 			Logger.Warn("Main window closed");
 
@@ -359,10 +374,12 @@ namespace Carina.PixelViewer
 			});
 
 			// save settings
-			this.Settings.Save();
+			Logger.Warn("Start saving settings");
+			await this.Settings.SaveAsync(this.settingsFilePath);
+			Logger.Warn("Settings saved");
 
 			// restart main window
-			if(this.isRestartMainWindowRequested)
+			if (this.isRestartMainWindowRequested)
 			{
 				Logger.Warn("Restart main window");
 				this.isRestartMainWindowRequested = false;
@@ -416,7 +433,7 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Get application settings.
 		/// </summary>
-		public Settings Settings { get; } = Settings.Default;
+		public Settings Settings { get => this.settings ?? throw new InvalidOperationException("Application is not ready yet."); }
 
 
 		// Create and show main window.
@@ -452,7 +469,7 @@ namespace Carina.PixelViewer
 		// Update string resource according to settings.
 		void UpdateStringResources()
 		{
-			if (this.Settings.AutoSelectLanguage)
+			if (this.Settings.TryGetValue<bool>(Settings.AutoSelectLanguage, out var boolValue) && boolValue)
 			{
 				// base resources
 				var localeName = this.CultureInfo.Name;
@@ -518,7 +535,9 @@ namespace Carina.PixelViewer
 		void UpdateStyles()
 		{
 			// select style
-			var addingStyle = this.Settings.DarkMode switch
+			if (!(this.Settings.TryGetValue<bool>(Settings.DarkMode, out var darkMode)))
+				return;
+			var addingStyle = darkMode switch
 			{
 				true => this.stylesDark ?? new StyleInclude(new Uri("avares://PixelViewer/")).Also((it) =>
 				{
@@ -531,7 +550,7 @@ namespace Carina.PixelViewer
 					this.stylesLight = it;
 				}),
 			};
-			var removingStyle = this.Settings.DarkMode switch
+			var removingStyle = darkMode switch
 			{
 				true => this.stylesLight,
 				_ => this.stylesDark,
