@@ -4,7 +4,9 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
+using Carina.PixelViewer.Collections;
 using Carina.PixelViewer.Controls;
+using Carina.PixelViewer.Input;
 using Carina.PixelViewer.Threading;
 using Carina.PixelViewer.ViewModels;
 using NLog;
@@ -26,6 +28,28 @@ namespace Carina.PixelViewer
 	/// </summary>
 	class App : Application, IThreadDependent
 	{
+		// Parsed options of launching application.
+		struct LaunchOptions
+		{
+			// Fields.
+			public string? FileName;
+
+			// Try parsing options from arguments.
+			public static bool TryParse(IList<string> args, out LaunchOptions options)
+			{
+				options = new LaunchOptions();
+				if (args.IsEmpty())
+					return true;
+				if (args.Count == 1)
+				{
+					options.FileName = args[0];
+					return true;
+				}
+				return false;
+			}
+		}
+
+
 		// Constants.
 		const string PIPE_NAME = "PixelViewer-Pipe";
 
@@ -38,6 +62,7 @@ namespace Carina.PixelViewer
 		// Fields.
 		bool isRestartMainWindowRequested;
 		bool isServer;
+		LaunchOptions launchOptions;
 		MainWindow? mainWindow;
 		readonly CancellationTokenSource pipeServerCancellationTokenSource = new CancellationTokenSource();
 		NamedPipeServerStream? pipeServerStream;
@@ -134,16 +159,18 @@ namespace Carina.PixelViewer
 				Logger.Warn("Start waiting for pipe client connection");
 				await this.pipeServerStream.WaitForConnectionAsync(this.pipeServerCancellationTokenSource.Token);
 
-				// read arguments from client
+				// read arguments and parse as options from client
 				Logger.Warn("Start reading arguments from pipe client");
-				var args = await Task.Run(() =>
+				var launchOptions = await Task.Run(() =>
 				{
 					using var reader = new BinaryReader(this.pipeServerStream, Encoding.UTF8);
 					var argCount = Math.Max(0, reader.ReadInt32());
 					var argList = new List<string>(argCount);
 					for (var i = argCount; i > 0; --i)
 						argList.Add(reader.ReadString());
-					return argList.ToArray();
+					if (!LaunchOptions.TryParse(argList, out var launchOptions))
+						Logger.Error($"Invalid arguments passing from pipe client: {argList.ContentToString()}");
+					return launchOptions;
 				});
 
 				// activate main window
@@ -153,6 +180,27 @@ namespace Carina.PixelViewer
 						mainWindow.WindowState = this.Settings.MainWindowState;
 					mainWindow.ActivateAndBringToFront();
 				});
+
+				// open file or activate existent session
+				if (launchOptions.FileName != null && this.workspace != null)
+				{
+					var existentSession = this.workspace.Sessions.Find((it) => it.SourceFileName == launchOptions.FileName);
+					if (existentSession != null)
+						this.workspace.ActivateSession(existentSession);
+					else
+					{
+						var emptySession = this.workspace.Sessions.Find((it) => !it.IsSourceFileOpened && it.SourceFileName == null);
+						if (emptySession == null)
+							this.workspace.CreateSession(launchOptions.FileName);
+						else if (emptySession.OpenSourceFileCommand.TryExecute(launchOptions.FileName))
+							this.workspace.ActivateSession(emptySession);
+						else
+						{
+							Logger.Error($"Unable to open '{launchOptions.FileName}' by {emptySession}");
+							this.workspace.CreateSession(launchOptions.FileName);
+						}
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -274,13 +322,17 @@ namespace Carina.PixelViewer
 				// setup shutdown mode
 				desktop.ShutdownMode = Avalonia.Controls.ShutdownMode.OnExplicitShutdown;
 
+				// parse launch options
+				if (!LaunchOptions.TryParse(desktop.Args, out this.launchOptions))
+					Logger.Error($"Invalid arguments: {desktop.Args.ContentToString()}");
+
 				// show main window
 				if (this.isServer)
 				{
 					this.workspace = new Workspace().Also((it) =>
 					{
 						// create first session
-						it.ActivateSession(it.CreateSession());
+						it.ActivateSession(it.CreateSession(this.launchOptions.FileName));
 					});
 					this.SynchronizationContext.Post(this.ShowMainWindow);
 				}

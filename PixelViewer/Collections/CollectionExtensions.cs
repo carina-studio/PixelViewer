@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Carina.PixelViewer.Collections
 {
@@ -61,6 +62,65 @@ namespace Carina.PixelViewer.Collections
 			if (result < 0)
 				return BinarySearch<T>(list, start, middle, element);
 			return BinarySearch<T>(list, middle + 1, end, element);
+		}
+
+
+		/// <summary>
+		/// Generate readable string represents content in <see cref="IEnumerable{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">Type of element.</typeparam>
+		/// <param name="enumerable"><see cref="IEnumerable{T}"/>.</param>
+		/// <returns>Readable string represents content.</returns>
+		public static string ContentToString<T>(this IEnumerable<T> enumerable)
+		{
+			var stringBuilder = new StringBuilder("[");
+			foreach (var element in enumerable)
+			{
+				if (stringBuilder.Length > 1)
+					stringBuilder.Append(", ");
+				if (element is string)
+				{
+					stringBuilder.Append('"');
+					stringBuilder.Append(element.ToString());
+					stringBuilder.Append('"');
+				}
+				else if (element != null)
+					stringBuilder.Append(element.ToString());
+				else
+					stringBuilder.Append("Null");
+			}
+			stringBuilder.Append(']');
+			return stringBuilder.ToString();
+		}
+
+
+		/// <summary>
+		/// Find the first element which matches the given condition in <see cref="IEnumerable{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">Type of element.</typeparam>
+		/// <param name="enumerable"><see cref="IEnumerable{T}"/>.</param>
+		/// <param name="predicate"><see cref="Predicate{T}"/> to check whether element matches the condition or not.</param>
+		/// <returns>The first element which matches the given condition.</returns>
+		public static T? Find<T>(this IEnumerable<T> enumerable, Predicate<T> predicate)
+		{
+			if (enumerable is IList<T> list)
+			{
+				for (int i = 0, count = list.Count; i < count; ++i)
+				{
+					var element = list[i];
+					if (predicate(element))
+						return element;
+				}
+			}
+			else
+			{
+				foreach (var element in enumerable)
+				{
+					if (predicate(element))
+						return element;
+				}
+			}
+			return default;
 		}
 
 

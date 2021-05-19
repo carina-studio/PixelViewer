@@ -1,4 +1,5 @@
-﻿using Carina.PixelViewer.Threading;
+﻿using Carina.PixelViewer.Input;
+using Carina.PixelViewer.Threading;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -100,8 +101,9 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Create new session.
 		/// </summary>
+		/// <param name="fileName">Name of source image file.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession()
+		public Session CreateSession(string? fileName = null)
 		{
 			// check state
 			this.VerifyAccess();
@@ -112,6 +114,16 @@ namespace Carina.PixelViewer.ViewModels
 			session.PropertyChanged += this.OnSessionPropertyChanged;
 			this.sessions.Add(session);
 			this.Logger.Debug($"Create session {session}, count: {this.sessions.Count}");
+
+			// open file
+			if (fileName != null)
+			{
+				this.Logger.Debug($"Open '{fileName}' after creating {session}");
+				if (!session.OpenSourceFileCommand.TryExecute(fileName))
+					this.Logger.Error($"Unable to open '{fileName}' after creating {session}");
+			}
+
+			// complete
 			return session;
 		}
 

@@ -189,6 +189,18 @@ namespace Carina.PixelViewer
 		}
 
 
+		// Called when collection of activated sessions has been changed.
+		void OnActivatedSessionsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems[0] is Session session)
+			{
+				var tabIndex = this.FindMainTabItemIndex(session);
+				if (tabIndex > 0 && this.mainTabControl.SelectedIndex != tabIndex)
+					this.mainTabControl.SelectedIndex = tabIndex;
+			}
+		}
+
+
 		// Called when window closed.
 		protected override void OnClosed(EventArgs e)
 		{
@@ -270,26 +282,18 @@ namespace Carina.PixelViewer
 				if (mainTabIndex < 0)
 					return;
 
-				// find session
-				Session? session = null;
+				// find session and open file
 				if (mainTabIndex < this.mainTabItems.Count - 1)
-					session = (this.mainTabItems[mainTabIndex] as TabItem)?.DataContext as Session;
-				else
-					session = this.workspace?.CreateSession();
-				if (session == null)
-					return;
-
-				// open source file
-				session.OpenSourceFileCommand?.Let((command) =>
 				{
-					if (!command.CanExecute(fileName))
+					((this.mainTabItems[mainTabIndex] as TabItem)?.DataContext as Session)?.Let((session) =>
 					{
-						Logger.Error($"Cannot open source '{fileName}' by drag-drop in current state");
-						return;
-					}
-					Logger.Info($"Open source '{fileName}' by drag-drop");
-					command.Execute(fileName);
-				});
+						Logger.Info($"Open source '{fileName}' by drag-drop to {session}");
+						if (!session.OpenSourceFileCommand.TryExecute(fileName))
+							Logger.Error($"Cannot open source '{fileName}' by drag-drop to {session}");
+					});
+				}
+				else
+					this.workspace?.CreateSession(fileName);
 			});
 		}
 
@@ -358,6 +362,7 @@ namespace Carina.PixelViewer
 					}
 
 					// detach from workspace
+					(prevWorkspace.ActivatedSessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnActivatedSessionsChanged);
 					(prevWorkspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
 				}
 				if (change.NewValue.Value is Workspace newWorkspace)
@@ -373,6 +378,7 @@ namespace Carina.PixelViewer
 					}
 
 					// attach to workspace
+					(workspace.ActivatedSessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnActivatedSessionsChanged);
 					(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
 
 					// make sure that at most 1 session has been activated
