@@ -63,6 +63,10 @@ namespace Carina.PixelViewer.Configuration
 		public const string YuvConversionMode = nameof(YuvConversionMode);
 
 
+		// Constants.
+		const int Version = 1;
+
+
 		// Static fields.
 		static readonly Dictionary<string, object> DefaultValues = new Dictionary<string, object>();
 		static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
@@ -123,6 +127,7 @@ namespace Carina.PixelViewer.Configuration
 		public async Task<bool> LoadAsync(string fileName)
 		{
 			// load from file
+			var version = Version;
 			var values = await Task.Run(() =>
 			{
 				try
@@ -136,6 +141,12 @@ namespace Carina.PixelViewer.Configuration
 					{
 						foreach (var keyValue in jsonDocument.RootElement.EnumerateObject())
 						{
+							if (keyValue.Name == "Version")
+							{
+								if (keyValue.Value.TryGetInt32(out var intValue))
+									version = intValue;
+								continue;
+							}
 							if (!values.ContainsKey(keyValue.Name))
 							{
 								Logger.Warn($"Unknown key '{keyValue.Name}' in '{fileName}'");
@@ -179,8 +190,19 @@ namespace Carina.PixelViewer.Configuration
 				this.values[keyValue.Key] = keyValue.Value;
 				this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(keyValue.Key));
 			}
+
+			// upgrade
+			if (version < Version)
+				this.OnUpgrade(version);
+
+			// complete
 			return true;
 		}
+
+
+		// Upgrade settings.
+		void OnUpgrade(int oldVersion)
+		{ }
 
 
 		/// <summary>
@@ -214,6 +236,7 @@ namespace Carina.PixelViewer.Configuration
 				Indented = true,
 			});
 			jsonWriter.WriteStartObject();
+			jsonWriter.WriteNumber("Version", Version);
 			foreach (var keyValue in values)
 			{
 				var key = keyValue.Key;
