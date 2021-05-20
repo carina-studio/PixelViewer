@@ -65,8 +65,8 @@ namespace Carina.PixelViewer
 		bool isServer;
 		LaunchOptions launchOptions;
 		MainWindow? mainWindow;
-		readonly CancellationTokenSource pipeServerCancellationTokenSource = new CancellationTokenSource();
-		NamedPipeServerStream? pipeServerStream;
+		readonly CancellationTokenSource serverCancellationTokenSource = new CancellationTokenSource();
+		NamedPipeServerStream? serverStream;
 		volatile Settings? settings;
 		string settingsFilePath = "";
 		ResourceInclude? stringResources;
@@ -100,20 +100,20 @@ namespace Carina.PixelViewer
 
 
 		// Create server pipe stream.
-		bool CreatePipeServerStream(bool printErrorLog = true)
+		bool CreateServerStream(bool printErrorLog = true)
 		{
-			if (this.pipeServerStream != null)
+			if (this.serverStream != null)
 				return true;
 			try
 			{
-				this.pipeServerStream = new NamedPipeServerStream(PIPE_NAME, PipeDirection.In, 1);
-				Logger.Warn("Pipe server stream created");
+				this.serverStream = new NamedPipeServerStream(PIPE_NAME, PipeDirection.In, 1);
+				Logger.Warn("Server stream created");
 				return true;
 			}
 			catch (Exception ex)
 			{
 				if (printErrorLog)
-					Logger.Error(ex, "Unable to create pipe server stream");
+					Logger.Error(ex, "Unable to create server stream");
 				return false;
 			}
 		}
@@ -149,30 +149,30 @@ namespace Carina.PixelViewer
 
 
 		// Handle client connection from pipe.
-		async void HandlePipeClientConnection()
+		async void HandleClientConnection()
 		{
-			if (this.pipeServerStream == null)
+			if (this.serverStream == null)
 			{
-				Logger.Error("No pipe server stream");
+				Logger.Error("No server stream");
 				return;
 			}
 			try
 			{
 				// wait for connection
-				Logger.Warn("Start waiting for pipe client connection");
-				await this.pipeServerStream.WaitForConnectionAsync(this.pipeServerCancellationTokenSource.Token);
+				Logger.Warn("Start waiting for client connection");
+				await this.serverStream.WaitForConnectionAsync(this.serverCancellationTokenSource.Token);
 
 				// read arguments and parse as options from client
-				Logger.Warn("Start reading arguments from pipe client");
+				Logger.Warn("Start reading arguments from client");
 				var launchOptions = await Task.Run(() =>
 				{
-					using var reader = new BinaryReader(this.pipeServerStream, Encoding.UTF8);
+					using var reader = new BinaryReader(this.serverStream, Encoding.UTF8);
 					var argCount = Math.Max(0, reader.ReadInt32());
 					var argList = new List<string>(argCount);
 					for (var i = argCount; i > 0; --i)
 						argList.Add(reader.ReadString());
 					if (!LaunchOptions.TryParse(argList, out var launchOptions))
-						Logger.Error($"Invalid arguments passing from pipe client: {argList.ContentToString()}");
+						Logger.Error($"Invalid arguments passing from client: {argList.ContentToString()}");
 					return launchOptions;
 				});
 
@@ -207,22 +207,22 @@ namespace Carina.PixelViewer
 			}
 			catch (Exception ex)
 			{
-				if (!this.pipeServerCancellationTokenSource.IsCancellationRequested)
-					Logger.Error(ex, "Error occurred while waiting for pipe client connection");
+				if (!this.serverCancellationTokenSource.IsCancellationRequested)
+					Logger.Error(ex, "Error occurred while waiting for client connection");
 			}
 			finally
 			{
 				// close server stream
-				this.pipeServerStream.Close();
-				this.pipeServerStream = null;
+				this.serverStream.Close();
+				this.serverStream = null;
 
 				// handle next connection
-				if (!this.pipeServerCancellationTokenSource.IsCancellationRequested)
+				if (!this.serverCancellationTokenSource.IsCancellationRequested)
 				{
 					this.SynchronizationContext.Post(() =>
 					{
-						if (this.CreatePipeServerStream())
-							this.HandlePipeClientConnection();
+						if (this.CreateServerStream())
+							this.HandleClientConnection();
 					});
 				}
 			}
@@ -242,28 +242,21 @@ namespace Carina.PixelViewer
 					Logger.Fatal($"***** Unhandled application exception ***** {exceptionObj}");
 			};
 
-			// start pipe server or send arguments to server
-			if (this.CreatePipeServerStream(false))
+			// start server or send arguments to server
+			if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+			{
+				// [workaround] treat process as client first becase limitation of max server instance seems not working on Linux
+				if (this.SendArgumentsToServer())
+					return;
+			}
+			if (this.CreateServerStream(false))
 			{
 				this.isServer = true;
-				this.HandlePipeClientConnection();
+				this.HandleClientConnection();
 			}
 			else
 			{
-				Logger.Warn("Send application arguments to pipe server");
-				try
-				{
-					using var clientStream = new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.Out);
-					clientStream.Connect();
-					using var writer = new BinaryWriter(clientStream);
-					writer.Write(Arguments.Length);
-					foreach (var arg in Arguments)
-						writer.Write(arg);
-				}
-				catch (Exception ex)
-				{
-					Logger.Error(ex, "Unable to send application arguments to pipe server");
-				}
+				this.SendArgumentsToServer();
 				return;
 			}
 
@@ -289,14 +282,14 @@ namespace Carina.PixelViewer
 				app.workspace?.Dispose();
 
 				// close pipe server
-				app.pipeServerCancellationTokenSource.Cancel();
+				app.serverCancellationTokenSource.Cancel();
 				try
 				{
-					app.pipeServerStream?.Close();
+					app.serverStream?.Close();
 				}
 				catch
 				{ }
-				app.pipeServerStream = null;
+				app.serverStream = null;
 			});
 
 			Logger.Info("Stop");
@@ -426,6 +419,37 @@ namespace Carina.PixelViewer
 			{
 				Logger.Warn("No main window to restart, show directly");
 				this.ShowMainWindow();
+			}
+		}
+
+
+		// Try sending arguments to server.
+		bool SendArgumentsToServer()
+		{
+			try
+			{
+				// connect
+				Logger.Warn("Try connect to server");
+				using var clientStream = new NamedPipeClientStream(".", PIPE_NAME, PipeDirection.Out);
+				clientStream.Connect(500);
+
+				// send arguments
+				Logger.Warn("Send application arguments to pipe server");
+				using var writer = new BinaryWriter(clientStream);
+				writer.Write(Arguments.Length);
+				foreach (var arg in Arguments)
+					writer.Write(arg);
+				return true;
+			}
+			catch (TimeoutException)
+			{
+				Logger.Warn("Unable to connect to server");
+				return false;
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Unable to send application arguments to pipe server");
+				return false;
 			}
 		}
 
