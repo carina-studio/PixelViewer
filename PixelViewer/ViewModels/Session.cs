@@ -396,7 +396,14 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Compare profiles.
-		static int CompareProfiles(IProfile x, IProfile y) => x.Name.CompareTo(y.Name);
+		static int CompareProfiles(IProfile x, IProfile y)
+		{
+			if (x == DefaultProfile)
+				return -1;
+			if (y == DefaultProfile)
+				return 1;
+			return x.Name.CompareTo(y.Name);
+		}
 
 
 		// Delete current profile.
