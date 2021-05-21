@@ -32,6 +32,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new Argb8888ImageRenderer(),
 			new Bgra8888ImageRenderer(),
 			new Rgba8888ImageRenderer(),
+			new Bgrx8888ImageRenderer(),
+			new Rgbx8888ImageRenderer(),
+			new Xbgr8888ImageRenderer(),
+			new Xrgb8888ImageRenderer(),
 		}).AsReadOnly();
 
 
