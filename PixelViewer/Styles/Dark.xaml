@@ -113,6 +113,32 @@
 		<Setter Property="Width" Value="{StaticResource Double.MainWindow.MainTabItem.IconSize}"/>
 	</Style>
 
+	<!-- MessageDialog -->
+	<Style Selector="Image.MessageDialog_Icon_Error">
+		<Setter Property="Height" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness.MessageDialog.Icon.Margin}"/>
+		<Setter Property="Source" Value="/Resources/Dark/Error_96px.png"/>
+		<Setter Property="Width" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+	</Style>
+	<Style Selector="Image.MessageDialog_Icon_Information">
+		<Setter Property="Height" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness.MessageDialog.Icon.Margin}"/>
+		<Setter Property="Source" Value="/Resources/Dark/Information_96px.png"/>
+		<Setter Property="Width" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+	</Style>
+	<Style Selector="Image.MessageDialog_Icon_Question">
+		<Setter Property="Height" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness.MessageDialog.Icon.Margin}"/>
+		<Setter Property="Source" Value="/Resources/Dark/Question_96px.png"/>
+		<Setter Property="Width" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+	</Style>
+	<Style Selector="Image.MessageDialog_Icon_Warning">
+		<Setter Property="Height" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness.MessageDialog.Icon.Margin}"/>
+		<Setter Property="Source" Value="/Resources/Dark/Warning_96px.png"/>
+		<Setter Property="Width" Value="{StaticResource Double.MessageDialog.IconSize}"/>
+	</Style>
+
 	<!-- SessionControl -->
 	<Style Selector="Border.SessionControl_DragDropHint">
 		<Setter Property="Margin" Value="{StaticResource Thickness.SessionControl.ImageViewer.Padding}"/>

@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.Controls.MessageDialog"
+        Classes="Dialog"
+				MinWidth="{StaticResource Double.MessageDialog.MinWidth}"
+				SizeToContent="WidthAndHeight">
+
+	<Border Classes="Dialog">
+		<Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+
+			<!-- Icon -->
+			<Image x:Name="icon"/>
+
+			<!-- Message -->
+			<TextBlock Grid.Column="1" Text="{Binding $parent[Window].Message}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+
+			<!-- Buttons -->
+			<StackPanel Grid.ColumnSpan="2" Grid.Row="1" HorizontalAlignment="Center" Orientation="Horizontal">
+				<Button x:Name="button1" Classes="Dialog_ControlButton" Click="OnControlButtonClick"/>
+				<Button x:Name="button2" Classes="Dialog_ControlButton" Click="OnControlButtonClick"/>
+			</StackPanel>
+			
+		</Grid>
+	</Border>
+	
+</Window>
