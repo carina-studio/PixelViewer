@@ -54,6 +54,7 @@
 	<sys:String x:Key="String.SessionControl.DeleteProfile">Delete profile</sys:String>
 	<sys:String x:Key="String.SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>
 	<sys:String x:Key="String.SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
+	<sys:String x:Key="String.SessionControl.DuplicateNameOfProfile">Profile '{0}' is existent.</sys:String>
 	<sys:String x:Key="String.SessionControl.EffectiveBits">Effective bits</sys:String>
 	<sys:String x:Key="String.SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
 	<sys:String x:Key="String.SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>

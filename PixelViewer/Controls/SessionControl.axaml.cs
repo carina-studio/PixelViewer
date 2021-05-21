@@ -7,6 +7,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Carina.PixelViewer.Collections;
 using Carina.PixelViewer.Data.Converters;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
@@ -406,13 +407,29 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// get name
-			var name = await new TextInputDialog()
+			var name = session.GenerateNameForNewProfile();
+			while (true)
 			{
-				Description = App.Current.GetString("SessionControl.InputNameOfProfile"),
-				InitialText = session.GenerateNameForNewProfile(),
-			}.ShowDialog<string>(window);
-			if (string.IsNullOrWhiteSpace(name))
-				return;
+				// input name
+				name = await new TextInputDialog()
+				{
+					Description = App.Current.GetString("SessionControl.InputNameOfProfile"),
+					InitialText = name,
+				}.ShowDialog<string>(window);
+				if (string.IsNullOrWhiteSpace(name))
+					return;
+
+				// check name
+				if (session.Profiles.Find((it) => it != Session.DefaultProfile && it.Name == name) == null)
+					break;
+
+				// show message for duplicate name
+				await new MessageDialog()
+				{
+					Icon = MessageDialogIcon.Warning,
+					Message = string.Format(App.Current.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
+				}.ShowDialog(window);
+			}
 
 			// save as new profile
 			session.SaveAsNewProfileCommand.Execute(name);
