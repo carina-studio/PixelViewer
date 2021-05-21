@@ -22,6 +22,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new I420ImageRenderer(),
 			new YV12ImageRenderer(),
 			new Yuv422pImageRenderer(),
+			new UyvyImageRenderer(),
+			new YuvyImageRenderer(),
 			new Yuv444pImageRenderer(),
 			new AndroidYuv420ImageRenderer(),
 			new Rgb565BEImageRenderer(),
