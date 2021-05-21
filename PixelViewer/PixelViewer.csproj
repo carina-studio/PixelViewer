@@ -66,6 +66,12 @@
 		<AvaloniaResource Include="Resources/Light/Settings_96px.png" />
 		<AvaloniaResource Include="Resources/Light/ZoomIn_96px.png" />
 		<AvaloniaResource Include="Resources/Light/ZoomOut_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Information_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Question_96px.png" />
+		<AvaloniaResource Include="Resources/Dark/Warning_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Information_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Question_96px.png" />
+		<AvaloniaResource Include="Resources/Light/Warning_96px.png" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
 		<AvaloniaResource Include="Strings/Default-Linux.xaml">
