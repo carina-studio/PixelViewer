@@ -10,6 +10,8 @@ PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform
 * YUV
   * YUV444p
   * YUV422p
+  * UYVY
+  * YUVY
   * NV12
   * NV21
   * I420
@@ -18,6 +20,10 @@ PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform
   * BGR_888
   * RGB_565 (LE/BE)
   * RGB_888
+  * BGRX_8888
+  * RGBX_8888
+  * XBGR_8888
+  * XRGB_8888
 * ARGB
   * ARGB_8888
   * ABGR_8888
@@ -53,3 +59,10 @@ If you want to run PixelViewer on Ubuntu (also for other Linux distributions), p
 
 Reference: [How can I edit/create new launcher items in Unity by hand?
 ](https://askubuntu.com/questions/13758/how-can-i-edit-create-new-launcher-items-in-unity-by-hand)
+
+## Dependencies
+* [.NET Core](https://dotnet.microsoft.com/)
+* [Avalonia](https://github.com/AvaloniaUI/Avalonia)
+* [NLog](https://github.com/NLog/NLog)
+* [NUnit](https://github.com/nunit/nunit)
+* [ReactiveUI](https://github.com/reactiveui/ReactiveUI)
