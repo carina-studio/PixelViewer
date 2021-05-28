@@ -1609,7 +1609,7 @@ namespace Carina.PixelViewer.ViewModels
 			try
 			{
 				// open file
-				using var stream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+				using var stream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
 				using var jsonWriter = new Utf8JsonWriter(stream, new JsonWriterOptions()
 				{
 					Indented = true,

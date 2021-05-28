@@ -264,7 +264,7 @@ namespace Carina.PixelViewer.Configuration
 			jsonWriter.Flush();
 
 			// write to file
-			using var stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.Write);
+			using var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
 			stream.Write(memoryStream.ToArray());
 		}
 
