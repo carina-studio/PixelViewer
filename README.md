@@ -67,6 +67,7 @@ Reference: [How can I edit/create new launcher items in Unity by hand?
 
 ## Dependencies
 * [.NET Core](https://dotnet.microsoft.com/)
+* [AppBase](https://github.com/carina-studio/AppBase)
 * [Avalonia](https://github.com/AvaloniaUI/Avalonia)
 * [NLog](https://github.com/NLog/NLog)
 * [NUnit](https://github.com/nunit/nunit)
