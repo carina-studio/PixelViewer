@@ -1,5 +1,6 @@
 ﻿using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Platform;
+using CarinaStudio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Carina.PixelViewer.Test.Media
 	/// Base class for tests of <see cref="IBitmapBuffer"/>.
 	/// </summary>
 	/// <typeparam name="T">Type of <see cref="IBitmapBuffer"/>.</typeparam>
-	abstract class BaseBitmapBufferTests<T> : BaseSharableDisposableTests<T> where T : class, IBitmapBuffer, ISharableDisposable<T>
+	abstract class BaseBitmapBufferTests<T> : BaseShareableDisposableTests<T> where T : class, IBitmapBuffer, IShareableDisposable<T>
 	{
 		// Create instance with random size.
 		protected override T CreateInstance()

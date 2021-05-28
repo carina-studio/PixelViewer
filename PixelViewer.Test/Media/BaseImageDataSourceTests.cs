@@ -1,4 +1,5 @@
 ﻿using Carina.PixelViewer.Media;
+using CarinaStudio;
 using NUnit.Framework;
 using System;
 using System.IO;
@@ -9,7 +10,7 @@ namespace Carina.PixelViewer.Test.Media
 	/// Base class for tests of <see cref="IImageDataSource"/>.
 	/// </summary>
 	/// <typeparam name="T">Type of <see cref="IImageDataSource"/>.</typeparam>
-	abstract class BaseImageDataSourceTests<T> : BaseSharableDisposableTests<T> where T : class, IImageDataSource, ISharableDisposable<T>
+	abstract class BaseImageDataSourceTests<T> : BaseShareableDisposableTests<T> where T : class, IImageDataSource, IShareableDisposable<T>
 	{
 		// Create instance with random data.
 		protected override T CreateInstance() => this.CreateInstance(this.GenerateRandomData(1 << 10, 1 << 20));

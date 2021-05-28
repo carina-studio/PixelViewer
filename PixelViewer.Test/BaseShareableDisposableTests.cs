@@ -1,11 +1,12 @@
-﻿using NUnit.Framework;
+﻿using CarinaStudio;
+using NUnit.Framework;
 
 namespace Carina.PixelViewer.Test
 {
 	/// <summary>
-	/// Base class for testing of <see cref="ISharableDisposable{T}"/>
+	/// Base class for testing of <see cref="IShareableDisposable{T}"/>
 	/// </summary>
-	abstract class BaseSharableDisposableTests<T> : BaseTests where T: class, ISharableDisposable<T>
+	abstract class BaseShareableDisposableTests<T> : BaseTests where T: class, IShareableDisposable<T>
 	{
 		/// <summary>
 		/// Create instance for testing.

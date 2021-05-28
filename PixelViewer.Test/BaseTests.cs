@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using CarinaStudio;
+using NLog;
 using NUnit.Framework;
 using System;
 using System.ComponentModel;

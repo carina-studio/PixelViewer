@@ -1,4 +1,5 @@
 ﻿using Carina.PixelViewer.Media;
+using CarinaStudio;
 using NUnit.Framework;
 
 namespace Carina.PixelViewer.Test.Media

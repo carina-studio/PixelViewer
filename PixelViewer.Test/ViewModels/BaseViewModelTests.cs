@@ -1,5 +1,6 @@
-﻿using Carina.PixelViewer.Threading;
-using Carina.PixelViewer.ViewModels;
+﻿using Carina.PixelViewer.ViewModels;
+using CarinaStudio;
+using CarinaStudio.Threading;
 using NUnit.Framework;
 using System;
 using System.Threading;
@@ -89,7 +90,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 							this.testSyncContext = new SingleThreadSynchronizationContext();
 					}
 				}
-				return this.testSyncContext.EnsureNonNull();
+				return this.testSyncContext.AsNonNull();
 			}
 		}
 	}
