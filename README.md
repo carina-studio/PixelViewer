@@ -29,6 +29,11 @@ PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform
   * ABGR_8888
   * BGRA_8888
   * RGBA_8888
+* Bayer
+  * BGGR_16 (LE/BE)
+  * GBRG_16 (LE/BE)
+  * GRBG_16 (LE/BE)
+  * RGGB_16 (LE/BE)
 
 ## Supported functions
 * Rendering image from raw pixel file.
