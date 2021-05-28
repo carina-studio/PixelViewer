@@ -4,12 +4,14 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.ReactiveUI;
-using Carina.PixelViewer.Collections;
 using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.Threading;
 using Carina.PixelViewer.ViewModels;
+using CarinaStudio;
+using CarinaStudio.Collections;
+using CarinaStudio.Threading;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -187,12 +190,12 @@ namespace Carina.PixelViewer
 				// open file or activate existent session
 				if (launchOptions.FileName != null && this.workspace != null)
 				{
-					var existentSession = this.workspace.Sessions.Find((it) => it.SourceFileName == launchOptions.FileName);
+					var existentSession = this.workspace.Sessions.First((it) => it.SourceFileName == launchOptions.FileName);
 					if (existentSession != null)
 						this.workspace.ActivateSession(existentSession);
 					else
 					{
-						var emptySession = this.workspace.Sessions.Find((it) => !it.IsSourceFileOpened && it.SourceFileName == null);
+						var emptySession = this.workspace.Sessions.First((it) => !it.IsSourceFileOpened && it.SourceFileName == null);
 						if (emptySession == null)
 							this.workspace.CreateSession(launchOptions.FileName);
 						else if (emptySession.OpenSourceFileCommand.TryExecute(launchOptions.FileName))

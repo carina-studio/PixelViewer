@@ -1,6 +1,7 @@
 ﻿using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
+using CarinaStudio;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,7 @@ namespace Carina.PixelViewer.ViewModels
 			get
 			{
 				if (ImageRenderers.TryFindByFormatName(this.Settings.GetValue<string>(Settings.DefaultImageRendererFormatName), out var renderer))
-					return renderer.EnsureNonNull();
+					return renderer.AsNonNull();
 				return ImageRenderers.All[0];
 			}
 			set => this.Settings[Settings.DefaultImageRendererFormatName] = value.Format.Name;

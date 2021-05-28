@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using CarinaStudio;
 using System;
 
 namespace Carina.PixelViewer.Controls
@@ -42,7 +43,7 @@ namespace Carina.PixelViewer.Controls
 #endif
 
 			// setup controls
-			this.textBox = this.FindControl<TextBox>("textBox").EnsureNonNull();
+			this.textBox = this.FindControl<TextBox>("textBox").AsNonNull();
 		}
 
 

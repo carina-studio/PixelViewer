@@ -7,14 +7,16 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
-using Carina.PixelViewer.Collections;
 using Carina.PixelViewer.Data.Converters;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
+using CarinaStudio;
+using CarinaStudio.Collections;
 using NLog;
 using ReactiveUI;
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Carina.PixelViewer.Controls
@@ -74,8 +76,8 @@ namespace Carina.PixelViewer.Controls
 			this.canOpenSourceFile.Update(false);
 
 			// setup controls
-			this.evaluateImageDimensionsMenu = (ContextMenu)this.Resources["evaluateImageDimensionsMenu"].EnsureNonNull();
-			this.imageScrollViewer = this.FindControl<ScrollViewer>("imageScrollViewer").EnsureNonNull();
+			this.evaluateImageDimensionsMenu = (ContextMenu)this.Resources["evaluateImageDimensionsMenu"].AsNonNull();
+			this.imageScrollViewer = this.FindControl<ScrollViewer>("imageScrollViewer").AsNonNull();
 		}
 
 
@@ -420,7 +422,7 @@ namespace Carina.PixelViewer.Controls
 					return;
 
 				// check name
-				if (session.Profiles.Find((it) => it != Session.DefaultProfile && it.Name == name) == null)
+				if (session.Profiles.First((it) => it != Session.DefaultProfile && it.Name == name) == null)
 					break;
 
 				// show message for duplicate name

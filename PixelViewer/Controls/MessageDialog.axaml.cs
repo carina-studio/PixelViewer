@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using CarinaStudio;
 using System;
 
 namespace Carina.PixelViewer.Controls
@@ -89,7 +90,7 @@ namespace Carina.PixelViewer.Controls
 			base.OnOpened(e);
 
 			// setup icon
-			this.FindControl<Image>("icon").EnsureNonNull().Classes = new Classes(this.Icon switch
+			this.FindControl<Image>("icon").AsNonNull().Classes = new Classes(this.Icon switch
 			{
 				MessageDialogIcon.Error => "MessageDialog_Icon_Error",
 				MessageDialogIcon.Question => "MessageDialog_Icon_Question",
@@ -103,22 +104,22 @@ namespace Carina.PixelViewer.Controls
 			{
 				case MessageDialogButtons.OK:
 					{
-						this.FindControl<Button>("button1").EnsureNonNull().Also((it) =>
+						this.FindControl<Button>("button1").AsNonNull().Also((it) =>
 						{
 							it.Content = app.GetString("Common.OK");
 							it.Tag = MessageDialogResult.OK;
 						});
-						this.FindControl<Button>("button2").EnsureNonNull().IsVisible = false;
+						this.FindControl<Button>("button2").AsNonNull().IsVisible = false;
 						break;
 					}
 				case MessageDialogButtons.OKCancel:
 					{
-						this.FindControl<Button>("button1").EnsureNonNull().Also((it) =>
+						this.FindControl<Button>("button1").AsNonNull().Also((it) =>
 						{
 							it.Content = app.GetString("Common.OK");
 							it.Tag = MessageDialogResult.OK;
 						});
-						this.FindControl<Button>("button2").EnsureNonNull().Also((it) =>
+						this.FindControl<Button>("button2").AsNonNull().Also((it) =>
 						{
 							it.Content = app.GetString("Common.Cancel");
 							it.Tag = MessageDialogResult.Cancel;

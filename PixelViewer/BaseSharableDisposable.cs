@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CarinaStudio;
+using System;
 
 namespace Carina.PixelViewer
 {

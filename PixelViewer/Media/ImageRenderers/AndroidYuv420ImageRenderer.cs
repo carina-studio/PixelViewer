@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using CarinaStudio;
+using System.Collections.Generic;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {

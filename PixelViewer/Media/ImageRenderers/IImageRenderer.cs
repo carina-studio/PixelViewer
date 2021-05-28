@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
+using CarinaStudio;
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;

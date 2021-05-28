@@ -1,5 +1,6 @@
 ﻿using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Threading;
+using CarinaStudio;
 using NLog;
 using System;
 using System.Collections.Generic;

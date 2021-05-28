@@ -4,13 +4,14 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
-using Carina.PixelViewer.Collections;
 using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Data.Converters;
 using Carina.PixelViewer.Input;
-using Carina.PixelViewer.Threading;
 using Carina.PixelViewer.ViewModels;
+using CarinaStudio;
+using CarinaStudio.Collections;
+using CarinaStudio.Threading;
 using NLog;
 using ReactiveUI;
 using System;
@@ -51,7 +52,7 @@ namespace Carina.PixelViewer
 		bool isConstructing = true;
 		readonly TabControl mainTabControl;
 		readonly IList mainTabItems;
-		readonly ScheduledOperation saveWindowSizeOperation;
+		readonly ScheduledAction saveWindowSizeOperation;
 		Workspace? workspace;
 
 
@@ -64,7 +65,7 @@ namespace Carina.PixelViewer
 			this.CloseMainTabItemCommand = ReactiveCommand.Create((TabItem tabItem) => this.CloseMainTabItem(tabItem));
 
 			// create scheduled operations
-			this.saveWindowSizeOperation = new ScheduledOperation(() =>
+			this.saveWindowSizeOperation = new ScheduledAction(() =>
 			{
 				if (this.WindowState == WindowState.Normal)
 				{
@@ -90,7 +91,7 @@ namespace Carina.PixelViewer
 			}
 
 			// setup main tab control
-			this.mainTabControl = this.FindControl<TabControl>("tabControl").EnsureNonNull().Also((it) =>
+			this.mainTabControl = this.FindControl<TabControl>("tabControl").AsNonNull().Also((it) =>
 			{
 				it.SelectionChanged += (s, e) => this.OnMainTabControlSelectionChanged();
 			});

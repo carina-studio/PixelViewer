@@ -1,4 +1,5 @@
 ﻿using Avalonia.Input;
+using CarinaStudio;
 
 namespace Carina.PixelViewer.Input
 {

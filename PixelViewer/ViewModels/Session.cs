@@ -1,12 +1,14 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Carina.PixelViewer.Collections;
 using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.IO;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
+using CarinaStudio;
+using CarinaStudio.Collections;
+using CarinaStudio.Threading;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -148,43 +150,43 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Static fields.
-		static readonly MutableObservableValue<bool> IsLoadingProfiles = new MutableObservableValue<bool>();
+		static readonly MutableObservableBoolean IsLoadingProfiles = new MutableObservableBoolean();
 		static readonly IList<IProfile> ReadOnlySharedProfileList;
 		static readonly ObservableCollection<IProfile> SharedProfileList = new ObservableCollection<IProfile>();
 		static long TotalRenderedImagesMemoryUsage;
 
 
 		// Fields.
-		readonly MutableObservableValue<bool> canOpenSourceFile = new MutableObservableValue<bool>(true);
-		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> canSaveOrDeleteProfile = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> canZoomIn = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> canZoomOut = new MutableObservableValue<bool>();
+		readonly MutableObservableBoolean canOpenSourceFile = new MutableObservableBoolean(true);
+		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly int[] effectiveBits = new int[4];
 		bool fitRenderedImageToViewport = true;
-		readonly MutableObservableValue<bool> hasImagePlane1 = new MutableObservableValue<bool>(true);
-		readonly MutableObservableValue<bool> hasImagePlane2 = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> hasImagePlane3 = new MutableObservableValue<bool>();
+		readonly MutableObservableBoolean hasImagePlane1 = new MutableObservableBoolean(true);
+		readonly MutableObservableBoolean hasImagePlane2 = new MutableObservableBoolean();
+		readonly MutableObservableBoolean hasImagePlane3 = new MutableObservableBoolean();
 		bool hasPendingImageRendering;
-		readonly MutableObservableValue<bool> hasSelectedRenderedImagePixel = new MutableObservableValue<bool>();
+		readonly MutableObservableBoolean hasSelectedRenderedImagePixel = new MutableObservableBoolean();
 		IImageDataSource? imageDataSource;
-		readonly MutableObservableValue<int> imageHeight = new MutableObservableValue<int>(1);
-		readonly MutableObservableValue<int> imagePlaneCount = new MutableObservableValue<int>(1);
+		readonly MutableObservableInt32 imageHeight = new MutableObservableInt32(1);
+		readonly MutableObservableInt32 imagePlaneCount = new MutableObservableInt32(1);
 		readonly MutableObservableValue<IImageRenderer> imageRenderer;
 		CancellationTokenSource? imageRenderingCancellationTokenSource;
-		readonly MutableObservableValue<int> imageWidth = new MutableObservableValue<int>(1);
-		readonly MutableObservableValue<bool> insufficientMemoryForRenderedImage = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> isAdjustableEffectiveBits1 = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> isAdjustableEffectiveBits2 = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> isAdjustableEffectiveBits3 = new MutableObservableValue<bool>();
+		readonly MutableObservableInt32 imageWidth = new MutableObservableInt32(1);
+		readonly MutableObservableBoolean insufficientMemoryForRenderedImage = new MutableObservableBoolean();
+		readonly MutableObservableBoolean isAdjustableEffectiveBits1 = new MutableObservableBoolean();
+		readonly MutableObservableBoolean isAdjustableEffectiveBits2 = new MutableObservableBoolean();
+		readonly MutableObservableBoolean isAdjustableEffectiveBits3 = new MutableObservableBoolean();
 		bool isFirstImageRenderingForSource = true;
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
 		IDisposable? isLoadingProfilesObserverSubscriptionToken;
-		readonly MutableObservableValue<bool> isRenderingImage = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> isSavingRenderedImage = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> isSourceFileOpened = new MutableObservableValue<bool>();
+		readonly MutableObservableBoolean isRenderingImage = new MutableObservableBoolean();
+		readonly MutableObservableBoolean isSavingRenderedImage = new MutableObservableBoolean();
+		readonly MutableObservableBoolean isSourceFileOpened = new MutableObservableBoolean();
 		readonly int[] pixelStrides = new int[4];
 		readonly MutableObservableValue<IProfile> profile = new MutableObservableValue<IProfile>(DefaultProfile);
 		readonly string profilesDirectoryPath;
@@ -192,13 +194,13 @@ namespace Carina.PixelViewer.ViewModels
 		IBitmapBuffer? renderedImageBuffer;
 		IDisposable? renderedImageMemoryUsageToken;
 		double renderedImageScale = 1.0;
-		readonly ScheduledOperation renderImageOperation;
+		readonly ScheduledAction renderImageOperation;
 		readonly int[] rowStrides = new int[4];
 		readonly MutableObservableValue<Color> selectedRenderedImagePixelColor = new MutableObservableValue<Color>();
-		readonly MutableObservableValue<int> selectedRenderedImagePixelPositionX = new MutableObservableValue<int>(-1);
-		readonly MutableObservableValue<int> selectedRenderedImagePixelPositionY = new MutableObservableValue<int>(-1);
-		readonly MutableObservableValue<string?> sourceFileName = new MutableObservableValue<string?>();
-		readonly MutableObservableValue<string?> sourceFileSizeString = new MutableObservableValue<string?>();
+		readonly MutableObservableInt32 selectedRenderedImagePixelPositionX = new MutableObservableInt32(-1);
+		readonly MutableObservableInt32 selectedRenderedImagePixelPositionY = new MutableObservableInt32(-1);
+		readonly MutableObservableString sourceFileName = new MutableObservableString();
+		readonly MutableObservableString sourceFileSizeString = new MutableObservableString();
 
 
 		// Static initializer.
@@ -227,7 +229,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.ZoomOutCommand = ReactiveCommand.Create(this.ZoomOut, this.canZoomOut);
 
 			// setup operations
-			this.renderImageOperation = new ScheduledOperation(this, this.RenderImage);
+			this.renderImageOperation = new ScheduledAction(this, this.RenderImage);
 
 			// setup profiles
 			this.profilesDirectoryPath = Path.Combine(App.Current.Directory, "Profiles");
@@ -1766,7 +1768,7 @@ namespace Carina.PixelViewer.ViewModels
 		IImageRenderer SelectDefaultImageRenderer()
 		{
 			if (ImageRenderers.TryFindByFormatName(this.Settings.GetValue<string>(Settings.DefaultImageRendererFormatName), out var imageRenderer))
-				return imageRenderer.EnsureNonNull();
+				return imageRenderer.AsNonNull();
 			return ImageRenderers.All.SingleOrDefault((candidate) => candidate is L8ImageRenderer) ?? ImageRenderers.All[0];
 		}
 

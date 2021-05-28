@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CarinaStudio.Threading;
+using System;
 
 namespace Carina.PixelViewer.Threading
 {

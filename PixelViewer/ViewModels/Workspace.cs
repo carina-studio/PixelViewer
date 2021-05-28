@@ -1,5 +1,7 @@
 ﻿using Carina.PixelViewer.Input;
 using Carina.PixelViewer.Threading;
+using CarinaStudio;
+using CarinaStudio.Threading;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,8 +18,8 @@ namespace Carina.PixelViewer.ViewModels
 		readonly ReadOnlyObservableCollection<Session> readOnlyActivatedSessions;
 		readonly ReadOnlyObservableCollection<Session> readOnlySessions;
 		readonly ObservableCollection<Session> sessions = new ObservableCollection<Session>();
-		readonly ScheduledOperation updateTitleOperation;
-		readonly MutableObservableValue<string?> title = new MutableObservableValue<string?>();
+		readonly ScheduledAction updateTitleOperation;
+		readonly MutableObservableString title = new MutableObservableString();
 
 
 		/// <summary>
@@ -30,7 +32,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.readOnlySessions = new ReadOnlyObservableCollection<Session>(this.sessions);
 
 			// create scheduled operations
-			this.updateTitleOperation = new ScheduledOperation(this.UpdateTitle);
+			this.updateTitleOperation = new ScheduledAction(this.UpdateTitle);
 
 			// observe property values
 			this.ObservePropertyValue(this.title, nameof(this.Title));

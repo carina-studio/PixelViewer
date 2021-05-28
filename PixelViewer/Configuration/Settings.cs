@@ -1,4 +1,5 @@
-﻿using NLog;
+﻿using CarinaStudio;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -114,7 +115,7 @@ namespace Carina.PixelViewer.Configuration
 		public T GetValue<T>(string key)
 		{
 			if (this.TryGetValue<T>(key, out var value))
-				return (T)((object?)value).EnsureNonNull();
+				return (T)((object?)value).AsNonNull();
 			throw new InvalidOperationException($"Cannot get value of '{key}' as {typeof(T)}");
 		}
 

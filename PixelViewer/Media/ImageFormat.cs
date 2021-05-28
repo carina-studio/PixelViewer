@@ -1,4 +1,5 @@
-﻿using Carina.PixelViewer.Collections;
+﻿using CarinaStudio;
+using CarinaStudio.Collections;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

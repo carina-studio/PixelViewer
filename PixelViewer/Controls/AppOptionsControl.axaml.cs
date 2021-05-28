@@ -6,6 +6,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Carina.PixelViewer.ViewModels;
+using CarinaStudio;
 using System;
 using System.Reflection;
 using System.Windows.Input;
@@ -54,7 +55,7 @@ namespace Carina.PixelViewer.Controls
 				using var stream = assets.Open(new Uri($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/AppIcon_128px.png")); 
 				appIcon = new Bitmap(stream);
 			}
-			this.FindControl<Image>("appIcon").EnsureNonNull().Source = appIcon;
+			this.FindControl<Image>("appIcon").AsNonNull().Source = appIcon;
 		}
 
 

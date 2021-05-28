@@ -1,5 +1,5 @@
-﻿using Carina.PixelViewer.Collections;
-using Carina.PixelViewer.IO;
+﻿using Carina.PixelViewer.IO;
+using CarinaStudio.Collections;
 using NLog;
 using System;
 using System.Collections.Generic;
