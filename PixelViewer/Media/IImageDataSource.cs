@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using CarinaStudio;
+using System.IO;
 
 namespace Carina.PixelViewer.Media
 {
 	/// <summary>
 	/// Source of raw image data.
 	/// </summary>
-	interface IImageDataSource : ISharableDisposable<IImageDataSource>
+	interface IImageDataSource : IShareableDisposable<IImageDataSource>
 	{
 		/// <summary>
 		/// Open <see cref="Stream"/> to read raw image data.

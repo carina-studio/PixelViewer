@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
+using CarinaStudio;
 using System.Buffers;
 
 namespace Carina.PixelViewer.Media
@@ -7,7 +8,7 @@ namespace Carina.PixelViewer.Media
 	/// <summary>
 	/// Data buffer of <see cref="IBitmap"/>.
 	/// </summary>
-	unsafe interface IBitmapBuffer : ISharableDisposable<IBitmapBuffer>, IMemoryOwner<byte>
+	unsafe interface IBitmapBuffer : IShareableDisposable<IBitmapBuffer>, IMemoryOwner<byte>
 	{
 		/// <summary>
 		/// Format of bitmap.

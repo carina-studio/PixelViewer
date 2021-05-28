@@ -1,4 +1,5 @@
 ﻿using Carina.PixelViewer.IO;
+using CarinaStudio;
 using CarinaStudio.Collections;
 using NLog;
 using System;
@@ -11,10 +12,10 @@ namespace Carina.PixelViewer.Media
 	/// <summary>
 	/// Implementation of <see cref="IImageDataSource"/> based-on file.
 	/// </summary>
-	unsafe class FileImageDataSource : BaseSharableDisposable<FileImageDataSource>, IImageDataSource
+	unsafe class FileImageDataSource : BaseShareableDisposable<FileImageDataSource>, IImageDataSource
 	{
 		// Holder.
-		class HolderImpl : BaseHolder
+		class HolderImpl : BaseResourceHolder
 		{
 			// Fields.
 			public readonly FileStream BaseStream;
@@ -26,17 +27,16 @@ namespace Carina.PixelViewer.Media
 				this.BaseStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 			}
 
-			// Dispose.
-			public override void Dispose(bool disposing)
+			// Release.
+			protected override void Release()
 			{
-				logger.Debug($"Dispose source of '{this.BaseStream.Name}'");
+				logger.Debug($"Release source of '{this.BaseStream.Name}'");
 				try
 				{
 					this.BaseStream.Close();
 				}
 				catch
 				{ }
-				base.Dispose(disposing);
 			}
 		}
 
@@ -112,10 +112,6 @@ namespace Carina.PixelViewer.Media
 		}
 
 
-		// Share.
-		protected override FileImageDataSource OnShare(BaseHolder holder) => new FileImageDataSource((HolderImpl)holder);
-
-
 		// Called when stream closed.
 		[MethodImpl(MethodImplOptions.Synchronized)]
 		void OnStreamClosed(StreamImpl stream)
@@ -149,15 +145,16 @@ namespace Carina.PixelViewer.Media
 		/// <summary>
 		/// Get name of file.
 		/// </summary>
-		public string FileName { get => ((HolderImpl)this.Holder).BaseStream.Name; }
+		public string FileName { get => this.GetResourceHolder<HolderImpl>().BaseStream.Name; }
 
 
 		// Share.
-		IImageDataSource ISharableDisposable<IImageDataSource>.Share() => this.Share();
+		protected override FileImageDataSource Share(BaseResourceHolder holder) => new FileImageDataSource((HolderImpl)holder);
+		IImageDataSource IShareableDisposable<IImageDataSource>.Share() => this.Share();
 
 
 		// Size of image data.
-		public long Size { get => ((HolderImpl)this.Holder).BaseStream.Length; }
+		public long Size { get => this.GetResourceHolder<HolderImpl>().BaseStream.Length; }
 
 
 		// To readable string.
