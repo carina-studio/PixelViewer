@@ -189,7 +189,7 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV422 to BGRA conversion (unsafe).
 		/// </summary>
 		/// <returns>YUV422 to BGRA conversion function.</returns>
-		public static Yuv422ToBgraUnsafe SelectYuv422ToBgraConversionUnsafe() => App.Current.Settings.GetValue<YuvConversionMode>(Settings.YuvConversionMode) switch
+		public static Yuv422ToBgraUnsafe SelectYuv422ToBgraConversionUnsafe() => App.Current.Settings.GetValueOrDefault(Settings.YuvConversionMode) switch
 		{
 			YuvConversionMode.ITU_R => Yuv422ToBgraUnsafeITUR,
 			_ => Yuv422ToBgraUnsafeNTSC,
@@ -200,7 +200,7 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV to BGRA conversion.
 		/// </summary>
 		/// <returns>YUV to BGRA conversion function.</returns>
-		public static Yuv444ToBgraUnsafe SelectYuv444ToBgraConversionUnsafe() => App.Current.Settings.GetValue<YuvConversionMode>(Settings.YuvConversionMode) switch
+		public static Yuv444ToBgraUnsafe SelectYuv444ToBgraConversionUnsafe() => App.Current.Settings.GetValueOrDefault(Settings.YuvConversionMode) switch
 		{
 			YuvConversionMode.ITU_R => Yuv444ToBgraUnsafeITUR,
 			_ => Yuv444ToBgraUnsafeNTSC,

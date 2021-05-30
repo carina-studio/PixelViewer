@@ -26,7 +26,8 @@
     <PackageReference Include="Avalonia.Desktop" Version="0.10.5" />
     <PackageReference Include="Avalonia.Diagnostics" Version="0.10.5" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.5" />
-    <PackageReference Include="CarinaStudio.AppBase.Core" Version="0.9.0.528" />
+    <PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.9.2.530" />
+    <PackageReference Include="CarinaStudio.AppBase.Core" Version="0.9.2.530" />
     <PackageReference Include="NLog" Version="4.7.10" />
     <PackageReference Include="ReactiveUI" Version="13.3.2" />
     <PackageReference Include="System.Drawing.Common" Version="5.0.2" />

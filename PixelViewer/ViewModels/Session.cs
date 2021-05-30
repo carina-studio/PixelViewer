@@ -8,6 +8,7 @@ using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Configuration;
 using CarinaStudio.Threading;
 using ReactiveUI;
 using System;
@@ -79,7 +80,7 @@ namespace Carina.PixelViewer.ViewModels
 			public ProfileImpl() // Constructor for default profile
 			{
 				this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
-				App.Current.Settings.PropertyChanged += this.OnSettingsChanged;
+				App.Current.Settings.SettingChanged += this.OnSettingChanged;
 			}
 			public ProfileImpl(string name)
 			{
@@ -99,10 +100,10 @@ namespace Carina.PixelViewer.ViewModels
 			// Name.
 			public string Name { get; private set; }
 
-			// Called when settings changed.
-			void OnSettingsChanged(object sender, PropertyChangedEventArgs e)
+			// Called when setting changed.
+			void OnSettingChanged(object? sender, SettingChangedEventArgs e)
 			{
-				if (e.PropertyName == Settings.AutoSelectLanguage && this == DefaultProfile)
+				if (e.Key == Settings.AutoSelectLanguage && this == DefaultProfile)
 				{
 					this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
 					this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Name)));
@@ -650,7 +651,7 @@ namespace Carina.PixelViewer.ViewModels
 
 				// render image
 				this.imageRenderer.Update(value);
-				if (this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterChangingRenderer))
+				if (this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterChangingRenderer))
 					this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
 				this.renderImageOperation.Reschedule();
@@ -944,11 +945,11 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
-		// Called when settings changed.
-		protected override void OnSettingsChanged(string propertyName)
+		// Called when setting changed.
+		protected override void OnSettingChanged(SettingKey key)
 		{
-			base.OnSettingsChanged(propertyName);
-			if (propertyName == nameof(Settings.AutoSelectLanguage))
+			base.OnSettingChanged(key);
+			if (key == Settings.AutoSelectLanguage)
 				this.UpdateTitle();
 		}
 
@@ -1031,21 +1032,21 @@ namespace Carina.PixelViewer.ViewModels
 			this.UpdateCanSaveDeleteProfile();
 
 			// reset to default renderer
-			if (this.Settings.GetValue<bool>(Settings.UseDefaultImageRendererAfterOpeningSourceFile))
+			if (this.Settings.GetValueOrDefault(Settings.UseDefaultImageRendererAfterOpeningSourceFile))
 			{
 				this.Logger.Warn($"Use default image renderer after opening source '{fileName}'");
 				var defaultImageRenderer = this.SelectDefaultImageRenderer();
 				if (this.imageRenderer != defaultImageRenderer)
 				{
 					this.imageRenderer.Update(defaultImageRenderer);
-					if (this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterChangingRenderer))
+					if (this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterChangingRenderer))
 						this.isImageDimensionsEvaluationNeeded = true;
 					this.isImagePlaneOptionsResetNeeded = true;
 				}
 			}
 
 			// render image
-			if (this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterOpeningSourceFile) && this.profile.Value == DefaultProfile)
+			if (this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterOpeningSourceFile) && this.profile.Value == DefaultProfile)
 			{
 				this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
@@ -1157,7 +1158,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Release token for rendered image memory usage.
 		void ReleaseRenderedImageMemoryUsage(RenderedImageMemoryUsageToken token)
 		{
-			var maxUsage = this.Settings.GetValue<long>(Settings.MaxRenderedImagesMemoryUsageMB) << 20;
+			var maxUsage = this.Settings.GetValueOrDefault(Settings.MaxRenderedImagesMemoryUsageMB) << 20;
 			TotalRenderedImagesMemoryUsage -= token.DataSize;
 			this.Logger.Debug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 		}
@@ -1229,7 +1230,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.Logger.Info($"Evaluate dimensions of image for '{sourceFileName}'");
 				this.isImageDimensionsEvaluationNeeded = false;
-				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValue<AspectRatio>(Settings.DefaultImageDimensionsEvaluationAspectRatio))?.Also((it) =>
+				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(Settings.DefaultImageDimensionsEvaluationAspectRatio))?.Also((it) =>
 				{
 					this.imageWidth.Update(it.Width);
 					this.imageHeight.Update(it.Height);
@@ -1378,7 +1379,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Request token for rendered image memory usage.
 		IDisposable? RequestRenderedImageMemoryUsage(long dataSize)
 		{
-			var maxUsage = this.Settings.GetValue<long>(Settings.MaxRenderedImagesMemoryUsageMB) << 20;
+			var maxUsage = this.Settings.GetValueOrDefault(Settings.MaxRenderedImagesMemoryUsageMB) << 20;
 			TotalRenderedImagesMemoryUsage += dataSize;
 			if (TotalRenderedImagesMemoryUsage <= maxUsage)
 			{
@@ -1767,7 +1768,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Select default image renderer according to settings.
 		IImageRenderer SelectDefaultImageRenderer()
 		{
-			if (ImageRenderers.TryFindByFormatName(this.Settings.GetValue<string>(Settings.DefaultImageRendererFormatName), out var imageRenderer))
+			if (ImageRenderers.TryFindByFormatName(this.Settings.GetValueOrDefault(Settings.DefaultImageRendererFormatName), out var imageRenderer))
 				return imageRenderer.AsNonNull();
 			return ImageRenderers.All.SingleOrDefault((candidate) => candidate is L8ImageRenderer) ?? ImageRenderers.All[0];
 		}

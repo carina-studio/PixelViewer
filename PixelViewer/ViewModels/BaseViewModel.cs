@@ -1,6 +1,7 @@
 ﻿using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
+using CarinaStudio.Configuration;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -58,7 +59,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.Id = $"{this.GetType().Name}({nextIdIndex++:x4})";
 			}
 			this.Logger = LogManager.GetLogger(this.Id);
-			this.Settings.PropertyChanged += this.OnSettingsChanged;
+			this.Settings.SettingChanged += this.OnSettingChanged;
 		}
 
 
@@ -94,7 +95,7 @@ namespace Carina.PixelViewer.ViewModels
 					disposable.Dispose();
 				this.subscribedPropertyValueObservers.Clear();
 			}
-			this.Settings.PropertyChanged -= this.OnSettingsChanged;
+			this.Settings.SettingChanged -= this.OnSettingChanged;
 		}
 
 
@@ -158,12 +159,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Called when property of <see cref="Settings"/> has been changed.
+		/// Called when setting has been changed.
 		/// </summary>
-		/// <param name="propertyName">Name of changed property.</param>
-		protected virtual void OnSettingsChanged(string propertyName)
+		/// <param name="key">Key of changed setting.</param>
+		protected virtual void OnSettingChanged(SettingKey key)
 		{ }
-		void OnSettingsChanged(object sender, PropertyChangedEventArgs e) => this.OnSettingsChanged(e.PropertyName);
+		void OnSettingChanged(object? sender, SettingChangedEventArgs e) => this.OnSettingChanged(e.Key);
 
 
 		// Raised when property changed.

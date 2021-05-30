@@ -2,6 +2,7 @@
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using CarinaStudio;
+using CarinaStudio.Configuration;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -31,13 +32,13 @@ namespace Carina.PixelViewer.ViewModels
 			this.RestartMainWindowCommand = ReactiveCommand.Create(() =>
 			{
 				App.Current.RestartMainWindow();
-				this.isOriginallyDarkMode = this.Settings.GetValue<bool>(Settings.DarkMode);
+				this.isOriginallyDarkMode = this.Settings.GetValueOrDefault(Settings.DarkMode);
 				this.IsRestartingMainWindowNeededToApplyDarkMode = false;
 				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
 			});
 
 			// get initial settings state
-			this.isOriginallyDarkMode = this.Settings.GetValue<bool>(Settings.DarkMode);
+			this.isOriginallyDarkMode = this.Settings.GetValueOrDefault(Settings.DarkMode);
 
 			// get version name
 			this.UpdateVersionString();
@@ -55,8 +56,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool AutoSelectLanguage
 		{
-			get => this.Settings.GetValue<bool>(Settings.AutoSelectLanguage);
-			set => this.Settings[Settings.AutoSelectLanguage] = value;
+			get => this.Settings.GetValueOrDefault(Settings.AutoSelectLanguage);
+			set => this.Settings.SetValue(Settings.AutoSelectLanguage, value);
 		}
 
 
@@ -65,8 +66,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool DarkMode
 		{
-			get => this.Settings.GetValue<bool>(Settings.DarkMode);
-			set => this.Settings[Settings.DarkMode] = value;
+			get => this.Settings.GetValueOrDefault(Settings.DarkMode);
+			set => this.Settings.SetValue(Settings.DarkMode, value);
 		}
 
 
@@ -75,8 +76,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
 		{
-			get => this.Settings.GetValue<AspectRatio>(Settings.DefaultImageDimensionsEvaluationAspectRatio);
-			set => this.Settings[Settings.DefaultImageDimensionsEvaluationAspectRatio] = value;
+			get => this.Settings.GetValueOrDefault(Settings.DefaultImageDimensionsEvaluationAspectRatio);
+			set => this.Settings.SetValue(Settings.DefaultImageDimensionsEvaluationAspectRatio, value);
 		}
 
 
@@ -87,11 +88,11 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get
 			{
-				if (ImageRenderers.TryFindByFormatName(this.Settings.GetValue<string>(Settings.DefaultImageRendererFormatName), out var renderer))
+				if (ImageRenderers.TryFindByFormatName(this.Settings.GetValueOrDefault(Settings.DefaultImageRendererFormatName), out var renderer))
 					return renderer.AsNonNull();
 				return ImageRenderers.All[0];
 			}
-			set => this.Settings[Settings.DefaultImageRendererFormatName] = value.Format.Name;
+			set => this.Settings.SetValue(Settings.DefaultImageRendererFormatName, value.Format.Name);
 		}
 
 
@@ -100,8 +101,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterChangingRenderer
 		{
-			get => this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterChangingRenderer);
-			set => this.Settings[Settings.EvaluateImageDimensionsAfterChangingRenderer] = value;
+			get => this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterChangingRenderer);
+			set => this.Settings.SetValue(Settings.EvaluateImageDimensionsAfterChangingRenderer, value);
 		}
 
 
@@ -110,8 +111,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterOpeningSourceFile
 		{
-			get => this.Settings.GetValue<bool>(Settings.EvaluateImageDimensionsAfterOpeningSourceFile);
-			set => this.Settings[Settings.EvaluateImageDimensionsAfterOpeningSourceFile] = value;
+			get => this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterOpeningSourceFile);
+			set => this.Settings.SetValue(Settings.EvaluateImageDimensionsAfterOpeningSourceFile, value);
 		}
 
 
@@ -126,45 +127,38 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
 		{
-			get => this.Settings.GetValue<long>(Settings.MaxRenderedImagesMemoryUsageMB);
-			set => this.Settings[Settings.MaxRenderedImagesMemoryUsageMB] = value;
+			get => this.Settings.GetValueOrDefault(Settings.MaxRenderedImagesMemoryUsageMB);
+			set => this.Settings.SetValue(Settings.MaxRenderedImagesMemoryUsageMB, value);
 		}
 
 
-		// Called when settings changed.
-		protected override void OnSettingsChanged(string propertyName)
+		// Called when setting changed.
+		protected override void OnSettingChanged(SettingKey key)
 		{
-			base.OnSettingsChanged(propertyName);
-			switch (propertyName)
+			base.OnSettingChanged(key);
+			if (key == Settings.AutoSelectLanguage)
 			{
-				case Settings.AutoSelectLanguage:
-					this.OnPropertyChanged(nameof(this.AutoSelectLanguage));
-					this.UpdateVersionString();
-					break;
-				case Settings.DarkMode:
-					this.OnPropertyChanged(nameof(this.DarkMode));
-					this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.GetValue<bool>(Settings.DarkMode) != this.isOriginallyDarkMode);
-					this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
-					break;
-				case Settings.DefaultImageDimensionsEvaluationAspectRatio:
-					this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
-					break;
-				case Settings.DefaultImageRendererFormatName:
-					this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
-					break;
-				case Settings.EvaluateImageDimensionsAfterChangingRenderer:
-					this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
-					break;
-				case Settings.EvaluateImageDimensionsAfterOpeningSourceFile:
-					this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
-					break;
-				case Settings.MaxRenderedImagesMemoryUsageMB:
-					this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
-					break;
-				case Settings.YuvConversionMode:
-					this.OnPropertyChanged(nameof(this.YuvConversionMode));
-					break;
+				this.OnPropertyChanged(nameof(this.AutoSelectLanguage));
+				this.UpdateVersionString();
 			}
+			else if (key == Settings.DarkMode)
+			{
+				this.OnPropertyChanged(nameof(this.DarkMode));
+				this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.GetValueOrDefault(Settings.DarkMode) != this.isOriginallyDarkMode);
+				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
+			}
+			else if (key == Settings.DefaultImageDimensionsEvaluationAspectRatio)
+				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
+			else if (key == Settings.DefaultImageRendererFormatName)
+				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
+			else if (key == Settings.EvaluateImageDimensionsAfterChangingRenderer)
+				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
+			else if (key == Settings.EvaluateImageDimensionsAfterOpeningSourceFile)
+				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
+			else if (key == Settings.MaxRenderedImagesMemoryUsageMB)
+				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
+			else if (key == Settings.YuvConversionMode)
+				this.OnPropertyChanged(nameof(this.YuvConversionMode));
 		}
 
 
@@ -218,8 +212,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool UseDefaultImageRendererAfterOpeningSourceFile
 		{
-			get => this.Settings.GetValue<bool>(Settings.UseDefaultImageRendererAfterOpeningSourceFile);
-			set => this.Settings[Settings.UseDefaultImageRendererAfterOpeningSourceFile] = value;
+			get => this.Settings.GetValueOrDefault(Settings.UseDefaultImageRendererAfterOpeningSourceFile);
+			set => this.Settings.SetValue(Settings.UseDefaultImageRendererAfterOpeningSourceFile, value);
 		}
 
 
@@ -234,8 +228,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public YuvConversionMode YuvConversionMode
 		{
-			get => this.Settings.GetValue<YuvConversionMode>(Settings.YuvConversionMode);
-			set => this.Settings[Settings.YuvConversionMode] = value;
+			get => this.Settings.GetValueOrDefault(Settings.YuvConversionMode);
+			set => this.Settings.SetValue(Settings.YuvConversionMode, value);
 		}
 
 

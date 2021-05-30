@@ -69,8 +69,8 @@ namespace Carina.PixelViewer
 			{
 				if (this.WindowState == WindowState.Normal)
 				{
-					this.Settings[Settings.MainWindowWidth] = (int)(this.Width + 0.5);
-					this.Settings[Settings.MainWindowHeight] = (int)(this.Height + 0.5);
+					this.Settings.SetValue(Settings.MainWindowWidth, (int)(this.Width + 0.5));
+					this.Settings.SetValue(Settings.MainWindowHeight, (int)(this.Height + 0.5));
 				}
 			});
 
@@ -81,9 +81,9 @@ namespace Carina.PixelViewer
 #endif
 
 			// setup window state and size
-			this.WindowState = this.Settings.GetValue<WindowState>(Settings.MainWindowState);
-			var windowWidth = this.Settings.GetValue<int>(Settings.MainWindowWidth);
-			var windowHeight = this.Settings.GetValue<int>(Settings.MainWindowHeight);
+			this.WindowState = this.Settings.GetValueOrDefault(Settings.MainWindowState);
+			var windowWidth = this.Settings.GetValueOrDefault(Settings.MainWindowWidth);
+			var windowHeight = this.Settings.GetValueOrDefault(Settings.MainWindowHeight);
 			if (windowWidth > 0 && windowHeight > 0)
 			{
 				this.Width = windowWidth;
@@ -411,7 +411,7 @@ namespace Carina.PixelViewer
 			{
 				var state = this.WindowState;
 				if (state != WindowState.Minimized)
-					this.Settings[Settings.MainWindowState] = state;
+					this.Settings.SetValue(Settings.MainWindowState, state);
 			}
 		}
 

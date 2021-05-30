@@ -11,6 +11,7 @@ using Carina.PixelViewer.Threading;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Configuration;
 using CarinaStudio.Threading;
 using NLog;
 using System;
@@ -183,7 +184,7 @@ namespace Carina.PixelViewer
 				this.mainWindow?.Let((mainWindow) =>
 				{
 					if (mainWindow.WindowState == Avalonia.Controls.WindowState.Minimized)
-						mainWindow.WindowState = this.Settings.GetValue<Avalonia.Controls.WindowState>(Settings.MainWindowState);
+						mainWindow.WindowState = this.Settings.GetValueOrDefault(Settings.MainWindowState);
 					mainWindow.ActivateAndBringToFront();
 				});
 
@@ -312,11 +313,18 @@ namespace Carina.PixelViewer
 			Logger.Warn("Start loading settings");
 			this.settingsFilePath = Path.Combine(this.Directory, "Settings.json");
 			this.settings = new Settings();
-			await this.settings.LoadAsync(this.settingsFilePath);
-			Logger.Warn("Settings loaded");
+			try
+			{
+				await this.settings.LoadAsync(this.settingsFilePath);
+				Logger.Warn("Settings loaded");
+			}
+			catch(Exception ex)
+			{
+				Logger.Error(ex, "Unable to load settings");
+			}
 
 			// attach to settings
-			this.Settings.PropertyChanged += (_, e) => this.OnSettingsChanged(e.PropertyName);
+			this.Settings.SettingChanged += (_, e) => this.OnSettingChanged(e.Key);
 
 			// load strings
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -371,8 +379,15 @@ namespace Carina.PixelViewer
 
 			// save settings
 			Logger.Warn("Start saving settings");
-			await this.Settings.SaveAsync(this.settingsFilePath);
-			Logger.Warn("Settings saved");
+			try
+			{
+				await this.Settings.SaveAsync(this.settingsFilePath);
+				Logger.Warn("Settings saved");
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Unable to save settings");
+			}
 
 			// restart main window
 			if (this.isRestartMainWindowRequested)
@@ -392,15 +407,11 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Called when settings changed.
-		void OnSettingsChanged(string propertyName)
+		// Called when setting changed.
+		void OnSettingChanged(SettingKey key)
 		{
-			switch (propertyName)
-			{
-				case nameof(Settings.AutoSelectLanguage):
-					this.UpdateStringResources();
-					break;
-			}
+			if (key == Settings.AutoSelectLanguage)
+				this.UpdateStringResources();
 		}
 
 
@@ -496,7 +507,7 @@ namespace Carina.PixelViewer
 		// Update string resource according to settings.
 		void UpdateStringResources()
 		{
-			if (this.Settings.TryGetValue<bool>(Settings.AutoSelectLanguage, out var boolValue) && boolValue)
+			if (this.Settings.GetValueOrDefault(Settings.AutoSelectLanguage))
 			{
 				// base resources
 				var localeName = this.CultureInfo.Name;
@@ -562,8 +573,7 @@ namespace Carina.PixelViewer
 		void UpdateStyles()
 		{
 			// select style
-			if (!(this.Settings.TryGetValue<bool>(Settings.DarkMode, out var darkMode)))
-				return;
+			var darkMode = this.Settings.GetValueOrDefault(Settings.DarkMode);
 			var addingStyle = darkMode switch
 			{
 				true => this.stylesDark ?? new StyleInclude(new Uri("avares://PixelViewer/")).Also((it) =>
