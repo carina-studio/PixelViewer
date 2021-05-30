@@ -1,4 +1,4 @@
-# 📢PixelViewer [![Releases](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer)](https://github.com/carina-studio/PixelViewer/releases) 
+# 📢PixelViewer
 PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB pixels data from file and rendering it. Currently it is still under development, but most of functions are ready.
 
 <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Dark_Thumb.png" alt="Main window (dark)" width="250"/> <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Light_Thumb.png" alt="Main window (light)" width="250"/> <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Dark_Linux_Thumb.png" alt="Main window on Ubuntu (dark)" width="250"/>
