@@ -110,7 +110,7 @@ namespace Carina.PixelViewer.Test.Media
 			Assert.GreaterOrEqual(instance.RowBytes, minRowStride, $"Insufficient row-stride: {instance.RowBytes}, size: {width}x{height}, bpp: {bpp}.");
 
 			// access data
-			instance.Memory.UnsafeAccess((address) =>
+			instance.Memory.Pin((address) =>
 			{
 				if (fullAccess)
 				{
