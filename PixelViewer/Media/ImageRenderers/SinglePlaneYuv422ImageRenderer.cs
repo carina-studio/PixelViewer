@@ -49,7 +49,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgraConversionUnsafe();
 
 			// render
-			bitmapBuffer.Memory.UnsafeAccess((bitmapBaseAddress) =>
+			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
 				var yuvRow = new byte[rowStride];
 				fixed (byte* yuvRowPtr = yuvRow)

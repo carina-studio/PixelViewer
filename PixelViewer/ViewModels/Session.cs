@@ -1815,7 +1815,7 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				// get color of pixel
-				var color = renderedImageBuffer.Memory.UnsafeAccess((baseAddress) =>
+				var color = renderedImageBuffer.Memory.Pin((baseAddress) =>
 				{
 					var pixelPtr = (byte*)baseAddress + renderedImageBuffer.GetPixelOffset(x, y);
 					return renderedImageBuffer.Format switch

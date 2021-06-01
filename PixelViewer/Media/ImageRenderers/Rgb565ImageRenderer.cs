@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CarinaStudio;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -44,7 +45,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			};
 
 			// render
-			bitmapBuffer.Memory.UnsafeAccess((bitmapBaseAddress) =>
+			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
 				byte[] row = new byte[rowStride];
 				fixed (byte* rowPtr = row)

@@ -47,7 +47,7 @@ namespace Carina.PixelViewer.Media
 		/// <returns><see cref="IBitmap"/>.</returns>
 		public static IBitmap CreateAvaloniaBitmap(this IBitmapBuffer buffer)
 		{
-			return buffer.Memory.UnsafeAccess((address) =>
+			return buffer.Memory.Pin((address) =>
 			{
 				return new Bitmap(buffer.Format.ToAvaloniaPixelFormat(), Avalonia.Platform.AlphaFormat.Unpremul, address, new PixelSize(buffer.Width, buffer.Height), new Vector(96, 96), buffer.RowBytes);
 			});
@@ -61,7 +61,7 @@ namespace Carina.PixelViewer.Media
 		/// <returns><see cref="System.Drawing.Bitmap"/>.</returns>
 		public static System.Drawing.Bitmap CreateSystemDrawingBitmap(this IBitmapBuffer buffer)
 		{
-			return buffer.Memory.UnsafeAccess((address) =>
+			return buffer.Memory.Pin((address) =>
 			{
 				return new System.Drawing.Bitmap(buffer.Width, buffer.Height, buffer.RowBytes, buffer.Format.ToSystemDrawingPixelFormat(), address);
 			});

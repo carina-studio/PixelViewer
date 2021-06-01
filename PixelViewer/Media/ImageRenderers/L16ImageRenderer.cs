@@ -67,7 +67,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			};
 
 			// render
-			bitmapBuffer.Memory.UnsafeAccess((bitmapBaseAddress) =>
+			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
 				byte[] row = new byte[rowStride];
 				fixed (byte* rowPtr = row)

@@ -56,7 +56,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var yuv444ToBgra = ImageProcessing.SelectYuv444ToBgraConversionUnsafe();
 
 			// render
-			bitmapBuffer.Memory.UnsafeAccess((bitmapBaseAddress) =>
+			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
 				// render Y
 				var yRow = new byte[yRowStride];
