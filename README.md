@@ -48,6 +48,12 @@ You can find and download all releases [HERE](https://github.com/carina-studio/P
 ## 💻Installation
 Currently PixelViewer is built as portable package, you can just unzip the package and run PixelViewer executable directly without installing .NET Core runtime environment.
 ### Ubuntu user
+Some functions of PixelViewer depend on ```libgdiplus```, you may need to install ```libgdiplus``` manually to let PixelViewer runs properly:
+
+```
+apt-get install libgdiplus
+```
+
 If you want to run PixelViewer on Ubuntu (also for other Linux distributions), please grant execution permission to PixelViewer first. If you want to create an entry on desktop, please follow the steps:
 1. Create a file *(name)*.desktop in ~/.local/share/applications. ex, ~/.local/share/applications/pixelviewer.desktop.
 2. Open the .desktop file and put the following content:
@@ -66,6 +72,9 @@ Type=Application
 
 Reference: [How can I edit/create new launcher items in Unity by hand?
 ](https://askubuntu.com/questions/13758/how-can-i-edit-create-new-launcher-items-in-unity-by-hand)
+
+## 📦Upgrade
+Currently PixelViewer has no installation package nor auto updater. To upgrade PixelViewer, you just need to extract new package and override all existing files.
 
 ## 🤝Dependencies
 * [.NET Core](https://dotnet.microsoft.com/)
