@@ -16,6 +16,7 @@
     <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <NoWin32Manifest>true</NoWin32Manifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG</DefineConstants>
