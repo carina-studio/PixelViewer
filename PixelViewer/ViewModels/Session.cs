@@ -13,8 +13,6 @@ using CarinaStudio.Threading;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -61,6 +59,20 @@ namespace Carina.PixelViewer.ViewModels
 			/// Name of profile.
 			/// </summary>
 			public abstract string Name { get; }
+		}
+
+
+		// Data for profile related events.
+		class ProfileEventArgs : EventArgs
+		{
+			// Fields.
+			public readonly IProfile Profile;
+
+			// Constructor.
+			public ProfileEventArgs(IProfile profile)
+			{
+				this.Profile = profile;
+			}
 		}
 
 
@@ -153,7 +165,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Static fields.
 		static readonly MutableObservableBoolean IsLoadingProfiles = new MutableObservableBoolean();
 		static readonly IList<IProfile> ReadOnlySharedProfileList;
-		static readonly ObservableCollection<IProfile> SharedProfileList = new ObservableCollection<IProfile>();
+		static readonly SortedList<IProfile> SharedProfileList = new SortedList<IProfile>(CompareProfiles);
 		static long TotalRenderedImagesMemoryUsage;
 
 
@@ -207,7 +219,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Static initializer.
 		static Session()
 		{
-			ReadOnlySharedProfileList = new ReadOnlyObservableCollection<IProfile>(SharedProfileList);
+			ReadOnlySharedProfileList = new ReadOnlyObservableList<IProfile>(SharedProfileList);
 		}
 
 
@@ -235,7 +247,7 @@ namespace Carina.PixelViewer.ViewModels
 			// setup profiles
 			this.profilesDirectoryPath = Path.Combine(App.Current.Directory, "Profiles");
 			this.LoadProfiles();
-			SharedProfileListChanging += this.OnSharedProfileListChanging;
+			RemovingProfileFromSharedProfileList += this.OnRemovingProfileFromSharedProfileList;
 
 			// select default image renderer
 			this.imageRenderer = new MutableObservableValue<IImageRenderer>(this.SelectDefaultImageRenderer());
@@ -402,7 +414,11 @@ namespace Carina.PixelViewer.ViewModels
 		static int CompareProfiles(IProfile x, IProfile y)
 		{
 			if (x == DefaultProfile)
+			{
+				if (y == DefaultProfile)
+					return 0;
 				return -1;
+			}
 			if (y == DefaultProfile)
 				return 1;
 			return x.Name.CompareTo(y.Name);
@@ -424,12 +440,8 @@ namespace Carina.PixelViewer.ViewModels
 
 			// remove profile
 			this.SwitchToProfileWithoutApplying(DefaultProfile);
-			var index = SharedProfileList.IndexOf(profile);
-			if (index >= 0)
-			{
-				SharedProfileListChanging?.Invoke(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, profile, index));
-				SharedProfileList.RemoveAt(index);
-			}
+			RemovingProfileFromSharedProfileList?.Invoke(null, new ProfileEventArgs(profile));
+			SharedProfileList.Remove(profile);
 
 			// delete
 			Task.Run(() =>
@@ -465,7 +477,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.CloseSourceFile();
 
 			// detach from shared profile list
-			SharedProfileListChanging -= this.OnSharedProfileListChanging;
+			RemovingProfileFromSharedProfileList -= this.OnRemovingProfileFromSharedProfileList;
 
 			// unsubscribe observable values
 			this.isLoadingProfilesObserverSubscriptionToken?.Dispose();
@@ -880,15 +892,12 @@ namespace Carina.PixelViewer.ViewModels
 			// add profiles
 			foreach (var profile in profiles)
 			{
-				var index = SharedProfileList.BinarySearch(profile, CompareProfiles);
-				if (index >= 0)
+				if (SharedProfileList.Contains(profile))
 				{
 					this.Logger.Error($"Duplicate profile '{profile.Name}'");
 					continue;
 				}
-				index = ~index;
-				SharedProfileListChanging?.Invoke(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, profile, index));
-				SharedProfileList.Insert(index, profile);
+				SharedProfileList.Add(profile);
 			}
 
 			// complete
@@ -935,6 +944,16 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
+		// Called when removing profile from shared profile list.
+		void OnRemovingProfileFromSharedProfileList(object? sender, ProfileEventArgs e)
+		{
+			if (this.profile != e.Profile)
+				return;
+			this.Logger.Warn($"Current profile '{this.profile}' will be deleted");
+			this.SwitchToProfileWithoutApplying(DefaultProfile);
+		}
+
+
 		// Raise PropertyChanged event for row stride.
 		void OnRowStrideChanged(int index) => this.OnPropertyChanged(index switch
 		{
@@ -951,19 +970,6 @@ namespace Carina.PixelViewer.ViewModels
 			base.OnSettingChanged(key);
 			if (key == Settings.AutoSelectLanguage)
 				this.UpdateTitle();
-		}
-
-
-		// Called before changing shared profile list.
-		void OnSharedProfileListChanging(object? sender, NotifyCollectionChangedEventArgs e)
-		{
-			if (e.Action == NotifyCollectionChangedAction.Remove)
-			{
-				if (!e.OldItems.Contains(this.profile))
-					return;
-				this.Logger.Warn($"Current profile '{this.profile}' will be deleted");
-				this.SwitchToProfileWithoutApplying(DefaultProfile);
-			}
 		}
 
 
@@ -1162,6 +1168,10 @@ namespace Carina.PixelViewer.ViewModels
 			TotalRenderedImagesMemoryUsage -= token.DataSize;
 			this.Logger.Debug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 		}
+
+
+		// Raised before removing profile from shared profile list.
+		static event EventHandler<ProfileEventArgs>? RemovingProfileFromSharedProfileList;
 
 
 		/// <summary>
@@ -1484,15 +1494,12 @@ namespace Carina.PixelViewer.ViewModels
 			var profile = new ProfileImpl(name).Also((it) => this.WriteParametersToProfile(it));
 
 			// insert profile
-			var index = SharedProfileList.BinarySearch(profile, CompareProfiles);
-			if (index >= 0)
+			if (SharedProfileList.Contains(profile))
 			{
 				this.Logger.Error($"Cannot create existent profile '{name}'");
 				return;
 			}
-			index = ~index;
-			SharedProfileListChanging?.Invoke(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, profile, index));
-			SharedProfileList.Insert(index, profile);
+			SharedProfileList.Add(profile);
 
 			// switch to profile
 			this.SwitchToProfileWithoutApplying(profile);
@@ -1503,12 +1510,8 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.Logger.Error($"Unable to save profile '{name}' to file");
 				this.SwitchToProfileWithoutApplying(DefaultProfile);
-				index = SharedProfileList.IndexOf(profile);
-				if (index >= 0)
-				{
-					SharedProfileListChanging?.Invoke(null, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, profile, index));
-					SharedProfileList.RemoveAt(index);
-				}
+				RemovingProfileFromSharedProfileList?.Invoke(null, new ProfileEventArgs(profile));
+				SharedProfileList.Remove(profile);
 				return;
 			}
 		}
@@ -1832,12 +1835,6 @@ namespace Carina.PixelViewer.ViewModels
 				this.hasSelectedRenderedImagePixel.Update(true);
 			}
 		}
-
-
-		/// <summary>
-		/// Raised before changing shared profile list.
-		/// </summary>
-		static event NotifyCollectionChangedEventHandler? SharedProfileListChanging;
 
 
 		/// <summary>

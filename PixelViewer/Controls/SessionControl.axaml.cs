@@ -422,7 +422,7 @@ namespace Carina.PixelViewer.Controls
 					return;
 
 				// check name
-				if (session.Profiles.First((it) => it != Session.DefaultProfile && it.Name == name) == null)
+				if (session.Profiles.FirstOrDefault((it) => it != Session.DefaultProfile && it.Name == name) == null)
 					break;
 
 				// show message for duplicate name
