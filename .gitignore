@@ -1,6 +1,9 @@
 .vs
 obj
 bin
-/PixelViewer/PixelViewer.csproj.user
 BundleArtifacts
 AppPackages
+/PixelViewer/PixelViewer.csproj.user
+/PixelViewer/Properties/PublishProfiles/FolderProfile-win-x86.pubxml.user
+/PixelViewer/Properties/PublishProfiles/FolderProfile-linux-x64.pubxml.user
+/PixelViewer/Properties/PublishProfiles/FolderProfile-win-x64.pubxml.user
