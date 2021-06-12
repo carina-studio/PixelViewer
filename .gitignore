@@ -1,5 +1,6 @@
 .vs
 obj
 bin
-PublishProfiles
 /PixelViewer/PixelViewer.csproj.user
+BundleArtifacts
+AppPackages
