@@ -126,6 +126,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PixelViewer\PixelViewer.csproj">
       <PublishProfile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Properties\PublishProfiles\FolderProfile-win-x64.pubxml</PublishProfile>
+      <PublishProfile Condition="'$(Configuration)|$(Platform)'=='Release|x86'">Properties\PublishProfiles\FolderProfile-win-x86.pubxml</PublishProfile>
     </ProjectReference>
   </ItemGroup>
 </Project>
