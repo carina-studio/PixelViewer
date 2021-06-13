@@ -56,6 +56,12 @@
 		<Setter Property="FontSize" Value="{StaticResource Double.AppOptionsControl.Item.Label.FontSize}"/>
 		<Setter Property="Margin" Value="{StaticResource Thickness.AppOptionsControl.Item.Label.Margin}"/>
 	</Style>
+	<Style Selector="TextBlock.AppOptionsControl_ItemLabel_Link">
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="FontSize" Value="{StaticResource Double.AppOptionsControl.Item.Label.FontSize}"/>
+		<Setter Property="Foreground" Value="#0094ff"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness.AppOptionsControl.Item.Label.Margin}"/>
+	</Style>
 	<Style Selector="ToggleSwitch.AppOptionsControl_ItemValue">
 		<Setter Property="Margin" Value="{StaticResource Thickness.AppOptionsControl.Item.Value.Margin}"/>
 	</Style>

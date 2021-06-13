@@ -21,7 +21,10 @@
 	<sys:String x:Key="String.AppOptionsControl.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.MemoryUsage">Memory usage</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.Other">Other</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.PrivacyPolicy" xml:space="preserve">Privacy Policy</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.RestartMainWindowToTakeEffect">Restart window to take effect</sys:String>
+	<sys:String x:Key="String.AppOptionsControl.SourceCode" xml:space="preserve">Source code on GitHub</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.UserInterface">User interface</sys:String>
 	<sys:String x:Key="String.AppOptionsControl.VersionName">Version {0}</sys:String>

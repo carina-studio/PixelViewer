@@ -133,6 +133,20 @@
 				<NumericUpDown Classes="AppOptionsControl_ItemValue" Maximum="8192" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
 
 			</StackPanel>
+
+			<!-- Other -->
+			<StackPanel Classes="AppOptionsControl_Group">
+
+				<!-- Header -->
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.Other}"/>
+
+				<!-- Source code -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://github.com/carina-studio/PixelViewer" Text="{DynamicResource String.AppOptionsControl.SourceCode}"/>
+
+				<!-- Privacy policy -->
+				<TextBlock Classes="AppOptionsControl_ItemLabel_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://github.com/carina-studio/PixelViewer/blob/master/PRIVACY-POLICY.md" Text="{DynamicResource String.AppOptionsControl.PrivacyPolicy}"/>
+
+			</StackPanel>
 			
 		</StackPanel>
 	</ScrollViewer>
