@@ -1,9 +1,9 @@
-﻿# Privacy Policy of PixelViewer
+# Privacy Policy of PixelViewer
 - Version: 1.0.
 - Update: 2021/6/13.
 
 This is the privacy policy of ```PixelViewer``` which you need to read before you using ```PixelViewer```. 
-The privacy policy may be updated in the future and you can check it in the website of ```PixelViewer```. 
+The privacy policy may be updated in the future and you can check it on the website of ```PixelViewer```. 
 We assume that you have agreed this privacy policy once you start using ```PixelViewer```.
 
 ## Scope of Privacy Policy
@@ -17,7 +17,7 @@ We **DON'T** collect the following personal data:
 - IP address.
 - Geographical location.
 
-We **DO** collect the following data which may related to your personal data:
+We **DO** collect the following data which may relate to your personal data:
 - Path/Name of files you open in ```PixelViewer``` or save in ```PixelViewer```.
 - Detailed information of application crashing.
 
