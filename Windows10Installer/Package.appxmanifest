@@ -7,9 +7,9 @@
   IgnorableNamespaces="uap rescap">
 
   <Identity
-    Name="59576095-8767-43d5-9b30-beacacbe65ac"
-    Publisher="CN=Carina Studio"
-    Version="1.0.0.0" />
+    Name="63804CarinaStudio.PixelViewer"
+    Publisher="CN=EC60EE78-EE19-41A6-B67E-3599D32645E7"
+    Version="0.9.7.0" />
 
   <Properties>
     <DisplayName>PixelViewer</DisplayName>
