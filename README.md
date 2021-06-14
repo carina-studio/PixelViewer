@@ -43,10 +43,10 @@ PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform
 * Save rendered image as PNG file.
 
 ## 📥Download
-The latest version is 0.9.7.612.
-* 📦[Windows (x64)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.7.612/PixelViewer-0.9.7.612-win-x64.zip)
-* 📦[Windows (x86)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.7.612/PixelViewer-0.9.7.612-win-x86.zip)
-* 📦[Linux (x64)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.7.612/PixelViewer-0.9.7.612-linux-x64.zip)
+The latest version is 0.9.8.614.
+* 📦[Windows (x64)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-win-x64.zip)
+* 📦[Windows (x86)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-win-x86.zip)
+* 📦[Linux (x64)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-linux-x64.zip)
 
 You can also find and download all releases [HERE](https://github.com/carina-studio/PixelViewer/releases).
 
