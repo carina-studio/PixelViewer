@@ -18,6 +18,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Threading;
 using System.Windows.Input;
 
@@ -50,6 +51,7 @@ namespace Carina.PixelViewer
 		readonly List<Dialog> dialogs = new List<Dialog>();
 		bool isClosed;
 		bool isConstructing = true;
+		bool isOpened;
 		readonly TabControl mainTabControl;
 		readonly IList mainTabItems;
 		readonly ScheduledAction saveWindowSizeOperation;
@@ -207,6 +209,7 @@ namespace Carina.PixelViewer
 		protected override void OnClosed(EventArgs e)
 		{
 			// update state
+			this.isOpened = false;
 			this.isClosed = true;
 
 			// disable drag-drop
@@ -332,6 +335,9 @@ namespace Carina.PixelViewer
 		// Called when opened.
 		protected override void OnOpened(EventArgs e)
 		{
+			// update state
+			this.isOpened = true;
+
 			// call base
 			base.OnOpened(e);
 
@@ -339,6 +345,9 @@ namespace Carina.PixelViewer
 			this.AddHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
 			this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
+
+			// update app if available
+			this.UpdateAppIfAvailable();
 		}
 
 
@@ -364,6 +373,7 @@ namespace Carina.PixelViewer
 					}
 
 					// detach from workspace
+					prevWorkspace.PropertyChanged -= this.OnWorkspacePropertyChanged;
 					(prevWorkspace.ActivatedSessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnActivatedSessionsChanged);
 					(prevWorkspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
 				}
@@ -380,6 +390,7 @@ namespace Carina.PixelViewer
 					}
 
 					// attach to workspace
+					workspace.PropertyChanged += this.OnWorkspacePropertyChanged;
 					(workspace.ActivatedSessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnActivatedSessionsChanged);
 					(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
 
@@ -458,6 +469,48 @@ namespace Carina.PixelViewer
 						});
 						break;
 					}
+			}
+		}
+
+
+		// Called when property of workspace changed.
+		void OnWorkspacePropertyChanged(object sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(Workspace.IsAppUpdateAvailable))
+				this.UpdateAppIfAvailable();
+		}
+
+
+		// Update application if available.
+		async void UpdateAppIfAvailable()
+		{
+			// check state
+			if (!(this.DataContext is Workspace workspace))
+				return;
+			if (!workspace.IsAppUpdateAvailable)
+				return;
+			if (!this.isOpened)
+				return;
+
+			// select updating action
+			var result = await new MessageDialog()
+			{
+				Buttons = MessageDialogButtons.YesNo,
+				Icon = MessageDialogIcon.Question,
+				Message = App.Current.GetString("MainWindow.AppUpdateFound"),
+			}.ShowDialog<MessageDialogResult?>(this);
+			if (result == null)
+				return;
+
+			// update or ignore
+			switch (result.Value)
+			{
+				case MessageDialogResult.Yes:
+					workspace.UpdateAppCommand.TryExecute();
+					break;
+				case MessageDialogResult.No:
+					workspace.IgnoreAppUpdateCommand.TryExecute();
+					break;
 			}
 		}
 

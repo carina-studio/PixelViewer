@@ -2,9 +2,13 @@
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.Threading;
+using ReactiveUI;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows.Input;
 
 namespace Carina.PixelViewer.ViewModels
 {
@@ -15,6 +19,7 @@ namespace Carina.PixelViewer.ViewModels
 	{
 		// Fields.
 		readonly ObservableCollection<Session> activatedSessions = new ObservableCollection<Session>();
+		readonly MutableObservableBoolean isAppUpdateAvailable = new MutableObservableBoolean();
 		readonly ReadOnlyObservableCollection<Session> readOnlyActivatedSessions;
 		readonly ReadOnlyObservableCollection<Session> readOnlySessions;
 		readonly ObservableCollection<Session> sessions = new ObservableCollection<Session>();
@@ -27,6 +32,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public Workspace()
 		{
+			// create commands
+			this.IgnoreAppUpdateCommand = ReactiveCommand.Create(this.IgnoreAppUpdate, this.isAppUpdateAvailable);
+			this.UpdateAppCommand = ReactiveCommand.Create(this.UpdateApp, this.isAppUpdateAvailable);
+
 			// create read-only collections
 			this.readOnlyActivatedSessions = new ReadOnlyObservableCollection<Session>(this.activatedSessions);
 			this.readOnlySessions = new ReadOnlyObservableCollection<Session>(this.sessions);
@@ -35,7 +44,15 @@ namespace Carina.PixelViewer.ViewModels
 			this.updateTitleOperation = new ScheduledAction(this.UpdateTitle);
 
 			// observe property values
+			this.ObservePropertyValue(this.isAppUpdateAvailable, nameof(this.IsAppUpdateAvailable));
 			this.ObservePropertyValue(this.title, nameof(this.Title));
+
+			// attach to App
+			App.Current.Let((app) =>
+			{
+				app.UpdateInfoChanged += this.OnAppUpdateInfoChanged;
+				this.OnAppUpdateInfoChanged(app, EventArgs.Empty);
+			});
 
 			// setup initial title
 			this.UpdateTitle();
@@ -160,8 +177,40 @@ namespace Carina.PixelViewer.ViewModels
 			// dispose app options
 			this.AppOptions.Dispose();
 
+			// detach from App
+			App.Current.UpdateInfoChanged -= this.OnAppUpdateInfoChanged;
+
 			// call base
 			base.Dispose(disposing);
+		}
+
+
+		// Ignore application update.
+		void IgnoreAppUpdate()
+		{
+			if (!this.isAppUpdateAvailable.Value)
+				return;
+			this.Logger.Warn("Ignore application update");
+			this.isAppUpdateAvailable.Update(false);
+		}
+
+
+		/// <summary>
+		/// Command to ignore application update.
+		/// </summary>
+		public ICommand IgnoreAppUpdateCommand { get; }
+
+
+		/// <summary>
+		/// Check whether application update is available or not.
+		/// </summary>
+		public bool IsAppUpdateAvailable { get => this.isAppUpdateAvailable.Value; }
+
+
+		// Called when app update info changed.
+		void OnAppUpdateInfoChanged(object? sender, EventArgs e)
+		{
+			this.isAppUpdateAvailable.Update(App.Current.UpdateInfo != null);
 		}
 
 
@@ -186,6 +235,51 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get all <see cref="Session"/>s.
 		/// </summary>
 		public ReadOnlyObservableCollection<Session> Sessions { get => this.readOnlySessions; }
+
+
+		// Update application.
+		void UpdateApp()
+		{
+			// check state
+			if (!this.isAppUpdateAvailable.Value)
+				return;
+			var updateInfo = App.Current.UpdateInfo;
+			if (updateInfo == null)
+			{
+				this.Logger.Error("No application update info");
+				return;
+			}
+
+			// update state
+			this.isAppUpdateAvailable.Update(false);
+
+			// open download link
+			this.Logger.Info("Open application update page");
+			try
+			{
+				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+				{
+					Process.Start(new ProcessStartInfo("cmd", $"/c start {updateInfo.ReleasePageUri}")
+					{
+						CreateNoWindow = true
+					});
+				}
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+					Process.Start("xdg-open", updateInfo.ReleasePageUri.ToString());
+				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+					Process.Start("open", updateInfo.ReleasePageUri.ToString());
+			}
+			catch (Exception ex)
+			{
+				this.Logger.Error(ex, $"Unable to open '{updateInfo.ReleasePageUri}' to update application");
+			}
+		}
+
+
+		/// <summary>
+		/// Command to update application.
+		/// </summary>
+		public ICommand UpdateAppCommand { get; }
 
 
 		// Update title.
