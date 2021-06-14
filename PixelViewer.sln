@@ -9,6 +9,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PixelViewer.Test", "PixelVi
 EndProject
 Project("{C7167F0D-BC9F-4E6E-AFE1-012C56B48DB5}") = "Windows10Installer", "Windows10Installer\Windows10Installer.wapproj", "{64DF6079-3B66-458E-A440-82252FECE32D}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5E248CB-81EB-47E3-9583-B1D78792D2AA}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.md = LICENSE.md
+		PRIVACY-POLICY.md = PRIVACY-POLICY.md
+		README.md = README.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
