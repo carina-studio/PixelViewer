@@ -88,6 +88,17 @@ namespace Carina.PixelViewer
 			.LogToTrace();
 
 
+		// Check application update.
+		void CheckApplicationUpdate()
+		{
+#if MSSTORE
+
+#else
+
+#endif
+		}
+
+
 		/// <summary>
 		/// Get current <see cref="CultureInfo"/>.
 		/// </summary>

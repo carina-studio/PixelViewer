@@ -8,6 +8,46 @@
       <Configuration>Debug</Configuration>
       <Platform>x86</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Debug|AnyCPU">
+      <Configuration>MSStore-Debug</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Debug|ARM">
+      <Configuration>MSStore-Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Debug|ARM64">
+      <Configuration>MSStore-Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Debug|x64">
+      <Configuration>MSStore-Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Debug|x86">
+      <Configuration>MSStore-Debug</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Release|AnyCPU">
+      <Configuration>MSStore-Release</Configuration>
+      <Platform>AnyCPU</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Release|ARM">
+      <Configuration>MSStore-Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Release|ARM64">
+      <Configuration>MSStore-Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Release|x64">
+      <Configuration>MSStore-Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MSStore-Release|x86">
+      <Configuration>MSStore-Release</Configuration>
+      <Platform>x86</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|x86">
       <Configuration>Release</Configuration>
       <Platform>x86</Platform>
@@ -72,7 +112,15 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x64'">
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x86'">
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
@@ -80,7 +128,15 @@
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|ARM'">
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
@@ -89,6 +145,10 @@
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <AppxBundle>Always</AppxBundle>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|ARM64'">
     <DefaultLanguage>en-US</DefaultLanguage>
     <AppxBundle>Always</AppxBundle>
   </PropertyGroup>
@@ -170,8 +230,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PixelViewer\PixelViewer.csproj">
-      <PublishProfile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Properties\PublishProfiles\FolderProfile-win-x64.pubxml</PublishProfile>
-      <PublishProfile Condition="'$(Configuration)|$(Platform)'=='Release|x86'">Properties\PublishProfiles\FolderProfile-win-x86.pubxml</PublishProfile>
+      <PublishProfile Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x64'">Properties\PublishProfiles\FolderProfile-win-x64.pubxml</PublishProfile>
+      <PublishProfile Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x86'">Properties\PublishProfiles\FolderProfile-win-x86.pubxml</PublishProfile>
     </ProjectReference>
   </ItemGroup>
 </Project>

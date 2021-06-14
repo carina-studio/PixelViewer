@@ -17,15 +17,34 @@
     <NoWin32Manifest>true</NoWin32Manifest>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Configurations>Debug;Release;MSStore-Debug;MSStore-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
+    <DefineConstants>DEBUG;MSSTORE</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
     <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x86'">
+    <DefineConstants>DEBUG;MSSTORE</DefineConstants>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <DefineConstants>DEBUG</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x64'">
+    <DefineConstants>DEBUG;MSSTORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|AnyCPU'">
+    <DefineConstants>MSSTORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x64'">
+    <DefineConstants>MSSTORE</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x86'">
+    <DefineConstants>MSSTORE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="0.10.6" />

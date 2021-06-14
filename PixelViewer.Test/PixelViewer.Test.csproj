@@ -5,9 +5,14 @@
     <IsPackable>false</IsPackable>
 		<Nullable>enable</Nullable>
     <RootNamespace>Carina.PixelViewer.Test</RootNamespace>
+    <Configurations>Debug;Release;MSStore-Debug;MSStore-Release</Configurations>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
