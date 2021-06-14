@@ -126,6 +126,20 @@ namespace Carina.PixelViewer.Controls
 						});
 						break;
 					}
+				case MessageDialogButtons.YesNo:
+					{
+						this.FindControl<Button>("button1").AsNonNull().Also((it) =>
+						{
+							it.Content = app.GetString("Common.Yes");
+							it.Tag = MessageDialogResult.Yes;
+						});
+						this.FindControl<Button>("button2").AsNonNull().Also((it) =>
+						{
+							it.Content = app.GetString("Common.No");
+							it.Tag = MessageDialogResult.No;
+						});
+						break;
+					}
 			}
 		}
 	}
@@ -141,9 +155,13 @@ namespace Carina.PixelViewer.Controls
 		/// </summary>
 		OK,
 		/// <summary>
-		/// OK and cancel.
+		/// OK and Cancel.
 		/// </summary>
 		OKCancel,
+		/// <summary>
+		/// Yes and No.
+		/// </summary>
+		YesNo,
 	}
 
 
@@ -184,5 +202,13 @@ namespace Carina.PixelViewer.Controls
 		/// Cancel.
 		/// </summary>
 		Cancel,
+		/// <summary>
+		/// Yes.
+		/// </summary>
+		Yes,
+		/// <summary>
+		/// No.
+		/// </summary>
+		No,
 	}
 }
