@@ -1,22 +1,22 @@
 {
-	"Version": "0.9.7.612",
-	"ReleaseDate": "2021/6/12",
-	"ReleasePageUrl": "https://github.com/carina-studio/PixelViewer/releases/tag/0.9.7.612",
+	"Version": "0.9.8.614",
+	"ReleaseDate": "2021/6/14",
+	"ReleasePageUrl": "https://github.com/carina-studio/PixelViewer/releases/tag/0.9.8.614",
 	"Packages": [
 		{
 			"OS": "Windows",
 			"Platform": "x64",
-			"Url": "https://github.com/carina-studio/PixelViewer/releases/download/0.9.7.612/PixelViewer-0.9.7.612-win-x64.zip"
+			"Url": "https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-win-x64.zip"
 		},
 		{
 			"OS": "Windows",
 			"Platform": "x86",
-			"Url": "https://github.com/carina-studio/PixelViewer/releases/download/0.9.7.612/PixelViewer-0.9.7.612-win-x86.zip"
+			"Url": "https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-win-x86.zip"
 		},
 		{
 			"OS": "Linux",
 			"Platform": "x64",
-			"Url": "https://github.com/carina-studio/PixelViewer/releases/download/0.9.7.612/PixelViewer-0.9.7.612-linux-x64.zip"
+			"Url": "https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-linux-x64.zip"
 		}
 	]
 }
