@@ -21,8 +21,11 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -62,9 +65,11 @@ namespace Carina.PixelViewer
 		// Static fields.
 		static string[] Arguments = new string[0];
 		static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+		static readonly Uri PackageInfoUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageInfo.json");
 
 
 		// Fields.
+		bool isCheckingUpdateInfo;
 		bool isRestartMainWindowRequested;
 		bool isServer;
 		LaunchOptions launchOptions;
@@ -89,13 +94,101 @@ namespace Carina.PixelViewer
 
 
 		// Check application update.
-		void CheckApplicationUpdate()
+		async void CheckUpdateInfo()
 		{
+			// check state
+			if (this.isCheckingUpdateInfo)
+				return;
+
+			// check update
+			try
+			{
 #if MSSTORE
-
+				// check through Microsoft Store
 #else
+				var request = WebRequest.Create(PackageInfoUri);
+				var updateInfo = await Task.Run(() =>
+				{
+					// get response
+					var response = request.GetResponse();
 
+					// get runtime information
+					var targetPlatform = Environment.Is64BitProcess ? "x64" : "x86";
+					var targetOS = "";
+					if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+						targetOS = "Windows";
+					else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+						targetOS = "Linux";
+
+					// parse JSON document
+					using var stream = response.GetResponseStream();
+					using var jsonDocument = JsonDocument.Parse(stream);
+					var rootElement = jsonDocument.RootElement;
+
+					// check version
+					var version = new Version(rootElement.GetProperty("Version").GetString());
+					if (version <= Assembly.GetExecutingAssembly().GetName().Version)
+					{
+						Logger.Info("This is the latest application");
+						return null;
+					}
+
+					// get release date and page
+					var releaseDate = DateTime.Parse(rootElement.GetProperty("ReleaseDate").GetString());
+					var releasePageUri = new Uri(rootElement.GetProperty("ReleasePageUrl").GetString());
+
+					// find proper package URI
+					var packageUri = rootElement.GetProperty("Packages").Let((packageArray) =>
+					{
+						foreach (var packageInfo in packageArray.EnumerateArray())
+						{
+							if (packageInfo.GetProperty("OS").GetString() != targetOS)
+								continue;
+							if (packageInfo.GetProperty("Platform").GetString() != targetPlatform)
+								continue;
+							return new Uri(packageInfo.GetProperty("Url").GetString());
+						}
+						Logger.Warn($"Cannot find proper package for {targetOS} {targetPlatform}");
+						return null;
+					});
+					if (packageUri == null)
+						return null;
+
+					// complete
+					return new AppUpdateInfo(version, releaseDate, releasePageUri, packageUri);
+				});
 #endif
+
+				// check with current update info
+				if (this.UpdateInfo == null)
+				{
+					if (updateInfo == null)
+						return;
+				}
+				else if (this.UpdateInfo.Equals(updateInfo))
+					return;
+
+				// report
+				if (updateInfo != null)
+				{
+					Logger.Debug($"New application version found: {updateInfo?.Version}");
+					this.UpdateInfo = updateInfo;
+				}
+				else
+				{
+					Logger.Warn("No valid application update info");
+					this.UpdateInfo = null;
+				}
+				this.UpdateInfoChanged?.Invoke(this, EventArgs.Empty);
+			}
+			catch (Exception ex)
+			{
+				Logger.Error(ex, "Unable to check application update info");
+			}
+			finally
+			{
+				this.isCheckingUpdateInfo = false;
+			}
 		}
 
 
@@ -495,6 +588,9 @@ namespace Carina.PixelViewer
 				return;
 			}
 
+			// check application update
+			this.CheckUpdateInfo();
+
 			// update styles
 			this.UpdateStyles();
 
@@ -513,6 +609,18 @@ namespace Carina.PixelViewer
 		/// Synchronization context.
 		/// </summary>
 		public SynchronizationContext SynchronizationContext { get => this.syncContext ?? throw new InvalidOperationException("Application is not ready yet."); }
+
+
+		/// <summary>
+		/// Get latest known application update info.
+		/// </summary>
+		public AppUpdateInfo? UpdateInfo { get; private set; }
+
+
+		/// <summary>
+		/// Raised when <see cref="UpdateInfo"/> changed.
+		/// </summary>
+		public event EventHandler? UpdateInfoChanged;
 
 
 		// Update string resource according to settings.
