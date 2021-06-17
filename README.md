@@ -1,5 +1,5 @@
 # PixelViewer
-PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB pixels data from file and rendering it. Currently it is still under development, but most of functions are ready.
+PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB pixels data from file and rendering it.
 
 <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Dark_Thumb.png" alt="Main window (dark)" width="250"/> <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Light_Thumb.png" alt="Main window (light)" width="250"/> <img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main_Dark_Linux_Thumb.png" alt="Main window on Ubuntu (dark)" width="250"/>
 
@@ -43,10 +43,10 @@ PixelViewer is a [.NET Core](https://dotnet.microsoft.com/) based cross-platform
 * Save rendered image as PNG file.
 
 ## 📥Download
-The latest version is 0.9.8.614.
-* 📦[Windows (x64)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-win-x64.zip)
-* 📦[Windows (x86)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-win-x86.zip)
-* 📦[Linux (x64)](https://github.com/carina-studio/PixelViewer/releases/download/0.9.8.614/PixelViewer-0.9.8.614-linux-x64.zip)
+The latest version is 1.0.0.617.
+* 📦[Windows (x64)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)
+* 📦[Windows (x86)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x86.zip)
+* 📦[Linux (x64)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
 
 You can also find and download all releases [HERE](https://github.com/carina-studio/PixelViewer/releases).
 
