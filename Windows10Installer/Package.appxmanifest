@@ -9,7 +9,7 @@
   <Identity
     Name="63804CarinaStudio.PixelViewer"
     Publisher="CN=EC60EE78-EE19-41A6-B67E-3599D32645E7"
-    Version="0.9.7.0" />
+    Version="1.0.0.0" />
 
   <Properties>
     <DisplayName>PixelViewer</DisplayName>
