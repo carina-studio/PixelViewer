@@ -7,5 +7,6 @@ AppPackages
 /PixelViewer/Properties/PublishProfiles/FolderProfile-win-x86.pubxml.user
 /PixelViewer/Properties/PublishProfiles/FolderProfile-linux-x64.pubxml.user
 /PixelViewer/Properties/PublishProfiles/FolderProfile-win-x64.pubxml.user
+/PixelViewer/Properties/PublishProfiles/FolderProfile-MSStore-x64.pubxml.user
 /Windows10Installer/Windows10Installer.wapproj.user
 /Windows10Installer/Package.StoreAssociation.xml

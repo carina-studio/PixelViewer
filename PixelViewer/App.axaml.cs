@@ -105,6 +105,7 @@ namespace Carina.PixelViewer
 			{
 #if MSSTORE
 				// check through Microsoft Store
+				var updateInfo = (AppUpdateInfo?)null;
 #else
 				var request = WebRequest.Create(PackageInfoUri);
 				var updateInfo = await Task.Run(() =>
