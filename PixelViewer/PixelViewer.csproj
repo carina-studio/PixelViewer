@@ -118,6 +118,7 @@
     </None>
     <None Update="NLog.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
     </None>
     <None Update="Strings/Default.xaml">
       <Generator>MSBuild:Compile</Generator>
