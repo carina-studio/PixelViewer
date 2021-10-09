@@ -1,62 +1,83 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <AssemblyVersion>1.0.0.617</AssemblyVersion>
-    <Version>1.0.0.617</Version>
-    <Authors>Carina Studio</Authors>
-    <Company>Carina Studio</Company>
-    <Copyright>©2021 Carina Studio</Copyright>
-    <OutputType>WinExe</OutputType>
-    <RuntimeIdentifiers>win-x64;win-x86;linux-x64</RuntimeIdentifiers>
-    <Platforms>AnyCPU;x64;x86</Platforms>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Nullable>enable</Nullable>
-    <LangVersion>latest</LangVersion>
-    <RootNamespace>Carina.PixelViewer</RootNamespace>
-    <StartupObject>Carina.PixelViewer.App</StartupObject>
-    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
-    <NoWin32Manifest>true</NoWin32Manifest>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-    <Configurations>Debug;Release;MSStore-Debug;MSStore-Release</Configurations>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
-    <DefineConstants>DEBUG;MSSTORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <DefineConstants>DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x86'">
-    <DefineConstants>DEBUG;MSSTORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DefineConstants>DEBUG</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x64'">
-    <DefineConstants>DEBUG;MSSTORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|AnyCPU'">
-    <DefineConstants>MSSTORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x64'">
-    <DefineConstants>MSSTORE</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x86'">
-    <DefineConstants>MSSTORE</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Avalonia" Version="0.10.6" />
-    <PackageReference Include="Avalonia.Desktop" Version="0.10.6" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="0.10.6" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="0.10.6" />
-    <PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.10.0.616" />
-    <PackageReference Include="CarinaStudio.AppBase.Core" Version="0.10.0.616" />
-    <PackageReference Include="NLog" Version="4.7.10" />
-    <PackageReference Include="ReactiveUI" Version="13.3.2" />
-    <PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
-  </ItemGroup>
+	<PropertyGroup>
+		<AssemblyVersion>1.0.0.617</AssemblyVersion>
+		<Version>1.0.0.617</Version>
+		<Authors>Carina Studio</Authors>
+		<Company>Carina Studio</Company>
+		<Copyright>©2021 Carina Studio</Copyright>
+		<OutputType>WinExe</OutputType>
+		<Nullable>enable</Nullable>
+		<LangVersion>latest</LangVersion>
+		<RootNamespace>Carina.PixelViewer</RootNamespace>
+		<StartupObject>Carina.PixelViewer.App</StartupObject>
+		<ApplicationIcon>AppIcon.ico</ApplicationIcon>
+		<NoWin32Manifest>true</NoWin32Manifest>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<Configurations>Debug;Release;MSStore-Debug;MSStore-Release;Debug-Windows;Release-Windows</Configurations>
+	</PropertyGroup>
+	
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+		<TargetFramework>net5.0</TargetFramework>
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|AnyCPU'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+		<TargetFramework>net5.0</TargetFramework>
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|x86'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x86'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<TargetFramework>net5.0</TargetFramework>
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|x64'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>DEBUG</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x64'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|AnyCPU'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>MSSTORE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x64'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>MSSTORE</DefineConstants>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x86'">
+		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<DefineConstants>MSSTORE</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="0.10.6" />
+		<PackageReference Include="Avalonia.Desktop" Version="0.10.6" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.6" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.6" />
+		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.10.0.616" />
+		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.10.0.616" />
+		<PackageReference Include="NLog" Version="4.7.10" />
+		<PackageReference Include="ReactiveUI" Version="13.3.2" />
+		<PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<AvaloniaResource Include="Resources/Default.xaml" />
 		<AvaloniaResource Include="Resources/Dark/OpenFile_96px.png" />
@@ -101,35 +122,32 @@
 		<AvaloniaResource Include="Resources/Light/Warning_96px.png" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
-		<AvaloniaResource Include="Strings/Default-Linux.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</AvaloniaResource>
-		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</AvaloniaResource>
+		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
+		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml" />
 		<AvaloniaResource Include="Styles/Dark.xaml" />
-		<AvaloniaResource Include="Styles/Light.xaml">
-		  <Generator>MSBuild:Compile</Generator>
-		</AvaloniaResource>
+		<AvaloniaResource Include="Styles/Light.xaml" />
 	</ItemGroup>
-  <ItemGroup>
-    <None Update="AppIcon_128px.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="NLog.config">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-    </None>
-    <None Update="Strings/Default.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-    <None Update="Strings/zh-TW.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </None>
-  </ItemGroup>
+	
+	<ItemGroup>
+		<None Update="AppIcon_128px.png">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Update="NLog.config">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</None>
+		<None Update="Strings/Default.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+		<None Update="Strings/zh-TW.xaml">
+			<Generator>MSBuild:Compile</Generator>
+		</None>
+	</ItemGroup>
+	
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>$(AssemblyName).Test</_Parameter1>
 		</AssemblyAttribute>
 	</ItemGroup>
+	
 </Project>

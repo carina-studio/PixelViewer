@@ -136,13 +136,13 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Called when key up.
-		protected override void OnKeyUp(KeyEventArgs e)
+		protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
 		{
 			// call base
 			base.OnKeyUp(e);
 
 			// check focus
-			var focusedElement = FocusManager.Instance.Current;
+			var focusedElement = Avalonia.Input.FocusManager.Instance.Current;
 			if (focusedElement != null)
 			{
 				if (focusedElement is TextBox || focusedElement is NumericUpDown)
@@ -160,33 +160,33 @@ namespace Carina.PixelViewer.Controls
 			{
 				switch(e.Key)
 				{
-					case Key.D0:
+					case Avalonia.Input.Key.D0:
 						{
 							session.FitRenderedImageToViewport = true;
 							break;
 						}
-					case Key.D1:
+					case Avalonia.Input.Key.D1:
 						{
 							session.RenderedImageScale = 1.0;
 							session.FitRenderedImageToViewport = false;
 							break;
 						}
-					case Key.O:
+					case Avalonia.Input.Key.O:
 						{
 							this.OpenSourceFile();
 							break;
 						}
-					case Key.OemPlus:
+					case Avalonia.Input.Key.OemPlus:
 						{
 							session.ZoomInCommand.Execute(null);
 							break;
 						}
-					case Key.OemMinus:
+					case Avalonia.Input.Key.OemMinus:
 						{
 							session.ZoomOutCommand.Execute(null);
 							break;
 						}
-					case Key.S:
+					case Avalonia.Input.Key.S:
 						{
 							this.SaveRenderedImage();
 							break;

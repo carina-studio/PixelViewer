@@ -62,7 +62,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when text block for link clicked.
 		void OnLinkTextBlockPointerReleased(object sender, PointerReleasedEventArgs e)
 		{
-			if (e.InitialPressMouseButton != MouseButton.Left)
+			if (e.InitialPressMouseButton != Avalonia.Input.MouseButton.Left)
 				return;
 			if (sender is not TextBlock textBlock)
 				return;
