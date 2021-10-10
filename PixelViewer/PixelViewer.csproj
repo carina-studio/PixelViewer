@@ -67,14 +67,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="0.10.6" />
-		<PackageReference Include="Avalonia.Desktop" Version="0.10.6" />
-		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.6" />
-		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.6" />
-		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.10.0.616" />
-		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.10.0.616" />
-		<PackageReference Include="NLog" Version="4.7.10" />
-		<PackageReference Include="ReactiveUI" Version="13.3.2" />
+		<PackageReference Include="Avalonia" Version="0.10.8" />
+		<PackageReference Include="Avalonia.Desktop" Version="0.10.8" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.8" />
+		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.8" />
+		<PackageReference Include="CarinaStudio.AppBase.Application" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppBase.Application.Avalonia" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppBase.AutoUpdate" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.27.3.1007" />
+		<PackageReference Include="NLog" Version="4.7.11" />
+		<PackageReference Include="ReactiveUI" Version="16.2.6" />
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
 	</ItemGroup>
 	
