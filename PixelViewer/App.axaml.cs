@@ -145,8 +145,17 @@ namespace Carina.PixelViewer
         // Prepare starting.
         protected override async Task OnPrepareStartingAsync()
         {
-			// call base
-			await base.OnPrepareStartingAsync();
+            // call base
+            try
+            {
+				await base.OnPrepareStartingAsync();
+			}
+			catch(Exception ex)
+            {
+				this.Logger.LogError(ex, "Unhandled error when launching");
+				this.Shutdown();
+				return;
+            }
 
 			// show main window
 			this.ShowMainWindow();

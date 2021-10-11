@@ -82,7 +82,6 @@
 	
 	<ItemGroup>
 		<AvaloniaResource Include="AppIcon.ico" />
-		<AvaloniaResource Include="Resources/Default.xaml" />
 		<AvaloniaResource Include="Resources/Dark/OpenFile_96px.png" />
 		<AvaloniaResource Include="Resources/Dark/Add_96px.png" />
 		<AvaloniaResource Include="Resources/Dark/Close_96px.png" />
@@ -127,7 +126,9 @@
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
 		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml" />
+		<AvaloniaResource Include="Styles/Base.axaml" />
 		<AvaloniaResource Include="Styles/Dark.xaml" />
+		<AvaloniaResource Include="Styles/Icons.axaml" />
 		<AvaloniaResource Include="Styles/Light.xaml" />
 	</ItemGroup>
 	

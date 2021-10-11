@@ -51,6 +51,9 @@
 	<sys:String x:Key="String/Session.EmptyTitle">(無影像)</sys:String>
 
 	<!-- SessionControl -->
+	<sys:String x:Key="String/SessionControl.ApplicationInfo">關於 PixelViewer</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項</sys:String>
+	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;無&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">刪除組態</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">拖拉檔案到這裡，或是點一下</sys:String>

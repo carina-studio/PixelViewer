@@ -12,30 +12,41 @@
 	<!-- Data templates -->
 	<Window.DataTemplates>
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
-			<StackPanel Background="{x:Static Brushes.Transparent}" DragDrop.AllowDrop="True" Margin="{DynamicResource Thickness/MainWindow.MainTabItem.Header.Padding}" Orientation="Horizontal">
-				<TextBlock MaxLines="1" MaxWidth="400" Text="{Binding Title}" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding SourceFileName}" VerticalAlignment="Center"/>
-				<Button Classes="Mainwindow_CloseTab" Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" ToolTip.Tip="{DynamicResource String/MainWindow.CloseSession}">
-					<Image Classes="Mainwindow_CloseTab"/>
+			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto" DragDrop.AllowDrop="True">
+				<Panel Classes="TabItem_Icon">
+					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
+					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Image}" IsVisible="{Binding IsSourceFileOpened}"/>
+				</Panel>
+				<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}" ToolTip.Tip="{Binding SourceFileName}"/>
+				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/MainWindow.CloseSession}">
+					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Close}"/>
 				</Button>
-			</StackPanel>
+			</Grid>
 		</DataTemplate>
 	</Window.DataTemplates>
+
+	<!-- Background -->
+	<Window.Background>
+		<SolidColorBrush Color="{DynamicResource Color/TabItem.Header.Background}" Opacity="{DynamicResource Double/MainWindow.Background.Opacity.SemiTransparent}"/>
+	</Window.Background>
 
 	<!-- Layout -->
 	<TabControl x:Name="tabControl" Padding="0">
 
 		<!-- Options tab -->
-		<TabItem DataContext="{Binding AppOptions}">
+		<TabItem Classes="Empty" DataContext="{Binding AppOptions}">
 			<TabItem.Header>
 				<Image Classes="Mainwindow_OptionsTab" ToolTip.Tip="{DynamicResource String/Common.Options}"/>
 			</TabItem.Header>
 			<appControls:AppOptionsControl DataContext="{Binding AppOptions}"/>
 		</TabItem>
 
-		<!-- New tab stub -->
-		<TabItem>
+		<!-- New tab -->
+		<TabItem Classes="Empty">
 			<TabItem.Header>
-				<Image Classes="Mainwindow_NewTab" DragDrop.AllowDrop="True" ToolTip.Tip="{DynamicResource String/MainWindow.NewSession}"/>
+				<Border Classes="AddTabItemButton" DragDrop.AllowDrop="True" ToolTip.Tip="{DynamicResource String/MainWindow.NewSession}">
+					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Add}"/>
+				</Border>
 			</TabItem.Header>
 		</TabItem>
 

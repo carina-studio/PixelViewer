@@ -1,0 +1,61 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:sys="using:System">
+
+	<!-- Resources -->
+	<Styles.Resources>
+
+		<!-- Accent -->
+		<Color x:Key="Color/Accent">#50b29b</Color>
+
+		<!-- AppOptionsControl -->
+		<sys:Double x:Key="Double/AppOptionsControl.AppIcon.Size">100</sys:Double>
+		<sys:Double x:Key="Double/AppOptionsControl.AppName.FontSize">50</sys:Double>
+		<sys:Double x:Key="Double/AppOptionsControl.MaxContentWidth">800</sys:Double>
+		<sys:Double x:Key="Double/AppOptionsControl.Group.Header.FontSize">30</sys:Double>
+		<sys:Double x:Key="Double/AppOptionsControl.Item.Label.FontSize">16</sys:Double>
+		<sys:Double x:Key="Double/AppOptionsControl.Item.Value.ComboBox.MinWidth">170</sys:Double>
+		<Thickness x:Key="Thickness/AppOptionsControl.AppIcon.Margin">0,0,20,0</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.AppName.Margin">0,0,0,0</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Attributions.Margin">0,20,0,0</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Attributions.TextSection.Margin">0,3,3,3</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Group.Header.Margin">0,0,0,5</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Group.Margin">0,40,0,0</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Item.Description.Margin">0,0,0,5</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Item.Label.Margin">0,15,0,5</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Item.Value.Margin">0,0,0,5</Thickness>
+		<Thickness x:Key="Thickness/AppOptionsControl.Padding">100,20,100,20</Thickness>
+
+		<!-- GridSplitter -->
+		<GridLength x:Key="GridLength/GridSplitter.Thickness">5</GridLength>
+
+		<!-- MessageDialog -->
+		<sys:Double x:Key="Double/MessageDialog.IconSize">30</sys:Double>
+		<sys:Double x:Key="Double/MessageDialog.MinWidth">300</sys:Double>
+		<Thickness x:Key="Thickness/MessageDialog.Icon.Margin">0,0,20,0</Thickness>
+
+		<!-- ProcessingDialog -->
+		<sys:Double x:Key="Double/ProcessingDialog.Width">300</sys:Double>
+		<Thickness x:Key="Thickness/ProcessingDialog.ProgressBar.Margin">0,10,0,10</Thickness>
+
+		<!-- SessionControl -->
+		<SolidColorBrush x:Key="Brush/SessionControl.Background" Color="{DynamicResource Color/SessionControl.Background}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.OptionsPanel.Background" Color="{DynamicResource Color/SessionControl.OptionsPanel.Background}"/>
+		<Color x:Key="Color/SessionControl.Background">#ffffff</Color>
+		<Color x:Key="Color/SessionControl.OptionsPanel.Background">#ffffff</Color>
+		<CornerRadius x:Key="CornerRadius/SessionControl.ImageToolBar.CornerRadius">5</CornerRadius>
+		<sys:Double x:Key="Double/SessionControl.ImageToolBar.IconSize">32</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.OptionsPanel.SeparatorSize">15</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.StatusBar.FontSize">10</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.TopBar.Height">5</sys:Double>
+		<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Margin">10,0,10,30</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Padding">5</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20,20,20,94</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.StatusBar.Padding">10</Thickness>
+		
+	</Styles.Resources>
+	
+</Styles>

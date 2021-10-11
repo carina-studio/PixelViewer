@@ -5,15 +5,15 @@
 				xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls">
 
 	<!-- Base style -->
-	<FluentTheme Mode="Dark"/>
+	<StyleInclude Source="/Styles/Base.axaml"/>
 
 	<!-- Resources -->
 	<Styles.Resources>
-		<ResourceDictionary>
-			<ResourceDictionary.MergedDictionaries>
-				<ResourceInclude Source="/Resources/Default.xaml"/>
-			</ResourceDictionary.MergedDictionaries>
-		</ResourceDictionary>
+
+		<!-- SessionControl -->
+		<Color x:Key="Color/SessionControl.Background">#000000</Color>
+		<Color x:Key="Color/SessionControl.OptionsPanel.Background">#161616</Color>
+		
 	</Styles.Resources>
 
 	<!-- AppOptionsControl -->
