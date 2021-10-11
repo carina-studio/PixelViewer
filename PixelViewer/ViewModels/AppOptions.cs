@@ -1,14 +1,12 @@
-﻿using Carina.PixelViewer.Configuration;
-using Carina.PixelViewer.Media;
+﻿using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using CarinaStudio;
 using CarinaStudio.Configuration;
-using ReactiveUI;
+using CarinaStudio.ViewModels;
+using CarinaStudio.Windows.Input;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Windows.Input;
 
 namespace Carina.PixelViewer.ViewModels
@@ -16,7 +14,7 @@ namespace Carina.PixelViewer.ViewModels
 	/// <summary>
 	/// View-model for application options.
 	/// </summary>
-	class AppOptions : BaseViewModel
+	class AppOptions : ViewModel
 	{
 		// Fields.
 		bool isOriginallyDarkMode;
@@ -25,20 +23,13 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Initialize new <see cref="AppOptions"/> instance.
 		/// </summary>
-		public AppOptions()
+		public AppOptions(Workspace workspace) : base(workspace)
 		{
 			// create command
-			this.OpenLinkCommand = ReactiveCommand.Create<string>(this.OpenLink);
-			this.RestartMainWindowCommand = ReactiveCommand.Create(() =>
-			{
-				App.Current.RestartMainWindow();
-				this.isOriginallyDarkMode = this.Settings.GetValueOrDefault(Settings.DarkMode);
-				this.IsRestartingMainWindowNeededToApplyDarkMode = false;
-				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
-			});
+			this.RestartMainWindowCommand = new Command(() => App.Current.RestartMainWindows());
 
 			// get initial settings state
-			this.isOriginallyDarkMode = this.Settings.GetValueOrDefault(Settings.DarkMode);
+			this.isOriginallyDarkMode = this.Settings.GetValueOrDefault(SettingKeys.DarkMode);
 
 			// get version name
 			this.UpdateVersionString();
@@ -56,8 +47,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool AutoSelectLanguage
 		{
-			get => this.Settings.GetValueOrDefault(Settings.AutoSelectLanguage);
-			set => this.Settings.SetValue(Settings.AutoSelectLanguage, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.AutoSelectLanguage);
+			set => this.Settings.SetValue<bool>(SettingKeys.AutoSelectLanguage, value);
 		}
 
 
@@ -66,8 +57,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool DarkMode
 		{
-			get => this.Settings.GetValueOrDefault(Settings.DarkMode);
-			set => this.Settings.SetValue(Settings.DarkMode, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.DarkMode);
+			set => this.Settings.SetValue<bool>(SettingKeys.DarkMode, value);
 		}
 
 
@@ -76,8 +67,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
 		{
-			get => this.Settings.GetValueOrDefault(Settings.DefaultImageDimensionsEvaluationAspectRatio);
-			set => this.Settings.SetValue(Settings.DefaultImageDimensionsEvaluationAspectRatio, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio);
+			set => this.Settings.SetValue<AspectRatio>(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio, value);
 		}
 
 
@@ -88,11 +79,11 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get
 			{
-				if (ImageRenderers.TryFindByFormatName(this.Settings.GetValueOrDefault(Settings.DefaultImageRendererFormatName), out var renderer))
+				if (ImageRenderers.TryFindByFormatName(this.Settings.GetValueOrDefault(SettingKeys.DefaultImageRendererFormatName), out var renderer))
 					return renderer.AsNonNull();
 				return ImageRenderers.All[0];
 			}
-			set => this.Settings.SetValue(Settings.DefaultImageRendererFormatName, value.Format.Name);
+			set => this.Settings.SetValue<string>(SettingKeys.DefaultImageRendererFormatName, value.Format.Name);
 		}
 
 
@@ -101,8 +92,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterChangingRenderer
 		{
-			get => this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterChangingRenderer);
-			set => this.Settings.SetValue(Settings.EvaluateImageDimensionsAfterChangingRenderer, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer);
+			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer, value);
 		}
 
 
@@ -111,8 +102,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterOpeningSourceFile
 		{
-			get => this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterOpeningSourceFile);
-			set => this.Settings.SetValue(Settings.EvaluateImageDimensionsAfterOpeningSourceFile, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile);
+			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile, value);
 		}
 
 
@@ -127,69 +118,40 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
 		{
-			get => this.Settings.GetValueOrDefault(Settings.MaxRenderedImagesMemoryUsageMB);
-			set => this.Settings.SetValue(Settings.MaxRenderedImagesMemoryUsageMB, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB);
+			set => this.Settings.SetValue<long>(SettingKeys.MaxRenderedImagesMemoryUsageMB, value);
 		}
 
 
-		// Called when setting changed.
-		protected override void OnSettingChanged(SettingKey key)
+        // Called when setting changed.
+		protected override void OnSettingChanged(SettingChangedEventArgs e)
 		{
-			base.OnSettingChanged(key);
-			if (key == Settings.AutoSelectLanguage)
+			base.OnSettingChanged(e);
+			var key = e.Key;
+			if (key == SettingKeys.AutoSelectLanguage)
 			{
 				this.OnPropertyChanged(nameof(this.AutoSelectLanguage));
 				this.UpdateVersionString();
 			}
-			else if (key == Settings.DarkMode)
+			else if (key == SettingKeys.DarkMode)
 			{
 				this.OnPropertyChanged(nameof(this.DarkMode));
-				this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.GetValueOrDefault(Settings.DarkMode) != this.isOriginallyDarkMode);
+				this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.GetValueOrDefault(SettingKeys.DarkMode) != this.isOriginallyDarkMode);
 				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
 			}
-			else if (key == Settings.DefaultImageDimensionsEvaluationAspectRatio)
+			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
-			else if (key == Settings.DefaultImageRendererFormatName)
+			else if (key == SettingKeys.DefaultImageRendererFormatName)
 				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
-			else if (key == Settings.EvaluateImageDimensionsAfterChangingRenderer)
+			else if (key == SettingKeys.EvaluateImageDimensionsAfterChangingRenderer)
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
-			else if (key == Settings.EvaluateImageDimensionsAfterOpeningSourceFile)
+			else if (key == SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
-			else if (key == Settings.MaxRenderedImagesMemoryUsageMB)
+			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
-			else if (key == Settings.YuvConversionMode)
+			else if (key == SettingKeys.YuvConversionMode)
 				this.OnPropertyChanged(nameof(this.YuvConversionMode));
 		}
-
-
-		// Open given URI in browser.
-		void OpenLink(string uri)
-		{
-			try
-			{
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-				{
-					Process.Start(new ProcessStartInfo("cmd", $"/c start {uri}")
-					{
-						CreateNoWindow = true
-					});
-				}
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-					Process.Start("xdg-open", uri);
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-					Process.Start("open", uri);
-			}
-			catch(Exception ex)
-			{
-				this.Logger.Error(ex, $"Unable to open '{uri}'");
-			}
-		}
-
-
-		/// <summary>
-		/// Command to open given URI in browser.
-		/// </summary>
-		public ICommand OpenLinkCommand { get; }
 
 
 		/// <summary>
@@ -212,8 +174,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public bool UseDefaultImageRendererAfterOpeningSourceFile
 		{
-			get => this.Settings.GetValueOrDefault(Settings.UseDefaultImageRendererAfterOpeningSourceFile);
-			set => this.Settings.SetValue(Settings.UseDefaultImageRendererAfterOpeningSourceFile, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile);
+			set => this.Settings.SetValue<bool>(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
 		}
 
 
@@ -228,8 +190,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public YuvConversionMode YuvConversionMode
 		{
-			get => this.Settings.GetValueOrDefault(Settings.YuvConversionMode);
-			set => this.Settings.SetValue(Settings.YuvConversionMode, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode);
+			set => this.Settings.SetValue<YuvConversionMode>(SettingKeys.YuvConversionMode, value);
 		}
 
 

@@ -1,22 +1,17 @@
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
-using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.Controls;
-using Carina.PixelViewer.Data.Converters;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using CarinaStudio.Threading;
-using NLog;
-using ReactiveUI;
+using CarinaStudio.Windows.Input;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Threading;
@@ -27,35 +22,11 @@ namespace Carina.PixelViewer
 	/// <summary>
 	/// Main window of PixelViewer.
 	/// </summary>
-	class MainWindow : Window
+	class MainWindow : CarinaStudio.AppSuite.Controls.MainWindow<Workspace>
 	{
-		/// <summary>
-		/// Property of <see cref="HasDialog"/>.
-		/// </summary>
-		public static readonly AvaloniaProperty<bool> HasDialogProperty = AvaloniaProperty.Register<MainWindow, bool>(nameof(HasDialog), false);
-		/// <summary>
-		/// <see cref="IValueConverter"/> to convert <see cref="HasDialog"/> to opacity of control.
-		/// </summary>
-		public static readonly IValueConverter HasDialogToControlOpacityConverter = new BooleanToDoubleConverter(0.3, 1.0);
-
-
-		// Constants.
-		const int SaveWindowSizeDelay = 300;
-		
-
-		// Static fields.
-		static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
-
-
 		// Fields.
-		readonly List<Dialog> dialogs = new List<Dialog>();
-		bool isClosed;
-		bool isConstructing = true;
-		bool isOpened;
 		readonly TabControl mainTabControl;
 		readonly IList mainTabItems;
-		readonly ScheduledAction saveWindowSizeOperation;
-		Workspace? workspace;
 
 
 		/// <summary>
@@ -64,33 +35,10 @@ namespace Carina.PixelViewer
 		public MainWindow()
 		{
 			// create commands
-			this.CloseMainTabItemCommand = ReactiveCommand.Create((TabItem tabItem) => this.CloseMainTabItem(tabItem));
-
-			// create scheduled operations
-			this.saveWindowSizeOperation = new ScheduledAction(() =>
-			{
-				if (this.WindowState == WindowState.Normal)
-				{
-					this.Settings.SetValue(Settings.MainWindowWidth, (int)(this.Width + 0.5));
-					this.Settings.SetValue(Settings.MainWindowHeight, (int)(this.Height + 0.5));
-				}
-			});
+			this.CloseMainTabItemCommand = new Command<TabItem>(this.CloseMainTabItem);
 
 			// initialize Avalonia resources
 			InitializeComponent();
-#if DEBUG
-            this.AttachDevTools();
-#endif
-
-			// setup window state and size
-			this.WindowState = this.Settings.GetValueOrDefault(Settings.MainWindowState);
-			var windowWidth = this.Settings.GetValueOrDefault(Settings.MainWindowWidth);
-			var windowHeight = this.Settings.GetValueOrDefault(Settings.MainWindowHeight);
-			if (windowWidth > 0 && windowHeight > 0)
-			{
-				this.Width = windowWidth;
-				this.Height = windowHeight;
-			}
 
 			// setup main tab control
 			this.mainTabControl = this.FindControl<TabControl>("tabControl").AsNonNull().Also((it) =>
@@ -98,9 +46,6 @@ namespace Carina.PixelViewer
 				it.SelectionChanged += (s, e) => this.OnMainTabControlSelectionChanged();
 			});
 			this.mainTabItems = (IList)this.mainTabControl.Items;
-
-			// update state
-			this.isConstructing = false;
 		}
 
 
@@ -135,7 +80,7 @@ namespace Carina.PixelViewer
 				return;
 
 			// close session
-			this.workspace?.CloseSession(session);
+			(this.DataContext as Workspace)?.CloseSession(session);
 		}
 
 
@@ -180,38 +125,43 @@ namespace Carina.PixelViewer
 		}
 
 
-		/// <summary>
-		/// Check whether one or more dialog hasn been show or not.
-		/// </summary>
-		public bool HasDialog { get => this.GetValue<bool>(HasDialogProperty); }
-
-
 		// Initialize Avalonia component.
-		private void InitializeComponent()
-		{
-			AvaloniaXamlLoader.Load(this);
-		}
+		private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
-		// Called when collection of activated sessions has been changed.
-		void OnActivatedSessionsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		// Attach to view-model.
+		protected override void OnAttachToViewModel(Workspace workspace)
 		{
-			if (e.Action == NotifyCollectionChangedAction.Add && e.NewItems[0] is Session session)
+			// call base
+			base.OnAttachToViewModel(workspace);
+
+			// create tab items
+			foreach (var session in workspace.Sessions)
 			{
-				var tabIndex = this.FindMainTabItemIndex(session);
-				if (tabIndex > 0 && this.mainTabControl.SelectedIndex != tabIndex)
-					this.mainTabControl.SelectedIndex = tabIndex;
+				var tabItem = this.AttachTabItemToSession(session);
+				this.mainTabItems.Insert(this.mainTabItems.Count - 1, tabItem);
 			}
+
+			// attach to workspace
+			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
+
+			// select tab item according to activated session
+			if (workspace.Sessions.IsNotEmpty())
+			{
+				var tabIndex = workspace.ActivatedSession != null ? this.FindMainTabItemIndex(workspace.ActivatedSession) : -1;
+				if (tabIndex > 0)
+					this.mainTabControl.SelectedIndex = tabIndex;
+				else
+					this.mainTabControl.SelectedIndex = 0;
+			}
+			else
+				this.mainTabControl.SelectedIndex = 0;
 		}
 
 
-		// Called when window closed.
-		protected override void OnClosed(EventArgs e)
+        // Called when window closed.
+        protected override void OnClosed(EventArgs e)
 		{
-			// update state
-			this.isOpened = false;
-			this.isClosed = true;
-
 			// disable drag-drop
 			this.RemoveHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
 			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
@@ -222,32 +172,29 @@ namespace Carina.PixelViewer
 		}
 
 
-		/// <summary>
-		/// Called when dialog owned by this window is closing.
-		/// </summary>
-		/// <param name="dialog">Closed dialog.</param>
-		public void OnDialogClosing(Dialog dialog)
-		{
-			if (!this.dialogs.Remove(dialog) || this.dialogs.IsNotEmpty())
-				return;
-			this.SetValue<bool>(HasDialogProperty, false);
-		}
+		// Detach from view-model.
+        protected override void OnDetachFromViewModel(Workspace workspace)
+        {
+			// clear tab items
+			this.mainTabControl.SelectedIndex = 0;
+			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
+			{
+				if (this.mainTabItems[i] is not TabItem tabItem)
+					continue;
+				this.DetachTabItemFromSession(tabItem);
+				this.mainTabItems.RemoveAt(i);
+			}
+
+			// detach from workspace
+			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
+
+			// call base
+			base.OnDetachFromViewModel(workspace);
+        }
 
 
-		/// <summary>
-		/// Called when dialog owned by this window has been opened.
-		/// </summary>
-		/// <param name="dialog">Opened dialog.</param>
-		public void OnDialogOpened(Dialog dialog)
-		{
-			this.dialogs.Add(dialog);
-			if (this.dialogs.Count == 1)
-				this.SetValue<bool>(HasDialogProperty, true);
-		}
-
-
-		// Called when drag enter.
-		void OnDragEnter(object? sender, DragEventArgs e)
+        // Called when drag enter.
+        void OnDragEnter(object? sender, DragEventArgs e)
 		{
 			this.ActivateAndBringToFront();
 		}
@@ -292,13 +239,13 @@ namespace Carina.PixelViewer
 				{
 					((this.mainTabItems[mainTabIndex] as TabItem)?.DataContext as Session)?.Let((session) =>
 					{
-						Logger.Info($"Open source '{fileName}' by drag-drop to {session}");
+						this.Logger.LogDebug($"Open source '{fileName}' by drag-drop to {session}");
 						if (!session.OpenSourceFileCommand.TryExecute(fileName))
-							Logger.Error($"Cannot open source '{fileName}' by drag-drop to {session}");
+							this.Logger.LogError($"Cannot open source '{fileName}' by drag-drop to {session}");
 					});
 				}
 				else
-					this.workspace?.CreateSession(fileName);
+					(this.DataContext as Workspace)?.CreateSession(fileName);
 			});
 		}
 
@@ -306,21 +253,15 @@ namespace Carina.PixelViewer
 		// Called when selection of main tab control changed.
 		void OnMainTabControlSelectionChanged()
 		{
-			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.isClosed)
-				this.workspace?.CreateSession();
+			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.IsClosed)
+				(this.DataContext as Workspace)?.CreateSession();
 			else
 			{
 				// update activated session
 				var selectedSession = (this.mainTabControl.SelectedItem as IControl)?.DataContext as Session;
-				this.workspace?.Let((workspace) =>
+				(this.DataContext as Workspace)?.Let((workspace) =>
 				{
-					for (var i = workspace.ActivatedSessions.Count - 1; i >= 0; --i)
-					{
-						if (workspace.ActivatedSessions[i] != selectedSession)
-							workspace.DeactivateSession(workspace.ActivatedSessions[i]);
-					}
-					if (selectedSession != null)
-						workspace.ActivateSession(selectedSession);
+					workspace.ActivatedSession = selectedSession;
 				});
 
 				// focus on content later to make sure that view has been attached to visual tree
@@ -335,9 +276,6 @@ namespace Carina.PixelViewer
 		// Called when opened.
 		protected override void OnOpened(EventArgs e)
 		{
-			// update state
-			this.isOpened = true;
-
 			// call base
 			base.OnOpened(e);
 
@@ -345,97 +283,18 @@ namespace Carina.PixelViewer
 			this.AddHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
 			this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
-
-			// update app if available
-			this.UpdateAppIfAvailable();
-		}
-
-
-		// Called when property changed.
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
-		{
-			base.OnPropertyChanged(change);
-			if (this.isConstructing)
-				return;
-			var property = change.Property;
-			if (property == Window.DataContextProperty)
-			{
-				if (change.OldValue.Value is Workspace prevWorkspace && prevWorkspace == this.workspace)
-				{
-					// clear tab items
-					this.mainTabControl.SelectedIndex = 0;
-					for (var i = this.mainTabItems.Count - 1; i > 0; --i)
-					{
-						if (this.mainTabItems[i] is not TabItem tabItem)
-							continue;
-						this.DetachTabItemFromSession(tabItem);
-						this.mainTabItems.RemoveAt(i);
-					}
-
-					// detach from workspace
-					prevWorkspace.PropertyChanged -= this.OnWorkspacePropertyChanged;
-					(prevWorkspace.ActivatedSessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnActivatedSessionsChanged);
-					(prevWorkspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
-				}
-				if (change.NewValue.Value is Workspace newWorkspace)
-				{
-					// keep reference
-					this.workspace = newWorkspace;
-
-					// create tab items
-					foreach (var session in newWorkspace.Sessions)
-					{
-						var tabItem = this.AttachTabItemToSession(session);
-						this.mainTabItems.Insert(this.mainTabItems.Count - 1, tabItem);
-					}
-
-					// attach to workspace
-					workspace.PropertyChanged += this.OnWorkspacePropertyChanged;
-					(workspace.ActivatedSessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnActivatedSessionsChanged);
-					(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
-
-					// make sure that at most 1 session has been activated
-					for (var i = newWorkspace.ActivatedSessions.Count - 1; i > 1; --i)
-						newWorkspace.DeactivateSession(newWorkspace.ActivatedSessions[i]);
-
-					// select tab item according to activated session
-					if (newWorkspace.ActivatedSessions.IsNotEmpty())
-					{
-						var tabIndex = this.FindMainTabItemIndex(newWorkspace.ActivatedSessions[0]);
-						if (tabIndex > 0)
-							this.mainTabControl.SelectedIndex = tabIndex;
-						else
-							this.mainTabControl.SelectedIndex = 0;
-					}
-					else
-						this.mainTabControl.SelectedIndex = 0;
-				}
-				else
-				{
-					this.workspace = null;
-					this.mainTabControl.SelectedIndex = 0;
-				}
-			}
-			if (property == Window.HeightProperty || property == Window.WidthProperty)
-				this.saveWindowSizeOperation.Schedule(SaveWindowSizeDelay);
-			else if (property == Window.WindowStateProperty)
-			{
-				var state = this.WindowState;
-				if (state != WindowState.Minimized)
-					this.Settings.SetValue(Settings.MainWindowState, state);
-			}
 		}
 
 
 		// Called when collection of sessions has been changed.
-		void OnSessionsChanged(object sender, NotifyCollectionChangedEventArgs e)
+		void OnSessionsChanged(object? sender, NotifyCollectionChangedEventArgs e)
 		{
 			switch (e.Action)
 			{
 				case NotifyCollectionChangedAction.Add:
 					{
 						var tabIndex = e.NewStartingIndex + 1;
-						foreach (Session? session in e.NewItems)
+						foreach (Session? session in e.NewItems.AsNonNull())
 						{
 							if (session == null)
 								continue;
@@ -447,7 +306,7 @@ namespace Carina.PixelViewer
 					}
 				case NotifyCollectionChangedAction.Remove:
 					{
-						foreach (Session? session in e.OldItems)
+						foreach (Session? session in e.OldItems.AsNonNull())
 						{
 							if (session == null)
 								continue;
@@ -462,9 +321,9 @@ namespace Carina.PixelViewer
 								this.mainTabControl.SelectedIndex = 0;
 							this.mainTabItems.RemoveAt(tabIndex);
 						}
-						this.workspace?.Let((it) =>
+						(this.DataContext as Workspace)?.Let((it) =>
 						{
-							if (it.Sessions.IsEmpty() && !this.isClosed)
+							if (it.Sessions.IsEmpty() && !this.IsClosed)
 								it.CreateSession();
 						});
 						break;
@@ -473,51 +332,20 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Called when property of workspace changed.
-		void OnWorkspacePropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			if (e.PropertyName == nameof(Workspace.IsAppUpdateAvailable))
-				this.UpdateAppIfAvailable();
-		}
-
-
-		// Update application if available.
-		async void UpdateAppIfAvailable()
-		{
-			// check state
-			if (!(this.DataContext is Workspace workspace))
+		// Property of view-model changed.
+        protected override void OnViewModelPropertyChanged(PropertyChangedEventArgs e)
+        {
+            base.OnViewModelPropertyChanged(e);
+			if (this.DataContext is not Workspace workspace)
 				return;
-			if (!workspace.IsAppUpdateAvailable)
-				return;
-			if (!this.isOpened)
-				return;
-
-			// select updating action
-			var result = await new MessageDialog()
+			if (e.PropertyName == nameof(Workspace.ActivatedSession))
 			{
-				Buttons = MessageDialogButtons.YesNo,
-				Icon = MessageDialogIcon.Question,
-				Message = App.Current.GetString("MainWindow.AppUpdateFound"),
-			}.ShowDialog<MessageDialogResult?>(this);
-			if (result == null)
-				return;
-
-			// update or ignore
-			switch (result.Value)
-			{
-				case MessageDialogResult.Yes:
-					workspace.UpdateAppCommand.TryExecute();
-					break;
-				case MessageDialogResult.No:
-					workspace.IgnoreAppUpdateCommand.TryExecute();
-					break;
+				var tabIndex = workspace.ActivatedSession != null ? this.FindMainTabItemIndex(workspace.ActivatedSession) : -1;
+				if (tabIndex < 0)
+					this.mainTabControl.SelectedIndex = 0;
+				else if (this.mainTabControl.SelectedIndex != tabIndex)
+					this.mainTabControl.SelectedIndex = tabIndex;
 			}
-		}
-
-
-		/// <summary>
-		/// Application settings.
-		/// </summary>
-		public Settings Settings { get; } = App.Current.Settings;
-	}
+        }
+    }
 }

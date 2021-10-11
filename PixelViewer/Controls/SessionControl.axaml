@@ -2,18 +2,19 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-						 xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
-						 xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
-						 xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
-						 xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
+             xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
+             xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
+             xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
+             xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.SessionControl">
+	
 	<!-- Resources -->
 	<UserControl.Resources>
 
 		<!-- Evaluate image dimensions -->
 		<ContextMenu x:Key="evaluateImageDimensionsMenu">
-			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Unknown}" Header="{DynamicResource String.AspectRatio.Unknown}"/>
+			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Unknown}" Header="{DynamicResource String/AspectRatio.Unknown}"/>
 			<Separator/>
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Ratio_4x3}" Header="4:3"/>
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Ratio_16x9}" Header="16:9"/>
@@ -33,7 +34,7 @@
 		<!-- Columns -->
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition MinWidth="300" Width="*"/>
-			<ColumnDefinition Width="{StaticResource GridLength.GridSplitter.Thickness}"/>
+			<ColumnDefinition Width="{DynamicResource GridLength/GridSplitter.Thickness}"/>
 			<ColumnDefinition MinWidth="300" Width="300"/>
 		</Grid.ColumnDefinitions>
 
@@ -46,9 +47,9 @@
 				<!-- Drag-drop hint -->
 				<Border Classes="SessionControl_DragDropHint" IsVisible="{Binding !IsSourceFileOpened}">
 					<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
-						<TextBlock Classes="SessionControl_DragDropHint" Text="{DynamicResource String.SessionControl.DragDropHint.Section1}"/>
+						<TextBlock Classes="SessionControl_DragDropHint" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
 						<Image Classes="SessionControl_DragDropHint"/>
-						<TextBlock Classes="SessionControl_DragDropHint" Text="{DynamicResource String.SessionControl.DragDropHint.Section2}"/>
+						<TextBlock Classes="SessionControl_DragDropHint" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
 					</StackPanel>
 				</Border>
 
@@ -56,7 +57,7 @@
 				<Border Classes="SessionControl_InsufficientMemoryForRenderedImageHint" IsVisible="{Binding InsufficientMemoryForRenderedImage}">
 					<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
 						<Image Classes="SessionControl_InsufficientMemoryForRenderedImageHint"/>
-						<TextBlock Classes="SessionControl_InsufficientMemoryForRenderedImageHint" Text="{DynamicResource String.SessionControl.InsufficientMemoryForRenderedImageHint}"/>
+						<TextBlock Classes="SessionControl_InsufficientMemoryForRenderedImageHint" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
 					</StackPanel>
 				</Border>
 
@@ -86,7 +87,7 @@
 
 				<!-- Rendering image indicator -->
 				<Border Classes="SessionControl_RenderingImage" HorizontalAlignment="Stretch" IsVisible="{Binding IsRenderingImage}" VerticalAlignment="Stretch">
-					<TextBlock Classes="SessionControl_RenderingImage" HorizontalAlignment="Center" Text="{DynamicResource String.SessionControl.RenderingImage}" VerticalAlignment="Center"/>
+					<TextBlock Classes="SessionControl_RenderingImage" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.RenderingImage}" VerticalAlignment="Center"/>
 				</Border>
 
 			</Grid>
@@ -96,12 +97,12 @@
 				<StackPanel Orientation="Horizontal">
 
 					<!-- Open file -->
-					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String.SessionControl.OpenSourceFile}">
+					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
 						<Image Classes="SessionControl_ImageToolBar_OpenSourceFile"/>
 					</Button>
 
 					<!-- Save rendered image -->
-					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding $parent[UserControl].SaveRenderedImageCommand}" ToolTip.Tip="{DynamicResource String.SessionControl.SaveRenderedImage}">
+					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding $parent[UserControl].SaveRenderedImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveRenderedImage}">
 						<Image Classes="SessionControl_ImageToolBar_SaveRenderedImage"/>
 					</Button>
 
@@ -109,12 +110,12 @@
 					<Separator Classes="SessionControl_ImageToolBar"/>
 
 					<!-- Fit to viewport -->
-					<ToggleButton Classes="SessionControl_ImageToolBarButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String.SessionControl.FitRenderedImageToViewport}">
+					<ToggleButton Classes="SessionControl_ImageToolBarButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 						<Image Classes="SessionControl_ImageToolBar_FitRenderedImageToViewport"/>
 					</ToggleButton>
 					
 					<!-- Zoom-out -->
-					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String.SessionControl.ZoomOut}">
+					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
 						<Image Classes="SessionControl_ImageToolBar_ZoomOut"/>
 					</Button>
 					
@@ -125,7 +126,7 @@
 					</StackPanel>
 					
 					<!-- Zoom-in -->
-					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String.SessionControl.ZoomIn}">
+					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
 						<Image Classes="SessionControl_ImageToolBar_ZoomIn"/>
 					</Button>
 
@@ -133,12 +134,12 @@
 					<Separator Classes="SessionControl_ImageToolBar"/>
 
 					<!-- Rotate-left -->
-					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String.SessionControl.RotateLeft}">
+					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
 						<Image Classes="SessionControl_ImageToolBar_RotateLeft"/>
 					</Button>
 
 					<!-- Rotate-right -->
-					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String.SessionControl.RotateRight}">
+					<Button Classes="SessionControl_ImageToolBarButton" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
 						<Image Classes="SessionControl_ImageToolBar_RotateRight"/>
 					</Button>
 
@@ -150,7 +151,7 @@
 				<Grid ColumnDefinitions="*,Auto">
 
 					<!-- File name -->
-					<TextBlock Classes="SessionControl_StatusBar" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String.SessionControl.NoSourceFileOpened}" TextTrimming="CharacterEllipsis"/>
+					<TextBlock Classes="SessionControl_StatusBar" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}" TextTrimming="CharacterEllipsis"/>
 					<TextBlock Classes="SessionControl_StatusBar" IsVisible="{Binding IsSourceFileOpened}" TextTrimming="CharacterEllipsis">
 						<TextBlock.Text>
 							<MultiBinding StringFormat="{}{0} ({1})">
@@ -164,7 +165,7 @@
 					<StackPanel Grid.Column="1" Opacity="{Binding HasSelectedRenderedImagePixel, Converter={x:Static appConverters:BooleanToDoubleConverter.Default}}" Orientation="Horizontal">
 
 						<!-- Position -->
-						<TextBlock Classes="SessionControl_StatusBar" Text="{DynamicResource String.SessionControl.SelectedRenderecImagePixelPosition}"/>
+						<TextBlock Classes="SessionControl_StatusBar" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelPosition}"/>
 						<TextBlock Classes="SessionControl_StatusBar">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}({0},{1})">
@@ -176,7 +177,7 @@
 
 						<!-- Color -->
 						<TextBlock Classes="SessionControl_StatusBar" Text="  "/>
-						<TextBlock Classes="SessionControl_StatusBar" Text="{DynamicResource String.SessionControl.SelectedRenderecImagePixelColor}"/>
+						<TextBlock Classes="SessionControl_StatusBar" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelColor}"/>
 						<TextBlock Classes="SessionControl_StatusBar">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}#{0:X2}{1:X2}{2:X2}{3:X2}">
@@ -201,7 +202,7 @@
 				<StackPanel Classes="SessionControl_OptionsPanel">
 
 					<!-- Profile -->
-					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.Profile}"/>
+					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.Profile}"/>
 					<ComboBox Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 						<ComboBox.DataTemplates>
 							<DataTemplate>
@@ -212,7 +213,7 @@
 					<Border Classes="SessionControl_OptionsPanel_Separator"/>
 
 					<!-- Image renderer -->
-					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.ImageRenderer}"/>
+					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
 					<ComboBox Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
 						<ComboBox.DataTemplates>
 							<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
@@ -223,62 +224,62 @@
 					<Border Classes="SessionControl_OptionsPanel_Separator"/>
 
 					<!-- Dimensions -->
-					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.ImageDimensions}"/>
+					<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
 					<Grid ColumnDefinitions="*,Auto,*">
 						<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
 						<TextBlock Grid.Column="1" Text=" × " VerticalAlignment="Center"/>
 						<NumericUpDown Classes="SessionControl_OptionsPanel_Item" Grid.Column="2" IsEnabled="{Binding IsSourceFileOpened}" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
 					</Grid>
-					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String.SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}"/>
+					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}"/>
 					<Border Classes="SessionControl_OptionsPanel_Separator"/>
 
 					<!-- Plane options #1 -->
-					<Expander Classes="SessionControl_OptionsPanel_Item" Header="{DynamicResource String.SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
+					<Expander Classes="SessionControl_OptionsPanel_Item" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
 						<StackPanel Orientation="Vertical">
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.RowStride}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.RowStride}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding RowStride1, Mode=TwoWay}"/>
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.PixelStride}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.PixelStride}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String.SessionControl.EffectiveBits}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
 						</StackPanel>
 					</Expander>
 					<Border Classes="SessionControl_OptionsPanel_Separator" IsVisible="{Binding HasImagePlane1}"/>
 
 					<!-- Plane options #2 -->
-					<Expander Classes="SessionControl_OptionsPanel_Item" Header="{DynamicResource String.SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
+					<Expander Classes="SessionControl_OptionsPanel_Item" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
 						<StackPanel Orientation="Vertical">
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.RowStride}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.RowStride}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding RowStride2, Mode=TwoWay}"/>
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.PixelStride}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.PixelStride}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String.SessionControl.EffectiveBits}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
 						</StackPanel>
 					</Expander>
 					<Border Classes="SessionControl_OptionsPanel_Separator" IsVisible="{Binding HasImagePlane2}"/>
 
 					<!-- Plane options #3 -->
-					<Expander Classes="SessionControl_OptionsPanel_Item" Header="{DynamicResource String.SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
+					<Expander Classes="SessionControl_OptionsPanel_Item" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
 						<StackPanel Orientation="Vertical">
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.RowStride}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.RowStride}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding RowStride3, Mode=TwoWay}"/>
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String.SessionControl.PixelStride}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" Text="{DynamicResource String/SessionControl.PixelStride}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
-							<TextBlock Classes="SessionControl_OptionsPanel_Item" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String.SessionControl.EffectiveBits}"/>
+							<TextBlock Classes="SessionControl_OptionsPanel_Item" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 							<NumericUpDown Classes="SessionControl_OptionsPanel_Item" IsEnabled="{Binding IsSourceFileOpened}" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
 						</StackPanel>
 					</Expander>
 					<Border Classes="SessionControl_OptionsPanel_Separator" IsVisible="{Binding HasImagePlane3}"/>
 
 					<!-- Save profile -->
-					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding SaveProfileCommand}" Content="{DynamicResource String.SessionControl.SaveProfile}"/>
+					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding SaveProfileCommand}" Content="{DynamicResource String/SessionControl.SaveProfile}"/>
 
 					<!-- Save as new profile -->
-					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding $parent[UserControl].SaveAsNewProfileCommand}" Content="{DynamicResource String.SessionControl.SaveAsNewProfile}"/>
+					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding $parent[UserControl].SaveAsNewProfileCommand}" Content="{DynamicResource String/SessionControl.SaveAsNewProfile}"/>
 
 					<!-- Delete profile -->
-					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding DeleteProfileCommand}" Content="{DynamicResource String.SessionControl.DeleteProfile}"/>
+					<Button Classes="SessionControl_OptionsPanel_Item" Command="{Binding DeleteProfileCommand}" Content="{DynamicResource String/SessionControl.DeleteProfile}"/>
 					
 				</StackPanel>
 			</ScrollViewer>

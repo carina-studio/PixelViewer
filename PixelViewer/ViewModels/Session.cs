@@ -1,6 +1,5 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Carina.PixelViewer.Configuration;
 using Carina.PixelViewer.IO;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
@@ -10,7 +9,9 @@ using CarinaStudio;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Threading;
-using ReactiveUI;
+using CarinaStudio.Windows.Input;
+using CarinaStudio.ViewModels;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,29 +28,8 @@ namespace Carina.PixelViewer.ViewModels
 	/// <summary>
 	/// A session of rendering and displaying image.
 	/// </summary>
-	class Session : BaseViewModel
+	class Session : ViewModel
 	{
-		// Observer for IsLoadingProfiles.
-		class IsLoadingProfilesObserver : IObserver<bool>
-		{
-			// Fields.
-			readonly Session owner;
-
-			// Constructor.
-			public IsLoadingProfilesObserver(Session owner)
-			{
-				this.owner = owner;
-			}
-
-			// Implementations.
-			public void OnCompleted()
-			{ }
-			public void OnError(Exception error)
-			{ }
-			public void OnNext(bool value) => this.owner.OnLoadingProfilesStateChanged(value);
-		}
-
-
 		/// <summary>
 		/// Interface of profile.
 		/// </summary>
@@ -92,7 +72,7 @@ namespace Carina.PixelViewer.ViewModels
 			public ProfileImpl() // Constructor for default profile
 			{
 				this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
-				App.Current.Settings.SettingChanged += this.OnSettingChanged;
+				App.Current.StringsUpdated += this.OnStringsUpdated;
 			}
 			public ProfileImpl(string name)
 			{
@@ -112,10 +92,10 @@ namespace Carina.PixelViewer.ViewModels
 			// Name.
 			public string Name { get; private set; }
 
-			// Called when setting changed.
-			void OnSettingChanged(object? sender, SettingChangedEventArgs e)
+			// Called strings updated.
+			void OnStringsUpdated(object? sender, EventArgs e)
 			{
-				if (e.Key == Settings.AutoSelectLanguage && this == DefaultProfile)
+				if (this == DefaultProfile)
 				{
 					this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
 					this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Name)));
@@ -156,6 +136,97 @@ namespace Carina.PixelViewer.ViewModels
 		/// Default profile.
 		/// </summary>
 		public static readonly IProfile DefaultProfile = new ProfileImpl();
+		/// <summary>
+		/// Property of <see cref="HasImagePlane1"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasImagePlane1Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane1), true);
+		/// <summary>
+		/// Property of <see cref="HasImagePlane2"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasImagePlane2Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane2));
+		/// <summary>
+		/// Property of <see cref="HasImagePlane3"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasImagePlane3Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane3));
+		/// <summary>
+		/// Property of <see cref="HasSelectedRenderedImagePixel"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProperty = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
+		/// <summary>
+		/// Property of <see cref="ImageHeight"/>.
+		/// </summary>
+		public static readonly ObservableProperty<int> ImageHeightProperty = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: it => Math.Max(1, it));
+		/// <summary>
+		/// Property of <see cref="ImagePlaneCount"/>.
+		/// </summary>
+		public static readonly ObservableProperty<int> ImagePlaneCountProperty = ObservableProperty.Register<Session, int>(nameof(ImagePlaneCount), 1);
+		/// <summary>
+		/// Property of <see cref="ImageRenderer"/>.
+		/// </summary>
+		public static readonly ObservableProperty<IImageRenderer?> ImageRendererProperty = ObservableProperty.Register<Session, IImageRenderer?>(nameof(ImageRenderer));
+		/// <summary>
+		/// Property of <see cref="ImageWidth"/>.
+		/// </summary>
+		public static readonly ObservableProperty<int> ImageWidthProperty = ObservableProperty.Register<Session, int>(nameof(ImageWidth), 1, coerce: it => Math.Max(1, it));
+		/// <summary>
+		/// Property of <see cref="InsufficientMemoryForRenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> InsufficientMemoryForRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(InsufficientMemoryForRenderedImage));
+		/// <summary>
+		/// Property of <see cref="IsAdjustableEffectiveBits1"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits1Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits1));
+		/// <summary>
+		/// Property of <see cref="IsAdjustableEffectiveBits2"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits2Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits2));
+		/// <summary>
+		/// Property of <see cref="IsAdjustableEffectiveBits3"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
+		/// <summary>
+		/// Property of <see cref="IsRenderingImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
+		/// <summary>
+		/// Property of <see cref="IsSavingRenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsSavingRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingRenderedImage));
+		/// <summary>
+		/// Property of <see cref="IsSourceFileOpened"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
+		/// <summary>
+		/// Property of <see cref="Profile"/>.
+		/// </summary>
+		public static readonly ObservableProperty<IProfile> ProfileProperty = ObservableProperty.Register<Session, IProfile>(nameof(Profile), DefaultProfile, validate: it =>
+		{
+			return it == DefaultProfile || (it is ProfileImpl && SharedProfileList.AsNonNull().Contains(it));
+		});
+		/// <summary>
+		/// Property of <see cref="RenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<IBitmap?> RenderedImageProperty = ObservableProperty.Register<Session, IBitmap?>(nameof(RenderedImage));
+		/// <summary>
+		/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Color> SelectedRenderedImagePixelColorProperty = ObservableProperty.Register<Session, Color>(nameof(SelectedRenderedImagePixelColor));
+		/// <summary>
+		/// Property of <see cref="SelectedRenderedImagePixelPositionX"/>.
+		/// </summary>
+		public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionXProperty = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionX), -1);
+		/// <summary>
+		/// Property of <see cref="SelectedRenderedImagePixelPositionY"/>.
+		/// </summary>
+		public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionYProperty = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionY), -1);
+		/// <summary>
+		/// Property of <see cref="SourceFileName"/>.
+		/// </summary>
+		public static readonly ObservableProperty<string?> SourceFileNameProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileName));
+		/// <summary>
+		/// Property of <see cref="SourceFileSizeString"/>.
+		/// </summary>
+		public static readonly ObservableProperty<string?> SourceFileSizeStringProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileSizeString));
 
 
 		// Constants.
@@ -165,7 +236,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Static fields.
 		static readonly MutableObservableBoolean IsLoadingProfiles = new MutableObservableBoolean();
 		static readonly IList<IProfile> ReadOnlySharedProfileList;
-		static readonly SortedList<IProfile> SharedProfileList = new SortedList<IProfile>(CompareProfiles);
+		static readonly SortedObservableList<IProfile> SharedProfileList = new SortedObservableList<IProfile>(CompareProfiles);
 		static long TotalRenderedImagesMemoryUsage;
 
 
@@ -178,42 +249,20 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly int[] effectiveBits = new int[4];
 		bool fitRenderedImageToViewport = true;
-		readonly MutableObservableBoolean hasImagePlane1 = new MutableObservableBoolean(true);
-		readonly MutableObservableBoolean hasImagePlane2 = new MutableObservableBoolean();
-		readonly MutableObservableBoolean hasImagePlane3 = new MutableObservableBoolean();
 		bool hasPendingImageRendering;
-		readonly MutableObservableBoolean hasSelectedRenderedImagePixel = new MutableObservableBoolean();
 		IImageDataSource? imageDataSource;
-		readonly MutableObservableInt32 imageHeight = new MutableObservableInt32(1);
-		readonly MutableObservableInt32 imagePlaneCount = new MutableObservableInt32(1);
-		readonly MutableObservableValue<IImageRenderer> imageRenderer;
 		CancellationTokenSource? imageRenderingCancellationTokenSource;
-		readonly MutableObservableInt32 imageWidth = new MutableObservableInt32(1);
-		readonly MutableObservableBoolean insufficientMemoryForRenderedImage = new MutableObservableBoolean();
-		readonly MutableObservableBoolean isAdjustableEffectiveBits1 = new MutableObservableBoolean();
-		readonly MutableObservableBoolean isAdjustableEffectiveBits2 = new MutableObservableBoolean();
-		readonly MutableObservableBoolean isAdjustableEffectiveBits3 = new MutableObservableBoolean();
 		bool isFirstImageRenderingForSource = true;
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
 		IDisposable? isLoadingProfilesObserverSubscriptionToken;
-		readonly MutableObservableBoolean isRenderingImage = new MutableObservableBoolean();
-		readonly MutableObservableBoolean isSavingRenderedImage = new MutableObservableBoolean();
-		readonly MutableObservableBoolean isSourceFileOpened = new MutableObservableBoolean();
 		readonly int[] pixelStrides = new int[4];
-		readonly MutableObservableValue<IProfile> profile = new MutableObservableValue<IProfile>(DefaultProfile);
 		readonly string profilesDirectoryPath;
-		readonly MutableObservableValue<IBitmap?> renderedImage = new MutableObservableValue<IBitmap?>();
 		IBitmapBuffer? renderedImageBuffer;
 		IDisposable? renderedImageMemoryUsageToken;
 		double renderedImageScale = 1.0;
 		readonly ScheduledAction renderImageOperation;
 		readonly int[] rowStrides = new int[4];
-		readonly MutableObservableValue<Color> selectedRenderedImagePixelColor = new MutableObservableValue<Color>();
-		readonly MutableObservableInt32 selectedRenderedImagePixelPositionX = new MutableObservableInt32(-1);
-		readonly MutableObservableInt32 selectedRenderedImagePixelPositionY = new MutableObservableInt32(-1);
-		readonly MutableObservableString sourceFileName = new MutableObservableString();
-		readonly MutableObservableString sourceFileSizeString = new MutableObservableString();
 
 
 		// Static initializer.
@@ -226,55 +275,32 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Initialize new <see cref="Session"/> instance.
 		/// </summary>
-		public Session()
+		public Session(Workspace workspace) : base(workspace)
 		{
 			// create commands
-			this.CloseSourceFileCommand = ReactiveCommand.Create(this.CloseSourceFile, this.isSourceFileOpened);
-			this.DeleteProfileCommand = ReactiveCommand.Create(this.DeleteProfile, this.canSaveOrDeleteProfile);
-			this.EvaluateImageDimensionsCommand = ReactiveCommand.Create<AspectRatio>(this.EvaluateImageDimensions, this.isSourceFileOpened);
-			this.OpenSourceFileCommand = ReactiveCommand.Create((string filePath) => this.OpenSourceFile(filePath), this.canOpenSourceFile);
-			this.RotateLeftCommand = ReactiveCommand.Create(this.RotateLeft, this.isSourceFileOpened);
-			this.RotateRightCommand = ReactiveCommand.Create(this.RotateRight, this.isSourceFileOpened);
-			this.SaveAsNewProfileCommand = ReactiveCommand.Create((string name) => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
-			this.SaveProfileCommand = ReactiveCommand.Create(() => this.SaveProfile(), this.canSaveOrDeleteProfile);
-			this.SaveRenderedImageCommand = ReactiveCommand.Create((Action<object?>)this.SaveRenderedImage, this.canSaveRenderedImage);
-			this.ZoomInCommand = ReactiveCommand.Create(this.ZoomIn, this.canZoomIn);
-			this.ZoomOutCommand = ReactiveCommand.Create(this.ZoomOut, this.canZoomOut);
+			var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceFileOpenedProperty);
+			this.CloseSourceFileCommand = new Command(() => this.CloseSourceFile(false), isSrcFileOpenedObservable);
+			this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
+			this.EvaluateImageDimensionsCommand = new Command<AspectRatio>(this.EvaluateImageDimensions, isSrcFileOpenedObservable);
+			this.OpenSourceFileCommand = new Command<string>(filePath => this.OpenSourceFile(filePath), this.canOpenSourceFile);
+			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
+			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
+			this.SaveAsNewProfileCommand = new Command<string>(name => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
+			this.SaveProfileCommand = new Command(() => this.SaveProfile(), this.canSaveOrDeleteProfile);
+			this.SaveRenderedImageCommand = new Command<object?>(this.SaveRenderedImage, this.canSaveRenderedImage);
+			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
+			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
 
 			// setup operations
 			this.renderImageOperation = new ScheduledAction(this, this.RenderImage);
 
 			// setup profiles
-			this.profilesDirectoryPath = Path.Combine(App.Current.Directory, "Profiles");
+			this.profilesDirectoryPath = Path.Combine(this.Application.RootPrivateDirectoryPath, "Profiles");
 			this.LoadProfiles();
 			RemovingProfileFromSharedProfileList += this.OnRemovingProfileFromSharedProfileList;
 
 			// select default image renderer
-			this.imageRenderer = new MutableObservableValue<IImageRenderer>(this.SelectDefaultImageRenderer());
-
-			// setup observable values
-			this.ObservePropertyValue(this.hasImagePlane1, nameof(HasImagePlane1));
-			this.ObservePropertyValue(this.hasImagePlane2, nameof(HasImagePlane2));
-			this.ObservePropertyValue(this.hasImagePlane3, nameof(HasImagePlane3));
-			this.ObservePropertyValue(this.hasSelectedRenderedImagePixel, nameof(HasSelectedRenderedImagePixel));
-			this.ObservePropertyValue(this.imageHeight, nameof(ImageHeight));
-			this.ObservePropertyValue(this.imagePlaneCount, nameof(ImagePlaneCount));
-			this.ObservePropertyValue(this.imageRenderer, nameof(ImageRenderer));
-			this.ObservePropertyValue(this.imageWidth, nameof(ImageWidth));
-			this.ObservePropertyValue(this.insufficientMemoryForRenderedImage, nameof(InsufficientMemoryForRenderedImage));
-			this.ObservePropertyValue(this.isAdjustableEffectiveBits1, nameof(IsAdjustableEffectiveBits1));
-			this.ObservePropertyValue(this.isAdjustableEffectiveBits2, nameof(IsAdjustableEffectiveBits2));
-			this.ObservePropertyValue(this.isAdjustableEffectiveBits3, nameof(IsAdjustableEffectiveBits3));
-			this.ObservePropertyValue(this.isRenderingImage, nameof(IsRenderingImage));
-			this.ObservePropertyValue(this.isSavingRenderedImage, nameof(IsSavingRenderedImage));
-			this.ObservePropertyValue(this.isSourceFileOpened, nameof(IsSourceFileOpened));
-			this.ObservePropertyValue(this.profile, nameof(Profile));
-			this.ObservePropertyValue(this.renderedImage, nameof(RenderedImage));
-			this.ObservePropertyValue(this.selectedRenderedImagePixelColor, nameof(SelectedRenderedImagePixelColor));
-			this.ObservePropertyValue(this.selectedRenderedImagePixelPositionX, nameof(SelectedRenderedImagePixelPositionX));
-			this.ObservePropertyValue(this.selectedRenderedImagePixelPositionY, nameof(SelectedRenderedImagePixelPositionY));
-			this.ObservePropertyValue(this.sourceFileName, nameof(SourceFileName));
-			this.ObservePropertyValue(this.sourceFileSizeString, nameof(SourceFileSizeString));
+			this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
 
 			// setup title
 			this.UpdateTitle();
@@ -290,12 +316,13 @@ namespace Carina.PixelViewer.ViewModels
 			// cancel
 			if (this.imageRenderingCancellationTokenSource == null)
 				return false;
-			this.Logger.Warn($"Cancel rendering image for source '{this.SourceFileName}'");
+			this.Logger.LogWarning($"Cancel rendering image for source '{this.SourceFileName}'");
 			this.imageRenderingCancellationTokenSource.Cancel();
 			this.imageRenderingCancellationTokenSource = null;
 
 			// update state
-			this.isRenderingImage.Update(false);
+			if (!this.IsDisposed)
+				this.SetValue(IsRenderingImageProperty, false);
 			if (cancelPendingRendering)
 				this.hasPendingImageRendering = false;
 
@@ -308,7 +335,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ChangeEffectiveBits(int index, int effectiveBits)
 		{
 			this.VerifyAccess();
-			this.ThrowIfDisposed();
+			this.VerifyDisposed();
 			if (this.effectiveBits[index] == effectiveBits)
 				return;
 			this.effectiveBits[index] = effectiveBits;
@@ -321,7 +348,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ChangePixelStride(int index, int pixelStride)
 		{
 			this.VerifyAccess();
-			this.ThrowIfDisposed();
+			this.VerifyDisposed();
 			if (this.pixelStrides[index] == pixelStride)
 				return;
 			this.pixelStrides[index] = pixelStride;
@@ -334,7 +361,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ChangeRowStride(int index, int rowStride)
 		{
 			this.VerifyAccess();
-			this.ThrowIfDisposed();
+			this.VerifyDisposed();
 			if (this.rowStrides[index] == rowStride)
 				return;
 			this.rowStrides[index] = rowStride;
@@ -347,11 +374,11 @@ namespace Carina.PixelViewer.ViewModels
 		void ClearSourceFile()
 		{
 			// close source file
-			this.CloseSourceFile();
+			this.CloseSourceFile(false);
 
 			// update state
-			this.sourceFileName.Update(null);
-			this.sourceFileSizeString.Update(null);
+			this.SetValue(SourceFileNameProperty, null);
+			this.SetValue(SourceFileSizeStringProperty, null);
 
 			// update title
 			this.UpdateTitle();
@@ -359,19 +386,23 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Close current source file.
-		void CloseSourceFile()
+		void CloseSourceFile(bool disposing)
 		{
 			// clear selected pixel
 			this.SelectRenderedImagePixel(-1, -1);
 
 			// update state
-			this.isSourceFileOpened.Update(false);
-			this.canSaveRenderedImage.Update(false);
-			this.UpdateCanSaveDeleteProfile();
-			var renderedImage = this.renderedImage.Value;
+			if (!disposing)
+			{
+				this.SetValue(IsSourceFileOpenedProperty, false);
+				this.canSaveRenderedImage.Update(false);
+				this.UpdateCanSaveDeleteProfile();
+			}
+			var renderedImage = this.RenderedImage;
 			if (renderedImage != null)
 			{
-				this.renderedImage.Update(null);
+				if (!disposing)
+					this.SetValue(RenderedImageProperty, null);
 				renderedImage.Dispose();
 				this.renderedImageBuffer = this.renderedImageBuffer.DisposeAndReturnNull();
 				this.renderedImageMemoryUsageToken = this.renderedImageMemoryUsageToken.DisposeAndReturnNull();
@@ -381,7 +412,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.EffectiveRenderedImageRotation = 0.0;
 				this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
 			}
-			this.insufficientMemoryForRenderedImage.Update(false);
+			if (!disposing)
+				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
 			// update zooming state
 			this.UpdateCanZoomInOut();
@@ -397,7 +429,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				_ = Task.Run(() =>
 				{
-					this.Logger.Info($"Dispose source for '{sourceFileName}'");
+					this.Logger.LogDebug($"Dispose source for '{sourceFileName}'");
 					imageDataSource?.Dispose();
 				});
 			}
@@ -431,10 +463,10 @@ namespace Carina.PixelViewer.ViewModels
 			// check state
 			if (!this.canSaveOrDeleteProfile.Value)
 				return;
-			var profile = (ProfileImpl)this.profile.Value;
+			var profile = (ProfileImpl)this.Profile;
 			if (profile == DefaultProfile)
 			{
-				this.Logger.Error("Cannot delete default profile");
+				this.Logger.LogError("Cannot delete default profile");
 				return;
 			}
 
@@ -452,11 +484,11 @@ namespace Carina.PixelViewer.ViewModels
 					try
 					{
 						File.Delete(filePath);
-						this.Logger.Debug($"Delete profile '{profile.Name}' and file '{filePath}'");
+						this.Logger.LogDebug($"Delete profile '{profile.Name}' and file '{filePath}'");
 					}
 					catch (Exception ex)
 					{
-						this.Logger.Warn(ex, $"Error occurred while deleting profile '{profile.Name}' and file '{filePath}'");
+						this.Logger.LogWarning(ex, $"Error occurred while deleting profile '{profile.Name}' and file '{filePath}'");
 					}
 				}
 			});
@@ -474,7 +506,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// close source file
 			if (disposing)
-				this.CloseSourceFile();
+				this.CloseSourceFile(true);
 
 			// detach from shared profile list
 			RemovingProfileFromSharedProfileList -= this.OnRemovingProfileFromSharedProfileList;
@@ -537,7 +569,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 
 			// evaluate
-			this.imageRenderer.Value.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((it) =>
+			this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((it) =>
 			{
 				this.ImageWidth = it.Width;
 				this.ImageHeight = it.Height;
@@ -561,7 +593,7 @@ namespace Carina.PixelViewer.ViewModels
 			set
 			{
 				this.VerifyAccess();
-				this.ThrowIfDisposed();
+				this.VerifyDisposed();
 				if (this.fitRenderedImageToViewport == value)
 					return;
 				this.fitRenderedImageToViewport = value;
@@ -582,7 +614,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <returns>Name for new profile.</returns>
 		public string GenerateNameForNewProfile()
 		{
-			var name = $"{this.imageWidth}x{this.imageHeight} [{this.imageRenderer.Value.Format.Name}]";
+			var name = $"{this.ImageWidth}x{this.ImageHeight} [{this.ImageRenderer.Format.Name}]";
 			if (!SharedProfileList.Any((it) => it.Name == name))
 				return name;
 			for (var i = 1; i <= 1000; ++i)
@@ -598,25 +630,25 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Check whether 1st image plane exists or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public bool HasImagePlane1 { get => this.hasImagePlane1.Value; }
+		public bool HasImagePlane1 { get => this.GetValue(HasImagePlane1Property); }
 
 
 		/// <summary>
 		/// Check whether 2nd image plane exists or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public bool HasImagePlane2 { get => this.hasImagePlane2.Value; }
+		public bool HasImagePlane2 { get => this.GetValue(HasImagePlane2Property); }
 
 
 		/// <summary>
 		/// Check whether 3rd image plane exists or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public bool HasImagePlane3 { get => this.hasImagePlane3.Value; }
+		public bool HasImagePlane3 { get => this.GetValue(HasImagePlane3Property); }
 
 
 		/// <summary>
 		/// Check whether there is a pixel selected on rendered image or not.
 		/// </summary>
-		public bool HasSelectedRenderedImagePixel { get => this.hasSelectedRenderedImagePixel.Value; }
+		public bool HasSelectedRenderedImagePixel { get => this.GetValue(HasSelectedRenderedImagePixelProperty); }
 
 
 		/// <summary>
@@ -624,25 +656,15 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public int ImageHeight
 		{
-			get => this.imageHeight.Value;
-			set
-			{
-				this.VerifyAccess();
-				this.ThrowIfDisposed();
-				if (this.imageHeight.Value == value)
-					return;
-				if (value <= 0)
-					throw new ArgumentOutOfRangeException();
-				this.imageHeight.Update(value);
-				this.renderImageOperation.Reschedule(RenderImageDelay);
-			}
+			get => this.GetValue(ImageHeightProperty);
+			set => this.SetValue(ImageHeightProperty, value);
 		}
 
 
 		/// <summary>
 		/// Get number of image planes according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public int ImagePlaneCount { get => this.imagePlaneCount.Value; }
+		public int ImagePlaneCount { get => this.GetValue(ImagePlaneCountProperty); }
 
 
 		/// <summary>
@@ -650,24 +672,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public IImageRenderer ImageRenderer
 		{
-			get => this.imageRenderer.Value;
-			set
-			{
-				// check state
-				this.VerifyAccess();
-				this.ThrowIfDisposed();
-				if (this.imageRenderer == value)
-					return;
-				if (!ImageRenderers.All.Contains(value))
-					throw new ArgumentException("Given image renderer is not part of available image renderer list.");
-
-				// render image
-				this.imageRenderer.Update(value);
-				if (this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterChangingRenderer))
-					this.isImageDimensionsEvaluationNeeded = true;
-				this.isImagePlaneOptionsResetNeeded = true;
-				this.renderImageOperation.Reschedule();
-			}
+			get => this.GetValue(ImageRendererProperty).AsNonNull();
+			set => this.SetValue(ImageRendererProperty, value.AsNonNull());
 		}
 
 
@@ -676,62 +682,51 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public int ImageWidth
 		{
-			get => this.imageWidth.Value;
-			set
-			{
-				this.VerifyAccess();
-				this.ThrowIfDisposed();
-				if (this.imageWidth.Value == value)
-					return;
-				if (value <= 0)
-					throw new ArgumentOutOfRangeException();
-				this.imageWidth.Update(value);
-				this.isImagePlaneOptionsResetNeeded = true;
-				this.renderImageOperation.Reschedule(RenderImageDelay);
-			}
+			get => this.GetValue(ImageWidthProperty);
+			set => this.SetValue(ImageWidthProperty, value);
 		}
 
 
 		/// <summary>
 		/// Value to indicate whether there is insufficient memory for rendered image or not.
 		/// </summary>
-		public bool InsufficientMemoryForRenderedImage { get => this.insufficientMemoryForRenderedImage.Value; }
+		public bool InsufficientMemoryForRenderedImage { get => this.GetValue(InsufficientMemoryForRenderedImageProperty); }
 
 
 		/// <summary>
 		/// Check whether effective bits for 1st image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public bool IsAdjustableEffectiveBits1 { get => this.isAdjustableEffectiveBits1.Value; }
+		public bool IsAdjustableEffectiveBits1 { get => this.GetValue(IsAdjustableEffectiveBits1Property); }
 
 
 		/// <summary>
 		/// Check whether effective bits for 2nd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public bool IsAdjustableEffectiveBits2 { get => this.isAdjustableEffectiveBits2.Value; }
+		public bool IsAdjustableEffectiveBits2 { get => this.GetValue(IsAdjustableEffectiveBits2Property); }
 
 
 		/// <summary>
 		/// Check whether effective bits for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
-		public bool IsAdjustableEffectiveBits3 { get => this.isAdjustableEffectiveBits3.Value; }
+		public bool IsAdjustableEffectiveBits3 { get => this.GetValue(IsAdjustableEffectiveBits3Property); }
 
 
 		/// <summary>
 		/// Check whether image is being rendered or not.
 		/// </summary>
-		public bool IsRenderingImage { get => this.isRenderingImage.Value; }
+		public bool IsRenderingImage { get => this.GetValue(IsRenderingImageProperty); }
 
 
 		/// <summary>
 		/// Check whether rendered image is being saved or not.
 		/// </summary>
-		public bool IsSavingRenderedImage { get => this.isSavingRenderedImage.Value; }
+		public bool IsSavingRenderedImage { get => this.GetValue(IsSavingRenderedImageProperty); }
 
 
 		/// <summary>
 		/// Check whether source image file has been opened or not.
 		/// </summary>
-		public bool IsSourceFileOpened { get => this.isSourceFileOpened.Value; }
+		public bool IsSourceFileOpened { get => this.GetValue(IsSourceFileOpenedProperty); }
 
 
 		// Load profile from file.
@@ -752,33 +747,33 @@ namespace Carina.PixelViewer.ViewModels
 				// get name
 				if (!jsonObject.TryGetProperty("Name", out var jsonElement) || jsonElement.ValueKind != JsonValueKind.String)
 				{
-					this.Logger.Error($"No 'Name' property in '{fileName}'");
+					this.Logger.LogError($"No 'Name' property in '{fileName}'");
 					return null;
 				}
-				var profile = new ProfileImpl(jsonElement.GetString());
+				var profile = new ProfileImpl(jsonElement.GetString().AsNonNull());
 
 				// get renderer
 				if (!jsonObject.TryGetProperty("Format", out jsonElement) || jsonElement.ValueKind != JsonValueKind.String)
 				{
-					this.Logger.Error($"No 'Format' property in '{fileName}'");
+					this.Logger.LogError($"No 'Format' property in '{fileName}'");
 					return null;
 				}
-				if (!ImageRenderers.TryFindByFormatName(jsonElement.GetString(), out profile.Renderer))
+				if (!ImageRenderers.TryFindByFormatName(jsonElement.GetString() ?? "", out profile.Renderer))
 				{
-					this.Logger.Error($"Invalid 'Format' property in '{fileName}': {jsonElement.GetString()}");
+					this.Logger.LogError($"Invalid 'Format' property in '{fileName}': {jsonElement.GetString()}");
 					return null;
 				}
 
 				// get dimensions
 				if (!jsonObject.TryGetProperty("Width", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Number)
 				{
-					this.Logger.Error($"No 'Width' property in '{fileName}'");
+					this.Logger.LogError($"No 'Width' property in '{fileName}'");
 					return null;
 				}
 				profile.Width = jsonElement.GetInt32();
 				if (!jsonObject.TryGetProperty("Height", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Number)
 				{
-					this.Logger.Error($"No 'Height' property in '{fileName}'");
+					this.Logger.LogError($"No 'Height' property in '{fileName}'");
 					return null;
 				}
 				profile.Height = jsonElement.GetInt32();
@@ -794,7 +789,7 @@ namespace Carina.PixelViewer.ViewModels
 					{
 						if (element.ValueKind != JsonValueKind.Number)
 						{
-							this.Logger.Error($"Invalid effective-bits[{index}] in '{fileName}'");
+							this.Logger.LogError($"Invalid effective-bits[{index}] in '{fileName}'");
 							return null;
 						}
 						profile.EffectiveBits[index++] = element.GetInt32();
@@ -804,7 +799,7 @@ namespace Carina.PixelViewer.ViewModels
 				// get pixel-strides
 				if (!jsonObject.TryGetProperty("PixelStrides", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Array)
 				{
-					this.Logger.Error($"No 'PixelStrides' property in '{fileName}'");
+					this.Logger.LogError($"No 'PixelStrides' property in '{fileName}'");
 					return null;
 				}
 				arrayLength = Math.Min(profile.PixelStrides.Length, jsonElement.GetArrayLength());
@@ -813,7 +808,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (element.ValueKind != JsonValueKind.Number)
 					{
-						this.Logger.Error($"Invalid pixel-stride[{index}] in '{fileName}'");
+						this.Logger.LogError($"Invalid pixel-stride[{index}] in '{fileName}'");
 						return null;
 					}
 					profile.PixelStrides[index++] = element.GetInt32();
@@ -822,7 +817,7 @@ namespace Carina.PixelViewer.ViewModels
 				// get row-strides
 				if (!jsonObject.TryGetProperty("RowStrides", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Array)
 				{
-					this.Logger.Error($"No 'RowStrides' property in '{fileName}'");
+					this.Logger.LogError($"No 'RowStrides' property in '{fileName}'");
 					return null;
 				}
 				arrayLength = Math.Min(profile.RowStrides.Length, jsonElement.GetArrayLength());
@@ -831,7 +826,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (element.ValueKind != JsonValueKind.Number)
 					{
-						this.Logger.Error($"Invalid row-stride[{index}] in '{fileName}'");
+						this.Logger.LogError($"Invalid row-stride[{index}] in '{fileName}'");
 						return null;
 					}
 					profile.RowStrides[index++] = element.GetInt32();
@@ -839,12 +834,12 @@ namespace Carina.PixelViewer.ViewModels
 
 				// complete
 				profile.FileName = Path.GetFileName(fileName);
-				this.Logger.Debug($"Load profile '{profile.Name}' from '{fileName}'");
+				this.Logger.LogDebug($"Load profile '{profile.Name}' from '{fileName}'");
 				return profile;
 			}
 			catch (Exception ex)
 			{
-				this.Logger.Error(ex, $"Unable to load profile from '{fileName}'");
+				this.Logger.LogError(ex, $"Unable to load profile from '{fileName}'");
 				return null;
 			}
 		}
@@ -854,7 +849,7 @@ namespace Carina.PixelViewer.ViewModels
 		async void LoadProfiles()
 		{
 			// subscribe state
-			this.isLoadingProfilesObserverSubscriptionToken = IsLoadingProfiles.Subscribe(new IsLoadingProfilesObserver(this));
+			this.isLoadingProfilesObserverSubscriptionToken = IsLoadingProfiles.Subscribe(new Observer<bool>(this.OnLoadingProfilesStateChanged));
 
 			// check state
 			if (SharedProfileList.IsNotEmpty())
@@ -864,7 +859,7 @@ namespace Carina.PixelViewer.ViewModels
 			SharedProfileList.Add(DefaultProfile);
 
 			// load profiles
-			this.Logger.Warn("Load profiles");
+			this.Logger.LogWarning("Load profiles");
 			IsLoadingProfiles.Update(true);
 			var profiles = await Task.Run(() =>
 			{
@@ -881,20 +876,20 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				catch (Exception ex)
 				{
-					this.Logger.Error(ex, "Error occurred while loading profiles");
+					this.Logger.LogError(ex, "Error occurred while loading profiles");
 				}
 				return profiles;
 			});
 			if (profiles == null)
 				return;
-			this.Logger.Debug($"{profiles.Count} profile(s) loaded");
+			this.Logger.LogDebug($"{profiles.Count} profile(s) loaded");
 
 			// add profiles
 			foreach (var profile in profiles)
 			{
 				if (SharedProfileList.Contains(profile))
 				{
-					this.Logger.Error($"Duplicate profile '{profile.Name}'");
+					this.Logger.LogError($"Duplicate profile '{profile.Name}'");
 					continue;
 				}
 				SharedProfileList.Add(profile);
@@ -915,6 +910,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get minimum scaling ratio of rendered image.
 		/// </summary>
 		public double MinRenderedImageScale { get; } = 0.1;
+
+
+		// Called when strings updated.
+		protected override void OnApplicationStringsUpdated()
+		{
+			base.OnApplicationStringsUpdated();
+			this.UpdateTitle();
+		}
 
 
 		// Raise PropertyChanged event for effectie bits.
@@ -944,12 +947,72 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
-		// Called when removing profile from shared profile list.
-		void OnRemovingProfileFromSharedProfileList(object? sender, ProfileEventArgs e)
+		// Property changed.
+        protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
+        {
+            base.OnPropertyChanged(property, oldValue, newValue);
+			if (property == ImageHeightProperty
+				|| property == ImageWidthProperty)
+			{
+				this.renderImageOperation.Reschedule(RenderImageDelay);
+			}
+			else if (property == ImageRendererProperty)
+			{
+				if (ImageRenderers.All.Contains(newValue))
+				{
+					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
+						this.isImageDimensionsEvaluationNeeded = true;
+					this.isImagePlaneOptionsResetNeeded = true;
+					this.renderImageOperation.Reschedule();
+				}
+				else
+					this.Logger.LogError($"{newValue} is not part of available image renderer list");
+			}
+			else if (property == ProfileProperty)
+			{
+				// change profile
+				var profile = (IProfile)newValue.AsNonNull();
+				this.SwitchToProfileWithoutApplying(profile);
+
+				// update state
+				this.UpdateCanSaveDeleteProfile();
+
+				// apply profile
+				if (profile != DefaultProfile && profile is ProfileImpl profileImpl)
+				{
+					// renderer
+					this.SetValue(ImageRendererProperty, profileImpl.Renderer ?? this.SelectDefaultImageRenderer());
+
+					// dimensions
+					this.SetValue(ImageWidthProperty, profileImpl.Width);
+					this.SetValue(ImageHeightProperty, profileImpl.Height);
+
+					// plane options
+					for (var i = this.ImageRenderer.Format.PlaneCount - 1; i >= 0; --i)
+					{
+						this.effectiveBits[i] = profileImpl.EffectiveBits[i];
+						this.pixelStrides[i] = profileImpl.PixelStrides[i];
+						this.rowStrides[i] = profileImpl.RowStrides[i];
+						this.OnEffectiveBitsChanged(i);
+						this.OnPixelStrideChanged(i);
+						this.OnRowStrideChanged(i);
+					}
+
+					// render image
+					this.isImageDimensionsEvaluationNeeded = false;
+					this.isImagePlaneOptionsResetNeeded = false;
+					this.renderImageOperation.Reschedule();
+				}
+			}
+        }
+
+
+        // Called when removing profile from shared profile list.
+        void OnRemovingProfileFromSharedProfileList(object? sender, ProfileEventArgs e)
 		{
-			if (this.profile != e.Profile)
+			if (this.Profile != e.Profile)
 				return;
-			this.Logger.Warn($"Current profile '{this.profile}' will be deleted");
+			this.Logger.LogWarning($"Current profile '{this.Profile}' will be deleted");
 			this.SwitchToProfileWithoutApplying(DefaultProfile);
 		}
 
@@ -964,33 +1027,24 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
-		// Called when setting changed.
-		protected override void OnSettingChanged(SettingKey key)
-		{
-			base.OnSettingChanged(key);
-			if (key == Settings.AutoSelectLanguage)
-				this.UpdateTitle();
-		}
-
-
-		// Open given file as image data source.
-		async void OpenSourceFile(string? fileName)
+        // Open given file as image data source.
+        async void OpenSourceFile(string? fileName)
 		{
 			// check state
 			if (fileName == null)
 				return;
 			if (!this.canOpenSourceFile.Value)
 			{
-				this.Logger.Error($"Cannot open '{fileName}' in current state");
+				this.Logger.LogError($"Cannot open '{fileName}' in current state");
 				return;
 			}
 
 			// close current source file
-			this.CloseSourceFile();
+			this.CloseSourceFile(false);
 
 			// update state
 			this.canOpenSourceFile.Update(false);
-			this.sourceFileName.Update(fileName);
+			this.SetValue(SourceFileNameProperty, fileName);
 
 			// update title
 			this.UpdateTitle();
@@ -1000,18 +1054,18 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				try
 				{
-					this.Logger.Info($"Create source for '{fileName}'");
+					this.Logger.LogDebug($"Create source for '{fileName}'");
 					return new FileImageDataSource(fileName);
 				}
 				catch (Exception ex)
 				{
-					this.Logger.Error(ex, $"Unable to create source for '{fileName}'");
+					this.Logger.LogError(ex, $"Unable to create source for '{fileName}'");
 					return null;
 				}
 			});
 			if (this.IsDisposed)
 			{
-				this.Logger.Warn($"Source for '{fileName}' created after disposing.");
+				this.Logger.LogWarning($"Source for '{fileName}' created after disposing.");
 				if (imageDataSource != null)
 					_ = Task.Run(imageDataSource.Dispose);
 				return;
@@ -1019,8 +1073,8 @@ namespace Carina.PixelViewer.ViewModels
 			if (imageDataSource == null)
 			{
 				// reset state
-				this.sourceFileName.Update(null);
-				this.isSourceFileOpened.Update(false);
+				this.SetValue(SourceFileNameProperty, null);
+				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.canOpenSourceFile.Update(true);
 
 				// update title
@@ -1032,27 +1086,27 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageDataSource = imageDataSource;
 
 			// update state
-			this.isSourceFileOpened.Update(true);
+			this.SetValue(IsSourceFileOpenedProperty, true);
 			this.canOpenSourceFile.Update(true);
-			this.sourceFileSizeString.Update(imageDataSource.Size.ToFileSizeString());
+			this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
 			this.UpdateCanSaveDeleteProfile();
 
 			// reset to default renderer
-			if (this.Settings.GetValueOrDefault(Settings.UseDefaultImageRendererAfterOpeningSourceFile))
+			if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
 			{
-				this.Logger.Warn($"Use default image renderer after opening source '{fileName}'");
+				this.Logger.LogWarning($"Use default image renderer after opening source '{fileName}'");
 				var defaultImageRenderer = this.SelectDefaultImageRenderer();
-				if (this.imageRenderer != defaultImageRenderer)
+				if (this.ImageRenderer != defaultImageRenderer)
 				{
-					this.imageRenderer.Update(defaultImageRenderer);
-					if (this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterChangingRenderer))
+					this.SetValue(ImageRendererProperty, defaultImageRenderer);
+					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 						this.isImageDimensionsEvaluationNeeded = true;
 					this.isImagePlaneOptionsResetNeeded = true;
 				}
 			}
 
 			// render image
-			if (this.Settings.GetValueOrDefault(Settings.EvaluateImageDimensionsAfterOpeningSourceFile) && this.profile.Value == DefaultProfile)
+			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile == DefaultProfile)
 			{
 				this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
@@ -1106,52 +1160,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public IProfile Profile
 		{
-			get => this.profile.Value;
-			set
-			{
-				// check state
-				this.VerifyAccess();
-				this.ThrowIfDisposed();
-
-				// check profile
-				if (this.profile == value)
-					return;
-				if (!SharedProfileList.Contains(value) || !(value is ProfileImpl profileImpl))
-					throw new ArgumentException("Unkown profile.");
-
-				// change profile
-				this.SwitchToProfileWithoutApplying(value);
-
-				// update state
-				this.UpdateCanSaveDeleteProfile();
-
-				// apply profile
-				if (value != DefaultProfile)
-				{
-					// renderer
-					this.imageRenderer.Update(profileImpl.Renderer ?? this.SelectDefaultImageRenderer());
-
-					// dimensions
-					this.imageWidth.Update(profileImpl.Width);
-					this.imageHeight.Update(profileImpl.Height);
-
-					// plane options
-					for (var i = this.imageRenderer.Value.Format.PlaneCount - 1; i >= 0; --i)
-					{
-						this.effectiveBits[i] = profileImpl.EffectiveBits[i];
-						this.pixelStrides[i] = profileImpl.PixelStrides[i];
-						this.rowStrides[i] = profileImpl.RowStrides[i];
-						this.OnEffectiveBitsChanged(i);
-						this.OnPixelStrideChanged(i);
-						this.OnRowStrideChanged(i);
-					}
-
-					// render image
-					this.isImageDimensionsEvaluationNeeded = false;
-					this.isImagePlaneOptionsResetNeeded = false;
-					this.renderImageOperation.Reschedule();
-				}
-			}
+			get => this.GetValue(ProfileProperty);
+			set => this.SetValue(ProfileProperty, value);
 		}
 
 
@@ -1164,9 +1174,9 @@ namespace Carina.PixelViewer.ViewModels
 		// Release token for rendered image memory usage.
 		void ReleaseRenderedImageMemoryUsage(RenderedImageMemoryUsageToken token)
 		{
-			var maxUsage = this.Settings.GetValueOrDefault(Settings.MaxRenderedImagesMemoryUsageMB) << 20;
+			var maxUsage = this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB) << 20;
 			TotalRenderedImagesMemoryUsage -= token.DataSize;
-			this.Logger.Debug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+			this.Logger.LogDebug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 		}
 
 
@@ -1177,7 +1187,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get rendered image.
 		/// </summary>
-		public IBitmap? RenderedImage { get => this.renderedImage.Value; }
+		public IBitmap? RenderedImage { get => this.GetValue(RenderedImageProperty); }
 
 
 		/// <summary>
@@ -1189,7 +1199,7 @@ namespace Carina.PixelViewer.ViewModels
 			set
 			{
 				this.VerifyAccess();
-				this.ThrowIfDisposed();
+				this.VerifyDisposed();
 				if (!double.IsFinite(value))
 					throw new ArgumentOutOfRangeException();
 				if (value < this.MinRenderedImageScale)
@@ -1222,13 +1232,13 @@ namespace Carina.PixelViewer.ViewModels
 			var imageDataSource = this.imageDataSource;
 			if (imageDataSource == null)
 				return;
-			var imageRenderer = this.imageRenderer.Value;
-			var sourceFileName = this.sourceFileName.Value;
+			var imageRenderer = this.ImageRenderer;
+			var sourceFileName = this.SourceFileName;
 
 			// render later
 			if (!this.isFirstImageRenderingForSource && cancelled)
 			{
-				this.Logger.Warn("Rendering image, start next rendering after cancellation completed");
+				this.Logger.LogWarning("Rendering image, start next rendering after cancellation completed");
 				this.hasPendingImageRendering = true;
 				return;
 			}
@@ -1238,36 +1248,36 @@ namespace Carina.PixelViewer.ViewModels
 			// evaluate dimensions
 			if (this.isImageDimensionsEvaluationNeeded)
 			{
-				this.Logger.Info($"Evaluate dimensions of image for '{sourceFileName}'");
+				this.Logger.LogDebug($"Evaluate dimensions of image for '{sourceFileName}'");
 				this.isImageDimensionsEvaluationNeeded = false;
-				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(Settings.DefaultImageDimensionsEvaluationAspectRatio))?.Also((it) =>
+				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((it) =>
 				{
-					this.imageWidth.Update(it.Width);
-					this.imageHeight.Update(it.Height);
+					this.SetValue(ImageWidthProperty, it.Width);
+					this.SetValue(ImageHeightProperty, it.Height);
 				});
 			}
 
 			// sync format information
 			var planeDescriptors = imageRenderer.Format.PlaneDescriptors;
-			if (this.imagePlaneCount.Value != planeDescriptors.Count)
+			if (this.ImagePlaneCount != planeDescriptors.Count)
 			{
-				this.imagePlaneCount.Update(planeDescriptors.Count);
-				this.hasImagePlane2.Update(planeDescriptors.Count >= 2);
-				this.hasImagePlane3.Update(planeDescriptors.Count >= 3);
+				this.SetValue(ImagePlaneCountProperty, planeDescriptors.Count);
+				this.SetValue(HasImagePlane2Property, planeDescriptors.Count >= 2);
+				this.SetValue(HasImagePlane3Property, planeDescriptors.Count >= 3);
 			}
 			for (var i = planeDescriptors.Count - 1; i >= 0; --i)
 			{
-				(i switch
+				this.SetValue(i switch
 				{
-					0 => this.isAdjustableEffectiveBits1,
-					1 => this.isAdjustableEffectiveBits2,
-					2 => this.isAdjustableEffectiveBits3,
+					0 => IsAdjustableEffectiveBits1Property,
+					1 => IsAdjustableEffectiveBits2Property,
+					2 => IsAdjustableEffectiveBits3Property,
 					_ => throw new ArgumentException(),
-				}).Update(planeDescriptors[i].IsAdjustableEffectiveBits);
+				}, planeDescriptors[i].IsAdjustableEffectiveBits);
 			}
 
 			// prepare plane options
-			var planeOptionsList = new List<ImagePlaneOptions>(imageRenderer.CreateDefaultPlaneOptions(this.imageWidth.Value, this.imageHeight.Value));
+			var planeOptionsList = new List<ImagePlaneOptions>(imageRenderer.CreateDefaultPlaneOptions(this.ImageWidth, this.ImageHeight));
 			if (this.isImagePlaneOptionsResetNeeded)
 			{
 				this.isImagePlaneOptionsResetNeeded = false;
@@ -1297,14 +1307,14 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// create rendered image
-			var renderedImageDataSize = ((long)this.imageWidth.Value * this.imageHeight.Value * imageRenderer.RenderedFormat.GetByteSize() * 2); // need double space because Avalonia will copy the bitmap data
+			var renderedImageDataSize = ((long)this.ImageWidth * this.ImageHeight * imageRenderer.RenderedFormat.GetByteSize() * 2); // need double space because Avalonia will copy the bitmap data
 			var memoryUsageToken = this.RequestRenderedImageMemoryUsage(renderedImageDataSize);
 			if (memoryUsageToken == null)
 			{
-				this.Logger.Warn("Unable to request memory usage for rendered image, dispose current rendered image first");
-				this.renderedImage.Value?.Let((it) =>
+				this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current rendered image first");
+				this.RenderedImage?.Let((it) =>
 				{
-					this.renderedImage.Update(null);
+					this.SetValue(RenderedImageProperty, null);
 					it.Dispose();
 					this.renderedImageBuffer = this.renderedImageBuffer.DisposeAndReturnNull();
 					this.renderedImageMemoryUsageToken = this.renderedImageMemoryUsageToken.DisposeAndReturnNull();
@@ -1313,34 +1323,34 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			if (memoryUsageToken == null)
 			{
-				this.Logger.Error("Unable to request memory usage for rendered image");
-				this.insufficientMemoryForRenderedImage.Update(true);
+				this.Logger.LogError("Unable to request memory usage for rendered image");
+				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 				return;
 			}
 			IBitmapBuffer? renderedImageBuffer = null;
 			try
 			{
-				renderedImageBuffer = new BitmapBuffer(imageRenderer.RenderedFormat, this.imageWidth.Value, this.imageHeight.Value);
+				renderedImageBuffer = new BitmapBuffer(imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
 			}
 			catch (OutOfMemoryException ex)
 			{
-				this.Logger.Error(ex, "Insufficient memory for rendered image");
+				this.Logger.LogError(ex, "Insufficient memory for rendered image");
 				renderedImageBuffer?.Dispose();
 				memoryUsageToken.Dispose();
-				this.insufficientMemoryForRenderedImage.Update(true);
+				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 				return;
 			}
 
 			// update state
 			this.canSaveRenderedImage.Update(false);
-			this.insufficientMemoryForRenderedImage.Update(false);
-			this.isRenderingImage.Update(true);
+			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+			this.SetValue(IsRenderingImageProperty, true);
 
 			// cancel scheduled rendering
 			this.renderImageOperation.Cancel();
 
 			// render
-			this.Logger.Debug($"Render image for '{sourceFileName}', dimensions: {this.imageWidth}x{this.imageHeight}");
+			this.Logger.LogDebug($"Render image for '{sourceFileName}', dimensions: {this.ImageWidth}x{this.ImageHeight}");
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 			await imageRenderer.Render(imageDataSource, renderedImageBuffer, new ImageRenderingOptions(), planeOptionsList, cancellationTokenSource.Token);
@@ -1348,7 +1358,7 @@ namespace Carina.PixelViewer.ViewModels
 			// check whether rendering has been cancelled or not
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
-				this.Logger.Warn($"Image rendering for '{sourceFileName}' has been cancelled");
+				this.Logger.LogWarning($"Image rendering for '{sourceFileName}' has been cancelled");
 				this.SynchronizationContext.Post(() =>
 				{
 					renderedImageBuffer.Dispose();
@@ -1356,7 +1366,7 @@ namespace Carina.PixelViewer.ViewModels
 				});
 				if (this.hasPendingImageRendering)
 				{
-					this.Logger.Warn("Start next rendering");
+					this.Logger.LogWarning("Start next rendering");
 					this.renderImageOperation.Schedule();
 				}
 				return;
@@ -1366,8 +1376,8 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 
 			// update state
-			this.Logger.Info($"Image for '{sourceFileName}' rendered");
-			this.renderedImage.Value?.Let((prevRenderedImage) =>
+			this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
+			this.RenderedImage?.Let((prevRenderedImage) =>
 			{
 				var prevRenderedImageBuffer = this.renderedImageBuffer;
 				var prevMemoryUsageToken = this.renderedImageMemoryUsageToken;
@@ -1380,24 +1390,24 @@ namespace Carina.PixelViewer.ViewModels
 			});
 			this.renderedImageMemoryUsageToken = memoryUsageToken;
 			this.renderedImageBuffer = renderedImageBuffer;
-			this.renderedImage.Update(renderedImageBuffer.CreateAvaloniaBitmap());
-			this.canSaveRenderedImage.Update(!this.isSavingRenderedImage.Value);
-			this.isRenderingImage.Update(false);
+			this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
+			this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
+			this.SetValue(IsRenderingImageProperty, false);
 		}
 
 
 		// Request token for rendered image memory usage.
 		IDisposable? RequestRenderedImageMemoryUsage(long dataSize)
 		{
-			var maxUsage = this.Settings.GetValueOrDefault(Settings.MaxRenderedImagesMemoryUsageMB) << 20;
+			var maxUsage = this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB) << 20;
 			TotalRenderedImagesMemoryUsage += dataSize;
 			if (TotalRenderedImagesMemoryUsage <= maxUsage)
 			{
-				this.Logger.Debug($"Request {dataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+				this.Logger.LogDebug($"Request {dataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 				return new RenderedImageMemoryUsageToken(this, dataSize);
 			}
 			TotalRenderedImagesMemoryUsage -= dataSize;
-			this.Logger.Error($"Unable to request {dataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+			this.Logger.LogError($"Unable to request {dataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 			return null;
 		}
 
@@ -1405,7 +1415,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Rotate rendered image counter-clockwise.
 		void RotateLeft()
 		{
-			if (!this.isSourceFileOpened.Value)
+			if (!this.IsSourceFileOpened)
 				return;
 			this.EffectiveRenderedImageRotation = (int)(this.EffectiveRenderedImageRotation + 0.5) switch
 			{
@@ -1427,7 +1437,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Rotate rendered image clockwise.
 		void RotateRight()
 		{
-			if (!this.isSourceFileOpened.Value)
+			if (!this.IsSourceFileOpened)
 				return;
 			this.EffectiveRenderedImageRotation = (int)(this.EffectiveRenderedImageRotation + 0.5) switch
 			{
@@ -1486,7 +1496,7 @@ namespace Carina.PixelViewer.ViewModels
 			// check name
 			if (name.Length == 0)
 			{
-				this.Logger.Error("Cannot create profile with empty name");
+				this.Logger.LogError("Cannot create profile with empty name");
 				return;
 			}
 
@@ -1496,7 +1506,7 @@ namespace Carina.PixelViewer.ViewModels
 			// insert profile
 			if (SharedProfileList.Contains(profile))
 			{
-				this.Logger.Error($"Cannot create existent profile '{name}'");
+				this.Logger.LogError($"Cannot create existent profile '{name}'");
 				return;
 			}
 			SharedProfileList.Add(profile);
@@ -1508,7 +1518,7 @@ namespace Carina.PixelViewer.ViewModels
 			var saved = await Task<bool>.Run(() => this.SaveProfileToFile(profile));
 			if (!saved)
 			{
-				this.Logger.Error($"Unable to save profile '{name}' to file");
+				this.Logger.LogError($"Unable to save profile '{name}' to file");
 				this.SwitchToProfileWithoutApplying(DefaultProfile);
 				RemovingProfileFromSharedProfileList?.Invoke(null, new ProfileEventArgs(profile));
 				SharedProfileList.Remove(profile);
@@ -1529,10 +1539,10 @@ namespace Carina.PixelViewer.ViewModels
 			// check state
 			if (!this.canSaveOrDeleteProfile.Value)
 				return;
-			var profile = (ProfileImpl)this.profile.Value;
+			var profile = (ProfileImpl)this.Profile;
 			if (profile == DefaultProfile)
 			{
-				this.Logger.Error("Cannot save default profile");
+				this.Logger.LogError("Cannot save default profile");
 				return;
 			}
 
@@ -1542,7 +1552,7 @@ namespace Carina.PixelViewer.ViewModels
 			// save
 			var saved = await Task<bool>.Run(() => this.SaveProfileToFile(profile));
 			if (!saved)
-				this.Logger.Error($"Failed to save profile '{profile.Name}'");
+				this.Logger.LogError($"Failed to save profile '{profile.Name}'");
 		}
 
 
@@ -1590,7 +1600,7 @@ namespace Carina.PixelViewer.ViewModels
 					}
 					catch (Exception ex)
 					{
-						this.Logger.Error(ex, $"Unable to generate file name for profile '{profile.Name}'");
+						this.Logger.LogError(ex, $"Unable to generate file name for profile '{profile.Name}'");
 						return false;
 					}
 				}
@@ -1606,7 +1616,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			catch (Exception ex)
 			{
-				this.Logger.Error(ex, $"Unable to create directory '{this.profilesDirectoryPath}'");
+				this.Logger.LogError(ex, $"Unable to create directory '{this.profilesDirectoryPath}'");
 				return false;
 			}
 
@@ -1649,11 +1659,11 @@ namespace Carina.PixelViewer.ViewModels
 
 				// complete
 				jsonWriter.WriteEndObject();
-				this.Logger.Debug($"Save profile '{profile.Name}' to '{filePath}'");
+				this.Logger.LogDebug($"Save profile '{profile.Name}' to '{filePath}'");
 			}
 			catch (Exception ex)
 			{
-				this.Logger.Error(ex, $"Unable to save profile '{profile.Name}' to '{filePath}'");
+				this.Logger.LogError(ex, $"Unable to save profile '{profile.Name}' to '{filePath}'");
 				return false;
 			}
 			return true;
@@ -1687,7 +1697,7 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				catch (Exception ex)
 				{
-					this.Logger.Error(ex, $"Unable to open {fileName}");
+					this.Logger.LogError(ex, $"Unable to open {fileName}");
 					return null;
 				}
 			});
@@ -1721,13 +1731,13 @@ namespace Carina.PixelViewer.ViewModels
 			var renderedImageBuffer = this.renderedImageBuffer;
 			if (renderedImageBuffer == null)
 			{
-				this.Logger.Error("No rendered image to save");
+				this.Logger.LogError("No rendered image to save");
 				return false;
 			}
 
 			// update state
 			this.canSaveRenderedImage.Update(false);
-			this.isSavingRenderedImage.Update(true);
+			this.SetValue(IsSavingRenderedImageProperty, true);
 
 			// share bitmap data
 			IBitmapBuffer sharedImageBuffer = renderedImageBuffer.Share();
@@ -1746,7 +1756,7 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				catch(Exception ex)
 				{
-					this.Logger.Error(ex, "Unable to save rendered image");
+					this.Logger.LogError(ex, "Unable to save rendered image");
 					return false;
 				}
 				finally
@@ -1756,8 +1766,8 @@ namespace Carina.PixelViewer.ViewModels
 			});
 
 			// complete
-			this.isSavingRenderedImage.Update(false);
-			this.canSaveRenderedImage.Update(!this.isRenderingImage.Value);
+			this.SetValue(IsSavingRenderedImageProperty, false);
+			this.canSaveRenderedImage.Update(!this.IsRenderingImage);
 			return result;
 		}
 
@@ -1771,7 +1781,7 @@ namespace Carina.PixelViewer.ViewModels
 		// Select default image renderer according to settings.
 		IImageRenderer SelectDefaultImageRenderer()
 		{
-			if (ImageRenderers.TryFindByFormatName(this.Settings.GetValueOrDefault(Settings.DefaultImageRendererFormatName), out var imageRenderer))
+			if (ImageRenderers.TryFindByFormatName(this.Settings.GetValueOrDefault(SettingKeys.DefaultImageRendererFormatName), out var imageRenderer))
 				return imageRenderer.AsNonNull();
 			return ImageRenderers.All.SingleOrDefault((candidate) => candidate is L8ImageRenderer) ?? ImageRenderers.All[0];
 		}
@@ -1780,19 +1790,19 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get color of selected pixel on rendered image.
 		/// </summary>
-		public Color SelectedRenderedImagePixelColor { get => this.selectedRenderedImagePixelColor.Value; }
+		public Color SelectedRenderedImagePixelColor { get => this.GetValue(SelectedRenderedImagePixelColorProperty); }
 
 
 		/// <summary>
 		/// Get horizontal position of selected pixel on rendered image. Return -1 if no pixel selected.
 		/// </summary>
-		public int SelectedRenderedImagePixelPositionX { get => this.selectedRenderedImagePixelPositionX.Value; }
+		public int SelectedRenderedImagePixelPositionX { get => this.GetValue(SelectedRenderedImagePixelPositionXProperty); }
 
 
 		/// <summary>
 		/// Get vertical position of selected pixel on rendered image. Return -1 if no pixel selected.
 		/// </summary>
-		public int SelectedRenderedImagePixelPositionY { get => this.selectedRenderedImagePixelPositionY.Value; }
+		public int SelectedRenderedImagePixelPositionY { get => this.GetValue(SelectedRenderedImagePixelPositionYProperty); }
 
 
 		/// <summary>
@@ -1802,17 +1812,19 @@ namespace Carina.PixelViewer.ViewModels
 		/// <param name="y">Vertical position of selected pixel.</param>
 		public unsafe void SelectRenderedImagePixel(int x, int y)
 		{
+			if (this.IsDisposed)
+				return;
 			var renderedImageBuffer = this.renderedImageBuffer;
 			if (renderedImageBuffer == null 
 				|| x < 0 || x >= renderedImageBuffer.Width
 				|| y < 0 || y >= renderedImageBuffer.Height)
 			{
-				if (this.hasSelectedRenderedImagePixel.Value)
+				if (this.HasSelectedRenderedImagePixel)
 				{
-					this.hasSelectedRenderedImagePixel.Update(false);
-					this.selectedRenderedImagePixelColor.Update(default);
-					this.selectedRenderedImagePixelPositionX.Update(-1);
-					this.selectedRenderedImagePixelPositionY.Update(-1);
+					this.SetValue(HasSelectedRenderedImagePixelProperty, false);
+					this.SetValue(SelectedRenderedImagePixelColorProperty, default);
+					this.SetValue(SelectedRenderedImagePixelPositionXProperty, -1);
+					this.SetValue(SelectedRenderedImagePixelPositionYProperty, -1);
 				}
 			}
 			else
@@ -1829,10 +1841,10 @@ namespace Carina.PixelViewer.ViewModels
 				});
 
 				// update state
-				this.selectedRenderedImagePixelColor.Update(color);
-				this.selectedRenderedImagePixelPositionX.Update(x);
-				this.selectedRenderedImagePixelPositionY.Update(y);
-				this.hasSelectedRenderedImagePixel.Update(true);
+				this.SetValue(SelectedRenderedImagePixelColorProperty, color);
+				this.SetValue(SelectedRenderedImagePixelPositionXProperty, x);
+				this.SetValue(SelectedRenderedImagePixelPositionYProperty, y);
+				this.SetValue(HasSelectedRenderedImagePixelProperty, true);
 			}
 		}
 
@@ -1840,19 +1852,19 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get name of source image file.
 		/// </summary>
-		public string? SourceFileName { get => this.sourceFileName.Value; }
+		public string? SourceFileName { get => this.GetValue(SourceFileNameProperty); }
 
 
 		/// <summary>
 		/// Get description of size of source image file.
 		/// </summary>
-		public string? SourceFileSizeString { get => this.sourceFileSizeString.Value; }
+		public string? SourceFileSizeString { get => this.GetValue(SourceFileSizeStringProperty); }
 
 
 		// Switch profile without applying parameters.
 		void SwitchToProfileWithoutApplying(IProfile profile)
 		{
-			this.profile.Update(profile);
+			this.SetValue(ProfileProperty, profile);
 			this.UpdateCanSaveDeleteProfile();
 		}
 
@@ -1866,7 +1878,9 @@ namespace Carina.PixelViewer.ViewModels
 		// Update CanSaveOrDeleteProfile and CanSaveAsNewProfile according to current state.
 		void UpdateCanSaveDeleteProfile()
 		{
-			if (!this.isSourceFileOpened.Value || IsLoadingProfiles.Value)
+			if (this.IsDisposed)
+				return;
+			if (!this.IsSourceFileOpened || IsLoadingProfiles.Value)
 			{
 				this.canSaveAsNewProfile.Update(false);
 				this.canSaveOrDeleteProfile.Update(false);
@@ -1874,7 +1888,7 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				this.canSaveAsNewProfile.Update(true);
-				this.canSaveOrDeleteProfile.Update(this.profile.Value != DefaultProfile);
+				this.canSaveOrDeleteProfile.Update(this.Profile != DefaultProfile);
 			}
 		}
 
@@ -1882,6 +1896,8 @@ namespace Carina.PixelViewer.ViewModels
 		// Update CanZoomIn and CanZoomOut according to current state.
 		void UpdateCanZoomInOut()
 		{
+			if (this.IsDisposed)
+				return;
 			if (this.fitRenderedImageToViewport || !this.IsSourceFileOpened)
 			{
 				this.canZoomIn.Update(false);
@@ -1907,7 +1923,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (this.SourceFileName != null)
 				title = Path.GetFileName(this.SourceFileName);
 			else
-				title = this.GetString("Session.EmptyTitle");
+				title = this.Application.GetString("Session.EmptyTitle");
 
 			// update property
 			if (this.Title != title)
@@ -1921,9 +1937,9 @@ namespace Carina.PixelViewer.ViewModels
 		// Write current parameters to given profile.
 		void WriteParametersToProfile(ProfileImpl profile)
 		{
-			profile.Renderer = this.imageRenderer.Value;
-			profile.Width = this.imageWidth.Value;
-			profile.Height = this.imageHeight.Value;
+			profile.Renderer = this.ImageRenderer;
+			profile.Width = this.ImageWidth;
+			profile.Height = this.ImageHeight;
 			Array.Copy(this.effectiveBits, profile.EffectiveBits, profile.EffectiveBits.Length);
 			Array.Copy(this.pixelStrides, profile.PixelStrides, profile.PixelStrides.Length);
 			Array.Copy(this.rowStrides, profile.RowStrides, profile.RowStrides.Length);

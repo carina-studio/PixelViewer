@@ -4,69 +4,61 @@
 										xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 	<!-- AppOptionsControl -->
-	<sys:Double x:Key="Double.AppOptionsControl.AppIcon.Size">100</sys:Double>
-	<sys:Double x:Key="Double.AppOptionsControl.AppName.FontSize">50</sys:Double>
-	<sys:Double x:Key="Double.AppOptionsControl.MaxContentWidth">800</sys:Double>
-	<sys:Double x:Key="Double.AppOptionsControl.Group.Header.FontSize">30</sys:Double>
-	<sys:Double x:Key="Double.AppOptionsControl.Item.Label.FontSize">16</sys:Double>
-	<sys:Double x:Key="Double.AppOptionsControl.Item.Value.ComboBox.MinWidth">170</sys:Double>
-	<Thickness x:Key="Thickness.AppOptionsControl.AppIcon.Margin">0,0,20,0</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.AppName.Margin">0,0,0,0</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Attributions.Margin">0,20,0,0</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Attributions.TextSection.Margin">0,3,3,3</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Group.Header.Margin">0,0,0,5</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Group.Margin">0,40,0,0</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Item.Description.Margin">0,0,0,5</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Item.Label.Margin">0,15,0,5</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Item.Value.Margin">0,0,0,5</Thickness>
-	<Thickness x:Key="Thickness.AppOptionsControl.Padding">100,20,100,20</Thickness>
-	
-	<!-- Dialog -->
-	<sys:Double x:Key="Double.Dialog.ControlButton.MinWidth">80</sys:Double>
-	<Thickness x:Key="Thickness.Dialog.BorderThickness">1</Thickness>
-	<Thickness x:Key="Thickness.Dialog.ControlButton.Margin">5,10,5,0</Thickness>
-	<Thickness x:Key="Thickness.Dialog.Label.Vertical">0,5,0,5</Thickness>
-	<Thickness x:Key="Thickness.Dialog.Label.Vertical.First">0,0,0,5</Thickness>
-	<Thickness x:Key="Thickness.Dialog.Padding">20</Thickness>
+	<sys:Double x:Key="Double/AppOptionsControl.AppIcon.Size">100</sys:Double>
+	<sys:Double x:Key="Double/AppOptionsControl.AppName.FontSize">50</sys:Double>
+	<sys:Double x:Key="Double/AppOptionsControl.MaxContentWidth">800</sys:Double>
+	<sys:Double x:Key="Double/AppOptionsControl.Group.Header.FontSize">30</sys:Double>
+	<sys:Double x:Key="Double/AppOptionsControl.Item.Label.FontSize">16</sys:Double>
+	<sys:Double x:Key="Double/AppOptionsControl.Item.Value.ComboBox.MinWidth">170</sys:Double>
+	<Thickness x:Key="Thickness/AppOptionsControl.AppIcon.Margin">0,0,20,0</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.AppName.Margin">0,0,0,0</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Attributions.Margin">0,20,0,0</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Attributions.TextSection.Margin">0,3,3,3</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Group.Header.Margin">0,0,0,5</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Group.Margin">0,40,0,0</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Item.Description.Margin">0,0,0,5</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Item.Label.Margin">0,15,0,5</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Item.Value.Margin">0,0,0,5</Thickness>
+	<Thickness x:Key="Thickness/AppOptionsControl.Padding">100,20,100,20</Thickness>
 	
 	<!-- GridSplitter -->
-	<GridLength x:Key="GridLength.GridSplitter.Thickness">5</GridLength>
+	<GridLength x:Key="GridLength/GridSplitter.Thickness">5</GridLength>
 
 	<!-- MainWindow -->
-	<sys:Double x:Key="Double.MainWindow.MainTabItem.CloseButton.IconSize">14</sys:Double>
-	<sys:Double x:Key="Double.MainWindow.MainTabItem.IconSize">20</sys:Double>
-	<Thickness x:Key="Thickness.MainWindow.MainTabItem.CloseButton.Margin">10,0,0,0</Thickness>
-	<Thickness x:Key="Thickness.MainWindow.MainTabItem.CloseButton.Padding">5</Thickness>
-	<Thickness x:Key="Thickness.MainWindow.MainTabItem.Header.Padding">10,0,10,0</Thickness>
+	<sys:Double x:Key="Double/MainWindow.MainTabItem.CloseButton.IconSize">14</sys:Double>
+	<sys:Double x:Key="Double/MainWindow.MainTabItem.IconSize">20</sys:Double>
+	<Thickness x:Key="Thickness/MainWindow.MainTabItem.CloseButton.Margin">10,0,0,0</Thickness>
+	<Thickness x:Key="Thickness/MainWindow.MainTabItem.CloseButton.Padding">5</Thickness>
+	<Thickness x:Key="Thickness/MainWindow.MainTabItem.Header.Padding">10,0,10,0</Thickness>
 
 	<!-- MessageDialog -->
-	<sys:Double x:Key="Double.MessageDialog.IconSize">30</sys:Double>
-	<sys:Double x:Key="Double.MessageDialog.MinWidth">300</sys:Double>
-	<Thickness x:Key="Thickness.MessageDialog.Icon.Margin">0,0,20,0</Thickness>
+	<sys:Double x:Key="Double/MessageDialog.IconSize">30</sys:Double>
+	<sys:Double x:Key="Double/MessageDialog.MinWidth">300</sys:Double>
+	<Thickness x:Key="Thickness/MessageDialog.Icon.Margin">0,0,20,0</Thickness>
 
 	<!-- ProcessingDialog -->
-	<sys:Double x:Key="Double.ProcessingDialog.Width">300</sys:Double>
-	<Thickness x:Key="Thickness.ProcessingDialog.ProgressBar.Margin">0,10,0,10</Thickness>
+	<sys:Double x:Key="Double/ProcessingDialog.Width">300</sys:Double>
+	<Thickness x:Key="Thickness/ProcessingDialog.ProgressBar.Margin">0,10,0,10</Thickness>
 
 	<!-- SessionControl -->
-	<CornerRadius x:Key="CornerRadius.SessionControl.ImageToolBar.CornerRadius">10</CornerRadius>
-	<sys:Double x:Key="Double.SessionControl.ImageToolBar.IconSize">32</sys:Double>
-	<sys:Double x:Key="Double.SessionControl.OptionsPanel.SeparatorSize">15</sys:Double>
-	<sys:Double x:Key="Double.SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
-	<sys:Double x:Key="Double.SessionControl.StatusBar.FontSize">10</sys:Double>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.Button.Margin">1,0,1,0</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.Button.Padding">10</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.Margin">10,0,10,30</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.Padding">10</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.Separator.Margin">5,10,5,10</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.TextBlock.Margin">1,0,1,0</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageToolBar.TextBlock.Padding">10,0,10,0</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.ImageViewer.Padding">20,20,20,122</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.OptionsPanel.Padding">10</Thickness>
-	<Thickness x:Key="Thickness.SessionControl.StatusBar.Padding">10</Thickness>
+	<CornerRadius x:Key="CornerRadius/SessionControl.ImageToolBar.CornerRadius">10</CornerRadius>
+	<sys:Double x:Key="Double/SessionControl.ImageToolBar.IconSize">32</sys:Double>
+	<sys:Double x:Key="Double/SessionControl.OptionsPanel.SeparatorSize">15</sys:Double>
+	<sys:Double x:Key="Double/SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
+	<sys:Double x:Key="Double/SessionControl.StatusBar.FontSize">10</sys:Double>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Button.Margin">1,0,1,0</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Button.Padding">10</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Margin">10,0,10,30</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Padding">10</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Separator.Margin">5,10,5,10</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.TextBlock.Margin">1,0,1,0</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageToolBar.TextBlock.Padding">10,0,10,0</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20,20,20,122</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">10</Thickness>
+	<Thickness x:Key="Thickness/SessionControl.StatusBar.Padding">10</Thickness>
 
 	<!-- TextInputDialog -->
-	<sys:Double x:Key="Double.TextInputDialog.Width">400</sys:Double>
+	<sys:Double x:Key="Double/TextInputDialog.Width">400</sys:Double>
 
 </ResourceDictionary>

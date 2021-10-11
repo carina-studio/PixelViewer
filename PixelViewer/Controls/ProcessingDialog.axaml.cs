@@ -1,5 +1,4 @@
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 
 namespace Carina.PixelViewer.Controls
@@ -7,7 +6,7 @@ namespace Carina.PixelViewer.Controls
 	/// <summary>
 	/// Dialog to indicate the job or task is on-going.
 	/// </summary>
-	class ProcessingDialog : Dialog
+	class ProcessingDialog : CarinaStudio.AppSuite.Controls.Dialog
 	{
 		/// <summary>
 		/// Property of <see cref="Message"/>.
@@ -21,17 +20,11 @@ namespace Carina.PixelViewer.Controls
 		public ProcessingDialog()
 		{
 			InitializeComponent();
-#if DEBUG
-			this.AttachDevTools();
-#endif
 		}
 
 
 		// Initialize avalonia components.
-		private void InitializeComponent()
-		{
-			AvaloniaXamlLoader.Load(this);
-		}
+		private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
 		/// <summary>

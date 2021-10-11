@@ -1,95 +1,90 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ResourceDictionary xmlns="https://github.com/avaloniaui" 
-										xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-										xmlns:sys="clr-namespace:System;assembly=mscorlib">
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 	<!-- AppOptionsControl -->
-	<sys:String x:Key="String.AppOptionsControl.Attribution.AppIcon.Section1" xml:space="preserve">Application icon is made by</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.Attribution.AppIcon.Section2" xml:space="preserve">from</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.Attribution.AppIcon.Section3" xml:space="preserve">.</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section1" xml:space="preserve">Powered by</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section2" xml:space="preserve">and</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.Attribution.Framework.Section3" xml:space="preserve">.</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.AutoSelectLanguage">Select language automatically</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.DarkMode">Dark mode</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.DefaultImageRendererFormatName">Default format</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.ImageFormat">Image format</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.MemoryUsage">Memory usage</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.Other">Other</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.PrivacyPolicy" xml:space="preserve">Privacy Policy</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.RestartMainWindowToTakeEffect">Restart window to take effect</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.SourceCode" xml:space="preserve">Source code on GitHub</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.UserInterface">User interface</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.VersionName">Version {0}</sys:String>
-	<sys:String x:Key="String.AppOptionsControl.YuvConversionMode">YUV to RGB conversion</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section1" xml:space="preserve">Application icon is made by</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section2" xml:space="preserve">from</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section3" xml:space="preserve">.</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section1" xml:space="preserve">Powered by</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section2" xml:space="preserve">and</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section3" xml:space="preserve">.</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.AutoSelectLanguage">Select language automatically</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.DarkMode">Dark mode</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.DefaultImageRendererFormatName">Default format</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.ImageFormat">Image format</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.MemoryUsage">Memory usage</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.Other">Other</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.PrivacyPolicy" xml:space="preserve">Privacy Policy</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.RestartMainWindowToTakeEffect">Restart window to take effect</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.SourceCode" xml:space="preserve">Source code on GitHub</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.UserInterface">User interface</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.VersionName">Version {0}</sys:String>
+	<sys:String x:Key="String/AppOptionsControl.YuvConversionMode">YUV to RGB conversion</sys:String>
 
 	<!-- AspectRatio -->
-	<sys:String x:Key="String.AspectRatio.Unknown">&lt;Unspecified&gt;</sys:String>
+	<sys:String x:Key="String/AspectRatio.Unknown">&lt;Unspecified&gt;</sys:String>
 	
 	<!-- Common -->
-	<sys:String x:Key="String.Common.Cancel">Cancel</sys:String>
-	<sys:String x:Key="String.Common.Delete">Delete</sys:String>
-	<sys:String x:Key="String.Common.KnowMoreAbout">Know more about</sys:String>
-	<sys:String x:Key="String.Common.No">No</sys:String>
-	<sys:String x:Key="String.Common.OK">OK</sys:String>
-	<sys:String x:Key="String.Common.Options">Options</sys:String>
-	<sys:String x:Key="String.Common.Rename">Rename</sys:String>
-	<sys:String x:Key="String.Common.Yes">Yes</sys:String>
+	<sys:String x:Key="String/Common.KnowMoreAbout">Know more about</sys:String>
+	<sys:String x:Key="String/Common.Options">Options</sys:String>
+	<sys:String x:Key="String/Common.Rename">Rename</sys:String>
 
 	<!-- FileType -->
-	<sys:String x:Key="String.FileType.All">All files</sys:String>
-	<sys:String x:Key="String.FileType.Png">PNG image</sys:String>
+	<sys:String x:Key="String/FileType.All">All files</sys:String>
+	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
 
 	<!-- MainWindow -->
-	<sys:String x:Key="String.MainWindow.AppUpdateFound">Application update is available. Do you want to go to the download page?</sys:String>
-	<sys:String x:Key="String.MainWindow.CloseSession">Close this tab</sys:String>
-	<sys:String x:Key="String.MainWindow.NewSession">Add new tab</sys:String>
+	<sys:String x:Key="String/MainWindow.AppUpdateFound">Application update is available. Do you want to go to the download page?</sys:String>
+	<sys:String x:Key="String/MainWindow.CloseSession">Close this tab</sys:String>
+	<sys:String x:Key="String/MainWindow.NewSession">Add new tab</sys:String>
 
 	<!-- Session -->
-	<sys:String x:Key="String.Session.EmptyTitle">(No image)</sys:String>
+	<sys:String x:Key="String/Session.EmptyTitle">(No image)</sys:String>
 
 	<!-- SessionControl -->
-	<sys:String x:Key="String.SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
-	<sys:String x:Key="String.SessionControl.DeleteProfile">Delete profile</sys:String>
-	<sys:String x:Key="String.SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>
-	<sys:String x:Key="String.SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
-	<sys:String x:Key="String.SessionControl.DuplicateNameOfProfile">Profile '{0}' is existent.</sys:String>
-	<sys:String x:Key="String.SessionControl.EffectiveBits">Effective bits</sys:String>
-	<sys:String x:Key="String.SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
-	<sys:String x:Key="String.SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
-	<sys:String x:Key="String.SessionControl.ImageDimensions">Dimensions (px)</sys:String>
-	<sys:String x:Key="String.SessionControl.ImagePlaneOptions.1">Plane #1</sys:String>
-	<sys:String x:Key="String.SessionControl.ImagePlaneOptions.2">Plane #2</sys:String>
-	<sys:String x:Key="String.SessionControl.ImagePlaneOptions.3">Plane #3</sys:String>
-	<sys:String x:Key="String.SessionControl.ImageRenderer">Format</sys:String>
-	<sys:String x:Key="String.SessionControl.InputNameOfProfile">Name of profile:</sys:String>
-	<sys:String x:Key="String.SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in options page.</sys:String>
-	<sys:String x:Key="String.SessionControl.NoSourceFileOpened">No image file opened</sys:String>
-	<sys:String x:Key="String.SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
-	<sys:String x:Key="String.SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
-	<sys:String x:Key="String.SessionControl.Profile">Profile</sys:String>
-	<sys:String x:Key="String.SessionControl.RenderingImage">Rendering</sys:String>
-	<sys:String x:Key="String.SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
-	<sys:String x:Key="String.SessionControl.RotateRight">Rotate clockwise</sys:String>
-	<sys:String x:Key="String.SessionControl.RowStride">Row-stride (bytes)</sys:String>
-	<sys:String x:Key="String.SessionControl.SaveAsNewProfile">Save as new profile</sys:String>
-	<sys:String x:Key="String.SessionControl.SaveProfile">Save profile</sys:String>
-	<sys:String x:Key="String.SessionControl.SaveRenderedImage">Save rendered image (Ctrl+S)</sys:String>
-	<sys:String x:Key="String.SessionControl.SavingRenderedImage">Saving rendered image...</sys:String>
-	<sys:String x:Key="String.SessionControl.SelectedRenderecImagePixelColor">Color: </sys:String>
-	<sys:String x:Key="String.SessionControl.SelectedRenderecImagePixelPosition">Position: </sys:String>
-	<sys:String x:Key="String.SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
-	<sys:String x:Key="String.SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
+	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
+	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete profile</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
+	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">Profile '{0}' is existent.</sys:String>
+	<sys:String x:Key="String/SessionControl.EffectiveBits">Effective bits</sys:String>
+	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
+	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageDimensions">Dimensions (px)</sys:String>
+	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">Plane #1</sys:String>
+	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">Plane #2</sys:String>
+	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">Plane #3</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageRenderer">Format</sys:String>
+	<sys:String x:Key="String/SessionControl.InputNameOfProfile">Name of profile:</sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in options page.</sys:String>
+	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No image file opened</sys:String>
+	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
+	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering</sys:String>
+	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
+	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
+	<sys:String x:Key="String/SessionControl.RowStride">Row-stride (bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as new profile</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveRenderedImage">Save rendered image (Ctrl+S)</sys:String>
+	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image...</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">Color: </sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">Position: </sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 
 	<!-- YuvConversionMode -->
-	<sys:String x:Key="String.YuvConversionMode.ITU_R">ITU-R</sys:String>
-	<sys:String x:Key="String.YuvConversionMode.NTSC">NTSC</sys:String>
+	<sys:String x:Key="String/YuvConversionMode.ITU_R">ITU-R</sys:String>
+	<sys:String x:Key="String/YuvConversionMode.NTSC">NTSC</sys:String>
 
 </ResourceDictionary>

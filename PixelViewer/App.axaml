@@ -7,14 +7,8 @@
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceInclude Source="/Resources/Default.xaml"/>
-				<ResourceInclude Source="/Strings/Default.xaml"/>
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Application.Resources>
-
-	<!-- Styles -->
-	<Application.Styles>
-		<!--StyleInclude Source="/Styles/Dark.xaml"/-->
-	</Application.Styles>
 	
 </Application>

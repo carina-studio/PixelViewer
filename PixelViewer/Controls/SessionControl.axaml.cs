@@ -12,8 +12,8 @@ using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Windows.Input;
 using NLog;
-using ReactiveUI;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -60,10 +60,10 @@ namespace Carina.PixelViewer.Controls
 		public SessionControl()
 		{
 			// create commands
-			this.OpenSourceFileCommand = ReactiveCommand.Create(this.OpenSourceFile, this.canOpenSourceFile);
-			this.SaveAsNewProfileCommand = ReactiveCommand.Create(() => this.SaveAsNewProfile(), this.canSaveAsNewProfile);
-			this.SaveRenderedImageCommand = ReactiveCommand.Create(() => this.SaveRenderedImage(), this.canSaveRenderedImage);
-			this.ShowEvaluateImageDimensionsMenuCommand = ReactiveCommand.Create(() =>
+			this.OpenSourceFileCommand = new Command(this.OpenSourceFile, this.canOpenSourceFile);
+			this.SaveAsNewProfileCommand = new Command(() => this.SaveAsNewProfile(), this.canSaveAsNewProfile);
+			this.SaveRenderedImageCommand = new Command(() => this.SaveRenderedImage(), this.canSaveRenderedImage);
+			this.ShowEvaluateImageDimensionsMenuCommand = new Command(() =>
 			{
 				this.evaluateImageDimensionsMenu?.Open(this);
 			}, this.canShowEvaluateImageDimensionsMenu);
@@ -413,11 +413,11 @@ namespace Carina.PixelViewer.Controls
 			while (true)
 			{
 				// input name
-				name = await new TextInputDialog()
+				name = await new CarinaStudio.AppSuite.Controls.TextInputDialog()
 				{
-					Description = App.Current.GetString("SessionControl.InputNameOfProfile"),
 					InitialText = name,
-				}.ShowDialog<string>(window);
+					Message = App.Current.GetString("SessionControl.InputNameOfProfile"),
+				}.ShowDialog(window);
 				if (string.IsNullOrWhiteSpace(name))
 					return;
 
@@ -426,9 +426,9 @@ namespace Carina.PixelViewer.Controls
 					break;
 
 				// show message for duplicate name
-				await new MessageDialog()
+				await new CarinaStudio.AppSuite.Controls.MessageDialog()
 				{
-					Icon = MessageDialogIcon.Warning,
+					Icon = CarinaStudio.AppSuite.Controls.MessageDialogIcon.Warning,
 					Message = string.Format(App.Current.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
 				}.ShowDialog(window);
 			}

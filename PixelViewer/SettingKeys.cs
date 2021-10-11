@@ -1,20 +1,23 @@
 ﻿using Carina.PixelViewer.Media;
 using CarinaStudio.Configuration;
 using System;
-namespace Carina.PixelViewer.Configuration
+
+namespace Carina.PixelViewer
 {
-	/// <summary>
-	/// Application settings.
-	/// </summary>
-	class Settings : BaseSettings
-	{
+    /// <summary>
+    /// Keys of setting.
+    /// </summary>
+    static class SettingKeys
+    {
 		/// <summary>
 		/// Select language automatically.
 		/// </summary>
+		[Obsolete]
 		public static readonly SettingKey<bool> AutoSelectLanguage = new SettingKey<bool>(nameof(AutoSelectLanguage), true);
 		/// <summary>
 		/// Use dark interface mode.
 		/// </summary>
+		[Obsolete]
 		public static readonly SettingKey<bool> DarkMode = new SettingKey<bool>(nameof(DarkMode), true);
 		/// <summary>
 		/// Default aspect ratio for image dimensions evaluation.
@@ -56,21 +59,5 @@ namespace Carina.PixelViewer.Configuration
 		/// YUV to RGB conversion mode.
 		/// </summary>
 		public static readonly SettingKey<YuvConversionMode> YuvConversionMode = new SettingKey<YuvConversionMode>(nameof(YuvConversionMode), Media.YuvConversionMode.NTSC);
-
-
-		/// <summary>
-		/// Initialize new <see cref="Settings"/> instance.
-		/// </summary>
-		public Settings() : base(JsonSettingsSerializer.Default)
-		{ }
-
-
-		// Upgrade settings.
-		protected override void OnUpgrade(int oldVersion)
-		{ }
-
-
-		// Version.
-		protected override int Version => 1;
 	}
 }

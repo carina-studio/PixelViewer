@@ -2,45 +2,46 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-						 xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
-						 xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
-						 xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
-						 xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
+			 xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+             xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
+             xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
+             xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
+             xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.AppOptionsControl">
 
 	<ScrollViewer HorizontalContentAlignment="Center">
-		<StackPanel Margin="{StaticResource Thickness.AppOptionsControl.Padding}" MaxWidth="{StaticResource Double.AppOptionsControl.MaxContentWidth}" Orientation="Vertical">
+		<StackPanel Margin="{DynamicResource Thickness/AppOptionsControl.Padding}" MaxWidth="{DynamicResource Double/AppOptionsControl.MaxContentWidth}" Orientation="Vertical">
 
 			<!-- App logo -->
 			<Grid ColumnDefinitions="Auto,*" HorizontalAlignment="Stretch">
-				<Image x:Name="appIcon" Height="{StaticResource Double.AppOptionsControl.AppIcon.Size}" Margin="{StaticResource Thickness.AppOptionsControl.AppIcon.Margin}" VerticalAlignment="Center" Width="{StaticResource Double.AppOptionsControl.AppIcon.Size}"/>
+				<Image x:Name="appIcon" Height="{DynamicResource Double/AppOptionsControl.AppIcon.Size}" Margin="{DynamicResource Thickness/AppOptionsControl.AppIcon.Margin}" VerticalAlignment="Center" Width="{DynamicResource Double/AppOptionsControl.AppIcon.Size}"/>
 				<StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Center">
-					<TextBlock FontSize="{StaticResource Double.AppOptionsControl.AppName.FontSize}" FontWeight="Bold" Margin="{StaticResource Thickness.AppOptionsControl.AppName.Margin}" Text="PixelViewer"/>
+					<TextBlock FontSize="{DynamicResource Double/AppOptionsControl.AppName.FontSize}" FontWeight="Bold" Margin="{DynamicResource Thickness/AppOptionsControl.AppName.Margin}" Text="PixelViewer"/>
 					<TextBlock Text="{Binding VersionString}"/>
 					<TextBlock Text="©2021 Carina Studio"/>
 				</StackPanel>
 			</Grid>
 
 			<!-- Attributions -->
-			<StackPanel Margin="{StaticResource Thickness.AppOptionsControl.Attributions.Margin}" Orientation="Vertical">
+			<StackPanel Margin="{DynamicResource Thickness/AppOptionsControl.Attributions.Margin}" Orientation="Vertical">
 
 				<!-- Framework -->
 				<StackPanel Orientation="Horizontal">
-					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.Framework.Section1}"/>
-					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://dotnet.microsoft.com/" Text=".NET Core"/>
-					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.Framework.Section2}"/>
-					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://avaloniaui.net/" Text="Avalonia UI Framework"/>
-					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.Framework.Section3}"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String/AppOptionsControl.Attribution.Framework.Section1}"/>
+					<asControls:LinkTextBlock Classes="AppOptionsControl_Attribution_Link" Text=".NET" Uri="https://dotnet.microsoft.com/"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String/AppOptionsControl.Attribution.Framework.Section2}"/>
+					<asControls:LinkTextBlock Classes="AppOptionsControl_Attribution_Link" Text="Avalonia UI Framework" Uri="https://avaloniaui.net/"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String/AppOptionsControl.Attribution.Framework.Section3}"/>
 				</StackPanel>
 
 				<!-- Icon -->
 				<StackPanel Orientation="Horizontal">
-					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.AppIcon.Section1}"/>
-					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://www.freepik.com/" Text="Freepik"/>
-					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.AppIcon.Section2}"/>
-					<TextBlock Classes="AppOptionsControl_Attribution_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://www.flaticon.com/" Text="Flaticon"/>
-					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String.AppOptionsControl.Attribution.AppIcon.Section3}"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String/AppOptionsControl.Attribution.AppIcon.Section1}"/>
+					<asControls:LinkTextBlock Classes="AppOptionsControl_Attribution_Link" Text="Freepik" Uri="https://www.freepik.com/"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String/AppOptionsControl.Attribution.AppIcon.Section2}"/>
+					<asControls:LinkTextBlock Classes="AppOptionsControl_Attribution_Link" Text="Flaticon" Uri="https://www.flaticon.com/"/>
+					<TextBlock Classes="AppOptionsControl_Attribution" Text="{DynamicResource String/AppOptionsControl.Attribution.AppIcon.Section3}"/>
 				</StackPanel>
 
 			</StackPanel>
@@ -49,10 +50,10 @@
 			<StackPanel Classes="AppOptionsControl_Group">
 
 				<!-- Header -->
-				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.ImageFormat}"/>
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String/AppOptionsControl.ImageFormat}"/>
 
 				<!-- Default renderer -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DefaultImageRendererFormatName}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.DefaultImageRendererFormatName}"/>
 				<ComboBox Classes="AppOptionsControl_ItemValue" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
 					<ComboBox.DataTemplates>
 						<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
@@ -62,11 +63,11 @@
 				</ComboBox>
 
 				<!-- Reset renderer after opening file -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>
 
 				<!-- YUV conversion mode -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.YuvConversionMode}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.YuvConversionMode}"/>
 				<ComboBox Classes="AppOptionsControl_ItemValue" Items="{Binding YuvConversionModes}" SelectedItem="{Binding YuvConversionMode, Mode=TwoWay}">
 					<ComboBox.DataTemplates>
 						<DataTemplate DataType="appMedia:YuvConversionMode">
@@ -74,7 +75,7 @@
 						</DataTemplate>
 					</ComboBox.DataTemplates>
 				</ComboBox>
-				<TextBlock Classes="AppOptionsControl_ItemDescription_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://en.wikipedia.org/wiki/YUV" Text="{DynamicResource String.Common.KnowMoreAbout}"/>
+				<asControls:LinkTextBlock Classes="AppOptionsControl_ItemDescription_Link" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
 				
 			</StackPanel>
 
@@ -82,10 +83,10 @@
 			<StackPanel Classes="AppOptionsControl_Group">
 
 				<!-- Header -->
-				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.ImageDimensionsEvaluation}"/>
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String/AppOptionsControl.ImageDimensionsEvaluation}"/>
 
 				<!-- Default aspect ratio -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio}"/>
 				<ComboBox Classes="AppOptionsControl_ItemValue" Items="{Binding AspectRatios}" SelectedItem="{Binding DefaultImageDimensionsEvaluationAspectRatio, Mode=TwoWay}">
 					<ComboBox.DataTemplates>
 						<DataTemplate DataType="appMedia:AspectRatio">
@@ -93,14 +94,14 @@
 						</DataTemplate>
 					</ComboBox.DataTemplates>
 				</ComboBox>
-				<TextBlock Classes="AppOptionsControl_ItemDescription" Text="{DynamicResource String.AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description}"/>
+				<TextBlock Classes="AppOptionsControl_ItemDescription" Text="{DynamicResource String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description}"/>
 
 				<!-- Evaluate after opening file -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding EvaluateImageDimensionsAfterOpeningSourceFile, Mode=TwoWay}"/>
 
 				<!-- Evaluate after changing renderer -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
 				
 			</StackPanel>
@@ -109,15 +110,15 @@
 			<StackPanel Classes="AppOptionsControl_Group">
 
 				<!-- Header -->
-				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.UserInterface}"/>
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String/AppOptionsControl.UserInterface}"/>
 
 				<!-- Dark mode -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.DarkMode}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.DarkMode}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding DarkMode, Mode=TwoWay}"/>
-				<TextBlock Classes="AppOptionsControl_ItemDescription_Link" IsVisible="{Binding IsRestartingMainWindowNeededToApplyDarkMode}" PointerReleased="OnLinkTextBlockPointerReleased" Tag="{Binding RestartMainWindowCommand}" Text="{DynamicResource String.AppOptionsControl.RestartMainWindowToTakeEffect}"/>
+				<asControls:LinkTextBlock Classes="AppOptionsControl_ItemDescription_Link" Command="{Binding RestartMainWindowCommand}" IsVisible="{Binding IsRestartingMainWindowNeededToApplyDarkMode}" Text="{DynamicResource String/AppOptionsControl.RestartMainWindowToTakeEffect}"/>
 
 				<!-- Select language automatically -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.AutoSelectLanguage}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.AutoSelectLanguage}"/>
 				<ToggleSwitch Classes="AppOptionsControl_ItemValue" IsChecked="{Binding AutoSelectLanguage, Mode=TwoWay}"/>
 				
 			</StackPanel>
@@ -126,10 +127,10 @@
 			<StackPanel Classes="AppOptionsControl_Group">
 
 				<!-- Header -->
-				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.MemoryUsage}"/>
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String/AppOptionsControl.MemoryUsage}"/>
 
 				<!-- Max rendered images memory usage -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String.AppOptionsControl.MaxRenderedImagesMemoryUsage}"/>
+				<TextBlock Classes="AppOptionsControl_ItemLabel" Text="{DynamicResource String/AppOptionsControl.MaxRenderedImagesMemoryUsage}"/>
 				<NumericUpDown Classes="AppOptionsControl_ItemValue" Maximum="8192" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
 
 			</StackPanel>
@@ -138,13 +139,13 @@
 			<StackPanel Classes="AppOptionsControl_Group">
 
 				<!-- Header -->
-				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String.AppOptionsControl.Other}"/>
+				<TextBlock Classes="AppOptionsControl_GroupHeader" Text="{DynamicResource String/AppOptionsControl.Other}"/>
 
 				<!-- Source code -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://github.com/carina-studio/PixelViewer" Text="{DynamicResource String.AppOptionsControl.SourceCode}"/>
+				<asControls:LinkTextBlock Classes="AppOptionsControl_ItemLabel_Link" Text="{DynamicResource String/AppOptionsControl.SourceCode}" Uri="https://github.com/carina-studio/PixelViewer"/>
 
 				<!-- Privacy policy -->
-				<TextBlock Classes="AppOptionsControl_ItemLabel_Link" PointerReleased="OnLinkTextBlockPointerReleased" Tag="https://github.com/carina-studio/PixelViewer/blob/master/PRIVACY-POLICY.md" Text="{DynamicResource String.AppOptionsControl.PrivacyPolicy}"/>
+				<asControls:LinkTextBlock Classes="AppOptionsControl_ItemLabel_Link" Text="{DynamicResource String/AppOptionsControl.PrivacyPolicy}" Uri="https://github.com/carina-studio/PixelViewer/blob/master/PRIVACY-POLICY.md"/>
 
 			</StackPanel>
 			

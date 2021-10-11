@@ -4,18 +4,17 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ProcessingDialog"
-				Classes="Dialog"
-				SizeToContent="Height"
-				Width="{StaticResource Double.ProcessingDialog.Width}">
+        Classes="Dialog"
+        Width="{DynamicResource Double/ProcessingDialog.Width}">
 
-	<Border Classes="Dialog">
+	<Border Classes="Dialog_ContentPanel">
 		<Grid RowDefinitions="Auto,Auto,Auto">
 
 			<!-- Message -->
 			<TextBlock MaxLines="1" Text="{Binding $parent[Window].Message}" TextTrimming="CharacterEllipsis"/>
 
 			<!-- Progress bar-->
-			<ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" IsIndeterminate="True" Margin="{StaticResource Thickness.ProcessingDialog.ProgressBar.Margin}"/>
+			<ProgressBar Grid.Row="1" HorizontalAlignment="Stretch" IsIndeterminate="True" Margin="{DynamicResource Thickness/ProcessingDialog.ProgressBar.Margin}"/>
 
 			<!-- Padding-->
 			<TextBlock Grid.Row="2" Text=" "/>

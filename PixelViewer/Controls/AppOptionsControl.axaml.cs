@@ -57,21 +57,5 @@ namespace Carina.PixelViewer.Controls
 			}
 			this.FindControl<Image>("appIcon").AsNonNull().Source = appIcon;
 		}
-
-
-		// Called when text block for link clicked.
-		void OnLinkTextBlockPointerReleased(object sender, PointerReleasedEventArgs e)
-		{
-			if (e.InitialPressMouseButton != Avalonia.Input.MouseButton.Left)
-				return;
-			if (sender is not TextBlock textBlock)
-				return;
-			if (this.DataContext is not AppOptions appOptions)
-				return;
-			if (textBlock.Tag is string uri)
-				appOptions.OpenLinkCommand.Execute(uri);
-			else if (textBlock.Tag is ICommand command)
-				command.Execute(null);
-		}
 	}
 }

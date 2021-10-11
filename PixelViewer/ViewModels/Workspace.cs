@@ -1,30 +1,31 @@
 ﻿using Carina.PixelViewer.Input;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
+using CarinaStudio.AppSuite.ViewModels;
+using CarinaStudio.Collections;
 using CarinaStudio.Threading;
-using ReactiveUI;
+using CarinaStudio.ViewModels;
+using CarinaStudio.Windows.Input;
+using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Windows.Input;
 
 namespace Carina.PixelViewer.ViewModels
 {
 	/// <summary>
 	/// Workspace.
 	/// </summary>
-	class Workspace : BaseViewModel
+	class Workspace : MainWindowViewModel
 	{
+		/// <summary>
+		/// Property of <see cref="ActivatedSession"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Session?> ActivatedSessionProperty = ObservableProperty.Register<Workspace, Session?>(nameof(ActivatedSession));
+
+
 		// Fields.
-		readonly ObservableCollection<Session> activatedSessions = new ObservableCollection<Session>();
-		readonly MutableObservableBoolean isAppUpdateAvailable = new MutableObservableBoolean();
-		readonly ReadOnlyObservableCollection<Session> readOnlyActivatedSessions;
-		readonly ReadOnlyObservableCollection<Session> readOnlySessions;
-		readonly ObservableCollection<Session> sessions = new ObservableCollection<Session>();
-		readonly ScheduledAction updateTitleOperation;
-		readonly MutableObservableString title = new MutableObservableString();
+		readonly ObservableList<Session> sessions = new ObservableList<Session>();
 
 
 		/// <summary>
@@ -32,85 +33,50 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public Workspace()
 		{
-			// create commands
-			this.IgnoreAppUpdateCommand = ReactiveCommand.Create(this.IgnoreAppUpdate, this.isAppUpdateAvailable);
-			this.UpdateAppCommand = ReactiveCommand.Create(this.UpdateApp, this.isAppUpdateAvailable);
-
-			// create read-only collections
-			this.readOnlyActivatedSessions = new ReadOnlyObservableCollection<Session>(this.activatedSessions);
-			this.readOnlySessions = new ReadOnlyObservableCollection<Session>(this.sessions);
-
-			// create scheduled operations
-			this.updateTitleOperation = new ScheduledAction(this.UpdateTitle);
-
-			// observe property values
-			this.ObservePropertyValue(this.isAppUpdateAvailable, nameof(this.IsAppUpdateAvailable));
-			this.ObservePropertyValue(this.title, nameof(this.Title));
-
-			// attach to App
-			App.Current.Let((app) =>
-			{
-				app.UpdateInfoChanged += this.OnAppUpdateInfoChanged;
-				this.OnAppUpdateInfoChanged(app, EventArgs.Empty);
-			});
-
-			// setup initial title
-			this.UpdateTitle();
+			this.AppOptions = new AppOptions(this);
+			this.Sessions = this.sessions.AsReadOnly();
 		}
 
 
 		/// <summary>
-		/// Get all activated <see cref="Session"/>s.
+		/// Get or set activated session.
 		/// </summary>
-		public ReadOnlyObservableCollection<Session> ActivatedSessions { get => this.readOnlyActivatedSessions; }
-
-
-		/// <summary>
-		/// Activate given session.
-		/// </summary>
-		/// <param name="session">Session to activate.</param>
-		public void ActivateSession(Session session)
+		public Session? ActivatedSession
 		{
-			// check state
-			this.VerifyAccess();
-			this.ThrowIfDisposed();
-			if (!this.sessions.Contains(session))
-				throw new ArgumentException($"Invalid session: {session}.");
-			if (this.activatedSessions.Contains(session))
-				return;
-
-			// activate
-			this.activatedSessions.Add(session);
-			this.Logger.Debug($"Activate session {session}, count: {this.activatedSessions.Count}");
-			this.updateTitleOperation.Schedule();
+			get => this.GetValue(ActivatedSessionProperty);
+			set => this.SetValue(ActivatedSessionProperty, value);
 		}
 
 
 		/// <summary>
 		/// Get <see cref="AppOptions"/> view-model.
 		/// </summary>
-		public AppOptions AppOptions { get; } = new AppOptions();
+		public AppOptions AppOptions { get; } 
 
 
 		/// <summary>
 		/// Close given session.
 		/// </summary>
 		/// <param name="session">Session to close.</param>
-		public void CloseSession(Session session)
+		public async void CloseSession(Session session)
 		{
 			// check state
 			this.VerifyAccess();
-			this.ThrowIfDisposed();
+			this.VerifyDisposed();
 			if (!this.sessions.Contains(session))
 				throw new ArgumentException($"Unknown session {session} to close.");
 
 			// deactivate
-			this.DeactivateSession(session);
+			if (this.ActivatedSession == session)
+				this.ActivatedSession = null;
 
-			// close session
+			// detach
 			session.PropertyChanged -= this.OnSessionPropertyChanged;
 			this.sessions.Remove(session);
-			this.Logger.Debug($"Close session {session}, count: {this.sessions.Count}");
+			this.Logger.LogDebug($"Close session {session}, count: {this.sessions.Count}");
+
+			// wait for completion
+			await this.WaitForNecessaryTaskAsync(session.WaitForNecessaryTasksAsync());
 
 			// dispose session
 			session.Dispose();
@@ -126,20 +92,20 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// check state
 			this.VerifyAccess();
-			this.ThrowIfDisposed();
+			this.VerifyDisposed();
 
 			// create session
-			var session = new Session();
+			var session = new Session(this);
 			session.PropertyChanged += this.OnSessionPropertyChanged;
 			this.sessions.Add(session);
-			this.Logger.Debug($"Create session {session}, count: {this.sessions.Count}");
+			this.Logger.LogDebug($"Create session {session}, count: {this.sessions.Count}");
 
 			// open file
 			if (fileName != null)
 			{
-				this.Logger.Debug($"Open '{fileName}' after creating {session}");
+				this.Logger.LogDebug($"Open '{fileName}' after creating {session}");
 				if (!session.OpenSourceFileCommand.TryExecute(fileName))
-					this.Logger.Error($"Unable to open '{fileName}' after creating {session}");
+					this.Logger.LogError($"Unable to open '{fileName}' after creating {session}");
 			}
 
 			// complete
@@ -147,28 +113,13 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
-		/// <summary>
-		/// Deactivate given session.
-		/// </summary>
-		/// <param name="session"><see cref="Session"/> to deactivate.</param>
-		public void DeactivateSession(Session session)
-		{
-			this.VerifyAccess();
-			if (!this.activatedSessions.Remove(session))
-				return;
-			this.Logger.Debug($"Deactivate session {session}, count: {this.activatedSessions.Count}");
-			this.updateTitleOperation.Schedule();
-		}
-
-
 		// Dispose.
 		protected override void Dispose(bool disposing)
 		{
 			// close all sessions
-			this.activatedSessions.Clear();
 			foreach (var session in this.sessions)
 			{
-				this.Logger.Warn($"Close session {session} when disposing workspace");
+				this.Logger.LogWarning($"Close session {session} when disposing workspace");
 				session.PropertyChanged -= this.OnSessionPropertyChanged;
 				session.Dispose();
 			}
@@ -177,124 +128,59 @@ namespace Carina.PixelViewer.ViewModels
 			// dispose app options
 			this.AppOptions.Dispose();
 
-			// detach from App
-			App.Current.UpdateInfoChanged -= this.OnAppUpdateInfoChanged;
-
 			// call base
 			base.Dispose(disposing);
 		}
 
 
-		// Ignore application update.
-		void IgnoreAppUpdate()
-		{
-			if (!this.isAppUpdateAvailable.Value)
-				return;
-			this.Logger.Warn("Ignore application update");
-			this.isAppUpdateAvailable.Update(false);
-		}
+		// Property changed.
+        protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
+        {
+            base.OnPropertyChanged(property, oldValue, newValue);
+			if (property == ActivatedSessionProperty)
+			{
+				// check value
+				var newSession = (newValue as Session);
+				if (newSession != null && !this.sessions.Contains(newSession))
+				{
+					this.Logger.LogError($"Invalid session: {newSession}");
+					this.SynchronizationContext.Post(() => this.ActivatedSession = null);
+					return;
+				}
+
+				// activate
+				if (newSession != null)
+					this.Logger.LogDebug($"Activate session {newSession}");
+				this.InvalidateTitle();
+			}
+        }
 
 
-		/// <summary>
-		/// Command to ignore application update.
-		/// </summary>
-		public ICommand IgnoreAppUpdateCommand { get; }
-
-
-		/// <summary>
-		/// Check whether application update is available or not.
-		/// </summary>
-		public bool IsAppUpdateAvailable { get => this.isAppUpdateAvailable.Value; }
-
-
-		// Called when app update info changed.
-		void OnAppUpdateInfoChanged(object? sender, EventArgs e)
-		{
-			this.isAppUpdateAvailable.Update(App.Current.UpdateInfo != null);
-		}
-
-
-		// Called when property of session changed.
-		void OnSessionPropertyChanged(object sender, PropertyChangedEventArgs e)
+        // Called when property of session changed.
+        void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
 			if (sender is not Session session)
 				return;
 			switch (e.PropertyName)
 			{
 				case nameof(Session.Title):
-					{
-						if (this.activatedSessions.Contains(session))
-							this.updateTitleOperation.Schedule();
-						break;
-					}
+					if (session == this.ActivatedSession)
+						this.InvalidateTitle();
+					break;
 			}
 		}
+
+
+		// Update title.
+        protected override string? OnUpdateTitle() => this.ActivatedSession?.Let(it =>
+		{
+			return $"PixelViewer - {it.Title}";
+		}) ?? "PixelViewer";
 
 
 		/// <summary>
 		/// Get all <see cref="Session"/>s.
 		/// </summary>
-		public ReadOnlyObservableCollection<Session> Sessions { get => this.readOnlySessions; }
-
-
-		// Update application.
-		void UpdateApp()
-		{
-			// check state
-			if (!this.isAppUpdateAvailable.Value)
-				return;
-			var updateInfo = App.Current.UpdateInfo;
-			if (updateInfo == null)
-			{
-				this.Logger.Error("No application update info");
-				return;
-			}
-
-			// update state
-			this.isAppUpdateAvailable.Update(false);
-
-			// open download link
-			this.Logger.Info("Open application update page");
-			try
-			{
-				if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-				{
-					Process.Start(new ProcessStartInfo("cmd", $"/c start {updateInfo.ReleasePageUri}")
-					{
-						CreateNoWindow = true
-					});
-				}
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-					Process.Start("xdg-open", updateInfo.ReleasePageUri.ToString());
-				else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-					Process.Start("open", updateInfo.ReleasePageUri.ToString());
-			}
-			catch (Exception ex)
-			{
-				this.Logger.Error(ex, $"Unable to open '{updateInfo.ReleasePageUri}' to update application");
-			}
-		}
-
-
-		/// <summary>
-		/// Command to update application.
-		/// </summary>
-		public ICommand UpdateAppCommand { get; }
-
-
-		// Update title.
-		void UpdateTitle()
-		{
-			if (this.activatedSessions.Count == 1)
-				this.title.Update($"PixelViewer - {this.activatedSessions[0].Title}");
-			else
-				this.title.Update("PixelViewer");
-		}
-
-
-		/// <summary>
-		/// Get title of workspace.
-		/// </summary>
-		public string? Title { get => this.title.Value; }
+		public IList<Session> Sessions { get; }
 	}
 }

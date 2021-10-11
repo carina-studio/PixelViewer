@@ -70,18 +70,18 @@
 		<PackageReference Include="Avalonia" Version="0.10.8" />
 		<PackageReference Include="Avalonia.Desktop" Version="0.10.8" />
 		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.8" />
-		<PackageReference Include="Avalonia.ReactiveUI" Version="0.10.8" />
 		<PackageReference Include="CarinaStudio.AppBase.Application" Version="0.27.3.1007" />
 		<PackageReference Include="CarinaStudio.AppBase.Application.Avalonia" Version="0.27.3.1007" />
 		<PackageReference Include="CarinaStudio.AppBase.AutoUpdate" Version="0.27.3.1007" />
 		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.27.3.1007" />
 		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.13.0.1009" />
 		<PackageReference Include="NLog" Version="4.7.11" />
-		<PackageReference Include="ReactiveUI" Version="16.2.6" />
 		<PackageReference Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
 	</ItemGroup>
 	
 	<ItemGroup>
+		<AvaloniaResource Include="AppIcon.ico" />
 		<AvaloniaResource Include="Resources/Default.xaml" />
 		<AvaloniaResource Include="Resources/Dark/OpenFile_96px.png" />
 		<AvaloniaResource Include="Resources/Dark/Add_96px.png" />
@@ -134,10 +134,6 @@
 	<ItemGroup>
 		<None Update="AppIcon_128px.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="NLog.config">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</None>
 		<None Update="Strings/Default.xaml">
 			<Generator>MSBuild:Compile</Generator>
