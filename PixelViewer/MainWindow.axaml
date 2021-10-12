@@ -7,7 +7,9 @@
         xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
-        Icon="/Resources/AppIcon.ico">
+        Icon="/Resources/AppIcon.ico"
+		MinHeight="{DynamicResource Double/MainWindow.MinHeight}"
+		MinWidth="{DynamicResource Double/MainWindow.MinWidth}">
 
 	<!-- Data templates -->
 	<Window.DataTemplates>
@@ -32,14 +34,6 @@
 
 	<!-- Layout -->
 	<TabControl x:Name="tabControl" Padding="0">
-
-		<!-- Options tab -->
-		<TabItem Classes="Empty" DataContext="{Binding AppOptions}">
-			<TabItem.Header>
-				<Image Classes="Mainwindow_OptionsTab" ToolTip.Tip="{DynamicResource String/Common.Options}"/>
-			</TabItem.Header>
-			<appControls:AppOptionsControl DataContext="{Binding AppOptions}"/>
-		</TabItem>
 
 		<!-- New tab -->
 		<TabItem Classes="Empty">

@@ -3,33 +3,6 @@
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-	<!-- AppOptionsControl -->
-	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section1" xml:space="preserve">Application icon is made by</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section2" xml:space="preserve">from</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section3" xml:space="preserve">.</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section1" xml:space="preserve">Powered by</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section2" xml:space="preserve">and</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section3" xml:space="preserve">.</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.AutoSelectLanguage">Select language automatically</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DarkMode">Dark mode</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DefaultImageRendererFormatName">Default format</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.ImageFormat">Image format</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.MemoryUsage">Memory usage</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Other">Other</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.PrivacyPolicy" xml:space="preserve">Privacy Policy</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.RestartMainWindowToTakeEffect">Restart window to take effect</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.SourceCode" xml:space="preserve">Source code on GitHub</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.UserInterface">User interface</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.VersionName">Version {0}</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.YuvConversionMode">YUV to RGB conversion</sys:String>
-
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
@@ -69,7 +42,7 @@
 	<sys:String x:Key="String/MainWindow.NewSession">Add new tab</sys:String>
 
 	<!-- Session -->
-	<sys:String x:Key="String/Session.EmptyTitle">(No image)</sys:String>
+	<sys:String x:Key="String/Session.EmptyTitle">Empty tab</sys:String>
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer</sys:String>

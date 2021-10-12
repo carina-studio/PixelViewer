@@ -102,7 +102,7 @@ namespace Carina.PixelViewer
 		// Find index of main tab item contains dragging point.
 		int FindMainTabItemIndex(DragEventArgs e)
 		{
-			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
+			for (var i = this.mainTabItems.Count - 1; i >= 0; --i)
 			{
 				if (!((this.mainTabItems[i] as TabItem)?.Header is IVisual headerVisual))
 					continue;
@@ -116,7 +116,7 @@ namespace Carina.PixelViewer
 		// Find index of main tab item attached to given session.
 		int FindMainTabItemIndex(Session session)
 		{
-			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
+			for (var i = this.mainTabItems.Count - 1; i >= 0; --i)
 			{
 				if ((this.mainTabItems[i] as TabItem)?.DataContext == session)
 					return i;
@@ -155,7 +155,7 @@ namespace Carina.PixelViewer
 					this.mainTabControl.SelectedIndex = 0;
 			}
 			else
-				this.mainTabControl.SelectedIndex = 0;
+				workspace.CreateSession();
 		}
 
 
@@ -254,7 +254,10 @@ namespace Carina.PixelViewer
 		void OnMainTabControlSelectionChanged()
 		{
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.IsClosed)
-				(this.DataContext as Workspace)?.CreateSession();
+			{
+				if (this.mainTabItems.Count > 1)
+					(this.DataContext as Workspace)?.CreateSession();
+			}
 			else
 			{
 				// update activated session
@@ -293,7 +296,7 @@ namespace Carina.PixelViewer
 			{
 				case NotifyCollectionChangedAction.Add:
 					{
-						var tabIndex = e.NewStartingIndex + 1;
+						var tabIndex = e.NewStartingIndex;
 						foreach (Session? session in e.NewItems.AsNonNull())
 						{
 							if (session == null)
@@ -313,12 +316,12 @@ namespace Carina.PixelViewer
 							var tabIndex = this.FindMainTabItemIndex(session);
 							if (tabIndex < 0 || this.mainTabItems[tabIndex] is not TabItem tabItem)
 								continue;
-							if (tabIndex > 1)
+							if (tabIndex > 0)
 								this.mainTabControl.SelectedIndex = (tabIndex - 1);
 							else if (tabIndex < this.mainTabItems.Count - 2)
 								this.mainTabControl.SelectedIndex = (tabIndex + 1);
 							else
-								this.mainTabControl.SelectedIndex = 0;
+								this.mainTabControl.SelectedIndex = -1;
 							this.mainTabItems.RemoveAt(tabIndex);
 						}
 						(this.DataContext as Workspace)?.Let((it) =>

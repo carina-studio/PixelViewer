@@ -12,6 +12,7 @@ using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
 using System;
@@ -49,6 +50,7 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
+		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ScrollViewer imageScrollViewer;
 		ProcessingDialog? savingRenderedImageDialog;
@@ -65,7 +67,11 @@ namespace Carina.PixelViewer.Controls
 			this.SaveRenderedImageCommand = new Command(() => this.SaveRenderedImage(), this.canSaveRenderedImage);
 			this.ShowEvaluateImageDimensionsMenuCommand = new Command(() =>
 			{
-				this.evaluateImageDimensionsMenu?.Open(this);
+				if (this.evaluateImageDimensionsMenu == null)
+					return;
+				if (this.evaluateImageDimensionsMenu.PlacementTarget == null)
+					this.evaluateImageDimensionsMenu.PlacementTarget = this.evaluateImageDimensionsButton;
+				this.evaluateImageDimensionsMenu.Open(this.evaluateImageDimensionsButton);
 			}, this.canShowEvaluateImageDimensionsMenu);
 			this.canOpenSourceFile.Update(true);
 
@@ -76,8 +82,13 @@ namespace Carina.PixelViewer.Controls
 			this.canOpenSourceFile.Update(false);
 
 			// setup controls
-			this.evaluateImageDimensionsMenu = (ContextMenu)this.Resources["evaluateImageDimensionsMenu"].AsNonNull();
-			this.imageScrollViewer = this.FindControl<ScrollViewer>("imageScrollViewer").AsNonNull();
+			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
+			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources["evaluateImageDimensionsMenu"].AsNonNull()).Also(it =>
+			{
+				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
+				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
+			});
+			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 		}
 
 

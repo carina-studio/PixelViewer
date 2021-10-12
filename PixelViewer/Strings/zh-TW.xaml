@@ -3,33 +3,6 @@
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
-	<!-- AppOptionsControl -->
-	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section1" xml:space="preserve">應用程式圖示由</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section2" xml:space="preserve">提供，並發布於</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.AppIcon.Section3" xml:space="preserve">。</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section1" xml:space="preserve">基於</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section2" xml:space="preserve">以及</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Attribution.Framework.Section3" xml:space="preserve">開發完成。</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.AutoSelectLanguage">自動選取語言</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DarkMode">深色模式</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.DefaultImageRendererFormatName">預設格式</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.ImageFormat">影像格式</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.MaxRenderedImagesMemoryUsage">影像輸出記憶體使用上限 (MB)</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.MemoryUsage">記憶體使用</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.Other">其他</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.PrivacyPolicy" xml:space="preserve">隱私權政策</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.RestartMainWindowToTakeEffect">重新啟動視窗以生效</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.SourceCode" xml:space="preserve">GitHub 上的原始程式碼</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.UserInterface">使用者介面</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.VersionName">版本 {0}</sys:String>
-	<sys:String x:Key="String/AppOptionsControl.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
-
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
@@ -62,7 +35,7 @@
 	<sys:String x:Key="String/MainWindow.NewSession">新增分頁</sys:String>
 
 	<!-- Session -->
-	<sys:String x:Key="String/Session.EmptyTitle">(無影像)</sys:String>
+	<sys:String x:Key="String/Session.EmptyTitle">空白分頁</sys:String>
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">關於 PixelViewer</sys:String>

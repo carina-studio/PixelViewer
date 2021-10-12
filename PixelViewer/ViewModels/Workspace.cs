@@ -33,7 +33,6 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public Workspace()
 		{
-			this.AppOptions = new AppOptions();
 			this.Sessions = this.sessions.AsReadOnly();
 		}
 
@@ -46,12 +45,6 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.GetValue(ActivatedSessionProperty);
 			set => this.SetValue(ActivatedSessionProperty, value);
 		}
-
-
-		/// <summary>
-		/// Get <see cref="AppOptions"/> view-model.
-		/// </summary>
-		public AppOptions AppOptions { get; } 
 
 
 		/// <summary>
@@ -124,9 +117,6 @@ namespace Carina.PixelViewer.ViewModels
 				session.Dispose();
 			}
 			this.sessions.Clear();
-
-			// dispose app options
-			this.AppOptions.Dispose();
 
 			// call base
 			base.Dispose(disposing);
