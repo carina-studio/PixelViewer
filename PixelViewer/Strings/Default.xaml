@@ -61,7 +61,7 @@
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">Plane #3</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageRenderer">Format</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">Name of profile:</sys:String>
-	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in options page.</sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in application options.</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No image file opened</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>

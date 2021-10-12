@@ -98,7 +98,10 @@ namespace Carina.PixelViewer.Controls
 			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
 			{
 				using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
-				var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater).ShowDialog(window);
+				var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater)
+				{
+					CheckForUpdateWhenShowing = true
+				}.ShowDialog(window);
 				if (result == CarinaStudio.AppSuite.Controls.ApplicationUpdateDialogResult.ShutdownNeeded)
 				{
 					Logger.LogWarning("Shut down to continue updating");

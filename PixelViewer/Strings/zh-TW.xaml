@@ -54,7 +54,7 @@
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">圖層 #3</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageRenderer">格式</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱：</sys:String>
-	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">記憶體不足。您可以嘗試在選項頁面調高記憶體使用上限。</sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">記憶體不足。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">沒有影像檔案開啟</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">開啟影像檔案 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>

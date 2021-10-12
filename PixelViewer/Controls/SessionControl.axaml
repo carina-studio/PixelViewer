@@ -48,25 +48,25 @@
 			<Grid Background="{DynamicResource Brush/SessionControl.Background}" DragDrop.AllowDrop="True">
 
 				<!-- Drag-drop hint -->
-				<Border Classes="SessionControl_DragDropHint" IsVisible="{Binding !IsSourceFileOpened}">
-					<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
-						<TextBlock Classes="SessionControl_DragDropHint" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
-						<Image Classes="SessionControl_DragDropHint"/>
-						<TextBlock Classes="SessionControl_DragDropHint" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
-					</StackPanel>
-				</Border>
+				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
+					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
+					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
+					</Border>
+					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
+				</StackPanel>
 
 				<!-- Insufficient memory hint -->
-				<Border Classes="SessionControl_InsufficientMemoryForRenderedImageHint" IsVisible="{Binding InsufficientMemoryForRenderedImage}">
-					<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
-						<Image Classes="SessionControl_InsufficientMemoryForRenderedImageHint"/>
-						<TextBlock Classes="SessionControl_InsufficientMemoryForRenderedImageHint" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
-					</StackPanel>
-				</Border>
+				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
+					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Warning}"/>
+					</Border>
+					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
+				</StackPanel>
 
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
-					<LayoutTransformControl Classes="SessionControl_ImageViewer">
+					<LayoutTransformControl Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
 						<Border>
 							<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}">
 								<Grid HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -89,8 +89,8 @@
 				</ScrollViewer>
 
 				<!-- Rendering image indicator -->
-				<Border Classes="SessionControl_RenderingImage" HorizontalAlignment="Stretch" IsVisible="{Binding IsRenderingImage}" VerticalAlignment="Stretch">
-					<TextBlock Classes="SessionControl_RenderingImage" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.RenderingImage}" VerticalAlignment="Center"/>
+				<Border HorizontalAlignment="Stretch" IsVisible="{Binding IsRenderingImage}" VerticalAlignment="Stretch">
+					<TextBlock HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.RenderingImage}" VerticalAlignment="Center"/>
 				</Border>
 
 			</Grid>
