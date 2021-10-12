@@ -2,12 +2,8 @@
 using Carina.PixelViewer.Media.ImageRenderers;
 using CarinaStudio;
 using CarinaStudio.Configuration;
-using CarinaStudio.ViewModels;
-using CarinaStudio.Windows.Input;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
-using System.Windows.Input;
 
 namespace Carina.PixelViewer.ViewModels
 {
@@ -16,50 +12,17 @@ namespace Carina.PixelViewer.ViewModels
 	/// </summary>
 	class AppOptions : CarinaStudio.AppSuite.ViewModels.ApplicationOptions
 	{
-		// Fields.
-		bool isOriginallyDarkMode;
-
-
 		/// <summary>
 		/// Initialize new <see cref="AppOptions"/> instance.
 		/// </summary>
 		public AppOptions()
-		{
-			// create command
-			this.RestartMainWindowCommand = new Command(() => App.Current.RestartMainWindows());
-
-			// get initial settings state
-			this.isOriginallyDarkMode = this.Settings.GetValueOrDefault(SettingKeys.DarkMode);
-
-			// get version name
-			this.UpdateVersionString();
-		}
+		{ }
 
 
 		/// <summary>
 		/// List of available values for <see cref="DefaultImageDimensionsEvaluationAspectRatio"/>.
 		/// </summary>
 		public IEnumerable<AspectRatio> AspectRatios { get; } = (AspectRatio[])Enum.GetValues(typeof(AspectRatio));
-
-
-		/// <summary>
-		/// Select interface language automatically.
-		/// </summary>
-		public bool AutoSelectLanguage
-		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.AutoSelectLanguage);
-			set => this.Settings.SetValue<bool>(SettingKeys.AutoSelectLanguage, value);
-		}
-
-
-		/// <summary>
-		/// Use dark interface mode.
-		/// </summary>
-		public bool DarkMode
-		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.DarkMode);
-			set => this.Settings.SetValue<bool>(SettingKeys.DarkMode, value);
-		}
 
 
 		/// <summary>
@@ -108,12 +71,6 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Check whether restarting main window is needed to apply dark mode change or not.
-		/// </summary>
-		public bool IsRestartingMainWindowNeededToApplyDarkMode { get; private set; } = false;
-
-
-		/// <summary>
 		/// Maximum memory usage for rendering images.
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
@@ -128,18 +85,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			base.OnSettingChanged(e);
 			var key = e.Key;
-			if (key == SettingKeys.AutoSelectLanguage)
-			{
-				this.OnPropertyChanged(nameof(this.AutoSelectLanguage));
-				this.UpdateVersionString();
-			}
-			else if (key == SettingKeys.DarkMode)
-			{
-				this.OnPropertyChanged(nameof(this.DarkMode));
-				this.IsRestartingMainWindowNeededToApplyDarkMode = (this.Settings.GetValueOrDefault(SettingKeys.DarkMode) != this.isOriginallyDarkMode);
-				this.OnPropertyChanged(nameof(this.IsRestartingMainWindowNeededToApplyDarkMode));
-			}
-			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
+			if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)
 				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
@@ -155,21 +101,6 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Command to restart main window.
-		/// </summary>
-		public ICommand RestartMainWindowCommand { get; }
-
-
-		// Update version string.
-		void UpdateVersionString()
-		{
-			var version = Assembly.GetExecutingAssembly().GetName().Version;
-			this.VersionString = string.Format(App.Current.GetStringNonNull("AppOptionsControl.VersionName"), version);
-			this.OnPropertyChanged(nameof(this.VersionString));
-		}
-
-
-		/// <summary>
 		/// Reset to default image renderer after opening file.
 		/// </summary>
 		public bool UseDefaultImageRendererAfterOpeningSourceFile
@@ -177,12 +108,6 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile);
 			set => this.Settings.SetValue<bool>(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
 		}
-
-
-		/// <summary>
-		/// Get application version name.
-		/// </summary>
-		public string VersionString { get; private set; } = "";
 
 
 		/// <summary>

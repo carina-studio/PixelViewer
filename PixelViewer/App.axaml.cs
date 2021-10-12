@@ -182,7 +182,14 @@ namespace Carina.PixelViewer
 
 			// upgrade theme mode
 			if (oldVersion <= 1)
-				settings.ResetValue(SettingKeys.DarkMode);
+			{
+				settings.GetValueOrDefault(SettingKeys.DarkMode).Let(it =>
+				{
+					settings.ResetValue(SettingKeys.DarkMode);
+					if (!this.IsSystemThemeModeSupported)
+						settings.SetValue<ThemeMode>(CarinaStudio.AppSuite.SettingKeys.ThemeMode, it ? ThemeMode.Dark : ThemeMode.Light);
+				});
+			}
 		}
 #pragma warning restore CS0612
 	}
