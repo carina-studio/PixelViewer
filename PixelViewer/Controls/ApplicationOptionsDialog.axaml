@@ -1,0 +1,118 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:as="using:CarinaStudio.AppSuite"
+		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+		xmlns:appControls="using:Carina.PixelViewer.Controls"
+		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
+		xmlns:appMedia="using:Carina.PixelViewer.Media"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog"
+		Classes="Dialog"
+        Title="{DynamicResource String/ApplicationOptions}"
+		Width="{DynamicResource Double/ApplicationOptionsDialog.Width}">
+
+	<DockPanel>
+
+		<!-- Control buttons -->
+		<Border Classes="Dialog_ControlButtonsPanel" DockPanel.Dock="Bottom">
+			<StackPanel Classes="Dialog_ControlButtonsPanel">
+				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].Close}" Content="{DynamicResource String/Common.OK}"/>
+			</StackPanel>
+		</Border>
+
+		<!-- Content -->
+		<ScrollViewer MaxHeight="{DynamicResource Double/ApplicationOptionsDialog.Content.MaxHeight}">
+			<StackPanel Classes="Dialog_ContentPanel">
+
+				<!-- User interface -->
+				<Border Classes="Dialog_TextBlock_Header1">
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptions.UserInterface}"/>
+				</Border>
+
+				<!-- Theme mode -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.ThemeMode}"/>
+				<ComboBox Classes="Dialog_ComboBox" Items="{Binding ThemeModes, Mode=OneTime}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Converter={x:Static appControls:ApplicationOptionsDialog.ThemeModeConverter}}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<TextBlock Classes="Dialog_TextBlock_Description_Error" IsVisible="{Binding IsRestartingMainWindowsNeeded}" Text="{DynamicResource String/ApplicationOptionsDialog.RestartingMainWindowsNeeded}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Enable blurry background -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.EnableBlurryBackground}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EnableBlurryBackground, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Culture -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.Culture}"/>
+				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type as:ApplicationCulture}" SelectedItem="{Binding Culture, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator_Large"/>
+
+				<!-- Image format -->
+				<Border Classes="Dialog_TextBlock_Header1">
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.ImageFormat}"/>
+				</Border>
+
+				<!-- Default renderer -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageRendererFormatName}"/>
+				<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
+					<ComboBox.DataTemplates>
+						<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
+							<TextBlock Text="{Binding Format.DisplayName}"/>
+						</DataTemplate>
+					</ComboBox.DataTemplates>
+				</ComboBox>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Reset renderer after opening file -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- YUV conversion mode -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.YuvConversionMode}"/>
+				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:YuvConversionMode}" SelectedItem="{Binding YuvConversionMode, Mode=TwoWay}"/>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
+				<Separator Classes="Dialog_Separator_Large"/>
+
+				<!-- Image dimensions evaluation -->
+				<Border Classes="Dialog_TextBlock_Header1">
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.ImageDimensionsEvaluation}"/>
+				</Border>
+
+				<!-- Default aspect ratio -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio}"/>
+				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:AspectRatio}" SelectedItem="{Binding DefaultImageDimensionsEvaluationAspectRatio, Mode=TwoWay}"/>
+				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Evaluate after opening file -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EvaluateImageDimensionsAfterOpeningSourceFile, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Evaluate after changing renderer -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator_Large"/>
+
+				<!-- Memory usage -->
+				<Border Classes="Dialog_TextBlock_Header1">
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.MemoryUsage}"/>
+				</Border>
+
+				<!-- Max rendered images memory usage -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
+				<NumericUpDown Classes="Dialog_NumericUpDown" Maximum="8192" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
+				
+			</StackPanel>
+		</ScrollViewer>
+		
+	</DockPanel>
+	
+</Window>

@@ -524,6 +524,21 @@ namespace Carina.PixelViewer.Controls
         }
 
 
+		// Show application options.
+		void ShowAppOptions()
+        {
+			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
+			{
+				await new ApplicationOptionsDialog().ShowDialog(window);
+				if (App.Current.IsRestartingMainWindowsNeeded)
+				{
+					Logger.LogWarning("Need to restart main windows");
+					App.Current.RestartMainWindows();
+				}
+			});
+		}
+
+
 		/// <summary>
 		/// <see cref="ICommand"/> to show menu of image dimensions evaluation.
 		/// </summary>

@@ -33,7 +33,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public Workspace()
 		{
-			this.AppOptions = new AppOptions(this);
+			this.AppOptions = new AppOptions();
 			this.Sessions = this.sessions.AsReadOnly();
 		}
 

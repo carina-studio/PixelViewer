@@ -30,6 +30,20 @@
 	<sys:String x:Key="String/AppOptionsControl.VersionName">版本 {0}</sys:String>
 	<sys:String x:Key="String/AppOptionsControl.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
 
+	<!-- ApplicationOptionsDialog -->
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像輸出記憶體使用上限 (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.MemoryUsage">記憶體使用</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.RestartingMainWindowsNeeded">將會自動重新啟動以套用</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
+
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
 	
@@ -52,7 +66,6 @@
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">關於 PixelViewer</sys:String>
-	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;無&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">刪除組態</sys:String>

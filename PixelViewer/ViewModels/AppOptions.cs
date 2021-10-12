@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.ViewModels
 	/// <summary>
 	/// View-model for application options.
 	/// </summary>
-	class AppOptions : ViewModel
+	class AppOptions : CarinaStudio.AppSuite.ViewModels.ApplicationOptions
 	{
 		// Fields.
 		bool isOriginallyDarkMode;
@@ -23,7 +23,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Initialize new <see cref="AppOptions"/> instance.
 		/// </summary>
-		public AppOptions(Workspace workspace) : base(workspace)
+		public AppOptions()
 		{
 			// create command
 			this.RestartMainWindowCommand = new Command(() => App.Current.RestartMainWindows());

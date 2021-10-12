@@ -157,7 +157,7 @@
 					<Separator Classes="ToolBar_Separator"/>
 
 					<!-- App options -->
-					<Button Classes="ToolBar_Button" Command="{x:Null}" ToolTip.Tip="{DynamicResource String/SessionControl.ApplicationOptions}">
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowAppOptions}" ToolTip.Tip="{DynamicResource String/ApplicationOptions}">
 						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Settings}"/>
 					</Button>
 

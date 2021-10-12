@@ -26,6 +26,10 @@
 		<Thickness x:Key="Thickness/AppOptionsControl.Item.Value.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/AppOptionsControl.Padding">100,20,100,20</Thickness>
 
+		<!-- ApplicationOptionsDialog -->
+		<sys:Double x:Key="Double/ApplicationOptionsDialog.Content.MaxHeight">500</sys:Double>
+		<sys:Double x:Key="Double/ApplicationOptionsDialog.Width">500</sys:Double>
+
 		<!-- GridSplitter -->
 		<GridLength x:Key="GridLength/GridSplitter.Thickness">5</GridLength>
 
