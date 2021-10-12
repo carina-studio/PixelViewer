@@ -4,14 +4,18 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Markup.Xaml.Styling;
 using Avalonia.Styling;
+using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
+using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.ViewModels;
+using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
-using NLog;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Globalization;
 using System.Threading.Tasks;
 
@@ -140,6 +144,41 @@ namespace Carina.PixelViewer
 				_ = it.Loaded;
 			});
 		}
+
+
+		// New instance launched.
+		protected override void OnNewInstanceLaunched(IDictionary<string, object> launchOptions)
+		{
+			// call base
+			base.OnNewInstanceLaunched(launchOptions);
+
+			// open image in current workspace
+			if (this.MainWindows.IsNotEmpty() && this.MainWindows[0].DataContext is Workspace workspace)
+			{
+				if (launchOptions.TryGetValue(FilePathKey, out var value) && value is string filePath)
+				{
+					var emptySession = workspace.Sessions.FirstOrDefault(it => !it.IsSourceFileOpened);
+					if (emptySession == null || !emptySession.OpenSourceFileCommand.TryExecute(filePath))
+						workspace.CreateSession(filePath);
+				}
+				this.MainWindows[0].ActivateAndBringToFront();
+			}
+			else
+				this.Logger.LogError("No main window or worksapce to handle new instance");
+		}
+
+
+		// Parse argument.
+        protected override int OnParseArguments(string[] args, int index, IDictionary<string, object> launchOptions)
+        {
+			var arg = args[index];
+			if (arg.Length > 0 && arg[0] != '-')
+			{
+				launchOptions[FilePathKey] = arg;
+				return ++index;
+			}
+            return base.OnParseArguments(args, index, launchOptions);
+        }
 
 
         // Prepare starting.
