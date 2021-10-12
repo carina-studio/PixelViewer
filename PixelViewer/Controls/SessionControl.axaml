@@ -6,6 +6,8 @@
              xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
              xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
              xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
+			 xmlns:ia="using:Avalonia.Xaml.Interactivity"
+             xmlns:iaCore="using:Avalonia.Xaml.Interactions.Core"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.SessionControl">
 	
@@ -275,7 +277,20 @@
 		</Grid>
 
 		<!-- Status bar -->
-		<Border Classes="StatusBar" Grid.Row="2">
+		<Border Background="{DynamicResource Brush/SessionControl.StatusBar.Background.Inactive}" Classes="StatusBar" Grid.Row="2">
+
+			<ia:Interaction.Behaviors>
+				<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Inactive">
+					<iaCore:ChangePropertyAction PropertyName="Background" Value="{StaticResource Brush/SessionControl.StatusBar.Background.Inactive}"/>
+				</iaCore:DataTriggerBehavior>
+				<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Error">
+					<iaCore:ChangePropertyAction PropertyName="Background" Value="{StaticResource Brush/SessionControl.StatusBar.Background.Error}"/>
+				</iaCore:DataTriggerBehavior>
+				<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Active">
+					<iaCore:ChangePropertyAction PropertyName="Background" Value="{StaticResource Brush/StatusBar.Background}"/>
+				</iaCore:DataTriggerBehavior>
+			</ia:Interaction.Behaviors>
+			
 			<Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Stretch">
 
 				<!-- Reserve -->

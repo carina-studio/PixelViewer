@@ -12,6 +12,7 @@
 		<!-- SessionControl -->
 		<Color x:Key="Color/SessionControl.Background">#eeeeee</Color>
 		<Color x:Key="Color/SessionControl.OptionsPanel.Background">#e0e0e0</Color>
+		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#aaaaaa</Color>
 		
 	</Styles.Resources>
 

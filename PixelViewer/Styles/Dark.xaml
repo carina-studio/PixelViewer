@@ -12,6 +12,7 @@
 		<!-- SessionControl -->
 		<Color x:Key="Color/SessionControl.Background">#000000</Color>
 		<Color x:Key="Color/SessionControl.OptionsPanel.Background">#161616</Color>
+		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#606060</Color>
 		
 	</Styles.Resources>
 

@@ -22,8 +22,12 @@
 		<!-- SessionControl -->
 		<SolidColorBrush x:Key="Brush/SessionControl.Background" Color="{DynamicResource Color/SessionControl.Background}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.OptionsPanel.Background" Color="{DynamicResource Color/SessionControl.OptionsPanel.Background}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
 		<Color x:Key="Color/SessionControl.Background">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.OptionsPanel.Background">#ffffff</Color>
+		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
+		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
 		<CornerRadius x:Key="CornerRadius/SessionControl.ImageToolBar.CornerRadius">5</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageToolBar.IconSize">32</sys:Double>

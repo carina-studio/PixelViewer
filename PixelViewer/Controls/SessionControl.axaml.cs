@@ -43,6 +43,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Static fields.
 		static readonly ILogger Logger = App.Current.LoggerFactory.CreateLogger(nameof(SessionControl));
+		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.Inactive);
 
 
 		// Fields.
@@ -53,6 +54,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ScrollViewer imageScrollViewer;
+		readonly ScheduledAction updateStatusBarStateAction;
 
 
 		/// <summary>
@@ -88,6 +90,21 @@ namespace Carina.PixelViewer.Controls
 				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
 			});
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
+
+			// create scheduled actions
+			this.updateStatusBarStateAction = new ScheduledAction(() =>
+			{
+				this.SetValue<StatusBarState>(StatusBarStateProperty, Global.Run(() =>
+				{
+					if (this.DataContext is not Session session)
+						return StatusBarState.Inactive;
+					if (session.InsufficientMemoryForRenderedImage)
+						return StatusBarState.Error;
+					if (session.IsSourceFileOpened)
+						return StatusBarState.Active;
+					return StatusBarState.Inactive;
+				}));
+			});
 		}
 
 
@@ -283,6 +300,7 @@ namespace Carina.PixelViewer.Controls
 					this.canShowEvaluateImageDimensionsMenu.Update(false);
 				}
 				this.UpdateEffectiveRenderedImageScale();
+				this.updateStatusBarStateAction.Schedule();
 			}
 		}
 
@@ -307,10 +325,8 @@ namespace Carina.PixelViewer.Controls
 			switch (e.PropertyName)
 			{
 				case nameof(Session.EffectiveRenderedImageScale):
-					{
-						this.UpdateEffectiveRenderedImageScale();
-						break;
-					}
+					this.UpdateEffectiveRenderedImageScale();
+					break;
 				case nameof(Session.FitRenderedImageToViewport):
 					{
 						// [Workaround] rearrange scroll viewer of the image viewer
@@ -319,16 +335,16 @@ namespace Carina.PixelViewer.Controls
 						this.imageScrollViewer.Padding = padding;
 						break;
 					}
+				case nameof(Session.InsufficientMemoryForRenderedImage):
+					this.updateStatusBarStateAction.Schedule();
+					break;
 				case nameof(Session.IsSourceFileOpened):
-					{
-						this.canShowEvaluateImageDimensionsMenu.Update((sender as Session)?.IsSourceFileOpened ?? false);
-						break;
-					}
+					this.canShowEvaluateImageDimensionsMenu.Update((sender as Session)?.IsSourceFileOpened ?? false);
+					this.updateStatusBarStateAction.Schedule();
+					break;
 				case nameof(Session.RenderedImage):
-					{
-						this.UpdateEffectiveRenderedImageScale();
-						break;
-					}
+					this.UpdateEffectiveRenderedImageScale();
+					break;
 			}
 		}
 
@@ -532,6 +548,10 @@ namespace Carina.PixelViewer.Controls
 		/// <see cref="ICommand"/> to show menu of image dimensions evaluation.
 		/// </summary>
 		public ICommand ShowEvaluateImageDimensionsMenuCommand { get; }
+
+
+		// Status bar state.
+		StatusBarState StatusBarState { get => this.GetValue<StatusBarState>(StatusBarStateProperty); }
 
 
 		// Update effective scale of rendered image.
