@@ -13,7 +13,7 @@ using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using CarinaStudio.Windows.Input;
-using NLog;
+using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -41,7 +41,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Static fields.
-		static readonly ILogger Logger = LogManager.GetCurrentClassLogger();
+		static readonly ILogger Logger = App.Current.LoggerFactory.CreateLogger(nameof(SessionControl));
 
 
 		// Fields.
@@ -79,6 +79,22 @@ namespace Carina.PixelViewer.Controls
 			this.evaluateImageDimensionsMenu = (ContextMenu)this.Resources["evaluateImageDimensionsMenu"].AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>("imageScrollViewer").AsNonNull();
 		}
+
+
+		// Check for application update.
+		void CheckForAppUpdate()
+        {
+			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
+			{
+				using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
+				var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater).ShowDialog(window);
+				if (result == CarinaStudio.AppSuite.Controls.ApplicationUpdateDialogResult.ShutdownNeeded)
+				{
+					Logger.LogWarning("Shut down to continue updating");
+					App.Current.Shutdown();
+				}
+			});
+        }
 
 
 		/// <summary>
@@ -334,7 +350,7 @@ namespace Carina.PixelViewer.Controls
 			// check state
 			if (!this.canOpenSourceFile.Value)
 			{
-				Logger.Error("Cannot open source file in current state");
+				Logger.LogError("Cannot open source file in current state");
 				return;
 			}
 
@@ -342,7 +358,7 @@ namespace Carina.PixelViewer.Controls
 			var window = this.FindAncestorOfType<Window>();
 			if (window == null)
 			{
-				Logger.Error("No window to show open file dialog");
+				Logger.LogError("No window to show open file dialog");
 				return;
 			}
 
@@ -364,13 +380,13 @@ namespace Carina.PixelViewer.Controls
 			// check state
 			if (!(this.DataContext is Session session))
 			{
-				Logger.Error("No session to open source file");
+				Logger.LogError("No session to open source file");
 				return;
 			}
 			var command = session.OpenSourceFileCommand;
 			if (!command.CanExecute(fileName))
 			{
-				Logger.Error("Cannot change source file in current state");
+				Logger.LogError("Cannot change source file in current state");
 				return;
 			}
 
@@ -391,12 +407,12 @@ namespace Carina.PixelViewer.Controls
 			// check state
 			if (!(this.DataContext is Session session))
 			{
-				Logger.Error("No session to save as new profile");
+				Logger.LogError("No session to save as new profile");
 				return;
 			}
 			if (!this.canSaveAsNewProfile.Value || !session.SaveAsNewProfileCommand.CanExecute(null))
 			{
-				Logger.Error("Cannot save as new profile in current state");
+				Logger.LogError("Cannot save as new profile in current state");
 				return;
 			}
 
@@ -404,7 +420,7 @@ namespace Carina.PixelViewer.Controls
 			var window = this.FindAncestorOfType<Window>();
 			if (window == null)
 			{
-				Logger.Error("No window to show dialog");
+				Logger.LogError("No window to show dialog");
 				return;
 			}
 
@@ -450,13 +466,13 @@ namespace Carina.PixelViewer.Controls
 			// check state
 			if (!(this.DataContext is Session session))
 			{
-				Logger.Error("No session to save rendered image");
+				Logger.LogError("No session to save rendered image");
 				return;
 			}
 			var command = session.SaveRenderedImageCommand;
 			if (!command.CanExecute(null) || !this.canSaveRenderedImage.Value)
 			{
-				Logger.Error("Cannot save rendered image in current state");
+				Logger.LogError("Cannot save rendered image in current state");
 				return;
 			}
 
@@ -464,7 +480,7 @@ namespace Carina.PixelViewer.Controls
 			var window = this.FindAncestorOfType<Window>();
 			if (window == null)
 			{
-				Logger.Error("No window to show dialog");
+				Logger.LogError("No window to show dialog");
 				return;
 			}
 
@@ -495,6 +511,17 @@ namespace Carina.PixelViewer.Controls
 		/// <see cref="ICommand"/> to save rendered image to file.
 		/// </summary>
 		public ICommand SaveRenderedImageCommand { get; }
+
+
+		// Show application info.
+		void ShowAppInfo()
+        {
+			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
+			{
+				using var appInfo = new AppInfo();
+				await new CarinaStudio.AppSuite.Controls.ApplicationInfoDialog(appInfo).ShowDialog(window);
+			});
+        }
 
 
 		/// <summary>

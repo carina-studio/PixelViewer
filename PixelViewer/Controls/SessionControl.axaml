@@ -162,12 +162,12 @@
 					</Button>
 
 					<!-- Check for update -->
-					<Button Classes="ToolBar_Button" Command="{x:Null}" ToolTip.Tip="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].CheckForAppUpdate}" ToolTip.Tip="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
 						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Update}"/>
 					</Button>
 
 					<!-- About -->
-					<Button Classes="ToolBar_Button" Command="{x:Null}" ToolTip.Tip="{DynamicResource String/SessionControl.ApplicationInfo}">
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowAppInfo}" ToolTip.Tip="{DynamicResource String/SessionControl.ApplicationInfo}">
 						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Information}"/>
 					</Button>
 
