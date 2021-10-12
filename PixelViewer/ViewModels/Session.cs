@@ -189,6 +189,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
 		/// <summary>
+		/// Property of <see cref="IsProcessingImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsProcessingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsProcessingImage));
+		/// <summary>
 		/// Property of <see cref="IsSavingRenderedImage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSavingRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingRenderedImage));
@@ -263,6 +267,7 @@ namespace Carina.PixelViewer.ViewModels
 		double renderedImageScale = 1.0;
 		readonly ScheduledAction renderImageOperation;
 		readonly int[] rowStrides = new int[4];
+		readonly ScheduledAction updateIsProcessingImageAction;
 
 
 		// Static initializer.
@@ -293,6 +298,12 @@ namespace Carina.PixelViewer.ViewModels
 
 			// setup operations
 			this.renderImageOperation = new ScheduledAction(this, this.RenderImage);
+			this.updateIsProcessingImageAction = new ScheduledAction(() =>
+			{
+				if (this.IsDisposed)
+					return;
+				this.SetValue(IsProcessingImageProperty, this.IsRenderingImage || this.IsSavingRenderedImage);
+			});
 
 			// setup profiles
 			this.profilesDirectoryPath = Path.Combine(this.Application.RootPrivateDirectoryPath, "Profiles");
@@ -321,8 +332,8 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageRenderingCancellationTokenSource = null;
 
 			// update state
-			if (!this.IsDisposed)
-				this.SetValue(IsRenderingImageProperty, false);
+			if(!this.IsDisposed)
+			this.SetValue(IsRenderingImageProperty, false);
 			if (cancelPendingRendering)
 				this.hasPendingImageRendering = false;
 
@@ -718,6 +729,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether image is being processed or not.
+		/// </summary>
+		public bool IsProcessingImage { get => this.GetValue(IsProcessingImageProperty); }
+
+
+		/// <summary>
 		/// Check whether rendered image is being saved or not.
 		/// </summary>
 		public bool IsSavingRenderedImage { get => this.GetValue(IsSavingRenderedImageProperty); }
@@ -967,6 +984,11 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				else
 					this.Logger.LogError($"{newValue} is not part of available image renderer list");
+			}
+			else if (property == IsRenderingImageProperty
+				|| property == IsSavingRenderedImageProperty)
+			{
+				this.updateIsProcessingImageAction.Schedule();
 			}
 			else if (property == ProfileProperty)
 			{
@@ -1381,8 +1403,9 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				var prevRenderedImageBuffer = this.renderedImageBuffer;
 				var prevMemoryUsageToken = this.renderedImageMemoryUsageToken;
-				this.SynchronizationContext.Post(() =>
+				this.SynchronizationContext.Post(async () =>
 				{
+					await this.WaitForNecessaryTasksAsync();
 					prevRenderedImage.Dispose();
 					prevRenderedImageBuffer?.Dispose();
 					prevMemoryUsageToken?.Dispose();
@@ -1705,7 +1728,9 @@ namespace Carina.PixelViewer.ViewModels
 				return false;
 
 			// save
-			var result = await this.SaveRenderedImage(stream);
+			var task = this.SaveRenderedImage(stream);
+			_ = this.WaitForNecessaryTaskAsync(task);
+			var result = await task;
 
 			// close file
 			await Task.Run(() =>

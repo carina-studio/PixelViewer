@@ -53,7 +53,6 @@ namespace Carina.PixelViewer.Controls
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ScrollViewer imageScrollViewer;
-		ProcessingDialog? savingRenderedImageDialog;
 
 
 		/// <summary>
@@ -318,30 +317,6 @@ namespace Carina.PixelViewer.Controls
 						var padding = this.imageScrollViewer.Padding;
 						this.imageScrollViewer.Padding = new Thickness(-1);
 						this.imageScrollViewer.Padding = padding;
-						break;
-					}
-				case nameof(Session.IsSavingRenderedImage):
-					{
-						if ((sender as Session)?.IsSavingRenderedImage == true)
-						{
-							if (this.savingRenderedImageDialog == null)
-							{
-								var window = this.FindAncestorOfType<Window>();
-								if (window != null)
-								{
-									this.savingRenderedImageDialog = new ProcessingDialog()
-									{
-										Message = App.Current.GetString("SessionControl.SavingRenderedImage"),
-									};
-									this.savingRenderedImageDialog.ShowDialog(window);
-								}
-							}
-						}
-						else if(this.savingRenderedImageDialog != null)
-						{
-							this.savingRenderedImageDialog.Close();
-							this.savingRenderedImageDialog = null;
-						}
 						break;
 					}
 				case nameof(Session.IsSourceFileOpened):

@@ -32,7 +32,9 @@
 	<Grid RowDefinitions="Auto,*,Auto">
 
 		<!-- Top bar -->
-		<Border Classes="ToolBar" Background="{DynamicResource Brush/ToolBar.Background}" Height="{DynamicResource Double/SessionControl.TopBar.Height}"/>
+		<Border Background="{DynamicResource Brush/ToolBar.Background}" Height="{DynamicResource Double/SessionControl.TopBar.Height}">
+			<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
+		</Border>
 
 		<!-- Viewer -->
 		<Grid Grid.Row="1">
@@ -87,11 +89,6 @@
 						</LayoutTransformControl.LayoutTransform>
 					</LayoutTransformControl>
 				</ScrollViewer>
-
-				<!-- Rendering image indicator -->
-				<Border HorizontalAlignment="Stretch" IsVisible="{Binding IsRenderingImage}" VerticalAlignment="Stretch">
-					<TextBlock HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.RenderingImage}" VerticalAlignment="Center"/>
-				</Border>
 
 			</Grid>
 
@@ -284,47 +281,83 @@
 				<!-- Reserve -->
 				<TextBlock Classes="StatusBar_TextBlock" Grid.ColumnSpan="2" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelPosition}" Opacity="0"/>
 
-				<!-- File name -->
+				<!-- Left part -->
 				<StackPanel Orientation="Horizontal">
-					<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}" TextTrimming="CharacterEllipsis"/>
-					<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding IsSourceFileOpened}" TextTrimming="CharacterEllipsis">
-						<TextBlock.Text>
-							<MultiBinding StringFormat="{}{0} ({1})">
-								<Binding Path="SourceFileName"/>
-								<Binding Path="SourceFileSizeString"/>
-							</MultiBinding>
-						</TextBlock.Text>
-					</TextBlock>
-					<Separator Classes="StatusBar_Separator"/>
+
+					<!-- File name -->
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}" TextTrimming="CharacterEllipsis"/>
+						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding IsSourceFileOpened}" TextTrimming="CharacterEllipsis">
+							<TextBlock.Text>
+								<MultiBinding StringFormat="{}{0} ({1})">
+									<Binding Path="SourceFileName"/>
+									<Binding Path="SourceFileSizeString"/>
+								</MultiBinding>
+							</TextBlock.Text>
+						</TextBlock>
+						<Separator Classes="StatusBar_Separator"/>
+					</StackPanel>
+
+					<!-- Selected pixel -->
+					<StackPanel IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
+
+						<!-- Position -->
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelPosition}"/>
+						<TextBlock Classes="StatusBar_TextBlock">
+							<TextBlock.Text>
+								<MultiBinding StringFormat="{}({0},{1})">
+									<Binding Path="SelectedRenderedImagePixelPositionX"/>
+									<Binding Path="SelectedRenderedImagePixelPositionY"/>
+								</MultiBinding>
+							</TextBlock.Text>
+						</TextBlock>
+
+						<!-- Color -->
+						<Separator Classes="StatusBar_Separator"/>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelColor}"/>
+						<TextBlock Classes="StatusBar_TextBlock">
+							<TextBlock.Text>
+								<MultiBinding StringFormat="{}#{0:X2}{1:X2}{2:X2}{3:X2}">
+									<Binding Path="SelectedRenderedImagePixelColor.A"/>
+									<Binding Path="SelectedRenderedImagePixelColor.R"/>
+									<Binding Path="SelectedRenderedImagePixelColor.G"/>
+									<Binding Path="SelectedRenderedImagePixelColor.B"/>
+								</MultiBinding>
+							</TextBlock.Text>
+						</TextBlock>
+
+					</StackPanel>
+
 				</StackPanel>
 
-				<!-- Selected pixel -->
-				<StackPanel Grid.Column="1" IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
+				<!-- Right part -->
+				<StackPanel Grid.Column="1" Orientation="Horizontal">
+					
+					<!-- Saving image -->
+					<StackPanel IsVisible="{Binding IsSavingRenderedImage}" Orientation="Horizontal">
+						<Separator Classes="StatusBar_Separator"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Save}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SavingRenderedImage}"/>
+					</StackPanel>
 
-					<!-- Position -->
-					<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelPosition}"/>
-					<TextBlock Classes="StatusBar_TextBlock">
-						<TextBlock.Text>
-							<MultiBinding StringFormat="{}({0},{1})">
-								<Binding Path="SelectedRenderedImagePixelPositionX"/>
-								<Binding Path="SelectedRenderedImagePixelPositionY"/>
-							</MultiBinding>
-						</TextBlock.Text>
-					</TextBlock>
-
-					<!-- Color -->
-					<Separator Classes="StatusBar_Separator"/>
-					<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelColor}"/>
-					<TextBlock Classes="StatusBar_TextBlock">
-						<TextBlock.Text>
-							<MultiBinding StringFormat="{}#{0:X2}{1:X2}{2:X2}{3:X2}">
-								<Binding Path="SelectedRenderedImagePixelColor.A"/>
-								<Binding Path="SelectedRenderedImagePixelColor.R"/>
-								<Binding Path="SelectedRenderedImagePixelColor.G"/>
-								<Binding Path="SelectedRenderedImagePixelColor.B"/>
-							</MultiBinding>
-						</TextBlock.Text>
-					</TextBlock>
+					<!-- Rendering image -->
+					<StackPanel IsVisible="{Binding IsRenderingImage}" Orientation="Horizontal">
+						<Separator Classes="StatusBar_Separator"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Waiting}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
+					</StackPanel>
 
 				</StackPanel>
 				

@@ -59,14 +59,14 @@
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">開啟影像檔案 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">組態</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中...</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">順時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">行步距 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">另存組態</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">儲存組態</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveRenderedImage">儲存繪製的影像 (Ctrl+S)</sys:String>
-	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像...</sys:String>
+	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">色彩：</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">位置：</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>

@@ -66,14 +66,14 @@
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">Row-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as new profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveRenderedImage">Save rendered image (Ctrl+S)</sys:String>
-	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image...</sys:String>
+	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">Color: </sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">Position: </sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
