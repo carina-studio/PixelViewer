@@ -10,6 +10,9 @@ using CarinaStudio.Collections;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
+#if WINDOWS10_0_17763_0_OR_GREATER
+using Microsoft.WindowsAPICodePack.Taskbar;
+#endif
 using System;
 using System.Collections;
 using System.Collections.Specialized;
@@ -25,8 +28,10 @@ namespace Carina.PixelViewer
 	class MainWindow : CarinaStudio.AppSuite.Controls.MainWindow<Workspace>
 	{
 		// Fields.
+		Session? attachedActivatedSession;
 		readonly TabControl mainTabControl;
 		readonly IList mainTabItems;
+		readonly ScheduledAction updateTitleBarAction;
 
 
 		/// <summary>
@@ -46,6 +51,28 @@ namespace Carina.PixelViewer
 				it.SelectionChanged += (s, e) => this.OnMainTabControlSelectionChanged();
 			});
 			this.mainTabItems = (IList)this.mainTabControl.Items;
+
+			// create scheduled actions
+			this.updateTitleBarAction = new ScheduledAction(() =>
+			{
+				if (this.IsClosed)
+					return;
+#if WINDOWS10_0_17763_0_OR_GREATER
+				if (!TaskbarManager.IsPlatformSupported)
+					return;
+				if (this.attachedActivatedSession == null)
+					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+				else if (this.attachedActivatedSession.InsufficientMemoryForRenderedImage)
+					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
+				else if (this.attachedActivatedSession.IsRenderingImage
+					|| this.attachedActivatedSession.IsSavingRenderedImage)
+				{
+					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+				}
+				else
+					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
+#endif
+			});
 		}
 
 
@@ -72,6 +99,18 @@ namespace Carina.PixelViewer
 		}
 
 
+		// Attach to activated session.
+		void AttachToActivatedSession(Session session)
+		{
+			if (this.attachedActivatedSession == session)
+				return;
+			this.DetachFromActivatedSession();
+			this.attachedActivatedSession = session;
+			session.PropertyChanged += this.OnActivatedSessionPropertyChanged;
+			this.updateTitleBarAction.Schedule();
+		}
+
+
 		// Close given tab item.
 		void CloseMainTabItem(TabItem tabItem)
 		{
@@ -88,6 +127,16 @@ namespace Carina.PixelViewer
 		/// Command for closing given tab item.
 		/// </summary>
 		public ICommand CloseMainTabItemCommand { get; }
+
+
+		// Detach from activated session.
+		void DetachFromActivatedSession()
+        {
+			if (this.attachedActivatedSession == null)
+				return;
+			this.attachedActivatedSession.PropertyChanged -= this.OnActivatedSessionPropertyChanged;
+			this.updateTitleBarAction.Schedule();
+        }
 
 
 		// Detach tab item from session.
@@ -129,6 +178,20 @@ namespace Carina.PixelViewer
 		private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
+		// Called when property of activated session changed.
+		void OnActivatedSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			switch(e.PropertyName)
+            {
+				case nameof(Session.InsufficientMemoryForRenderedImage):
+				case nameof(Session.IsRenderingImage):
+				case nameof(Session.IsSavingRenderedImage):
+					this.updateTitleBarAction.Schedule();
+					break;
+            }
+		}
+
+
 		// Attach to view-model.
 		protected override void OnAttachToViewModel(Workspace workspace)
 		{
@@ -156,6 +219,9 @@ namespace Carina.PixelViewer
 			}
 			else
 				workspace.CreateSession();
+
+			// attach to activated session
+			workspace.ActivatedSession?.Let(it => this.AttachToActivatedSession(it));
 		}
 
 
@@ -175,6 +241,9 @@ namespace Carina.PixelViewer
 		// Detach from view-model.
         protected override void OnDetachFromViewModel(Workspace workspace)
         {
+			// detach from activated session
+			this.DetachFromActivatedSession();
+
 			// clear tab items
 			this.mainTabControl.SelectedIndex = 0;
 			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
@@ -343,11 +412,16 @@ namespace Carina.PixelViewer
 				return;
 			if (e.PropertyName == nameof(Workspace.ActivatedSession))
 			{
-				var tabIndex = workspace.ActivatedSession != null ? this.FindMainTabItemIndex(workspace.ActivatedSession) : -1;
+				var activatedSession = workspace.ActivatedSession;
+				var tabIndex = activatedSession != null ? this.FindMainTabItemIndex(activatedSession) : -1;
 				if (tabIndex < 0)
 					this.mainTabControl.SelectedIndex = 0;
 				else if (this.mainTabControl.SelectedIndex != tabIndex)
 					this.mainTabControl.SelectedIndex = tabIndex;
+				if (activatedSession != null)
+					this.AttachToActivatedSession(activatedSession);
+				else
+					this.DetachFromActivatedSession();
 			}
         }
     }
