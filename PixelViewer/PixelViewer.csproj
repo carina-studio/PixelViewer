@@ -76,7 +76,7 @@
 		<PackageReference Include="CarinaStudio.AppBase.AutoUpdate" Version="0.27.3.1007" />
 		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.27.3.1007" />
 		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.27.3.1007" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.14.1.1013" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.14.2.1013" />
 		<PackageReference Condition="'$(Configuration)'=='Debug-Windows'" Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
 		<PackageReference Condition="'$(Configuration)'=='Release-Windows'" Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
 		<PackageReference Include="NLog" Version="4.7.11" />
