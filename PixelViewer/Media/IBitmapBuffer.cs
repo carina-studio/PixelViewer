@@ -54,6 +54,7 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+#if WINDOWS10_0_17763_0_OR_GREATER
 		/// <summary>
 		/// Create <see cref="System.Drawing.Bitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
 		/// </summary>
@@ -66,6 +67,7 @@ namespace Carina.PixelViewer.Media
 				return new System.Drawing.Bitmap(buffer.Width, buffer.Height, buffer.RowBytes, buffer.Format.ToSystemDrawingPixelFormat(), address);
 			});
 		}
+#endif
 
 
 		/// <summary>

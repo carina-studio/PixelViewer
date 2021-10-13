@@ -1781,8 +1781,13 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					unsafe
 					{
+#if WINDOWS10_0_17763_0_OR_GREATER
 						using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
 						bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+#else
+						using var bitmap = sharedImageBuffer.CreateAvaloniaBitmap();
+						bitmap.Save(stream);
+#endif
 					}
 					return true;
 				}
