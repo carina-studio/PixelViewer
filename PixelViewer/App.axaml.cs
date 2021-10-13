@@ -30,6 +30,11 @@ namespace Carina.PixelViewer
 		const string FilePathKey = "FilePath";
 
 
+		// Static fields.
+		static readonly Uri PreviewPackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
+		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
+
+
 		// Constructor.
 		public App()
         {
@@ -233,7 +238,16 @@ namespace Carina.PixelViewer
 #pragma warning restore CS0612
 
 
-		// Releasing type.
-		public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
+		// URI of package manifest.
+        public override Uri? PackageManifestUri
+        {
+			get => this.Settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.AcceptNonStableApplicationUpdate)
+				? PreviewPackageManifestUri
+				: StablePackageManifestUri;
+        }
+
+
+        // Releasing type.
+        public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
     }
 }

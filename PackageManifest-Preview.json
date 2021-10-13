@@ -1,0 +1,25 @@
+{
+	"Name": "PixelViewer",
+	"Version": "1.0.0.617",
+	"PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/1.0.0.617",
+	"Packages": [
+		{
+			"Architecture": "X64",
+			"OperatingSystem": "Windows",
+			"SHA256": "",
+			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip"
+		},
+		{
+			"Architecture": "X64",
+			"OperatingSystem": "Linux",
+			"SHA256": "",
+			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip"
+		},
+		{
+			"Architecture": "X64",
+			"OperatingSystem": "OSX",
+			"SHA256": "",
+			"Uri": ""
+		}
+	]
+}
