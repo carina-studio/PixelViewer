@@ -12,6 +12,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.RestartingMainWindowsNeeded">Will restart automatically to take effect</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV to RGB conversion</sys:String>

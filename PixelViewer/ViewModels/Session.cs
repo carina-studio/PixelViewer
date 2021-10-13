@@ -972,11 +972,8 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {
             base.OnPropertyChanged(property, oldValue, newValue);
-			if (property == ImageHeightProperty
-				|| property == ImageWidthProperty)
-			{
+			if (property == ImageHeightProperty)
 				this.renderImageOperation.Reschedule(RenderImageDelay);
-			}
 			else if (property == ImageRendererProperty)
 			{
 				if (ImageRenderers.All.Contains(newValue))
@@ -988,6 +985,12 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				else
 					this.Logger.LogError($"{newValue} is not part of available image renderer list");
+			}
+			else if (property == ImageWidthProperty)
+			{
+				if (this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions))
+					this.isImagePlaneOptionsResetNeeded = true;
+				this.renderImageOperation.Reschedule(RenderImageDelay);
 			}
 			else if (property == IsRenderingImageProperty
 				|| property == IsSavingRenderedImageProperty)

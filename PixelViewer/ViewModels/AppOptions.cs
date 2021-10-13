@@ -95,8 +95,22 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
 			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
+			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)
+				this.OnPropertyChanged(nameof(this.ResetImagePlaneOptionsAfterChangingImageDimensions));
+			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
+				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
 			else if (key == SettingKeys.YuvConversionMode)
 				this.OnPropertyChanged(nameof(this.YuvConversionMode));
+		}
+
+
+		/// <summary>
+		/// Reset image plane options after changing image dimensions.
+		/// </summary>
+		public bool ResetImagePlaneOptionsAfterChangingImageDimensions
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions);
+			set => this.Settings.SetValue<bool>(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions, value);
 		}
 
 
