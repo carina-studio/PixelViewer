@@ -30,6 +30,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="0.27.3.1007" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.14.2.1013" />
 		<PackageReference Include="NLog" Version="4.7.11" />
 		<PackageReference Include="NUnit" Version="3.13.2" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />

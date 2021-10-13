@@ -2,8 +2,6 @@
 using NLog;
 using NUnit.Framework;
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,10 +12,9 @@ namespace Carina.PixelViewer.Test
 	/// <summary>
 	/// Base class for test fixture.
 	/// </summary>
-	abstract class BaseTests
+	abstract class BaseTests : CarinaStudio.AppSuite.ApplicationBasedTests
 	{
 		// Fields.
-		volatile string? baseDirectory;
 		volatile string? cacheDirectory;
 
 
@@ -26,18 +23,6 @@ namespace Carina.PixelViewer.Test
 		/// </summary>
 		protected BaseTests()
 		{ }
-
-
-		/// <summary>
-		/// Get base directory for testing purpose.
-		/// </summary>
-		protected string BaseDirectory
-		{
-			get => this.baseDirectory ?? Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName)?.Also((it) =>
-			{
-				this.baseDirectory = it;
-			}) ?? throw new Exception("Unable to get base directory.");
-		}
 
 
 		/// <summary>
@@ -62,13 +47,13 @@ namespace Carina.PixelViewer.Test
 				lock (this)
 				{
 					if (this.cacheDirectory == null)
-						this.cacheDirectory = Path.Combine(this.BaseDirectory, this.GetType().Name);
+						this.cacheDirectory = Path.Combine(this.Application.RootPrivateDirectoryPath, this.GetType().Name);
 					Directory.CreateDirectory(this.cacheDirectory);
 				}
 			}
 
 			// generate file
-			while(true)
+			while (true)
 			{
 				var fileName = new char[16];
 				for (var i = fileName.Length - 1; i >= 0; --i)
@@ -141,62 +126,6 @@ namespace Carina.PixelViewer.Test
 
 			// check final value
 			return command.CanExecute(parameter) == canExecute;
-		}
-
-
-		/// <summary>
-		/// Wait for value of given property to be specific one.
-		/// </summary>
-		/// <param name="source">Source of property.</param>
-		/// <param name="propertyName">Name of property.</param>
-		/// <param name="targetValue">Specific value to wait for.</param>
-		/// <param name="timeoutMillis">Timeout in milliseconds.</param>
-		/// <returns>True if property has been changed to specific value in given timeout.</returns>
-		protected async Task<bool> WaitForProperty<TSource, TValue>(TSource source, string propertyName, TValue targetValue, int timeoutMillis) where TSource : INotifyPropertyChanged
-		{
-			// find property
-			var sourceType = source.GetType();
-			var propertyGetter = sourceType.GetProperty(propertyName)?.GetGetMethod()?.CreateDelegate(typeof(Func<TSource, TValue>)) as Func<TSource, TValue> ?? throw new ArgumentException($"Cannot find property '{propertyName}' in {sourceType.Name}.");
-
-			// check current value
-			var checkValueFunc = new Func<TValue, TValue, bool>((x, y) =>
-			{
-				if (x != null)
-					return y != null && x.Equals(y);
-				return y == null;
-			});
-			var value = propertyGetter(source);
-			if (checkValueFunc(value, targetValue))
-				return true;
-
-			// check timeout
-			if (timeoutMillis == 0)
-				return false;
-
-			// wait for property change
-			var cancellationTokenSource = new CancellationTokenSource();
-			var eventHandler = new PropertyChangedEventHandler((_, e) =>
-			{
-				if (e.PropertyName == propertyName && checkValueFunc(propertyGetter(source), targetValue))
-					cancellationTokenSource.Cancel();
-			});
-			source.PropertyChanged += eventHandler;
-			try
-			{
-				await Task.Delay(timeoutMillis, cancellationTokenSource.Token);
-			}
-			catch (TaskCanceledException)
-			{
-				await Task.Delay(1); // delay to make sure that other properties changed by source are completed
-				return true;
-			}
-			finally
-			{
-				source.PropertyChanged -= eventHandler;
-			}
-
-			// check final value
-			return checkValueFunc(propertyGetter(source), targetValue);
 		}
 	}
 }

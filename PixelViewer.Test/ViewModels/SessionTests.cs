@@ -1,6 +1,8 @@
 ﻿using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.ViewModels;
+using CarinaStudio.Tests;
 using NUnit.Framework;
+using System;
 using System.IO;
 
 namespace Carina.PixelViewer.Test.ViewModels
@@ -9,10 +11,11 @@ namespace Carina.PixelViewer.Test.ViewModels
 	/// Tests of <see cref="Session"/>.
 	/// </summary>
 	[TestFixture]
-	class SessionTests : BaseViewModelTests<Session>
+	class SessionTests : BaseTests
 	{
 		// Fields.
-		Session? session = null;
+		Session? session;
+		Workspace? workspace;
 
 
 		/// <summary>
@@ -21,10 +24,11 @@ namespace Carina.PixelViewer.Test.ViewModels
 		[OneTimeSetUp]
 		public void CreateSession()
 		{
-			this.TestSynchronizationContext.Send((_) =>
+			this.TestOnApplicationThread(() =>
 			{
-				this.session = new Session();
-			}, null);
+				this.workspace = new Workspace();
+				this.session = this.workspace.CreateSession();
+			});
 		}
 
 
@@ -34,19 +38,21 @@ namespace Carina.PixelViewer.Test.ViewModels
 		[OneTimeTearDown]
 		public void DisposeSession()
 		{
-			this.TestSynchronizationContext.Send((_) =>
+			this.TestOnApplicationThread(() =>
 			{
-				this.session?.Dispose();
-			}, null);
+				if (this.session != null)
+					this.workspace?.CloseSession(this.session);
+				this.workspace?.Dispose();
+			});
 		}
 
 
 		// Generate source image file with random data.
 		string GenerateSourceFile()
 		{
-			var data = new byte[this.Random.Next(1 << 10, 1 << 20 + 1)];
+			var data = new byte[CarinaStudio.Tests.Random.Next(1 << 10, 1 << 20 + 1)];
 			for (var i = data.Length - 1; i >= 0; --i)
-				data[i] = (byte)this.Random.Next(0, 256);
+				data[i] = (byte)CarinaStudio.Tests.Random.Next(0, 256);
 			using var stream = this.CreateCacheFile();
 			stream.Write(data);
 			return stream.Name;
@@ -61,15 +67,15 @@ namespace Carina.PixelViewer.Test.ViewModels
 		public void TestChangingImageRenderer()
 		{
 			var session = this.session ?? throw new AssertionException("No instance for testing.");
-			this.TestByTestSynchronizationContext(async () =>
+			this.TestOnApplicationThread(async () =>
 			{
 				// open file
 				var filePath = this.GenerateSourceFile();
 				session.OpenSourceFileCommand.Execute(filePath);
-				Assert.IsTrue(await this.WaitForProperty(session, nameof(Session.IsSourceFileOpened), true, 1000), "Cannot open source file.");
+				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), true, 1000), "Cannot open source file.");
 
 				// wait for first rendering
-				Assert.IsTrue(await this.WaitForProperty(session, nameof(Session.IsRenderingImage), false, 10000), "Unable to complete first rendering.");
+				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsRenderingImage), false, 10000), "Unable to complete first rendering.");
 				Assert.IsNotNull(session.RenderedImage, "No rendered image for first rendering.");
 
 				// change renderers
@@ -77,7 +83,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				{
 					session.ImageRenderer = imageRenderer;
 					var planeDescriptors = imageRenderer.Format.PlaneDescriptors;
-					Assert.IsTrue(await this.WaitForProperty(session, nameof(Session.IsRenderingImage), false, 10000), $"Unable to complete rendering by {imageRenderer}.");
+					Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsRenderingImage), false, 10000), $"Unable to complete rendering by {imageRenderer}.");
 					Assert.IsNotNull(session.RenderedImage, $"No rendered image for rendering by {imageRenderer}.");
 					Assert.AreEqual(planeDescriptors.Count, session.ImagePlaneCount, "Reported image plane count is incorrect.");
 					Assert.AreEqual(planeDescriptors.Count >= 1, session.HasImagePlane1, $"{nameof(Session.HasImagePlane1)} is incorrect.");
@@ -87,10 +93,10 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// close file
 				session.CloseSourceFileCommand.Execute(null);
-				Assert.IsTrue(await this.WaitForProperty(session, nameof(Session.IsSourceFileOpened), false, 1000), "Cannot close source file.");
+				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), false, 1000), "Cannot close source file.");
 				Assert.IsNull(session.RenderedImage, "Rendered image is still there after closing source file.");
 				File.Delete(filePath);
-			}, 30000);
+			});
 		}
 
 
@@ -98,12 +104,12 @@ namespace Carina.PixelViewer.Test.ViewModels
 		/// Test for opening and closing source image file.
 		/// </summary>
 		[Test]
-		public void TestOpeningClosingSourceFile()
+		public void TestOnApplicationThread()
 		{
 			var session = this.session ?? throw new AssertionException("No instance for testing.");
 			var openCommand = session.OpenSourceFileCommand;
 			var closeCommand = session.CloseSourceFileCommand;
-			this.TestByTestSynchronizationContext(async () =>
+			this.TestOnApplicationThread(async () =>
 			{
 				// open file 1
 				var filePath1 = this.GenerateSourceFile();
@@ -114,7 +120,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.IsFalse(session.IsSourceFileOpened, $"{nameof(Session.IsSourceFileOpened)} should false.");
 
 				// wait for opening
-				var waitingResult = await this.WaitForProperty(session, nameof(Session.IsSourceFileOpened), true, 1000);
+				var waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), true, 1000);
 				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceFileOpened)} should be true.");
 				Assert.AreEqual(filePath1, session.SourceFileName, "Source file name is different from set one.");
 				Assert.IsTrue(openCommand.CanExecute(null), "Source file opening should be able to be executed.");
@@ -128,7 +134,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.IsFalse(session.IsSourceFileOpened, $"{nameof(Session.IsSourceFileOpened)} should false.");
 
 				// wait for opening
-				waitingResult = await this.WaitForProperty(session, nameof(Session.IsSourceFileOpened), true, 1000);
+				waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), true, 1000);
 				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceFileOpened)} should be true.");
 				Assert.AreEqual(filePath2, session.SourceFileName, "Source file name is different from set one.");
 				Assert.IsTrue(openCommand.CanExecute(null), "Source file opening should be able to be executed.");
@@ -143,13 +149,13 @@ namespace Carina.PixelViewer.Test.ViewModels
 				// wait for closing
 				waitingResult = await this.WaitForCommandState(closeCommand, false, null, 1000);
 				Assert.IsTrue(waitingResult, "Source file closing should be able to be executed.");
-				waitingResult = await this.WaitForProperty(session, nameof(Session.IsSourceFileOpened), false, 1000);
+				waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), false, 1000);
 				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceFileOpened)} should be false.");
 				Assert.IsTrue(openCommand.CanExecute(null), "Source file opening should be able to be executed.");
 
 				// delete file 2 to make sure that file has been unlocked
 				File.Delete(filePath2);
-			}, 10000);
+			});
 		}
 	}
 }
