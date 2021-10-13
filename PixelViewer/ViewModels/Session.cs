@@ -582,9 +582,13 @@ namespace Carina.PixelViewer.ViewModels
 			// evaluate
 			this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((it) =>
 			{
-				this.ImageWidth = it.Width;
-				this.ImageHeight = it.Height;
-				this.renderImageOperation.ExecuteIfScheduled();
+				if (this.ImageWidth != it.Width || this.ImageHeight != it.Height)
+				{
+					this.ImageWidth = it.Width;
+					this.ImageHeight = it.Height;
+					this.isImagePlaneOptionsResetNeeded = true;
+					this.renderImageOperation.ExecuteIfScheduled();
+				}
 			});
 		}
 
