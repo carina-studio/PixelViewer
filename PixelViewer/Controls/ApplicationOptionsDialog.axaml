@@ -101,10 +101,15 @@
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
-				<!-- Memory usage -->
+				<!-- Other -->
 				<Border Classes="Dialog_TextBlock_Header1">
-					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.MemoryUsage}"/>
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptions.Others}"/>
 				</Border>
+
+				<!-- Accept non-stable update -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.AcceptNonStableApplicationUpdate}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding AcceptNonStableApplicationUpdate, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Max rendered images memory usage -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>

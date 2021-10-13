@@ -12,7 +12,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像輸出記憶體使用上限 (MB)</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.MemoryUsage">記憶體使用</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.RestartingMainWindowsNeeded">將會自動重新啟動以套用</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>

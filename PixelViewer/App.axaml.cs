@@ -231,5 +231,9 @@ namespace Carina.PixelViewer
 			}
 		}
 #pragma warning restore CS0612
-	}
+
+
+		// Releasing type.
+		public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
+    }
 }
