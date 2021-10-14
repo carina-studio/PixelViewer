@@ -70,9 +70,7 @@
 	<sys:String x:Key="String/SessionControl.SaveProfile">儲存組態</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveRenderedImage">儲存繪製的影像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">色彩：</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">位置：</sys:String>
-	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料:</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 

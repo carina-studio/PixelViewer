@@ -327,18 +327,30 @@
 					</StackPanel>
 
 					<!-- Source data size -->
-					<StackPanel IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal">
-						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SourceDataSize}"/>
-						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={} {0:N0} }"/>
+					<StackPanel Background="{x:Static Brushes.Transparent}" IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={}{0:N0} }"/>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/Common.Bytes}"/>
-						<Separator Classes="StatusBar_Separator"/>
 					</StackPanel>
+					<Separator Classes="StatusBar_Separator" IsVisible="{Binding HasRenderedImage}"/>
 
 					<!-- Selected pixel -->
 					<StackPanel IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
 
 						<!-- Position -->
-						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelPosition}"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
 						<TextBlock Classes="StatusBar_TextBlock">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}({0},{1})">
@@ -350,7 +362,13 @@
 
 						<!-- Color -->
 						<Separator Classes="StatusBar_Separator"/>
-						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelColor}"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Color}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
 						<TextBlock Classes="StatusBar_TextBlock">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}#{0:X2}{1:X2}{2:X2}{3:X2}">

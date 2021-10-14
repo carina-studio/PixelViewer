@@ -86,18 +86,6 @@
 	
 	<ItemGroup>
 		<AvaloniaResource Include="AppIcon.ico" />
-		<AvaloniaResource Include="Resources/Dark/OpenFile_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Add_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Close_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/FitToScreen_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/RotateLeft_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/RotateRight_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Settings_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/ZoomIn_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/ZoomOut_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/NewSession_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Options_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Save_96px.png" />
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
 		<AvaloniaResource Include="Resources/AppIcon_128px.png" />
 		<AvaloniaResource Include="Resources/AppIcon_16px.png" />
@@ -106,26 +94,6 @@
 		<AvaloniaResource Include="Resources/AppIcon_512px.png" />
 		<AvaloniaResource Include="Resources/AppIcon_64px.png" />
 		<AvaloniaResource Include="Resources/AppIcon.ico" />
-		<AvaloniaResource Include="Resources/Dark/Error_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Add_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Close_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Error_96px.png" />
-		<AvaloniaResource Include="Resources/Light/FitToScreen_96px.png" />
-		<AvaloniaResource Include="Resources/Light/NewSession_96px.png" />
-		<AvaloniaResource Include="Resources/Light/OpenFile_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Options_96px.png" />
-		<AvaloniaResource Include="Resources/Light/RotateLeft_96px.png" />
-		<AvaloniaResource Include="Resources/Light/RotateRight_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Save_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Settings_96px.png" />
-		<AvaloniaResource Include="Resources/Light/ZoomIn_96px.png" />
-		<AvaloniaResource Include="Resources/Light/ZoomOut_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Information_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Question_96px.png" />
-		<AvaloniaResource Include="Resources/Dark/Warning_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Information_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Question_96px.png" />
-		<AvaloniaResource Include="Resources/Light/Warning_96px.png" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
 		<AvaloniaResource Include="Strings/Default-Linux.xaml" />

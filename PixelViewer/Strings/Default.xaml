@@ -77,9 +77,7 @@
 	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveRenderedImage">Save rendered image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">Color: </sys:String>
-	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">Position: </sys:String>
-	<sys:String x:Key="String/SessionControl.SourceDataSize">Source data:</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 
