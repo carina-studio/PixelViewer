@@ -51,11 +51,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var height = (bitmapBuffer.Height & 0x7ffffffe);
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
-			if (width <= 0 || height <= 0 || pixelStride < 4
-				|| pixelStride <= 0 || (pixelStride * width / 2) > rowStride)
-			{
-				return;
-			}
+			if (width <= 0 || height <= 0)
+				throw new ArgumentException($"Invalid size: {width}x{height}.");
+			if (pixelStride < 4 || pixelStride <= 0 || (pixelStride * width / 2) > rowStride)
+				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// select color conversion
 			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgraConversionUnsafe();

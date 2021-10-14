@@ -413,6 +413,19 @@
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
 					</StackPanel>
 
+					<!-- Rendering error -->
+					<StackPanel IsVisible="{Binding HasRenderingError}" Orientation="Horizontal">
+						<Separator Classes="StatusBar_Separator"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Error}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
+					</StackPanel>
+
 				</StackPanel>
 				
 			</Grid>

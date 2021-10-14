@@ -23,13 +23,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		{
 			// get parameters
 			if (planeOptions.Count != 1)
-				return;
+				throw new ArgumentException($"Invalid number of plane options: {planeOptions.Count}.");
 			var width = bitmapBuffer.Width;
 			var height = bitmapBuffer.Height;
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			if (pixelStride <= 0 || rowStride <= 0)
-				return;
+				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>

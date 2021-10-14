@@ -63,6 +63,7 @@
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">組態</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">繪製發生錯誤</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">順時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">行步距 (位元組)</sys:String>

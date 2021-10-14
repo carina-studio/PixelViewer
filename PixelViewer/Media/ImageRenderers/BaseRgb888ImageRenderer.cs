@@ -39,7 +39,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			if (pixelStride <= 0 || (pixelStride * width) > rowStride)
-				return;
+				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>

@@ -28,7 +28,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			if (pixelStride <= 0 || rowStride <= 0)
-				return;
+				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// render
 			var srcRow = new byte[rowStride];

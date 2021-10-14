@@ -62,8 +62,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			var effectiveBits = planeOptions[0].EffectiveBits;
-			if (width <= 0 || height <= 0 || pixelStride <= 0 || (pixelStride * width) > rowStride || effectiveBits <= 8 || effectiveBits > 16)
-				return;
+			if (width <= 0 || height <= 0)
+				throw new ArgumentException($"Invalid size: {width}x{height}.");
+			if (pixelStride <= 0 || (pixelStride * width) > rowStride)
+				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
+			if (effectiveBits <= 8 || effectiveBits > 16)
+				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
 
 			// select byte ordering
 			var effectiveBitsShiftCount = (effectiveBits - 8);

@@ -153,6 +153,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderedImage));
 		/// <summary>
+		/// Property of <see cref="HasRenderingError"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasRenderingErrorProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderingError));
+		/// <summary>
 		/// Property of <see cref="HasSelectedRenderedImagePixel"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProperty = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
@@ -242,7 +246,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Constants.
-		const int RenderImageDelay = 1000;
+		const int RenderImageDelay = 500;
 
 
 		// Static fields.
@@ -359,7 +363,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.effectiveBits[index] = effectiveBits;
 			this.OnEffectiveBitsChanged(index);
-			this.renderImageOperation.Reschedule();
+			this.renderImageOperation.Reschedule(RenderImageDelay);
 		}
 
 
@@ -372,7 +376,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.pixelStrides[index] = pixelStride;
 			this.OnPixelStrideChanged(index);
-			this.renderImageOperation.Reschedule();
+			this.renderImageOperation.Reschedule(RenderImageDelay);
 		}
 
 
@@ -385,7 +389,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.rowStrides[index] = rowStride;
 			this.OnRowStrideChanged(index);
-			this.renderImageOperation.Reschedule();
+			this.renderImageOperation.Reschedule(RenderImageDelay);
 		}
 
 
@@ -433,6 +437,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			if (!disposing)
 			{
+				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 				this.SetValue(SourceDataSizeProperty, 0);
 			}
@@ -675,6 +680,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether <see cref="RenderedImage"/> is non-null or not.
 		/// </summary>
 		public bool HasRenderedImage { get => this.GetValue(HasRenderedImageProperty); }
+
+
+		/// <summary>
+		/// Check whether error was occurred when rendering or not.
+		/// </summary>
+		public bool HasRenderingError { get => this.GetValue(HasRenderingErrorProperty); }
 
 
 		/// <summary>
@@ -1401,11 +1412,16 @@ namespace Carina.PixelViewer.ViewModels
 			this.Logger.LogDebug($"Render image for '{sourceFileName}', dimensions: {this.ImageWidth}x{this.ImageHeight}");
 			var cancellationTokenSource = new CancellationTokenSource();
 			var renderingOptions = new ImageRenderingOptions();
+			var exception = (Exception?)null;
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-			await imageRenderer.Render(imageDataSource, renderedImageBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
-
-			// update source data size
-			this.SetValue(SourceDataSizeProperty, imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList));
+			try
+			{
+				await imageRenderer.Render(imageDataSource, renderedImageBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+			}
+			catch (Exception ex)
+			{
+				exception = ex;
+			}
 
 			// check whether rendering has been cancelled or not
 			if (cancellationTokenSource.IsCancellationRequested)
@@ -1428,7 +1444,10 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 
 			// update state
-			this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
+			if (exception == null)
+				this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
+			else
+				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
 			this.RenderedImage?.Let((prevRenderedImage) =>
 			{
 				var prevRenderedImageBuffer = this.renderedImageBuffer;
@@ -1443,9 +1462,12 @@ namespace Carina.PixelViewer.ViewModels
 			});
 			this.renderedImageMemoryUsageToken = memoryUsageToken;
 			this.renderedImageBuffer = renderedImageBuffer;
+			this.SetValue(HasRenderingErrorProperty, exception != null);
 			this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
 			this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 			this.SetValue(IsRenderingImageProperty, false);
+			if (exception == null)
+				this.SetValue(SourceDataSizeProperty, imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList));
 		}
 
 

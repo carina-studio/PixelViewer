@@ -58,7 +58,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				|| yPixelStride <= 0 || yRowStride <= 0 || (yPixelStride * width) > yRowStride
 				|| uvPixelStride <= 0 || uvRowStride <= 0 || (uvPixelStride * width / 2) > uvRowStride)
 			{
-				return;
+				throw new ArgumentException($"Invalid pixel/row stride.");
 			}
 
 			// select color conversion

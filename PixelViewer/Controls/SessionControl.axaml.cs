@@ -106,7 +106,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					if (this.DataContext is not Session session)
 						return StatusBarState.Inactive;
-					if (session.InsufficientMemoryForRenderedImage)
+					if (session.HasRenderingError || session.InsufficientMemoryForRenderedImage)
 						return StatusBarState.Error;
 					if (session.IsSourceFileOpened)
 						return StatusBarState.Active;
@@ -343,6 +343,7 @@ namespace Carina.PixelViewer.Controls
 						this.imageScrollViewer.Padding = padding;
 						break;
 					}
+				case nameof(Session.HasRenderingError):
 				case nameof(Session.InsufficientMemoryForRenderedImage):
 					this.updateStatusBarStateAction.Schedule();
 					break;

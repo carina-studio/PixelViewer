@@ -70,6 +70,7 @@
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering error occurred</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">Row-stride (bytes)</sys:String>
