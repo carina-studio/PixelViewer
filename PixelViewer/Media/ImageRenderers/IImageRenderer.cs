@@ -32,6 +32,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
+		/// Evaluate size of data need to be consumed from source.
+		/// </summary>
+		/// <param name="width">Width of image in pixels.</param>
+		/// <param name="height">Height of image in pixels.</param>
+		/// <param name="renderingOptions">Rendering options.</param>
+		/// <param name="planeOptions">Rendering options for each plane.</param>
+		/// <returns>Data size in bytes.</returns>
+		long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions);
+
+
+		/// <summary>
 		/// Format supported by this renderer.
 		/// </summary>
 		ImageFormat Format { get; }

@@ -32,5 +32,15 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 		// Evaluate pixel count.
 		public override int EvaluatePixelCount(IImageDataSource source) => (int)(source.Size / this.bytesPerPixel);
+
+
+		// Evaluate source data size.
+		public override long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions)
+		{
+			if (width <= 0 || height <= 0)
+				return 0;
+			var rowStride = Math.Min(width * this.bytesPerPixel, planeOptions[0].RowStride);
+			return rowStride * height;
+		}
 	}
 }

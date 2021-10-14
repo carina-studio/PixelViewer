@@ -29,7 +29,21 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Evaluate pixel count.
-		public override int EvaluatePixelCount(IImageDataSource source) => (int)(source.Size / 2);
+		public override int EvaluatePixelCount(IImageDataSource source) => (int)(source.Size / 3);
+
+
+		// Evaluate source data size.
+		public override long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions)
+		{
+			width &= 0x7ffffffe;
+			height &= 0x7ffffffe;
+			if (width <= 0 || height <= 0)
+				return 0;
+			var yRowStride = Math.Min(width, planeOptions[0].RowStride);
+			var uv1RowStride = Math.Min(width, planeOptions[1].RowStride);
+			var uv2RowStride = Math.Min(width, planeOptions[2].RowStride);
+			return (yRowStride * height) + (uv1RowStride * height) + (uv2RowStride * height);
+		}
 
 
 		// Render.

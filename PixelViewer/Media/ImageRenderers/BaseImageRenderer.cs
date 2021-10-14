@@ -80,6 +80,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		// Implementations.
 		public abstract IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height);
 		public abstract int EvaluatePixelCount(IImageDataSource source);
+		public abstract long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions);
 		public ImageFormat Format { get; }
 		public virtual BitmapFormat RenderedFormat => BitmapFormat.Bgra32;
 	}
