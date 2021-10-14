@@ -1084,7 +1084,7 @@ namespace Carina.PixelViewer.ViewModels
 				try
 				{
 					this.Logger.LogDebug($"Create source for '{fileName}'");
-					return new FileImageDataSource(fileName);
+					return new FileImageDataSource(this.Application, fileName);
 				}
 				catch (Exception ex)
 				{

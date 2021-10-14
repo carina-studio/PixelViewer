@@ -1,4 +1,6 @@
-﻿using NLog;
+﻿using CarinaStudio;
+using CarinaStudio.IO;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,7 +21,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		protected BaseImageRenderer(ImageFormat format)
 		{
 			this.Format = format;
-			this.Logger = LogManager.GetLogger(this.GetType().Name);
+			this.Logger = App.Current.LoggerFactory.CreateLogger(this.GetType().Name);
 		}
 
 
@@ -42,25 +44,36 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Render.
-		public Task Render(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+		public async Task Render(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
+			// check parameter
 			if (bitmapBuffer.Format != this.RenderedFormat)
 				throw new ArgumentException($"Invalid format of bitmap buffer: {bitmapBuffer.Format}.");
-			var sharedSource = source.Share();
-			var sharedBitmapBuffer = bitmapBuffer.Share();
-			return Task.Run(() =>
+
+			// share resources
+			using var sharedSource = source.Share();
+			using var sharedBitmapBuffer = bitmapBuffer.Share();
+
+			// open stream
+			var stream = await sharedSource.OpenStreamAsync(StreamAccess.Read);
+			if (cancellationToken.IsCancellationRequested)
 			{
-				try
+				Global.RunWithoutErrorAsync(stream.Dispose);
+				throw new TaskCanceledException();
+			}
+
+			// render
+			try
+            {
+				await Task.Run(() =>
 				{
-					using var stream = sharedSource.Open();
 					this.OnRender(sharedSource, stream, sharedBitmapBuffer, renderingOptions, planeOptions, cancellationToken);
-				}
-				finally
-				{
-					sharedBitmapBuffer.Dispose();
-					sharedSource.Dispose();
-				}
-			});
+				});
+			}
+			finally
+            {
+				Global.RunWithoutErrorAsync(stream.Dispose);
+			}
 		}
 
 
