@@ -27,6 +27,26 @@
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Ratio_9x16}" Header="9:16"/>
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Ratio_2x3}" Header="2:3"/>
 		</ContextMenu>
+
+		<!-- Other actions -->
+		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Top">
+			<MenuItem Command="{Binding $parent[UserControl].ShowAppOptions}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
+				<MenuItem.Icon>
+					<Border Classes="MenuItem_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Settings}"/>
+					</Border>
+				</MenuItem.Icon>
+			</MenuItem>
+			<MenuItem Command="{Binding $parent[UserControl].CheckForAppUpdate}" Header="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
+				<MenuItem.Icon>
+					<Border Classes="MenuItem_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Update}"/>
+					</Border>
+				</MenuItem.Icon>
+			</MenuItem>
+			<Separator/>
+			<MenuItem Command="{Binding $parent[UserControl].ShowAppInfo}" Header="{DynamicResource String/SessionControl.ApplicationInfo}"/>
+		</ContextMenu>
 		
 	</UserControl.Resources>
 
@@ -155,20 +175,13 @@
 					<!-- Separator -->
 					<Separator Classes="ToolBar_Separator"/>
 
-					<!-- App options -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowAppOptions}" ToolTip.Tip="{DynamicResource String/ApplicationOptions}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Settings}"/>
-					</Button>
-
-					<!-- Check for update -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].CheckForAppUpdate}" ToolTip.Tip="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Update}"/>
-					</Button>
-
-					<!-- About -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowAppInfo}" ToolTip.Tip="{DynamicResource String/SessionControl.ApplicationInfo}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Information}"/>
-					</Button>
+					<!-- Other actions -->
+					<ToggleButton Name="otherActionsButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
+						<Panel>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
 
 				</StackPanel>
 			</Border>

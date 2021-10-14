@@ -45,8 +45,9 @@
 	<sys:String x:Key="String/Session.EmptyTitle">Empty tab</sys:String>
 
 	<!-- SessionControl -->
-	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer</sys:String>
-	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for application update</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
+	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete profile</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>
@@ -64,6 +65,7 @@
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in application options.</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No image file opened</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
+	<sys:String x:Key="String/SessionControl.OtherActions">Other actions</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>

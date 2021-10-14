@@ -54,6 +54,8 @@ namespace Carina.PixelViewer.Controls
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ScrollViewer imageScrollViewer;
+		readonly ToggleButton otherActionsButton;
+		readonly ContextMenu otherActionsMenu;
 		readonly ScheduledAction updateStatusBarStateAction;
 
 
@@ -90,6 +92,12 @@ namespace Carina.PixelViewer.Controls
 				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
 			});
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
+			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
+			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
+			{
+				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
+				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
+			});
 
 			// create scheduled actions
 			this.updateStatusBarStateAction = new ScheduledAction(() =>
@@ -548,6 +556,15 @@ namespace Carina.PixelViewer.Controls
 		/// <see cref="ICommand"/> to show menu of image dimensions evaluation.
 		/// </summary>
 		public ICommand ShowEvaluateImageDimensionsMenuCommand { get; }
+
+
+		// Show other actions.
+		void ShowOtherActions()
+		{
+			if (this.otherActionsMenu.PlacementTarget == null)
+				this.otherActionsMenu.PlacementTarget = this.otherActionsButton;
+			this.otherActionsMenu.Open(this.otherActionsButton);
+		}
 
 
 		// Status bar state.
