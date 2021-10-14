@@ -144,7 +144,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							try
 							{
 								var pixelCount = (width * height);
-								if (pixelCount <= 0 || pixelCount > maxPixelCount || (double)pixelCount / maxPixelCount < 0.8)
+								if (pixelCount <= 0 || pixelCount > maxPixelCount)
 									continue;
 								var diff = (maxPixelCount - pixelCount);
 								if (diff < minPixelCountDiff)
