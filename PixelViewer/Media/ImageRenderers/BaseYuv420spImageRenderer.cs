@@ -38,8 +38,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			height &= 0x7ffffffe;
 			if (width <= 0 || height <= 0)
 				return 0;
-			var yRowStride = Math.Min(width, planeOptions[0].RowStride);
-			var uvRowStride = Math.Min(width, planeOptions[1].RowStride);
+			var yRowStride = Math.Max(width, planeOptions[0].RowStride);
+			var uvRowStride = Math.Max(width, planeOptions[1].RowStride);
 			return (yRowStride * height) + (uvRowStride * height / 2);
 		}
 

@@ -39,7 +39,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		{
 			if (width <= 0 || height <= 0)
 				return 0;
-			var rowStride = Math.Min(width * this.bytesPerPixel, planeOptions[0].RowStride);
+			var rowStride = Math.Max(width * this.bytesPerPixel, planeOptions[0].RowStride);
 			return rowStride * height;
 		}
 	}

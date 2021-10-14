@@ -21,6 +21,7 @@
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
 	
 	<!-- Common -->
+	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
 	<sys:String x:Key="String/Common.KnowMoreAbout">了解更多</sys:String>
 	<sys:String x:Key="String/Common.Options">選項</sys:String>
 	<sys:String x:Key="String/Common.Rename">重新命名</sys:String>
@@ -71,6 +72,7 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">色彩：</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">位置：</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料:</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 

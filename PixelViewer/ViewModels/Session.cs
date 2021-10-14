@@ -149,6 +149,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasImagePlane3Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane3));
 		/// <summary>
+		/// Property of <see cref="HasRenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderedImage));
+		/// <summary>
 		/// Property of <see cref="HasSelectedRenderedImagePixel"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProperty = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
@@ -223,6 +227,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="SelectedRenderedImagePixelPositionY"/>.
 		/// </summary>
 		public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionYProperty = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionY), -1);
+		/// <summary>
+		/// Property of <see cref="SourceDataSize"/>.
+		/// </summary>
+		public static readonly ObservableProperty<long> SourceDataSizeProperty = ObservableProperty.Register<Session, long>(nameof(SourceDataSize));
 		/// <summary>
 		/// Property of <see cref="SourceFileName"/>.
 		/// </summary>
@@ -424,7 +432,10 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
 			}
 			if (!disposing)
+			{
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+				this.SetValue(SourceDataSizeProperty, 0);
+			}
 
 			// update zooming state
 			this.UpdateCanZoomInOut();
@@ -658,6 +669,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether 3rd image plane exists or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
 		public bool HasImagePlane3 { get => this.GetValue(HasImagePlane3Property); }
+
+
+		/// <summary>
+		/// Check whether <see cref="RenderedImage"/> is non-null or not.
+		/// </summary>
+		public bool HasRenderedImage { get => this.GetValue(HasRenderedImageProperty); }
 
 
 		/// <summary>
@@ -1033,6 +1050,8 @@ namespace Carina.PixelViewer.ViewModels
 					this.renderImageOperation.Reschedule();
 				}
 			}
+			else if (property == RenderedImageProperty)
+				this.SetValue(HasRenderedImageProperty, newValue != null);
         }
 
 
@@ -1381,8 +1400,12 @@ namespace Carina.PixelViewer.ViewModels
 			// render
 			this.Logger.LogDebug($"Render image for '{sourceFileName}', dimensions: {this.ImageWidth}x{this.ImageHeight}");
 			var cancellationTokenSource = new CancellationTokenSource();
+			var renderingOptions = new ImageRenderingOptions();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-			await imageRenderer.Render(imageDataSource, renderedImageBuffer, new ImageRenderingOptions(), planeOptionsList, cancellationTokenSource.Token);
+			await imageRenderer.Render(imageDataSource, renderedImageBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+
+			// update source data size
+			this.SetValue(SourceDataSizeProperty, imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList));
 
 			// check whether rendering has been cancelled or not
 			if (cancellationTokenSource.IsCancellationRequested)
@@ -1884,6 +1907,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HasSelectedRenderedImagePixelProperty, true);
 			}
 		}
+
+
+		/// <summary>
+		/// Get size of source image data in bytes.
+		/// </summary>
+		public long SourceDataSize { get => this.GetValue(SourceDataSizeProperty); }
 
 
 		/// <summary>

@@ -43,7 +43,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Static fields.
 		static readonly ILogger Logger = App.Current.LoggerFactory.CreateLogger(nameof(SessionControl));
-		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.Inactive);
+		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
 
 		// Fields.

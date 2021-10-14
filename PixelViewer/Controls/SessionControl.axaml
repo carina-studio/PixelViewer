@@ -290,7 +290,7 @@
 		</Grid>
 
 		<!-- Status bar -->
-		<Border Background="{DynamicResource Brush/SessionControl.StatusBar.Background.Inactive}" Classes="StatusBar" Grid.Row="2">
+		<Border Background="{x:Null}" Classes="StatusBar" Grid.Row="2">
 
 			<ia:Interaction.Behaviors>
 				<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Inactive">
@@ -314,7 +314,7 @@
 
 					<!-- File name -->
 					<StackPanel Orientation="Horizontal">
-						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}" TextTrimming="CharacterEllipsis"/>
+						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}"/>
 						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding IsSourceFileOpened}" TextTrimming="CharacterEllipsis">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}{0} ({1})">
@@ -323,6 +323,14 @@
 								</MultiBinding>
 							</TextBlock.Text>
 						</TextBlock>
+						<Separator Classes="StatusBar_Separator"/>
+					</StackPanel>
+
+					<!-- Source data size -->
+					<StackPanel IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal">
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SourceDataSize}"/>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={} {0:N0} }"/>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/Common.Bytes}"/>
 						<Separator Classes="StatusBar_Separator"/>
 					</StackPanel>
 

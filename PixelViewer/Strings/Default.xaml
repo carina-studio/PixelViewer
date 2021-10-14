@@ -28,6 +28,7 @@
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;Unspecified&gt;</sys:String>
 	
 	<!-- Common -->
+	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
 	<sys:String x:Key="String/Common.KnowMoreAbout">Know more about</sys:String>
 	<sys:String x:Key="String/Common.Options">Options</sys:String>
 	<sys:String x:Key="String/Common.Rename">Rename</sys:String>
@@ -78,6 +79,7 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelColor">Color: </sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedRenderecImagePixelPosition">Position: </sys:String>
+	<sys:String x:Key="String/SessionControl.SourceDataSize">Source data:</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 

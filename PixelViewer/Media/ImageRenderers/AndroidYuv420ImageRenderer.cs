@@ -1,4 +1,5 @@
 ﻿using CarinaStudio;
+using System;
 using System.Collections.Generic;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
@@ -32,8 +33,20 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		public override int EvaluatePixelCount(IImageDataSource source) => (int)((source.Size + 2) / 2);
 
 
-		// Select UV component.
-		protected override void SelectUV(byte uv1, byte uv2, out byte u, out byte v)
+		// Evaluate source data size.
+        public override long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions)
+        {
+			var size = base.EvaluateSourceDataSize(width, height, renderingOptions, planeOptions);
+			var uPixelStride = Math.Max(1, planeOptions[1].PixelStride);
+			var vPixelStride = Math.Max(1, planeOptions[2].PixelStride);
+			if (size > 0)
+				size -= (uPixelStride - 1) + (vPixelStride - 1);
+			return Math.Max(0, size);
+        }
+
+
+        // Select UV component.
+        protected override void SelectUV(byte uv1, byte uv2, out byte u, out byte v)
 		{
 			u = uv1;
 			v = uv2;

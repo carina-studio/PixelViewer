@@ -8,6 +8,10 @@ namespace Carina.PixelViewer.Controls
     enum StatusBarState
     {
         /// <summary>
+        /// None.
+        /// </summary>
+        None,
+        /// <summary>
         /// Active.
         /// </summary>
         Active,
