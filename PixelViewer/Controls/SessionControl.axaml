@@ -6,6 +6,7 @@
              xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
              xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
              xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
+			 xmlns:appProfiles="using:Carina.PixelViewer.Media.Profiles"
 			 xmlns:ia="using:Avalonia.Xaml.Interactivity"
              xmlns:iaCore="using:Avalonia.Xaml.Interactions.Core"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -193,7 +194,7 @@
 
 						<!-- Profile -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>
-						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
+						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{x:Static appProfiles:ImageRenderingProfiles.Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 							<ComboBox.DataTemplates>
 								<DataTemplate>
 									<TextBlock Text="{Binding Name}"/>

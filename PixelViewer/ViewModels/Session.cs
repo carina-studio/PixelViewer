@@ -3,10 +3,10 @@ using Avalonia.Media.Imaging;
 using Carina.PixelViewer.IO;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
+using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
-using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
@@ -14,11 +14,8 @@ using CarinaStudio.ViewModels;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -30,86 +27,6 @@ namespace Carina.PixelViewer.ViewModels
 	/// </summary>
 	class Session : ViewModel
 	{
-		/// <summary>
-		/// Interface of profile.
-		/// </summary>
-		public interface IProfile
-		{
-			/// <summary>
-			/// Name of profile.
-			/// </summary>
-			public abstract string Name { get; }
-		}
-
-
-		// Data for profile related events.
-		class ProfileEventArgs : EventArgs
-		{
-			// Fields.
-			public readonly IProfile Profile;
-
-			// Constructor.
-			public ProfileEventArgs(IProfile profile)
-			{
-				this.Profile = profile;
-			}
-		}
-
-
-		// Implementation of Profile.
-		class ProfileImpl : INotifyPropertyChanged, IProfile
-		{
-			// Fields.
-			public readonly int[] EffectiveBits = new int[4];
-			public volatile string? FileName;
-			public int Height;
-			public readonly int[] PixelStrides = new int[4];
-			public IImageRenderer? Renderer;
-			public readonly int[] RowStrides = new int[4];
-			public int Width;
-
-			// Constructor.
-			public ProfileImpl() // Constructor for default profile
-			{
-				this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
-				App.Current.StringsUpdated += this.OnStringsUpdated;
-			}
-			public ProfileImpl(string name)
-			{
-				this.Name = name;
-			}
-			public ProfileImpl(ProfileImpl template)
-			{
-				this.Name = template.Name;
-				this.Renderer = template.Renderer;
-				this.Width = template.Width;
-				this.Height = template.Height;
-				Array.Copy(template.EffectiveBits, this.EffectiveBits, this.EffectiveBits.Length);
-				Array.Copy(template.PixelStrides, this.PixelStrides, this.PixelStrides.Length);
-				Array.Copy(template.RowStrides, this.RowStrides, this.RowStrides.Length);
-			}
-
-			// Name.
-			public string Name { get; private set; }
-
-			// Called strings updated.
-			void OnStringsUpdated(object? sender, EventArgs e)
-			{
-				if (this == DefaultProfile)
-				{
-					this.Name = App.Current.GetStringNonNull("SessionControl.DefaultProfile");
-					this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(this.Name)));
-				}
-			}
-
-			// Raised when property changed.
-			public event PropertyChangedEventHandler? PropertyChanged;
-
-			// To readable string.
-			public override string ToString() => this.Name;
-		}
-
-
 		// Token of memory usage of rendered image.
 		class RenderedImageMemoryUsageToken : IDisposable
 		{
@@ -132,10 +49,6 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
-		/// <summary>
-		/// Default profile.
-		/// </summary>
-		public static readonly IProfile DefaultProfile = new ProfileImpl();
 		/// <summary>
 		/// Property of <see cref="HasImagePlane1"/>.
 		/// </summary>
@@ -211,9 +124,9 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="Profile"/>.
 		/// </summary>
-		public static readonly ObservableProperty<IProfile> ProfileProperty = ObservableProperty.Register<Session, IProfile>(nameof(Profile), DefaultProfile, validate: it =>
+		public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default, validate: it =>
 		{
-			return it == DefaultProfile || (it is ProfileImpl && SharedProfileList.AsNonNull().Contains(it));
+			return ImageRenderingProfiles.Profiles.Contains(it);
 		});
 		/// <summary>
 		/// Property of <see cref="RenderedImage"/>.
@@ -250,9 +163,6 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Static fields.
-		static readonly MutableObservableBoolean IsLoadingProfiles = new MutableObservableBoolean();
-		static readonly IList<IProfile> ReadOnlySharedProfileList;
-		static readonly SortedObservableList<IProfile> SharedProfileList = new SortedObservableList<IProfile>(CompareProfiles);
 		static long TotalRenderedImagesMemoryUsage;
 
 
@@ -263,7 +173,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
-		readonly int[] effectiveBits = new int[4];
+		readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
 		bool fitRenderedImageToViewport = true;
 		bool hasPendingImageRendering;
 		IImageDataSource? imageDataSource;
@@ -272,21 +182,13 @@ namespace Carina.PixelViewer.ViewModels
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
 		IDisposable? isLoadingProfilesObserverSubscriptionToken;
-		readonly int[] pixelStrides = new int[4];
-		readonly string profilesDirectoryPath;
+		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 		IBitmapBuffer? renderedImageBuffer;
 		IDisposable? renderedImageMemoryUsageToken;
 		double renderedImageScale = 1.0;
 		readonly ScheduledAction renderImageOperation;
-		readonly int[] rowStrides = new int[4];
+		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly ScheduledAction updateIsProcessingImageAction;
-
-
-		// Static initializer.
-		static Session()
-		{
-			ReadOnlySharedProfileList = new ReadOnlyObservableList<IProfile>(SharedProfileList);
-		}
 
 
 		/// <summary>
@@ -317,10 +219,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(IsProcessingImageProperty, this.IsRenderingImage || this.IsSavingRenderedImage);
 			});
 
-			// setup profiles
-			this.profilesDirectoryPath = Path.Combine(this.Application.RootPrivateDirectoryPath, "Profiles");
-			this.LoadProfiles();
-			RemovingProfileFromSharedProfileList += this.OnRemovingProfileFromSharedProfileList;
+			// attach to profiles
+			ImageRenderingProfiles.RemovingProfile += this.OnRemovingProfile;
 
 			// select default image renderer
 			this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
@@ -469,56 +369,22 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand CloseSourceFileCommand { get; }
 
 
-		// Compare profiles.
-		static int CompareProfiles(IProfile x, IProfile y)
-		{
-			if (x == DefaultProfile)
-			{
-				if (y == DefaultProfile)
-					return 0;
-				return -1;
-			}
-			if (y == DefaultProfile)
-				return 1;
-			return x.Name.CompareTo(y.Name);
-		}
-
-
 		// Delete current profile.
 		void DeleteProfile()
 		{
 			// check state
 			if (!this.canSaveOrDeleteProfile.Value)
 				return;
-			var profile = (ProfileImpl)this.Profile;
-			if (profile == DefaultProfile)
+			var profile = this.Profile;
+			if (profile.IsDefault)
 			{
 				this.Logger.LogError("Cannot delete default profile");
 				return;
 			}
 
 			// remove profile
-			this.SwitchToProfileWithoutApplying(DefaultProfile);
-			RemovingProfileFromSharedProfileList?.Invoke(null, new ProfileEventArgs(profile));
-			SharedProfileList.Remove(profile);
-
-			// delete
-			Task.Run(() =>
-			{
-				if(profile.FileName != null)
-				{
-					var filePath = Path.Combine(this.profilesDirectoryPath, profile.FileName);
-					try
-					{
-						File.Delete(filePath);
-						this.Logger.LogDebug($"Delete profile '{profile.Name}' and file '{filePath}'");
-					}
-					catch (Exception ex)
-					{
-						this.Logger.LogWarning(ex, $"Error occurred while deleting profile '{profile.Name}' and file '{filePath}'");
-					}
-				}
-			});
+			this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
+			ImageRenderingProfiles.RemoveProfile(profile);
 		}
 
 
@@ -535,8 +401,8 @@ namespace Carina.PixelViewer.ViewModels
 			if (disposing)
 				this.CloseSourceFile(true);
 
-			// detach from shared profile list
-			RemovingProfileFromSharedProfileList -= this.OnRemovingProfileFromSharedProfileList;
+			// detach from profiles
+			ImageRenderingProfiles.RemovingProfile -= this.OnRemovingProfile;
 
 			// unsubscribe observable values
 			this.isLoadingProfilesObserverSubscriptionToken?.Dispose();
@@ -646,12 +512,12 @@ namespace Carina.PixelViewer.ViewModels
 		public string GenerateNameForNewProfile()
 		{
 			var name = $"{this.ImageWidth}x{this.ImageHeight} [{this.ImageRenderer.Format.Name}]";
-			if (!SharedProfileList.Any((it) => it.Name == name))
+			if (ImageRenderingProfiles.ValidateNewProfileName(name))
 				return name;
 			for (var i = 1; i <= 1000; ++i)
 			{
 				var alternativeName = $"{name} ({i})";
-				if (!SharedProfileList.Any((it) => it.Name == alternativeName))
+				if (ImageRenderingProfiles.ValidateNewProfileName(alternativeName))
 					return alternativeName;
 			}
 			return "";
@@ -778,177 +644,6 @@ namespace Carina.PixelViewer.ViewModels
 		public bool IsSourceFileOpened { get => this.GetValue(IsSourceFileOpenedProperty); }
 
 
-		// Load profile from file.
-		IProfile? LoadProfileFromFile(string fileName)
-		{
-			try
-			{
-				// open file
-				using var stream = new FileStream(fileName, FileMode.Open, FileAccess.ReadWrite);
-				using var jsonDocument = JsonDocument.Parse(stream);
-				var jsonObject = jsonDocument.RootElement.Let((it) =>
-				{
-					if (it.ValueKind == JsonValueKind.Object)
-						return it;
-					throw new Exception($"Root element in '{fileName}' is not an object.");
-				});
-
-				// get name
-				if (!jsonObject.TryGetProperty("Name", out var jsonElement) || jsonElement.ValueKind != JsonValueKind.String)
-				{
-					this.Logger.LogError($"No 'Name' property in '{fileName}'");
-					return null;
-				}
-				var profile = new ProfileImpl(jsonElement.GetString().AsNonNull());
-
-				// get renderer
-				if (!jsonObject.TryGetProperty("Format", out jsonElement) || jsonElement.ValueKind != JsonValueKind.String)
-				{
-					this.Logger.LogError($"No 'Format' property in '{fileName}'");
-					return null;
-				}
-				if (!ImageRenderers.TryFindByFormatName(jsonElement.GetString() ?? "", out profile.Renderer))
-				{
-					this.Logger.LogError($"Invalid 'Format' property in '{fileName}': {jsonElement.GetString()}");
-					return null;
-				}
-
-				// get dimensions
-				if (!jsonObject.TryGetProperty("Width", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Number)
-				{
-					this.Logger.LogError($"No 'Width' property in '{fileName}'");
-					return null;
-				}
-				profile.Width = jsonElement.GetInt32();
-				if (!jsonObject.TryGetProperty("Height", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Number)
-				{
-					this.Logger.LogError($"No 'Height' property in '{fileName}'");
-					return null;
-				}
-				profile.Height = jsonElement.GetInt32();
-
-				// get effective bits
-				var arrayLength = 0;
-				var index = 0;
-				if (jsonObject.TryGetProperty("EffectiveBits", out jsonElement) && jsonElement.ValueKind == JsonValueKind.Array)
-				{
-					arrayLength = Math.Min(profile.EffectiveBits.Length, jsonElement.GetArrayLength());
-					index = 0;
-					foreach (var element in jsonElement.EnumerateArray())
-					{
-						if (element.ValueKind != JsonValueKind.Number)
-						{
-							this.Logger.LogError($"Invalid effective-bits[{index}] in '{fileName}'");
-							return null;
-						}
-						profile.EffectiveBits[index++] = element.GetInt32();
-					}
-				}
-
-				// get pixel-strides
-				if (!jsonObject.TryGetProperty("PixelStrides", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Array)
-				{
-					this.Logger.LogError($"No 'PixelStrides' property in '{fileName}'");
-					return null;
-				}
-				arrayLength = Math.Min(profile.PixelStrides.Length, jsonElement.GetArrayLength());
-				index = 0;
-				foreach(var element in jsonElement.EnumerateArray())
-				{
-					if (element.ValueKind != JsonValueKind.Number)
-					{
-						this.Logger.LogError($"Invalid pixel-stride[{index}] in '{fileName}'");
-						return null;
-					}
-					profile.PixelStrides[index++] = element.GetInt32();
-				}
-
-				// get row-strides
-				if (!jsonObject.TryGetProperty("RowStrides", out jsonElement) || jsonElement.ValueKind != JsonValueKind.Array)
-				{
-					this.Logger.LogError($"No 'RowStrides' property in '{fileName}'");
-					return null;
-				}
-				arrayLength = Math.Min(profile.RowStrides.Length, jsonElement.GetArrayLength());
-				index = 0;
-				foreach (var element in jsonElement.EnumerateArray())
-				{
-					if (element.ValueKind != JsonValueKind.Number)
-					{
-						this.Logger.LogError($"Invalid row-stride[{index}] in '{fileName}'");
-						return null;
-					}
-					profile.RowStrides[index++] = element.GetInt32();
-				}
-
-				// complete
-				profile.FileName = Path.GetFileName(fileName);
-				this.Logger.LogDebug($"Load profile '{profile.Name}' from '{fileName}'");
-				return profile;
-			}
-			catch (Exception ex)
-			{
-				this.Logger.LogError(ex, $"Unable to load profile from '{fileName}'");
-				return null;
-			}
-		}
-
-
-		// Load profiles.
-		async void LoadProfiles()
-		{
-			// subscribe state
-			this.isLoadingProfilesObserverSubscriptionToken = IsLoadingProfiles.Subscribe(new Observer<bool>(this.OnLoadingProfilesStateChanged));
-
-			// check state
-			if (SharedProfileList.IsNotEmpty())
-				return;
-
-			// add default profile
-			SharedProfileList.Add(DefaultProfile);
-
-			// load profiles
-			this.Logger.LogWarning("Load profiles");
-			IsLoadingProfiles.Update(true);
-			var profiles = await Task.Run(() =>
-			{
-				var profiles = new List<IProfile>();
-				try
-				{
-					if (Directory.Exists(this.profilesDirectoryPath))
-					{
-						foreach (var fileName in Directory.EnumerateFiles(this.profilesDirectoryPath, "*.json"))
-						{
-							this.LoadProfileFromFile(fileName)?.Also((it) => profiles.Add(it));
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					this.Logger.LogError(ex, "Error occurred while loading profiles");
-				}
-				return profiles;
-			});
-			if (profiles == null)
-				return;
-			this.Logger.LogDebug($"{profiles.Count} profile(s) loaded");
-
-			// add profiles
-			foreach (var profile in profiles)
-			{
-				if (SharedProfileList.Contains(profile))
-				{
-					this.Logger.LogError($"Duplicate profile '{profile.Name}'");
-					continue;
-				}
-				SharedProfileList.Add(profile);
-			}
-
-			// complete
-			IsLoadingProfiles.Update(false);
-		}
-
-
 		/// <summary>
 		/// Get maximum scaling ratio of rendered image.
 		/// </summary>
@@ -1028,37 +723,35 @@ namespace Carina.PixelViewer.ViewModels
 			else if (property == ProfileProperty)
 			{
 				// change profile
-				var profile = (IProfile)newValue.AsNonNull();
-				this.SwitchToProfileWithoutApplying(profile);
+				var profile = (ImageRenderingProfile)newValue.AsNonNull();
 
 				// update state
 				this.UpdateCanSaveDeleteProfile();
 
 				// apply profile
-				if (profile != DefaultProfile && profile is ProfileImpl profileImpl)
+				if (!profile.IsDefault)
 				{
 					// renderer
-					this.SetValue(ImageRendererProperty, profileImpl.Renderer ?? this.SelectDefaultImageRenderer());
+					this.SetValue(ImageRendererProperty, profile.Renderer ?? this.SelectDefaultImageRenderer());
 
 					// dimensions
-					this.SetValue(ImageWidthProperty, profileImpl.Width);
-					this.SetValue(ImageHeightProperty, profileImpl.Height);
+					this.SetValue(ImageWidthProperty, profile.Width);
+					this.SetValue(ImageHeightProperty, profile.Height);
 
 					// plane options
 					for (var i = this.ImageRenderer.Format.PlaneCount - 1; i >= 0; --i)
 					{
-						this.effectiveBits[i] = profileImpl.EffectiveBits[i];
-						this.pixelStrides[i] = profileImpl.PixelStrides[i];
-						this.rowStrides[i] = profileImpl.RowStrides[i];
-						this.OnEffectiveBitsChanged(i);
-						this.OnPixelStrideChanged(i);
-						this.OnRowStrideChanged(i);
+						this.ChangeEffectiveBits(i, profile.EffectiveBits[i]);
+						this.ChangePixelStride(i, profile.PixelStrides[i]);
+						this.ChangeRowStride(i, profile.RowStrides[i]);
 					}
 
-					// render image
-					this.isImageDimensionsEvaluationNeeded = false;
-					this.isImagePlaneOptionsResetNeeded = false;
-					this.renderImageOperation.Reschedule();
+					// update state
+					if (this.renderImageOperation.IsScheduled)
+					{
+						this.isImageDimensionsEvaluationNeeded = false;
+						this.isImagePlaneOptionsResetNeeded = false;
+					}
 				}
 			}
 			else if (property == RenderedImageProperty)
@@ -1066,13 +759,11 @@ namespace Carina.PixelViewer.ViewModels
         }
 
 
-        // Called when removing profile from shared profile list.
-        void OnRemovingProfileFromSharedProfileList(object? sender, ProfileEventArgs e)
+		// Called before moreving profile.
+		void OnRemovingProfile(object? sender, ImageRenderingProfileEventArgs e)
 		{
-			if (this.Profile != e.Profile)
-				return;
-			this.Logger.LogWarning($"Current profile '{this.Profile}' will be deleted");
-			this.SwitchToProfileWithoutApplying(DefaultProfile);
+			if (e.Profile == this.Profile)
+				this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
 		}
 
 
@@ -1165,7 +856,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// render image
-			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile == DefaultProfile)
+			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.IsDefault)
 			{
 				this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
@@ -1217,17 +908,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get or set current profile.
 		/// </summary>
-		public IProfile Profile
+		public ImageRenderingProfile Profile
 		{
 			get => this.GetValue(ProfileProperty);
 			set => this.SetValue(ProfileProperty, value);
 		}
-
-
-		/// <summary>
-		/// Get list of available profiles.
-		/// </summary>
-		public IList<IProfile> Profiles { get => ReadOnlySharedProfileList; }
 
 
 		// Release token for rendered image memory usage.
@@ -1237,10 +922,6 @@ namespace Carina.PixelViewer.ViewModels
 			TotalRenderedImagesMemoryUsage -= token.DataSize;
 			this.Logger.LogDebug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 		}
-
-
-		// Raised before removing profile from shared profile list.
-		static event EventHandler<ProfileEventArgs>? RemovingProfileFromSharedProfileList;
 
 
 		/// <summary>
@@ -1562,7 +1243,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Save as new profile.
-		async void SaveAsNewProfile(string name)
+		void SaveAsNewProfile(string name)
 		{
 			// check state
 			if (!this.canSaveAsNewProfile.Value)
@@ -1576,29 +1257,15 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// create profile
-			var profile = new ProfileImpl(name).Also((it) => this.WriteParametersToProfile(it));
-
-			// insert profile
-			if (SharedProfileList.Contains(profile))
+			var profile = new ImageRenderingProfile(name, this.ImageRenderer).Also((it) => this.WriteParametersToProfile(it));
+			if (!ImageRenderingProfiles.AddProfile(profile))
 			{
-				this.Logger.LogError($"Cannot create existent profile '{name}'");
+				this.Logger.LogError($"Unable to add profile '{name}'");
 				return;
 			}
-			SharedProfileList.Add(profile);
 
 			// switch to profile
 			this.SwitchToProfileWithoutApplying(profile);
-
-			// save
-			var saved = await Task<bool>.Run(() => this.SaveProfileToFile(profile));
-			if (!saved)
-			{
-				this.Logger.LogError($"Unable to save profile '{name}' to file");
-				this.SwitchToProfileWithoutApplying(DefaultProfile);
-				RemovingProfileFromSharedProfileList?.Invoke(null, new ProfileEventArgs(profile));
-				SharedProfileList.Remove(profile);
-				return;
-			}
 		}
 
 
@@ -1614,8 +1281,8 @@ namespace Carina.PixelViewer.ViewModels
 			// check state
 			if (!this.canSaveOrDeleteProfile.Value)
 				return;
-			var profile = (ProfileImpl)this.Profile;
-			if (profile == DefaultProfile)
+			var profile = this.Profile;
+			if (profile.IsDefault)
 			{
 				this.Logger.LogError("Cannot save default profile");
 				return;
@@ -1625,9 +1292,14 @@ namespace Carina.PixelViewer.ViewModels
 			this.WriteParametersToProfile(profile);
 
 			// save
-			var saved = await Task<bool>.Run(() => this.SaveProfileToFile(profile));
-			if (!saved)
-				this.Logger.LogError($"Failed to save profile '{profile.Name}'");
+			try
+			{
+				await profile.SaveAsync();
+			}
+			catch (Exception ex)
+			{
+				this.Logger.LogError(ex, $"Failed to save profile '{profile.Name}'");
+			}
 		}
 
 
@@ -1635,114 +1307,6 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to save parameters to current profile.
 		/// </summary>
 		public ICommand SaveProfileCommand { get; }
-
-
-		// Save profile to file.
-		bool SaveProfileToFile(ProfileImpl profile)
-		{
-			// generate file name
-			var fileName = profile.FileName;
-			var filePath = "";
-			if (fileName == null)
-			{
-				var fileNameBuilder = new StringBuilder(profile.Name);
-				for (var i = fileNameBuilder.Length - 1; i >= 0; --i)
-				{
-					var c = fileNameBuilder[i];
-					if (!char.IsDigit(c) && !char.IsLetter(c) && c != '_' && c != '-')
-						fileNameBuilder[i] = '_';
-				}
-				fileName = fileNameBuilder.ToString();
-				lock (typeof(ProfileImpl))
-				{
-					try
-					{
-						filePath = Path.Combine(this.profilesDirectoryPath, $"{fileName}.json");
-						if (File.Exists(filePath) || Directory.Exists(filePath))
-						{
-							for (var i = 1; ; ++i)
-							{
-								filePath = Path.Combine(this.profilesDirectoryPath, $"{fileName}_{i}.json");
-								if (!File.Exists(filePath) && !Directory.Exists(filePath))
-								{
-									fileName = $"{fileName}_{i}";
-									break;
-								}
-								if (i >= 1000)
-									throw new Exception($"Unable to find proper alternative file name based-on '{fileName}' in {this.profilesDirectoryPath}.");
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						this.Logger.LogError(ex, $"Unable to generate file name for profile '{profile.Name}'");
-						return false;
-					}
-				}
-				fileName += ".json";
-				profile.FileName = fileName;
-			}
-
-			// create directory
-			try
-			{
-				if (!Directory.Exists(this.profilesDirectoryPath))
-					Directory.CreateDirectory(this.profilesDirectoryPath);
-			}
-			catch (Exception ex)
-			{
-				this.Logger.LogError(ex, $"Unable to create directory '{this.profilesDirectoryPath}'");
-				return false;
-			}
-
-			// save to file
-			filePath = Path.Combine(this.profilesDirectoryPath, fileName);
-			try
-			{
-				// open file
-				using var stream = new FileStream(filePath, FileMode.Create, FileAccess.ReadWrite);
-				using var jsonWriter = new Utf8JsonWriter(stream, new JsonWriterOptions()
-				{
-					Indented = true,
-				});
-
-				// write name
-				jsonWriter.WriteStartObject();
-				jsonWriter.WriteString("Name", profile.Name);
-
-				// write renderer
-				jsonWriter.WriteString("Format", profile.Renderer?.Format?.Name ?? "");
-
-				// write dimensions
-				jsonWriter.WriteNumber("Width", profile.Width);
-				jsonWriter.WriteNumber("Height", profile.Height);
-
-				// write plane options
-				var planeCount = profile.Renderer?.Format?.PlaneCount ?? 1;
-				jsonWriter.WriteStartArray("EffectiveBits");
-				for (var i = 0; i < planeCount; ++i)
-					jsonWriter.WriteNumberValue(profile.EffectiveBits[i]);
-				jsonWriter.WriteEndArray();
-				jsonWriter.WriteStartArray("PixelStrides");
-				for (var i = 0; i < planeCount; ++i)
-					jsonWriter.WriteNumberValue(profile.PixelStrides[i]);
-				jsonWriter.WriteEndArray();
-				jsonWriter.WriteStartArray("RowStrides");
-				for (var i = 0; i < planeCount; ++i)
-					jsonWriter.WriteNumberValue(profile.RowStrides[i]);
-				jsonWriter.WriteEndArray();
-
-				// complete
-				jsonWriter.WriteEndObject();
-				this.Logger.LogDebug($"Save profile '{profile.Name}' to '{filePath}'");
-			}
-			catch (Exception ex)
-			{
-				this.Logger.LogError(ex, $"Unable to save profile '{profile.Name}' to '{filePath}'");
-				return false;
-			}
-			return true;
-		}
 
 
 		// Save rendered image.
@@ -1950,7 +1514,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Switch profile without applying parameters.
-		void SwitchToProfileWithoutApplying(IProfile profile)
+		void SwitchToProfileWithoutApplying(ImageRenderingProfile profile)
 		{
 			this.SetValue(ProfileProperty, profile);
 			this.UpdateCanSaveDeleteProfile();
@@ -1968,7 +1532,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (this.IsDisposed)
 				return;
-			if (!this.IsSourceFileOpened || IsLoadingProfiles.Value)
+			if (!this.IsSourceFileOpened)
 			{
 				this.canSaveAsNewProfile.Update(false);
 				this.canSaveOrDeleteProfile.Update(false);
@@ -1976,7 +1540,7 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				this.canSaveAsNewProfile.Update(true);
-				this.canSaveOrDeleteProfile.Update(this.Profile != DefaultProfile);
+				this.canSaveOrDeleteProfile.Update(!this.Profile.IsDefault);
 			}
 		}
 
@@ -2023,14 +1587,14 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Write current parameters to given profile.
-		void WriteParametersToProfile(ProfileImpl profile)
+		void WriteParametersToProfile(ImageRenderingProfile profile)
 		{
 			profile.Renderer = this.ImageRenderer;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
-			Array.Copy(this.effectiveBits, profile.EffectiveBits, profile.EffectiveBits.Length);
-			Array.Copy(this.pixelStrides, profile.PixelStrides, profile.PixelStrides.Length);
-			Array.Copy(this.rowStrides, profile.RowStrides, profile.RowStrides.Length);
+			profile.EffectiveBits = this.effectiveBits;
+			profile.PixelStrides = this.pixelStrides;
+			profile.RowStrides = this.rowStrides;
 		}
 
 

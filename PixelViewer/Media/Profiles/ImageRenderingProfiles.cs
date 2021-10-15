@@ -21,9 +21,13 @@ namespace Carina.PixelViewer.Media.Profiles
         static volatile ILogger? logger;
         static readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>((x, y) =>
         {
-            if (x == null || x.IsDefault)
-                return -1;
-            if (y == null || y.IsDefault)
+            if (x == null)
+                return y == null ? 0 : -1;
+            if (y == null)
+                return 1;
+            if (x.IsDefault)
+                return y.IsDefault ? 0 : -1;
+            if (y.IsDefault)
                 return 1;
             var result = x.Name.CompareTo(y.Name);
             return result != 0 ? result : x.GetHashCode() - y.GetHashCode();
@@ -148,12 +152,19 @@ namespace Carina.PixelViewer.Media.Profiles
         public static void RemoveProfile(ImageRenderingProfile profile)
         {
             app.AsNonNull().VerifyAccess();
-            if (profiles.Remove(profile))
+            var index = profiles.IndexOf(profile);
+            if (index >= 0)
             {
+                RemovingProfile?.Invoke(null, new ImageRenderingProfileEventArgs(profile));
+                profiles.RemoveAt(index);
                 profile.PropertyChanged -= OnProfilePropertyChanged;
                 _ = profile.DeleteFileAsync();
             }
         }
+
+
+        // Raised before removing profile.
+        public static event EventHandler<ImageRenderingProfileEventArgs>? RemovingProfile;
 
 
         // Check whether given name of profile is valid or not.

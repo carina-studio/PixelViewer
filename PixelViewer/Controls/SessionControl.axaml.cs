@@ -9,6 +9,7 @@ using Avalonia.Media;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Data.Converters;
 using Carina.PixelViewer.Input;
+using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
@@ -452,7 +453,7 @@ namespace Carina.PixelViewer.Controls
 					return;
 
 				// check name
-				if (session.Profiles.FirstOrDefault((it) => it != Session.DefaultProfile && it.Name == name) == null)
+				if (ImageRenderingProfiles.ValidateNewProfileName(name))
 					break;
 
 				// show message for duplicate name

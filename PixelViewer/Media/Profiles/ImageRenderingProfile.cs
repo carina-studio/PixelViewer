@@ -10,7 +10,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -338,7 +337,7 @@ namespace Carina.PixelViewer.Media.Profiles
             this.VerifyDefault();
 
             // select file name
-            var fileName = Path.Combine(DirectoryPath, WebUtility.UrlDecode(this.name) + ".json");
+            var fileName = Path.Combine(DirectoryPath, WebUtility.UrlEncode(this.name) + ".json");
 
             // save to file
             var prevFileName = this.fileName;
@@ -427,5 +426,19 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Width)));
             }
         }
+    }
+
+
+    /// <summary>
+    /// Data for <see cref="ImageRenderingProfile"/> related events.
+    /// </summary>
+    class ImageRenderingProfileEventArgs : EventArgs
+    {
+        // Constructor.
+        public ImageRenderingProfileEventArgs(ImageRenderingProfile profile) => this.Profile = profile;
+
+
+        // Related profile.
+        public ImageRenderingProfile Profile { get; }
     }
 }
