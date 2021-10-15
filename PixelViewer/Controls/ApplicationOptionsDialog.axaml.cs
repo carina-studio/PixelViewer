@@ -24,6 +24,7 @@ namespace Carina.PixelViewer.Controls
         public ApplicationOptionsDialog()
         {
             this.DataContext = new AppOptions();
+            this.Application.StringsUpdated += this.OnAppStringsUpdated;
             InitializeComponent();
         }
 
@@ -32,9 +33,20 @@ namespace Carina.PixelViewer.Controls
         private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
+        // Called when strings updated.
+        void OnAppStringsUpdated(object? sender, EventArgs e)
+        {
+            // [Workaround] re-attach to data to update strings in EnumComboBox
+            var dataContext = this.DataContext;
+            this.DataContext = null;
+            this.DataContext = dataContext;
+        }
+
+
         // Called when window closed.
         protected override void OnClosed(EventArgs e)
         {
+            this.Application.StringsUpdated -= this.OnAppStringsUpdated;
             (this.DataContext as IDisposable)?.Dispose();
             base.OnClosed(e);
         }
