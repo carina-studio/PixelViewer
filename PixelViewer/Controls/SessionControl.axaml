@@ -91,6 +91,14 @@
 					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
 				</StackPanel>
 
+				<!-- Rendering error -->
+				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
+					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Error}"/>
+					</Border>
+					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
+				</StackPanel>
+
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<LayoutTransformControl Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
@@ -317,7 +325,7 @@
 			<Grid ColumnDefinitions="*,Auto" HorizontalAlignment="Stretch">
 
 				<!-- Reserve -->
-				<TextBlock Classes="StatusBar_TextBlock" Grid.ColumnSpan="2" Text="{DynamicResource String/SessionControl.SelectedRenderecImagePixelPosition}" Opacity="0"/>
+				<TextBlock Classes="StatusBar_TextBlock" Grid.ColumnSpan="2" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}" Opacity="0"/>
 
 				<!-- Left part -->
 				<StackPanel Orientation="Horizontal">
@@ -421,19 +429,6 @@
 							</DrawingPresenter>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
-					</StackPanel>
-
-					<!-- Rendering error -->
-					<StackPanel IsVisible="{Binding HasRenderingError}" Orientation="Horizontal">
-						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Error}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
-						</Border>
-						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
 					</StackPanel>
 
 				</StackPanel>

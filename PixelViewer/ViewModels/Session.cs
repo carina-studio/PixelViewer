@@ -1164,7 +1164,11 @@ namespace Carina.PixelViewer.ViewModels
 			if (exception == null)
 				this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
 			else
+			{
 				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
+				renderedImageBuffer.Dispose();
+				memoryUsageToken.Dispose();
+			}
 			this.RenderedImage?.Let((prevRenderedImage) =>
 			{
 				var prevRenderedImageBuffer = this.renderedImageBuffer;
@@ -1179,12 +1183,20 @@ namespace Carina.PixelViewer.ViewModels
 			});
 			this.renderedImageMemoryUsageToken = memoryUsageToken;
 			this.renderedImageBuffer = renderedImageBuffer;
-			this.SetValue(HasRenderingErrorProperty, exception != null);
-			this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
-			this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
-			this.SetValue(IsRenderingImageProperty, false);
 			if (exception == null)
+			{
+				this.SetValue(HasRenderingErrorProperty, false);
+				this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
 				this.SetValue(SourceDataSizeProperty, imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList));
+				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
+			}
+			else
+			{
+				this.SetValue(HasRenderingErrorProperty, true);
+				this.SetValue(RenderedImageProperty, null);
+				this.canSaveRenderedImage.Update(false);
+			}
+			this.SetValue(IsRenderingImageProperty, false);
 		}
 
 
