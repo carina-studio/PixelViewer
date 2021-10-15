@@ -3,6 +3,9 @@
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+	<!-- App -->
+	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">載入組態</sys:String>
+	
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
@@ -29,6 +32,9 @@
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG 影像</sys:String>
+
+	<!-- ImageRenderingProfile -->
+	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;無&gt;</sys:String>
 
 	<!-- MainWindow -->
 	<sys:String x:Key="String/MainWindow.AppUpdateFound">已有新版本的應用程式，是否要前往下載頁面？</sys:String>

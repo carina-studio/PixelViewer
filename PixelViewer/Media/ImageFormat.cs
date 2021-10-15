@@ -12,6 +12,12 @@ namespace Carina.PixelViewer.Media
 	class ImageFormat : IEquatable<ImageFormat>
 	{
 		/// <summary>
+		/// Maximum number of planes defined for each format.
+		/// </summary>
+		public const int MaxPlaneCount = 4;
+
+
+		/// <summary>
 		/// Initialize new <see cref="ImageFormat"/> instance.
 		/// </summary>
 		/// <param name="category">Category of format.</param>

@@ -3,6 +3,9 @@
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+	<!-- App -->
+	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">Loading profiles</sys:String>
+
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
@@ -36,6 +39,9 @@
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All files</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
+
+	<!-- ImageRenderingProfile -->
+	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;None&gt;</sys:String>
 
 	<!-- MainWindow -->
 	<sys:String x:Key="String/MainWindow.AppUpdateFound">Application update is available. Do you want to go to the download page?</sys:String>

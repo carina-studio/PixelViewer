@@ -186,6 +186,17 @@ namespace Carina.PixelViewer
         }
 
 
+		// Prepare shutting down.
+        protected override async Task OnPrepareShuttingDownAsync()
+        {
+			// wait for I/O of image rendering profiles
+			await Media.Profiles.ImageRenderingProfiles.WaitForIOTasksAsync();
+
+			// call base
+            await base.OnPrepareShuttingDownAsync();
+        }
+
+
         // Prepare starting.
         protected override async Task OnPrepareStartingAsync()
         {
@@ -200,6 +211,10 @@ namespace Carina.PixelViewer
 				this.Shutdown();
 				return;
             }
+
+			// initialize image rendering profiles
+			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
+			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
 
 			// show main window
 			this.ShowMainWindow();
