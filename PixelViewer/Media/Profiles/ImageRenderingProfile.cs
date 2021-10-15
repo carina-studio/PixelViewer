@@ -36,6 +36,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Fields.
+        ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         IList<int> effectiveBits = emptyEffectiveBits;
         string? fileName;
         int height = 1;
@@ -69,6 +70,24 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Application.
         public IApplication Application { get => app ?? throw new InvalidOperationException("Profile is not ready yet."); }
+
+
+        // Byte ordering.
+        public ByteOrdering ByteOrdering
+        {
+            get => this.byteOrdering;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDefault();
+                if (this.byteOrdering == value)
+                    return;
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException();
+                this.byteOrdering = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ByteOrdering)));
+            }
+        }
 
 
         // Check thread.
@@ -186,13 +205,85 @@ namespace Carina.PixelViewer.Media.Profiles
                 // get renderer
                 if(rootElement.TryGetProperty("Format", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
                 {
-                    if (ImageRenderers.ImageRenderers.TryFindByFormatName(jsonProperty.GetString().AsNonNull(), out var renderer))
+                    var formatName = jsonProperty.GetString().AsNonNull();
+                    switch (formatName)
+                    {
+                        case "BGGR_16_BE":
+                            formatName = "BGGR_16";
+                            profile.byteOrdering = ByteOrdering.BigEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "BGGR_16_LE":
+                            formatName = "BGGR_16";
+                            profile.byteOrdering = ByteOrdering.LittleEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "GBRG_16_BE":
+                            formatName = "GBRG_16";
+                            profile.byteOrdering = ByteOrdering.BigEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "GBRG_16_LE":
+                            formatName = "GBRG_16";
+                            profile.byteOrdering = ByteOrdering.LittleEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "GRBG_16_BE":
+                            formatName = "GRBG_16";
+                            profile.byteOrdering = ByteOrdering.BigEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "GRBG_16_LE":
+                            formatName = "GRBG_16";
+                            profile.byteOrdering = ByteOrdering.LittleEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "L16_BE":
+                            formatName = "L16";
+                            profile.byteOrdering = ByteOrdering.BigEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "L16_LE":
+                            formatName = "L16";
+                            profile.byteOrdering = ByteOrdering.LittleEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "RGB_565_BE":
+                            formatName = "RGB_565";
+                            profile.byteOrdering = ByteOrdering.BigEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "RGB_565_LE":
+                            formatName = "RGB_565";
+                            profile.byteOrdering = ByteOrdering.LittleEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "RGGB_16_BE":
+                            formatName = "RGGB_16";
+                            profile.byteOrdering = ByteOrdering.BigEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                        case "RGGB_16_BL":
+                            formatName = "RGGB_16";
+                            profile.byteOrdering = ByteOrdering.LittleEndian;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
+                    }
+                    if (ImageRenderers.ImageRenderers.TryFindByFormatName(formatName, out var renderer))
                         profile.renderer = renderer;
                     else
                         throw new JsonException($"Unknown format: {jsonProperty.GetString()}.");
                 }
                 else
                     throw new JsonException("No format specified.");
+
+                // get byte ordering
+                if (profile.renderer?.Format?.HasMultipleByteOrderings == true
+                    && rootElement.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
+                    && jsonProperty.ValueKind == JsonValueKind.String)
+                {
+                    Enum.TryParse(jsonProperty.GetString(), out profile.byteOrdering);
+                }
 
                 // get dimensions
                 if (rootElement.TryGetProperty(nameof(Width), out jsonProperty) && jsonProperty.TryGetInt32(out var intValue))
@@ -368,6 +459,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 jsonWriter.WriteStartObject();
                 jsonWriter.WriteString(nameof(Name), this.name);
                 jsonWriter.WriteString("Format", format.Name);
+                if (format.HasMultipleByteOrderings)
+                    jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);
                 jsonWriter.WritePropertyName(nameof(EffectiveBits));

@@ -9,21 +9,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// <summary>
 	/// Base implementation of <see cref="IImageRenderer"/> to rendering RGB_565 format image.
 	/// </summary>
-	abstract class Rgb565ImageRenderer : SinglePlaneImageRenderer
+	class Rgb565ImageRenderer : SinglePlaneImageRenderer
 	{
-		// Fields.
-		readonly bool isLittleEndian;
-
-
 		/// <summary>
 		/// Initiaize new <see cref="Rgb565ImageRenderer"/> instance.
 		/// </summary>
-		/// <param name="format">Supported format.</param>
-		/// <param name="isLittleEndian">True to use little-endian for byte ordering.</param>
-		protected Rgb565ImageRenderer(ImageFormat format, bool isLittleEndian) : base(format)
-		{
-			this.isLittleEndian = isLittleEndian;
-		}
+		public Rgb565ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_565", true, new ImagePlaneDescriptor(2)))
+		{ }
 
 
 		// Render.
@@ -38,9 +30,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				return;
 
 			// select byte ordering
-			Func<byte, byte, int> pixelConversionFunc = this.isLittleEndian switch
+			Func<byte, byte, int> pixelConversionFunc = renderingOptions.ByteOrdering switch
 			{
-				true => (b1, b2) => (b2 << 8) | b1,
+				ByteOrdering.LittleEndian => (b1, b2) => (b2 << 8) | b1,
 				_ => (b1, b2) => (b1 << 8) | b2,
 			};
 

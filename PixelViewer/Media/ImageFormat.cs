@@ -32,6 +32,17 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="category">Category of format.</param>
 		/// <param name="name">Name.</param>
+		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
+		/// <param name="planeDescriptor">Plane descriptor.</param>
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, name, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor })
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
 		/// <param name="displayName">Displayed name.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
 		public ImageFormat(ImageFormatCategory category, string name, string displayName, ImagePlaneDescriptor planeDescriptor) : this(category, name, displayName, new ImagePlaneDescriptor[] { planeDescriptor })
@@ -55,13 +66,26 @@ namespace Carina.PixelViewer.Media
 		/// <param name="name">Name.</param>
 		/// <param name="displayName">Displayed name.</param>
 		/// <param name="planeDescriptors">Plane descriptors.</param>
-		public ImageFormat(ImageFormatCategory category, string name, string displayName, IList<ImagePlaneDescriptor> planeDescriptors)
+		public ImageFormat(ImageFormatCategory category, string name, string displayName, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, displayName, false, planeDescriptors)
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="displayName">Displayed name.</param>
+		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
+		/// <param name="planeDescriptors">Plane descriptors.</param>
+		public ImageFormat(ImageFormatCategory category, string name, string displayName, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors)
 		{
 			if (planeDescriptors.IsEmpty())
 				throw new ArgumentException("Empty image plane descriptor.");
 			this.Category = category;
 			this.Name = name;
 			this.DisplayName = displayName;
+			this.HasMultipleByteOrderings = hasMultiByteOrderings;
 			this.PlaneDescriptors = planeDescriptors.Let((it) =>
 			{
 				if (it.IsReadOnly)
@@ -81,6 +105,12 @@ namespace Carina.PixelViewer.Media
 		/// Display name of format.
 		/// </summary>
 		public string DisplayName { get; }
+
+
+		/// <summary>
+		/// Whether multiple byte orderings are supported by this format or not.
+		/// </summary>
+		public bool HasMultipleByteOrderings { get; }
 
 
 		/// <summary>

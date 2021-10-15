@@ -50,6 +50,10 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Property of <see cref="ByteOrdering"/>.
+		/// </summary>
+		public static readonly ObservableProperty<ByteOrdering> ByteOrderingProperty = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
+		/// <summary>
 		/// Property of <see cref="HasImagePlane1"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasImagePlane1Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane1), true);
@@ -61,6 +65,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="HasImagePlane3"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasImagePlane3Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane3));
+		/// <summary>
+		/// Property of <see cref="HasMultipleByteOrderings"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasMultipleByteOrderingsProperty = ObservableProperty.Register<Session, bool>(nameof(HasMultipleByteOrderings));
 		/// <summary>
 		/// Property of <see cref="HasRenderedImage"/>.
 		/// </summary>
@@ -227,6 +235,16 @@ namespace Carina.PixelViewer.ViewModels
 
 			// setup title
 			this.UpdateTitle();
+		}
+
+
+		/// <summary>
+		/// Get or set byte ordering.
+		/// </summary>
+		public ByteOrdering ByteOrdering
+        {
+			get => this.GetValue(ByteOrderingProperty);
+			set => this.SetValue(ByteOrderingProperty, value);
 		}
 
 
@@ -543,6 +561,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether multiple byte orderings are supported by the format of current <see cref="ImageRenderer"/> or not.
+		/// </summary>
+		public bool HasMultipleByteOrderings { get => this.GetValue(HasMultipleByteOrderingsProperty); }
+
+
+		/// <summary>
 		/// Check whether <see cref="RenderedImage"/> is non-null or not.
 		/// </summary>
 		public bool HasRenderedImage { get => this.GetValue(HasRenderedImageProperty); }
@@ -695,7 +719,12 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {
             base.OnPropertyChanged(property, oldValue, newValue);
-			if (property == ImageHeightProperty)
+			if (property == ByteOrderingProperty)
+			{
+				if (this.HasMultipleByteOrderings)
+					this.renderImageOperation.Reschedule();
+			}
+			else if (property == ImageHeightProperty)
 				this.renderImageOperation.Reschedule(RenderImageDelay);
 			else if (property == ImageRendererProperty)
 			{
@@ -703,6 +732,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 						this.isImageDimensionsEvaluationNeeded = true;
+					this.SetValue(HasMultipleByteOrderingsProperty, ((IImageRenderer)newValue.AsNonNull()).Format.HasMultipleByteOrderings);
 					this.isImagePlaneOptionsResetNeeded = true;
 					this.renderImageOperation.Reschedule();
 				}
@@ -733,6 +763,9 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					// renderer
 					this.SetValue(ImageRendererProperty, profile.Renderer ?? this.SelectDefaultImageRenderer());
+
+					// byte ordering
+					this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
 
 					// dimensions
 					this.SetValue(ImageWidthProperty, profile.Width);
@@ -1092,7 +1125,10 @@ namespace Carina.PixelViewer.ViewModels
 			// render
 			this.Logger.LogDebug($"Render image for '{sourceFileName}', dimensions: {this.ImageWidth}x{this.ImageHeight}");
 			var cancellationTokenSource = new CancellationTokenSource();
-			var renderingOptions = new ImageRenderingOptions();
+			var renderingOptions = new ImageRenderingOptions()
+			{
+				ByteOrdering = this.ByteOrdering,
+			};
 			var exception = (Exception?)null;
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 			try
@@ -1590,6 +1626,7 @@ namespace Carina.PixelViewer.ViewModels
 		void WriteParametersToProfile(ImageRenderingProfile profile)
 		{
 			profile.Renderer = this.ImageRenderer;
+			profile.ByteOrdering = this.ByteOrdering;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
 			profile.EffectiveBits = this.effectiveBits;

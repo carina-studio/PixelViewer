@@ -31,19 +31,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
-		// Fields.
-		readonly bool isLittleEndian;
-
-
 		/// <summary>
 		/// Initialize new <see cref="BayerPattern16ImageRenderer"/> instance.
 		/// </summary>
 		/// <param name="format">Format.</param>
-		/// <param name="isLittleEndian">True to use little-endian for byte ordering.</param>
-		protected BayerPattern16ImageRenderer(ImageFormat format, bool isLittleEndian) : base(format)
-		{
-			this.isLittleEndian = isLittleEndian;
-		}
+		protected BayerPattern16ImageRenderer(ImageFormat format) : base(format)
+		{ }
 
 
 		// Create default plane options.
@@ -62,6 +55,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			var effectiveBits = planeOptions[0].EffectiveBits;
+			var isLittleEndian = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian;
 			if (width <= 0 || height <= 0)
 				throw new ArgumentException($"Invalid size: {width}x{height}.");
 			if (pixelStride <= 0 || (pixelStride * width) > rowStride)
@@ -78,12 +72,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			};
 			Func<byte, byte, byte> pixelConversionFunc = (effectiveBits == 16) switch
 			{
-				true => this.isLittleEndian switch
+				true => isLittleEndian switch
 				{
 					true => (b1, b2) => b2,
 					_ => (b1, b2) => b1,
 				},
-				_ => this.isLittleEndian switch
+				_ => isLittleEndian switch
 				{
 					true => (b1, b2) => (byte)((((b2 << 8) | b1) & effectiveBitsMask) >> effectiveBitsShiftCount),
 					_ => (b1, b2) => (byte)((((b1 << 8) | b2) & effectiveBitsMask) >> effectiveBitsShiftCount),

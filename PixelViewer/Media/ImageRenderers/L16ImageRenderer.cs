@@ -7,23 +7,15 @@ using System.Threading;
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
 	/// <summary>
-	/// Base implementation of <see cref="IImageRenderer"/> to rendering L16 format image.
+	/// <see cref="IImageRenderer"/> to rendering L16 format image.
 	/// </summary>
-	abstract class L16ImageRenderer : SinglePlaneImageRenderer
+	class L16ImageRenderer : SinglePlaneImageRenderer
 	{
-		// Fields.
-		readonly bool isLittleEndian;
-
-
 		/// <summary>
 		/// Initiaize new <see cref="L16ImageRenderer"/> instance.
 		/// </summary>
-		/// <param name="format">Supported format.</param>
-		/// <param name="isLittleEndian">True to use little-endian for byte ordering.</param>
-		protected L16ImageRenderer(ImageFormat format, bool isLittleEndian) : base(format)
-		{
-			this.isLittleEndian = isLittleEndian;
-		}
+		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16)))
+		{ }
 
 
 		// Create default plane options.
@@ -42,6 +34,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			var effectiveBits = planeOptions[0].EffectiveBits;
+			var isLittleEndian = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian;
 			if (width <= 0 || height <= 0)
 				throw new ArgumentException($"Invalid size: {width}x{height}.");
 			if (pixelStride <= 0 || (pixelStride * width) > rowStride)
@@ -58,12 +51,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			};
 			Func<byte, byte, byte> pixelConversionFunc = (effectiveBits == 16) switch
 			{
-				true => this.isLittleEndian switch
+				true => isLittleEndian switch
 				{
 					true => (b1, b2) => b2,
 					_ => (b1, b2) => b1,
 				},
-				_ => this.isLittleEndian switch
+				_ => isLittleEndian switch
 				{
 					true => (b1, b2) => (byte)((((b2 << 8) | b1) & effectiveBitsMask) >> effectiveBitsShiftCount),
 					_ => (b1, b2) => (byte)((((b1 << 8) | b2) & effectiveBitsMask) >> effectiveBitsShiftCount),

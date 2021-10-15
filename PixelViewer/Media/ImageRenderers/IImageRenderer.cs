@@ -205,6 +205,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// <summary>
 	/// Options for rendering image.
 	/// </summary>
-	public struct ImageRenderingOptions
-	{ }
+	struct ImageRenderingOptions
+	{
+		/// <summary>
+		/// Byte ordering.
+		/// </summary>
+		public ByteOrdering ByteOrdering { get; set; }
+	}
 }

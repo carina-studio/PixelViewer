@@ -15,8 +15,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		public static IList<IImageRenderer> All { get; } = new List<IImageRenderer>(new IImageRenderer[]
 		{
 			new L8ImageRenderer(),
-			new L16BEImageRenderer(),
-			new L16LEImageRenderer(),
+			new L16ImageRenderer(),
 			new NV12ImageRenderer(),
 			new NV21ImageRenderer(),
 			new I420ImageRenderer(),
@@ -26,8 +25,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new YuvyImageRenderer(),
 			new Yuv444pImageRenderer(),
 			new AndroidYuv420ImageRenderer(),
-			new Rgb565BEImageRenderer(),
-			new Rgb565LEImageRenderer(),
+			new Rgb565ImageRenderer(),
 			new Bgr888ImageRenderer(),
 			new Rgb888ImageRenderer(),
 			new Abgr8888ImageRenderer(),
@@ -38,14 +36,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new Rgbx8888ImageRenderer(),
 			new Xbgr8888ImageRenderer(),
 			new Xrgb8888ImageRenderer(),
-			new Bggr16BEImageRenderer(),
-			new Bggr16LEImageRenderer(),
-			new Gbrg16BEImageRenderer(),
-			new Gbrg16LEImageRenderer(),
-			new Grbg16BEImageRenderer(),
-			new Grbg16LEImageRenderer(),
-			new Rggb16BEImageRenderer(),
-			new Rggb16LEImageRenderer(),
+			new Bggr16ImageRenderer(),
+			new Gbrg16ImageRenderer(),
+			new Grbg16ImageRenderer(),
+			new Rggb16ImageRenderer(),
 		}).AsReadOnly();
 
 
