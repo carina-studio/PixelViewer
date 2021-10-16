@@ -31,6 +31,24 @@
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Ratio_2x3}" Header="2:3"/>
 		</ContextMenu>
 
+		<!-- File actions -->
+		<ContextMenu x:Key="fileActionsMenu" PlacementMode="Top">
+			<MenuItem Command="{Binding $parent[UserControl].CopyFileName}" Header="{DynamicResource String/SessionControl.CopyFileName}">
+				<MenuItem.Icon>
+					<Border Classes="MenuItem_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Copy}"/>
+					</Border>
+				</MenuItem.Icon>
+			</MenuItem>
+			<MenuItem Command="{Binding $parent[UserControl].CopyFilePath}" Header="{DynamicResource String/SessionControl.CopyFilePath}">
+				<MenuItem.Icon>
+					<Border Classes="MenuItem_Icon">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Copy}"/>
+					</Border>
+				</MenuItem.Icon>
+			</MenuItem>
+		</ContextMenu>
+
 		<!-- Other actions -->
 		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Top">
 			<MenuItem Command="{Binding $parent[UserControl].ShowAppOptions}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
@@ -330,17 +348,22 @@
 				<!-- Left part -->
 				<StackPanel Orientation="Horizontal">
 
-					<!-- File name -->
+					<!-- File actions -->
 					<StackPanel Orientation="Horizontal">
 						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}"/>
-						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding IsSourceFileOpened}" TextTrimming="CharacterEllipsis">
-							<TextBlock.Text>
-								<MultiBinding StringFormat="{}{0} ({1})">
-									<Binding Path="SourceFileName"/>
-									<Binding Path="SourceFileSizeString"/>
-								</MultiBinding>
-							</TextBlock.Text>
-						</TextBlock>
+						<ToggleButton Name="fileActionsButton" Classes="StatusBar_ToggleButton" Command="{Binding $parent[UserControl].ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{DynamicResource Double/SessionControl.StatusBar.FileActions.MaxWidth}">
+							<Grid ColumnDefinitions="*,Auto,Auto">
+								<TextBlock Text="{Binding SourceFileName}" TextTrimming="CharacterEllipsis"/>
+								<TextBlock Grid.Column="1" Text="{Binding SourceFileSizeString, StringFormat={} ({0})}"/>
+								<Border Classes="StatusBar_DropDownIcon" Grid.Column="2">
+									<DrawingPresenter Classes="Icon">
+										<DrawingPresenter.Drawing>
+											<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.MoveUp}"/>
+										</DrawingPresenter.Drawing>
+									</DrawingPresenter>
+								</Border>
+							</Grid>
+						</ToggleButton>
 						<Separator Classes="StatusBar_Separator"/>
 					</StackPanel>
 

@@ -1,6 +1,5 @@
 ﻿using Avalonia.Media;
 using Avalonia.Media.Imaging;
-using Carina.PixelViewer.IO;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
@@ -8,6 +7,7 @@ using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.Configuration;
+using CarinaStudio.IO;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using CarinaStudio.ViewModels;

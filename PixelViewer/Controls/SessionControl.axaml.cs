@@ -18,7 +18,7 @@ using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
-using System.Linq;
+using System.IO;
 using System.Windows.Input;
 
 namespace Carina.PixelViewer.Controls
@@ -54,6 +54,8 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
+		readonly ToggleButton fileActionsButton;
+		readonly ContextMenu fileActionsMenu;
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
@@ -87,10 +89,16 @@ namespace Carina.PixelViewer.Controls
 
 			// setup controls
 			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
-			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources["evaluateImageDimensionsMenu"].AsNonNull()).Also(it =>
+			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 			{
 				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
+			});
+			this.fileActionsButton = this.FindControl<ToggleButton>(nameof(this.fileActionsButton)).AsNonNull();
+			this.fileActionsMenu = ((ContextMenu)this.Resources[nameof(fileActionsMenu)].AsNonNull()).Also(it =>
+			{
+				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
+				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 			});
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
@@ -134,6 +142,30 @@ namespace Carina.PixelViewer.Controls
 				}
 			});
         }
+
+
+		// Copy file name.
+		void CopyFileName()
+        {
+			if (this.DataContext is not Session session || !session.IsSourceFileOpened)
+				return;
+			session.SourceFileName?.Let(it =>
+			{
+				_ = App.Current.Clipboard.SetTextAsync(Path.GetFileName(it));
+			});
+        }
+
+
+		// Copy file path.
+		void CopyFilePath()
+		{
+			if (this.DataContext is not Session session || !session.IsSourceFileOpened)
+				return;
+			session.SourceFileName?.Let(it =>
+			{
+				_ = App.Current.Clipboard.SetTextAsync(it);
+			});
+		}
 
 
 		/// <summary>
@@ -558,6 +590,15 @@ namespace Carina.PixelViewer.Controls
 		/// <see cref="ICommand"/> to show menu of image dimensions evaluation.
 		/// </summary>
 		public ICommand ShowEvaluateImageDimensionsMenuCommand { get; }
+
+
+		// Show file actions.
+		void ShowFileActions()
+		{
+			if (this.fileActionsMenu.PlacementTarget == null)
+				this.fileActionsMenu.PlacementTarget = this.fileActionsButton;
+			this.fileActionsMenu.Open(this.fileActionsButton);
+		}
 
 
 		// Show other actions.
