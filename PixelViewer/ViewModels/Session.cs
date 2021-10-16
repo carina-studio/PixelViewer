@@ -832,6 +832,9 @@ namespace Carina.PixelViewer.ViewModels
 					// renderer
 					this.SetValue(ImageRendererProperty, profile.Renderer ?? this.SelectDefaultImageRenderer());
 
+					// data offset
+					this.SetValue(DataOffsetProperty, profile.DataOffset);
+
 					// byte ordering
 					this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
 
@@ -1731,6 +1734,7 @@ namespace Carina.PixelViewer.ViewModels
 		void WriteParametersToProfile(ImageRenderingProfile profile)
 		{
 			profile.Renderer = this.ImageRenderer;
+			profile.DataOffset = this.DataOffset;
 			profile.ByteOrdering = this.ByteOrdering;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;

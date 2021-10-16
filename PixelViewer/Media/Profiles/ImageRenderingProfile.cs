@@ -37,6 +37,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Fields.
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
+        long dataOffset;
         IList<int> effectiveBits = emptyEffectiveBits;
         string? fileName;
         int height = 1;
@@ -92,6 +93,24 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Check thread.
         public bool CheckAccess() => this.Application.CheckAccess();
+
+
+        // Data offset.
+        public long DataOffset
+        {
+            get => this.dataOffset;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDefault();
+                if (this.dataOffset == value)
+                    return;
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException();
+                this.dataOffset = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(DataOffset)));
+            }
+        }
 
 
         // Delete related file.
@@ -277,6 +296,10 @@ namespace Carina.PixelViewer.Media.Profiles
                 else
                     throw new JsonException("No format specified.");
 
+                // get data offset
+                if (rootElement.TryGetProperty(nameof(DataOffset), out jsonProperty))
+                    jsonProperty.TryGetInt64(out profile.dataOffset);
+
                 // get byte ordering
                 if (profile.renderer?.Format?.HasMultipleByteOrderings == true
                     && rootElement.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
@@ -459,6 +482,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 jsonWriter.WriteStartObject();
                 jsonWriter.WriteString(nameof(Name), this.name);
                 jsonWriter.WriteString("Format", format.Name);
+                if (this.dataOffset != 0)
+                    jsonWriter.WriteNumber(nameof(DataOffset), this.dataOffset);
                 if (format.HasMultipleByteOrderings)
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 jsonWriter.WriteNumber(nameof(Width), this.width);
