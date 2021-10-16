@@ -175,12 +175,15 @@
 
 					<!-- Zoom & rotation -->
 					<Panel>
-						<TextBlock Classes="ToolBar_TextBlock" Text=" 999% " Opacity="0"/>
-						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RenderedImageScale, Converter={x:Static appConverters:RatioToPercentageConverter.Default}}"/>
-					</Panel>
-					<Panel>
-						<TextBlock Classes="ToolBar_TextBlock" Text=" 1800 " Opacity="0"/>
-						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
+						<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000 / 0000"/>
+						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
+							<TextBlock.Text>
+								<MultiBinding StringFormat="{}{0} / {1}">
+									<Binding Converter="{x:Static appConverters:RatioToPercentageConverter.Default}" Path="RenderedImageScale"/>
+									<Binding Converter="{x:Static appConverters:DegreesToStringConverter.Default}" Path="EffectiveRenderedImageRotation"/>
+								</MultiBinding>
+							</TextBlock.Text>
+						</TextBlock>
 					</Panel>
 
 					<!-- Zoom-in -->
@@ -218,15 +221,18 @@
 						</RepeatButton>
 
 						<!-- Frame info -->
-						<Button Classes="ToolBar_Button" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
-							<StackPanel Orientation="Horizontal">
-								<Panel>
-									<TextBlock Classes="ToolBar_TextBlock" Text="{Binding FrameCount}" Opacity="0"/>
-									<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding FrameNumber}"/>
-								</Panel>
-								<TextBlock Classes="ToolBar_TextBlock" Text="/"/>
-								<TextBlock Classes="ToolBar_TextBlock" Text="{Binding FrameCount}"/>
-							</StackPanel>
+						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+							<Panel>
+								<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
+								<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
+									<TextBlock.Text>
+										<MultiBinding StringFormat="{}{0} / {1}">
+											<Binding Path="FrameNumber"/>
+											<Binding Path="FrameCount"/>
+										</MultiBinding>
+									</TextBlock.Text>
+								</TextBlock>
+							</Panel>
 						</Button>
 
 						<!-- Next frame -->

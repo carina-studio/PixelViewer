@@ -174,6 +174,35 @@ namespace Carina.PixelViewer.Controls
 		public double EffectiveRenderedImageScale { get => this.GetValue<double>(EffectiveRenderedImageScaleProperty); }
 
 
+		// Move to specific frame.
+		async void MoveToSpecificFrame()
+        {
+			// check state
+			if (this.DataContext is not Session session)
+				return;
+			if (!session.HasMultipleFrames)
+				return;
+
+			// find window
+			var window = this.FindLogicalAncestorOfType<Window>();
+			if (window == null)
+				return;
+
+			// select frame number
+			var selectFrameNumber = await new FrameNumberSelectionDialog()
+			{
+				FrameCount = session.FrameCount,
+				InitialFrameNumber = session.FrameNumber,
+			}.ShowDialog<int?>(window);
+			if (selectFrameNumber == null)
+				return;
+
+			// move to frame
+			if (this.DataContext == session)
+				session.FrameNumber = selectFrameNumber.Value;
+		}
+
+
 		// Called when attached to logical tree.
 		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
@@ -239,13 +268,13 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// get session
-			if (!(this.DataContext is Session session))
+			if (this.DataContext is not Session session)
 				return;
 
 			// handle key event
 			if ((e.KeyModifiers & KeyModifiers.Control) != 0)
 			{
-				switch(e.Key)
+				switch (e.Key)
 				{
 					case Avalonia.Input.Key.D0:
 						{
@@ -278,6 +307,27 @@ namespace Carina.PixelViewer.Controls
 							this.SaveRenderedImage();
 							break;
 						}
+					default:
+						return;
+				}
+				e.Handled = true;
+			}
+			else if (e.KeyModifiers == 0)
+			{
+				switch (e.Key)
+                {
+					case Avalonia.Input.Key.End:
+						session.MoveToLastFrameCommand.TryExecute();
+						break;
+					case Avalonia.Input.Key.Home:
+						session.MoveToFirstFrameCommand.TryExecute();
+						break;
+					case Avalonia.Input.Key.PageDown:
+						session.MoveToNextFrameCommand.TryExecute();
+						break;
+					case Avalonia.Input.Key.PageUp:
+						session.MoveToPreviousFrameCommand.TryExecute();
+						break;
 					default:
 						return;
 				}

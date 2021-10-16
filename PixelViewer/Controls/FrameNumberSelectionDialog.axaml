@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.Controls.FrameNumberSelectionDialog"
+		Classes="Dialog"
+        Title="{DynamicResource String/FrameNumberSelectionDialog.Title}"
+		Width="{DynamicResource Double/FrameNumberSelectionDialog.Width}">
+
+	<DockPanel>
+
+		<!-- Control buttons -->
+		<Border Classes="Dialog_ControlButtonsPanel">
+			<StackPanel Classes="Dialog_ControlButtonsPanel">
+				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
+				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].Close}" Content="{DynamicResource String/Common.Cancel}"/>
+			</StackPanel>
+		</Border>
+
+		<!-- Content -->
+		<Grid Classes="Dialog_ContentPanel" ColumnDefinitions="*,Auto">
+			<NumericUpDown Name="frameNumberUpDown" Classes="Dialog_NumericUpDown" Maximum="{Binding $parent[Window].FrameCount}" Minimum="1" Value="{Binding $parent[Window].InitialFrameNumber}"/>
+			<TextBlock Grid.Column="1" Margin="{DynamicResource Thickness/FrameNumberSelectionDialog.FrameCount.Margin}" Text="{Binding $parent[Window].FrameCount, StringFormat={}/ {0}}" VerticalAlignment="Center"/>
+		</Grid>
+		
+	</DockPanel>
+	
+</Window>
