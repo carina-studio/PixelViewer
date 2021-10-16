@@ -204,6 +204,46 @@
 					<!-- Separator -->
 					<Separator Classes="ToolBar_Separator"/>
 
+					<!-- Frame navigation -->
+					<StackPanel IsVisible="{Binding HasMultipleFrames}" Orientation="Horizontal">
+
+						<!-- First frame -->
+						<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.MoveToFirst}"/>
+						</Button>
+
+						<!-- Previous frame -->
+						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Backward}"/>
+						</RepeatButton>
+
+						<!-- Frame info -->
+						<Button Classes="ToolBar_Button" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+							<StackPanel Orientation="Horizontal">
+								<Panel>
+									<TextBlock Classes="ToolBar_TextBlock" Text="{Binding FrameCount}" Opacity="0"/>
+									<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding FrameNumber}"/>
+								</Panel>
+								<TextBlock Classes="ToolBar_TextBlock" Text="/"/>
+								<TextBlock Classes="ToolBar_TextBlock" Text="{Binding FrameCount}"/>
+							</StackPanel>
+						</Button>
+
+						<!-- Next frame -->
+						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Forward}"/>
+						</RepeatButton>
+
+						<!-- Last frame -->
+						<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.MoveToLast}"/>
+						</Button>
+
+						<!-- Separator -->
+						<Separator Classes="ToolBar_Separator"/>
+
+					</StackPanel>
+
 					<!-- Other actions -->
 					<ToggleButton Name="otherActionsButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
 						<Panel>

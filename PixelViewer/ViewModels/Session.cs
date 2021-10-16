@@ -62,9 +62,9 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<int> FrameCountProperty = ObservableProperty.Register<Session, int>(nameof(FrameCount), 0);
 		/// <summary>
-		/// Property of <see cref="FrameIndex"/>.
+		/// Property of <see cref="FrameNumber"/>.
 		/// </summary>
-		public static readonly ObservableProperty<int> FrameIndexProperty = ObservableProperty.Register<Session, int>(nameof(FrameIndex), 0);
+		public static readonly ObservableProperty<int> FrameNumberProperty = ObservableProperty.Register<Session, int>(nameof(FrameNumber), 0);
 		/// <summary>
 		/// Property of <see cref="HasImagePlane1"/>.
 		/// </summary>
@@ -146,10 +146,6 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
 		/// <summary>
-		/// Property of <see cref="MaxFrameIndex"/>.
-		/// </summary>
-		public static readonly ObservableProperty<int> MaxFrameIndexProperty = ObservableProperty.Register<Session, int>(nameof(MaxFrameIndex), 0);
-		/// <summary>
 		/// Property of <see cref="Profile"/>.
 		/// </summary>
 		public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default, validate: it =>
@@ -195,6 +191,8 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Fields.
+		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canOpenSourceFile = new MutableObservableBoolean(true);
 		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
@@ -228,6 +226,26 @@ namespace Carina.PixelViewer.ViewModels
 			this.CloseSourceFileCommand = new Command(() => this.CloseSourceFile(false), isSrcFileOpenedObservable);
 			this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
 			this.EvaluateImageDimensionsCommand = new Command<AspectRatio>(this.EvaluateImageDimensions, isSrcFileOpenedObservable);
+			this.MoveToFirstFrameCommand = new Command(() =>
+			{
+				if (this.canMoveToPreviousFrame.Value)
+					this.FrameNumber = 1;
+			}, this.canMoveToPreviousFrame);
+			this.MoveToLastFrameCommand = new Command(() =>
+			{
+				if (this.canMoveToNextFrame.Value)
+					this.FrameNumber = this.FrameCount;
+			}, this.canMoveToNextFrame);
+			this.MoveToNextFrameCommand = new Command(() =>
+			{
+				if (this.canMoveToNextFrame.Value)
+					++this.FrameNumber;
+			}, this.canMoveToNextFrame);
+			this.MoveToPreviousFrameCommand = new Command(() =>
+			{
+				if (this.canMoveToPreviousFrame.Value)
+					--this.FrameNumber;
+			}, this.canMoveToPreviousFrame);
 			this.OpenSourceFileCommand = new Command<string>(filePath => this.OpenSourceFile(filePath), this.canOpenSourceFile);
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
@@ -354,8 +372,14 @@ namespace Carina.PixelViewer.ViewModels
 			// update state
 			if (!disposing)
 			{
+				this.SetValue(DataOffsetProperty, 0L);
+				this.SetValue(FrameCountProperty, 0);
+				this.SetValue(FrameNumberProperty, 0);
 				this.SetValue(IsSourceFileOpenedProperty, false);
+				this.canMoveToNextFrame.Update(false);
+				this.canMoveToPreviousFrame.Update(false);
 				this.canSaveRenderedImage.Update(false);
+				this.SetValue(SourceDataSizeProperty, 0);
 				this.UpdateCanSaveDeleteProfile();
 			}
 			var renderedImage = this.RenderedImage;
@@ -374,12 +398,8 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			if (!disposing)
 			{
-				this.SetValue(DataOffsetProperty, 0L);
-				this.SetValue(FrameCountProperty, 0);
-				this.SetValue(FrameIndexProperty, 0);
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
-				this.SetValue(SourceDataSizeProperty, 0);
 			}
 
 			// update zooming state
@@ -561,10 +581,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get of set index of frame to render.
 		/// </summary>
-		public int FrameIndex
+		public int FrameNumber
 		{
-			get => this.GetValue(FrameIndexProperty);
-			set => this.SetValue(FrameIndexProperty, value);
+			get => this.GetValue(FrameNumberProperty);
+			set => this.SetValue(FrameNumberProperty, value);
 		}
 
 
@@ -720,12 +740,6 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Get maximum index of frame available in source file.
-		/// </summary>
-		public int MaxFrameIndex { get => this.GetValue(MaxFrameIndexProperty); }
-
-
-		/// <summary>
 		/// Get maximum scaling ratio of rendered image.
 		/// </summary>
 		public double MaxRenderedImageScale { get; } = 10.0;
@@ -735,6 +749,30 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get minimum scaling ratio of rendered image.
 		/// </summary>
 		public double MinRenderedImageScale { get; } = 0.1;
+
+
+		/// <summary>
+		/// Command to move to first frame and render.
+		/// </summary>
+		public ICommand MoveToFirstFrameCommand { get; }
+
+
+		/// <summary>
+		/// Command to move to last frame and render.
+		/// </summary>
+		public ICommand MoveToLastFrameCommand { get; }
+
+
+		/// <summary>
+		/// Command to move to next frame and render.
+		/// </summary>
+		public ICommand MoveToNextFrameCommand { get; }
+
+
+		/// <summary>
+		/// Command to move to previous frame and render.
+		/// </summary>
+		public ICommand MoveToPreviousFrameCommand { get; }
 
 
 		// Called when strings updated.
@@ -787,12 +825,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.renderImageOperation.Reschedule(RenderImageDelay);
 			}
 			else if (property == FrameCountProperty)
-			{
-				var frameCount = (int)newValue.AsNonNull();
-				this.SetValue(HasMultipleFramesProperty, frameCount > 1);
-				this.SetValue(MaxFrameIndexProperty, Math.Max(0, frameCount - 1));
-			}
-			else if (property == FrameIndexProperty)
+				this.SetValue(HasMultipleFramesProperty, (int)newValue.AsNonNull() > 1);
+			else if (property == FrameNumberProperty)
 				this.renderImageOperation.Reschedule();
 			else if (property == ImageRendererProperty)
 			{
@@ -941,7 +975,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// update state
 			this.SetValue(DataOffsetProperty, 0L);
-			this.SetValue(FrameIndexProperty, 0);
+			this.SetValue(FrameNumberProperty, 1);
 			this.SetValue(IsSourceFileOpenedProperty, true);
 			this.canOpenSourceFile.Update(true);
 			this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
@@ -1193,16 +1227,22 @@ namespace Carina.PixelViewer.ViewModels
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
 			};
-			var frameIndex = this.FrameIndex;
+			var frameNumber = this.FrameNumber;
 			var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
 			try
 			{
 				var totalDataSize = imageDataSource.Size - this.DataOffset;
 				var frameCount = (int)Math.Max(1, totalDataSize / frameDataSize);
-				if (frameIndex < 0)
-					frameIndex = 0;
-				else if (frameIndex >= frameCount)
-					frameIndex = (frameCount - 1);
+				if (frameNumber < 1)
+				{
+					frameNumber = 1;
+					this.SetValue(FrameNumberProperty, 1);
+				}
+				else if (frameNumber > frameCount)
+				{
+					frameNumber = frameCount;
+					this.SetValue(FrameNumberProperty, frameCount);
+				}
 				this.SetValue(FrameCountProperty, frameCount);
 			}
 			catch (Exception ex)
@@ -1228,7 +1268,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 			try
 			{
-				renderingOptions.DataOffset += (frameDataSize * frameIndex);
+				renderingOptions.DataOffset += (frameDataSize * (frameNumber - 1));
 				await imageRenderer.Render(imageDataSource, renderedImageBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
@@ -1284,12 +1324,16 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
+				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
+				this.canMoveToPreviousFrame.Update(frameNumber > 1);
 				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 			}
 			else
 			{
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.SetValue(RenderedImageProperty, null);
+				this.canMoveToNextFrame.Update(false);
+				this.canMoveToPreviousFrame.Update(false);
 				this.canSaveRenderedImage.Update(false);
 			}
 			this.SetValue(IsRenderingImageProperty, false);

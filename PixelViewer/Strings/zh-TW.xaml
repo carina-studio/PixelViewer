@@ -71,6 +71,11 @@
 	<sys:String x:Key="String/SessionControl.ImageRenderer">格式</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱：</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">記憶體不足。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一張畫面</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最後一張畫面</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一張畫面</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一張畫面</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至畫面…</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">沒有影像檔案開啟</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">開啟影像檔案 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">其他動作</sys:String>
