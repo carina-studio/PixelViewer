@@ -67,6 +67,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             {
 				await Task.Run(() =>
 				{
+					if (renderingOptions.DataOffset > 0)
+						stream.Seek(renderingOptions.DataOffset, SeekOrigin.Begin);
 					this.OnRender(sharedSource, stream, sharedBitmapBuffer, renderingOptions, planeOptions, cancellationToken);
 				});
 			}

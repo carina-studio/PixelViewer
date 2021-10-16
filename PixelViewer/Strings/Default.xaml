@@ -62,6 +62,7 @@
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy full path</sys:String>
+	<sys:String x:Key="String/SessionControl.DataOffset">Starting data offset (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete profile</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>

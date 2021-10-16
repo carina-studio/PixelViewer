@@ -54,6 +54,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<ByteOrdering> ByteOrderingProperty = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
 		/// <summary>
+		/// Property of <see cref="DataOffset"/>.
+		/// </summary>
+		public static readonly ObservableProperty<long> DataOffsetProperty = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
+		/// <summary>
 		/// Property of <see cref="HasImagePlane1"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasImagePlane1Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane1), true);
@@ -189,7 +193,6 @@ namespace Carina.PixelViewer.ViewModels
 		bool isFirstImageRenderingForSource = true;
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
-		IDisposable? isLoadingProfilesObserverSubscriptionToken;
 		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 		IBitmapBuffer? renderedImageBuffer;
 		IDisposable? renderedImageMemoryUsageToken;
@@ -355,6 +358,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			if (!disposing)
 			{
+				this.SetValue(DataOffsetProperty, 0L);
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 				this.SetValue(SourceDataSizeProperty, 0);
@@ -385,6 +389,16 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command for closing opened source file.
 		/// </summary>
 		public ICommand CloseSourceFileCommand { get; }
+
+
+		/// <summary>
+		/// Get or set offset to first byte of data to render image.
+		/// </summary>
+		public long DataOffset
+        {
+			get => this.GetValue(DataOffsetProperty);
+			set => this.SetValue(DataOffsetProperty, value);
+		}
 
 
 		// Delete current profile.
@@ -421,9 +435,6 @@ namespace Carina.PixelViewer.ViewModels
 
 			// detach from profiles
 			ImageRenderingProfiles.RemovingProfile -= this.OnRemovingProfile;
-
-			// unsubscribe observable values
-			this.isLoadingProfilesObserverSubscriptionToken?.Dispose();
 
 			// call super
 			base.Dispose(disposing);
@@ -724,8 +735,11 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.HasMultipleByteOrderings)
 					this.renderImageOperation.Reschedule();
 			}
-			else if (property == ImageHeightProperty)
+			else if (property == DataOffsetProperty 
+				|| property == ImageHeightProperty)
+			{
 				this.renderImageOperation.Reschedule(RenderImageDelay);
+			}
 			else if (property == ImageRendererProperty)
 			{
 				if (ImageRenderers.All.Contains(newValue))
@@ -869,6 +883,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageDataSource = imageDataSource;
 
 			// update state
+			this.SetValue(DataOffsetProperty, 0L);
 			this.SetValue(IsSourceFileOpenedProperty, true);
 			this.canOpenSourceFile.Update(true);
 			this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
@@ -1128,6 +1143,7 @@ namespace Carina.PixelViewer.ViewModels
 			var renderingOptions = new ImageRenderingOptions()
 			{
 				ByteOrdering = this.ByteOrdering,
+				DataOffset = this.DataOffset,
 			};
 			var exception = (Exception?)null;
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;

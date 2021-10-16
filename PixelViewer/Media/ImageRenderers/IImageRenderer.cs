@@ -211,5 +211,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Byte ordering.
 		/// </summary>
 		public ByteOrdering ByteOrdering { get; set; }
+
+
+		/// <summary>
+		/// Offset to first byte of data provided by <see cref="IImageDataSource"/>.
+		/// </summary>
+		public long DataOffset { get; set; }
 	}
 }
