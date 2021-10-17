@@ -535,7 +535,7 @@ namespace Carina.PixelViewer.Controls
 					return;
 
 				// check name
-				if (ImageRenderingProfiles.ValidateNewProfileName(name))
+				if (ImageRenderingProfiles.ValidateNewUserDefinedProfileName(name))
 					break;
 
 				// show message for duplicate name

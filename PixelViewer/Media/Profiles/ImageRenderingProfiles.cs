@@ -19,34 +19,22 @@ namespace Carina.PixelViewer.Media.Profiles
         // Fields.
         static volatile IApplication? app;
         static volatile ILogger? logger;
-        static readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>((x, y) =>
-        {
-            if (x == null)
-                return y == null ? 0 : -1;
-            if (y == null)
-                return 1;
-            if (x.IsDefault)
-                return y.IsDefault ? 0 : -1;
-            if (y.IsDefault)
-                return 1;
-            var result = x.Name.CompareTo(y.Name);
-            return result != 0 ? result : x.GetHashCode() - y.GetHashCode();
-        });
+        static readonly ObservableList<ImageRenderingProfile> userDefinedProfiles = new ObservableList<ImageRenderingProfile>();
 
 
         // Initializer.
         static ImageRenderingProfiles()
         {
-            Profiles = profiles.AsReadOnly();
+            UserDefinedProfiles = userDefinedProfiles.AsReadOnly();
         }
 
 
         // Add new profile.
-        public static bool AddProfile(ImageRenderingProfile profile)
+        public static bool AddUserDefinedProfile(ImageRenderingProfile profile)
         {
             // check state
             app.AsNonNull().VerifyAccess();
-            if (!ValidateNewProfileName(profile.Name))
+            if (!ValidateNewUserDefinedProfileName(profile.Name))
                 return false;
 
             // start saving to file
@@ -54,7 +42,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
             // add to list
             profile.PropertyChanged += OnProfilePropertyChanged;
-            profiles.Add(profile);
+            userDefinedProfiles.Add(profile);
             return true;
         }
 
@@ -76,7 +64,6 @@ namespace Carina.PixelViewer.Media.Profiles
 
             // initialize profile
             ImageRenderingProfile.Initialize(app);
-            profiles.Add(ImageRenderingProfile.Default);
 
             // find profile files
             var fileNames = await Task.Run(() =>
@@ -93,9 +80,9 @@ namespace Carina.PixelViewer.Media.Profiles
                 }
                 return fileNames;
             });
-            logger.LogTrace($"{fileNames.Count} profile file(s) found");
+            logger.LogTrace($"{fileNames.Count} user-defined profile file(s) found");
 
-            // load profiles
+            // load user defined profiles
             foreach (var fileName in fileNames)
             {
                 var profile = (ImageRenderingProfile?)null;
@@ -109,20 +96,20 @@ namespace Carina.PixelViewer.Media.Profiles
                     logger.LogError(ex, $"Unable to load '{fileName}'");
                     continue;
                 }
-                if (!ValidateNewProfileName(profile.Name))
+                if (!ValidateNewUserDefinedProfileName(profile.Name))
                 {
-                    logger.LogError($"Duplicate name of profile '{profile.Name}'");
+                    logger.LogError($"Duplicate name of user-defined profile '{profile.Name}'");
                     continue;
                 }
                 if (profile.IsUpgradedWhenLoading)
                 {
-                    logger.LogWarning($"Profile '{profile.Name}' was upgraded, save back to file");
+                    logger.LogWarning($"User-defined profile '{profile.Name}' was upgraded, save back to file");
                     _ = profile.SaveAsync();
                 }
                 profile.PropertyChanged += OnProfilePropertyChanged;
-                profiles.Add(profile);
+                userDefinedProfiles.Add(profile);
             }
-            logger.LogDebug($"{profiles.Count - 1} profile(s) loaded");
+            logger.LogDebug($"{userDefinedProfiles.Count} user-defined profile(s) loaded");
         }
 
 
@@ -134,41 +121,35 @@ namespace Carina.PixelViewer.Media.Profiles
             if (e.PropertyName == nameof(ImageRenderingProfile.Name))
             {
                 var newName = profile.Name;
-                profiles.Sort(profile);
-                if (profiles.FirstOrDefault(it => !it.IsDefault && it != profile && it.Name == newName) != null)
+                if (userDefinedProfiles.FirstOrDefault(it => it.Type == ImageRenderingProfileType.UserDefined && it != profile && it.Name == newName) != null)
                 {
                     logger?.LogError($"Duplicate profile name '{newName}', remove changed profile");
-                    RemoveProfile(profile);
+                    RemoveUserDefinedProfile(profile);
                 }
             }
         }
 
 
-        // Get all profiles.
-        public static IList<ImageRenderingProfile> Profiles { get; }
+        // Get all user defined profiles.
+        public static IList<ImageRenderingProfile> UserDefinedProfiles { get; }
 
 
-        // Remove profile.
-        public static void RemoveProfile(ImageRenderingProfile profile)
+        // Remove user defined profile.
+        public static void RemoveUserDefinedProfile(ImageRenderingProfile profile)
         {
             app.AsNonNull().VerifyAccess();
-            var index = profiles.IndexOf(profile);
+            var index = userDefinedProfiles.IndexOf(profile);
             if (index >= 0)
             {
-                RemovingProfile?.Invoke(null, new ImageRenderingProfileEventArgs(profile));
-                profiles.RemoveAt(index);
+                userDefinedProfiles.RemoveAt(index);
                 profile.PropertyChanged -= OnProfilePropertyChanged;
                 _ = profile.DeleteFileAsync();
             }
         }
 
 
-        // Raised before removing profile.
-        public static event EventHandler<ImageRenderingProfileEventArgs>? RemovingProfile;
-
-
         // Check whether given name of profile is valid or not.
-        public static bool ValidateNewProfileName(string name) => profiles.FirstOrDefault(it => !it.IsDefault && it.Name == name) == null;
+        public static bool ValidateNewUserDefinedProfileName(string name) => userDefinedProfiles.FirstOrDefault(it => it.Type == ImageRenderingProfileType.UserDefined && it.Name == name) == null;
 
 
         // Wait for IO tasks complete.

@@ -6,6 +6,7 @@ using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
+using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.IO;
 using CarinaStudio.Threading;
@@ -14,6 +15,8 @@ using CarinaStudio.ViewModels;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -148,10 +151,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="Profile"/>.
 		/// </summary>
-		public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default, validate: it =>
-		{
-			return ImageRenderingProfiles.Profiles.Contains(it);
-		});
+		public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default);
 		/// <summary>
 		/// Property of <see cref="RenderedImage"/>.
 		/// </summary>
@@ -208,6 +208,7 @@ namespace Carina.PixelViewer.ViewModels
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
 		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
+		readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>(CompareProfiles);
 		IBitmapBuffer? renderedImageBuffer;
 		IDisposable? renderedImageMemoryUsageToken;
 		double renderedImageScale = 1.0;
@@ -265,7 +266,14 @@ namespace Carina.PixelViewer.ViewModels
 			});
 
 			// attach to profiles
-			ImageRenderingProfiles.RemovingProfile += this.OnRemovingProfile;
+			this.profiles.Add(ImageRenderingProfile.Default);
+			foreach (var profile in ImageRenderingProfiles.UserDefinedProfiles)
+			{
+				profile.PropertyChanged += this.OnProfilePropertyChanged;
+				this.profiles.Add(profile);
+			}
+			this.Profiles = this.profiles.AsReadOnly();
+			((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged += this.OnUserDefinedProfilesChanged;
 
 			// select default image renderer
 			this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
@@ -429,6 +437,21 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand CloseSourceFileCommand { get; }
 
 
+		// Compare profiles.
+		static int CompareProfiles(ImageRenderingProfile? x, ImageRenderingProfile? y)
+		{
+			if (x == null)
+				return y == null ? 0 : -1;
+			if (y == null)
+				return 1;
+			var result = x.Type.CompareTo(y.Type);
+			if (result != 0)
+				return result;
+			result = x.Name.CompareTo(y.Name);
+			return result != 0 ? result : x.GetHashCode() - y.GetHashCode();
+		}
+
+
 		/// <summary>
 		/// Get or set offset to first byte of data to render image.
 		/// </summary>
@@ -446,15 +469,15 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.canSaveOrDeleteProfile.Value)
 				return;
 			var profile = this.Profile;
-			if (profile.IsDefault)
+			if (profile.Type != ImageRenderingProfileType.UserDefined)
 			{
-				this.Logger.LogError("Cannot delete default profile");
+				this.Logger.LogError("Cannot delete non user defined profile");
 				return;
 			}
 
 			// remove profile
 			this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
-			ImageRenderingProfiles.RemoveProfile(profile);
+			ImageRenderingProfiles.RemoveUserDefinedProfile(profile);
 		}
 
 
@@ -472,7 +495,9 @@ namespace Carina.PixelViewer.ViewModels
 				this.CloseSourceFile(true);
 
 			// detach from profiles
-			ImageRenderingProfiles.RemovingProfile -= this.OnRemovingProfile;
+			((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged -= this.OnUserDefinedProfilesChanged;
+			foreach (var profile in this.profiles)
+				profile.PropertyChanged -= this.OnProfilePropertyChanged;
 
 			// call super
 			base.Dispose(disposing);
@@ -595,12 +620,12 @@ namespace Carina.PixelViewer.ViewModels
 		public string GenerateNameForNewProfile()
 		{
 			var name = $"{this.ImageWidth}x{this.ImageHeight} [{this.ImageRenderer.Format.Name}]";
-			if (ImageRenderingProfiles.ValidateNewProfileName(name))
+			if (ImageRenderingProfiles.ValidateNewUserDefinedProfileName(name))
 				return name;
 			for (var i = 1; i <= 1000; ++i)
 			{
 				var alternativeName = $"{name} ({i})";
-				if (ImageRenderingProfiles.ValidateNewProfileName(alternativeName))
+				if (ImageRenderingProfiles.ValidateNewUserDefinedProfileName(alternativeName))
 					return alternativeName;
 			}
 			return "";
@@ -810,6 +835,14 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
+		// Called when property of profile changed.
+		void OnProfilePropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			if (e.PropertyName == nameof(ImageRenderingProfile.Name))
+				(sender as ImageRenderingProfile)?.Let(it => this.profiles.Sort(it));
+		}
+
+
 		// Property changed.
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {
@@ -861,7 +894,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.UpdateCanSaveDeleteProfile();
 
 				// apply profile
-				if (!profile.IsDefault)
+				if (profile.Type != ImageRenderingProfileType.Default)
 				{
 					// renderer
 					this.SetValue(ImageRendererProperty, profile.Renderer ?? this.SelectDefaultImageRenderer());
@@ -897,14 +930,6 @@ namespace Carina.PixelViewer.ViewModels
         }
 
 
-		// Called before moreving profile.
-		void OnRemovingProfile(object? sender, ImageRenderingProfileEventArgs e)
-		{
-			if (e.Profile == this.Profile)
-				this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
-		}
-
-
 		// Raise PropertyChanged event for row stride.
 		void OnRowStrideChanged(int index) => this.OnPropertyChanged(index switch
 		{
@@ -913,6 +938,31 @@ namespace Carina.PixelViewer.ViewModels
 			2 => nameof(this.RowStride3),
 			_ => throw new ArgumentOutOfRangeException(),
 		});
+
+
+		// Called when user defined profiles changed.
+		void OnUserDefinedProfilesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+		{
+			switch (e.Action)
+			{
+				case NotifyCollectionChangedAction.Add:
+					foreach (var profile in e.NewItems.AsNonNull().Cast<ImageRenderingProfile>())
+					{
+						profile.PropertyChanged += this.OnProfilePropertyChanged;
+						this.profiles.Add(profile);
+					}
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					foreach (var profile in e.OldItems.AsNonNull().Cast<ImageRenderingProfile>())
+					{
+						if (profile == this.Profile)
+							this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
+						profile.PropertyChanged -= this.OnProfilePropertyChanged;
+						this.profiles.Remove(profile);
+					}
+					break;
+			}
+		}
 
 
         // Open given file as image data source.
@@ -996,7 +1046,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// render image
-			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.IsDefault)
+			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.Type == ImageRenderingProfileType.Default)
 			{
 				this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
@@ -1053,6 +1103,12 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.GetValue(ProfileProperty);
 			set => this.SetValue(ProfileProperty, value);
 		}
+
+
+		/// <summary>
+		/// Get available profiles.
+		/// </summary>
+		public IList<ImageRenderingProfile> Profiles { get; }
 
 
 		// Release token for rendered image memory usage.
@@ -1446,7 +1502,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// create profile
 			var profile = new ImageRenderingProfile(name, this.ImageRenderer).Also((it) => this.WriteParametersToProfile(it));
-			if (!ImageRenderingProfiles.AddProfile(profile))
+			if (!ImageRenderingProfiles.AddUserDefinedProfile(profile))
 			{
 				this.Logger.LogError($"Unable to add profile '{name}'");
 				return;
@@ -1470,9 +1526,9 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.canSaveOrDeleteProfile.Value)
 				return;
 			var profile = this.Profile;
-			if (profile.IsDefault)
+			if (profile.Type != ImageRenderingProfileType.UserDefined)
 			{
-				this.Logger.LogError("Cannot save default profile");
+				this.Logger.LogError("Cannot save non user defined profile");
 				return;
 			}
 
@@ -1728,7 +1784,7 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				this.canSaveAsNewProfile.Update(true);
-				this.canSaveOrDeleteProfile.Update(!this.Profile.IsDefault);
+				this.canSaveOrDeleteProfile.Update(this.Profile.Type == ImageRenderingProfileType.UserDefined);
 			}
 		}
 

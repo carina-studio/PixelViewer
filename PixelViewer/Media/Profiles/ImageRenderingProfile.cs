@@ -49,15 +49,15 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Constructor.
-        public ImageRenderingProfile(string name, ImageRenderers.IImageRenderer renderer) : this(false)
+        public ImageRenderingProfile(string name, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.UserDefined)
         {
             this.name = name;
             this.renderer = renderer;
         }
-        ImageRenderingProfile(bool isDefault)
+        ImageRenderingProfile(ImageRenderingProfileType type)
         {
-            this.IsDefault = isDefault;
-            if (isDefault)
+            this.Type = type;
+            if (type == ImageRenderingProfileType.Default)
             {
                 this.name = this.Application.GetStringNonNull("ImageRenderingProfile.Default");
                 this.Application.StringsUpdated += (_, e) =>
@@ -187,14 +187,10 @@ namespace Carina.PixelViewer.Media.Profiles
                     throw new InvalidOperationException("Unexpected initialization.");
                 ImageRenderingProfile.app = app;
             }
-            defaultProfile = new ImageRenderingProfile(true);
+            defaultProfile = new ImageRenderingProfile(ImageRenderingProfileType.Default);
             directoryPath = Path.Combine(app.RootPrivateDirectoryPath, "Profiles");
             logger = app.LoggerFactory.CreateLogger(nameof(ImageRenderingProfile));
         }
-
-
-        // Check whether profile is default one or not.
-        public bool IsDefault { get; }
 
 
         // Check upgrading state.
@@ -205,7 +201,7 @@ namespace Carina.PixelViewer.Media.Profiles
         public static async Task<ImageRenderingProfile> LoadAsync(string fileName)
         {
             // load from file
-            var profile = new ImageRenderingProfile(false);
+            var profile = new ImageRenderingProfile(ImageRenderingProfileType.UserDefined);
             await IOTaskFactory.StartNew(() =>
             {
                 // parse file
@@ -448,7 +444,8 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             // check state
             this.VerifyAccess();
-            this.VerifyDefault();
+            if (this.Type != ImageRenderingProfileType.UserDefined)
+                throw new InvalidOperationException();
 
             // select file name
             var fileName = Path.Combine(DirectoryPath, WebUtility.UrlEncode(this.name) + ".json");
@@ -520,10 +517,14 @@ namespace Carina.PixelViewer.Media.Profiles
         public event PropertyChangedEventHandler? PropertyChanged;
 
 
+        // Type of profile.
+        public ImageRenderingProfileType Type { get; }
+
+
         // Throw exception is profile is default.
         void VerifyDefault()
         {
-            if (this.IsDefault)
+            if (this.Type == ImageRenderingProfileType.Default)
                 throw new InvalidOperationException("Cannot modify default profile.");
         }
 
@@ -558,5 +559,25 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Related profile.
         public ImageRenderingProfile Profile { get; }
+    }
+
+
+    /// <summary>
+    /// Type of <see cref="ImageRenderingProfile"/>.
+    /// </summary>
+    enum ImageRenderingProfileType
+    {
+        /// <summary>
+        /// Default profile.
+        /// </summary>
+        Default,
+        /// <summary>
+        /// Generated for file format.
+        /// </summary>
+        FileFormat,
+        /// <summary>
+        /// User defined.
+        /// </summary>
+        UserDefined,
     }
 }

@@ -220,8 +220,8 @@
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Backward}"/>
 						</RepeatButton>
 
-						<!-- Frame info -->
-						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+						<!-- Frame -->
+						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding !HasRenderingError}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
 							<Panel>
 								<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
 								<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
@@ -268,7 +268,7 @@
 
 						<!-- Profile -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>
-						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{x:Static appProfiles:ImageRenderingProfiles.Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
+						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 							<ComboBox.DataTemplates>
 								<DataTemplate>
 									<TextBlock Text="{Binding Name}"/>
