@@ -19,7 +19,7 @@ namespace Carina.PixelViewer.Media.Profiles
     /// <summary>
     /// Profile of image rendering.
     /// </summary>
-    class ImageRenderingProfile : IApplicationObject, INotifyPropertyChanged
+    class ImageRenderingProfile : BaseDisposable, IApplicationObject, INotifyPropertyChanged
     {
         /// <summary>
         /// <see cref="TaskFactory"/> for I/O operations.
@@ -39,6 +39,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         long dataOffset;
         IList<int> effectiveBits = emptyEffectiveBits;
+        readonly FileFormat? fileFormat;
         string? fileName;
         long framePaddingSize;
         int height = 1;
@@ -53,6 +54,13 @@ namespace Carina.PixelViewer.Media.Profiles
         public ImageRenderingProfile(string name, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.UserDefined)
         {
             this.name = name;
+            this.renderer = renderer;
+        }
+        public ImageRenderingProfile(FileFormat format, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.FileFormat)
+        {
+            this.fileFormat = format;
+            this.fileFormat.PropertyChanged += this.OnFileFormatPropertyChanged;
+            this.name = format.Name;
             this.renderer = renderer;
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
@@ -81,6 +89,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.byteOrdering == value)
                     return;
@@ -103,6 +112,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.dataOffset == value)
                     return;
@@ -117,6 +127,8 @@ namespace Carina.PixelViewer.Media.Profiles
         // Delete related file.
         public Task DeleteFileAsync()
         {
+            this.VerifyAccess();
+            this.VerifyDisposed();
             var fileName = this.fileName;
             if (string.IsNullOrEmpty(fileName))
                 return Task.CompletedTask;
@@ -143,6 +155,16 @@ namespace Carina.PixelViewer.Media.Profiles
         public static string DirectoryPath { get => directoryPath ?? throw new InvalidOperationException("Profile is not ready yet."); }
 
 
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            this.VerifyAccess();
+            this.VerifyDefault();
+            if (this.fileFormat != null)
+                fileFormat.PropertyChanged -= this.OnFileFormatPropertyChanged;
+        }
+
+
         // Effective bits for each plane.
         public IList<int> EffectiveBits
         {
@@ -150,6 +172,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.effectiveBits.SequenceEqual(value))
                     return;
@@ -168,6 +191,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.framePaddingSize == value)
                     return;
@@ -186,6 +210,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.height == value)
                     return;
@@ -401,10 +426,23 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
-                this.VerifyDefault();
+                this.VerifyDisposed();
+                if (this.Type != ImageRenderingProfileType.UserDefined)
+                    throw new InvalidOperationException();
                 if (this.name == value)
                     return;
                 this.name = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
+            }
+        }
+
+
+        // Property of file format changed.
+        void OnFileFormatPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(FileFormat.Name))
+            {
+                this.name = this.fileFormat.AsNonNull().Name;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
             }
         }
@@ -417,6 +455,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.pixelStrides.SequenceEqual(value))
                     return;
@@ -435,6 +474,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.renderer == value)
                     return;
@@ -451,6 +491,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.rowStrides.SequenceEqual(value))
                     return;
@@ -467,6 +508,7 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             // check state
             this.VerifyAccess();
+            this.VerifyDisposed();
             if (this.Type != ImageRenderingProfileType.UserDefined)
                 throw new InvalidOperationException();
 
@@ -561,6 +603,7 @@ namespace Carina.PixelViewer.Media.Profiles
             set
             {
                 this.VerifyAccess();
+                this.VerifyDisposed();
                 this.VerifyDefault();
                 if (this.width == value)
                     return;
@@ -570,20 +613,6 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Width)));
             }
         }
-    }
-
-
-    /// <summary>
-    /// Data for <see cref="ImageRenderingProfile"/> related events.
-    /// </summary>
-    class ImageRenderingProfileEventArgs : EventArgs
-    {
-        // Constructor.
-        public ImageRenderingProfileEventArgs(ImageRenderingProfile profile) => this.Profile = profile;
-
-
-        // Related profile.
-        public ImageRenderingProfile Profile { get; }
     }
 
 

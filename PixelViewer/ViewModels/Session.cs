@@ -483,6 +483,7 @@ namespace Carina.PixelViewer.ViewModels
 			// remove profile
 			this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
 			ImageRenderingProfiles.RemoveUserDefinedProfile(profile);
+			profile.Dispose();
 		}
 
 
