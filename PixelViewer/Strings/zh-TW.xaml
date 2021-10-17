@@ -35,6 +35,7 @@
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
+	<sys:String x:Key="String/FileType.Bmp">Windows 點陣圖</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG 影像</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->

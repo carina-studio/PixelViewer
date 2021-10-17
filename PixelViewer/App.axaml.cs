@@ -212,6 +212,9 @@ namespace Carina.PixelViewer
 				return;
             }
 
+			// initialize file formats
+			Media.FileFormats.Initialize(this);
+
 			// initialize image rendering profiles
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
 			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);

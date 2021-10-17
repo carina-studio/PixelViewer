@@ -42,7 +42,9 @@
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All files</sys:String>
+	<sys:String x:Key="String/FileType.Bmp">Windows Bitmap</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
+	<sys:String x:Key="String/FileType.Yuv4Mpeg2">YUV4MPEG2</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to frame</sys:String>
