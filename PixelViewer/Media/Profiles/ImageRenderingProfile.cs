@@ -40,6 +40,7 @@ namespace Carina.PixelViewer.Media.Profiles
         long dataOffset;
         IList<int> effectiveBits = emptyEffectiveBits;
         string? fileName;
+        long framePaddingSize;
         int height = 1;
         string name = "";
         IList<int> pixelStrides = emptyEffectiveBits;
@@ -156,6 +157,24 @@ namespace Carina.PixelViewer.Media.Profiles
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
                 this.effectiveBits = value.ToArray().AsReadOnly();
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EffectiveBits)));
+            }
+        }
+
+
+        // Padding size between each frame.
+        public long FramePaddingSize
+        {
+            get => this.framePaddingSize;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDefault();
+                if (this.framePaddingSize == value)
+                    return;
+                if (value <= 0)
+                    throw new ArgumentOutOfRangeException();
+                this.framePaddingSize = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FramePaddingSize)));
             }
         }
 
@@ -295,6 +314,10 @@ namespace Carina.PixelViewer.Media.Profiles
                 // get data offset
                 if (rootElement.TryGetProperty(nameof(DataOffset), out jsonProperty))
                     jsonProperty.TryGetInt64(out profile.dataOffset);
+
+                // get frame padding size
+                if (rootElement.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
+                    jsonProperty.TryGetInt64(out profile.framePaddingSize);
 
                 // get byte ordering
                 if (profile.renderer?.Format?.HasMultipleByteOrderings == true
@@ -481,6 +504,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 jsonWriter.WriteString("Format", format.Name);
                 if (this.dataOffset != 0)
                     jsonWriter.WriteNumber(nameof(DataOffset), this.dataOffset);
+                if (this.framePaddingSize != 0)
+                    jsonWriter.WriteNumber(nameof(FramePaddingSize), this.framePaddingSize);
                 if (format.HasMultipleByteOrderings)
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 jsonWriter.WriteNumber(nameof(Width), this.width);

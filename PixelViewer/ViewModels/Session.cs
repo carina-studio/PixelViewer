@@ -69,6 +69,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<int> FrameNumberProperty = ObservableProperty.Register<Session, int>(nameof(FrameNumber), 0);
 		/// <summary>
+		/// Property of <see cref="FramePaddingSize"/>.
+		/// </summary>
+		public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
+		/// <summary>
 		/// Property of <see cref="HasImagePlane1"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasImagePlane1Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane1), true);
@@ -383,6 +387,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(DataOffsetProperty, 0L);
 				this.SetValue(FrameCountProperty, 0);
 				this.SetValue(FrameNumberProperty, 0);
+				this.SetValue(FramePaddingSizeProperty, 0L);
 				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
@@ -610,6 +615,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.GetValue(FrameNumberProperty);
 			set => this.SetValue(FrameNumberProperty, value);
+		}
+
+
+		/// <summary>
+		/// Get of set padding size between frames in bytes.
+		/// </summary>
+		public long FramePaddingSize
+		{
+			get => this.GetValue(FramePaddingSizeProperty);
+			set => this.SetValue(FramePaddingSizeProperty, value);
 		}
 
 
@@ -853,6 +868,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.renderImageOperation.Reschedule();
 			}
 			else if (property == DataOffsetProperty
+				|| property == FramePaddingSizeProperty
 				|| property == ImageHeightProperty)
 			{
 				this.renderImageOperation.Reschedule(RenderImageDelay);
@@ -901,6 +917,9 @@ namespace Carina.PixelViewer.ViewModels
 
 					// data offset
 					this.SetValue(DataOffsetProperty, profile.DataOffset);
+
+					// frame padding size
+					this.SetValue(FramePaddingSizeProperty, profile.FramePaddingSize);
 
 					// byte ordering
 					this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
@@ -1026,6 +1045,7 @@ namespace Carina.PixelViewer.ViewModels
 			// update state
 			this.SetValue(DataOffsetProperty, 0L);
 			this.SetValue(FrameNumberProperty, 1);
+			this.SetValue(FramePaddingSizeProperty, 0L);
 			this.SetValue(IsSourceFileOpenedProperty, true);
 			this.canOpenSourceFile.Update(true);
 			this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
@@ -1324,7 +1344,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 			try
 			{
-				renderingOptions.DataOffset += (frameDataSize * (frameNumber - 1));
+				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
 				await imageRenderer.Render(imageDataSource, renderedImageBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
@@ -1835,6 +1855,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			profile.Renderer = this.ImageRenderer;
 			profile.DataOffset = this.DataOffset;
+			profile.FramePaddingSize = this.FramePaddingSize;
 			profile.ByteOrdering = this.ByteOrdering;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;

@@ -34,6 +34,8 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             // check state
             app.AsNonNull().VerifyAccess();
+            if (profile.Type != ImageRenderingProfileType.UserDefined)
+                return false;
             if (!ValidateNewUserDefinedProfileName(profile.Name))
                 return false;
 

@@ -282,6 +282,13 @@
 						<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
 						<Separator Classes="Dialog_Separator"/>
 
+						<!-- Frame padding bytes -->
+						<StackPanel IsVisible="{Binding HasMultipleFrames}">
+							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.FramePaddingSize}"/>
+							<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
+							<Separator Classes="Dialog_Separator"/>
+						</StackPanel>
+
 						<!-- Image renderer -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
 						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
