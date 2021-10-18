@@ -21,7 +21,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
 
 
         /// <inheritdoc/>
-        protected override async Task<ImageRenderingProfile> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
+        protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
         {
             // parse
             var width = 0;
@@ -30,7 +30,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             var renderer = (ImageRenderers.IImageRenderer?)null;
             var pixelStrides = new int[ImageFormat.MaxPlaneCount];
             var rowStrides = new int[ImageFormat.MaxPlaneCount];
-            await Task.Run(() =>
+            var parsed = await Task.Run(() =>
             {
                 // check header
                 var headerBuffer = new byte[10];
@@ -40,7 +40,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     || headerBuffer[4] != 'M' || headerBuffer[5] != 'P' || headerBuffer[6] != 'E' || headerBuffer[7] != 'G' || headerBuffer[8] != '2'
                     || headerBuffer[9] != 0x20)
                 {
-                    this.ThrowInvalidFormatException();
+                    return false;
                 }
 
                 // read parameters
@@ -97,9 +97,14 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     pixelStrides[i] = defaultPlaneOptions[i].PixelStride;
                     rowStrides[i] = defaultPlaneOptions[i].RowStride;
                 }
+
+                // complete
+                return true;
             });
 
             // complete
+            if (!parsed)
+                return null;
             return new ImageRenderingProfile(this.FileFormat, renderer.AsNonNull()).Also(it =>
             {
                 it.DataOffset = dataOffset;

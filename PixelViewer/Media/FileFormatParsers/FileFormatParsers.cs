@@ -41,7 +41,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         /// <param name="source">Image data source.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of parsing.</returns>
-        public static async Task<Profiles.ImageRenderingProfile> ParseImageRenderingProfileAsync(IImageDataSource source, CancellationToken cancellationToken)
+        public static async Task<Profiles.ImageRenderingProfile?> ParseImageRenderingProfileAsync(IImageDataSource source, CancellationToken cancellationToken)
         {
             // parse by file name
             var remainingParsers = new HashSet<IFileFormatParser>(parsers.Values);
@@ -55,18 +55,26 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         remainingParsers.Remove(parser);
                         try
                         {
-                            return await parser.ParseImageRenderingProfileAsync(source, cancellationToken);
+                            logger?.LogTrace($"Use {parser.GetType().Name} to parse '{fileSource.FileName}'");
+                            var profile = await parser.ParseImageRenderingProfileAsync(source, cancellationToken);
+                            if (profile != null)
+                                return profile;
+                            logger?.LogTrace($"'{fileSource.FileName}' is not a {parser.FileFormat} file");
                         }
-                        catch
+                        catch (Exception ex)
                         {
                             if (cancellationToken.IsCancellationRequested)
                                 throw new TaskCanceledException();
+                            logger?.LogWarning(ex, $"Unable to parse '{fileSource.FileName}' as {parser.FileFormat} file");
                         }
                     }
                 }
+                if (remainingParsers.IsEmpty())
+                {
+                    logger?.LogTrace($"Unable to identify file format of '{fileSource.FileName}'");
+                    return null;
+                }
             }
-            if (remainingParsers.IsEmpty())
-                throw new ArgumentException("Unable to parse.");
 
             // open stream
             var stream = (Stream?)null;
@@ -90,6 +98,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         continue;
                     try
                     {
+                        logger?.LogTrace($"Use {parser.GetType().Name} to parse");
                         return await parser.ParseImageRenderingProfileAsync(source, cancellationToken);
                     }
                     catch
@@ -109,7 +118,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             }
 
             // unable to parse
-            throw new ArgumentException("Unable to parse.");
+            logger?.LogTrace("Unable to identify file format");
+            return null;
         }
     }
 }

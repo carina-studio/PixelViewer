@@ -204,6 +204,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
+		ImageRenderingProfile? fileFormatProfile;
 		bool fitRenderedImageToViewport = true;
 		bool hasPendingImageRendering;
 		IImageDataSource? imageDataSource;
@@ -420,6 +421,19 @@ namespace Carina.PixelViewer.ViewModels
 
 			// cancel rendering image
 			this.CancelRenderingImage(true);
+
+			// remove profile generated for file format
+			if (this.fileFormatProfile != null)
+			{
+				if (!disposing)
+				{
+					if (this.Profile == this.fileFormatProfile)
+						this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
+					this.profiles.Remove(this.fileFormatProfile);
+				}
+				this.fileFormatProfile.Dispose();
+				this.fileFormatProfile = null;
+			}
 
 			// dispose image data source
 			var imageDataSource = this.imageDataSource;
@@ -1043,6 +1057,16 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.imageDataSource = imageDataSource;
 
+			// parse file format
+			try
+			{
+				this.fileFormatProfile = await Media.FileFormatParsers.FileFormatParsers.ParseImageRenderingProfileAsync(imageDataSource, new CancellationToken());
+				if (this.fileFormatProfile != null)
+					this.profiles.Add(this.fileFormatProfile);
+			}
+			catch
+			{ }
+
 			// update state
 			this.SetValue(DataOffsetProperty, 0L);
 			this.SetValue(FrameNumberProperty, 1);
@@ -1052,8 +1076,10 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
 			this.UpdateCanSaveDeleteProfile();
 
-			// reset to default renderer
-			if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
+			// use profile of file format or reset to default renderer
+			if (this.fileFormatProfile != null)
+				this.Profile = this.fileFormatProfile;
+			else if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
 			{
 				this.Logger.LogWarning($"Use default image renderer after opening source '{fileName}'");
 				var defaultImageRenderer = this.SelectDefaultImageRenderer();

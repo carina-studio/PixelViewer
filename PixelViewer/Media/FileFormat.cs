@@ -52,5 +52,9 @@ namespace Carina.PixelViewer.Media
 
         // SynchronizationContext
         public SynchronizationContext SynchronizationContext => this.Application.SynchronizationContext;
+
+
+        /// <inheritdoc/>
+        public override string ToString() => this.Id;
     }
 }

@@ -22,6 +22,6 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         /// <param name="source">Image data source.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of parsing.</returns>
-        Task<Profiles.ImageRenderingProfile> ParseImageRenderingProfileAsync(IImageDataSource source, CancellationToken cancellationToken);
+        Task<Profiles.ImageRenderingProfile?> ParseImageRenderingProfileAsync(IImageDataSource source, CancellationToken cancellationToken);
     }
 }

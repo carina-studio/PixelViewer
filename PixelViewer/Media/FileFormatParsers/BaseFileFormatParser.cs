@@ -42,7 +42,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
 
 
         /// <inheritdoc/>
-        public async Task<ImageRenderingProfile> ParseImageRenderingProfileAsync(IImageDataSource source, CancellationToken cancellationToken)
+        public async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsync(IImageDataSource source, CancellationToken cancellationToken)
         {
             // open stream
             this.VerifyAccess();
@@ -82,7 +82,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         /// <param name="stream">Stream to read data.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of parsing <see cref="ImageRenderingProfile"/>.</returns>
-        protected abstract Task<ImageRenderingProfile> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken);
+        protected abstract Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken);
 
 
         /// <summary>
