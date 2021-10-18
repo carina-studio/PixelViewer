@@ -27,6 +27,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             var width = 0;
             var height = 0;
             var dataOffset = 0L;
+            var byteOrdering = ByteOrdering.BigEndian;
             var renderer = (ImageRenderers.IImageRenderer?)null;
             var pixelStrides = new int[ImageFormat.MaxPlaneCount];
             var rowStrides = new int[ImageFormat.MaxPlaneCount];
@@ -53,11 +54,6 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     if (name < 0)
                         this.ThrowInvalidFormatException();
                     var value = this.ReadParameterValue(stream, out var isLastParam);
-                    if (isLastParam)
-                    {
-                        dataOffset = stream.Position + 6;
-                        break;
-                    }
                     switch (name)
                     {
                         case 'C':
@@ -72,6 +68,11 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 this.ThrowInvalidFormatException();
                             break;
                     }
+                    if (isLastParam)
+                    {
+                        dataOffset = stream.Position + 6;
+                        break;
+                    }
                 }
                 if (width <= 0 || height <= 0)
                     this.ThrowInvalidFormatException();
@@ -80,9 +81,18 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 var imageFormatName = yuvFormat switch
                 {
                     "420" or "" => "I420",
+                    "420p10" => "P010",
+                    "420p16" => "P016",
                     "422" => "YUV422p",
                     "444" => "YUV444p",
                     _ => throw new ArgumentException($"Unknown YUV format: {yuvFormat}."),
+                };
+
+                // select byte ordering
+                byteOrdering = imageFormatName switch
+                {
+                    "P010" or "P016" => ByteOrdering.LittleEndian,
+                    _ => byteOrdering,
                 };
 
                 // find renderer
@@ -107,6 +117,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 return null;
             return new ImageRenderingProfile(this.FileFormat, renderer.AsNonNull()).Also(it =>
             {
+                it.ByteOrdering = byteOrdering;
                 it.DataOffset = dataOffset;
                 it.FramePaddingSize = 6;
                 it.Width = width;

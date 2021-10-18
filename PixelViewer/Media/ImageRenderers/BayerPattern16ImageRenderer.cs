@@ -55,7 +55,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			var effectiveBits = planeOptions[0].EffectiveBits;
-			var isLittleEndian = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian;
 			if (width <= 0 || height <= 0)
 				throw new ArgumentException($"Invalid size: {width}x{height}.");
 			if (pixelStride <= 0 || (pixelStride * width) > rowStride)
@@ -64,25 +63,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
 
 			// select byte ordering
-			var effectiveBitsShiftCount = (effectiveBits - 8);
-			var effectiveBitsMask = (effectiveBits == 16) switch
-			{
-				true => 0,
-				_ => 0xff << effectiveBitsShiftCount,
-			};
-			Func<byte, byte, byte> pixelConversionFunc = (effectiveBits == 16) switch
-			{
-				true => isLittleEndian switch
-				{
-					true => (b1, b2) => b2,
-					_ => (b1, b2) => b1,
-				},
-				_ => isLittleEndian switch
-				{
-					true => (b1, b2) => (byte)((((b2 << 8) | b1) & effectiveBitsMask) >> effectiveBitsShiftCount),
-					_ => (b1, b2) => (byte)((((b1 << 8) | b2) & effectiveBitsMask) >> effectiveBitsShiftCount),
-				},
-			};
+			var pixelConversionFunc = this.Create16BitsTo8BitsConversion(renderingOptions.ByteOrdering, effectiveBits);
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
