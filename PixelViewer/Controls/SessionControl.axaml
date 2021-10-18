@@ -281,7 +281,12 @@
 						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 							<ComboBox.DataTemplates>
 								<DataTemplate>
-									<TextBlock Text="{Binding Name}"/>
+									<StackPanel Orientation="Horizontal">
+										<Border Height="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}" Margin="{DynamicResource Thickness/SessionControl.ImageRenderingProfile.Icon.Margin}" VerticalAlignment="Center" Width="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}">
+											<DrawingPresenter Classes="Icon" Drawing="{Binding Converter={x:Static appConverters:ImageRenderingProfileIconConverter.Default}}"/>
+										</Border>
+										<TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+									</StackPanel>
 								</DataTemplate>
 							</ComboBox.DataTemplates>
 						</ComboBox>
