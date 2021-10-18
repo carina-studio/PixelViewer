@@ -90,6 +90,7 @@
 	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">Move to previous frame (Page Up)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">Move to frame…</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No image file opened</sys:String>
+	<sys:String x:Key="String/SessionControl.OpeningSourceFile">Opening image file…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">Other actions</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>

@@ -93,12 +93,22 @@
 			<Grid Background="{DynamicResource Brush/SessionControl.Background}" DragDrop.AllowDrop="True">
 
 				<!-- Drag-drop hint -->
-				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
-					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
+				<Border IsVisible="{Binding !IsOpeningSourceFile}">
+					<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
+						<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
+						<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
+						</Border>
+						<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
+					</StackPanel>
+				</Border>
+
+				<!-- Opening file hint -->
+				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
 					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
 						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
 					</Border>
-					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
+					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
 				</StackPanel>
 
 				<!-- Insufficient memory hint -->

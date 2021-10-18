@@ -137,13 +137,17 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
 		/// <summary>
-		/// Property of <see cref="IsRenderingImage"/>.
+		/// Property of <see cref="IsOpeningSourceFile"/>.
 		/// </summary>
-		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
+		public static readonly ObservableProperty<bool> IsOpeningSourceFileProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSourceFile));
 		/// <summary>
 		/// Property of <see cref="IsProcessingImage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsProcessingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsProcessingImage));
+		/// <summary>
+		/// Property of <see cref="IsRenderingImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
 		/// <summary>
 		/// Property of <see cref="IsSavingRenderedImage"/>.
 		/// </summary>
@@ -267,7 +271,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.IsDisposed)
 					return;
-				this.SetValue(IsProcessingImageProperty, this.IsRenderingImage || this.IsSavingRenderedImage);
+				this.SetValue(IsProcessingImageProperty, this.IsOpeningSourceFile || this.IsRenderingImage || this.IsSavingRenderedImage);
 			});
 
 			// attach to profiles
@@ -771,15 +775,21 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Check whether image is being rendered or not.
+		/// Check whether source file is being opened or not.
 		/// </summary>
-		public bool IsRenderingImage { get => this.GetValue(IsRenderingImageProperty); }
+		public bool IsOpeningSourceFile { get => this.GetValue(IsOpeningSourceFileProperty); }
 
 
 		/// <summary>
 		/// Check whether image is being processed or not.
 		/// </summary>
 		public bool IsProcessingImage { get => this.GetValue(IsProcessingImageProperty); }
+
+
+		/// <summary>
+		/// Check whether image is being rendered or not.
+		/// </summary>
+		public bool IsRenderingImage { get => this.GetValue(IsRenderingImageProperty); }
 
 
 		/// <summary>
@@ -911,7 +921,8 @@ namespace Carina.PixelViewer.ViewModels
 					this.isImagePlaneOptionsResetNeeded = true;
 				this.renderImageOperation.Reschedule(RenderImageDelay);
 			}
-			else if (property == IsRenderingImageProperty
+			else if (property == IsOpeningSourceFileProperty
+				|| property == IsRenderingImageProperty
 				|| property == IsSavingRenderedImageProperty)
 			{
 				this.updateIsProcessingImageAction.Schedule();
@@ -1016,6 +1027,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// update state
 			this.canOpenSourceFile.Update(false);
+			this.SetValue(IsOpeningSourceFileProperty, true);
 			this.SetValue(SourceFileNameProperty, fileName);
 
 			// update title
@@ -1047,6 +1059,7 @@ namespace Carina.PixelViewer.ViewModels
 				// reset state
 				this.SetValue(SourceFileNameProperty, null);
 				this.SetValue(IsSourceFileOpenedProperty, false);
+				this.SetValue(IsOpeningSourceFileProperty, false);
 				this.canOpenSourceFile.Update(true);
 
 				// update title
@@ -1071,6 +1084,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(DataOffsetProperty, 0L);
 			this.SetValue(FrameNumberProperty, 1);
 			this.SetValue(FramePaddingSizeProperty, 0L);
+			this.SetValue(IsOpeningSourceFileProperty, false);
 			this.SetValue(IsSourceFileOpenedProperty, true);
 			this.canOpenSourceFile.Update(true);
 			this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
