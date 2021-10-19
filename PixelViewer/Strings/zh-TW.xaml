@@ -55,6 +55,7 @@
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">關於 PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項…</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplyProfile">重設至組態參數</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">位元組順序</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">複製檔案名稱</sys:String>

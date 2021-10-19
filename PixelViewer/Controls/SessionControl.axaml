@@ -378,6 +378,10 @@
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane3}"/>
 
+						<!-- Apply profile -->
+						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ApplyProfileCommand}" Content="{DynamicResource String/SessionControl.ApplyProfile}"/>
+						<Separator Classes="Dialog_Separator_Small"/>
+
 						<!-- Save profile -->
 						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SaveProfileCommand}" Content="{DynamicResource String/SessionControl.SaveProfile}"/>
 						<Separator Classes="Dialog_Separator_Small"/>

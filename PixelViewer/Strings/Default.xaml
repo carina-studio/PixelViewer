@@ -63,6 +63,7 @@
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte ordering</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>

@@ -199,6 +199,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Fields.
+		readonly MutableObservableBoolean canApplyProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canOpenSourceFile = new MutableObservableBoolean(true);
@@ -233,6 +234,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// create commands
 			var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceFileOpenedProperty);
+			this.ApplyProfileCommand = new Command(this.ApplyProfile, this.canApplyProfile);
 			this.CloseSourceFileCommand = new Command(() => this.CloseSourceFile(false), isSrcFileOpenedObservable);
 			this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
 			this.EvaluateImageDimensionsCommand = new Command<AspectRatio>(this.EvaluateImageDimensions, isSrcFileOpenedObservable);
@@ -290,6 +292,58 @@ namespace Carina.PixelViewer.ViewModels
 			// setup title
 			this.UpdateTitle();
 		}
+
+
+		// Apply parameters defined in current profile.
+		void ApplyProfile()
+        {
+			// get profile
+			var profile = this.Profile;
+
+			// update state
+			this.UpdateCanSaveDeleteProfile();
+
+			// apply profile
+			if (profile.Type != ImageRenderingProfileType.Default)
+			{
+				// renderer
+				this.SetValue(ImageRendererProperty, profile.Renderer ?? this.SelectDefaultImageRenderer());
+
+				// data offset
+				this.SetValue(DataOffsetProperty, profile.DataOffset);
+
+				// frame padding size
+				this.SetValue(FramePaddingSizeProperty, profile.FramePaddingSize);
+
+				// byte ordering
+				this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
+
+				// dimensions
+				this.SetValue(ImageWidthProperty, profile.Width);
+				this.SetValue(ImageHeightProperty, profile.Height);
+
+				// plane options
+				for (var i = this.ImageRenderer.Format.PlaneCount - 1; i >= 0; --i)
+				{
+					this.ChangeEffectiveBits(i, profile.EffectiveBits[i]);
+					this.ChangePixelStride(i, profile.PixelStrides[i]);
+					this.ChangeRowStride(i, profile.RowStrides[i]);
+				}
+
+				// update state
+				if (this.renderImageOperation.IsScheduled)
+				{
+					this.isImageDimensionsEvaluationNeeded = false;
+					this.isImagePlaneOptionsResetNeeded = false;
+				}
+			}
+		}
+
+
+		/// <summary>
+		/// Command to apply parameters defined by current <see cref="Profile"/>.
+		/// </summary>
+		public ICommand ApplyProfileCommand { get; }
 
 
 		/// <summary>
@@ -929,46 +983,8 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == ProfileProperty)
 			{
-				// change profile
-				var profile = (ImageRenderingProfile)newValue.AsNonNull();
-
-				// update state
-				this.UpdateCanSaveDeleteProfile();
-
-				// apply profile
-				if (profile.Type != ImageRenderingProfileType.Default)
-				{
-					// renderer
-					this.SetValue(ImageRendererProperty, profile.Renderer ?? this.SelectDefaultImageRenderer());
-
-					// data offset
-					this.SetValue(DataOffsetProperty, profile.DataOffset);
-
-					// frame padding size
-					this.SetValue(FramePaddingSizeProperty, profile.FramePaddingSize);
-
-					// byte ordering
-					this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
-
-					// dimensions
-					this.SetValue(ImageWidthProperty, profile.Width);
-					this.SetValue(ImageHeightProperty, profile.Height);
-
-					// plane options
-					for (var i = this.ImageRenderer.Format.PlaneCount - 1; i >= 0; --i)
-					{
-						this.ChangeEffectiveBits(i, profile.EffectiveBits[i]);
-						this.ChangePixelStride(i, profile.PixelStrides[i]);
-						this.ChangeRowStride(i, profile.RowStrides[i]);
-					}
-
-					// update state
-					if (this.renderImageOperation.IsScheduled)
-					{
-						this.isImageDimensionsEvaluationNeeded = false;
-						this.isImagePlaneOptionsResetNeeded = false;
-					}
-				}
+				this.canApplyProfile.Update(((ImageRenderingProfile)newValue.AsNonNull()).Type != ImageRenderingProfileType.Default);
+				this.ApplyProfile();
 			}
 			else if (property == RenderedImageProperty)
 				this.SetValue(HasRenderedImageProperty, newValue != null);
