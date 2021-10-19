@@ -61,6 +61,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
+		Vector? targetImageViewportCenter;
 		readonly ScheduledAction updateStatusBarStateAction;
 
 
@@ -368,6 +369,33 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Called when property of image scroll viewer changed.
+		void OnImageScrollViewerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+		{
+			if (e.Property == ScrollViewer.ExtentProperty && this.targetImageViewportCenter.HasValue)
+			{
+				App.Current.SynchronizationContext.Post(() =>
+				{
+					var center = this.targetImageViewportCenter.Value;
+					this.targetImageViewportCenter = null;
+					var viewportSize = this.imageScrollViewer.Viewport;
+					var contentSize = this.imageScrollViewer.Extent;
+					var offsetX = (contentSize.Width * center.X) - (viewportSize.Width / 2);
+					var offsetY = (contentSize.Height * center.Y) - (viewportSize.Height / 2);
+					if (offsetX < 0)
+						offsetX = 0;
+					else if (offsetX + viewportSize.Width > contentSize.Width)
+						offsetX = contentSize.Width - viewportSize.Width;
+					if (offsetY < 0)
+						offsetY = 0;
+					else if (offsetY + viewportSize.Height > contentSize.Height)
+						offsetY = contentSize.Height - viewportSize.Height;
+					this.imageScrollViewer.Offset = new Vector(offsetX, offsetY);
+				});
+			}
+		}
+
+
 		// Called when property changed.
 		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
 		{
@@ -434,6 +462,7 @@ namespace Carina.PixelViewer.Controls
 						var padding = this.imageScrollViewer.Padding;
 						this.imageScrollViewer.Padding = new Thickness(-1);
 						this.imageScrollViewer.Padding = padding;
+						this.targetImageViewportCenter = new Vector(0.5, 0.5);
 						break;
 					}
 				case nameof(Session.HasRenderingError):
@@ -446,6 +475,16 @@ namespace Carina.PixelViewer.Controls
 					break;
 				case nameof(Session.RenderedImage):
 					this.UpdateEffectiveRenderedImageScale();
+					break;
+				case nameof(Session.RenderedImageScale):
+                    {
+						var viewportSize = this.imageScrollViewer.Viewport;
+						var viewportOffset = this.imageScrollViewer.Offset;
+						var contentSize = this.imageScrollViewer.Extent;
+						var centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
+						var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
+						this.targetImageViewportCenter = new Vector(centerX, centerY);
+					}
 					break;
 			}
 		}

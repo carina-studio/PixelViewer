@@ -129,7 +129,7 @@
 				</StackPanel>
 
 				<!-- Image -->
-				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
+				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" PropertyChanged="OnImageScrollViewerPropertyChanged" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<LayoutTransformControl Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
 						<Border>
 							<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}">
