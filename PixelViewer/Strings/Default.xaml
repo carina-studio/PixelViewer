@@ -14,9 +14,10 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max usage of all rendered images (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max memory usage of all rendered images (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.RestartingMainWindowsNeeded">Will restart automatically to take effect</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memoey usage on status bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV to RGB conversion</sys:String>
 
@@ -68,6 +69,7 @@
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy full path</sys:String>
+	<sys:String x:Key="String/SessionControl.CpuUsage">CPU usage</sys:String>
 	<sys:String x:Key="String/SessionControl.DataOffset">Starting data offset (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete profile</sys:String>
@@ -95,7 +97,9 @@
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">Other actions</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">Process private memory usage</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory usage of rendered images by this tab</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed which is usually caused by incorrect rendering parameters.</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
@@ -106,6 +110,8 @@
 	<sys:String x:Key="String/SessionControl.SaveRenderedImage">Save rendered image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
+	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
+	<sys:String x:Key="String/SessionControl.UIResponseDuration">User interface response time</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 

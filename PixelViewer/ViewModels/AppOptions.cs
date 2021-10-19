@@ -97,6 +97,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)
 				this.OnPropertyChanged(nameof(this.ResetImagePlaneOptionsAfterChangingImageDimensions));
+			else if (key == SettingKeys.ShowProcessInfo)
+				this.OnPropertyChanged(nameof(this.ShowProcessInfo));
 			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
 			else if (key == SettingKeys.YuvConversionMode)
@@ -111,6 +113,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions);
 			set => this.Settings.SetValue<bool>(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions, value);
+		}
+
+
+		/// <summary>
+		/// Show process information on UI.
+		/// </summary>
+		public bool ShowProcessInfo
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ShowProcessInfo);
+			set => this.Settings.SetValue<bool>(SettingKeys.ShowProcessInfo, value);
 		}
 
 

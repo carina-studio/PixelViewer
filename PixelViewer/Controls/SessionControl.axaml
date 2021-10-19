@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+			 xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
 			 xmlns:app="using:Carina.PixelViewer"
              xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
              xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
@@ -445,7 +446,7 @@
 					</StackPanel>
 
 					<!-- Source data size -->
-					<StackPanel Background="{x:Static Brushes.Transparent}" IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
+					<StackPanel Background="{x:Static Brushes.Transparent}" IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
 						<Border Classes="StatusBar_Icon">
 							<DrawingPresenter Classes="Icon">
 								<DrawingPresenter.Drawing>
@@ -529,6 +530,59 @@
 							</DrawingPresenter>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
+					</StackPanel>
+
+					<!-- Process info -->
+					<StackPanel IsVisible="{Binding $parent[UserControl].ShowProcessInfo}" Orientation="Horizontal">
+						
+						<!-- UI response duration -->
+						<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=IsDebugMode}" Orientation="Horizontal">
+							<Separator Classes="StatusBar_Separator"/>
+							<Border Classes="StatusBar_Icon">
+								<DrawingPresenter Classes="Icon">
+									<DrawingPresenter.Drawing>
+										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Speed}"/>
+									</DrawingPresenter.Drawing>
+								</DrawingPresenter>
+							</Border>
+							<Panel>
+								<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="000 ms   "/>
+								<TextBlock Classes="StatusBar_TextBlock" HorizontalAlignment="Left" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.UIResponseDuration, Converter={x:Static asConverters:TimeSpanConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.UIResponseDuration}"/>
+							</Panel>
+						</StackPanel>
+
+						<!-- CPU usage -->
+						<Separator Classes="StatusBar_Separator"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Cpu}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
+						<Panel>
+							<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="00.0%"/>
+							<TextBlock Classes="StatusBar_TextBlock" HorizontalAlignment="Left" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.CpuUsagePercentage, StringFormat={}{0:F1}%}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.CpuUsage}"/>
+						</Panel>
+
+						<!-- Memory usage -->
+						<Separator Classes="StatusBar_Separator"/>
+						<Border Classes="StatusBar_Icon">
+							<DrawingPresenter Classes="Icon">
+								<DrawingPresenter.Drawing>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Memory}"/>
+								</DrawingPresenter.Drawing>
+							</DrawingPresenter>
+						</Border>
+						<Panel>
+							<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="000.0%"/>
+							<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding RenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.RenderedImagesMemoryUsage}"/>
+								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding TotalRenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.TotalRenderedImagesMemoryUsage}"/>
+								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
+							</StackPanel>
+						</Panel>
+
 					</StackPanel>
 
 				</StackPanel>

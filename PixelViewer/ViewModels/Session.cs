@@ -165,6 +165,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<IBitmap?> RenderedImageProperty = ObservableProperty.Register<Session, IBitmap?>(nameof(RenderedImage));
 		/// <summary>
+		/// Property of <see cref="RenderedImagesMemoryUsage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<long> RenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(RenderedImagesMemoryUsage));
+		/// <summary>
 		/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
 		/// </summary>
 		public static readonly ObservableProperty<Color> SelectedRenderedImagePixelColorProperty = ObservableProperty.Register<Session, Color>(nameof(SelectedRenderedImagePixelColor));
@@ -188,6 +192,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="SourceFileSizeString"/>.
 		/// </summary>
 		public static readonly ObservableProperty<string?> SourceFileSizeStringProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileSizeString));
+		/// <summary>
+		/// Property of <see cref="TotalRenderedImagesMemoryUsage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
 
 
 		// Constants.
@@ -195,7 +203,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Static fields.
-		static long TotalRenderedImagesMemoryUsage;
+		static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new MutableObservableInt64();
 
 
 		// Fields.
@@ -224,6 +232,7 @@ namespace Carina.PixelViewer.ViewModels
 		double renderedImageScale = 1.0;
 		readonly ScheduledAction renderImageOperation;
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
+		readonly IDisposable sharedRenderedImagesMemoryUsageObserverToken;
 		readonly ScheduledAction updateIsProcessingImageAction;
 
 
@@ -275,6 +284,10 @@ namespace Carina.PixelViewer.ViewModels
 					return;
 				this.SetValue(IsProcessingImageProperty, this.IsOpeningSourceFile || this.IsRenderingImage || this.IsSavingRenderedImage);
 			});
+
+			// setup rendered images memory usage
+			this.SetValue(TotalRenderedImagesMemoryUsageProperty, SharedRenderedImagesMemoryUsage.Value);
+			this.sharedRenderedImagesMemoryUsageObserverToken = SharedRenderedImagesMemoryUsage.Subscribe(new Observer<long>(this.OnSharedRenderedImagesMemoryUsageChanged));
 
 			// attach to profiles
 			this.profiles.Add(ImageRenderingProfile.Default);
@@ -576,6 +589,9 @@ namespace Carina.PixelViewer.ViewModels
 			((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged -= this.OnUserDefinedProfilesChanged;
 			foreach (var profile in this.profiles)
 				profile.PropertyChanged -= this.OnProfilePropertyChanged;
+
+			// detach from shared rendered images memory usage
+			this.sharedRenderedImagesMemoryUsageObserverToken.Dispose();
 
 			// call super
 			base.Dispose(disposing);
@@ -1001,6 +1017,14 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
+		// Called when total memory usage of rendered images changed.
+		void OnSharedRenderedImagesMemoryUsageChanged(long usage)
+		{
+			if (!this.IsDisposed)
+				this.SetValue(TotalRenderedImagesMemoryUsageProperty, usage);
+		}
+
+
 		// Called when user defined profiles changed.
 		void OnUserDefinedProfilesChanged(object? sender, NotifyCollectionChangedEventArgs e)
 		{
@@ -1192,8 +1216,10 @@ namespace Carina.PixelViewer.ViewModels
 		void ReleaseRenderedImageMemoryUsage(RenderedImageMemoryUsageToken token)
 		{
 			var maxUsage = this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB) << 20;
-			TotalRenderedImagesMemoryUsage -= token.DataSize;
-			this.Logger.LogDebug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+			if (!this.IsDisposed)
+				this.SetValue(RenderedImagesMemoryUsageProperty, this.RenderedImagesMemoryUsage - token.DataSize);
+			SharedRenderedImagesMemoryUsage.Decrease(token.DataSize);
+			this.Logger.LogDebug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {SharedRenderedImagesMemoryUsage.Value.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 		}
 
 
@@ -1230,6 +1256,12 @@ namespace Carina.PixelViewer.ViewModels
 				}
 			}
 		}
+
+
+		/// <summary>
+		/// Get memory usage of rendered images by this session in bytes.
+		/// </summary>
+		public long RenderedImagesMemoryUsage { get => this.GetValue(RenderedImagesMemoryUsageProperty); }
 
 
 		// Render image according to current state.
@@ -1477,14 +1509,15 @@ namespace Carina.PixelViewer.ViewModels
 		IDisposable? RequestRenderedImageMemoryUsage(long dataSize)
 		{
 			var maxUsage = this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB) << 20;
-			TotalRenderedImagesMemoryUsage += dataSize;
-			if (TotalRenderedImagesMemoryUsage <= maxUsage)
+			var totalMemoryUsage = SharedRenderedImagesMemoryUsage.Value + dataSize;
+			if (totalMemoryUsage <= maxUsage)
 			{
-				this.Logger.LogDebug($"Request {dataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+				SharedRenderedImagesMemoryUsage.Update(totalMemoryUsage);
+				this.SetValue(RenderedImagesMemoryUsageProperty, this.RenderedImagesMemoryUsage + dataSize);
+				this.Logger.LogDebug($"Request {dataSize.ToFileSizeString()} for rendered image, total: {totalMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 				return new RenderedImageMemoryUsageToken(this, dataSize);
 			}
-			TotalRenderedImagesMemoryUsage -= dataSize;
-			this.Logger.LogError($"Unable to request {dataSize.ToFileSizeString()} for rendered image, total: {TotalRenderedImagesMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+			this.Logger.LogError($"Unable to request {dataSize.ToFileSizeString()} for rendered image, total: {SharedRenderedImagesMemoryUsage.Value.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 			return null;
 		}
 
@@ -1846,6 +1879,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get title of session.
 		/// </summary>
 		public string? Title { get; private set; }
+
+
+		/// <summary>
+		/// Get total memory usage for rendered images in bytes.
+		/// </summary>
+		public long TotalRenderedImagesMemoryUsage { get => this.GetValue(TotalRenderedImagesMemoryUsageProperty); }
 
 
 		// Update CanSaveOrDeleteProfile and CanSaveAsNewProfile according to current state.

@@ -13,6 +13,7 @@ using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Configuration;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
@@ -44,6 +45,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Static fields.
 		static readonly ILogger Logger = App.Current.LoggerFactory.CreateLogger(nameof(SessionControl));
+		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
 
@@ -212,6 +214,11 @@ namespace Carina.PixelViewer.Controls
 			// enable drag-drop
 			this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
+
+			// attach to settings
+			var settings = App.Current.Settings;
+			settings.SettingChanged += this.OnSettingChanged;
+			this.SetValue<bool>(ShowProcessInfoProperty, settings.GetValueOrDefault(SettingKeys.ShowProcessInfo));
 		}
 
 
@@ -221,6 +228,9 @@ namespace Carina.PixelViewer.Controls
 			// disable drag-drop
 			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.RemoveHandler(DragDrop.DropEvent, this.OnDrop);
+
+			// detach from settings
+			App.Current.Settings.SettingChanged -= this.OnSettingChanged;
 
 			// call base
 			base.OnDetachedFromLogicalTree(e);
@@ -441,6 +451,14 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Called when setting changed.
+		void OnSettingChanged(object? sender, SettingChangedEventArgs e)
+		{
+			if (e.Key == SettingKeys.ShowProcessInfo)
+				this.SetValue<bool>(ShowProcessInfoProperty, (bool)e.Value);
+		}
+
+
 		// Open source file.
 		async void OpenSourceFile()
 		{
@@ -658,6 +676,10 @@ namespace Carina.PixelViewer.Controls
 				this.otherActionsMenu.PlacementTarget = this.otherActionsButton;
 			this.otherActionsMenu.Open(this.otherActionsButton);
 		}
+
+
+		// Show process info on UI or not.
+		bool ShowProcessInfo { get => this.GetValue<bool>(ShowProcessInfoProperty); }
 
 
 		// Status bar state.

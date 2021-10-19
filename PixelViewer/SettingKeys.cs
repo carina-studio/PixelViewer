@@ -56,6 +56,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<bool> ResetImagePlaneOptionsAfterChangingImageDimensions = new SettingKey<bool>(nameof(ResetImagePlaneOptionsAfterChangingImageDimensions), true);
 		/// <summary>
+		/// Show process info on UI or not.
+		/// </summary>
+		public static readonly SettingKey<bool> ShowProcessInfo = new SettingKey<bool>(nameof(ShowProcessInfo), false);
+		/// <summary>
 		/// Change to default image renderer after opening file.
 		/// </summary>
 		public static readonly SettingKey<bool> UseDefaultImageRendererAfterOpeningSourceFile = new SettingKey<bool>(nameof(UseDefaultImageRendererAfterOpeningSourceFile), false);

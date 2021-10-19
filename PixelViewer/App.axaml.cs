@@ -227,9 +227,20 @@ namespace Carina.PixelViewer
         }
 
 
+		///<inheritdoc/>
+        protected override bool OnSelectEnteringDebugMode()
+        {
+#if DEBUG
+			return true;
+#else
+			return base.OnSelectEnteringDebugMode();
+#endif
+        }
+
+
 #pragma warning disable CS0612
-		// Upgrade settings.
-		protected override void OnUpgradeSettings(ISettings settings, int oldVersion, int newVersion)
+        // Upgrade settings.
+        protected override void OnUpgradeSettings(ISettings settings, int oldVersion, int newVersion)
         {
 			// call base
             base.OnUpgradeSettings(settings, oldVersion, newVersion);

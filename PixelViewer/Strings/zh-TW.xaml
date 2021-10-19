@@ -14,9 +14,10 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像輸出記憶體使用上限 (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像繪製記憶體使用上限 (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.RestartingMainWindowsNeeded">將會自動重新啟動以套用</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
 
@@ -60,6 +61,7 @@
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">複製檔案名稱</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">複製完整檔案路徑</sys:String>
+	<sys:String x:Key="String/SessionControl.CpuUsage">CPU 使用率</sys:String>
 	<sys:String x:Key="String/SessionControl.DataOffset">起始資料位移 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;無&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">刪除組態</sys:String>
@@ -87,7 +89,9 @@
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">開啟影像檔案 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">其他動作</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>
+	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">處理程序的私有記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">組態</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">此分頁的影像繪製記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">繪製失敗，通常是因為使用錯誤的繪製參數。</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆時針旋轉</sys:String>
@@ -98,6 +102,8 @@
 	<sys:String x:Key="String/SessionControl.SaveRenderedImage">儲存繪製的影像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
+	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>
+	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用者介面回應時間</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 
