@@ -17,51 +17,25 @@
 		<Configurations>Debug;Release;MSStore-Debug;MSStore-Release;Debug-Windows;Release-Windows</Configurations>
 	</PropertyGroup>
 	
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<TargetFramework>net5.0</TargetFramework>
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|AnyCPU'">
+	<PropertyGroup Condition="'$(Configuration)'=='Debug-Windows'">
 		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
+	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<TargetFramework>net5.0</TargetFramework>
-		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|x86'">
+	<PropertyGroup Condition="'$(Configuration)'=='Release-Windows'">
 		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x86'">
+	<PropertyGroup Condition="'$(Configuration)'=='MSStore-Debug'">
 		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
 		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
 	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<TargetFramework>net5.0</TargetFramework>
-		<DefineConstants>DEBUG</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|x64'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>DEBUG</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|x64'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|AnyCPU'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>MSSTORE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x64'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>MSSTORE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Release|x86'">
+	<PropertyGroup Condition="'$(Configuration)'=='MSStore-Release'">
 		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
 		<DefineConstants>MSSTORE</DefineConstants>
 	</PropertyGroup>
