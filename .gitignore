@@ -7,3 +7,4 @@ AppPackages
 /Windows10Installer/Windows10Installer.wapproj.user
 /Windows10Installer/Package.StoreAssociation.xml
 /PixelViewer/Properties/PublishProfiles/*.user
+/Packages
