@@ -216,6 +216,9 @@ namespace Carina.PixelViewer.Controls
 			this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
 
+			// add event handlers
+			this.AddHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged, Avalonia.Interactivity.RoutingStrategies.Tunnel);
+
 			// attach to settings
 			var settings = App.Current.Settings;
 			settings.SettingChanged += this.OnSettingChanged;
@@ -229,6 +232,9 @@ namespace Carina.PixelViewer.Controls
 			// disable drag-drop
 			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
 			this.RemoveHandler(DragDrop.DropEvent, this.OnDrop);
+
+			// remove event handlers
+			this.RemoveHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged);
 
 			// detach from settings
 			App.Current.Settings.SettingChanged -= this.OnSettingChanged;
@@ -363,7 +369,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Called when pressing on image scroll viewer.
-		void OnImageScrollViewerPointerPressed(object sender, PointerPressedEventArgs e)
+		void OnImageScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
 		{
 			this.imageScrollViewer.Focus();
 		}
@@ -393,6 +399,34 @@ namespace Carina.PixelViewer.Controls
 					this.imageScrollViewer.Offset = new Vector(offsetX, offsetY);
 				});
 			}
+		}
+
+
+		// Called when changing mouse wheel.
+		void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
+		{
+			if (!this.imageScrollViewer.IsPointerOver || (e.KeyModifiers & KeyModifiers.Control) == 0)
+				return;
+			if (this.DataContext is not Session session || !session.IsSourceFileOpened || session.FitRenderedImageToViewport)
+				return;
+			var zoomed = false;
+			if (e.Delta.Y > 0)
+			{
+				for (var i = (int)(e.Delta.Y + 0.5); i > 0; --i)
+				{
+					if (session.ZoomInCommand.TryExecute())
+						zoomed = true;
+				}
+			}
+			else if (e.Delta.Y < 0)
+			{
+				for (var i = (int)(e.Delta.Y - 0.5); i < 0; ++i)
+				{
+					if (session.ZoomOutCommand.TryExecute())
+						zoomed = true;
+				}
+			}
+			e.Handled = zoomed;
 		}
 
 

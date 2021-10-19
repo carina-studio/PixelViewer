@@ -1969,8 +1969,8 @@ namespace Carina.PixelViewer.ViewModels
 			this.RenderedImageScale = this.RenderedImageScale.Let((it) =>
 			{
 				if (it <= 0.999)
-					return (Math.Floor(it * 10) + 1) / 10;
-				return Math.Floor(it) + 1;
+					return (Math.Floor(it * 20) + 1) / 20;
+				return (Math.Floor(it * 2) + 1) / 2;
 			});
 		}
 
@@ -1989,8 +1989,8 @@ namespace Carina.PixelViewer.ViewModels
 			this.RenderedImageScale = this.RenderedImageScale.Let((it) =>
 			{
 				if (it <= 1.001)
-					return (Math.Ceiling(it * 10) - 1) / 10;
-				return Math.Ceiling(it) - 1;
+					return (Math.Ceiling(it * 20) - 1) / 20;
+				return (Math.Ceiling(it * 2) - 1) / 2;
 			});
 		}
 

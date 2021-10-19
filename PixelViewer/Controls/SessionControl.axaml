@@ -180,9 +180,9 @@
 					</ToggleButton>
 
 					<!-- Zoom-out -->
-					<Button Classes="ToolBar_Button" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
+					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
 						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomOut}"/>
-					</Button>
+					</RepeatButton>
 
 					<!-- Zoom & rotation -->
 					<Panel>
@@ -198,9 +198,9 @@
 					</Panel>
 
 					<!-- Zoom-in -->
-					<Button Classes="ToolBar_Button" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
+					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
 						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomIn}"/>
-					</Button>
+					</RepeatButton>
 
 					<!-- Separator -->
 					<Separator Classes="ToolBar_Separator"/>
