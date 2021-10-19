@@ -45,7 +45,11 @@ namespace Carina.PixelViewer
 		// Avalonia configuration, don't remove; also used by visual designer.
 		static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
 			.UsePlatformDetect()
-			.LogToTrace();
+			.LogToTrace().Also(it =>
+			{
+				if (CarinaStudio.Platform.IsLinux)
+					it.With(new X11PlatformOptions());
+			});
 
 
 		// Initialize.
