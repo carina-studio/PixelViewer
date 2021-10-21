@@ -57,7 +57,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// select color conversion
-			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgraConversionUnsafe();
+			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgra32ConversionUnsafe();
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>

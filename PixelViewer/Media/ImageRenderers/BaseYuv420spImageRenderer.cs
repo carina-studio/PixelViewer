@@ -62,7 +62,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			}
 
 			// select color conversion
-			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgraConversionUnsafe();
+			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgra32ConversionUnsafe();
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
