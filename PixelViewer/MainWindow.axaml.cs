@@ -7,6 +7,7 @@ using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
@@ -274,7 +275,7 @@ namespace Carina.PixelViewer
 		{
 			if (e.Handled)
 				return;
-			if (!e.Data.HasSingleFileName())
+			if (!e.Data.TryGetSingleFileName(out var fileName))
 			{
 				e.DragEffects = DragDropEffects.None;
 				return;
@@ -296,7 +297,7 @@ namespace Carina.PixelViewer
 		{
 			if (e.Handled)
 				return;
-			e.Data.GetSingleFileName()?.Let((fileName) =>
+			if (e.Data.TryGetSingleFileName(out var fileName) && fileName != null)
 			{
 				// find tab
 				int mainTabIndex = this.FindMainTabItemIndex(e);
@@ -315,7 +316,7 @@ namespace Carina.PixelViewer
 				}
 				else
 					(this.DataContext as Workspace)?.CreateSession(fileName);
-			});
+			}
 		}
 
 

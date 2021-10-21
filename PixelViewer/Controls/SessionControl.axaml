@@ -172,7 +172,7 @@
 					<Separator Classes="ToolBar_Separator"/>
 
 					<!-- Fit to viewport -->
-					<ToggleButton Classes="ToolBar_Button" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
+					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 						<Panel>
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -223,7 +223,7 @@
 
 						<!-- First frame -->
 						<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.MoveToFirst}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastBackward}"/>
 						</Button>
 
 						<!-- Previous frame -->
@@ -253,7 +253,7 @@
 
 						<!-- Last frame -->
 						<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.MoveToLast}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastForward}"/>
 						</Button>
 
 						<!-- Separator -->
@@ -262,7 +262,7 @@
 					</StackPanel>
 
 					<!-- Other actions -->
-					<ToggleButton Name="otherActionsButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
+					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
 						<Panel>
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>

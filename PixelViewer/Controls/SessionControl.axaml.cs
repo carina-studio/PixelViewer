@@ -8,12 +8,12 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Data.Converters;
-using Carina.PixelViewer.Input;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
+using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
@@ -247,7 +247,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when drag over.
 		void OnDragOver(object? sender, DragEventArgs e)
 		{
-			if (e.Data.HasSingleFileName())
+			if (e.Data.TryGetSingleFileName(out var fileName))
 			{
 				e.DragEffects = DragDropEffects.Copy;
 				e.Handled = true;
@@ -260,11 +260,11 @@ namespace Carina.PixelViewer.Controls
 		// Called when drop.
 		void OnDrop(object? sender, DragEventArgs e)
 		{
-			e.Data.GetSingleFileName()?.Let((it) =>
+			if (e.Data.TryGetSingleFileName(out var fileName) && fileName != null)
 			{
-				this.OpenSourceFile(it);
+				this.OpenSourceFile(fileName);
 				e.Handled = true;
-			});
+			}
 		}
 
 

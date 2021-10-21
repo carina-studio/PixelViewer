@@ -61,12 +61,6 @@
 	<ItemGroup>
 		<AvaloniaResource Include="AppIcon.ico" />
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
-		<AvaloniaResource Include="Resources/AppIcon_128px.png" />
-		<AvaloniaResource Include="Resources/AppIcon_16px.png" />
-		<AvaloniaResource Include="Resources/AppIcon_256px.png" />
-		<AvaloniaResource Include="Resources/AppIcon_32px.png" />
-		<AvaloniaResource Include="Resources/AppIcon_512px.png" />
-		<AvaloniaResource Include="Resources/AppIcon_64px.png" />
 		<AvaloniaResource Include="Resources/AppIcon.ico" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />

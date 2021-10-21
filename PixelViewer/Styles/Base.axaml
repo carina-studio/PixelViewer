@@ -16,9 +16,6 @@
 		<sys:Double x:Key="Double/FrameNumberSelectionDialog.Width">300</sys:Double>
 		<Thickness x:Key="Thickness/FrameNumberSelectionDialog.FrameCount.Margin">10,0,0,0</Thickness>
 
-		<!-- GridSplitter -->
-		<GridLength x:Key="GridLength/GridSplitter.Thickness">5</GridLength>
-
 		<!-- MainWindow -->
 		<sys:Double x:Key="Double/MainWindow.MinHeight">400</sys:Double>
 		<sys:Double x:Key="Double/MainWindow.MinWidth">600</sys:Double>
@@ -49,10 +46,6 @@
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20,20,20,94</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
-
-		<!-- StatusBar -->
-		<sys:Double x:Key="Double/StatusBar.DropDownIcon.Size">8</sys:Double>
-		<Thickness x:Key="Thickness/StatusBar.DropDownIcon.Margin">8,0,0,0</Thickness>
 		
 	</Styles.Resources>
 
@@ -78,29 +71,6 @@
 	<Style Selector="ToggleButton.SessionControl_OptionsPanel_ToggleButton">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
-	</Style>
-
-	<!-- StatusBar -->
-	<Style Selector="Border.StatusBar_DropDownIcon">
-		<Setter Property="Height" Value="{DynamicResource Double/StatusBar.DropDownIcon.Size}"/>
-		<Setter Property="Margin" Value="{DynamicResource Thickness/StatusBar.DropDownIcon.Margin}"/>
-		<Setter Property="VerticalAlignment" Value="Center"/>
-		<Setter Property="Width" Value="{DynamicResource Double/StatusBar.DropDownIcon.Size}"/>
-	</Style>
-
-	<!-- ToolBar -->
-	<Style Selector="RepeatButton.ToolBar_RepeatButton">
-		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
-		<Setter Property="Height" Value="{DynamicResource Double/ToolBar.Button.Size}"/>
-		<Setter Property="HorizontalContentAlignment" Value="Center"/>
-		<Setter Property="Margin" Value="{DynamicResource Thickness/ToolBar.Item.Margin}"/>
-		<Setter Property="Padding" Value="{DynamicResource Thickness/ToolBar.Button.Padding}"/>
-		<Setter Property="VerticalAlignment" Value="Center"/>
-		<Setter Property="VerticalContentAlignment" Value="Center"/>
-		<Setter Property="Width" Value="{DynamicResource Double/ToolBar.Button.Size}"/>
-	</Style>
-	<Style Selector="RepeatButton.ToolBar_RepeatButton:disabled /template/ ContentPresenter#PART_ContentPresenter">
-		<Setter Property="Background" Value="{x:Null}"/>
 	</Style>
 	
 </Styles>
