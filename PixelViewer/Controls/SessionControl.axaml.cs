@@ -755,6 +755,19 @@ namespace Carina.PixelViewer.Controls
 		bool ShowProcessInfo { get => this.GetValue<bool>(ShowProcessInfoProperty); }
 
 
+		// Show file in file explorer.
+		void ShowSourceFileInFileExplorer()
+        {
+			if (!CarinaStudio.Platform.IsOpeningFileManagerSupported)
+				return;
+			if (this.DataContext is not Session session)
+				return;
+			var fileName = session.SourceFileName;
+			if (!string.IsNullOrEmpty(fileName))
+				CarinaStudio.Platform.OpenFileManager(fileName);
+		}
+
+
 		// Status bar state.
 		StatusBarState StatusBarState { get => this.GetValue<StatusBarState>(StatusBarStateProperty); }
 

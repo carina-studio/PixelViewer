@@ -64,8 +64,10 @@
 		<AvaloniaResource Include="Resources/AppIcon.ico" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
-		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml" />
+		<AvaloniaResource Include="Strings/zh-TW-OSX.xaml"/>
+		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
+		<AvaloniaResource Include="Strings/Default-OSX.xaml"/>
 		<AvaloniaResource Include="Styles/Base.axaml" />
 		<AvaloniaResource Include="Styles/Dark.xaml" />
 		<AvaloniaResource Include="Styles/Icons.axaml" />

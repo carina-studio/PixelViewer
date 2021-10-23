@@ -94,6 +94,17 @@ namespace Carina.PixelViewer
 					});
 				});
 			}
+			else if (CarinaStudio.Platform.IsMacOS)
+			{
+				resources = new ResourceDictionary().Also(it =>
+				{
+					it.MergedDictionaries.Add(resources);
+					it.MergedDictionaries.Add(new ResourceInclude()
+					{
+						Source = new Uri("avares://PixelViewer/Strings/Default-OSX.xaml")
+					});
+				});
+			}
 			return resources;
 		}
 
@@ -122,6 +133,19 @@ namespace Carina.PixelViewer
 					var platformResources = new ResourceInclude().Also(it =>
 					{
 						it.Source = new Uri($"avares://PixelViewer/Strings/{cultureInfo}-Linux.xaml");
+						_ = it.Loaded;
+					});
+					resources = new ResourceDictionary().Also(it =>
+					{
+						it.MergedDictionaries.Add(resources);
+						it.MergedDictionaries.Add(platformResources);
+					});
+				}
+				else if (CarinaStudio.Platform.IsMacOS)
+				{
+					var platformResources = new ResourceInclude().Also(it =>
+					{
+						it.Source = new Uri($"avares://PixelViewer/Strings/{cultureInfo}-OSX.xaml");
 						_ = it.Loaded;
 					});
 					resources = new ResourceDictionary().Also(it =>

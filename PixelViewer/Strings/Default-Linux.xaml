@@ -6,5 +6,6 @@
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Click</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show file in File Manager</sys:String>
 
 </ResourceDictionary>

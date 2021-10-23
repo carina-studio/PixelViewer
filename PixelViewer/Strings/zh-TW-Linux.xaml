@@ -6,5 +6,6 @@
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">點一下</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以開啟影像檔案。</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案管理器中顯示檔案</sys:String>
 
 </ResourceDictionary>
