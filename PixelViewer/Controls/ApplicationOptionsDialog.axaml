@@ -4,6 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:as="using:CarinaStudio.AppSuite"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
@@ -40,7 +41,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsRestartingMainWindowsNeeded}" Text="{DynamicResource String/ApplicationOptionsDialog.RestartingMainWindowsNeeded}"/>
+				<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsRestartingMainWindowsNeeded}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Enable blurry background -->
@@ -52,6 +53,14 @@
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.Culture}"/>
 				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type as:ApplicationCulture}" SelectedItem="{Binding Culture, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
+
+				<!-- Custom screen scale factor -->
+				<StackPanel IsVisible="{Binding IsCustomScreenScaleFactorSupported}">
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.CustomScreenScaleFactor}"/>
+					<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="{}{0:F0}%" Increment="25" Maximum="300" Minimum="100" Value="{Binding CustomScreenScaleFactor, Converter={x:Static asConverters:RatioToPercentageConverter.Default}, Mode=TwoWay}"/>
+					<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsCustomScreenScaleFactorAdjusted}" Text="{DynamicResource String/ApplicationOptions.NeedToRestartApplicationToTakeEffect}"/>
+					<Separator Classes="Dialog_Separator"/>
+				</StackPanel>
 
 				<!-- Image format -->
 				<Border Classes="Dialog_TextBlock_Header1">
