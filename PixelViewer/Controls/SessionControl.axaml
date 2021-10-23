@@ -585,7 +585,7 @@
 							<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding RenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.RenderedImagesMemoryUsage}"/>
 								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding TotalRenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.TotalRenderedImagesMemoryUsage}"/>
-								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
+								<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding $parent[UserControl].IsNotMacOS}" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
 							</StackPanel>
 						</Panel>
 

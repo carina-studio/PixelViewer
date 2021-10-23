@@ -177,6 +177,9 @@ namespace Carina.PixelViewer.Controls
 		public double EffectiveRenderedImageScale { get => this.GetValue<double>(EffectiveRenderedImageScaleProperty); }
 
 
+		bool IsNotMacOS { get; } = !CarinaStudio.Platform.IsMacOS;
+
+
 		// Move to specific frame.
 		async void MoveToSpecificFrame()
         {
