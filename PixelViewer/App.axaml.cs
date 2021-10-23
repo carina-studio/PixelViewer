@@ -42,16 +42,6 @@ namespace Carina.PixelViewer
         }
 
 
-		// Avalonia configuration, don't remove; also used by visual designer.
-		static AppBuilder BuildAvaloniaApp() => AppBuilder.Configure<App>()
-			.UsePlatformDetect()
-			.LogToTrace().Also(it =>
-			{
-				if (CarinaStudio.Platform.IsLinux)
-					it.With(new X11PlatformOptions());
-			});
-
-
 		// Initialize.
 		public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
@@ -60,7 +50,7 @@ namespace Carina.PixelViewer
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+			BuildApplication<App>().StartWithClassicDesktopLifetime(args);
 		}
 
 
