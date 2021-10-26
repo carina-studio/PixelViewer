@@ -31,8 +31,8 @@
 	<ItemGroup>
 		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.28.1.1022" />
 		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="0.28.1.1022" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.17.0.1023" />
-		<PackageReference Include="NLog" Version="4.7.11" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.18.0.1026" />
+		<PackageReference Include="NLog" Version="4.7.12" />
 		<PackageReference Include="NUnit" Version="3.13.2" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
