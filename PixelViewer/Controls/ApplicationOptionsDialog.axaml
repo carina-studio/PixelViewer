@@ -5,21 +5,19 @@
 		xmlns:as="using:CarinaStudio.AppSuite"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
+		xmlns:asViewModels="using:CarinaStudio.AppSuite.ViewModels"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog"
-		Classes="Dialog"
-        Title="{DynamicResource String/ApplicationOptions}"
-		Width="{DynamicResource Double/ApplicationOptionsDialog.Width}">
+        x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog">
 
 	<DockPanel>
 
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel" DockPanel.Dock="Bottom">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].Close}" Content="{DynamicResource String/Common.OK}"/>
+				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
 			</StackPanel>
 		</Border>
 
@@ -37,7 +35,7 @@
 				<ComboBox Classes="Dialog_ComboBox" Items="{Binding ThemeModes, Mode=OneTime}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding Converter={x:Static appControls:ApplicationOptionsDialog.ThemeModeConverter}}"/>
+							<TextBlock Text="{Binding Converter={x:Static asViewModels:ApplicationOptions.ThemeModeConverter}}"/>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>

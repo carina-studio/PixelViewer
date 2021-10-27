@@ -1,12 +1,7 @@
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Data.Converters;
 using Avalonia.Markup.Xaml;
 using Carina.PixelViewer.ViewModels;
-using CarinaStudio;
-using CarinaStudio.AppSuite;
 using CarinaStudio.AppSuite.Controls;
-using CarinaStudio.AppSuite.Converters;
+using CarinaStudio.AppSuite.ViewModels;
 using System;
 
 namespace Carina.PixelViewer.Controls
@@ -14,16 +9,11 @@ namespace Carina.PixelViewer.Controls
     /// <summary>
     /// Application options dialog.
     /// </summary>
-    partial class ApplicationOptionsDialog : Dialog
+    partial class ApplicationOptionsDialog : BaseApplicationOptionsDialog
     {
-        // Static fields.
-        public static readonly IValueConverter ThemeModeConverter = new EnumConverter(App.Current, typeof(ThemeMode));
-
-
         // Constructor.
         public ApplicationOptionsDialog()
         {
-            this.DataContext = new AppOptions();
             this.Application.StringsUpdated += this.OnAppStringsUpdated;
             InitializeComponent();
         }
@@ -47,8 +37,11 @@ namespace Carina.PixelViewer.Controls
         protected override void OnClosed(EventArgs e)
         {
             this.Application.StringsUpdated -= this.OnAppStringsUpdated;
-            (this.DataContext as IDisposable)?.Dispose();
             base.OnClosed(e);
         }
+
+
+        // Create view-model.
+        protected override ApplicationOptions OnCreateViewModel() => new AppOptions();
     }
 }

@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Carina.PixelViewer
@@ -55,11 +56,11 @@ namespace Carina.PixelViewer
 
 
 		// Create main window.
-		protected override CarinaStudio.AppSuite.Controls.Window OnCreateMainWindow(object? param) => new MainWindow();
+		protected override CarinaStudio.AppSuite.Controls.Window OnCreateMainWindow() => new MainWindow();
 
 
 		// Create view-model for main window.
-		protected override ViewModel OnCreateMainWindowViewModel(object? param) => new Workspace().Also(it =>
+		protected override ViewModel OnCreateMainWindowViewModel(JsonElement? savedState) => new Workspace().Also(it =>
 		{
 			this.LaunchOptions.TryGetValue(FilePathKey, out var filePath);
 			it.ActivatedSession = it.CreateSession(filePath as string);

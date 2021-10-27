@@ -10,6 +10,7 @@ using Avalonia.VisualTree;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.Converters;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
@@ -131,7 +132,7 @@ namespace Carina.PixelViewer.Controls
 		// Check for application update.
 		void CheckForAppUpdate()
         {
-			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
+			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
 			{
 				using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
 				var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater)
@@ -190,7 +191,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// find window
-			var window = this.FindLogicalAncestorOfType<Window>();
+			var window = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>();
 			if (window == null)
 				return;
 
@@ -546,7 +547,7 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// find window
-			var window = this.FindAncestorOfType<Window>();
+			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
 			if (window == null)
 			{
 				Logger.LogError("No window to show open file dialog");
@@ -608,7 +609,7 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// find window
-			var window = this.FindAncestorOfType<Window>();
+			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
 			if (window == null)
 			{
 				Logger.LogError("No window to show dialog");
@@ -668,7 +669,7 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// find window
-			var window = this.FindAncestorOfType<Window>();
+			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
 			if (window == null)
 			{
 				Logger.LogError("No window to show dialog");
@@ -707,10 +708,10 @@ namespace Carina.PixelViewer.Controls
 		// Show application info.
 		void ShowAppInfo()
         {
-			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
+			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
 			{
 				using var appInfo = new AppInfo();
-				await new CarinaStudio.AppSuite.Controls.ApplicationInfoDialog(appInfo).ShowDialog(window);
+				await new ApplicationInfoDialog(appInfo).ShowDialog(window);
 			});
         }
 
@@ -718,13 +719,14 @@ namespace Carina.PixelViewer.Controls
 		// Show application options.
 		void ShowAppOptions()
         {
-			this.FindLogicalAncestorOfType<Window>()?.Let(async (window) =>
+			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
 			{
-				await new ApplicationOptionsDialog().ShowDialog(window);
-				if (App.Current.IsRestartingMainWindowsNeeded)
+				switch (await new ApplicationOptionsDialog().ShowDialog<ApplicationOptionsDialogResult>(window))
 				{
-					Logger.LogWarning("Need to restart main windows");
-					App.Current.RestartMainWindows();
+					case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
+						Logger.LogWarning("Need to restart main windows");
+						App.Current.RestartMainWindows();
+						break;
 				}
 			});
 		}
@@ -788,7 +790,7 @@ namespace Carina.PixelViewer.Controls
 			// apply screen DPI
 			session.RenderedImage?.Let((renderedImage) =>
 			{
-				this.FindAncestorOfType<Window>()?.Let((window) =>
+				this.FindAncestorOfType<Avalonia.Controls.Window>()?.Let((window) =>
 				{
 					var screenDpi = window.Screens.Primary.PixelDensity;
 					scale *= (Math.Min(renderedImage.Dpi.X, renderedImage.Dpi.Y) / 96.0 / screenDpi);
