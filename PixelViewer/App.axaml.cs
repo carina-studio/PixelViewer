@@ -36,6 +36,10 @@ namespace Carina.PixelViewer
 		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
 
 
+		// Fields.
+		bool isInitBeforeShowingMainWindowsCompleted;
+
+
 		// Constructor.
 		public App()
         {
@@ -45,6 +49,28 @@ namespace Carina.PixelViewer
 
 		// Initialize.
 		public override void Initialize() => AvaloniaXamlLoader.Load(this);
+
+
+		// Initialize before showing/restoring main windows.
+		async Task InitializeBeforeShowingMainWindows()
+        {
+			// check state
+			if (this.isInitBeforeShowingMainWindowsCompleted)
+				return;
+
+			// update state
+			this.isInitBeforeShowingMainWindowsCompleted = true;
+
+			// initialize file formats
+			Media.FileFormats.Initialize(this);
+
+			// initialize file format parsers
+			Media.FileFormatParsers.FileFormatParsers.Initialize(this);
+
+			// initialize image rendering profiles
+			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
+			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
+		}
 
 
 		// Application entry point.
@@ -60,10 +86,11 @@ namespace Carina.PixelViewer
 
 
 		// Create view-model for main window.
-		protected override ViewModel OnCreateMainWindowViewModel(JsonElement? savedState) => new Workspace().Also(it =>
+		protected override ViewModel OnCreateMainWindowViewModel(JsonElement? savedState) => new Workspace(savedState).Also(it =>
 		{
 			this.LaunchOptions.TryGetValue(FilePathKey, out var filePath);
-			it.ActivatedSession = it.CreateSession(filePath as string);
+			if (filePath != null || it.Sessions.IsEmpty())
+				it.ActivatedSession = it.CreateSession(filePath as string);
 		});
 
 
@@ -216,37 +243,46 @@ namespace Carina.PixelViewer
         }
 
 
-        // Prepare starting.
-        protected override async Task OnPrepareStartingAsync()
-        {
-            // call base
-            try
-            {
+		// Prepare starting.
+		protected override async Task OnPrepareStartingAsync()
+		{
+			// call base
+			try
+			{
 				await base.OnPrepareStartingAsync();
 			}
-			catch(Exception ex)
-            {
+			catch (Exception ex)
+			{
 				this.Logger.LogError(ex, "Unhandled error when launching");
 				this.Shutdown();
 				return;
-            }
+			}
 
-			// initialize file formats
-			Media.FileFormats.Initialize(this);
-
-			// initialize file format parsers
-			Media.FileFormatParsers.FileFormatParsers.Initialize(this);
-
-			// initialize image rendering profiles
-			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
-			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
+			// initialize
+			await this.InitializeBeforeShowingMainWindows();
 
 			// show main window
-			this.ShowMainWindow();
+			if (!this.IsRestoringMainWindowsRequested)
+				this.ShowMainWindow();
+		}
+
+
+        // Restore main windows.
+        protected override async void OnRestoreMainWindows()
+        {
+			// initialize
+			await this.InitializeBeforeShowingMainWindows();
+
+			// call base
+			base.OnRestoreMainWindows();
+
+			// make sure that at least one main window can be shown
+			if (this.MainWindows.IsEmpty())
+				this.ShowMainWindow();
         }
 
 
-		///<inheritdoc/>
+        ///<inheritdoc/>
         protected override bool OnSelectEnteringDebugMode()
         {
 #if DEBUG

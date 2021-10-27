@@ -8,3 +8,4 @@ AppPackages
 /Windows10Installer/Package.StoreAssociation.xml
 /PixelViewer/Properties/PublishProfiles/*.user
 /Packages
+/PixelViewer/Properties/launchSettings.json

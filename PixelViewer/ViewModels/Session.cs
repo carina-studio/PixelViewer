@@ -19,6 +19,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -239,7 +240,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Initialize new <see cref="Session"/> instance.
 		/// </summary>
-		public Session(Workspace workspace) : base(workspace)
+		public Session(Workspace workspace, JsonElement? savedState) : base(workspace)
 		{
 			// create commands
 			var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceFileOpenedProperty);
@@ -267,7 +268,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.canMoveToPreviousFrame.Value)
 					--this.FrameNumber;
 			}, this.canMoveToPreviousFrame);
-			this.OpenSourceFileCommand = new Command<string>(filePath => this.OpenSourceFile(filePath), this.canOpenSourceFile);
+			this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSourceFile);
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
 			this.SaveAsNewProfileCommand = new Command<string>(name => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
@@ -304,6 +305,10 @@ namespace Carina.PixelViewer.ViewModels
 
 			// setup title
 			this.UpdateTitle();
+
+			// restore state
+			if (savedState.HasValue)
+				this.RestoreState(savedState.Value);
 		}
 
 
@@ -1051,7 +1056,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
         // Open given file as image data source.
-        async void OpenSourceFile(string? fileName)
+        async Task OpenSourceFile(string? fileName)
 		{
 			// check state
 			if (fileName == null)
@@ -1522,6 +1527,158 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Restore state.
+		async void RestoreState(JsonElement savedState)
+        {
+			// check parameter
+			if (savedState.ValueKind != JsonValueKind.Object)
+				return;
+
+			this.Logger.LogWarning("Start restoring state");
+
+			// load rendering parameters
+			if (!savedState.TryGetProperty(nameof(SourceFileName), out var jsonProperty) || jsonProperty.ValueKind != JsonValueKind.String)
+			{
+				this.Logger.LogDebug("No source file to restore");
+				return;
+			}
+			var fileName = jsonProperty.GetString().AsNonNull();
+			var profile = Global.Run(() =>
+			{
+				if (savedState.TryGetProperty(nameof(Profile), out var jsonProperty))
+				{
+					if (jsonProperty.ValueKind == JsonValueKind.Null)
+						return ImageRenderingProfile.Default;
+					if (jsonProperty.ValueKind == JsonValueKind.String)
+					{
+						var name = jsonProperty.GetString();
+						return ImageRenderingProfiles.UserDefinedProfiles.FirstOrDefault(it => it.Name == name);
+					}
+				}
+				return null;
+			});
+			var renderer = Global.Run(() =>
+			{
+				if (savedState.TryGetProperty(nameof(ImageRenderer), out var jsonProperty)
+					&& jsonProperty.ValueKind == JsonValueKind.String)
+				{
+					if (ImageRenderers.TryFindByFormatName(jsonProperty.GetString().AsNonNull(), out var renderer))
+						return renderer;
+					this.Logger.LogWarning($"Cannot find image renderer of '{jsonProperty.GetString()}' to restore");
+				}
+				return null;
+			});
+			var dataOffset = 0L;
+			var framePaddingSize = 0L;
+			var byteOrdering = ByteOrdering.BigEndian;
+			var width = 1;
+			var height = 1;
+			var effectiveBits = new int[this.effectiveBits.Length];
+			var pixelStrides = new int[this.pixelStrides.Length];
+			var rowStrides = new int[this.rowStrides.Length];
+			if (savedState.TryGetProperty(nameof(DataOffset), out jsonProperty))
+				jsonProperty.TryGetInt64(out dataOffset);
+			if (savedState.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
+				jsonProperty.TryGetInt64(out framePaddingSize);
+			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty))
+				Enum.TryParse(jsonProperty.GetString(), out byteOrdering);
+			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
+				jsonProperty.TryGetInt32(out width);
+			if (savedState.TryGetProperty(nameof(ImageHeight), out jsonProperty))
+				jsonProperty.TryGetInt32(out height);
+			if (savedState.TryGetProperty("EffectiveBits", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+			{
+				var index = 0;
+				foreach (var jsonValue in jsonProperty.EnumerateArray())
+				{
+					if (jsonValue.TryGetInt32(out var intValue))
+						effectiveBits[index] = intValue;
+					++index;
+					if (index >= this.effectiveBits.Length)
+						break;
+				}
+			}
+			if (savedState.TryGetProperty("PixelStrides", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+			{
+				var index = 0;
+				foreach (var jsonValue in jsonProperty.EnumerateArray())
+				{
+					if (jsonValue.TryGetInt32(out var intValue))
+						pixelStrides[index] = intValue;
+					++index;
+					if (index >= this.pixelStrides.Length)
+						break;
+				}
+			}
+			if (savedState.TryGetProperty("RowStrides", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+			{
+				var index = 0;
+				foreach (var jsonValue in jsonProperty.EnumerateArray())
+				{
+					if (jsonValue.TryGetInt32(out var intValue))
+						rowStrides[index] = intValue;
+					++index;
+					if (index >= this.rowStrides.Length)
+						break;
+				}
+			}
+
+			// load displaying parameters
+			var fitToViewport = true;
+			var frameNumber = 1;
+			var rotation = 0;
+			var scale = 1.0;
+			if (savedState.TryGetProperty(nameof(FitRenderedImageToViewport), out jsonProperty))
+				fitToViewport = jsonProperty.ValueKind != JsonValueKind.False;
+			if (savedState.TryGetProperty(nameof(FrameNumber), out jsonProperty))
+				jsonProperty.TryGetInt32(out frameNumber);
+			if (savedState.TryGetProperty(nameof(EffectiveRenderedImageRotation), out jsonProperty))
+				jsonProperty.TryGetInt32(out rotation);
+			if (savedState.TryGetProperty(nameof(RenderedImageScale), out jsonProperty))
+				jsonProperty.TryGetDouble(out scale);
+
+			// open source file
+			await this.OpenSourceFile(fileName);
+			if (!this.IsSourceFileOpened)
+			{
+				this.Logger.LogError($"Unable to restore source file '{fileName}'");
+				return;
+			}
+
+			// apply profile
+			if (profile != null)
+				this.SetValue(ProfileProperty, profile);
+
+			// apply rendering parameters
+			if (renderer != null)
+				this.SetValue(ImageRendererProperty, renderer);
+			this.SetValue(DataOffsetProperty, dataOffset);
+			this.SetValue(FramePaddingSizeProperty, framePaddingSize);
+			this.SetValue(ByteOrderingProperty, byteOrdering);
+			this.SetValue(ImageWidthProperty, width);
+			this.SetValue(ImageHeightProperty, height);
+			for (var i = effectiveBits.Length - 1; i >= 0; --i)
+				this.ChangeEffectiveBits(i, effectiveBits[i]);
+			for (var i = pixelStrides.Length - 1; i >= 0; --i)
+				this.ChangePixelStride(i, pixelStrides[i]);
+			for (var i = rowStrides.Length - 1; i >= 0; --i)
+				this.ChangeRowStride(i, rowStrides[i]);
+
+			// apply displaying parameters
+			this.EffectiveRenderedImageRotation = rotation;
+			this.FitRenderedImageToViewport = fitToViewport;
+			this.FrameNumber = frameNumber;
+			this.RenderedImageScale = scale;
+
+			this.Logger.LogWarning("State restored");
+
+			// start rendering
+			this.isImageDimensionsEvaluationNeeded = false;
+			this.isImagePlaneOptionsResetNeeded = false;
+			this.renderImageOperation.Reschedule();
+        }
+
+
 		// Rotate rendered image counter-clockwise.
 		void RotateLeft()
 		{
@@ -1776,6 +1933,54 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command for saving rendered image to file or stream.
 		/// </summary>
 		public ICommand SaveRenderedImageCommand { get; }
+
+
+		/// <summary>
+		/// Save instance state in JSON format.
+		/// </summary>
+		public void SaveState(Utf8JsonWriter writer)
+		{
+			writer.WriteStartObject();
+			if (!string.IsNullOrEmpty(this.SourceFileName))
+			{
+				writer.WriteString(nameof(SourceFileName), this.SourceFileName.AsNonNull());
+				switch (this.Profile.Type)
+				{
+					case ImageRenderingProfileType.Default:
+						writer.WriteNull(nameof(Profile));
+						break;
+					case ImageRenderingProfileType.UserDefined:
+						writer.WriteString(nameof(Profile), this.Profile.Name);
+						break;
+				}
+				writer.WriteString(nameof(ImageRenderer), this.ImageRenderer.Format.Name);
+				writer.WriteNumber(nameof(DataOffset), this.DataOffset);
+				writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
+				writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
+				writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
+				writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
+				writer.WritePropertyName("EffectiveBits");
+				writer.WriteStartArray();
+				foreach (var n in this.effectiveBits)
+					writer.WriteNumberValue(n);
+				writer.WriteEndArray();
+				writer.WritePropertyName("PixelStrides");
+				writer.WriteStartArray();
+				foreach (var n in this.pixelStrides)
+					writer.WriteNumberValue(n);
+				writer.WriteEndArray();
+				writer.WritePropertyName("RowStrides");
+				writer.WriteStartArray();
+				foreach (var n in this.rowStrides)
+					writer.WriteNumberValue(n);
+				writer.WriteEndArray();
+				writer.WriteNumber(nameof(EffectiveRenderedImageRotation), (int)(this.EffectiveRenderedImageRotation + 0.5));
+				writer.WriteBoolean(nameof(FitRenderedImageToViewport), this.fitRenderedImageToViewport);
+				writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
+				writer.WriteNumber(nameof(RenderedImageScale), this.renderedImageScale);
+			}
+			writer.WriteEndObject();
+		}
 
 
 		// Select default image renderer according to settings.

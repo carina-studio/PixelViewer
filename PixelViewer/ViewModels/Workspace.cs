@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.Json;
 
 namespace Carina.PixelViewer.ViewModels
 {
@@ -31,9 +32,39 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Initialize new <see cref="Workspace"/> instance.
 		/// </summary>
-		public Workspace()
+		/// <param name="savedState">Saved state in JSON format.</param>
+		public Workspace(JsonElement? savedState)
 		{
+			// setup properties
 			this.Sessions = this.sessions.AsReadOnly();
+
+			// restore state
+			savedState?.Let(savedState =>
+			{
+				// check saved state
+				if (savedState.ValueKind != JsonValueKind.Object)
+					return;
+
+				this.Logger.LogWarning("Start restoring state");
+
+				// restore sessions
+				if (savedState.TryGetProperty(nameof(Sessions), out var jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+				{
+					foreach (var jsonValue in jsonProperty.EnumerateArray())
+						this.sessions.Add(new Session(this, jsonValue));
+				}
+
+				// restore activated session
+				if (savedState.TryGetProperty(nameof(ActivatedSession), out jsonProperty)
+					&& jsonProperty.TryGetInt32(out var intValue)
+					&& intValue >= 0
+					&& intValue < this.sessions.Count)
+				{
+					this.SetValue(ActivatedSessionProperty, this.sessions[intValue]);
+				}
+
+				this.Logger.LogWarning($"State restored, session count: {this.sessions.Count}");
+			});
 		}
 
 
@@ -88,7 +119,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.VerifyDisposed();
 
 			// create session
-			var session = new Session(this);
+			var session = new Session(this, null);
 			session.PropertyChanged += this.OnSessionPropertyChanged;
 			this.sessions.Add(session);
 			this.Logger.LogDebug($"Create session {session}, count: {this.sessions.Count}");
@@ -168,9 +199,32 @@ namespace Carina.PixelViewer.ViewModels
 		}) ?? "PixelViewer";
 
 
-		/// <summary>
-		/// Get all <see cref="Session"/>s.
-		/// </summary>
-		public IList<Session> Sessions { get; }
+		/// <inheritdoc/>
+        public override void SaveState(Utf8JsonWriter writer)
+        {
+			// start object
+			writer.WriteStartObject();
+
+			// save sessions
+			writer.WritePropertyName(nameof(Sessions));
+			writer.WriteStartArray();
+			foreach (var session in this.sessions)
+				session.SaveState(writer);
+			writer.WriteEndArray();
+
+			// save activated session
+			var index = this.ActivatedSession != null ? this.sessions.IndexOf(this.ActivatedSession) : -1;
+			if (index >= 0)
+				writer.WriteNumber(nameof(ActivatedSession), index);
+
+			// complete
+			writer.WriteEndObject();
+		}
+
+
+        /// <summary>
+        /// Get all <see cref="Session"/>s.
+        /// </summary>
+        public IList<Session> Sessions { get; }
 	}
 }
