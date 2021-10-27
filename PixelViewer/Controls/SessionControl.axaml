@@ -267,6 +267,11 @@
 
 					</StackPanel>
 
+					<!-- Test -->
+					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Lab}"/>
+					</Button>
+
 					<!-- Other actions -->
 					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
 						<Panel>

@@ -111,6 +111,9 @@ namespace Carina.PixelViewer.Controls
 				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 			});
+#if DEBUG
+			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
+#endif
 
 			// create scheduled actions
 			this.updateStatusBarStateAction = new ScheduledAction(() =>
@@ -534,6 +537,11 @@ namespace Carina.PixelViewer.Controls
 			if (e.Key == SettingKeys.ShowProcessInfo)
 				this.SetValue<bool>(ShowProcessInfoProperty, (bool)e.Value);
 		}
+
+
+		// Called when test button clicked.
+		void OnTestButtonClick()
+		{ }
 
 
 		// Open source file.
