@@ -56,7 +56,7 @@
 					<Separator Classes="Dialog_Separator"/>
 					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.CustomScreenScaleFactor}"/>
 					<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="{}{0:F0}%" Increment="25" Maximum="300" Minimum="100" Value="{Binding CustomScreenScaleFactor, Converter={x:Static asConverters:RatioToPercentageConverter.Default}, Mode=TwoWay}"/>
-					<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsCustomScreenScaleFactorAdjusted}" Text="{DynamicResource String/ApplicationOptions.NeedToRestartApplicationToTakeEffect}"/>
+					<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsCustomScreenScaleFactorAdjusted}" Text="{DynamicResource String/ApplicationOptions.WillRestartApplicationToTakeEffect}"/>
 					<Separator Classes="Dialog_Separator"/>
 				</StackPanel>
 				<Separator Classes="Dialog_Separator_Large"/>

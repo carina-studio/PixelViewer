@@ -731,6 +731,13 @@ namespace Carina.PixelViewer.Controls
 			{
 				switch (await new ApplicationOptionsDialog().ShowDialog<ApplicationOptionsDialogResult>(window))
 				{
+					case ApplicationOptionsDialogResult.RestartApplicationNeeded:
+						Logger.LogWarning("Need to restart application");
+						if (App.Current.IsDebugMode)
+							App.Current.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}");
+						else
+							App.Current.Restart(App.RestoreMainWindowsArgument);
+						break;
 					case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
 						Logger.LogWarning("Need to restart main windows");
 						App.Current.RestartMainWindows();
