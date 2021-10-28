@@ -36,10 +36,6 @@ namespace Carina.PixelViewer
 		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
 
 
-		// Fields.
-		bool isInitBeforeShowingMainWindowsCompleted;
-
-
 		// Constructor.
 		public App()
         {
@@ -49,28 +45,6 @@ namespace Carina.PixelViewer
 
 		// Initialize.
 		public override void Initialize() => AvaloniaXamlLoader.Load(this);
-
-
-		// Initialize before showing/restoring main windows.
-		async Task InitializeBeforeShowingMainWindows()
-        {
-			// check state
-			if (this.isInitBeforeShowingMainWindowsCompleted)
-				return;
-
-			// update state
-			this.isInitBeforeShowingMainWindowsCompleted = true;
-
-			// initialize file formats
-			Media.FileFormats.Initialize(this);
-
-			// initialize file format parsers
-			Media.FileFormatParsers.FileFormatParsers.Initialize(this);
-
-			// initialize image rendering profiles
-			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
-			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
-		}
 
 
 		// Application entry point.
@@ -258,28 +232,20 @@ namespace Carina.PixelViewer
 				return;
 			}
 
-			// initialize
-			await this.InitializeBeforeShowingMainWindows();
+			// initialize file formats
+			Media.FileFormats.Initialize(this);
+
+			// initialize file format parsers
+			Media.FileFormatParsers.FileFormatParsers.Initialize(this);
+
+			// initialize image rendering profiles
+			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
+			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
 
 			// show main window
 			if (!this.IsRestoringMainWindowsRequested)
 				this.ShowMainWindow();
 		}
-
-
-        // Restore main windows.
-        protected override async void OnRestoreMainWindows()
-        {
-			// initialize
-			await this.InitializeBeforeShowingMainWindows();
-
-			// call base
-			base.OnRestoreMainWindows();
-
-			// make sure that at least one main window can be shown
-			if (this.MainWindows.IsEmpty())
-				this.ShowMainWindow();
-        }
 
 
         ///<inheritdoc/>
