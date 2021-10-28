@@ -102,7 +102,7 @@ Type=Application
 Reference: [How can I edit/create new launcher items in Unity by hand?
 ](https://askubuntu.com/questions/13758/how-can-i-edit-create-new-launcher-items-in-unity-by-hand)
 
-Currently PixelViewer lacks of ability to detect screen DPI on Linux, so you may find that UI displays too small on Hi-DPI screen. In this case you can open ```Application Options``` of PixelViewer, find ```User interface scale factor``` and change the scale factor to proper value. You need to restart PixelViewer manually to apply modified scale factor. If you found that scale factor doesn't work on your Linux PC, please install ```xrandr``` tool then check again.
+Currently PixelViewer lacks of ability to detect screen DPI on Linux, so you may find that UI displays too small on Hi-DPI screen. In this case you can open ```Application Options``` of PixelViewer, find ```User interface scale factor``` and change the scale factor to proper value. If you found that scale factor doesn't work on your Linux PC, please install ```xrandr``` tool then check again.
 
 ## 📦Upgrade
 
