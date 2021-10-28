@@ -10,10 +10,12 @@ using Avalonia.VisualTree;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.Converters;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
+using CarinaStudio.Controls;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
@@ -28,7 +30,7 @@ namespace Carina.PixelViewer.Controls
 	/// <summary>
 	/// <see cref="Control"/>(View) of <see cref="Session"/>.
 	/// </summary>
-	class SessionControl : UserControl
+	class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		/// <summary>
 		/// <see cref="IValueConverter"/> which maps boolean to <see cref="Stretch.Uniform"/>(True) and <see cref="Stretch.None"/>(False).
@@ -45,7 +47,6 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Static fields.
-		static readonly ILogger Logger = App.Current.LoggerFactory.CreateLogger(nameof(SessionControl));
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
@@ -95,21 +96,21 @@ namespace Carina.PixelViewer.Controls
 			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
 			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 			{
-				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
-				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
+				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
+				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
 			});
 			this.fileActionsButton = this.FindControl<ToggleButton>(nameof(this.fileActionsButton)).AsNonNull();
 			this.fileActionsMenu = ((ContextMenu)this.Resources[nameof(fileActionsMenu)].AsNonNull()).Also(it =>
 			{
-				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
-				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
+				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
+				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 			});
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 			{
-				it.MenuClosed += (_, e) => App.Current.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
-				it.MenuOpened += (_, e) => App.Current.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
+				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
+				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 			});
 #if DEBUG
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
@@ -142,10 +143,10 @@ namespace Carina.PixelViewer.Controls
 				{
 					CheckForUpdateWhenShowing = true
 				}.ShowDialog(window);
-				if (result == CarinaStudio.AppSuite.Controls.ApplicationUpdateDialogResult.ShutdownNeeded)
+				if (result == ApplicationUpdateDialogResult.ShutdownNeeded)
 				{
 					Logger.LogWarning("Shut down to continue updating");
-					App.Current.Shutdown();
+					this.Application.Shutdown();
 				}
 			});
         }
@@ -158,7 +159,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 			session.SourceFileName?.Let(it =>
 			{
-				_ = App.Current.Clipboard.SetTextAsync(Path.GetFileName(it));
+				_ = ((App)this.Application).Clipboard.SetTextAsync(Path.GetFileName(it));
 			});
         }
 
@@ -170,7 +171,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 			session.SourceFileName?.Let(it =>
 			{
-				_ = App.Current.Clipboard.SetTextAsync(it);
+				_ = ((App)this.Application).Clipboard.SetTextAsync(it);
 			});
 		}
 
@@ -227,7 +228,7 @@ namespace Carina.PixelViewer.Controls
 			this.AddHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged, Avalonia.Interactivity.RoutingStrategies.Tunnel);
 
 			// attach to settings
-			var settings = App.Current.Settings;
+			var settings = this.Settings;
 			settings.SettingChanged += this.OnSettingChanged;
 			this.SetValue<bool>(ShowProcessInfoProperty, settings.GetValueOrDefault(SettingKeys.ShowProcessInfo));
 		}
@@ -244,7 +245,7 @@ namespace Carina.PixelViewer.Controls
 			this.RemoveHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged);
 
 			// detach from settings
-			App.Current.Settings.SettingChanged -= this.OnSettingChanged;
+			this.Settings.SettingChanged -= this.OnSettingChanged;
 
 			// call base
 			base.OnDetachedFromLogicalTree(e);
@@ -387,7 +388,7 @@ namespace Carina.PixelViewer.Controls
 		{
 			if (e.Property == ScrollViewer.ExtentProperty && this.targetImageViewportCenter.HasValue)
 			{
-				App.Current.SynchronizationContext.Post(() =>
+				this.SynchronizationContext.Post(() =>
 				{
 					var center = this.targetImageViewportCenter.Value;
 					this.targetImageViewportCenter = null;
@@ -629,10 +630,10 @@ namespace Carina.PixelViewer.Controls
 			while (true)
 			{
 				// input name
-				name = await new CarinaStudio.AppSuite.Controls.TextInputDialog()
+				name = await new TextInputDialog()
 				{
 					InitialText = name,
-					Message = App.Current.GetString("SessionControl.InputNameOfProfile"),
+					Message = this.Application.GetString("SessionControl.InputNameOfProfile"),
 				}.ShowDialog(window);
 				if (string.IsNullOrWhiteSpace(name))
 					return;
@@ -642,10 +643,10 @@ namespace Carina.PixelViewer.Controls
 					break;
 
 				// show message for duplicate name
-				await new CarinaStudio.AppSuite.Controls.MessageDialog()
+				await new MessageDialog()
 				{
 					Icon = CarinaStudio.AppSuite.Controls.MessageDialogIcon.Warning,
-					Message = string.Format(App.Current.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
+					Message = string.Format(this.Application.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
 				}.ShowDialog(window);
 			}
 
@@ -687,7 +688,7 @@ namespace Carina.PixelViewer.Controls
 			// select file
 			var fileName = await new SaveFileDialog().Also((dialog) =>
 			{
-				var app = App.Current;
+				var app = (App)this.Application;
 				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
 				{
 					filter.Name = app.GetString("FileType.Png");
@@ -733,14 +734,14 @@ namespace Carina.PixelViewer.Controls
 				{
 					case ApplicationOptionsDialogResult.RestartApplicationNeeded:
 						Logger.LogWarning("Need to restart application");
-						if (App.Current.IsDebugMode)
-							App.Current.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}");
+						if (this.Application.IsDebugMode)
+							this.Application.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}");
 						else
-							App.Current.Restart(App.RestoreMainWindowsArgument);
+							this.Application.Restart(App.RestoreMainWindowsArgument);
 						break;
 					case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
 						Logger.LogWarning("Need to restart main windows");
-						App.Current.RestartMainWindows();
+						this.Application.RestartMainWindows();
 						break;
 				}
 			});
