@@ -7,7 +7,7 @@
 		<Copyright>©2021 Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
-		<LangVersion>latest</LangVersion>
+		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<RootNamespace>Carina.PixelViewer</RootNamespace>
 		<StartupObject>Carina.PixelViewer.App</StartupObject>
 		<ApplicationIcon>AppIcon.ico</ApplicationIcon>
