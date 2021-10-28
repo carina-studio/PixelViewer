@@ -1,13 +1,13 @@
 # PixelViewer
 
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blue&logo=Windows&label=Windows(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.100.0.1023/PixelViewer-1.100.0.1023-win-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blueviolet&logo=Apple&label=macOS(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.100.0.1023/PixelViewer-1.100.0.1023-osx-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.100.0.1023/PixelViewer-1.100.0.1023-linux-x64.zip)
+[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blue&logo=Windows&label=Windows(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.101.0.1028/PixelViewer-1.101.0.1028-win-x64.zip)
+[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blueviolet&logo=Apple&label=macOS(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.101.0.1028/PixelViewer-1.101.0.1028-osx-x64.zip)
+[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.101.0.1028/PixelViewer-1.101.0.1028-linux-x64.zip)
 
 [![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?style=for-the-badge&color=blue&logo=Windows&label=Windows)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)
 [![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
 
-[![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.100.0.1023)
+[![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.101.0.1028)
 [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/commits/master)
 [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
 
@@ -104,7 +104,7 @@ Type=Application
 Reference: [How can I edit/create new launcher items in Unity by hand?
 ](https://askubuntu.com/questions/13758/how-can-i-edit-create-new-launcher-items-in-unity-by-hand)
 
-Currently PixelViewer lacks of ability to detect screen DPI on Linux, so you may find that UI displays too small on Hi-DPI screen. In this case you can open ```Application Options``` of PixelViewer, find ```User interface scale factor``` and change the scale factor to proper value. You need to restart PixelViewer manually to apply modified scale factor.
+Currently PixelViewer lacks of ability to detect screen DPI on Linux, so you may find that UI displays too small on Hi-DPI screen. In this case you can open ```Application Options``` of PixelViewer, find ```User interface scale factor``` and change the scale factor to proper value. You need to restart PixelViewer manually to apply modified scale factor. If you found that scale factor doesn't work on your Linux PC, please install ```xrandr``` tool then check again.
 
 ## 📦Upgrade
 
