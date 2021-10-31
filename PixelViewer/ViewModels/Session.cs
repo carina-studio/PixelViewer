@@ -106,6 +106,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProperty = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
 		/// <summary>
+		/// Property of <see cref="Histograms"/>.
+		/// </summary>
+		public static readonly ObservableProperty<BitmapHistograms?> HistogramsProperty = ObservableProperty.Register<Session, BitmapHistograms?>(nameof(Histograms));
+		/// <summary>
 		/// Property of <see cref="ImageHeight"/>.
 		/// </summary>
 		public static readonly ObservableProperty<int> ImageHeightProperty = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: it => Math.Max(1, it));
@@ -465,6 +469,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(FrameCountProperty, 0);
 				this.SetValue(FrameNumberProperty, 0);
 				this.SetValue(FramePaddingSizeProperty, 0L);
+				this.SetValue(HistogramsProperty, null);
 				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
@@ -787,6 +792,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether there is a pixel selected on rendered image or not.
 		/// </summary>
 		public bool HasSelectedRenderedImagePixel { get => this.GetValue(HasSelectedRenderedImagePixelProperty); }
+
+
+		/// <summary>
+		/// Get histograms of <see cref="RenderedImage"/>.
+		/// </summary>
+		public BitmapHistograms? Histograms { get => this.GetValue(HistogramsProperty); }
 
 
 		/// <summary>
@@ -1446,6 +1457,21 @@ namespace Carina.PixelViewer.ViewModels
 				exception = ex;
 			}
 
+			// generate histograms
+			var histograms = (BitmapHistograms?)null;
+			if (exception == null && !cancellationTokenSource.IsCancellationRequested)
+			{
+				try
+				{
+					histograms = await BitmapHistograms.CreateAsync(renderedImageBuffer, cancellationTokenSource.Token);
+				}
+				catch (Exception ex)
+				{
+					if (ex is not TaskCanceledException)
+						this.Logger.LogError(ex, "Failed to generate histograms");
+				}
+			}
+
 			// check whether rendering has been cancelled or not
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
@@ -1492,6 +1518,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (exception == null)
 			{
 				this.SetValue(HasRenderingErrorProperty, false);
+				this.SetValue(HistogramsProperty, histograms);
 				this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
@@ -1501,6 +1528,7 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				this.SetValue(HasRenderingErrorProperty, true);
+				this.SetValue(HistogramsProperty, null);
 				this.SetValue(RenderedImageProperty, null);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
