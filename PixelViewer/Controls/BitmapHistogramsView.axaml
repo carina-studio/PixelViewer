@@ -1,0 +1,79 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+			 xmlns:a="using:Avalonia"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Carina.PixelViewer.Controls.BitmapHistogramsView">
+
+	<Grid RowDefinitions="Auto,*,Auto">
+
+		<!-- Histograms -->
+		<Panel Grid.Row="1">
+			
+			<!-- Styles -->
+			<Panel.Styles>
+				<Style Selector="Image">
+					<Setter Property="RenderTransformOrigin" Value="{x:Static a:RelativePoint.BottomRight}"/>
+					<Setter Property="Stretch" Value="Fill"/>
+					<Setter Property="StretchDirection" Value="Both"/>
+				</Style>
+			</Panel.Styles>
+			
+			<!-- Red -->
+			<Image IsVisible="{Binding $parent[UserControl].IsREdHistogramVisible}" Source="{Binding $parent[UserControl].RedHistogramImage}">
+				<Image.RenderTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].RedHistogramScaleY}">
+						<ScaleTransform.Transitions>
+							<Transitions>
+								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
+							</Transitions>
+						</ScaleTransform.Transitions>
+					</ScaleTransform>
+				</Image.RenderTransform>
+			</Image>
+			
+			<!-- Green -->
+			<Image IsVisible="{Binding $parent[UserControl].IsGreenHistogramVisible}" Source="{Binding $parent[UserControl].GreenHistogramImage}">
+				<Image.RenderTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].GreenHistogramScaleY}">
+						<ScaleTransform.Transitions>
+							<Transitions>
+								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
+							</Transitions>
+						</ScaleTransform.Transitions>
+					</ScaleTransform>
+				</Image.RenderTransform>
+			</Image>
+			
+			<!-- Blue -->
+			<Image IsVisible="{Binding $parent[UserControl].IsBlueHistogramVisible}" Source="{Binding $parent[UserControl].BlueHistogramImage}">
+				<Image.RenderTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].BlueHistogramScaleY}">
+						<ScaleTransform.Transitions>
+							<Transitions>
+								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
+							</Transitions>
+						</ScaleTransform.Transitions>
+					</ScaleTransform>
+				</Image.RenderTransform>
+			</Image>
+			
+			<!-- Luminance -->
+			<Image IsVisible="{Binding $parent[UserControl].IsLuminanceHistogramVisible}" Source="{Binding $parent[UserControl].LuminanceHistogramImage}">
+				<Image.RenderTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].LuminanceHistogramScaleY}">
+						<ScaleTransform.Transitions>
+							<Transitions>
+								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
+							</Transitions>
+						</ScaleTransform.Transitions>
+					</ScaleTransform>
+				</Image.RenderTransform>
+			</Image>
+			
+		</Panel>
+		
+	</Grid>
+	
+</UserControl>

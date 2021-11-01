@@ -22,7 +22,8 @@ namespace Carina.PixelViewer.Media
         /// <param name="luminance">Histogram of luminance.</param>
         public BitmapHistograms(IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance)
         {
-            if (red.Count != green.Count || green.Count != blue.Count || blue.Count != luminance.Count)
+            this.ColorCount = red.Count;
+            if (this.ColorCount != green.Count || this.ColorCount != blue.Count || this.ColorCount != luminance.Count)
                 throw new ArgumentException();
             this.Blue = blue.AsReadOnly();
             this.Green = green.AsReadOnly();
@@ -36,6 +37,12 @@ namespace Carina.PixelViewer.Media
         /// Histogram of blue channel.
         /// </summary>
         public IList<int> Blue { get; }
+
+
+        /// <summary>
+        /// Get number of available colors for each channel.
+        /// </summary>
+        public int ColorCount { get; }
 
 
         /// <summary>
@@ -117,7 +124,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Get maximum value in all histograms.
         /// </summary>
-        int Maximum { get; }
+        public int Maximum { get; }
 
 
         /// <summary>

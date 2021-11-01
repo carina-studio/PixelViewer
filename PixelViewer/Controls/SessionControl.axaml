@@ -160,7 +160,7 @@
 						</LayoutTransformControl.LayoutTransform>
 					</LayoutTransformControl>
 				</ScrollViewer>
-
+				
 			</Grid>
 
 			<!-- Image tool bar -->

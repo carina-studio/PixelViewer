@@ -1,4 +1,5 @@
-﻿using Avalonia.Media;
+﻿using Avalonia;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
@@ -73,6 +74,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="FramePaddingSize"/>.
 		/// </summary>
 		public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
+		/// <summary>
+		/// Property of <see cref="HasHistograms"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasHistogramsProperty = ObservableProperty.Register<Session, bool>(nameof(HasHistograms));
 		/// <summary>
 		/// Property of <see cref="HasImagePlane1"/>.
 		/// </summary>
@@ -161,6 +166,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="IsSourceFileOpened"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
+		/// <summary>
+		/// Property of <see cref="LuminanceHistogramGeometry"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Geometry?> LuminanceHistogramGeometryProperty = ObservableProperty.Register<Session, Geometry?>(nameof(LuminanceHistogramGeometry));
 		/// <summary>
 		/// Property of <see cref="Profile"/>.
 		/// </summary>
@@ -471,6 +480,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(FramePaddingSizeProperty, 0L);
 				this.SetValue(HistogramsProperty, null);
 				this.SetValue(IsSourceFileOpenedProperty, false);
+				this.SetValue(LuminanceHistogramGeometryProperty, null);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
 				this.canSaveRenderedImage.Update(false);
@@ -747,6 +757,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether <see cref="Histograms"/> is valid or not.
+		/// </summary>
+		public bool HasHistograms { get => this.GetValue(HasHistogramsProperty); }
+
+
+		/// <summary>
 		/// Check whether 1st image plane exists or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
 		public bool HasImagePlane1 { get => this.GetValue(HasImagePlane1Property); }
@@ -891,6 +907,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get <see cref="Geometry"/> of luminance histogram.
+		/// </summary>
+		public Geometry? LuminanceHistogramGeometry { get => this.GetValue(LuminanceHistogramGeometryProperty); }
+
+
+		/// <summary>
 		/// Get maximum scaling ratio of rendered image.
 		/// </summary>
 		public double MaxRenderedImageScale { get; } = 10.0;
@@ -988,6 +1010,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HasMultipleFramesProperty, (int)newValue.AsNonNull() > 1);
 			else if (property == FrameNumberProperty)
 				this.renderImageOperation.Reschedule();
+			else if (property == HistogramsProperty)
+				this.SetValue(HasHistogramsProperty, newValue != null);
 			else if (property == ImageRendererProperty)
 			{
 				if (ImageRenderers.All.Contains(newValue))
