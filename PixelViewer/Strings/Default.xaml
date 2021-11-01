@@ -79,6 +79,7 @@
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding between frames (bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.Histograms">Histograms</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageDimensions">Dimensions (px)</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">Plane #1</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">Plane #2</sys:String>

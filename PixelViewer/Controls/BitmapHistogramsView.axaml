@@ -23,52 +23,28 @@
 			<!-- Red -->
 			<Image IsVisible="{Binding $parent[UserControl].IsREdHistogramVisible}" Source="{Binding $parent[UserControl].RedHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].RedHistogramScaleY}">
-						<ScaleTransform.Transitions>
-							<Transitions>
-								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
-							</Transitions>
-						</ScaleTransform.Transitions>
-					</ScaleTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].RedHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
 			
 			<!-- Green -->
 			<Image IsVisible="{Binding $parent[UserControl].IsGreenHistogramVisible}" Source="{Binding $parent[UserControl].GreenHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].GreenHistogramScaleY}">
-						<ScaleTransform.Transitions>
-							<Transitions>
-								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
-							</Transitions>
-						</ScaleTransform.Transitions>
-					</ScaleTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].GreenHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
 			
 			<!-- Blue -->
 			<Image IsVisible="{Binding $parent[UserControl].IsBlueHistogramVisible}" Source="{Binding $parent[UserControl].BlueHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].BlueHistogramScaleY}">
-						<ScaleTransform.Transitions>
-							<Transitions>
-								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
-							</Transitions>
-						</ScaleTransform.Transitions>
-					</ScaleTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].BlueHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
 			
 			<!-- Luminance -->
 			<Image IsVisible="{Binding $parent[UserControl].IsLuminanceHistogramVisible}" Source="{Binding $parent[UserControl].LuminanceHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].LuminanceHistogramScaleY}">
-						<ScaleTransform.Transitions>
-							<Transitions>
-								<DoubleTransition Property="ScaleY" Duration="0:0:0.3"/>
-							</Transitions>
-						</ScaleTransform.Transitions>
-					</ScaleTransform>
+					<ScaleTransform ScaleY="{Binding $parent[UserControl].LuminanceHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
 			

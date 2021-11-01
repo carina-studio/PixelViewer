@@ -224,6 +224,36 @@
 					<!-- Separator -->
 					<Separator Classes="ToolBar_Separator"/>
 
+					<!-- Histograms -->
+					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" IsEnabled="{Binding HasHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
+						<Panel>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Popup Name="histogramsPopup" IsLightDismissEnabled="True" PlacementAnchor="Top" PlacementGravity="Top" PlacementMode="AnchorAndGravity">
+								<Border Background="{DynamicResource ComboBoxDropDownBackground}" BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}" BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}" CornerRadius="{DynamicResource OverlayCornerRadius}" Padding="{DynamicResource Thickness/SessionControl.HistogramsPanel.Padding}">
+									<Border.Styles>
+										<Style Selector="appControls|BitmapHistogramsView">
+											<Setter Property="Height" Value="{DynamicResource Double/SessionControl.Histogram.Height}"/>
+											<Setter Property="Width" Value="{DynamicResource Double/SessionControl.Histogram.Width}"/>
+										</Style>
+									</Border.Styles>
+									<StackPanel Orientation="Horizontal">
+										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True"/>
+										<Separator Classes="Dialog_Separator_Small"/>
+										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True"/>
+										<Separator Classes="Dialog_Separator_Small"/>
+										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True"/>
+										<Separator Classes="Dialog_Separator_Small"/>
+										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True"/>
+									</StackPanel>
+								</Border>
+							</Popup>
+						</Panel>
+					</ToggleButton>
+
+					<!-- Separator -->
+					<Separator Classes="ToolBar_Separator"/>
+
 					<!-- Frame navigation -->
 					<StackPanel IsVisible="{Binding HasMultipleFrames}" Orientation="Horizontal">
 

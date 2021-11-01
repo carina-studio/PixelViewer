@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:sys="using:System">
 
 	<!-- Resources -->
@@ -7,6 +8,18 @@
 
 		<!-- Accent -->
 		<Color x:Key="Color/Accent">#50b29b</Color>
+
+		<!-- BitmapHistogramsView -->
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Bakground}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Bakground}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Bakground}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Bakground}"/>
+		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Bakground">#3f3fff</Color>
+		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Bakground">#3fff3f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Bakground">#bfbfbf</Color>
+		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Bakground">#ff3f3f</Color>
+		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">1</Thickness>
+		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
 		<!-- FrameNumberSelectionDialog -->
 		<sys:Double x:Key="Double/FrameNumberSelectionDialog.Width">300</sys:Double>
@@ -26,6 +39,8 @@
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
 		<CornerRadius x:Key="CornerRadius/SessionControl.ImageToolBar.CornerRadius">5</CornerRadius>
+		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.Histogram.Width">150</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageRenderingProfile.Icon.Size">16</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageToolBar.IconSize">32</sys:Double>
@@ -35,6 +50,7 @@
 		<sys:Double x:Key="Double/SessionControl.StatusBar.FileActions.MaxWidth">500</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.TopBar.Height">5</sys:Double>
 		<Thickness x:Key="ExpanderContentPadding">5</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Margin">10,0,10,30</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageToolBar.Padding">5</Thickness>
@@ -44,6 +60,18 @@
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
 		
 	</Styles.Resources>
+
+	<!-- BitmapHistogramsView -->
+	<Style Selector="appControls|BitmapHistogramsView">
+		<Setter Property="BlueHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.BlueHistogram.Bakground}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
+		<Setter Property="BorderThickness" Value="{DynamicResource Thickness/BitmapHistogramsView.Border}"/>
+		<Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
+		<Setter Property="GreenHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.GreenHistogram.Bakground}"/>
+		<Setter Property="LuminanceHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.LuminanceHistogram.Bakground}"/>
+		<Setter Property="Padding" Value="{DynamicResource Thickness/BitmapHistogramsView.Padding}"/>
+		<Setter Property="RedHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.RedHistogram.Bakground}"/>
+	</Style>
 
 	<!-- SessionControl -->
 	<Style Selector="Border.SessionControl_ImageViewer_Hint_Icon">

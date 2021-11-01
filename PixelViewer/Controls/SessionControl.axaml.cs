@@ -60,6 +60,8 @@ namespace Carina.PixelViewer.Controls
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
 		readonly ContextMenu fileActionsMenu;
+		readonly ToggleButton histogramsButton;
+		readonly Popup histogramsPopup;
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
@@ -104,6 +106,12 @@ namespace Carina.PixelViewer.Controls
 			{
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
+			});
+			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
+			this.histogramsPopup = this.FindControl<Popup>(nameof(histogramsPopup)).AsNonNull().Also(it =>
+			{
+				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.histogramsButton.IsChecked = false);
+				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.histogramsButton.IsChecked = true);
 			});
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
@@ -761,6 +769,18 @@ namespace Carina.PixelViewer.Controls
 				this.fileActionsMenu.PlacementTarget = this.fileActionsButton;
 			this.fileActionsMenu.Open(this.fileActionsButton);
 		}
+
+
+		// Show or hide histograms panel.
+		void ShowHideHistograms()
+        {
+			if (this.histogramsPopup.PlacementTarget == null)
+				this.histogramsPopup.PlacementTarget = this.histogramsButton;
+			if (this.histogramsPopup.IsOpen)
+				this.histogramsPopup.Close();
+			else
+				this.histogramsPopup.Open();
+        }
 
 
 		// Show other actions.

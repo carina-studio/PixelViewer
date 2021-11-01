@@ -71,6 +71,7 @@
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">自動評估</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">調整至視窗大小 (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">畫面資料間格 (位元組)</sys:String>
+	<sys:String x:Key="String/SessionControl.Histograms">色階分布圖</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageDimensions">尺寸 (像素)</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">圖層 #1</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">圖層 #2</sys:String>

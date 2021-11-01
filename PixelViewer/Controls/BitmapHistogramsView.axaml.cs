@@ -19,13 +19,21 @@ namespace Carina.PixelViewer.Controls
     partial class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     {
         /// <summary>
+        /// Property of <see cref="BlueHistogramBrush"/>.
+        /// </summary>
+        public static readonly AvaloniaProperty<IBrush?> BlueHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(BlueHistogramBrush));
+        /// <summary>
+        /// Property of <see cref="GreenHistogramBrush"/>.
+        /// </summary>
+        public static readonly AvaloniaProperty<IBrush?> GreenHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(GreenHistogramBrush));
+        /// <summary>
         /// Property of <see cref="IsBlueHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsBlueHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsBlueHistogramVisible), true);
+        public static readonly AvaloniaProperty<bool> IsBlueHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsBlueHistogramVisible), false);
         /// <summary>
         /// Property of <see cref="IsGreenHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsGreenHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsGreenHistogramVisible), true);
+        public static readonly AvaloniaProperty<bool> IsGreenHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsGreenHistogramVisible), false);
         /// <summary>
         /// Property of <see cref="IsLuminanceHistogramVisible"/>.
         /// </summary>
@@ -33,7 +41,15 @@ namespace Carina.PixelViewer.Controls
         /// <summary>
         /// Property of <see cref="IsRedHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsRedHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsRedHistogramVisible), true);
+        public static readonly AvaloniaProperty<bool> IsRedHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsRedHistogramVisible), false);
+        /// <summary>
+        /// Property of <see cref="LuminanceHistogramBrush"/>.
+        /// </summary>
+        public static readonly AvaloniaProperty<IBrush?> LuminanceHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(LuminanceHistogramBrush));
+        /// <summary>
+        /// Property of <see cref="RedHistogramBrush"/>.
+        /// </summary>
+        public static readonly AvaloniaProperty<IBrush?> RedHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(RedHistogramBrush));
 
 
         // Static fields.
@@ -52,6 +68,7 @@ namespace Carina.PixelViewer.Controls
         int maxGreenValue;
         int maxLuminanceValue;
         int maxRedValue;
+        readonly ScheduledAction updateHistogramImagesAction;
         readonly ScheduledAction updateHistogramScalesAction;
 
 
@@ -64,6 +81,23 @@ namespace Carina.PixelViewer.Controls
             InitializeComponent();
 
             // create actions
+            this.updateHistogramImagesAction = new ScheduledAction(() =>
+            {
+                if (this.DataContext is BitmapHistograms histograms)
+                {
+                    this.SetValue<IImage?>(RedHistogramImageProperty, this.GenerateHistogramImage(histograms.Red, this.maxRedValue, this.RedHistogramBrush));
+                    this.SetValue<IImage?>(GreenHistogramImageProperty, this.GenerateHistogramImage(histograms.Green, this.maxGreenValue, this.GreenHistogramBrush));
+                    this.SetValue<IImage?>(BlueHistogramImageProperty, this.GenerateHistogramImage(histograms.Blue, this.maxBlueValue, this.BlueHistogramBrush));
+                    this.SetValue<IImage?>(LuminanceHistogramImageProperty, this.GenerateHistogramImage(histograms.Luminance, this.maxLuminanceValue, this.LuminanceHistogramBrush));
+                }
+                else
+                {
+                    this.SetValue<IImage?>(RedHistogramImageProperty, null);
+                    this.SetValue<IImage?>(GreenHistogramImageProperty, null);
+                    this.SetValue<IImage?>(BlueHistogramImageProperty, null);
+                    this.SetValue<IImage?>(LuminanceHistogramImageProperty, null);
+                }
+            });
             this.updateHistogramScalesAction = new ScheduledAction(() =>
             {
                 // check state
@@ -74,14 +108,10 @@ namespace Carina.PixelViewer.Controls
                 var maxValue = (double)histograms.Maximum;
 
                 // update scales
-                if (this.IsRedHistogramVisible)
-                    this.SetValue<double>(RedHistogramScaleYProperty, this.maxRedValue / maxValue);
-                if (this.IsGreenHistogramVisible)
-                    this.SetValue<double>(GreenHistogramScaleYProperty, this.maxGreenValue / maxValue);
-                if (this.IsBlueHistogramVisible)
-                    this.SetValue<double>(BlueHistogramScaleYProperty, this.maxBlueValue / maxValue);
-                if (this.IsLuminanceHistogramVisible)
-                    this.SetValue<double>(LuminanceHistogramScaleYProperty, this.maxLuminanceValue / maxValue);
+                this.SetValue<double>(RedHistogramScaleYProperty, this.IsRedHistogramVisible ? this.maxRedValue / maxValue : 0);
+                this.SetValue<double>(GreenHistogramScaleYProperty, this.IsGreenHistogramVisible ? this.maxGreenValue / maxValue : 0);
+                this.SetValue<double>(BlueHistogramScaleYProperty, this.IsBlueHistogramVisible ? this.maxBlueValue / maxValue : 0);
+                this.SetValue<double>(LuminanceHistogramScaleYProperty, this.IsLuminanceHistogramVisible ? this.maxLuminanceValue / maxValue : 0);
             });
         }
 
@@ -94,13 +124,20 @@ namespace Carina.PixelViewer.Controls
             this.maxGreenValue = histograms.Green.Max();
             this.maxBlueValue = histograms.Blue.Max();
             this.maxLuminanceValue = histograms.Luminance.Max();
-            this.SetValue<IImage?>(RedHistogramImageProperty, this.GenerateHistogramImage(histograms.Red, this.maxRedValue, Colors.Red));
-            this.SetValue<IImage?>(GreenHistogramImageProperty, this.GenerateHistogramImage(histograms.Green, this.maxGreenValue, Colors.Green));
-            this.SetValue<IImage?>(BlueHistogramImageProperty, this.GenerateHistogramImage(histograms.Blue, this.maxBlueValue, Colors.Blue));
-            this.SetValue<IImage?>(LuminanceHistogramImageProperty, this.GenerateHistogramImage(histograms.Luminance, this.maxLuminanceValue, Colors.White));
+            this.updateHistogramImagesAction.Schedule();
 
             // update display scales
             this.updateHistogramScalesAction.Execute();
+        }
+
+
+        /// <summary>
+        /// Get or set brush for histogram of blue channel.
+        /// </summary>
+        public IBrush? BlueHistogramBrush
+        {
+            get => this.GetValue<IBrush?>(BlueHistogramBrushProperty);
+            set => this.SetValue<IBrush?>(BlueHistogramBrushProperty, value);
         }
 
 
@@ -116,15 +153,12 @@ namespace Carina.PixelViewer.Controls
         void DetachFromBitmapHistograms(BitmapHistograms histograms)
         {
             // clear images
-            this.SetValue<IImage?>(RedHistogramImageProperty, null);
-            this.SetValue<IImage?>(GreenHistogramImageProperty, null);
-            this.SetValue<IImage?>(BlueHistogramImageProperty, null);
-            this.SetValue<IImage?>(LuminanceHistogramImageProperty, null);
+            this.updateHistogramImagesAction.Schedule();
         }
 
 
         // Generate image for histogram.
-        IImage GenerateHistogramImage(IList<int> histogram, int max, Color color)
+        IImage GenerateHistogramImage(IList<int> histogram, int max, IBrush? brush)
         {
             var dataCount = histogram.Count;
             var pathBuilder = new StringBuilder($"M 0,{dataCount} L {dataCount - 1},{dataCount}");
@@ -135,10 +169,20 @@ namespace Carina.PixelViewer.Controls
             {
                 Drawing = new GeometryDrawing()
                 {
-                    Brush = new SolidColorBrush(Color.FromArgb(127, color.R, color.G, color.B)),
+                    Brush = brush,
                     Geometry = PathGeometry.Parse(pathBuilder.ToString()),
                 },
             };
+        }
+
+
+        /// <summary>
+        /// Get or set brush for histogram of green channel.
+        /// </summary>
+        public IBrush? GreenHistogramBrush
+        {
+            get => this.GetValue<IBrush?>(GreenHistogramBrushProperty);
+            set => this.SetValue<IBrush?>(GreenHistogramBrushProperty, value);
         }
 
 
@@ -194,6 +238,16 @@ namespace Carina.PixelViewer.Controls
         }
 
 
+        /// <summary>
+        /// Get or set brush for histogram of luminance.
+        /// </summary>
+        public IBrush? LuminanceHistogramBrush
+        {
+            get => this.GetValue<IBrush?>(LuminanceHistogramBrushProperty);
+            set => this.SetValue<IBrush?>(LuminanceHistogramBrushProperty, value);
+        }
+
+
         // Image of luminance histogram.
         IImage? LuminanceHistogramImage { get => this.GetValue<IImage?>(LuminanceHistogramImageProperty); }
 
@@ -207,7 +261,14 @@ namespace Carina.PixelViewer.Controls
         {
             base.OnPropertyChanged(change);
             var property = change.Property;
-            if (property == DataContextProperty)
+            if (property == BlueHistogramBrushProperty
+                || property == GreenHistogramBrushProperty
+                || property == LuminanceHistogramBrushProperty
+                || property == RedHistogramBrushProperty)
+            {
+                this.updateHistogramImagesAction.Schedule();
+            }
+            else if (property == DataContextProperty)
             {
                 (change.OldValue.Value as BitmapHistograms)?.Let(it => this.DetachFromBitmapHistograms(it));
                 (change.NewValue.Value as BitmapHistograms)?.Let(it => this.AttachToBitmapHistograms(it));
@@ -219,6 +280,16 @@ namespace Carina.PixelViewer.Controls
             {
                 this.updateHistogramScalesAction.Schedule();
             }
+        }
+
+
+        /// <summary>
+        /// Get or set brush for histogram of red channel.
+        /// </summary>
+        public IBrush? RedHistogramBrush
+        {
+            get => this.GetValue<IBrush?>(RedHistogramBrushProperty);
+            set => this.SetValue<IBrush?>(RedHistogramBrushProperty, value);
         }
 
 
