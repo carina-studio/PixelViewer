@@ -60,7 +60,7 @@
 		</ContextMenu>
 
 		<!-- Other actions -->
-		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Top">
+		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Bottom">
 			<MenuItem Command="{Binding $parent[UserControl].ShowAppOptions}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
 					<Border Classes="MenuItem_Icon">
@@ -84,10 +84,141 @@
 	<!-- Content -->
 	<Grid RowDefinitions="Auto,*,Auto">
 
-		<!-- Top bar -->
-		<Border Background="{DynamicResource Brush/ToolBar.Background}" Height="{DynamicResource Double/SessionControl.TopBar.Height}">
-			<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
+		<!-- Tool bar -->
+		<Border Classes="ToolBar">
+			<Grid ColumnDefinitions="*,Auto">
+
+				<!-- Image actions -->
+				<StackPanel Orientation="Horizontal">
+
+					<!-- Open file -->
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
+					</Button>
+
+					<!-- Save rendered image -->
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveRenderedImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveRenderedImage}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Save}"/>
+					</Button>
+
+					<!-- Separator -->
+					<Separator Classes="ToolBar_Separator"/>
+
+					<!-- Fit to viewport -->
+					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
+						<Panel>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
+
+					<!-- Zoom-out -->
+					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomOut}"/>
+					</RepeatButton>
+
+					<!-- Zoom -->
+					<Panel>
+						<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000%"/>
+						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RenderedImageScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
+					</Panel>
+
+					<!-- Zoom-in -->
+					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomIn}"/>
+					</RepeatButton>
+
+					<!-- Separator -->
+					<Separator Classes="ToolBar_Separator"/>
+
+					<!-- Rotate-left -->
+					<Button Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.RotateLeft}"/>
+					</Button>
+
+					<!-- Rotation -->
+					<Panel>
+						<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000"/>
+						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
+					</Panel>
+
+					<!-- Rotate-right -->
+					<Button Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.RotateRight}"/>
+					</Button>
+
+					<!-- Separator -->
+					<Separator Classes="ToolBar_Separator"/>
+
+					<!-- Histograms -->
+					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" IsEnabled="{Binding HasHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
+						<Panel>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
+
+					<!-- Separator -->
+					<Separator Classes="ToolBar_Separator"/>
+
+					<!-- First frame -->
+					<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastBackward}"/>
+					</Button>
+
+					<!-- Previous frame -->
+					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Backward}"/>
+					</RepeatButton>
+
+					<!-- Frame -->
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding !HasRenderingError}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+						<Panel>
+							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
+							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
+								<TextBlock.Text>
+									<MultiBinding StringFormat="{}{0} / {1}">
+										<Binding Path="FrameNumber"/>
+										<Binding Path="FrameCount"/>
+									</MultiBinding>
+								</TextBlock.Text>
+							</TextBlock>
+						</Panel>
+					</Button>
+
+					<!-- Next frame -->
+					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Forward}"/>
+					</RepeatButton>
+
+					<!-- Last frame -->
+					<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastForward}"/>
+					</Button>
+
+				</StackPanel>
+
+				<!-- Other actions -->
+				<StackPanel Grid.Column="1" Orientation="Horizontal">
+
+					<!-- Test -->
+					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
+						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Lab}"/>
+					</Button>
+
+					<!-- Other actions -->
+					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
+						<Panel>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
+					
+				</StackPanel>
+
+			</Grid>
 		</Border>
+		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
 
 		<!-- Viewer -->
 		<Grid Grid.Row="1">
@@ -162,156 +293,6 @@
 				</ScrollViewer>
 				
 			</Grid>
-
-			<!-- Image tool bar -->
-			<Border Background="{DynamicResource Brush/ToolBar.Background}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageToolBar.CornerRadius}" HorizontalAlignment="Center" Margin="{DynamicResource Thickness/SessionControl.ImageToolBar.Margin}" VerticalAlignment="Bottom">
-				<StackPanel Margin="{DynamicResource Thickness/SessionControl.ImageToolBar.Padding}" Orientation="Horizontal">
-
-					<!-- Open file -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
-					</Button>
-
-					<!-- Save rendered image -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveRenderedImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveRenderedImage}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Save}"/>
-					</Button>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Fit to viewport -->
-					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
-						<Panel>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-						</Panel>
-					</ToggleButton>
-
-					<!-- Zoom-out -->
-					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomOut}"/>
-					</RepeatButton>
-
-					<!-- Zoom & rotation -->
-					<Panel>
-						<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000 / 0000"/>
-						<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-							<TextBlock Classes="ToolBar_TextBlock" Text="{Binding RenderedImageScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
-							<TextBlock Classes="ToolBar_TextBlock" Text=" / "/>
-							<TextBlock Classes="ToolBar_TextBlock" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
-						</StackPanel>
-					</Panel>
-
-					<!-- Zoom-in -->
-					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomIn}"/>
-					</RepeatButton>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Rotate-left -->
-					<Button Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.RotateLeft}"/>
-					</Button>
-
-					<!-- Rotate-right -->
-					<Button Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.RotateRight}"/>
-					</Button>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Histograms -->
-					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" IsEnabled="{Binding HasHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
-						<Panel>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-							<Popup Name="histogramsPopup" IsLightDismissEnabled="True" PlacementAnchor="Top" PlacementGravity="Top" PlacementMode="AnchorAndGravity">
-								<Border Background="{DynamicResource ComboBoxDropDownBackground}" BorderBrush="{DynamicResource ComboBoxDropDownBorderBrush}" BorderThickness="{DynamicResource ComboBoxDropdownBorderThickness}" CornerRadius="{DynamicResource OverlayCornerRadius}" Padding="{DynamicResource Thickness/SessionControl.HistogramsPanel.Padding}">
-									<Border.Styles>
-										<Style Selector="appControls|BitmapHistogramsView">
-											<Setter Property="Height" Value="{DynamicResource Double/SessionControl.Histogram.Height}"/>
-											<Setter Property="Width" Value="{DynamicResource Double/SessionControl.Histogram.Width}"/>
-										</Style>
-									</Border.Styles>
-									<StackPanel Orientation="Horizontal">
-										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True"/>
-										<Separator Classes="Dialog_Separator_Small"/>
-										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True"/>
-										<Separator Classes="Dialog_Separator_Small"/>
-										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True"/>
-										<Separator Classes="Dialog_Separator_Small"/>
-										<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True"/>
-									</StackPanel>
-								</Border>
-							</Popup>
-						</Panel>
-					</ToggleButton>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Frame navigation -->
-					<StackPanel IsVisible="{Binding HasMultipleFrames}" Orientation="Horizontal">
-
-						<!-- First frame -->
-						<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastBackward}"/>
-						</Button>
-
-						<!-- Previous frame -->
-						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Backward}"/>
-						</RepeatButton>
-
-						<!-- Frame -->
-						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding !HasRenderingError}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
-							<Panel>
-								<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
-								<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
-									<TextBlock.Text>
-										<MultiBinding StringFormat="{}{0} / {1}">
-											<Binding Path="FrameNumber"/>
-											<Binding Path="FrameCount"/>
-										</MultiBinding>
-									</TextBlock.Text>
-								</TextBlock>
-							</Panel>
-						</Button>
-
-						<!-- Next frame -->
-						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Forward}"/>
-						</RepeatButton>
-
-						<!-- Last frame -->
-						<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastForward}"/>
-						</Button>
-
-						<!-- Separator -->
-						<Separator Classes="ToolBar_Separator"/>
-
-					</StackPanel>
-
-					<!-- Test -->
-					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Lab}"/>
-					</Button>
-
-					<!-- Other actions -->
-					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
-						<Panel>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-						</Panel>
-					</ToggleButton>
-
-				</StackPanel>
-			</Border>
 
 			<!-- Options panel -->
 			<Border Background="{DynamicResource Brush/SessionControl.OptionsPanel.Background}" Grid.Column="2">
