@@ -147,6 +147,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
 		/// <summary>
+		/// Property of <see cref="IsHistogramsVisible"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
+		/// <summary>
 		/// Property of <see cref="IsOpeningSourceFile"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsOpeningSourceFileProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSourceFile));
@@ -217,6 +221,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Static fields.
+		static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new SettingKey<bool>("Session.IsInitHistogramsPanelVisible", false);
 		static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new MutableObservableInt64();
 
 
@@ -322,6 +327,8 @@ namespace Carina.PixelViewer.ViewModels
 			// restore state
 			if (savedState.HasValue)
 				this.RestoreState(savedState.Value);
+			else
+				this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
 		}
 
 
@@ -877,6 +884,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get or set whether histograms of image is visible or not
+		/// </summary>
+		public bool IsHistogramsVisible
+		{
+			get => this.GetValue(IsHistogramsVisibleProperty);
+			set => this.SetValue(IsHistogramsVisibleProperty, value);
+		}
+
+
+		/// <summary>
 		/// Check whether source file is being opened or not.
 		/// </summary>
 		public bool IsOpeningSourceFile { get => this.GetValue(IsOpeningSourceFileProperty); }
@@ -1031,6 +1048,8 @@ namespace Carina.PixelViewer.ViewModels
 					this.isImagePlaneOptionsResetNeeded = true;
 				this.renderImageOperation.Reschedule(RenderImageDelay);
 			}
+			else if (property == IsHistogramsVisibleProperty)
+				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
 			else if (property == IsOpeningSourceFileProperty
 				|| property == IsRenderingImageProperty
 				|| property == IsSavingRenderedImageProperty)
@@ -1678,6 +1697,7 @@ namespace Carina.PixelViewer.ViewModels
 			// load displaying parameters
 			var fitToViewport = true;
 			var frameNumber = 1;
+			var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
 			var rotation = 0;
 			var scale = 1.0;
 			if (savedState.TryGetProperty(nameof(FitRenderedImageToViewport), out jsonProperty))
@@ -1686,6 +1706,8 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetInt32(out frameNumber);
 			if (savedState.TryGetProperty(nameof(EffectiveRenderedImageRotation), out jsonProperty))
 				jsonProperty.TryGetInt32(out rotation);
+			if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
+				isHistogramsVisible = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(RenderedImageScale), out jsonProperty))
 				jsonProperty.TryGetDouble(out scale);
 
@@ -1720,6 +1742,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.EffectiveRenderedImageRotation = rotation;
 			this.FitRenderedImageToViewport = fitToViewport;
 			this.FrameNumber = frameNumber;
+			this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
 			this.RenderedImageScale = scale;
 
 			this.Logger.LogWarning("State restored");
@@ -2029,6 +2052,7 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteNumber(nameof(EffectiveRenderedImageRotation), (int)(this.EffectiveRenderedImageRotation + 0.5));
 				writer.WriteBoolean(nameof(FitRenderedImageToViewport), this.fitRenderedImageToViewport);
 				writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
+				writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
 				writer.WriteNumber(nameof(RenderedImageScale), this.renderedImageScale);
 			}
 			writer.WriteEndObject();

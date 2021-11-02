@@ -151,7 +151,7 @@
 					<Separator Classes="ToolBar_Separator"/>
 
 					<!-- Histograms -->
-					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" IsEnabled="{Binding HasHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
+					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
 						<Panel>
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -232,7 +232,22 @@
 			</Grid.ColumnDefinitions>
 
 			<!-- Histograms -->
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
+			<Border Name="histogramsPanel" Background="{DynamicResource Brush/WorkingArea.Panel.Background}">
+				<Border.RenderTransform>
+					<TranslateTransform>
+						<TranslateTransform.Transitions>
+							<Transitions>
+								<DoubleTransition Property="X" Duration="{StaticResource TimeSpan/SessionControl.HistogramsPanel.Transition}" Easing="ExponentialEaseOut"/>
+							</Transitions>
+						</TranslateTransform.Transitions>
+					</TranslateTransform>
+				</Border.RenderTransform>
+				<Border.Transitions>
+					<Transitions>
+						<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/SessionControl.HistogramsPanel.Transition}" Easing="ExponentialEaseOut"/>
+					</Transitions>
+				</Border.Transitions>
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
 
@@ -262,7 +277,6 @@
 						<!-- Blue -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Histogram.Blue}"/>
 						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True"/>
-						<Separator Classes="Dialog_Separator"/>
 						
 					</StackPanel>
 				</ScrollViewer>

@@ -7,6 +7,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
+using Carina.PixelViewer.Animation;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
@@ -56,11 +57,15 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
+		readonly ScheduledAction commitHistogramsPanelVisibilityAction;
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
 		readonly ContextMenu fileActionsMenu;
 		readonly ToggleButton histogramsButton;
+		readonly Control histogramsPanel;
+		readonly int histogramsPanelTransitionDuration;
+		readonly double histogramsPanelTransitionX;
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
@@ -107,6 +112,7 @@ namespace Carina.PixelViewer.Controls
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 			});
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
+			this.histogramsPanel = this.FindControl<Control>(nameof(histogramsPanel)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
@@ -118,7 +124,18 @@ namespace Carina.PixelViewer.Controls
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
 
+			// load resources
+			if (this.Application.TryGetResource<double>("Double/SessionControl.Histogram.Width", out var doubleValue) && doubleValue.HasValue)
+				this.histogramsPanelTransitionX = doubleValue.Value / -2;
+			if (this.Application.TryGetResource<TimeSpan>("TimeSpan/SessionControl.HistogramsPanel.Transition", out var duration) && duration.HasValue)
+				this.histogramsPanelTransitionDuration = (int)duration.Value.TotalMilliseconds;
+
 			// create scheduled actions
+			this.commitHistogramsPanelVisibilityAction = new ScheduledAction(() =>
+			{
+				if (this.DataContext is Session session)
+					this.histogramsPanel.IsVisible = session.IsHistogramsVisible;
+			});
 			this.updateStatusBarStateAction = new ScheduledAction(() =>
 			{
 				this.SetValue<StatusBarState>(StatusBarStateProperty, Global.Run(() =>
@@ -132,6 +149,23 @@ namespace Carina.PixelViewer.Controls
 					return StatusBarState.Inactive;
 				}));
 			});
+		}
+
+
+		// Animate histograms panel according to current state
+		void AnimateHistogramsPanel()
+		{
+			if (this.DataContext is Session session && session.IsHistogramsVisible)
+			{
+				this.histogramsPanel.IsVisible = true;
+				this.histogramsPanel.Opacity = 1;
+				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = 0);
+			}
+			else
+            {
+				this.histogramsPanel.Opacity = 0;
+				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = this.histogramsPanelTransitionX);
+			}
 		}
 
 
@@ -456,6 +490,7 @@ namespace Carina.PixelViewer.Controls
 				}
 				if (change.NewValue.Value is Session newSession)
 				{
+					// attach to session
 					newSession.PropertyChanged += this.OnSessionPropertyChanged;
 					newSession.OpenSourceFileCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.SaveAsNewProfileCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
@@ -464,6 +499,15 @@ namespace Carina.PixelViewer.Controls
 					this.canSaveAsNewProfile.Update(newSession.SaveAsNewProfileCommand.CanExecute(null));
 					this.canSaveRenderedImage.Update(newSession.SaveRenderedImageCommand.CanExecute(null));
 					this.canShowEvaluateImageDimensionsMenu.Update(newSession.IsSourceFileOpened);
+
+					// setup histograms panel
+					this.histogramsButton.IsChecked = newSession.IsHistogramsVisible;
+					this.histogramsPanel.DisableTransitionsAndRun(() =>
+					{
+						this.AnimateHistogramsPanel();
+						this.histogramsPanel.IsVisible = newSession.IsHistogramsVisible;
+						this.commitHistogramsPanelVisibilityAction.Cancel();
+					});
 				}
 				else
 				{
@@ -495,6 +539,8 @@ namespace Carina.PixelViewer.Controls
 		// Called when property of session changed.
 		void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
+			if (sender is not Session session)
+				return;
 			switch (e.PropertyName)
 			{
 				case nameof(Session.EffectiveRenderedImageScale):
@@ -512,6 +558,14 @@ namespace Carina.PixelViewer.Controls
 				case nameof(Session.HasRenderingError):
 				case nameof(Session.InsufficientMemoryForRenderedImage):
 					this.updateStatusBarStateAction.Schedule();
+					break;
+				case nameof(Session.IsHistogramsVisible):
+					this.AnimateHistogramsPanel();
+					if (session.IsHistogramsVisible)
+						this.commitHistogramsPanelVisibilityAction.Cancel();
+					else
+						this.commitHistogramsPanelVisibilityAction.Reschedule(this.histogramsPanelTransitionDuration);
+					this.histogramsButton.IsChecked = session.IsHistogramsVisible;
 					break;
 				case nameof(Session.IsSourceFileOpened):
 					this.canShowEvaluateImageDimensionsMenu.Update((sender as Session)?.IsSourceFileOpened ?? false);
@@ -768,7 +822,9 @@ namespace Carina.PixelViewer.Controls
 		// Show or hide histograms panel.
 		void ShowHideHistograms()
         {
-			//
+			if (this.DataContext is not Session session)
+				return;
+			session.IsHistogramsVisible = !session.IsHistogramsVisible;
         }
 
 

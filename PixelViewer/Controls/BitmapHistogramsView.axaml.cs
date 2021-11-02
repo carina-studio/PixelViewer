@@ -79,6 +79,7 @@ namespace Carina.PixelViewer.Controls
         {
             // initialize
             InitializeComponent();
+            this.IsEnabled = false;
 
             // create actions
             this.updateHistogramImagesAction = new ScheduledAction(() =>
@@ -273,7 +274,7 @@ namespace Carina.PixelViewer.Controls
                 (change.OldValue.Value as BitmapHistograms)?.Let(it => this.DetachFromBitmapHistograms(it));
                 (change.NewValue.Value as BitmapHistograms)?.Let(it => this.AttachToBitmapHistograms(it));
             }
-            else if (property == IsBlueHistogramVisibleProperty 
+            else if (property == IsBlueHistogramVisibleProperty
                 || property == IsGreenHistogramVisibleProperty
                 || property == IsLuminanceHistogramVisibleProperty
                 || property == IsRedHistogramVisibleProperty)
