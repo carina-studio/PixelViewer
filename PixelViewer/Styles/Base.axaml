@@ -18,7 +18,7 @@
 		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Bakground">#3fff3f</Color>
 		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Bakground">#bfbfbf</Color>
 		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Bakground">#ff3f3f</Color>
-		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">1</Thickness>
+		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">0,0,0,1</Thickness>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
 		<!-- FrameNumberSelectionDialog -->
@@ -30,12 +30,8 @@
 		<sys:Double x:Key="Double/MainWindow.MinWidth">600</sys:Double>
 
 		<!-- SessionControl -->
-		<SolidColorBrush x:Key="Brush/SessionControl.Background" Color="{DynamicResource Color/SessionControl.Background}"/>
-		<SolidColorBrush x:Key="Brush/SessionControl.OptionsPanel.Background" Color="{DynamicResource Color/SessionControl.OptionsPanel.Background}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
-		<Color x:Key="Color/SessionControl.Background">#ffffff</Color>
-		<Color x:Key="Color/SessionControl.OptionsPanel.Background">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
@@ -58,6 +54,7 @@
 
 	<!-- BitmapHistogramsView -->
 	<Style Selector="appControls|BitmapHistogramsView">
+		<Setter Property="Background" Value="{DynamicResource TextControlBackground}"/>
 		<Setter Property="BlueHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.BlueHistogram.Bakground}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
 		<Setter Property="BorderThickness" Value="{DynamicResource Thickness/BitmapHistogramsView.Border}"/>

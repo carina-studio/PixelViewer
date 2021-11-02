@@ -225,13 +225,51 @@
 
 			<!-- Columns -->
 			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition MaxWidth="400" MinWidth="300" Width="300"/>
 			</Grid.ColumnDefinitions>
 
+			<!-- Histograms -->
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}">
+				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
+
+						<!-- Styles -->
+						<StackPanel.Styles>
+							<Style Selector="appControls|BitmapHistogramsView">
+								<Setter Property="Height" Value="{DynamicResource Double/SessionControl.Histogram.Height}"/>
+								<Setter Property="Width" Value="{DynamicResource Double/SessionControl.Histogram.Width}"/>
+							</Style>
+						</StackPanel.Styles>
+
+						<!-- Luminance -->
+						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Histogram.Luminance}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True"/>
+						<Separator Classes="Dialog_Separator"/>
+
+						<!-- Red -->
+						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Histogram.Red}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True"/>
+						<Separator Classes="Dialog_Separator"/>
+
+						<!-- Green -->
+						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Histogram.Green}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True"/>
+						<Separator Classes="Dialog_Separator"/>
+
+						<!-- Blue -->
+						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Histogram.Blue}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True"/>
+						<Separator Classes="Dialog_Separator"/>
+						
+					</StackPanel>
+				</ScrollViewer>
+			</Border>
+
 			<!-- Image viewer -->
-			<Grid Background="{DynamicResource Brush/SessionControl.Background}" DragDrop.AllowDrop="True">
+			<Grid Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1">
 
 				<!-- Drag-drop hint -->
 				<Border IsVisible="{Binding !IsOpeningSourceFile}">
@@ -295,7 +333,7 @@
 			</Grid>
 
 			<!-- Options panel -->
-			<Border Background="{DynamicResource Brush/SessionControl.OptionsPanel.Background}" Grid.Column="2">
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
 
@@ -421,7 +459,7 @@
 			</Border>
 
 			<!-- Splitter -->
-			<GridSplitter Background="{DynamicResource Brush/SessionControl.OptionsPanel.Background}" Classes="GridSplitter_Vertical" Grid.Column="1"/>
+			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" Grid.Column="2"/>
 			
 		</Grid>
 
