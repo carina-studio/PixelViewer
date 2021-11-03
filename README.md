@@ -1,13 +1,13 @@
 # PixelViewer
 
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blue&logo=Windows&label=Windows(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.101.0.1028/PixelViewer-1.101.0.1028-win-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blueviolet&logo=Apple&label=macOS(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.101.0.1028/PixelViewer-1.101.0.1028-osx-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.101.0.1028/PixelViewer-1.101.0.1028-linux-x64.zip)
+[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blue&logo=Windows&label=Windows(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.102.0.1103/PixelViewer-1.102.0.1103-win-x64.zip)
+[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blueviolet&logo=Apple&label=macOS(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.102.0.1103/PixelViewer-1.102.0.1103-osx-x64.zip)
+[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.102.0.1103/PixelViewer-1.102.0.1103-linux-x64.zip)
 
 [![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?style=for-the-badge&color=blue&logo=Windows&label=Windows)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)
 [![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
 
-[![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.101.0.1028)
+[![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.102.0.1103)
 [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/commits/master)
 [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
 
@@ -62,6 +62,7 @@ PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform imag
 * Specify data offset to image in file. (v1.99+)
 * Rotate and scale rendered image.
 * Navigate to specific image frame in file. (v1.99+)
+* Show histograms of R/G/B and luminance. (v1.102+)
 * Save rendered image as PNG file.
 
 ## 💻Installation
