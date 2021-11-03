@@ -172,7 +172,7 @@
 					</RepeatButton>
 
 					<!-- Frame -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding !HasRenderingError}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
 						<Panel>
 							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
 							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
