@@ -32,6 +32,56 @@ namespace Carina.PixelViewer.ViewModels
 	/// </summary>
 	class Session : ViewModel
 	{
+		// Frame of image.
+		class ImageFrame : BaseDisposable
+		{
+			// Fields.
+			readonly IDisposable memoryUsageToken;
+
+			// Constructor
+			ImageFrame(IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, int frameNumber)
+			{
+				this.BitmapBuffer = bitmapBuffer;
+				this.FrameNumber = frameNumber;
+				this.memoryUsageToken = memoryUsageToken;
+			}
+
+			public static ImageFrame Allocate(Session session, int frameNumber, BitmapFormat format, int width, int height)
+			{
+				var renderedImageDataSize = ((long)width * height * format.GetByteSize() * 2); // need double space because Avalonia will copy the bitmap data
+				var memoryUsageToken = session.RequestRenderedImageMemoryUsage(renderedImageDataSize);
+				if (memoryUsageToken == null)
+				{
+					session.Logger.LogError("Unable to request memory usage for image frame");
+					throw new OutOfMemoryException();
+				}
+				try
+				{
+					var bitmapBuffer = new BitmapBuffer(format, width, height);
+					return new ImageFrame(memoryUsageToken, bitmapBuffer, frameNumber);
+				}
+				catch
+				{
+					memoryUsageToken.Dispose();
+					throw;
+				}
+			}
+
+			// Bitmap buffer.
+			public readonly IBitmapBuffer BitmapBuffer;
+
+			// Dispose.
+            protected override void Dispose(bool disposing)
+            {
+				this.BitmapBuffer.Dispose();
+				this.memoryUsageToken.Dispose();
+            }
+
+			// Frame number.
+			public readonly int FrameNumber;
+        }
+
+
 		// Token of memory usage of rendered image.
 		class RenderedImageMemoryUsageToken : IDisposable
 		{
@@ -246,8 +296,7 @@ namespace Carina.PixelViewer.ViewModels
 		bool isImagePlaneOptionsResetNeeded = true;
 		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>(CompareProfiles);
-		IBitmapBuffer? renderedImageBuffer;
-		IDisposable? renderedImageMemoryUsageToken;
+		ImageFrame? renderedImageFrame;
 		double renderedImageScale = 1.0;
 		readonly ScheduledAction renderImageOperation;
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
@@ -500,8 +549,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (!disposing)
 					this.SetValue(RenderedImageProperty, null);
 				renderedImage.Dispose();
-				this.renderedImageBuffer = this.renderedImageBuffer.DisposeAndReturnNull();
-				this.renderedImageMemoryUsageToken = this.renderedImageMemoryUsageToken.DisposeAndReturnNull();
+				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 			}
 			if (Math.Abs(this.EffectiveRenderedImageRotation) > 0.1)
 			{
@@ -1410,41 +1458,6 @@ namespace Carina.PixelViewer.ViewModels
 				}
 			}
 
-			// create rendered image
-			var renderedImageDataSize = ((long)this.ImageWidth * this.ImageHeight * imageRenderer.RenderedFormat.GetByteSize() * 2); // need double space because Avalonia will copy the bitmap data
-			var memoryUsageToken = this.RequestRenderedImageMemoryUsage(renderedImageDataSize);
-			if (memoryUsageToken == null)
-			{
-				this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current rendered image first");
-				this.RenderedImage?.Let((it) =>
-				{
-					this.SetValue(RenderedImageProperty, null);
-					it.Dispose();
-					this.renderedImageBuffer = this.renderedImageBuffer.DisposeAndReturnNull();
-					this.renderedImageMemoryUsageToken = this.renderedImageMemoryUsageToken.DisposeAndReturnNull();
-				});
-				memoryUsageToken = this.RequestRenderedImageMemoryUsage(renderedImageDataSize);
-			}
-			if (memoryUsageToken == null)
-			{
-				this.Logger.LogError("Unable to request memory usage for rendered image");
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-				return;
-			}
-			IBitmapBuffer? renderedImageBuffer = null;
-			try
-			{
-				renderedImageBuffer = new BitmapBuffer(imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
-			}
-			catch (OutOfMemoryException ex)
-			{
-				this.Logger.LogError(ex, "Insufficient memory for rendered image");
-				renderedImageBuffer?.Dispose();
-				memoryUsageToken.Dispose();
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-				return;
-			}
-
 			// calculate frame count and index
 			var renderingOptions = new ImageRenderingOptions()
 			{
@@ -1472,8 +1485,49 @@ namespace Carina.PixelViewer.ViewModels
 			catch (Exception ex)
 			{
 				this.Logger.LogError(ex, $"Unable to update frame count and index of '{this.SourceFileName}'");
-				renderedImageBuffer?.Dispose();
-				memoryUsageToken.Dispose();
+				this.SetValue(HasRenderingErrorProperty, true);
+				return;
+			}
+
+			// create rendered image
+			var renderedImageFrame = (ImageFrame?)null;
+			try
+			{
+				renderedImageFrame = ImageFrame.Allocate(this, frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
+			}
+			catch (Exception ex)
+			{
+				if (ex is OutOfMemoryException)
+				{
+					this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current rendered image first");
+					this.RenderedImage?.Let((it) =>
+					{
+						this.SetValue(RenderedImageProperty, null);
+						it.Dispose();
+					});
+					this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+					try
+					{
+						renderedImageFrame = ImageFrame.Allocate(this, frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
+					}
+					catch (Exception innerEx)
+					{
+						if (innerEx is OutOfMemoryException)
+						{
+							this.Logger.LogError("Unable to request memory usage for rendered image");
+							this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+							return;
+						}
+						else
+							this.Logger.LogError(ex, "Unable to allocate rendered image");
+					}
+				}
+				else
+					this.Logger.LogError(ex, "Unable to allocate rendered image");
+			}
+			if (renderedImageFrame == null)
+			{
+				this.SetValue(HasRenderingErrorProperty, true);
 				return;
 			}
 
@@ -1493,7 +1547,7 @@ namespace Carina.PixelViewer.ViewModels
 			try
 			{
 				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
-				await imageRenderer.Render(imageDataSource, renderedImageBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
 			{
@@ -1506,7 +1560,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				try
 				{
-					histograms = await BitmapHistograms.CreateAsync(renderedImageBuffer, cancellationTokenSource.Token);
+					histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
 				}
 				catch (Exception ex)
 				{
@@ -1519,11 +1573,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
 				this.Logger.LogWarning($"Image rendering for '{sourceFileName}' has been cancelled");
-				this.SynchronizationContext.Post(() =>
-				{
-					renderedImageBuffer.Dispose();
-					memoryUsageToken.Dispose();
-				});
+				this.SynchronizationContext.Post(renderedImageFrame.Dispose);
 				if (this.hasPendingImageRendering)
 				{
 					this.Logger.LogWarning("Start next rendering");
@@ -1541,28 +1591,24 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
-				renderedImageBuffer.Dispose();
-				memoryUsageToken.Dispose();
+				renderedImageFrame.Dispose();
 			}
 			this.RenderedImage?.Let((prevRenderedImage) =>
 			{
-				var prevRenderedImageBuffer = this.renderedImageBuffer;
-				var prevMemoryUsageToken = this.renderedImageMemoryUsageToken;
+				var prevRenderedImageFrame = this.renderedImageFrame;
 				this.SynchronizationContext.Post(async () =>
 				{
 					await this.WaitForNecessaryTasksAsync();
 					prevRenderedImage.Dispose();
-					prevRenderedImageBuffer?.Dispose();
-					prevMemoryUsageToken?.Dispose();
+					prevRenderedImageFrame?.Dispose();
 				});
 			});
-			this.renderedImageMemoryUsageToken = memoryUsageToken;
-			this.renderedImageBuffer = renderedImageBuffer;
+			this.renderedImageFrame = renderedImageFrame;
 			if (exception == null)
 			{
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(HistogramsProperty, histograms);
-				this.SetValue(RenderedImageProperty, renderedImageBuffer.CreateAvaloniaBitmap());
+				this.SetValue(RenderedImageProperty, renderedImageFrame.BitmapBuffer.CreateAvaloniaBitmap());
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
@@ -1955,7 +2001,7 @@ namespace Carina.PixelViewer.ViewModels
 				return false;
 			if (!this.canSaveRenderedImage.Value)
 				return false;
-			var renderedImageBuffer = this.renderedImageBuffer;
+			var renderedImageBuffer = this.renderedImageFrame?.BitmapBuffer;
 			if (renderedImageBuffer == null)
 			{
 				this.Logger.LogError("No rendered image to save");
@@ -2095,7 +2141,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (this.IsDisposed)
 				return;
-			var renderedImageBuffer = this.renderedImageBuffer;
+			var renderedImageBuffer = this.renderedImageFrame?.BitmapBuffer;
 			if (renderedImageBuffer == null 
 				|| x < 0 || x >= renderedImageBuffer.Width
 				|| y < 0 || y >= renderedImageBuffer.Height)
