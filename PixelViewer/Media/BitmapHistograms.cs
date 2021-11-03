@@ -70,6 +70,7 @@ namespace Carina.PixelViewer.Media
                     var green = new int[256];
                     var blue = new int[256];
                     var luminance = new int[256];
+                    var rgbToLuminance = ImageProcessing.SelectRgb24ToLuminanceConversion();
                     unsafe
                     {
                         bitmapBuffer.Memory.Pin(ptr =>
@@ -89,7 +90,7 @@ namespace Carina.PixelViewer.Media
                                         var r = pixelPtr[2];
                                         var g = pixelPtr[1];
                                         var b = pixelPtr[0];
-                                        var l = (r + g + b) / 3;
+                                        var l = rgbToLuminance(r, g, b);
                                         ++redHistoram[r];
                                         ++greenHistogram[g];
                                         ++blueHistogram[b];

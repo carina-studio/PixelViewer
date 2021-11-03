@@ -223,6 +223,23 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+		// COnvert from RGB24 to Luminance based-on ITU-R BT.709.
+		static int Rgb24ToLuminanceBT709(int r, int g, int b)
+		{
+			var dR = 0.2126 * r;
+			var dG = 0.7152 * g;
+			var dB = 0.0722 * b;
+			return ClipToByte((int)(dR + dG + dB + 0.5));
+		}
+
+
+		/// <summary>
+		/// Select proper function to convert from 24-bit RGB to luminance.
+		/// </summary>
+		/// <returns>RGB to luminance conversion function.</returns>
+		public static Func<int, int, int, int> SelectRgb24ToLuminanceConversion() => Rgb24ToLuminanceBT709;
+
+
 		/// <summary>
 		/// Select proper function for YUV422 to 32-bit BGRA conversion (unsafe).
 		/// </summary>
