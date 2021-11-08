@@ -31,10 +31,10 @@
 	<ItemGroup>
 		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.30.1.1030" />
 		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="0.30.1.1030" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.21.0.1030" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.22.0.1108" />
 		<PackageReference Include="NLog" Version="4.7.12" />
 		<PackageReference Include="NUnit" Version="3.13.2" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.0.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
 	</ItemGroup>
 
