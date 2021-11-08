@@ -32,6 +32,19 @@ namespace Carina.PixelViewer.ViewModels
 	/// </summary>
 	class Session : ViewModel
 	{
+		// Activation token.
+		class ActivationToken : IDisposable
+		{
+			// Fields.
+			readonly Session session;
+
+			// Constructor.
+			public ActivationToken(Session session) => this.session = session;
+
+			// Dispose.
+			public void Dispose() => this.session.Deactivate(this);
+        }
+
 		// Frame of image.
 		class ImageFrame : BaseDisposable
 		{
@@ -185,6 +198,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> InsufficientMemoryForRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(InsufficientMemoryForRenderedImage));
 		/// <summary>
+		/// Property of <see cref="IsActivated"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsActivatedProperty = ObservableProperty.Register<Session, bool>(nameof(IsActivated));
+		/// <summary>
 		/// Property of <see cref="IsAdjustableEffectiveBits1"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits1Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits1));
@@ -276,6 +293,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Fields.
+		readonly List<ActivationToken> activationTokens = new List<ActivationToken>();
 		readonly MutableObservableBoolean canApplyProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
@@ -379,6 +397,32 @@ namespace Carina.PixelViewer.ViewModels
 			else
 				this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
 		}
+
+
+		/// <summary>
+		/// Activate session.
+		/// </summary>
+		/// <returns>Token of activation.</returns>
+		public IDisposable Activate()
+        {
+			// check state
+			this.VerifyAccess();
+			this.VerifyDisposed();
+
+			// create token
+			var token = new ActivationToken(this);
+			this.activationTokens.Add(token);
+
+			// activate
+			if (this.activationTokens.Count == 1)
+			{
+				this.Logger.LogDebug("Activate");
+				if (!this.HasRenderedImage)
+					this.renderImageOperation.Reschedule();
+				this.SetValue(IsActivatedProperty, true);
+			}
+			return token;
+        }
 
 
 		// Apply parameters defined in current profile.
@@ -506,6 +550,35 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Clear rendered image.
+		bool ClearRenderedImage()
+        {
+			// check state
+			if (this.IsActivated)
+				return false;
+
+			// cancel rendering
+			this.renderImageOperation.Cancel();
+			this.imageRenderingCancellationTokenSource?.Cancel();
+			this.imageRenderingCancellationTokenSource = null;
+
+			// clear rendered image
+			if (this.IsRenderingImage)
+				return true; // clear when rendering completed
+			var renderedImageFrame = this.renderedImageFrame;
+			if (renderedImageFrame == null)
+				return false;
+			this.RenderedImage?.Let(it =>
+			{
+				this.SetValue(RenderedImageProperty, null);
+				it.Dispose();
+			});
+			this.SetValue(HistogramsProperty, null);
+			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+			return true;
+        }
+
+
 		// Close and clear current source file.
 		void ClearSourceFile()
 		{
@@ -625,6 +698,24 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.GetValue(DataOffsetProperty);
 			set => this.SetValue(DataOffsetProperty, value);
 		}
+
+
+		// Deactivate.
+		void Deactivate(ActivationToken token)
+        {
+			// check state
+			this.VerifyAccess();
+			if (this.IsDisposed)
+				return;
+
+			// remove token
+			if (!this.activationTokens.Remove(token) || this.activationTokens.IsNotEmpty())
+				return;
+
+			// deactivate
+			this.Logger.LogDebug("Deactivate");
+			this.SetValue(IsActivatedProperty, false);
+        }
 
 
 		// Delete current profile.
@@ -911,6 +1002,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Value to indicate whether there is insufficient memory for rendered image or not.
 		/// </summary>
 		public bool InsufficientMemoryForRenderedImage { get => this.GetValue(InsufficientMemoryForRenderedImageProperty); }
+
+
+		/// <summary>
+		/// Check whether session is activated or not.
+		/// </summary>
+		public bool IsActivated { get => this.GetValue(IsActivatedProperty); }
 
 
 		/// <summary>
@@ -1260,7 +1357,10 @@ namespace Carina.PixelViewer.ViewModels
 				this.isImagePlaneOptionsResetNeeded = true;
 			}
 			this.isFirstImageRenderingForSource = true;
-			this.renderImageOperation.Reschedule();
+			if (this.IsActivated)
+				this.renderImageOperation.Reschedule();
+			else
+				this.renderImageOperation.Cancel();
 
 			// update zooming state
 			this.UpdateCanZoomInOut();
@@ -1489,52 +1589,80 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			}
 
+			// update state
+			this.canSaveRenderedImage.Update(false);
+			this.SetValue(IsRenderingImageProperty, true);
+
 			// create rendered image
 			var renderedImageFrame = (ImageFrame?)null;
-			try
+			while (true)
 			{
-				renderedImageFrame = ImageFrame.Allocate(this, frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
-			}
-			catch (Exception ex)
-			{
-				if (ex is OutOfMemoryException)
+				try
 				{
-					this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current rendered image first");
-					this.RenderedImage?.Let((it) =>
+					renderedImageFrame = ImageFrame.Allocate(this, frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
+					break;
+				}
+				catch (Exception ex)
+				{
+					if (ex is OutOfMemoryException)
 					{
-						this.SetValue(RenderedImageProperty, null);
-						it.Dispose();
-					});
-					this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-					try
-					{
-						renderedImageFrame = ImageFrame.Allocate(this, frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
-					}
-					catch (Exception innerEx)
-					{
-						if (innerEx is OutOfMemoryException)
+						if (this.RenderedImage != null)
 						{
-							this.Logger.LogError("Unable to request memory usage for rendered image");
-							this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-							return;
+							this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current rendered image");
+							this.RenderedImage?.Let((it) =>
+							{
+								this.SetValue(HistogramsProperty, null);
+								this.SetValue(RenderedImageProperty, null);
+								it.Dispose();
+							});
+							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 						}
 						else
-							this.Logger.LogError(ex, "Unable to allocate rendered image");
+						{
+							var maxMemoryUsage = 0L;
+							var sessionToClearRenderedImage = (Session?)null;
+							foreach (var candidateSession in ((Workspace)this.Owner.AsNonNull()).Sessions)
+							{
+								if (candidateSession == this || candidateSession.IsActivated)
+									continue;
+								if (candidateSession.RenderedImagesMemoryUsage > maxMemoryUsage)
+								{
+									maxMemoryUsage = candidateSession.RenderedImagesMemoryUsage;
+									sessionToClearRenderedImage = candidateSession;
+								}
+							}
+							if (sessionToClearRenderedImage != null)
+							{
+								this.Logger.LogWarning($"Unable to request memory usage for rendered image, release rendered image of {sessionToClearRenderedImage}");
+								if (sessionToClearRenderedImage.ClearRenderedImage())
+									await Task.Delay(1000);
+								else
+								{
+									this.Logger.LogError($"Failed to release rendered image of {sessionToClearRenderedImage}");
+									break;
+								}
+							}
+							else
+							{
+								this.Logger.LogWarning("No deactivated session to release rendered image");
+								break;
+							}
+						}
 					}
+					else
+						this.Logger.LogError(ex, "Unable to allocate rendered image");
 				}
-				else
-					this.Logger.LogError(ex, "Unable to allocate rendered image");
 			}
 			if (renderedImageFrame == null)
 			{
-				this.SetValue(HasRenderingErrorProperty, true);
+				this.canSaveRenderedImage.Update(this.RenderedImage != null);
+				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+				this.SetValue(IsRenderingImageProperty, false);
 				return;
 			}
 
 			// update state
-			this.canSaveRenderedImage.Update(false);
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
-			this.SetValue(IsRenderingImageProperty, true);
 
 			// cancel scheduled rendering
 			this.renderImageOperation.Cancel();
@@ -1576,8 +1704,13 @@ namespace Carina.PixelViewer.ViewModels
 				this.SynchronizationContext.Post(renderedImageFrame.Dispose);
 				if (this.hasPendingImageRendering)
 				{
-					this.Logger.LogWarning("Start next rendering");
-					this.renderImageOperation.Schedule();
+					if (this.IsActivated)
+					{
+						this.Logger.LogWarning("Start next rendering");
+						this.renderImageOperation.Schedule();
+					}
+					else
+						this.hasPendingImageRendering = false;
 				}
 				return;
 			}
@@ -1796,7 +1929,10 @@ namespace Carina.PixelViewer.ViewModels
 			// start rendering
 			this.isImageDimensionsEvaluationNeeded = false;
 			this.isImagePlaneOptionsResetNeeded = false;
-			this.renderImageOperation.Reschedule();
+			if (this.IsActivated)
+				this.renderImageOperation.Reschedule();
+			else
+				this.renderImageOperation.Cancel();
         }
 
 

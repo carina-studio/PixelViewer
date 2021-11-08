@@ -26,6 +26,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Fields.
+		IDisposable? sessionActivationToken;
 		readonly ObservableList<Session> sessions = new ObservableList<Session>();
 
 
@@ -160,6 +161,9 @@ namespace Carina.PixelViewer.ViewModels
             base.OnPropertyChanged(property, oldValue, newValue);
 			if (property == ActivatedSessionProperty)
 			{
+				// deactivate
+				this.sessionActivationToken = this.sessionActivationToken.DisposeAndReturnNull();
+
 				// check value
 				var newSession = (newValue as Session);
 				if (newSession != null && !this.sessions.Contains(newSession))
@@ -171,7 +175,10 @@ namespace Carina.PixelViewer.ViewModels
 
 				// activate
 				if (newSession != null)
+				{
 					this.Logger.LogDebug($"Activate session {newSession}");
+					this.sessionActivationToken = newSession.Activate();
+				}
 				this.InvalidateTitle();
 			}
         }
