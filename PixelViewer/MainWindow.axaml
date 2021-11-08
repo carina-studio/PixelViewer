@@ -7,6 +7,7 @@
         xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
+		Classes="Tabbed"
         Icon="/Resources/AppIcon.ico"
 		MinHeight="{DynamicResource Double/MainWindow.MinHeight}"
 		MinWidth="{DynamicResource Double/MainWindow.MinWidth}">
@@ -29,11 +30,6 @@
 			</Grid>
 		</DataTemplate>
 	</Window.DataTemplates>
-
-	<!-- Background -->
-	<Window.Background>
-		<SolidColorBrush Color="{DynamicResource Color/TabItem.Header.Background}" Opacity="{DynamicResource Double/MainWindow.Background.Opacity.SemiTransparent}"/>
-	</Window.Background>
 
 	<!-- Layout -->
 	<TabControl x:Name="tabControl" Padding="0">
