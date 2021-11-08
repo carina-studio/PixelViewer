@@ -118,7 +118,13 @@ namespace Carina.PixelViewer.Media
 			}
 
 			// call base
-			base.Dispose(disposing);
+			if (disposing)
+				base.Dispose(disposing);
+			else
+			{
+				// [Workaround] prevent NRE if disposing from finalizer caused by error in constructor
+				Global.RunWithoutError(() => base.Dispose(disposing));
+			}
 		}
 
 
