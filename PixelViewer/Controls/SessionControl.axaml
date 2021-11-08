@@ -38,14 +38,14 @@
 			<MenuItem Command="{Binding $parent[UserControl].CopyFileName}" Header="{DynamicResource String/SessionControl.CopyFileName}">
 				<MenuItem.Icon>
 					<Border Classes="MenuItem_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Copy}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Copy}"/>
 					</Border>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[UserControl].CopyFilePath}" Header="{DynamicResource String/SessionControl.CopyFilePath}">
 				<MenuItem.Icon>
 					<Border Classes="MenuItem_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Copy}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Copy}"/>
 					</Border>
 				</MenuItem.Icon>
 			</MenuItem>
@@ -53,7 +53,7 @@
 			<MenuItem Command="{Binding $parent[UserControl].ShowSourceFileInFileExplorer}" Header="{DynamicResource String/SessionControl.ShowFileInExplorer}" IsEnabled="{x:Static c:Platform.IsOpeningFileManagerSupported}">
 				<MenuItem.Icon>
 					<Border Classes="MenuItem_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FileManager}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FileManager}"/>
 					</Border>
 				</MenuItem.Icon>
 			</MenuItem>
@@ -64,14 +64,14 @@
 			<MenuItem Command="{Binding $parent[UserControl].ShowAppOptions}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
 					<Border Classes="MenuItem_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Settings}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Settings}"/>
 					</Border>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[UserControl].CheckForAppUpdate}" Header="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
 				<MenuItem.Icon>
 					<Border Classes="MenuItem_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Update}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Update}"/>
 					</Border>
 				</MenuItem.Icon>
 			</MenuItem>
@@ -93,12 +93,12 @@
 
 					<!-- Open file -->
 					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 					</Button>
 
 					<!-- Save rendered image -->
 					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveRenderedImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveRenderedImage}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Save}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Save}"/>
 					</Button>
 
 					<!-- Separator -->
@@ -107,14 +107,14 @@
 					<!-- Fit to viewport -->
 					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 						<Panel>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 
 					<!-- Zoom-out -->
 					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomOut}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomOut}"/>
 					</RepeatButton>
 
 					<!-- Zoom -->
@@ -125,7 +125,7 @@
 
 					<!-- Zoom-in -->
 					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.ZoomIn}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomIn}"/>
 					</RepeatButton>
 
 					<!-- Separator -->
@@ -133,7 +133,7 @@
 
 					<!-- Rotate-left -->
 					<Button Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.RotateLeft}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateLeft}"/>
 					</Button>
 
 					<!-- Rotation -->
@@ -144,7 +144,7 @@
 
 					<!-- Rotate-right -->
 					<Button Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.RotateRight}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateRight}"/>
 					</Button>
 
 					<!-- Separator -->
@@ -153,8 +153,8 @@
 					<!-- Histograms -->
 					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
 						<Panel>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 
@@ -163,12 +163,12 @@
 
 					<!-- First frame -->
 					<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastBackward}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastBackward}"/>
 					</Button>
 
 					<!-- Previous frame -->
 					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Backward}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Backward}"/>
 					</RepeatButton>
 
 					<!-- Frame -->
@@ -188,12 +188,12 @@
 
 					<!-- Next frame -->
 					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Forward}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Forward}"/>
 					</RepeatButton>
 
 					<!-- Last frame -->
 					<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.FastForward}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
 					</Button>
 
 				</StackPanel>
@@ -203,14 +203,14 @@
 
 					<!-- Test -->
 					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Lab}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Lab}"/>
 					</Button>
 
 					<!-- Other actions -->
 					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
 						<Panel>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 					
@@ -290,7 +290,7 @@
 					<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
 						<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
 						<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-							<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 						</Border>
 						<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
 					</StackPanel>
@@ -299,7 +299,7 @@
 				<!-- Opening file hint -->
 				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
 					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.OpenFile}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 					</Border>
 					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
 				</StackPanel>
@@ -307,7 +307,7 @@
 				<!-- Insufficient memory hint -->
 				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
 					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Warning}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Warning}"/>
 					</Border>
 					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
 				</StackPanel>
@@ -315,7 +315,7 @@
 				<!-- Rendering error -->
 				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
 					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Error}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Error}"/>
 					</Border>
 					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
 				</StackPanel>
@@ -358,7 +358,7 @@
 								<DataTemplate>
 									<StackPanel Orientation="Horizontal">
 										<Border Height="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}" Margin="{DynamicResource Thickness/SessionControl.ImageRenderingProfile.Icon.Margin}" VerticalAlignment="Center" Width="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}">
-											<DrawingPresenter Classes="Icon" Drawing="{Binding Converter={x:Static appConverters:ImageRenderingProfileIconConverter.Default}}"/>
+											<Image Classes="Icon" Source="{Binding Converter={x:Static appConverters:ImageRenderingProfileIconConverter.Default}}"/>
 										</Border>
 										<TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
 									</StackPanel>
@@ -508,11 +508,11 @@
 								<TextBlock Text="{Binding SourceFileName}" TextTrimming="CharacterEllipsis"/>
 								<TextBlock Grid.Column="1" Text="{Binding SourceFileSizeString, StringFormat={} ({0})}"/>
 								<Border Classes="StatusBar_DropDownIcon" Grid.Column="2">
-									<DrawingPresenter Classes="Icon">
-										<DrawingPresenter.Drawing>
+									<Image Classes="Icon">
+										<DrawingImage>
 											<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.MoveUp}"/>
-										</DrawingPresenter.Drawing>
-									</DrawingPresenter>
+										</DrawingImage>
+									</Image>
 								</Border>
 							</Grid>
 						</ToggleButton>
@@ -522,11 +522,11 @@
 					<!-- Source data size -->
 					<StackPanel Background="{x:Static Brushes.Transparent}" IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={}{0:N0} }"/>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/Common.Bytes}"/>
@@ -538,11 +538,11 @@
 
 						<!-- Position -->
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock">
 							<TextBlock.Text>
@@ -556,11 +556,11 @@
 						<!-- Color -->
 						<Separator Classes="StatusBar_Separator"/>
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Color}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock">
 							<TextBlock.Text>
@@ -584,11 +584,11 @@
 					<StackPanel IsVisible="{Binding IsSavingRenderedImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Save}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SavingRenderedImage}"/>
 					</StackPanel>
@@ -597,11 +597,11 @@
 					<StackPanel IsVisible="{Binding IsRenderingImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Waiting}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
 					</StackPanel>
@@ -613,11 +613,11 @@
 						<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=IsDebugMode}" Orientation="Horizontal">
 							<Separator Classes="StatusBar_Separator"/>
 							<Border Classes="StatusBar_Icon">
-								<DrawingPresenter Classes="Icon">
-									<DrawingPresenter.Drawing>
+								<Image Classes="Icon">
+									<DrawingImage>
 										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Speed}"/>
-									</DrawingPresenter.Drawing>
-								</DrawingPresenter>
+									</DrawingImage>
+								</Image>
 							</Border>
 							<Panel>
 								<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="000 ms   "/>
@@ -628,11 +628,11 @@
 						<!-- CPU usage -->
 						<Separator Classes="StatusBar_Separator"/>
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Cpu}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<Panel>
 							<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="00.0%"/>
@@ -642,11 +642,11 @@
 						<!-- Memory usage -->
 						<Separator Classes="StatusBar_Separator"/>
 						<Border Classes="StatusBar_Icon">
-							<DrawingPresenter Classes="Icon">
-								<DrawingPresenter.Drawing>
+							<Image Classes="Icon">
+								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Memory}"/>
-								</DrawingPresenter.Drawing>
-							</DrawingPresenter>
+								</DrawingImage>
+							</Image>
 						</Border>
 						<Panel>
 							<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="000.0%"/>

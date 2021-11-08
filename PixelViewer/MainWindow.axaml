@@ -16,15 +16,15 @@
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
 			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto" DragDrop.AllowDrop="True">
 				<Panel Classes="TabItem_Icon">
-					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
+					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
 					<Panel IsVisible="{Binding IsSourceFileOpened}">
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Image}" IsVisible="{Binding InsufficientMemoryForRenderedImage}"/>
-						<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Image.Active}" IsVisible="{Binding !InsufficientMemoryForRenderedImage}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image}" IsVisible="{Binding InsufficientMemoryForRenderedImage}"/>
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image.Active}" IsVisible="{Binding !InsufficientMemoryForRenderedImage}"/>
 					</Panel>
 				</Panel>
 				<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}" ToolTip.Tip="{Binding SourceFileName}"/>
 				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/MainWindow.CloseSession}">
-					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Close}"/>
+					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Close}"/>
 				</Button>
 			</Grid>
 		</DataTemplate>
@@ -42,7 +42,7 @@
 		<TabItem Classes="Empty">
 			<TabItem.Header>
 				<Border Classes="AddTabItemButton" DragDrop.AllowDrop="True" ToolTip.Tip="{DynamicResource String/MainWindow.NewSession}">
-					<DrawingPresenter Classes="Icon" Drawing="{DynamicResource Drawing/Icon.Add}"/>
+					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
 				</Border>
 			</TabItem.Header>
 		</TabItem>

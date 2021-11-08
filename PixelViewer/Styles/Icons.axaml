@@ -24,5 +24,18 @@
 	<GeometryDrawing x:Key="Drawing/Icon.ImageRenderingProfile.UserDefined" Brush="{DynamicResource Brush/Icon}" Geometry="{DynamicResource Geometry/Icon.Details}"/>
 	<GeometryDrawing x:Key="Drawing/Icon.RotateLeft" Brush="{DynamicResource Brush/Icon}" Geometry="{StaticResource Geometry/Icon.RotateLeft}"/>
 	<GeometryDrawing x:Key="Drawing/Icon.RotateRight" Brush="{DynamicResource Brush/Icon}" Geometry="{StaticResource Geometry/Icon.RotateRight}"/>
+
+	<!-- Images -->
+	<DrawingImage x:Key="Image/Icon.FitToScreen" Drawing="{StaticResource Drawing/Icon.FitToScreen}"/>
+	<DrawingImage x:Key="Image/Icon.FitToScreen.Light" Drawing="{StaticResource Drawing/Icon.FitToScreen.Light}"/>
+	<DrawingImage x:Key="Image/Icon.Histogram" Drawing="{StaticResource Drawing/Icon.Histogram}"/>
+	<DrawingImage x:Key="Image/Icon.Histogram.Light" Drawing="{StaticResource Drawing/Icon.Histogram.Light}"/>
+	<DrawingImage x:Key="Image/Icon.Image" Drawing="{StaticResource Drawing/Icon.Image}"/>
+	<DrawingImage x:Key="Image/Icon.Image.Active" Drawing="{StaticResource Drawing/Icon.Image.Active}"/>
+	<DrawingImage x:Key="Image/Icon.ImageRenderingProfile.Default" Drawing="{StaticResource Drawing/Icon.ImageRenderingProfile.Default}"/>
+	<DrawingImage x:Key="Image/Icon.ImageRenderingProfile.FileFormat" Drawing="{DynamicResource Drawing/Icon.File}"/>
+	<DrawingImage x:Key="Image/Icon.ImageRenderingProfile.UserDefined" Drawing="{DynamicResource Drawing/Icon.Details}"/>
+	<DrawingImage x:Key="Image/Icon.RotateLeft" Drawing="{StaticResource Drawing/Icon.RotateLeft}"/>
+	<DrawingImage x:Key="Image/Icon.RotateRight" Drawing="{StaticResource Drawing/Icon.RotateRight}"/>
 	
 </ResourceDictionary>
