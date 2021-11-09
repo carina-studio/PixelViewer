@@ -64,6 +64,7 @@
 	<sys:String x:Key="String/SessionControl.DataOffset">起始資料位移 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;無&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">刪除組態</sys:String>
+	<sys:String x:Key="String/SessionControl.Demosaicing">去馬賽克</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">拖拉檔案到這裡，或是點一下</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以開啟影像檔案。</sys:String>
 	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">組態 '{0}' 已經存在。</sys:String>

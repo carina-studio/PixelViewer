@@ -217,5 +217,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Offset to first byte of data provided by <see cref="IImageDataSource"/>.
 		/// </summary>
 		public long DataOffset { get; set; }
+
+
+		/// <summary>
+		/// Whether demosaicing is needed to be performed or not.
+		/// </summary>
+		public bool Demosaicing { get; set; }
 	}
 }

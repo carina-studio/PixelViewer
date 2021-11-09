@@ -38,6 +38,7 @@ namespace Carina.PixelViewer.Media.Profiles
         // Fields.
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         long dataOffset;
+        bool demosaicing = true;
         IList<int> effectiveBits = emptyEffectiveBits;
         readonly FileFormat? fileFormat;
         string? fileName;
@@ -149,6 +150,23 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Default profile.
         public static ImageRenderingProfile Default { get => defaultProfile ?? throw new InvalidOperationException("Default profile is not ready yet."); }
+
+
+        // Demosaicing
+        public bool Demosaicing
+        {
+            get => this.demosaicing;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.demosaicing == value)
+                    return;
+                this.demosaicing = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Demosaicing)));
+            }
+        }
 
 
         // Path of directory to load/save profiles.
@@ -352,6 +370,10 @@ namespace Carina.PixelViewer.Media.Profiles
                     Enum.TryParse(jsonProperty.GetString(), out profile.byteOrdering);
                 }
 
+                // get demosaicing
+                if (rootElement.TryGetProperty(nameof(Demosaicing), out jsonProperty))
+                    profile.demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
+
                 // get dimensions
                 if (rootElement.TryGetProperty(nameof(Width), out jsonProperty) && jsonProperty.TryGetInt32(out var intValue))
                     profile.width = Math.Max(1, intValue);
@@ -550,6 +572,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteNumber(nameof(FramePaddingSize), this.framePaddingSize);
                 if (format.HasMultipleByteOrderings)
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
+                jsonWriter.WriteBoolean(nameof(Demosaicing), this.demosaicing);
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);
                 jsonWriter.WritePropertyName(nameof(EffectiveBits));

@@ -72,6 +72,7 @@
 	<sys:String x:Key="String/SessionControl.DataOffset">Starting data offset (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete profile</sys:String>
+	<sys:String x:Key="String/SessionControl.Demosaicing">Demosaicing</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
 	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">Profile '{0}' is existent.</sys:String>

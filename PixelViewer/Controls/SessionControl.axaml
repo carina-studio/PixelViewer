@@ -397,6 +397,13 @@
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
+						<!-- Demisaicing -->
+						<StackPanel IsVisible="{Binding IsDemosaicingSupported}">
+							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Demosaicing}"/>
+							<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding Demosaicing, Mode=TwoWay}"/>
+							<Separator Classes="Dialog_Separator"/>
+						</StackPanel>
+
 						<!-- Dimensions -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
 						<Grid ColumnDefinitions="*,Auto,*">

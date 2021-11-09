@@ -126,6 +126,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<long> DataOffsetProperty = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
 		/// <summary>
+		/// Property of <see cref="Demosaicing"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> DemosaicingProperty = ObservableProperty.Register<Session, bool>(nameof(Demosaicing), true);
+		/// <summary>
 		/// Property of <see cref="FrameCount"/>.
 		/// </summary>
 		public static readonly ObservableProperty<int> FrameCountProperty = ObservableProperty.Register<Session, int>(nameof(FrameCount), 0);
@@ -213,6 +217,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="IsAdjustableEffectiveBits3"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
+		/// <summary>
+		/// Property of <see cref="IsDemosaicingSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsDemosaicingSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsDemosaicingSupported));
 		/// <summary>
 		/// Property of <see cref="IsHistogramsVisible"/>.
 		/// </summary>
@@ -448,6 +456,9 @@ namespace Carina.PixelViewer.ViewModels
 
 				// byte ordering
 				this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
+
+				// demosaicing
+				this.SetValue(DemosaicingProperty, profile.Demosaicing);
 
 				// dimensions
 				this.SetValue(ImageWidthProperty, profile.Width);
@@ -744,6 +755,16 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand DeleteProfileCommand { get; }
 
 
+		/// <summary>
+		/// Get or set whether demosaicing is needed to be performed or not.
+		/// </summary>
+		public bool Demosaicing
+		{
+			get => this.GetValue(DemosaicingProperty);
+			set => this.SetValue(DemosaicingProperty, value);
+		}
+
+
 		// Dispose.
 		protected override void Dispose(bool disposing)
 		{
@@ -1029,6 +1050,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether demosaicing is supported by current <see cref="ImageRenderer"/> or not.
+		/// </summary>
+		public bool IsDemosaicingSupported { get => this.GetValue(IsDemosaicingSupportedProperty); }
+
+
+		/// <summary>
 		/// Get or set whether histograms of image is visible or not
 		/// </summary>
 		public bool IsHistogramsVisible
@@ -1168,6 +1195,11 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.renderImageOperation.Reschedule(RenderImageDelay);
 			}
+			else if (property == DemosaicingProperty)
+			{
+				if (this.IsDemosaicingSupported)
+					this.renderImageOperation.Reschedule();
+			}
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (int)newValue.AsNonNull() > 1);
 			else if (property == FrameNumberProperty)
@@ -1180,7 +1212,9 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 						this.isImageDimensionsEvaluationNeeded = true;
-					this.SetValue(HasMultipleByteOrderingsProperty, ((IImageRenderer)newValue.AsNonNull()).Format.HasMultipleByteOrderings);
+					var imageRenderer = (IImageRenderer)newValue.AsNonNull();
+					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
+					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.isImagePlaneOptionsResetNeeded = true;
 					this.renderImageOperation.Reschedule();
 				}
@@ -1563,6 +1597,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
+				Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
 			};
 			var frameNumber = this.FrameNumber;
 			var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
@@ -1821,6 +1856,7 @@ namespace Carina.PixelViewer.ViewModels
 			var dataOffset = 0L;
 			var framePaddingSize = 0L;
 			var byteOrdering = ByteOrdering.BigEndian;
+			var demosaicing = true;
 			var width = 1;
 			var height = 1;
 			var effectiveBits = new int[this.effectiveBits.Length];
@@ -1832,6 +1868,8 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetInt64(out framePaddingSize);
 			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty))
 				Enum.TryParse(jsonProperty.GetString(), out byteOrdering);
+			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
+				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
 				jsonProperty.TryGetInt32(out width);
 			if (savedState.TryGetProperty(nameof(ImageHeight), out jsonProperty))
@@ -1908,6 +1946,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(DataOffsetProperty, dataOffset);
 			this.SetValue(FramePaddingSizeProperty, framePaddingSize);
 			this.SetValue(ByteOrderingProperty, byteOrdering);
+			this.SetValue(DemosaicingProperty, demosaicing);
 			this.SetValue(ImageWidthProperty, width);
 			this.SetValue(ImageHeightProperty, height);
 			for (var i = effectiveBits.Length - 1; i >= 0; --i)
@@ -2214,6 +2253,7 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteNumber(nameof(DataOffset), this.DataOffset);
 				writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 				writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
+				writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
 				writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
 				writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
 				writer.WritePropertyName("EffectiveBits");
@@ -2416,6 +2456,7 @@ namespace Carina.PixelViewer.ViewModels
 			profile.DataOffset = this.DataOffset;
 			profile.FramePaddingSize = this.FramePaddingSize;
 			profile.ByteOrdering = this.ByteOrdering;
+			profile.Demosaicing = this.Demosaicing;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
 			profile.EffectiveBits = this.effectiveBits;

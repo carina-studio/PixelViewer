@@ -68,11 +68,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
+				// render to 8-bit R/G/B
+				var bitmapRowPtr = (byte*)bitmapBaseAddress;
+				var bitmapRowStride = bitmapBuffer.RowBytes;
 				byte[] row = new byte[rowStride];
 				fixed (byte* rowPtr = row)
 				{
-					var bitmapRowPtr = (byte*)bitmapBaseAddress;
-					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapBuffer.RowBytes)
+					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 					{
 						imageStream.Read(row, 0, rowStride);
 						var pixelPtr = rowPtr;
@@ -86,6 +88,110 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							break;
 						if (y < height - 1)
 							Array.Clear(row, 0, rowStride);
+					}
+				}
+
+				// demosaic
+				if (cancellationToken.IsCancellationRequested || !renderingOptions.Demosaicing)
+					return;
+				bitmapRowPtr = (byte*)bitmapBaseAddress;
+				var accumColors = new int[3];
+				var colorCounts = new int[3];
+				for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
+				{
+					var bitmapPixelPtr = bitmapRowPtr;
+					var leftBitmapPixelPtr = (byte*)null;
+					var rightBitmapPixelPtr = (bitmapPixelPtr + 4);
+					var topBitmapPixelPtr = (bitmapPixelPtr - bitmapRowStride);
+					var bottomBitmapPixelPtr = (bitmapPixelPtr + bitmapRowStride);
+					for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4, topBitmapPixelPtr += 4, bottomBitmapPixelPtr += 4)
+					{
+						// get component at current pixel
+						var centerComponent = (int)this.SelectColorComponent(x, y);
+
+						// collect colors around current pixel (3x3)
+						var neighborComponent = 0;
+						if (x > 0)
+						{
+							neighborComponent = (int)this.SelectColorComponent(x - 1, y);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += (leftBitmapPixelPtr)[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+						}
+						if (x < width - 1)
+						{
+							neighborComponent = (int)this.SelectColorComponent(x + 1, y);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += (rightBitmapPixelPtr)[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+						}
+						if (y > 0)
+						{
+							neighborComponent = (int)this.SelectColorComponent(x, y - 1);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += (topBitmapPixelPtr)[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+							if (x > 0)
+							{
+								neighborComponent = (int)this.SelectColorComponent(x - 1, y - 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (topBitmapPixelPtr - 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+							if (x < width - 1)
+							{
+								neighborComponent = (int)this.SelectColorComponent(x + 1, y - 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (topBitmapPixelPtr + 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+						}
+						if (y < height - 1)
+						{
+							neighborComponent = (int)this.SelectColorComponent(x, y + 1);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += (bottomBitmapPixelPtr)[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+							if (x > 0)
+							{
+								neighborComponent = (int)this.SelectColorComponent(x - 1, y + 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (bottomBitmapPixelPtr - 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+							if (x < width - 1)
+							{
+								neighborComponent = (int)this.SelectColorComponent(x + 1, y + 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (bottomBitmapPixelPtr + 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+						}
+
+						// combine to full RGB color
+						for (var i = 2; i >= 0; --i)
+						{
+							if (i != centerComponent)
+								bitmapPixelPtr[i] = ImageProcessing.ClipToByte(accumColors[i] / colorCounts[i]);
+							accumColors[i] = 0;
+							colorCounts[i] = 0;
+						}
 					}
 				}
 			});
