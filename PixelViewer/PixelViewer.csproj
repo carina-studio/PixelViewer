@@ -39,6 +39,10 @@
 		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
 		<DefineConstants>MSSTORE</DefineConstants>
 	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="ChangeList-zh-TW.json" />
+	  <None Remove="ChangeList.json" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia" Version="0.10.10" />
@@ -90,6 +94,11 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>$(AssemblyName).Test</_Parameter1>
 		</AssemblyAttribute>
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <EmbeddedResource Include="ChangeList-zh-TW.json" />
+	  <EmbeddedResource Include="ChangeList.json" />
 	</ItemGroup>
 	
 </Project>
