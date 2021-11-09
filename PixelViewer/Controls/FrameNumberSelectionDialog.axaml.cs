@@ -19,8 +19,8 @@ namespace Carina.PixelViewer.Controls
     partial class FrameNumberSelectionDialog : InputDialog
     {
         // Static fields.
-        static readonly AvaloniaProperty<int> FrameCountProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, int>(nameof(FrameCount), 1);
-        static readonly AvaloniaProperty<int> InitialFrameNumberProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, int>(nameof(InitialFrameNumber), 1);
+        static readonly AvaloniaProperty<long> FrameCountProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(FrameCount), 1);
+        static readonly AvaloniaProperty<long> InitialFrameNumberProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(InitialFrameNumber), 1);
 
 
         // Fields.
@@ -40,10 +40,10 @@ namespace Carina.PixelViewer.Controls
 
 
         // Number of frames.
-        public int FrameCount
+        public long FrameCount
         {
-            get => this.GetValue<int>(FrameCountProperty);
-            set => this.SetValue<int>(FrameCountProperty, value);
+            get => this.GetValue<long>(FrameCountProperty);
+            set => this.SetValue<long>(FrameCountProperty, value);
         }
 
 
@@ -52,10 +52,10 @@ namespace Carina.PixelViewer.Controls
 
 
         // Initial frame number.
-        public int InitialFrameNumber
+        public long InitialFrameNumber
         {
-            get => this.GetValue<int>(InitialFrameNumberProperty);
-            set => this.SetValue<int>(InitialFrameNumberProperty, value);
+            get => this.GetValue<long>(InitialFrameNumberProperty);
+            set => this.SetValue<long>(InitialFrameNumberProperty, value);
         }
 
 

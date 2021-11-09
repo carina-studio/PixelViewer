@@ -52,14 +52,14 @@ namespace Carina.PixelViewer.ViewModels
 			readonly IDisposable memoryUsageToken;
 
 			// Constructor
-			ImageFrame(IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, int frameNumber)
+			ImageFrame(IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, long frameNumber)
 			{
 				this.BitmapBuffer = bitmapBuffer;
 				this.FrameNumber = frameNumber;
 				this.memoryUsageToken = memoryUsageToken;
 			}
 
-			public static ImageFrame Allocate(Session session, int frameNumber, BitmapFormat format, int width, int height)
+			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, int width, int height)
 			{
 				var renderedImageDataSize = ((long)width * height * format.GetByteSize() * 2); // need double space because Avalonia will copy the bitmap data
 				var memoryUsageToken = session.RequestRenderedImageMemoryUsage(renderedImageDataSize);
@@ -91,7 +91,7 @@ namespace Carina.PixelViewer.ViewModels
             }
 
 			// Frame number.
-			public readonly int FrameNumber;
+			public readonly long FrameNumber;
         }
 
 
@@ -132,11 +132,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="FrameCount"/>.
 		/// </summary>
-		public static readonly ObservableProperty<int> FrameCountProperty = ObservableProperty.Register<Session, int>(nameof(FrameCount), 0);
+		public static readonly ObservableProperty<long> FrameCountProperty = ObservableProperty.Register<Session, long>(nameof(FrameCount), 0);
 		/// <summary>
 		/// Property of <see cref="FrameNumber"/>.
 		/// </summary>
-		public static readonly ObservableProperty<int> FrameNumberProperty = ObservableProperty.Register<Session, int>(nameof(FrameNumber), 0);
+		public static readonly ObservableProperty<long> FrameNumberProperty = ObservableProperty.Register<Session, long>(nameof(FrameNumber), 0);
 		/// <summary>
 		/// Property of <see cref="FramePaddingSize"/>.
 		/// </summary>
@@ -881,13 +881,13 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get number of frames in source file.
 		/// </summary>
-		public int FrameCount { get => this.GetValue(FrameCountProperty); }
+		public long FrameCount { get => this.GetValue(FrameCountProperty); }
 
 
 		/// <summary>
 		/// Get of set index of frame to render.
 		/// </summary>
-		public int FrameNumber
+		public long FrameNumber
 		{
 			get => this.GetValue(FrameNumberProperty);
 			set => this.SetValue(FrameNumberProperty, value);
@@ -1201,7 +1201,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.renderImageOperation.Reschedule();
 			}
 			else if (property == FrameCountProperty)
-				this.SetValue(HasMultipleFramesProperty, (int)newValue.AsNonNull() > 1);
+				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
 			else if (property == FrameNumberProperty)
 				this.renderImageOperation.Reschedule();
 			else if (property == HistogramsProperty)
@@ -1604,7 +1604,7 @@ namespace Carina.PixelViewer.ViewModels
 			try
 			{
 				var totalDataSize = imageDataSource.Size - this.DataOffset;
-				var frameCount = (int)Math.Max(1, totalDataSize / frameDataSize);
+				var frameCount = Math.Max(1, totalDataSize / frameDataSize);
 				if (frameNumber < 1)
 				{
 					frameNumber = 1;
@@ -1913,14 +1913,14 @@ namespace Carina.PixelViewer.ViewModels
 
 			// load displaying parameters
 			var fitToViewport = true;
-			var frameNumber = 1;
+			var frameNumber = 1L;
 			var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
 			var rotation = 0;
 			var scale = 1.0;
 			if (savedState.TryGetProperty(nameof(FitRenderedImageToViewport), out jsonProperty))
 				fitToViewport = jsonProperty.ValueKind != JsonValueKind.False;
-			if (savedState.TryGetProperty(nameof(FrameNumber), out jsonProperty))
-				jsonProperty.TryGetInt32(out frameNumber);
+			if (savedState.TryGetProperty(nameof(FrameNumber), out jsonProperty) && jsonProperty.TryGetInt64(out frameNumber))
+				frameNumber = Math.Max(1, frameNumber);
 			if (savedState.TryGetProperty(nameof(EffectiveRenderedImageRotation), out jsonProperty))
 				jsonProperty.TryGetInt32(out rotation);
 			if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
