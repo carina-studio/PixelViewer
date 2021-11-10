@@ -55,6 +55,20 @@ namespace Carina.PixelViewer.Media
 		public delegate void Yuv444ToBgra64Unsafe(int y, int u, int v, long* bgra);
 
 
+		/// <summary>
+		/// Whether system uses Big-Endian or not.
+		/// </summary>
+		public static readonly bool IsBigEndian = CarinaStudio.Global.Run(() =>
+		{
+			var n = 1;
+			return ((*((byte*)&n) & 1) == 0);
+		});
+		/// <summary>
+		/// Whether system uses Little-Endian or not.
+		/// </summary>
+		public static readonly bool IsLittleEndian = !IsBigEndian;
+
+
 		// Static fields.
 		static readonly ILogger logger = App.Current.LoggerFactory.CreateLogger(nameof(ImageProcessing));
 
@@ -82,6 +96,22 @@ namespace Carina.PixelViewer.Media
 		/// <returns>Clipped number.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ushort ClipToUInt16(double value)
+		{
+			if (value < 0)
+				return 0;
+			if (value > 65535)
+				return 65535;
+			return (ushort)value;
+		}
+
+
+		/// <summary>
+		/// Clip given number to the range of <see cref="ushort"/>.
+		/// </summary>
+		/// <param name="value">Given number.</param>
+		/// <returns>Clipped number.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ushort ClipToUInt16(long value)
 		{
 			if (value < 0)
 				return 0;
@@ -223,37 +253,71 @@ namespace Carina.PixelViewer.Media
 		}
 
 
-		// Pack B/G/R/A to 32-bit BGRA.
-		static uint PackBgra32BE(byte b, byte g, byte r, byte a) =>
+		/// <summary>
+		/// Pack B/G/R/A to 32-bit BGRA for Big-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint PackBgra32BE(byte b, byte g, byte r, byte a) =>
 			(uint)((b << 24) | (g << 16) | (r << 8) | a);
-		static uint PackBgra32LE(byte b, byte g, byte r, byte a) =>
+
+
+		/// <summary>
+		/// Pack B/G/R/A to 32-bit BGRA for Little-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint PackBgra32LE(byte b, byte g, byte r, byte a) =>
 			(uint)((a << 24) | (r << 16) | (g << 8) | b);
 
 
-		// Pack B/G/R/A to 64-bit BGRA.
-		static ulong PackBgra64BE(ushort b, ushort g, ushort r, ushort a) =>
+		/// <summary>
+		/// Pack B/G/R/A to 62-bit BGRA for Big-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong PackBgra64BE(ushort b, ushort g, ushort r, ushort a) =>
 			((ulong)b << 48) | ((ulong)g << 32) | ((ulong)r << 16) | a;
-		static ulong PackBgra64LE(ushort b, ushort g, ushort r, ushort a) =>
+
+
+		/// <summary>
+		/// Pack B/G/R/A to 62-bit BGRA for Little-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong PackBgra64LE(ushort b, ushort g, ushort r, ushort a) =>
 			((ulong)a << 48) | ((ulong)r << 32) | ((ulong)g << 16) | b;
 
 
 		// Convert from RGB24 to Luminance based-on ITU-R BT.709.
 		static byte Rgb24ToLuminanceBT709(int r, int g, int b)
 		{
-			var dR = 0.2126 * r;
-			var dG = 0.7152 * g;
-			var dB = 0.0722 * b;
-			return ClipToByte((int)(dR + dG + dB + 0.5));
+			// L = 0.2126 R + 0.7152 G + 0.0722 B
+			return ClipToByte((13933 * r + 46871 * g + 4732 * b) >> 16);
 		}
 
 
 		// Convert from RGB48 to Luminance based-on ITU-R BT.709.
 		static ushort Rgb48ToLuminanceBT709(int r, int g, int b)
 		{
-			var dR = 0.2126 * r;
-			var dG = 0.7152 * g;
-			var dB = 0.0722 * b;
-			return ClipToUInt16((int)(dR + dG + dB + 0.5));
+			// L = 0.2126 R + 0.7152 G + 0.0722 B
+			return ClipToUInt16((13933L * r + 46871L * g + 4732L * b) >> 16);
 		}
 
 
@@ -263,8 +327,7 @@ namespace Carina.PixelViewer.Media
 		/// <returns>Pointer to packing function.</returns>
 		public static delegate*<byte, byte, byte, byte, uint> SelectBgra32Packing()
         {
-			var n = 1;
-			if (*((byte*)&n) == 1)
+			if (IsLittleEndian)
 				return &PackBgra32LE;
 			return &PackBgra32BE;
         }
@@ -276,8 +339,7 @@ namespace Carina.PixelViewer.Media
 		/// <returns>Pointer to unpacking function.</returns>
 		public static delegate*<uint, byte*, byte*, byte*, byte*, void> SelectBgra32Unpacking()
 		{
-			var n = 1;
-			if (*((byte*)&n) == 1)
+			if (IsLittleEndian)
 				return &UnpackBgra32LE;
 			return &UnpackBgra32BE;
 		}
@@ -289,8 +351,7 @@ namespace Carina.PixelViewer.Media
 		/// <returns>Pointer to packing function.</returns>
 		public static delegate*<ushort, ushort, ushort, ushort, ulong> SelectBgra64Packing()
 		{
-			var n = 1;
-			if (*((byte*)&n) == 1)
+			if (IsLittleEndian)
 				return &PackBgra64LE;
 			return &PackBgra64BE;
 		}
@@ -302,8 +363,7 @@ namespace Carina.PixelViewer.Media
 		/// <returns>Pointer to unpacking function.</returns>
 		public static delegate*<ulong, ushort*, ushort*, ushort*, ushort*, void> SelectBgra64Unpacking()
 		{
-			var n = 1;
-			if (*((byte*)&n) == 1)
+			if (IsLittleEndian)
 				return &UnpackBgra64LE;
 			return &UnpackBgra64BE;
 		}
@@ -367,15 +427,34 @@ namespace Carina.PixelViewer.Media
 		};
 
 
-		// Unpack 32-bit integer into B/G/R/A.
-		static void UnpackBgra32BE(uint bgra, byte* b, byte* g, byte* r, byte* a)
+		/// <summary>
+		/// Unpack 32-bit integer into B/G/R/A for Big-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked B.</param>
+		/// <param name="g">Unpacked G.</param>
+		/// <param name="r">Unpacked R.</param>
+		/// <param name="a">Unpacked A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackBgra32BE(uint bgra, byte* b, byte* g, byte* r, byte* a)
 		{
 			*b = (byte)(bgra >> 24);
 			*g = (byte)((bgra >> 16) & 0xff);
 			*r = (byte)((bgra >> 8) & 0xff);
 			*a = (byte)(bgra & 0xff);
 		}
-		static void UnpackBgra32LE(uint bgra, byte* b, byte* g, byte* r, byte* a)
+
+
+		/// <summary>
+		/// Unpack 32-bit integer into B/G/R/A for Little-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked B.</param>
+		/// <param name="g">Unpacked G.</param>
+		/// <param name="r">Unpacked R.</param>
+		/// <param name="a">Unpacked A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackBgra32LE(uint bgra, byte* b, byte* g, byte* r, byte* a)
 		{
 			*a = (byte)(bgra >> 24);
 			*r = (byte)((bgra >> 16) & 0xff);
@@ -384,15 +463,34 @@ namespace Carina.PixelViewer.Media
 		}
 
 
-		// Unpack 64-bit integer into B/G/R/A.
-		static void UnpackBgra64BE(ulong bgra, ushort* b, ushort* g, ushort* r, ushort* a)
+		/// <summary>
+		/// Unpack 64-bit integer into B/G/R/A for Big-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked B.</param>
+		/// <param name="g">Unpacked G.</param>
+		/// <param name="r">Unpacked R.</param>
+		/// <param name="a">Unpacked A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackBgra64BE(ulong bgra, ushort* b, ushort* g, ushort* r, ushort* a)
 		{
 			*b = (ushort)(bgra >> 48);
 			*g = (ushort)((bgra >> 32) & 0xffff);
 			*r = (ushort)((bgra >> 16) & 0xffff);
 			*a = (ushort)(bgra & 0xffff);
 		}
-		static void UnpackBgra64LE(ulong bgra, ushort* b, ushort* g, ushort* r, ushort* a)
+
+
+		/// <summary>
+		/// Unpack 64-bit integer into B/G/R/A for Little-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked B.</param>
+		/// <param name="g">Unpacked G.</param>
+		/// <param name="r">Unpacked R.</param>
+		/// <param name="a">Unpacked A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackBgra64LE(ulong bgra, ushort* b, ushort* g, ushort* r, ushort* a)
 		{
 			*a = (ushort)(bgra >> 48);
 			*r = (ushort)((bgra >> 32) & 0xffff);
