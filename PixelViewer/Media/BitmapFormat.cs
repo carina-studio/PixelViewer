@@ -8,9 +8,13 @@ namespace Carina.PixelViewer.Media
 	enum BitmapFormat
 	{
 		/// <summary>
-		/// 32-bits BGRA.
+		/// 32-bit BGRA.
 		/// </summary>
 		Bgra32,
+		/// <summary>
+		/// 64-bit BGRA.
+		/// </summary>
+		Bgra64,
 	}
 
 

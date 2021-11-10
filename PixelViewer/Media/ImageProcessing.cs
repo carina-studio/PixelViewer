@@ -223,8 +223,22 @@ namespace Carina.PixelViewer.Media
 		}
 
 
-		// COnvert from RGB24 to Luminance based-on ITU-R BT.709.
-		static int Rgb24ToLuminanceBT709(int r, int g, int b)
+		// Pack B/G/R/A to 32-bit BGRA.
+		static uint PackBgra32BE(byte b, byte g, byte r, byte a) =>
+			(uint)((b << 24) | (g << 16) | (r << 8) | a);
+		static uint PackBgra32LE(byte b, byte g, byte r, byte a) =>
+			(uint)((a << 24) | (r << 16) | (g << 8) | b);
+
+
+		// Pack B/G/R/A to 64-bit BGRA.
+		static ulong PackBgra64BE(ushort b, ushort g, ushort r, ushort a) =>
+			((ulong)b << 48) | ((ulong)g << 32) | ((ulong)r << 16) | a;
+		static ulong PackBgra64LE(ushort b, ushort g, ushort r, ushort a) =>
+			((ulong)a << 48) | ((ulong)r << 32) | ((ulong)g << 16) | b;
+
+
+		// Convert from RGB24 to Luminance based-on ITU-R BT.709.
+		static byte Rgb24ToLuminanceBT709(int r, int g, int b)
 		{
 			var dR = 0.2126 * r;
 			var dG = 0.7152 * g;
@@ -233,11 +247,80 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+		// Convert from RGB48 to Luminance based-on ITU-R BT.709.
+		static ushort Rgb48ToLuminanceBT709(int r, int g, int b)
+		{
+			var dR = 0.2126 * r;
+			var dG = 0.7152 * g;
+			var dB = 0.0722 * b;
+			return ClipToUInt16((int)(dR + dG + dB + 0.5));
+		}
+
+
 		/// <summary>
-		/// Select proper function to convert from 24-bit RGB to luminance.
+		/// Select property function to pack B/G/R/A into 32-bit integer.
+		/// </summary>
+		/// <returns>Pointer to packing function.</returns>
+		public static delegate*<byte, byte, byte, byte, uint> SelectBgra32Packing()
+        {
+			var n = 1;
+			if (*((byte*)&n) == 1)
+				return &PackBgra32LE;
+			return &PackBgra32BE;
+        }
+
+
+		/// <summary>
+		/// Select property function to unpack 32-bit integer into B/G/R/A.
+		/// </summary>
+		/// <returns>Pointer to unpacking function.</returns>
+		public static delegate*<uint, byte*, byte*, byte*, byte*, void> SelectBgra32Unpacking()
+		{
+			var n = 1;
+			if (*((byte*)&n) == 1)
+				return &UnpackBgra32LE;
+			return &UnpackBgra32BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to pack B/G/R/A into 64-bit integer.
+		/// </summary>
+		/// <returns>Pointer to packing function.</returns>
+		public static delegate*<ushort, ushort, ushort, ushort, ulong> SelectBgra64Packing()
+		{
+			var n = 1;
+			if (*((byte*)&n) == 1)
+				return &PackBgra64LE;
+			return &PackBgra64BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to unpack 64-bit integer into B/G/R/A.
+		/// </summary>
+		/// <returns>Pointer to unpacking function.</returns>
+		public static delegate*<ulong, ushort*, ushort*, ushort*, ushort*, void> SelectBgra64Unpacking()
+		{
+			var n = 1;
+			if (*((byte*)&n) == 1)
+				return &UnpackBgra64LE;
+			return &UnpackBgra64BE;
+		}
+
+
+		/// <summary>
+		/// Select proper function to convert from 24-bit RGB to 8-bit luminance.
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>
-		public static Func<int, int, int, int> SelectRgb24ToLuminanceConversion() => Rgb24ToLuminanceBT709;
+		public static Func<int, int, int, byte> SelectRgb24ToLuminanceConversion() => Rgb24ToLuminanceBT709;
+
+
+		/// <summary>
+		/// Select proper function to convert from 48-bit RGB to 16-bit luminance.
+		/// </summary>
+		/// <returns>RGB to luminance conversion function.</returns>
+		public static Func<int, int, int, ushort> SelectRgb48ToLuminanceConversion() => Rgb48ToLuminanceBT709;
 
 
 		/// <summary>
@@ -282,6 +365,40 @@ namespace Carina.PixelViewer.Media
 			YuvConversionMode.ITU_R => Yuv444ToBgra64UnsafeITUR,
 			_ => Yuv444ToBgra64UnsafeNTSC,
 		};
+
+
+		// Unpack 32-bit integer into B/G/R/A.
+		static void UnpackBgra32BE(uint bgra, byte* b, byte* g, byte* r, byte* a)
+		{
+			*b = (byte)(bgra >> 24);
+			*g = (byte)((bgra >> 16) & 0xff);
+			*r = (byte)((bgra >> 8) & 0xff);
+			*a = (byte)(bgra & 0xff);
+		}
+		static void UnpackBgra32LE(uint bgra, byte* b, byte* g, byte* r, byte* a)
+		{
+			*a = (byte)(bgra >> 24);
+			*r = (byte)((bgra >> 16) & 0xff);
+			*g = (byte)((bgra >> 8) & 0xff);
+			*b = (byte)(bgra & 0xff);
+		}
+
+
+		// Unpack 64-bit integer into B/G/R/A.
+		static void UnpackBgra64BE(ulong bgra, ushort* b, ushort* g, ushort* r, ushort* a)
+		{
+			*b = (ushort)(bgra >> 48);
+			*g = (ushort)((bgra >> 32) & 0xffff);
+			*r = (ushort)((bgra >> 16) & 0xffff);
+			*a = (ushort)(bgra & 0xffff);
+		}
+		static void UnpackBgra64LE(ulong bgra, ushort* b, ushort* g, ushort* r, ushort* a)
+		{
+			*a = (ushort)(bgra >> 48);
+			*r = (ushort)((bgra >> 32) & 0xffff);
+			*g = (ushort)((bgra >> 16) & 0xffff);
+			*b = (ushort)(bgra & 0xffff);
+		}
 
 
 		/// <summary>
