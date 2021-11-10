@@ -3,6 +3,7 @@ using CarinaStudio.IO;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,7 +97,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					if (renderingOptions.DataOffset > 0)
 						stream.Seek(renderingOptions.DataOffset, SeekOrigin.Begin);
+					var stopWatch = App.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
+					stopWatch?.Start();
 					this.OnRender(sharedSource, stream, sharedBitmapBuffer, renderingOptions, planeOptions, cancellationToken);
+					stopWatch?.Let(it => this.Logger.LogTrace($"Rendering time: {it.ElapsedMilliseconds} ms"));
 				});
 			}
 			finally

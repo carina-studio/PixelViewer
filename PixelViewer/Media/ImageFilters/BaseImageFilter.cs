@@ -1,4 +1,7 @@
-﻿using System;
+﻿using CarinaStudio;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,6 +12,15 @@ namespace Carina.PixelViewer.Media.ImageFilters
     /// </summary>
     abstract class BaseImageFilter<TParams> : IImageFilter<TParams> where TParams : ImageFilterParams
     {
+        /// <summary>
+		/// Initialize new <see cref="BaseImageFilter{TParams}"/> instance.
+		/// </summary>
+		protected BaseImageFilter()
+        {
+            this.Logger = App.Current.LoggerFactory.CreateLogger(this.GetType().Name);
+        }
+
+
         /// <inheritdoc/>
         public async Task ApplyFilterAsync(IBitmapBuffer source, IBitmapBuffer result, TParams parameters, CancellationToken cancellationToken)
         {
@@ -26,7 +38,13 @@ namespace Carina.PixelViewer.Media.ImageFilters
             using var sharedResult = result.Share();
             try
             {
-                await Task.Run(() => this.OnApplyFilter(sharedSource, sharedResult, parameters, cancellationToken));
+                await Task.Run(() =>
+                {
+                    var stopWatch = App.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
+                    stopWatch?.Start();
+                    this.OnApplyFilter(sharedSource, sharedResult, parameters, cancellationToken);
+                    stopWatch?.Let(it => this.Logger.LogTrace($"Filtering time: {it.ElapsedMilliseconds} ms"));
+                });
             }
             catch (Exception ex)
             {
@@ -36,6 +54,12 @@ namespace Carina.PixelViewer.Media.ImageFilters
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
         }
+
+
+        /// <summary>
+		/// Logger.
+		/// </summary>
+		protected ILogger Logger { get; }
 
 
         /// <summary>
