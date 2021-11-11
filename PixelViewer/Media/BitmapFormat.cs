@@ -40,6 +40,7 @@ namespace Carina.PixelViewer.Media
 		public static int GetByteSize(this BitmapFormat format) => format switch
 		{
 			BitmapFormat.Bgra32 => 4,
+			BitmapFormat.Bgra64 => 8,
 			_ => throw new ArgumentException($"Unknown format: {format}"),
 		};
 

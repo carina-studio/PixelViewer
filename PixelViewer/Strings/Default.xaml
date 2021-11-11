@@ -78,8 +78,10 @@
 	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">Profile '{0}' is existent.</sys:String>
 	<sys:String x:Key="String/SessionControl.EffectiveBits">Effective bits</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
+	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">Applying filters…</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding between frames (bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.GrayscaleFilter">Grayscale filter</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Luminance">Luminance</sys:String>

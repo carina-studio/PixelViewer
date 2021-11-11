@@ -64,7 +64,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, int width, int height)
 			{
-				var renderedImageDataSize = ((long)width * height * format.GetByteSize() * 2); // need double space because Avalonia will copy the bitmap data
+				var renderedImageDataSize = ((long)width * height * format.GetByteSize()); // no need to reserve for Avalonia bitmap
 				var memoryUsageToken = session.RequestRenderedImageMemoryUsage(renderedImageDataSize);
 				if (memoryUsageToken == null)
 				{
@@ -95,6 +95,9 @@ namespace Carina.PixelViewer.ViewModels
 				else
 					this.session.SynchronizationContext.Post(this.memoryUsageToken.Dispose);
 			}
+
+			// Histograms.
+			public BitmapHistograms? Histograms { get; set; }
 
 			// Frame number.
 			public readonly long FrameNumber;
@@ -236,6 +239,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsFilteringRenderedImageNeededProperty = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImageNeeded));
 		/// <summary>
+		/// Property of <see cref="IsGrayscaleFilterEnabled"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsGrayscaleFilterEnabledProperty = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterEnabled));
+		/// <summary>
+		/// Property of <see cref="IsGrayscaleFilterSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsGrayscaleFilterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterSupported));
+		/// <summary>
 		/// Property of <see cref="IsHistogramsVisible"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
@@ -345,6 +356,8 @@ namespace Carina.PixelViewer.ViewModels
 		readonly ScheduledAction renderImageAction;
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly IDisposable sharedRenderedImagesMemoryUsageObserverToken;
+		readonly ScheduledAction updateFilterSupportingAction;
+		readonly ScheduledAction updateIsFilteringImageNeededAction;
 		readonly ScheduledAction updateIsProcessingImageAction;
 
 
@@ -395,6 +408,20 @@ namespace Carina.PixelViewer.ViewModels
 					this.FilterImage(this.renderedImageFrame);
 			});
 			this.renderImageAction = new ScheduledAction(this.RenderImage);
+			this.updateFilterSupportingAction = new ScheduledAction(() =>
+			{
+				if (this.IsDisposed)
+					return;
+				if (!this.IsSourceFileOpened)
+				{
+					this.SetValue(IsGrayscaleFilterSupportedProperty, false);
+				}
+				else
+				{
+					var format = this.ImageRenderer.Format;
+					this.SetValue(IsGrayscaleFilterSupportedProperty, format.Category != ImageFormatCategory.Luminance);
+				}
+			});
 			this.updateIsProcessingImageAction = new ScheduledAction(() =>
 			{
 				if (this.IsDisposed)
@@ -403,6 +430,12 @@ namespace Carina.PixelViewer.ViewModels
 					|| this.IsOpeningSourceFile 
 					|| this.IsRenderingImage 
 					|| this.IsSavingRenderedImage);
+			});
+			this.updateIsFilteringImageNeededAction = new ScheduledAction(() =>
+			{
+				if (this.IsDisposed)
+					return;
+				this.SetValue(IsFilteringRenderedImageNeededProperty, this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported);
 			});
 
 			// setup rendered images memory usage
@@ -699,18 +732,11 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
-		// Clear rendered image.
-		bool ClearRenderedImage(bool checkActivation)
+		// Clear filtered image.
+		bool ClearFilteredImage()
         {
-			// check state
-			if (this.IsActivated && checkActivation)
-				return false;
-
 			// cancel filtering
 			this.CancelFilteringImage(true);
-
-			// cancel rendering
-			this.CancelRenderingImage(true);
 
 			// clear images
 			if (!this.IsFilteringRenderedImage && this.filteredImageFrame != null)
@@ -719,6 +745,24 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(RenderedImageProperty, null);
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			}
+			return true;
+		}
+
+
+		// Clear rendered image.
+		bool ClearRenderedImage(bool checkActivation)
+        {
+			// check state
+			if (this.IsActivated && checkActivation)
+				return false;
+
+			// clear filtered image
+			this.ClearFilteredImage();
+
+			// cancel rendering
+			this.CancelRenderingImage(true);
+
+			// clear images
 			if (!this.IsRenderingImage && this.renderedImageFrame != null)
 			{
 				this.SetValue(HistogramsProperty, null);
@@ -1008,6 +1052,7 @@ namespace Carina.PixelViewer.ViewModels
 			// prepare
 			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 			this.imageFilteringCancellationTokenSource = cancellationTokenSource;
+			this.canSaveRenderedImage.Update(false);
 			this.SetValue(IsFilteringRenderedImageProperty, true);
 
 			// setup swap function
@@ -1027,6 +1072,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.imageFilteringCancellationTokenSource = null;
 					this.SetValue(IsFilteringRenderedImageProperty, false);
 					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					this.ReportRenderedImage();
 				}
 				else if (this.hasPendingImageFiltering)
 				{
@@ -1036,7 +1082,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			}
 			var filteredImageFrame2 = (ImageFrame?)null;
-			if (true)
+			if (false)
 			{
 				filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
 				if (filteredImageFrame2 == null)
@@ -1046,6 +1092,7 @@ namespace Carina.PixelViewer.ViewModels
 						this.imageFilteringCancellationTokenSource = null;
 						this.SetValue(IsFilteringRenderedImageProperty, false);
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+						this.ReportRenderedImage();
 					}
 					else if (this.hasPendingImageFiltering)
 					{
@@ -1058,29 +1105,35 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			var sourceImageFrame = renderedImageFrame;
 			var resultImageFrame = filteredImageFrame1;
+			var failedToApply = false;
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
-			// apply filters
-			var filter = new LuminanceImageFilter();
-			if (await this.ApplyImageFilterAsync(filter, sourceImageFrame, resultImageFrame, cancellationTokenSource.Token))
+			// apply luminance filter
+			if (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported)
 			{
-				if (sourceImageFrame == renderedImageFrame)
+				if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame, resultImageFrame, cancellationTokenSource.Token))
 				{
-					sourceImageFrame = resultImageFrame;
-					resultImageFrame = filteredImageFrame2;
+					if (sourceImageFrame == renderedImageFrame)
+					{
+						sourceImageFrame = resultImageFrame;
+						resultImageFrame = filteredImageFrame2;
+					}
+					else
+						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
 				}
-				else
-					SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
 			}
-			else
+
+			// check filtering result
+			if (failedToApply)
 			{
 				filteredImageFrame1.Dispose();
-				filteredImageFrame2.Dispose();
+				filteredImageFrame2?.Dispose();
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageFilteringCancellationTokenSource = null;
 					this.SetValue(HasRenderingErrorProperty, true);
 					this.SetValue(IsFilteringRenderedImageProperty, false);
+					this.ReportRenderedImage();
 				}
 				else if (this.hasPendingImageFiltering)
 				{
@@ -1091,10 +1144,9 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// generate histograms
-			var histograms = (BitmapHistograms?)null;
 			try
 			{
-				histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+				sourceImageFrame.Histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.BitmapBuffer, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
 			{
@@ -1106,7 +1158,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
 				filteredImageFrame1.Dispose();
-				filteredImageFrame2.Dispose();
+				filteredImageFrame2?.Dispose();
 				if (this.hasPendingImageFiltering)
 				{
 					this.Logger.LogDebug("Start next filtering");
@@ -1120,17 +1172,15 @@ namespace Carina.PixelViewer.ViewModels
 			if (sourceImageFrame == filteredImageFrame1)
             {
 				this.filteredImageFrame = filteredImageFrame1;
-				filteredImageFrame2.Dispose();
+				filteredImageFrame2?.Dispose();
             }
 			else
             {
 				this.filteredImageFrame = filteredImageFrame2;
 				filteredImageFrame1.Dispose();
 			}
-			this.SetValue(HasRenderingErrorProperty, false);
-			this.SetValue(HistogramsProperty, histograms);
-			this.SetValue(RenderedImageProperty, this.filteredImageFrame.BitmapBuffer.CreateAvaloniaBitmap());
 			this.SetValue(IsFilteringRenderedImageProperty, false);
+			this.ReportRenderedImage();
 		}
 
 
@@ -1348,6 +1398,22 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Enable or disable grayscale filter.
+		/// </summary>
+		public bool IsGrayscaleFilterEnabled
+        {
+			get => this.GetValue(IsGrayscaleFilterEnabledProperty);
+			set => this.SetValue(IsGrayscaleFilterEnabledProperty, value);
+        }
+
+
+		/// <summary>
+		/// Check whether grayscale filter is supported or not.
+		/// </summary>
+		public bool IsGrayscaleFilterSupported { get => this.GetValue(IsGrayscaleFilterSupportedProperty); }
+
+
+		/// <summary>
 		/// Get or set whether histograms of image is visible or not
 		/// </summary>
 		public bool IsHistogramsVisible
@@ -1508,6 +1574,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
 					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.isImagePlaneOptionsResetNeeded = true;
+					this.updateFilterSupportingAction.Reschedule();
 					this.renderImageAction.Reschedule();
 				}
 				else
@@ -1519,6 +1586,18 @@ namespace Carina.PixelViewer.ViewModels
 					this.isImagePlaneOptionsResetNeeded = true;
 				this.renderImageAction.Reschedule(RenderImageDelay);
 			}
+			else if (property == IsFilteringRenderedImageNeededProperty)
+			{
+				if ((bool)newValue.AsNonNull())
+					this.filterImageAction.Schedule();
+				else
+				{
+					this.ClearFilteredImage();
+					this.ReportRenderedImage();
+				}
+			}
+			else if (property == IsGrayscaleFilterEnabledProperty)
+				this.updateIsFilteringImageNeededAction.Schedule();
 			else if (property == IsFilteringRenderedImageProperty
 				|| property == IsOpeningSourceFileProperty
 				|| property == IsRenderingImageProperty
@@ -1528,6 +1607,13 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsHistogramsVisibleProperty)
 				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
+			else if (property == IsSourceFileOpenedProperty)
+			{
+				if (this.IsSourceFileOpened)
+					this.updateFilterSupportingAction.Schedule();
+				else
+					this.updateFilterSupportingAction.Execute();
+			}
 			else if (property == ProfileProperty)
 			{
 				this.canApplyProfile.Update(((ImageRenderingProfile)newValue.AsNonNull()).Type != ImageRenderingProfileType.Default);
@@ -1968,10 +2054,10 @@ namespace Carina.PixelViewer.ViewModels
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageRenderingCancellationTokenSource = null;
-					this.canSaveRenderedImage.Update(this.RenderedImage != null);
 					if (this.IsActivated)
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 					this.SetValue(IsRenderingImageProperty, false);
+					this.ReportRenderedImage();
 				}
 				else if (this.hasPendingImageRendering)
 				{
@@ -2003,12 +2089,11 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// generate histograms
-			var histograms = (BitmapHistograms?)null;
-			if (exception == null && !cancellationTokenSource.IsCancellationRequested && !this.IsFilteringRenderedImageNeeded)
+			if (exception == null && !cancellationTokenSource.IsCancellationRequested)
 			{
 				try
 				{
-					histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+					renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
 				}
 				catch (Exception ex)
 				{
@@ -2052,31 +2137,25 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				// update state
 				this.SetValue(HasRenderingErrorProperty, false);
-				if (!this.IsFilteringRenderedImageNeeded)
-				{
-					this.SetValue(HistogramsProperty, histograms);
-					this.SetValue(RenderedImageProperty, renderedImageFrame.BitmapBuffer.CreateAvaloniaBitmap());
-				}
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
-				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 
-				// filter image
+				// filter image or report now
 				if (this.IsFilteringRenderedImageNeeded)
 				{
 					this.Logger.LogDebug("Continue filtering image after rendering");
 					this.FilterImage(renderedImageFrame);
 				}
+				else
+					this.ReportRenderedImage();
 			}
 			else
 			{
 				this.SetValue(HasRenderingErrorProperty, true);
-				this.SetValue(HistogramsProperty, null);
-				this.SetValue(RenderedImageProperty, null);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
-				this.canSaveRenderedImage.Update(false);
+				this.ReportRenderedImage();
 			}
 			this.SetValue(IsRenderingImageProperty, false);
 		}
@@ -2096,6 +2175,23 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.Logger.LogError($"Unable to request {dataSize.ToFileSizeString()} for rendered image, total: {SharedRenderedImagesMemoryUsage.Value.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
 			return null;
+		}
+
+
+		// Report rendered image according to current state.
+		void ReportRenderedImage()
+		{
+			var imageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
+			if (imageFrame != null)
+			{
+				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
+				this.SetValue(HasRenderingErrorProperty, false);
+				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+			}
+			else
+				this.canSaveRenderedImage.Update(false);
+			this.SetValue(HistogramsProperty, imageFrame?.Histograms);
+			this.SetValue(RenderedImageProperty, imageFrame?.BitmapBuffer?.CreateAvaloniaBitmap());
 		}
 
 
@@ -2198,6 +2294,11 @@ namespace Carina.PixelViewer.ViewModels
 				}
 			}
 
+			// load filtering parameters
+			var isGrayscaleFilterEnabled = false;
+			if (savedState.TryGetProperty(nameof(IsGrayscaleFilterEnabled), out jsonProperty))
+				isGrayscaleFilterEnabled = jsonProperty.ValueKind != JsonValueKind.False;
+
 			// load displaying parameters
 			var fitToViewport = true;
 			var frameNumber = 1L;
@@ -2242,6 +2343,9 @@ namespace Carina.PixelViewer.ViewModels
 				this.ChangePixelStride(i, pixelStrides[i]);
 			for (var i = rowStrides.Length - 1; i >= 0; --i)
 				this.ChangeRowStride(i, rowStrides[i]);
+
+			// apply filtering parameters
+			this.SetValue(IsGrayscaleFilterEnabledProperty, isGrayscaleFilterEnabled);
 
 			// apply displaying parameters
 			this.EffectiveRenderedImageRotation = rotation;
@@ -2463,7 +2567,7 @@ namespace Carina.PixelViewer.ViewModels
 				return false;
 			if (!this.canSaveRenderedImage.Value)
 				return false;
-			var renderedImageBuffer = this.renderedImageFrame?.BitmapBuffer;
+			var renderedImageBuffer = (this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame)?.BitmapBuffer;
 			if (renderedImageBuffer == null)
 			{
 				this.Logger.LogError("No rendered image to save");
@@ -2494,7 +2598,7 @@ namespace Carina.PixelViewer.ViewModels
 					}
 					return true;
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					this.Logger.LogError(ex, "Unable to save rendered image");
 					return false;
@@ -2507,7 +2611,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// complete
 			this.SetValue(IsSavingRenderedImageProperty, false);
-			this.canSaveRenderedImage.Update(!this.IsRenderingImage);
+			this.canSaveRenderedImage.Update(!this.IsRenderingImage && !this.IsFilteringRenderedImage);
 			return result;
 		}
 
@@ -2526,7 +2630,10 @@ namespace Carina.PixelViewer.ViewModels
 			writer.WriteStartObject();
 			if (!string.IsNullOrEmpty(this.SourceFileName))
 			{
+				// file and profile
 				writer.WriteString(nameof(SourceFileName), this.SourceFileName.AsNonNull());
+
+				// rendering parameters
 				switch (this.Profile.Type)
 				{
 					case ImageRenderingProfileType.Default:
@@ -2558,6 +2665,11 @@ namespace Carina.PixelViewer.ViewModels
 				foreach (var n in this.rowStrides)
 					writer.WriteNumberValue(n);
 				writer.WriteEndArray();
+
+				// filtering parameters
+				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
+
+				// displaying parameters
 				writer.WriteNumber(nameof(EffectiveRenderedImageRotation), (int)(this.EffectiveRenderedImageRotation + 0.5));
 				writer.WriteBoolean(nameof(FitRenderedImageToViewport), this.fitRenderedImageToViewport);
 				writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);

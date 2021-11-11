@@ -196,6 +196,17 @@
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
 					</Button>
 
+					<!-- Separator -->
+					<Separator Classes="ToolBar_Separator"/>
+
+					<!-- Grayscale filter -->
+					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding IsGrayscaleFilterEnabled, Mode=TwoWay}" IsEnabled="{Binding IsGrayscaleFilterSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.GrayscaleFilter}">
+						<Panel>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Grayscale}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Grayscale.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
+
 				</StackPanel>
 
 				<!-- Other actions -->
@@ -598,6 +609,19 @@
 							</Image>
 						</Border>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SavingRenderedImage}"/>
+					</StackPanel>
+
+					<!-- Filtering image -->
+					<StackPanel IsVisible="{Binding IsFilteringRenderedImage}" Orientation="Horizontal">
+						<Separator Classes="StatusBar_Separator"/>
+						<Border Classes="StatusBar_Icon">
+							<Image Classes="Icon">
+								<DrawingImage>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.ImageFilter}"/>
+								</DrawingImage>
+							</Image>
+						</Border>
+						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.FilteringRenderedImage}"/>
 					</StackPanel>
 
 					<!-- Rendering image -->

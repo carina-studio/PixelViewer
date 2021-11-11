@@ -598,7 +598,9 @@ namespace Carina.PixelViewer.Controls
 
 		// Called when test button clicked.
 		void OnTestButtonClick()
-		{ }
+		{
+			this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
+		}
 
 
 		// Open source file.
