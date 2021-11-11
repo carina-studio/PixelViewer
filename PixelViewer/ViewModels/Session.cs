@@ -2,6 +2,7 @@
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.ImageFilters;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Platform;
@@ -50,13 +51,15 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// Fields.
 			readonly IDisposable memoryUsageToken;
+			readonly Session session;
 
 			// Constructor
-			ImageFrame(IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, long frameNumber)
+			ImageFrame(Session session, IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, long frameNumber)
 			{
 				this.BitmapBuffer = bitmapBuffer;
 				this.FrameNumber = frameNumber;
 				this.memoryUsageToken = memoryUsageToken;
+				this.session = session;
 			}
 
 			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, int width, int height)
@@ -71,7 +74,7 @@ namespace Carina.PixelViewer.ViewModels
 				try
 				{
 					var bitmapBuffer = new BitmapBuffer(format, width, height);
-					return new ImageFrame(memoryUsageToken, bitmapBuffer, frameNumber);
+					return new ImageFrame(session, memoryUsageToken, bitmapBuffer, frameNumber);
 				}
 				catch
 				{
@@ -84,11 +87,14 @@ namespace Carina.PixelViewer.ViewModels
 			public readonly IBitmapBuffer BitmapBuffer;
 
 			// Dispose.
-            protected override void Dispose(bool disposing)
-            {
+			protected override void Dispose(bool disposing)
+			{
 				this.BitmapBuffer.Dispose();
-				this.memoryUsageToken.Dispose();
-            }
+				if (this.session.CheckAccess())
+					this.memoryUsageToken.Dispose();
+				else
+					this.session.SynchronizationContext.Post(this.memoryUsageToken.Dispose);
+			}
 
 			// Frame number.
 			public readonly long FrameNumber;
@@ -222,6 +228,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsDemosaicingSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsDemosaicingSupported));
 		/// <summary>
+		/// Property of <see cref="IsFilteringRenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsFilteringRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImage));
+		/// <summary>
+		/// Property of <see cref="IsFilteringRenderedImageNeeded"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsFilteringRenderedImageNeededProperty = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImageNeeded));
+		/// <summary>
 		/// Property of <see cref="IsHistogramsVisible"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
@@ -313,9 +327,13 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
 		ImageRenderingProfile? fileFormatProfile;
+		readonly ScheduledAction filterImageAction;
+		ImageFrame? filteredImageFrame;
 		bool fitRenderedImageToViewport = true;
+		bool hasPendingImageFiltering;
 		bool hasPendingImageRendering;
 		IImageDataSource? imageDataSource;
+		CancellationTokenSource? imageFilteringCancellationTokenSource;
 		CancellationTokenSource? imageRenderingCancellationTokenSource;
 		bool isFirstImageRenderingForSource = true;
 		bool isImageDimensionsEvaluationNeeded = true;
@@ -324,7 +342,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>(CompareProfiles);
 		ImageFrame? renderedImageFrame;
 		double renderedImageScale = 1.0;
-		readonly ScheduledAction renderImageOperation;
+		readonly ScheduledAction renderImageAction;
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly IDisposable sharedRenderedImagesMemoryUsageObserverToken;
 		readonly ScheduledAction updateIsProcessingImageAction;
@@ -371,12 +389,20 @@ namespace Carina.PixelViewer.ViewModels
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
 
 			// setup operations
-			this.renderImageOperation = new ScheduledAction(this, this.RenderImage);
+			this.filterImageAction = new ScheduledAction(() =>
+			{
+				if (this.renderedImageFrame != null)
+					this.FilterImage(this.renderedImageFrame);
+			});
+			this.renderImageAction = new ScheduledAction(this.RenderImage);
 			this.updateIsProcessingImageAction = new ScheduledAction(() =>
 			{
 				if (this.IsDisposed)
 					return;
-				this.SetValue(IsProcessingImageProperty, this.IsOpeningSourceFile || this.IsRenderingImage || this.IsSavingRenderedImage);
+				this.SetValue(IsProcessingImageProperty, this.IsFilteringRenderedImage
+					|| this.IsOpeningSourceFile 
+					|| this.IsRenderingImage 
+					|| this.IsSavingRenderedImage);
 			});
 
 			// setup rendered images memory usage
@@ -426,10 +452,102 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.Logger.LogDebug("Activate");
 				if (!this.HasRenderedImage)
-					this.renderImageOperation.Reschedule();
+					this.renderImageAction.Reschedule();
 				this.SetValue(IsActivatedProperty, true);
 			}
 			return token;
+        }
+
+
+		// Try allocating image frame for filtered image.
+		async Task<ImageFrame?> AllocateFilteredImageFrame(ImageFrame renderedImageFrame)
+        {
+			while (true)
+			{
+				try
+				{
+					return ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height);
+				}
+				catch (Exception ex)
+				{
+					if (ex is OutOfMemoryException)
+					{
+						if (this.filteredImageFrame != null)
+						{
+							this.Logger.LogWarning("Unable to request memory usage for filtered image, dispose current images");
+							this.SetValue(HistogramsProperty, null);
+							this.SetValue(RenderedImageProperty, null);
+							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+						}
+						else if (!(await this.ReleaseRenderedImageMemoryFromAnotherSession()))
+						{
+							this.Logger.LogWarning("Unable to release rendered image from another session");
+							return null;
+						}
+					}
+					else
+					{
+						this.Logger.LogError(ex, "Unable to allocate filtered image");
+						return null;
+					}
+				}
+			}
+        }
+
+
+		// Try allocating image frame for rendered image.
+		async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, int width, int height)
+		{
+			while (true)
+			{
+				try
+				{
+					return ImageFrame.Allocate(this, frameNumber, format, width, height);
+				}
+				catch (Exception ex)
+				{
+					if (ex is OutOfMemoryException)
+					{
+						if (this.renderedImageFrame != null)
+						{
+							this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current images");
+							this.SetValue(HistogramsProperty, null);
+							this.SetValue(RenderedImageProperty, null);
+							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+						}
+						else if (!(await this.ReleaseRenderedImageMemoryFromAnotherSession()))
+						{
+							this.Logger.LogWarning("Unable to release rendered image from another session");
+							return null;
+						}
+					}
+					else
+					{
+						this.Logger.LogError(ex, "Unable to allocate rendered image");
+						return null;
+					}
+				}
+			}
+		}
+
+
+		// Apply given filter.
+		Task<bool> ApplyImageFilterAsync(IImageFilter<ImageFilterParams> filter, ImageFrame sourceFrame, ImageFrame resultFrame, CancellationToken cancellationToken) =>
+			this.ApplyImageFilterAsync(filter, sourceFrame, resultFrame, ImageFilterParams.Empty, cancellationToken);
+		async Task<bool> ApplyImageFilterAsync<TParam>(IImageFilter<TParam> filter, ImageFrame sourceFrame, ImageFrame resultFrame, TParam parameters, CancellationToken cancellationToken) where TParam : ImageFilterParams
+        {
+			try
+			{
+				await filter.ApplyFilterAsync(sourceFrame.BitmapBuffer, resultFrame.BitmapBuffer, parameters, cancellationToken);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				if (!cancellationToken.IsCancellationRequested)
+					this.Logger.LogError(ex, $"Error occurred while applying filter {filter}");
+				return false;
+			}
         }
 
 
@@ -473,7 +591,7 @@ namespace Carina.PixelViewer.ViewModels
 				}
 
 				// update state
-				if (this.renderImageOperation.IsScheduled)
+				if (this.renderImageAction.IsScheduled)
 				{
 					this.isImageDimensionsEvaluationNeeded = false;
 					this.isImagePlaneOptionsResetNeeded = false;
@@ -498,13 +616,33 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Cancel filtering image.
+		bool CancelFilteringImage(bool cancelPendingRendering = false)
+        {
+			// cancel
+			this.filterImageAction.Cancel();
+			if (this.imageFilteringCancellationTokenSource == null)
+				return false;
+			this.Logger.LogWarning($"Cancel filtering image for source '{this.SourceFileName}'");
+			this.imageFilteringCancellationTokenSource.Cancel();
+			this.imageFilteringCancellationTokenSource = null;
+
+			// update state
+			if (!this.IsDisposed)
+				this.SetValue(IsFilteringRenderedImageProperty, false);
+			if (cancelPendingRendering)
+				this.hasPendingImageFiltering = false;
+
+			// complete
+			return true;
+		}
+
+
 		// Cancel rendering image.
 		bool CancelRenderingImage(bool cancelPendingRendering = false)
 		{
-			// stop timer
-			this.renderImageOperation.Cancel();
-
 			// cancel
+			this.renderImageAction.Cancel();
 			if (this.imageRenderingCancellationTokenSource == null)
 				return false;
 			this.Logger.LogWarning($"Cancel rendering image for source '{this.SourceFileName}'");
@@ -531,7 +669,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.effectiveBits[index] = effectiveBits;
 			this.OnEffectiveBitsChanged(index);
-			this.renderImageOperation.Reschedule(RenderImageDelay);
+			this.renderImageAction.Reschedule(RenderImageDelay);
 		}
 
 
@@ -544,7 +682,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.pixelStrides[index] = pixelStride;
 			this.OnPixelStrideChanged(index);
-			this.renderImageOperation.Reschedule(RenderImageDelay);
+			this.renderImageAction.Reschedule(RenderImageDelay);
 		}
 
 
@@ -557,35 +695,36 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.rowStrides[index] = rowStride;
 			this.OnRowStrideChanged(index);
-			this.renderImageOperation.Reschedule(RenderImageDelay);
+			this.renderImageAction.Reschedule(RenderImageDelay);
 		}
 
 
 		// Clear rendered image.
-		bool ClearRenderedImage()
+		bool ClearRenderedImage(bool checkActivation)
         {
 			// check state
-			if (this.IsActivated)
+			if (this.IsActivated && checkActivation)
 				return false;
+
+			// cancel filtering
+			this.CancelFilteringImage(true);
 
 			// cancel rendering
-			this.renderImageOperation.Cancel();
-			this.imageRenderingCancellationTokenSource?.Cancel();
-			this.imageRenderingCancellationTokenSource = null;
+			this.CancelRenderingImage(true);
 
-			// clear rendered image
-			if (this.IsRenderingImage)
-				return true; // clear when rendering completed
-			var renderedImageFrame = this.renderedImageFrame;
-			if (renderedImageFrame == null)
-				return false;
-			this.RenderedImage?.Let(it =>
+			// clear images
+			if (!this.IsFilteringRenderedImage && this.filteredImageFrame != null)
 			{
+				this.SetValue(HistogramsProperty, null);
 				this.SetValue(RenderedImageProperty, null);
-				it.Dispose();
-			});
-			this.SetValue(HistogramsProperty, null);
-			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+			}
+			if (!this.IsRenderingImage && this.renderedImageFrame != null)
+			{
+				this.SetValue(HistogramsProperty, null);
+				this.SetValue(RenderedImageProperty, null);
+				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+			}
 			return true;
         }
 
@@ -619,6 +758,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(FrameNumberProperty, 0);
 				this.SetValue(FramePaddingSizeProperty, 0L);
 				this.SetValue(HistogramsProperty, null);
+				this.SetValue(RenderedImageProperty, null);
 				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.SetValue(LuminanceHistogramGeometryProperty, null);
 				this.canMoveToNextFrame.Update(false);
@@ -627,14 +767,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(SourceDataSizeProperty, 0);
 				this.UpdateCanSaveDeleteProfile();
 			}
-			var renderedImage = this.RenderedImage;
-			if (renderedImage != null)
-			{
-				if (!disposing)
-					this.SetValue(RenderedImageProperty, null);
-				renderedImage.Dispose();
-				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-			}
+			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 			if (Math.Abs(this.EffectiveRenderedImageRotation) > 0.1)
 			{
 				this.EffectiveRenderedImageRotation = 0.0;
@@ -650,6 +784,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.UpdateCanZoomInOut();
 
 			// cancel rendering image
+			this.CancelFilteringImage(true);
 			this.CancelRenderingImage(true);
 
 			// remove profile generated for file format
@@ -842,7 +977,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.ImageWidth = it.Width;
 					this.ImageHeight = it.Height;
 					this.isImagePlaneOptionsResetNeeded = true;
-					this.renderImageOperation.ExecuteIfScheduled();
+					this.renderImageAction.ExecuteIfScheduled();
 				}
 			});
 		}
@@ -852,6 +987,151 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command for image dimension evaluation.
 		/// </summary>
 		public ICommand EvaluateImageDimensionsCommand { get; }
+
+
+		// Filter image.
+		async void FilterImage(ImageFrame renderedImageFrame)
+        {
+			// check state
+			if (!this.IsFilteringRenderedImageNeeded)
+				return;
+
+			// cancel current filtering
+			if (this.CancelFilteringImage(true))
+			{
+				this.Logger.LogWarning("Continue filtering when current filtering completed");
+				hasPendingImageFiltering = true;
+				return;
+			}
+			this.hasPendingImageFiltering = false;
+
+			// prepare
+			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+			this.imageFilteringCancellationTokenSource = cancellationTokenSource;
+			this.SetValue(IsFilteringRenderedImageProperty, true);
+
+			// setup swap function
+			void SwapImageFrames(ref ImageFrame x, ref ImageFrame y)
+			{
+				var t = x;
+				x = y;
+				y = t;
+			}
+
+			// allocate frames
+			var filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
+			if (filteredImageFrame1 == null)
+			{
+				if (!cancellationTokenSource.IsCancellationRequested)
+				{
+					this.imageFilteringCancellationTokenSource = null;
+					this.SetValue(IsFilteringRenderedImageProperty, false);
+					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+				}
+				else if (this.hasPendingImageFiltering)
+				{
+					this.Logger.LogWarning("Start next filtering");
+					this.filterImageAction.Schedule();
+				}
+				return;
+			}
+			var filteredImageFrame2 = (ImageFrame?)null;
+			if (true)
+			{
+				filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
+				if (filteredImageFrame2 == null)
+				{
+					if (!cancellationTokenSource.IsCancellationRequested)
+					{
+						this.imageFilteringCancellationTokenSource = null;
+						this.SetValue(IsFilteringRenderedImageProperty, false);
+						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					}
+					else if (this.hasPendingImageFiltering)
+					{
+						this.Logger.LogWarning("Start next filtering");
+						this.filterImageAction.Schedule();
+					}
+					filteredImageFrame1.Dispose();
+					return;
+				}
+			}
+			var sourceImageFrame = renderedImageFrame;
+			var resultImageFrame = filteredImageFrame1;
+			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+
+			// apply filters
+			var filter = new LuminanceImageFilter();
+			if (await this.ApplyImageFilterAsync(filter, sourceImageFrame, resultImageFrame, cancellationTokenSource.Token))
+			{
+				if (sourceImageFrame == renderedImageFrame)
+				{
+					sourceImageFrame = resultImageFrame;
+					resultImageFrame = filteredImageFrame2;
+				}
+				else
+					SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+			}
+			else
+			{
+				filteredImageFrame1.Dispose();
+				filteredImageFrame2.Dispose();
+				if (!cancellationTokenSource.IsCancellationRequested)
+				{
+					this.imageFilteringCancellationTokenSource = null;
+					this.SetValue(HasRenderingErrorProperty, true);
+					this.SetValue(IsFilteringRenderedImageProperty, false);
+				}
+				else if (this.hasPendingImageFiltering)
+				{
+					this.Logger.LogDebug("Start next filtering");
+					this.filterImageAction.Schedule();
+				}
+				return;
+			}
+
+			// generate histograms
+			var histograms = (BitmapHistograms?)null;
+			try
+			{
+				histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+			}
+			catch (Exception ex)
+			{
+				if (!cancellationTokenSource.IsCancellationRequested)
+					this.Logger.LogError(ex, "Failed to generate histograms for filtered image");
+			}
+
+			// cancellation check
+			if (cancellationTokenSource.IsCancellationRequested)
+			{
+				filteredImageFrame1.Dispose();
+				filteredImageFrame2.Dispose();
+				if (this.hasPendingImageFiltering)
+				{
+					this.Logger.LogDebug("Start next filtering");
+					this.filterImageAction.Schedule();
+				}
+				return;
+			}
+
+			// complete
+			this.filteredImageFrame?.Dispose();
+			if (sourceImageFrame == filteredImageFrame1)
+            {
+				this.filteredImageFrame = filteredImageFrame1;
+				filteredImageFrame2.Dispose();
+            }
+			else
+            {
+				this.filteredImageFrame = filteredImageFrame2;
+				filteredImageFrame1.Dispose();
+			}
+			this.SetValue(HasRenderingErrorProperty, false);
+			this.SetValue(HistogramsProperty, histograms);
+			this.SetValue(RenderedImageProperty, this.filteredImageFrame.BitmapBuffer.CreateAvaloniaBitmap());
+			this.SetValue(IsFilteringRenderedImageProperty, false);
+		}
 
 
 		/// <summary>
@@ -1056,6 +1336,18 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether rendered image is being filtered or not.
+		/// </summary>
+		public bool IsFilteringRenderedImage { get => this.GetValue(IsFilteringRenderedImageProperty); }
+
+
+		/// <summary>
+		/// Check whether rendered image is needed to be filtered or not.
+		/// </summary>
+		public bool IsFilteringRenderedImageNeeded { get => this.GetValue(IsFilteringRenderedImageNeededProperty); }
+
+
+		/// <summary>
 		/// Get or set whether histograms of image is visible or not
 		/// </summary>
 		public bool IsHistogramsVisible
@@ -1187,23 +1479,23 @@ namespace Carina.PixelViewer.ViewModels
 			if (property == ByteOrderingProperty)
 			{
 				if (this.HasMultipleByteOrderings)
-					this.renderImageOperation.Reschedule();
+					this.renderImageAction.Reschedule();
 			}
 			else if (property == DataOffsetProperty
 				|| property == FramePaddingSizeProperty
 				|| property == ImageHeightProperty)
 			{
-				this.renderImageOperation.Reschedule(RenderImageDelay);
+				this.renderImageAction.Reschedule(RenderImageDelay);
 			}
 			else if (property == DemosaicingProperty)
 			{
 				if (this.IsDemosaicingSupported)
-					this.renderImageOperation.Reschedule();
+					this.renderImageAction.Reschedule();
 			}
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
 			else if (property == FrameNumberProperty)
-				this.renderImageOperation.Reschedule();
+				this.renderImageAction.Reschedule();
 			else if (property == HistogramsProperty)
 				this.SetValue(HasHistogramsProperty, newValue != null);
 			else if (property == ImageRendererProperty)
@@ -1216,7 +1508,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
 					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.isImagePlaneOptionsResetNeeded = true;
-					this.renderImageOperation.Reschedule();
+					this.renderImageAction.Reschedule();
 				}
 				else
 					this.Logger.LogError($"{newValue} is not part of available image renderer list");
@@ -1225,23 +1517,28 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions))
 					this.isImagePlaneOptionsResetNeeded = true;
-				this.renderImageOperation.Reschedule(RenderImageDelay);
+				this.renderImageAction.Reschedule(RenderImageDelay);
 			}
-			else if (property == IsHistogramsVisibleProperty)
-				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
-			else if (property == IsOpeningSourceFileProperty
+			else if (property == IsFilteringRenderedImageProperty
+				|| property == IsOpeningSourceFileProperty
 				|| property == IsRenderingImageProperty
 				|| property == IsSavingRenderedImageProperty)
 			{
 				this.updateIsProcessingImageAction.Schedule();
 			}
+			else if (property == IsHistogramsVisibleProperty)
+				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
 			else if (property == ProfileProperty)
 			{
 				this.canApplyProfile.Update(((ImageRenderingProfile)newValue.AsNonNull()).Type != ImageRenderingProfileType.Default);
 				this.ApplyProfile();
 			}
 			else if (property == RenderedImageProperty)
+			{
+				if (oldValue != null)
+					this.SynchronizationContext.Post(() => (oldValue as IDisposable)?.Dispose());
 				this.SetValue(HasRenderedImageProperty, newValue != null);
+			}
         }
 
 
@@ -1392,9 +1689,9 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.isFirstImageRenderingForSource = true;
 			if (this.IsActivated)
-				this.renderImageOperation.Reschedule();
+				this.renderImageAction.Reschedule();
 			else
-				this.renderImageOperation.Cancel();
+				this.renderImageAction.Cancel();
 
 			// update zooming state
 			this.UpdateCanZoomInOut();
@@ -1453,6 +1750,37 @@ namespace Carina.PixelViewer.ViewModels
 		public IList<ImageRenderingProfile> Profiles { get; }
 
 
+		// Release memory of rendered images from another session.
+		async Task<bool> ReleaseRenderedImageMemoryFromAnotherSession()
+        {
+			var maxMemoryUsage = 0L;
+			var sessionToClearRenderedImage = (Session?)null;
+			foreach (var candidateSession in ((Workspace)this.Owner.AsNonNull()).Sessions)
+			{
+				if (candidateSession == this || candidateSession.IsActivated)
+					continue;
+				if (candidateSession.RenderedImagesMemoryUsage > maxMemoryUsage)
+				{
+					maxMemoryUsage = candidateSession.RenderedImagesMemoryUsage;
+					sessionToClearRenderedImage = candidateSession;
+				}
+			}
+			if (sessionToClearRenderedImage != null)
+			{
+				this.Logger.LogWarning($"Release rendered image of {sessionToClearRenderedImage}");
+				if (sessionToClearRenderedImage.ClearRenderedImage(true))
+				{
+					await Task.Delay(1000);
+					return true;
+				}
+				this.Logger.LogError($"Failed to release rendered image of {sessionToClearRenderedImage}");
+				return false;
+			}
+			this.Logger.LogWarning("No deactivated session to release rendered image");
+			return false;
+		}
+
+
 		// Release token for rendered image memory usage.
 		void ReleaseRenderedImageMemoryUsage(RenderedImageMemoryUsageToken token)
 		{
@@ -1508,6 +1836,9 @@ namespace Carina.PixelViewer.ViewModels
 		// Render image according to current state.
 		async void RenderImage()
 		{
+			// cancel filtering
+			this.CancelFilteringImage(true);
+
 			// cancel rendering
 			var cancelled = this.CancelRenderingImage();
 
@@ -1629,84 +1960,38 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(IsRenderingImageProperty, true);
 
 			// create rendered image
-			var renderedImageFrame = (ImageFrame?)null;
-			while (true)
-			{
-				try
-				{
-					renderedImageFrame = ImageFrame.Allocate(this, frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
-					break;
-				}
-				catch (Exception ex)
-				{
-					if (ex is OutOfMemoryException)
-					{
-						if (this.RenderedImage != null)
-						{
-							this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current rendered image");
-							this.RenderedImage?.Let((it) =>
-							{
-								this.SetValue(HistogramsProperty, null);
-								this.SetValue(RenderedImageProperty, null);
-								it.Dispose();
-							});
-							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-						}
-						else
-						{
-							var maxMemoryUsage = 0L;
-							var sessionToClearRenderedImage = (Session?)null;
-							foreach (var candidateSession in ((Workspace)this.Owner.AsNonNull()).Sessions)
-							{
-								if (candidateSession == this || candidateSession.IsActivated)
-									continue;
-								if (candidateSession.RenderedImagesMemoryUsage > maxMemoryUsage)
-								{
-									maxMemoryUsage = candidateSession.RenderedImagesMemoryUsage;
-									sessionToClearRenderedImage = candidateSession;
-								}
-							}
-							if (sessionToClearRenderedImage != null)
-							{
-								this.Logger.LogWarning($"Unable to request memory usage for rendered image, release rendered image of {sessionToClearRenderedImage}");
-								if (sessionToClearRenderedImage.ClearRenderedImage())
-									await Task.Delay(1000);
-								else
-								{
-									this.Logger.LogError($"Failed to release rendered image of {sessionToClearRenderedImage}");
-									break;
-								}
-							}
-							else
-							{
-								this.Logger.LogWarning("No deactivated session to release rendered image");
-								break;
-							}
-						}
-					}
-					else
-						this.Logger.LogError(ex, "Unable to allocate rendered image");
-				}
-			}
+			var cancellationTokenSource = new CancellationTokenSource();
+			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
+			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
 			if (renderedImageFrame == null)
 			{
-				this.canSaveRenderedImage.Update(this.RenderedImage != null);
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-				this.SetValue(IsRenderingImageProperty, false);
+				if (!cancellationTokenSource.IsCancellationRequested)
+				{
+					this.imageRenderingCancellationTokenSource = null;
+					this.canSaveRenderedImage.Update(this.RenderedImage != null);
+					if (this.IsActivated)
+						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					this.SetValue(IsRenderingImageProperty, false);
+				}
+				else if (this.hasPendingImageRendering)
+				{
+					if (this.IsActivated)
+					{
+						this.Logger.LogWarning("Start next rendering");
+						this.renderImageAction.Schedule();
+					}
+					else
+						this.hasPendingImageRendering = false;
+				}
 				return;
 			}
 
 			// update state
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
-			// cancel scheduled rendering
-			this.renderImageOperation.Cancel();
-
 			// render
 			this.Logger.LogDebug($"Render image for '{sourceFileName}', dimensions: {this.ImageWidth}x{this.ImageHeight}");
-			var cancellationTokenSource = new CancellationTokenSource();
 			var exception = (Exception?)null;
-			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 			try
 			{
 				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
@@ -1719,7 +2004,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// generate histograms
 			var histograms = (BitmapHistograms?)null;
-			if (exception == null && !cancellationTokenSource.IsCancellationRequested)
+			if (exception == null && !cancellationTokenSource.IsCancellationRequested && !this.IsFilteringRenderedImageNeeded)
 			{
 				try
 				{
@@ -1742,7 +2027,7 @@ namespace Carina.PixelViewer.ViewModels
 					if (this.IsActivated)
 					{
 						this.Logger.LogWarning("Start next rendering");
-						this.renderImageOperation.Schedule();
+						this.renderImageAction.Schedule();
 					}
 					else
 						this.hasPendingImageRendering = false;
@@ -1753,7 +2038,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (this.IsDisposed)
 				return;
 
-			// update state
+			// update state and continue filtering if needed
 			if (exception == null)
 				this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
 			else
@@ -1761,26 +2046,28 @@ namespace Carina.PixelViewer.ViewModels
 				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
 				renderedImageFrame.Dispose();
 			}
-			this.RenderedImage?.Let((prevRenderedImage) =>
-			{
-				var prevRenderedImageFrame = this.renderedImageFrame;
-				this.SynchronizationContext.Post(async () =>
-				{
-					await this.WaitForNecessaryTasksAsync();
-					prevRenderedImage.Dispose();
-					prevRenderedImageFrame?.Dispose();
-				});
-			});
+			this.renderedImageFrame?.Dispose();
 			this.renderedImageFrame = renderedImageFrame;
 			if (exception == null)
 			{
+				// update state
 				this.SetValue(HasRenderingErrorProperty, false);
-				this.SetValue(HistogramsProperty, histograms);
-				this.SetValue(RenderedImageProperty, renderedImageFrame.BitmapBuffer.CreateAvaloniaBitmap());
+				if (!this.IsFilteringRenderedImageNeeded)
+				{
+					this.SetValue(HistogramsProperty, histograms);
+					this.SetValue(RenderedImageProperty, renderedImageFrame.BitmapBuffer.CreateAvaloniaBitmap());
+				}
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
 				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
+
+				// filter image
+				if (this.IsFilteringRenderedImageNeeded)
+				{
+					this.Logger.LogDebug("Continue filtering image after rendering");
+					this.FilterImage(renderedImageFrame);
+				}
 			}
 			else
 			{
@@ -1969,9 +2256,9 @@ namespace Carina.PixelViewer.ViewModels
 			this.isImageDimensionsEvaluationNeeded = false;
 			this.isImagePlaneOptionsResetNeeded = false;
 			if (this.IsActivated)
-				this.renderImageOperation.Reschedule();
+				this.renderImageAction.Reschedule();
 			else
-				this.renderImageOperation.Cancel();
+				this.renderImageAction.Cancel();
         }
 
 
