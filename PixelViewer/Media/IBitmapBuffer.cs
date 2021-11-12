@@ -1,6 +1,8 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
+using Carina.PixelViewer.Runtime.InteropServices;
 using CarinaStudio;
+using System;
 using System.Buffers;
 
 namespace Carina.PixelViewer.Media
@@ -40,6 +42,51 @@ namespace Carina.PixelViewer.Media
 	/// </summary>
 	static class BitmapBufferExtensions
 	{
+		/// <summary>
+		/// Copy data as new bitmap buffer.
+		/// </summary>
+		/// <param name="source">Source <see cref="IBitmapBuffer"/>.</param>
+		/// <returns><see cref="IBitmapBuffer"/> with copied data.</returns>
+		public static IBitmapBuffer Copy(this IBitmapBuffer source) => new BitmapBuffer(source.Format, source.Width, source.Height).Also(it =>
+		{
+			source.CopyTo(it);
+		});
+
+
+		/// <summary>
+		/// Copy data to given bitmap buffer.
+		/// </summary>
+		/// <param name="source">Source <see cref="IBitmapBuffer"/>.</param>
+		/// <param name="dest">Destination <see cref="IBitmapBuffer"/>.</param>
+		public static unsafe void CopyTo(this IBitmapBuffer source, IBitmapBuffer dest)
+		{
+			if (source == dest)
+				return;
+			if (source.Format != dest.Format)
+				throw new ArgumentException("Cannot copy to bitmap with different format.");
+			if (source.Width != dest.Width || source.Height != dest.Height)
+				throw new ArgumentException("Cannot copy to bitmap with different dimensions.");
+			source.Memory.Pin(sourceBaseAddr =>
+			{
+				dest.Memory.Pin(destBaseAddr =>
+				{
+					var sourceRowStride = source.RowBytes;
+					var destRowStride = dest.RowBytes;
+					if (sourceRowStride == destRowStride)
+						Marshal.Copy((void*)sourceBaseAddr, (void*)destBaseAddr, sourceRowStride * source.Height);
+					else
+					{
+						var sourceRowPtr = (byte*)sourceBaseAddr;
+						var destRowPtr = (byte*)destBaseAddr;
+						var minRowStride = Math.Min(sourceRowStride, destRowStride);
+						for (var y = source.Height; y > 0; --y, sourceRowPtr += sourceRowStride, destRowPtr += destRowStride)
+							Marshal.Copy(sourceRowPtr, destRowPtr, minRowStride);
+					}
+				});
+			});
+		}
+
+
 		/// <summary>
 		/// Create <see cref="IBitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
 		/// </summary>
