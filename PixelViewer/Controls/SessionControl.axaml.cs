@@ -53,6 +53,8 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Fields.
+		readonly ToggleButton brightnessAdjustmentButton;
+		readonly Popup brightnessAdjustmentPopup;
 		readonly MutableObservableValue<bool> canOpenSourceFile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
@@ -99,6 +101,13 @@ namespace Carina.PixelViewer.Controls
 			this.canOpenSourceFile.Update(false);
 
 			// setup controls
+			this.brightnessAdjustmentButton = this.FindControl<ToggleButton>(nameof(brightnessAdjustmentButton)).AsNonNull();
+			this.brightnessAdjustmentPopup = this.FindControl<Popup>(nameof(brightnessAdjustmentPopup)).AsNonNull().Also(it =>
+			{
+				it.PlacementTarget = this.brightnessAdjustmentButton;
+				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAdjustmentButton.IsChecked = false);
+				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAdjustmentButton.IsChecked = true);
+			});
 			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
 			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 			{
@@ -600,6 +609,13 @@ namespace Carina.PixelViewer.Controls
 		void OnTestButtonClick()
 		{
 			this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
+		}
+
+
+		// Open brightness adjustment UI.
+		void OpenBrightnessAdjustmentPopup()
+		{
+			this.brightnessAdjustmentPopup.Open();
 		}
 
 

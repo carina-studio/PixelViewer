@@ -127,6 +127,17 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Property of <see cref="BrightnessAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> BrightnessAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BrightnessAdjustment), 0, coerce: it =>
+		{
+			if (it < -3)
+				return -3;
+			if (it > 3)
+				return 3;
+			return it;
+		}, validate: it => double.IsFinite(it));
+		/// <summary>
 		/// Property of <see cref="ByteOrdering"/>.
 		/// </summary>
 		public static readonly ObservableProperty<ByteOrdering> ByteOrderingProperty = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
@@ -150,6 +161,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="FramePaddingSize"/>.
 		/// </summary>
 		public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
+		/// <summary>
+		/// Property of <see cref="HasBrightnessAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasBrightnessAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasBrightnessAdjustment));
 		/// <summary>
 		/// Property of <see cref="HasHistograms"/>.
 		/// </summary>
@@ -226,6 +241,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="IsAdjustableEffectiveBits3"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
+		/// <summary>
+		/// Property of <see cref="IsBrightnessAdjustmentSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsBrightnessAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBrightnessAdjustmentSupported));
 		/// <summary>
 		/// Property of <see cref="IsDemosaicingSupported"/>.
 		/// </summary>
@@ -414,11 +433,13 @@ namespace Carina.PixelViewer.ViewModels
 					return;
 				if (!this.IsSourceFileOpened)
 				{
+					this.SetValue(IsBrightnessAdjustmentSupportedProperty, false);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, false);
 				}
 				else
 				{
 					var format = this.ImageRenderer.Format;
+					this.SetValue(IsBrightnessAdjustmentSupportedProperty, true);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, format.Category != ImageFormatCategory.Luminance);
 				}
 			});
@@ -435,7 +456,8 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.IsDisposed)
 					return;
-				this.SetValue(IsFilteringRenderedImageNeededProperty, this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported);
+				this.SetValue(IsFilteringRenderedImageNeededProperty, (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+					|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 			});
 
 			// setup rendered images memory usage
@@ -637,6 +659,16 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to apply parameters defined by current <see cref="Profile"/>.
 		/// </summary>
 		public ICommand ApplyProfileCommand { get; }
+
+
+		/// <summary>
+		/// Get or set brightness adjustment for filter in EV.
+		/// </summary>
+		public double BrightnessAdjustment
+		{
+			get => this.GetValue(BrightnessAdjustmentProperty);
+			set => this.SetValue(BrightnessAdjustmentProperty, value);
+		}
 
 
 		/// <summary>
@@ -1056,12 +1088,21 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(IsFilteringRenderedImageProperty, true);
 
 			// setup swap function
-			void SwapImageFrames(ref ImageFrame x, ref ImageFrame y)
+			void SwapImageFrames(ref ImageFrame? x, ref ImageFrame? y)
 			{
 				var t = x;
 				x = y;
 				y = t;
 			}
+
+			// check filters needed
+			var filterCount = 0;
+			var isBrightnessFilterNeeded = (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
+			var isGrayscaleFilterNeeded = (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported);
+			if (isBrightnessFilterNeeded)
+				++filterCount;
+			if (isGrayscaleFilterNeeded)
+				++filterCount;
 
 			// allocate frames
 			var filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
@@ -1082,7 +1123,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			}
 			var filteredImageFrame2 = (ImageFrame?)null;
-			if (false)
+			if (filterCount > 1)
 			{
 				filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
 				if (filteredImageFrame2 == null)
@@ -1108,10 +1149,14 @@ namespace Carina.PixelViewer.ViewModels
 			var failedToApply = false;
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
-			// apply luminance filter
-			if (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported)
+			// apply brightness filter
+			if (isBrightnessFilterNeeded)
 			{
-				if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame, resultImageFrame, cancellationTokenSource.Token))
+				var parameters = new BrightnessImageFilter.Params()
+				{
+					Factor = Math.Pow(2, this.BrightnessAdjustment)
+				};
+				if (await this.ApplyImageFilterAsync(new BrightnessImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (sourceImageFrame == renderedImageFrame)
 					{
@@ -1121,6 +1166,25 @@ namespace Carina.PixelViewer.ViewModels
 					else
 						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
 				}
+				else
+					failedToApply = true;
+			}
+
+			// apply luminance filter
+			if (!failedToApply && isGrayscaleFilterNeeded)
+			{
+				if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), cancellationTokenSource.Token))
+				{
+					if (sourceImageFrame == renderedImageFrame)
+					{
+						sourceImageFrame = resultImageFrame;
+						resultImageFrame = filteredImageFrame2;
+					}
+					else
+						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+				}
+				else
+					failedToApply = true;
 			}
 
 			// check filtering result
@@ -1146,7 +1210,7 @@ namespace Carina.PixelViewer.ViewModels
 			// generate histograms
 			try
 			{
-				sourceImageFrame.Histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+				sourceImageFrame.AsNonNull().Histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
 			{
@@ -1168,6 +1232,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// complete
+			this.imageFilteringCancellationTokenSource = null;
 			this.filteredImageFrame?.Dispose();
 			if (sourceImageFrame == filteredImageFrame1)
             {
@@ -1251,6 +1316,12 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			return "";
 		}
+
+
+		/// <summary>
+		/// Check whether <see cref="BrightnessAdjustment"/> is non-zero or not.
+		/// </summary>
+		public bool HasBrightnessAdjustment { get => this.GetValue(HasBrightnessAdjustmentProperty); }
 
 
 		/// <summary>
@@ -1377,6 +1448,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether effective bits for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 		/// </summary>
 		public bool IsAdjustableEffectiveBits3 { get => this.GetValue(IsAdjustableEffectiveBits3Property); }
+
+
+		/// <summary>
+		/// Check whether brightness adjustment is supported or not.
+		/// </summary>
+		public bool IsBrightnessAdjustmentSupported { get => this.GetValue(IsBrightnessAdjustmentSupportedProperty); }
 
 
 		/// <summary>
@@ -1542,7 +1619,13 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {
             base.OnPropertyChanged(property, oldValue, newValue);
-			if (property == ByteOrderingProperty)
+			if (property == BrightnessAdjustmentProperty)
+			{
+				this.SetValue(HasBrightnessAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule(RenderImageDelay);
+			}
+			else if (property == ByteOrderingProperty)
 			{
 				if (this.HasMultipleByteOrderings)
 					this.renderImageAction.Reschedule();
@@ -1597,7 +1680,10 @@ namespace Carina.PixelViewer.ViewModels
 				}
 			}
 			else if (property == IsGrayscaleFilterEnabledProperty)
+			{
 				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule();
+			}
 			else if (property == IsFilteringRenderedImageProperty
 				|| property == IsOpeningSourceFileProperty
 				|| property == IsRenderingImageProperty
@@ -2295,7 +2381,10 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// load filtering parameters
+			var brightnessAdjustment = 0.0;
 			var isGrayscaleFilterEnabled = false;
+			if (savedState.TryGetProperty(nameof(BrightnessAdjustment), out jsonProperty))
+				jsonProperty.TryGetDouble(out brightnessAdjustment);
 			if (savedState.TryGetProperty(nameof(IsGrayscaleFilterEnabled), out jsonProperty))
 				isGrayscaleFilterEnabled = jsonProperty.ValueKind != JsonValueKind.False;
 
@@ -2345,6 +2434,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.ChangeRowStride(i, rowStrides[i]);
 
 			// apply filtering parameters
+			this.SetValue(BrightnessAdjustmentProperty, brightnessAdjustment);
 			this.SetValue(IsGrayscaleFilterEnabledProperty, isGrayscaleFilterEnabled);
 
 			// apply displaying parameters
@@ -2667,6 +2757,8 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteEndArray();
 
 				// filtering parameters
+				if (HasBrightnessAdjustment)
+					writer.WriteNumber(nameof(BrightnessAdjustment), this.BrightnessAdjustment);
 				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 
 				// displaying parameters

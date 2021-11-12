@@ -34,6 +34,7 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
+		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Width">150</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
@@ -43,6 +44,7 @@
 		<sys:Double x:Key="Double/SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.StatusBar.FileActions.MaxWidth">500</sys:Double>
 		<Thickness x:Key="ExpanderContentPadding">5</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.FilterParamsPopup.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
@@ -50,6 +52,12 @@
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
 		<sys:TimeSpan x:Key="TimeSpan/SessionControl.HistogramsPanel.Transition">0:0:0.5</sys:TimeSpan>
+
+		<!-- Slider -->
+		<!--SolidColorBrush x:Key="SliderTrackValueFill" Color="#00000000"/>
+		<SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#00000000"/>
+		<SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#00000000"/>
+		<SolidColorBrush x:Key="SliderTrackValueFillDisabled" Color="#00000000"/-->
 		
 	</Styles.Resources>
 
@@ -67,6 +75,13 @@
 	</Style>
 
 	<!-- SessionControl -->
+	<Style Selector="Border.SessionControl_FilterParamsPopup">
+		<Setter Property="Background" Value="{DynamicResource ComboBoxDropDownBackground}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxDropDownBorderBrush}"/>
+		<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxDropdownBorderThickness}"/>
+		<Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}"/>
+		<Setter Property="Padding" Value="{DynamicResource Thickness/SessionControl.FilterParamsPopup.Padding}"/>
+	</Style>
 	<Style Selector="Border.SessionControl_ImageViewer_Hint_Icon">
 		<Setter Property="Height" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
 		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.ImageViewer.Hint.Icon.Margin}"/>
@@ -80,6 +95,27 @@
 	<Style Selector="Expander.SessionControl_OptionsPanel_Expander">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+	</Style>
+	<Style Selector="Popup.SessionControl_FilterParamsPopup">
+		<Setter Property="IsLightDismissEnabled" Value="True"/>
+		<Setter Property="PlacementAnchor" Value="Bottom"/>
+		<Setter Property="PlacementGravity" Value="Bottom"/>
+		<Setter Property="PlacementMode" Value="AnchorAndGravity"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider">
+		<Setter Property="Foreground" Value="{DynamicResource SliderTrackFill}"/>
+		<Setter Property="IsSnapToTickEnabled" Value="True"/>
+		<Setter Property="TickPlacement" Value="Outside"/>
+		<Setter Property="Width" Value="{DynamicResource Double/SessionControl.FilterParamsSlider.Width}"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider:disabled /template/ RepeatButton#PART_DecreaseButton">
+		<Setter Property="Background" Value="{DynamicResource SliderTrackFillDisabled}"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider:pointerover /template/ RepeatButton#PART_DecreaseButton">
+		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPointerOver}"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider:pressed /template/ RepeatButton#PART_DecreaseButton">
+		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPressed}"/>
 	</Style>
 	<Style Selector="TextBlock.SessionControl_ImageViewer_Hint_TextBlock">
 		<Setter Property="FontSize" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>

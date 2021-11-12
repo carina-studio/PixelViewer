@@ -207,6 +207,23 @@
 						</Panel>
 					</ToggleButton>
 
+					<!-- Brightness adjustment -->
+					<ToggleButton Name="brightnessAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenBrightnessAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.BrightnessAdjustment}">
+						<Panel>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Brightness}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Brightness.Active}" IsVisible="{Binding HasBrightnessAdjustment}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Brightness.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Popup Name="brightnessAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
+								<Border Classes="SessionControl_FilterParamsPopup">
+									<StackPanel>
+										<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.0;-0.0} EV}"/>
+										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="3" Ticks="-2,-1.67,-1.33,-1,-0.67,-0.33,0,0.33,0.67,1,1.33,1.67,2" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+									</StackPanel>
+								</Border>
+							</Popup>
+						</Panel>
+					</ToggleButton>
+
 				</StackPanel>
 
 				<!-- Other actions -->
