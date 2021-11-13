@@ -54,10 +54,8 @@
 		<sys:TimeSpan x:Key="TimeSpan/SessionControl.HistogramsPanel.Transition">0:0:0.5</sys:TimeSpan>
 
 		<!-- Slider -->
-		<!--SolidColorBrush x:Key="SliderTrackValueFill" Color="#00000000"/>
-		<SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#00000000"/>
-		<SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#00000000"/>
-		<SolidColorBrush x:Key="SliderTrackValueFillDisabled" Color="#00000000"/-->
+		<SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{DynamicResource SystemAccentColorLight1}" />
+		<SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="{DynamicResource SystemAccentColorDark1}" />
 		
 	</Styles.Resources>
 

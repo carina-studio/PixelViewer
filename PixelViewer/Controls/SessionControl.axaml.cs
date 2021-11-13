@@ -60,6 +60,8 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
 		readonly ScheduledAction commitHistogramsPanelVisibilityAction;
+		readonly ToggleButton contrastAdjustmentButton;
+		readonly Popup contrastAdjustmentPopup;
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
@@ -107,6 +109,13 @@ namespace Carina.PixelViewer.Controls
 				it.PlacementTarget = this.brightnessAdjustmentButton;
 				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAdjustmentButton.IsChecked = false);
 				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAdjustmentButton.IsChecked = true);
+			});
+			this.contrastAdjustmentButton = this.FindControl<ToggleButton>(nameof(contrastAdjustmentButton)).AsNonNull();
+			this.contrastAdjustmentPopup = this.FindControl<Popup>(nameof(contrastAdjustmentPopup)).AsNonNull().Also(it =>
+			{
+				it.PlacementTarget = this.contrastAdjustmentButton;
+				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.contrastAdjustmentButton.IsChecked = false);
+				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.contrastAdjustmentButton.IsChecked = true);
 			});
 			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
 			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
@@ -616,6 +625,13 @@ namespace Carina.PixelViewer.Controls
 		void OpenBrightnessAdjustmentPopup()
 		{
 			this.brightnessAdjustmentPopup.Open();
+		}
+
+
+		// Open contrast adjustment UI.
+		void OpenContrastAdjustmentPopup()
+		{
+			this.contrastAdjustmentPopup.Open();
 		}
 
 

@@ -57,8 +57,11 @@
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重設至組態參數</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAdjustment">亮度調整</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAdjustment.Label">亮度</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">位元組順序</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新…</sys:String>
+	<sys:String x:Key="String/SessionControl.ContrastAdjustment">對比調整</sys:String>
+	<sys:String x:Key="String/SessionControl.ContrastAdjustment.Label">對比</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">複製檔案名稱</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">複製完整檔案路徑</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU 使用率</sys:String>

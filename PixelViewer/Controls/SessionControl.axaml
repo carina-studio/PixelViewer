@@ -216,8 +216,33 @@
 							<Popup Name="brightnessAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 								<Border Classes="SessionControl_FilterParamsPopup">
 									<StackPanel>
-										<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.0;-0.0} EV}"/>
-										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="3" Ticks="-2,-1.67,-1.33,-1,-0.67,-0.33,0,0.33,0.67,1,1.33,1.67,2" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+										<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAdjustment.Label}" VerticalAlignment="Center"/>
+											<Separator Classes="Dialog_Separator_Small"/>
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" VerticalAlignment="Center"/>
+										</StackPanel>
+										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" Ticks="-2,-1.84,-1.67,-1.5,-1.33,-1.17,-1,-0.84,-0.67,-0.5,-0.33,-0.17,0,0.17,0.33,0.5,0.67,0.84,1,1.17,1.33,1.5,1.67,1.84,2" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+									</StackPanel>
+								</Border>
+							</Popup>
+						</Panel>
+					</ToggleButton>
+					
+					<!-- Contrast adjustment -->
+					<ToggleButton Name="contrastAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenContrastAdjustmentPopup}" IsEnabled="{Binding IsContrastAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ContrastAdjustment}">
+						<Panel>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasContrastAdjustment}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Popup Name="contrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
+								<Border Classes="SessionControl_FilterParamsPopup">
+									<StackPanel>
+										<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ContrastAdjustment.Label}" VerticalAlignment="Center"/>
+											<Separator Classes="Dialog_Separator_Small"/>
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+										</StackPanel>
+										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
 									</StackPanel>
 								</Border>
 							</Popup>

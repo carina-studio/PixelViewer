@@ -142,6 +142,17 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<ByteOrdering> ByteOrderingProperty = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
 		/// <summary>
+		/// Property of <see cref="ContrastAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> ContrastAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, coerce: it =>
+		{
+			if (it < -3)
+				return -3;
+			if (it > 3)
+				return 3;
+			return it;
+		}, validate: it => double.IsFinite(it));
+		/// <summary>
 		/// Property of <see cref="DataOffset"/>.
 		/// </summary>
 		public static readonly ObservableProperty<long> DataOffsetProperty = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
@@ -165,6 +176,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="HasBrightnessAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasBrightnessAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasBrightnessAdjustment));
+		/// <summary>
+		/// Property of <see cref="HasContrastAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasContrastAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasContrastAdjustment));
 		/// <summary>
 		/// Property of <see cref="HasHistograms"/>.
 		/// </summary>
@@ -245,6 +260,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="IsBrightnessAdjustmentSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsBrightnessAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBrightnessAdjustmentSupported));
+		/// <summary>
+		/// Property of <see cref="IsContrastAdjustmentSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsContrastAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsContrastAdjustmentSupported));
 		/// <summary>
 		/// Property of <see cref="IsDemosaicingSupported"/>.
 		/// </summary>
@@ -434,12 +453,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (!this.IsSourceFileOpened)
 				{
 					this.SetValue(IsBrightnessAdjustmentSupportedProperty, false);
+					this.SetValue(IsContrastAdjustmentSupportedProperty, false);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, false);
 				}
 				else
 				{
 					var format = this.ImageRenderer.Format;
 					this.SetValue(IsBrightnessAdjustmentSupportedProperty, true);
+					this.SetValue(IsContrastAdjustmentSupportedProperty, true);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, format.Category != ImageFormatCategory.Luminance);
 				}
 			});
@@ -457,6 +478,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsDisposed)
 					return;
 				this.SetValue(IsFilteringRenderedImageNeededProperty, (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+					|| (this.HasContrastAdjustment && this.IsContrastAdjustmentSupported)
 					|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 			});
 
@@ -913,6 +935,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get or set contrast adjustment.
+		/// </summary>
+		public double ContrastAdjustment
+		{
+			get => this.GetValue(ContrastAdjustmentProperty);
+			set => this.SetValue(ContrastAdjustmentProperty, value);
+		}
+
+
+		/// <summary>
 		/// Get or set offset to first byte of data to render image.
 		/// </summary>
 		public long DataOffset
@@ -1098,7 +1130,8 @@ namespace Carina.PixelViewer.ViewModels
 			// check filters needed
 			var filterCount = 0;
 			var isColorLutFilterNeeded = false;
-			if (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+			if ((this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+				|| (this.HasContrastAdjustment && this.IsContrastAdjustmentSupported))
 			{
 				isColorLutFilterNeeded = true;
 				++filterCount;
@@ -1164,6 +1197,16 @@ namespace Carina.PixelViewer.ViewModels
 				var bLut = rLut;
 				if (HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
 					ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
+				if (HasContrastAdjustment && this.IsContrastAdjustmentSupported)
+                {
+					var contrast = this.ContrastAdjustment;
+					var middleColor = (rLut.Count - 1) / 2.0;
+					var factor = (contrast > 0.1)
+						? contrast + 1
+						: -1 / (contrast - 1);
+					ColorLut.Multiply(rLut, factor);
+					ColorLut.Translate(rLut, (1 - factor) * middleColor);
+                }
 
 				// apply filter
 				var parameters = new ColorLutImageFilter.Params()
@@ -1342,6 +1385,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether <see cref="ContrastAdjustment"/> is non-zero or not.
+		/// </summary>
+		public bool HasContrastAdjustment { get => this.GetValue(HasContrastAdjustmentProperty); }
+
+
+		/// <summary>
 		/// Check whether <see cref="Histograms"/> is valid or not.
 		/// </summary>
 		public bool HasHistograms { get => this.GetValue(HasHistogramsProperty); }
@@ -1471,6 +1520,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether brightness adjustment is supported or not.
 		/// </summary>
 		public bool IsBrightnessAdjustmentSupported { get => this.GetValue(IsBrightnessAdjustmentSupportedProperty); }
+
+
+		/// <summary>
+		/// Check whether contrast adjustment is supported or not.
+		/// </summary>
+		public bool IsContrastAdjustmentSupported { get => this.GetValue(IsContrastAdjustmentSupportedProperty); }
 
 
 		/// <summary>
@@ -1646,6 +1701,12 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.HasMultipleByteOrderings)
 					this.renderImageAction.Reschedule();
+			}
+			else if (property == ContrastAdjustmentProperty)
+			{
+				this.SetValue(HasContrastAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule(RenderImageDelay);
 			}
 			else if (property == DataOffsetProperty
 				|| property == FramePaddingSizeProperty
@@ -2399,9 +2460,12 @@ namespace Carina.PixelViewer.ViewModels
 
 			// load filtering parameters
 			var brightnessAdjustment = 0.0;
+			var contrastAdjustment = 0.0;
 			var isGrayscaleFilterEnabled = false;
 			if (savedState.TryGetProperty(nameof(BrightnessAdjustment), out jsonProperty))
 				jsonProperty.TryGetDouble(out brightnessAdjustment);
+			if (savedState.TryGetProperty(nameof(ContrastAdjustment), out jsonProperty))
+				jsonProperty.TryGetDouble(out contrastAdjustment);
 			if (savedState.TryGetProperty(nameof(IsGrayscaleFilterEnabled), out jsonProperty))
 				isGrayscaleFilterEnabled = jsonProperty.ValueKind != JsonValueKind.False;
 
@@ -2452,6 +2516,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// apply filtering parameters
 			this.SetValue(BrightnessAdjustmentProperty, brightnessAdjustment);
+			this.SetValue(ContrastAdjustmentProperty, contrastAdjustment);
 			this.SetValue(IsGrayscaleFilterEnabledProperty, isGrayscaleFilterEnabled);
 
 			// apply displaying parameters
@@ -2776,6 +2841,8 @@ namespace Carina.PixelViewer.ViewModels
 				// filtering parameters
 				if (HasBrightnessAdjustment)
 					writer.WriteNumber(nameof(BrightnessAdjustment), this.BrightnessAdjustment);
+				if (HasContrastAdjustment)
+					writer.WriteNumber(nameof(ContrastAdjustment), this.ContrastAdjustment);
 				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 
 				// displaying parameters
