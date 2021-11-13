@@ -59,6 +59,8 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
+		readonly ToggleButton colorAdjustmentButton;
+		readonly Popup colorAdjustmentPopup;
 		readonly ScheduledAction commitHistogramsPanelVisibilityAction;
 		readonly ToggleButton contrastAdjustmentButton;
 		readonly Popup contrastAdjustmentPopup;
@@ -109,6 +111,13 @@ namespace Carina.PixelViewer.Controls
 				it.PlacementTarget = this.brightnessAdjustmentButton;
 				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAdjustmentButton.IsChecked = false);
 				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAdjustmentButton.IsChecked = true);
+			});
+			this.colorAdjustmentButton = this.FindControl<ToggleButton>(nameof(colorAdjustmentButton)).AsNonNull();
+			this.colorAdjustmentPopup = this.FindControl<Popup>(nameof(colorAdjustmentPopup)).AsNonNull().Also(it =>
+			{
+				it.PlacementTarget = this.colorAdjustmentButton;
+				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = false);
+				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = true);
 			});
 			this.contrastAdjustmentButton = this.FindControl<ToggleButton>(nameof(contrastAdjustmentButton)).AsNonNull();
 			this.contrastAdjustmentPopup = this.FindControl<Popup>(nameof(contrastAdjustmentPopup)).AsNonNull().Also(it =>
@@ -622,17 +631,15 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Open brightness adjustment UI.
-		void OpenBrightnessAdjustmentPopup()
-		{
-			this.brightnessAdjustmentPopup.Open();
-		}
+		void OpenBrightnessAdjustmentPopup() => this.brightnessAdjustmentPopup.Open();
+
+
+		// Open color adjustment UI.
+		void OpenColorAdjustmentPopup() => this.colorAdjustmentPopup.Open();
 
 
 		// Open contrast adjustment UI.
-		void OpenContrastAdjustmentPopup()
-		{
-			this.contrastAdjustmentPopup.Open();
-		}
+		void OpenContrastAdjustmentPopup() => this.contrastAdjustmentPopup.Open();
 
 
 		// Open source file.

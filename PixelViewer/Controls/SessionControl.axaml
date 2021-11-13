@@ -13,6 +13,7 @@
 			 xmlns:appProfiles="using:Carina.PixelViewer.Media.Profiles"
 			 xmlns:ia="using:Avalonia.Xaml.Interactivity"
              xmlns:iaCore="using:Avalonia.Xaml.Interactions.Core"
+			 xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.SessionControl">
 	
@@ -243,6 +244,41 @@
 											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
 										</StackPanel>
 										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+									</StackPanel>
+								</Border>
+							</Popup>
+						</Panel>
+					</ToggleButton>
+
+					<!-- Color adjustment -->
+					<ToggleButton Name="colorAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ColorAdjustment}">
+						<Panel>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Active}" IsVisible="{Binding HasColorAdjustment}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
+								<Border Classes="SessionControl_FilterParamsPopup">
+									<StackPanel>
+										<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" VerticalAlignment="Center"/>
+											<Separator Classes="Dialog_Separator_Small"/>
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+										</StackPanel>
+										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
+										<Separator Classes="Dialog_Separator"/>
+										<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" VerticalAlignment="Center"/>
+											<Separator Classes="Dialog_Separator_Small"/>
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+										</StackPanel>
+										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
+										<Separator Classes="Dialog_Separator"/>
+										<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" VerticalAlignment="Center"/>
+											<Separator Classes="Dialog_Separator_Small"/>
+											<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+										</StackPanel>
+										<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
 									</StackPanel>
 								</Border>
 							</Popup>

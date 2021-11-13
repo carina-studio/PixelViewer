@@ -127,16 +127,13 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Property of <see cref="BlueColorAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> BlueColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorAdjustment), 0, validate: it => double.IsFinite(it));
+		/// <summary>
 		/// Property of <see cref="BrightnessAdjustment"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> BrightnessAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BrightnessAdjustment), 0, coerce: it =>
-		{
-			if (it < -3)
-				return -3;
-			if (it > 3)
-				return 3;
-			return it;
-		}, validate: it => double.IsFinite(it));
+		public static readonly ObservableProperty<double> BrightnessAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BrightnessAdjustment), 0, validate: it => double.IsFinite(it));
 		/// <summary>
 		/// Property of <see cref="ByteOrdering"/>.
 		/// </summary>
@@ -144,14 +141,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="ContrastAdjustment"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> ContrastAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, coerce: it =>
-		{
-			if (it < -3)
-				return -3;
-			if (it > 3)
-				return 3;
-			return it;
-		}, validate: it => double.IsFinite(it));
+		public static readonly ObservableProperty<double> ContrastAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, validate: it => double.IsFinite(it));
 		/// <summary>
 		/// Property of <see cref="DataOffset"/>.
 		/// </summary>
@@ -173,9 +163,17 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
 		/// <summary>
+		/// Property of <see cref="GreenColorAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> GreenColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorAdjustment), 0, validate: it => double.IsFinite(it));
+		/// <summary>
 		/// Property of <see cref="HasBrightnessAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasBrightnessAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasBrightnessAdjustment));
+		/// <summary>
+		/// Property of <see cref="HasColorAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasColorAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasColorAdjustment));
 		/// <summary>
 		/// Property of <see cref="HasContrastAdjustment"/>.
 		/// </summary>
@@ -261,6 +259,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsBrightnessAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBrightnessAdjustmentSupported));
 		/// <summary>
+		/// Property of <see cref="IsColorAdjustmentSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsColorAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsColorAdjustmentSupported));
+		/// <summary>
 		/// Property of <see cref="IsContrastAdjustmentSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsContrastAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsContrastAdjustmentSupported));
@@ -316,6 +318,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="Profile"/>.
 		/// </summary>
 		public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default);
+		/// <summary>
+		/// Property of <see cref="RedColorAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> RedColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(RedColorAdjustment), 0, validate: it => double.IsFinite(it));
 		/// <summary>
 		/// Property of <see cref="RenderedImage"/>.
 		/// </summary>
@@ -453,6 +459,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (!this.IsSourceFileOpened)
 				{
 					this.SetValue(IsBrightnessAdjustmentSupportedProperty, false);
+					this.SetValue(IsColorAdjustmentSupportedProperty, false);
 					this.SetValue(IsContrastAdjustmentSupportedProperty, false);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, false);
 				}
@@ -460,6 +467,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					var format = this.ImageRenderer.Format;
 					this.SetValue(IsBrightnessAdjustmentSupportedProperty, true);
+					this.SetValue(IsColorAdjustmentSupportedProperty, true);
 					this.SetValue(IsContrastAdjustmentSupportedProperty, true);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, format.Category != ImageFormatCategory.Luminance);
 				}
@@ -478,6 +486,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsDisposed)
 					return;
 				this.SetValue(IsFilteringRenderedImageNeededProperty, (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+					|| (this.HasColorAdjustment && this.IsColorAdjustmentSupported)
 					|| (this.HasContrastAdjustment && this.IsContrastAdjustmentSupported)
 					|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 			});
@@ -681,6 +690,16 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to apply parameters defined by current <see cref="Profile"/>.
 		/// </summary>
 		public ICommand ApplyProfileCommand { get; }
+
+
+		/// <summary>
+		/// Get or set blue color adjustment.
+		/// </summary>
+		public double BlueColorAdjustment
+		{
+			get => this.GetValue(BlueColorAdjustmentProperty);
+			set => this.SetValue(BlueColorAdjustmentProperty, value);
+		}
 
 
 		/// <summary>
@@ -1131,6 +1150,7 @@ namespace Carina.PixelViewer.ViewModels
 			var filterCount = 0;
 			var isColorLutFilterNeeded = false;
 			if ((this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+				|| (this.HasColorAdjustment && this.IsColorAdjustmentSupported)
 				|| (this.HasContrastAdjustment && this.IsContrastAdjustmentSupported))
 			{
 				isColorLutFilterNeeded = true;
@@ -1199,14 +1219,26 @@ namespace Carina.PixelViewer.ViewModels
 					ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
 				if (HasContrastAdjustment && this.IsContrastAdjustmentSupported)
                 {
-					var contrast = this.ContrastAdjustment;
 					var middleColor = (rLut.Count - 1) / 2.0;
-					var factor = (contrast > 0.1)
-						? contrast + 1
-						: -1 / (contrast - 1);
+					var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
 					ColorLut.Multiply(rLut, factor);
 					ColorLut.Translate(rLut, (1 - factor) * middleColor);
                 }
+				if (HasColorAdjustment && this.IsColorAdjustmentSupported)
+				{
+					var rFactor = this.RedColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+					var gFactor = this.GreenColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+					var bFactor = this.BlueColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+					var correction = 3 / (rFactor + gFactor + bFactor);
+					rFactor *= correction;
+					gFactor *= correction;
+					bFactor *= correction;
+					gLut = rLut.ToArray();
+					bLut = rLut.ToArray();
+					ColorLut.Multiply(rLut, rFactor);
+					ColorLut.Multiply(gLut, gFactor);
+					ColorLut.Multiply(bLut, bFactor);
+				}
 
 				// apply filter
 				var parameters = new ColorLutImageFilter.Params()
@@ -1379,9 +1411,25 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get or set green color adjustment.
+		/// </summary>
+		public double GreenColorAdjustment
+		{
+			get => this.GetValue(GreenColorAdjustmentProperty);
+			set => this.SetValue(GreenColorAdjustmentProperty, value);
+		}
+
+
+		/// <summary>
 		/// Check whether <see cref="BrightnessAdjustment"/> is non-zero or not.
 		/// </summary>
 		public bool HasBrightnessAdjustment { get => this.GetValue(HasBrightnessAdjustmentProperty); }
+
+
+		/// <summary>
+		/// Check whether at least one of <see cref="RedColorAdjustment"/>, <see cref="GreenColorAdjustment"/>, <see cref="BlueColorAdjustment"/> is non-zero or not.
+		/// </summary>
+		public bool HasColorAdjustment { get => this.GetValue(HasColorAdjustmentProperty); }
 
 
 		/// <summary>
@@ -1520,6 +1568,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether brightness adjustment is supported or not.
 		/// </summary>
 		public bool IsBrightnessAdjustmentSupported { get => this.GetValue(IsBrightnessAdjustmentSupportedProperty); }
+
+
+		/// <summary>
+		/// Check whether color adjustment is supported or not.
+		/// </summary>
+		public bool IsColorAdjustmentSupported { get => this.GetValue(IsColorAdjustmentSupportedProperty); }
 
 
 		/// <summary>
@@ -1691,7 +1745,17 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {
             base.OnPropertyChanged(property, oldValue, newValue);
-			if (property == BrightnessAdjustmentProperty)
+			if (property == BlueColorAdjustmentProperty
+				|| property == GreenColorAdjustmentProperty
+				|| property == RedColorAdjustmentProperty)
+			{
+				this.SetValue(HasColorAdjustmentProperty, Math.Abs(this.BlueColorAdjustment) > 0.01
+					|| Math.Abs(this.GreenColorAdjustment) > 0.01
+					|| Math.Abs(this.RedColorAdjustment) > 0.01);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule(RenderImageDelay);
+			}
+			else if (property == BrightnessAdjustmentProperty)
 			{
 				this.SetValue(HasBrightnessAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 				this.updateIsFilteringImageNeededAction.Schedule();
@@ -1998,6 +2062,16 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get available profiles.
 		/// </summary>
 		public IList<ImageRenderingProfile> Profiles { get; }
+
+
+		/// <summary>
+		/// Get or set red color adjustment.
+		/// </summary>
+		public double RedColorAdjustment
+		{
+			get => this.GetValue(RedColorAdjustmentProperty);
+			set => this.SetValue(RedColorAdjustmentProperty, value);
+		}
 
 
 		// Release memory of rendered images from another session.
@@ -2459,15 +2533,24 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// load filtering parameters
+			var blueColorAdjustment = 0.0;
 			var brightnessAdjustment = 0.0;
 			var contrastAdjustment = 0.0;
+			var greenColorAdjustment = 0.0;
 			var isGrayscaleFilterEnabled = false;
+			var redColorAdjustment = 0.0;
+			if (savedState.TryGetProperty(nameof(BlueColorAdjustment), out jsonProperty))
+				jsonProperty.TryGetDouble(out blueColorAdjustment);
 			if (savedState.TryGetProperty(nameof(BrightnessAdjustment), out jsonProperty))
 				jsonProperty.TryGetDouble(out brightnessAdjustment);
 			if (savedState.TryGetProperty(nameof(ContrastAdjustment), out jsonProperty))
 				jsonProperty.TryGetDouble(out contrastAdjustment);
+			if (savedState.TryGetProperty(nameof(GreenColorAdjustment), out jsonProperty))
+				jsonProperty.TryGetDouble(out greenColorAdjustment);
 			if (savedState.TryGetProperty(nameof(IsGrayscaleFilterEnabled), out jsonProperty))
 				isGrayscaleFilterEnabled = jsonProperty.ValueKind != JsonValueKind.False;
+			if (savedState.TryGetProperty(nameof(RedColorAdjustment), out jsonProperty))
+				jsonProperty.TryGetDouble(out redColorAdjustment);
 
 			// load displaying parameters
 			var fitToViewport = true;
@@ -2515,9 +2598,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.ChangeRowStride(i, rowStrides[i]);
 
 			// apply filtering parameters
+			this.SetValue(BlueColorAdjustmentProperty, blueColorAdjustment);
 			this.SetValue(BrightnessAdjustmentProperty, brightnessAdjustment);
 			this.SetValue(ContrastAdjustmentProperty, contrastAdjustment);
+			this.SetValue(GreenColorAdjustmentProperty, greenColorAdjustment);
 			this.SetValue(IsGrayscaleFilterEnabledProperty, isGrayscaleFilterEnabled);
+			this.SetValue(RedColorAdjustmentProperty, redColorAdjustment);
 
 			// apply displaying parameters
 			this.EffectiveRenderedImageRotation = rotation;
@@ -2839,9 +2925,15 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteEndArray();
 
 				// filtering parameters
-				if (HasBrightnessAdjustment)
+				if (this.HasBrightnessAdjustment)
 					writer.WriteNumber(nameof(BrightnessAdjustment), this.BrightnessAdjustment);
-				if (HasContrastAdjustment)
+				if (this.HasColorAdjustment)
+				{
+					writer.WriteNumber(nameof(BlueColorAdjustment), this.BlueColorAdjustment);
+					writer.WriteNumber(nameof(GreenColorAdjustment), this.GreenColorAdjustment);
+					writer.WriteNumber(nameof(RedColorAdjustment), this.RedColorAdjustment);
+				}
+				if (this.HasContrastAdjustment)
 					writer.WriteNumber(nameof(ContrastAdjustment), this.ContrastAdjustment);
 				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 

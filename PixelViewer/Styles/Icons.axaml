@@ -39,6 +39,15 @@
 	<DrawingImage x:Key="Image/Icon.Brightness.Light">
 		<GeometryDrawing Brush="{DynamicResource Brush/Icon.Light}" Geometry="{StaticResource Geometry/Icon.Brightness}"/>
 	</DrawingImage>
+	<DrawingImage x:Key="Image/Icon.Color">
+		<GeometryDrawing Brush="{DynamicResource Brush/Icon}" Geometry="{StaticResource Geometry/Icon.Color}"/>
+	</DrawingImage>
+	<DrawingImage x:Key="Image/Icon.Color.Active">
+		<GeometryDrawing Brush="{DynamicResource Brush/Icon.Active}" Geometry="{StaticResource Geometry/Icon.Color}"/>
+	</DrawingImage>
+	<DrawingImage x:Key="Image/Icon.Color.Light">
+		<GeometryDrawing Brush="{DynamicResource Brush/Icon.Light}" Geometry="{StaticResource Geometry/Icon.Color}"/>
+	</DrawingImage>
 	<DrawingImage x:Key="Image/Icon.Contrast">
 		<GeometryDrawing Brush="{DynamicResource Brush/Icon}" Geometry="{StaticResource Geometry/Icon.Contrast}"/>
 	</DrawingImage>

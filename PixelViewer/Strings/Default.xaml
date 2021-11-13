@@ -68,6 +68,10 @@
 	<sys:String x:Key="String/SessionControl.BrightnessAdjustment.Label">Brightness</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte ordering</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color adjustment</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red</sys:String>
 	<sys:String x:Key="String/SessionControl.ContrastAdjustment">Contrast adjustment</sys:String>
 	<sys:String x:Key="String/SessionControl.ContrastAdjustment.Label">Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
