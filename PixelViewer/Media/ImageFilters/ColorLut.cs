@@ -53,6 +53,18 @@ namespace Carina.PixelViewer.Media.ImageFilters
 
 
         /// <summary>
+        /// Apply multiplication.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="factor">Factor.</param>
+        public static void Multiply(IList<double> lut, double factor)
+        {
+            for (var n = lut.Count - 1; n >= 0; --n)
+                lut[n] *= factor;
+        }
+
+
+        /// <summary>
         /// Reset LUT to identity transformation.
         /// </summary>
         /// <param name="lut">LUT.</param>
@@ -60,6 +72,18 @@ namespace Carina.PixelViewer.Media.ImageFilters
         {
             for (var n = lut.Count - 1; n >= 0; --n)
                 lut[n] = n;
+        }
+
+
+        /// <summary>
+        /// Apply translation.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="offset">Offset.</param>
+        public static void Translate(IList<double> lut, double offset)
+        {
+            for (var n = lut.Count - 1; n >= 0; --n)
+                lut[n] += offset;
         }
     }
 }

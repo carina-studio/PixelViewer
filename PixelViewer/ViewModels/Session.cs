@@ -1097,12 +1097,18 @@ namespace Carina.PixelViewer.ViewModels
 
 			// check filters needed
 			var filterCount = 0;
-			var isBrightnessFilterNeeded = (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
-			var isGrayscaleFilterNeeded = (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported);
-			if (isBrightnessFilterNeeded)
+			var isColorLutFilterNeeded = false;
+			if (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+			{
+				isColorLutFilterNeeded = true;
 				++filterCount;
-			if (isGrayscaleFilterNeeded)
+			}
+			var isGrayscaleFilterNeeded = false;
+			if (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported)
+			{
+				isGrayscaleFilterNeeded = true;
 				++filterCount;
+			}
 
 			// allocate frames
 			var filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
@@ -1149,14 +1155,25 @@ namespace Carina.PixelViewer.ViewModels
 			var failedToApply = false;
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
-			// apply brightness filter
-			if (isBrightnessFilterNeeded)
+			// apply color LUT filter
+			if (isColorLutFilterNeeded)
 			{
-				var parameters = new BrightnessImageFilter.Params()
+				// prepare color LUT
+				var rLut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
+				var gLut = rLut;
+				var bLut = rLut;
+				if (HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+					ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
+
+				// apply filter
+				var parameters = new ColorLutImageFilter.Params()
 				{
-					Factor = Math.Pow(2, this.BrightnessAdjustment)
-				};
-				if (await this.ApplyImageFilterAsync(new BrightnessImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
+					RedLookupTable = rLut,
+					GreenLookupTable = gLut,
+					BlueLookupTable = bLut,
+					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
+			};
+				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (sourceImageFrame == renderedImageFrame)
 					{
