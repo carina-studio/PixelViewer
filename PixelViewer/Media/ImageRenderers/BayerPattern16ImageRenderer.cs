@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -94,12 +95,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				// horizontal demosaicing
 				if (cancellationToken.IsCancellationRequested || !renderingOptions.Demosaicing)
 					return;
-				bitmapRowPtr = (byte*)bitmapBaseAddress;
-				var accumColors = stackalloc int[3];
-				var colorCounts = stackalloc int[3];
-				for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
+				Parallel.For(0, height, (y) =>
 				{
-					var bitmapPixelPtr = bitmapRowPtr;
+					var accumColors = stackalloc int[3];
+					var colorCounts = stackalloc int[3];
+					var bitmapPixelPtr = ((byte*)bitmapBaseAddress + bitmapRowStride * y);
 					var leftBitmapPixelPtr = (byte*)null;
 					var rightBitmapPixelPtr = (bitmapPixelPtr + 4);
 					for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4)
@@ -137,27 +137,26 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						}
 					}
 					if (cancellationToken.IsCancellationRequested)
-						break;
-				}
+						return;
+				});
 
 				// vertical demosaicing
 				if (cancellationToken.IsCancellationRequested)
 					return;
-				bitmapRowPtr = (byte*)bitmapBaseAddress;
-				for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
+				Parallel.For(0, width, (x) =>
 				{
-					var bitmapPixelPtr = bitmapRowPtr;
+					var accumColors = stackalloc int[3];
+					var colorCounts = stackalloc int[3];
+					var bitmapPixelPtr = ((byte*)bitmapBaseAddress + x * 4);
 					var topBitmapPixelPtr = (bitmapPixelPtr - bitmapRowStride);
 					var bottomBitmapPixelPtr = (bitmapPixelPtr + bitmapRowStride);
-					var isNotFirstRow = (y > 0);
-					var isNotLastRow = (y < height - 1);
-					for (var x = 0; x < width; ++x, bitmapPixelPtr += 4, topBitmapPixelPtr += 4, bottomBitmapPixelPtr += 4)
+					for (var y = 0; y < height; ++y, bitmapPixelPtr += bitmapRowStride, topBitmapPixelPtr += bitmapRowStride, bottomBitmapPixelPtr += bitmapRowStride)
 					{
 						// get component at current pixel
 						var centerComponent = (int)this.SelectColorComponent(x, y);
 
 						// collect colors around current pixel
-						if (isNotFirstRow)
+						if (y > 0)
 						{
 							var neighborComponent = (int)this.SelectColorComponent(x, y - 1);
 							if (neighborComponent != centerComponent)
@@ -166,7 +165,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								++colorCounts[neighborComponent];
 							}
 						}
-						if (isNotLastRow)
+						if (y < height - 1)
 						{
 							var neighborComponent = (int)this.SelectColorComponent(x, y + 1);
 							if (neighborComponent != centerComponent)
@@ -186,8 +185,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						}
 					}
 					if (cancellationToken.IsCancellationRequested)
-						break;
-				}
+						return;
+				});
 			});
 		}
 

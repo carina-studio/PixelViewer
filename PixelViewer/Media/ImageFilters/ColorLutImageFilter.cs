@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageFilters
 {
@@ -85,19 +86,12 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 {
                     var sourceRowStride = source.RowBytes;
                     var resultRowStride = result.RowBytes;
-                    var sourceRowPtr = (byte*)sourceBaseAddr;
-                    var resultRowPtr = (byte*)resultBaseAddr;
                     var width = source.Width;
-                    var height = source.Height;
                     switch (source.Format)
                     {
                         case BitmapFormat.Bgra32:
                             {
                                 var luts = (byte*)Marshal.AllocHGlobal(256 * 4);
-                                var r = (byte)0;
-                                var g = (byte)0;
-                                var b = (byte)0;
-                                var a = (byte)0;
                                 var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 try
@@ -109,10 +103,14 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     var aLut = this.BuildFinalLookupTable(parameters.AlphaLookupTable, bLut + 256);
 
                                     // apply
-                                    for (var y = height; y > 0; --y, sourceRowPtr += sourceRowStride, resultRowPtr += resultRowStride)
+                                    Parallel.For(0, source.Height, (y) =>
                                     {
-                                        var sourcePixelPtr = (uint*)sourceRowPtr;
-                                        var resultPixelPtr = (uint*)resultRowPtr;
+                                        var r = (byte)0;
+                                        var g = (byte)0;
+                                        var b = (byte)0;
+                                        var a = (byte)0;
+                                        var sourcePixelPtr = (uint*)((byte*)sourceBaseAddr + sourceRowStride * y);
+                                        var resultPixelPtr = (uint*)((byte*)resultBaseAddr + resultRowStride * y);
                                         for (var x = width; x > 0; --x, ++sourcePixelPtr, ++resultPixelPtr)
                                         {
                                             unpackFunc(*sourcePixelPtr, &b, &g, &r, &a);
@@ -120,7 +118,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                         }
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
-                                    }
+                                    });
                                 }
                                 finally
                                 {
@@ -131,10 +129,6 @@ namespace Carina.PixelViewer.Media.ImageFilters
                         case BitmapFormat.Bgra64:
                             {
                                 var luts = (ushort*)Marshal.AllocHGlobal(65536 * 4);
-                                var r = (ushort)0;
-                                var g = (ushort)0;
-                                var b = (ushort)0;
-                                var a = (ushort)0;
                                 var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 try
@@ -146,10 +140,14 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     var aLut = this.BuildFinalLookupTable(parameters.AlphaLookupTable, bLut + 65536);
 
                                     // apply
-                                    for (var y = height; y > 0; --y, sourceRowPtr += sourceRowStride, resultRowPtr += resultRowStride)
+                                    Parallel.For(0, source.Height, (y) =>
                                     {
-                                        var sourcePixelPtr = (ulong*)sourceRowPtr;
-                                        var resultPixelPtr = (ulong*)resultRowPtr;
+                                        var r = (ushort)0;
+                                        var g = (ushort)0;
+                                        var b = (ushort)0;
+                                        var a = (ushort)0;
+                                        var sourcePixelPtr = (ulong*)((byte*)sourceBaseAddr + sourceRowStride * y);
+                                        var resultPixelPtr = (ulong*)((byte*)resultBaseAddr + resultRowStride * y);
                                         for (var x = width; x > 0; --x, ++sourcePixelPtr, ++resultPixelPtr)
                                         {
                                             unpackFunc(*sourcePixelPtr, &b, &g, &r, &a);
@@ -157,7 +155,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                         }
                                         if (cancellationToken.IsCancellationRequested)
                                             return;
-                                    }
+                                    });
                                 }
                                 finally
                                 {
