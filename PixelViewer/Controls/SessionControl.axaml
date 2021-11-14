@@ -90,7 +90,7 @@
 			<Grid ColumnDefinitions="*,Auto">
 
 				<!-- Image actions -->
-				<StackPanel Orientation="Horizontal">
+				<WrapPanel Orientation="Horizontal">
 
 					<!-- Open file -->
 					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
@@ -162,40 +162,45 @@
 					<!-- Separator -->
 					<Separator Classes="ToolBar_Separator"/>
 
-					<!-- First frame -->
-					<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastBackward}"/>
-					</Button>
+					<!-- Frame navigation -->
+					<StackPanel Orientation="Horizontal">
 
-					<!-- Previous frame -->
-					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Backward}"/>
-					</RepeatButton>
+						<!-- First frame -->
+						<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastBackward}"/>
+						</Button>
 
-					<!-- Frame -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
-						<Panel>
-							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
-							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
-								<TextBlock.Text>
-									<MultiBinding StringFormat="{}{0} / {1}">
-										<Binding Path="FrameNumber"/>
-										<Binding Path="FrameCount"/>
-									</MultiBinding>
-								</TextBlock.Text>
-							</TextBlock>
-						</Panel>
-					</Button>
+						<!-- Previous frame -->
+						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Backward}"/>
+						</RepeatButton>
 
-					<!-- Next frame -->
-					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Forward}"/>
-					</RepeatButton>
+						<!-- Frame -->
+						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+							<Panel>
+								<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
+								<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
+									<TextBlock.Text>
+										<MultiBinding StringFormat="{}{0} / {1}">
+											<Binding Path="FrameNumber"/>
+											<Binding Path="FrameCount"/>
+										</MultiBinding>
+									</TextBlock.Text>
+								</TextBlock>
+							</Panel>
+						</Button>
 
-					<!-- Last frame -->
-					<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
-					</Button>
+						<!-- Next frame -->
+						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Forward}"/>
+						</RepeatButton>
+
+						<!-- Last frame -->
+						<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
+						</Button>
+						
+					</StackPanel>
 
 					<!-- Separator -->
 					<Separator Classes="ToolBar_Separator"/>
@@ -290,10 +295,10 @@
 						</Panel>
 					</ToggleButton>
 
-				</StackPanel>
+				</WrapPanel>
 
 				<!-- Other actions -->
-				<StackPanel Grid.Column="1" Orientation="Horizontal">
+				<StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
 
 					<!-- Test -->
 					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
