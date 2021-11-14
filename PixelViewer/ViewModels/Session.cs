@@ -1842,8 +1842,9 @@ namespace Carina.PixelViewer.ViewModels
 					this.filterImageAction.Schedule();
 				else
 				{
-					this.ClearFilteredImage();
+					this.CancelFilteringImage();
 					this.ReportRenderedImage();
+					this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 				}
 			}
 			else if (property == IsFilteringRenderedImageProperty
@@ -2443,19 +2444,30 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Report rendered image according to current state.
-		void ReportRenderedImage()
+		async void ReportRenderedImage()
 		{
 			var imageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
 			if (imageFrame != null)
 			{
+				// convert to Avalonia bitmap
+				var bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync();
+				var currentImageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
+				if (currentImageFrame != imageFrame)
+					return;
+
+				// update state
 				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+				this.SetValue(HistogramsProperty, imageFrame.Histograms);
+				this.SetValue(RenderedImageProperty, bitmap);
 			}
 			else
+			{
 				this.canSaveRenderedImage.Update(false);
-			this.SetValue(HistogramsProperty, imageFrame?.Histograms);
-			this.SetValue(RenderedImageProperty, imageFrame?.BitmapBuffer?.CreateAvaloniaBitmap());
+				this.SetValue(HistogramsProperty, null);
+				this.SetValue(RenderedImageProperty, null);
+			}
 		}
 
 
@@ -2916,20 +2928,17 @@ namespace Carina.PixelViewer.ViewModels
 			IBitmapBuffer sharedImageBuffer = renderedImageBuffer.Share();
 
 			// save
-			var result = await Task.Run(() =>
+			var result = await Task.Run(async () =>
 			{
 				try
 				{
-					unsafe
-					{
 #if WINDOWS10_0_17763_0_OR_GREATER
-						using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
-						bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+					using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
+					bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
 #else
-						using var bitmap = sharedImageBuffer.CreateAvaloniaBitmap();
-						bitmap.Save(stream);
+					using var bitmap = await sharedImageBuffer.CreateAvaloniaBitmapAsync();
+					bitmap.Save(stream);
 #endif
-					}
 					return true;
 				}
 				catch (Exception ex)

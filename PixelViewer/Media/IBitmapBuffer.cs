@@ -4,6 +4,7 @@ using Carina.PixelViewer.Runtime.InteropServices;
 using CarinaStudio;
 using System;
 using System.Buffers;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media
 {
@@ -88,17 +89,21 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
-		/// Create <see cref="IBitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
+		/// Create <see cref="IBitmap"/> which copied data from this <see cref="IBitmapBuffer"/> asynchronously.
 		/// </summary>
 		/// <param name="buffer"><see cref="IBitmapBuffer"/>.</param>
-		/// <returns><see cref="IBitmap"/>.</returns>
-		public static IBitmap CreateAvaloniaBitmap(this IBitmapBuffer buffer)
-		{
-			return buffer.Memory.Pin((address) =>
+		/// <returns>Task of creating <see cref="IBitmap"/>.</returns>
+		public static async Task<IBitmap> CreateAvaloniaBitmapAsync(this IBitmapBuffer buffer)
+        {
+			using var sharedBuffer = buffer.Share();
+			return await Task.Run(() =>
 			{
-				return new Bitmap(buffer.Format.ToAvaloniaPixelFormat(), Avalonia.Platform.AlphaFormat.Unpremul, address, new PixelSize(buffer.Width, buffer.Height), new Vector(96, 96), buffer.RowBytes);
+				return sharedBuffer.Memory.Pin((address) =>
+				{
+					return new Bitmap(sharedBuffer.Format.ToAvaloniaPixelFormat(), Avalonia.Platform.AlphaFormat.Unpremul, address, new PixelSize(sharedBuffer.Width, sharedBuffer.Height), new Vector(96, 96), sharedBuffer.RowBytes);
+				});
 			});
-		}
+        }
 
 
 #if WINDOWS10_0_17763_0_OR_GREATER
