@@ -78,7 +78,6 @@
 		<Setter Property="BorderBrush" Value="{DynamicResource ComboBoxDropDownBorderBrush}"/>
 		<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxDropdownBorderThickness}"/>
 		<Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}"/>
-		<Setter Property="Padding" Value="{DynamicResource Thickness/SessionControl.FilterParamsPopup.Padding}"/>
 	</Style>
 	<Style Selector="Border.SessionControl_ImageViewer_Hint_Icon">
 		<Setter Property="Height" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
@@ -114,6 +113,9 @@
 	</Style>
 	<Style Selector="Slider.SessionControl_FilterParamsSlider:pressed /template/ RepeatButton#PART_DecreaseButton">
 		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPressed}"/>
+	</Style>
+	<Style Selector="StackPanel.SessionControl_FilterParamsPopup">
+		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.FilterParamsPopup.Padding}"/>
 	</Style>
 	<Style Selector="TextBlock.SessionControl_ImageViewer_Hint_TextBlock">
 		<Setter Property="FontSize" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>

@@ -375,6 +375,9 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canOpenSourceFile = new MutableObservableBoolean(true);
+		readonly MutableObservableBoolean canResetBrightnessAdjustment = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canResetColorAdjustment = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canResetContrastAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
@@ -437,6 +440,9 @@ namespace Carina.PixelViewer.ViewModels
 					--this.FrameNumber;
 			}, this.canMoveToPreviousFrame);
 			this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSourceFile);
+			this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
+			this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
+			this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
 			this.SaveAsNewProfileCommand = new Command<string>(name => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
@@ -485,9 +491,9 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.IsDisposed)
 					return;
-				this.SetValue(IsFilteringRenderedImageNeededProperty, (this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
-					|| (this.HasColorAdjustment && this.IsColorAdjustmentSupported)
-					|| (this.HasContrastAdjustment && this.IsContrastAdjustmentSupported)
+				this.SetValue(IsFilteringRenderedImageNeededProperty, this.canResetBrightnessAdjustment.Value
+					|| this.canResetColorAdjustment.Value
+					|| this.canResetContrastAdjustment.Value
 					|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 			});
 
@@ -1149,9 +1155,7 @@ namespace Carina.PixelViewer.ViewModels
 			// check filters needed
 			var filterCount = 0;
 			var isColorLutFilterNeeded = false;
-			if ((this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
-				|| (this.HasColorAdjustment && this.IsColorAdjustmentSupported)
-				|| (this.HasContrastAdjustment && this.IsContrastAdjustmentSupported))
+			if (this.canResetBrightnessAdjustment.Value || this.canResetColorAdjustment.Value || this.canResetContrastAdjustment.Value)
 			{
 				isColorLutFilterNeeded = true;
 				++filterCount;
@@ -1215,16 +1219,16 @@ namespace Carina.PixelViewer.ViewModels
 				var rLut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
 				var gLut = rLut;
 				var bLut = rLut;
-				if (HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported)
+				if (this.canResetBrightnessAdjustment.Value)
 					ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
-				if (HasContrastAdjustment && this.IsContrastAdjustmentSupported)
+				if (this.canResetContrastAdjustment.Value)
                 {
 					var middleColor = (rLut.Count - 1) / 2.0;
 					var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
 					ColorLut.Multiply(rLut, factor);
 					ColorLut.Translate(rLut, (1 - factor) * middleColor);
                 }
-				if (HasColorAdjustment && this.IsColorAdjustmentSupported)
+				if (this.canResetColorAdjustment.Value)
 				{
 					var rFactor = this.RedColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
 					var gFactor = this.GreenColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
@@ -1752,12 +1756,14 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HasColorAdjustmentProperty, Math.Abs(this.BlueColorAdjustment) > 0.01
 					|| Math.Abs(this.GreenColorAdjustment) > 0.01
 					|| Math.Abs(this.RedColorAdjustment) > 0.01);
+				this.canResetColorAdjustment.Update(this.HasColorAdjustment && this.IsColorAdjustmentSupported);
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
 			else if (property == BrightnessAdjustmentProperty)
 			{
 				this.SetValue(HasBrightnessAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+				this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
@@ -1769,6 +1775,7 @@ namespace Carina.PixelViewer.ViewModels
 			else if (property == ContrastAdjustmentProperty)
 			{
 				this.SetValue(HasContrastAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+				this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
@@ -1811,6 +1818,24 @@ namespace Carina.PixelViewer.ViewModels
 					this.isImagePlaneOptionsResetNeeded = true;
 				this.renderImageAction.Reschedule(RenderImageDelay);
 			}
+			else if (property == IsBrightnessAdjustmentSupportedProperty)
+			{
+				this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Reschedule();
+			}
+			else if (property == IsColorAdjustmentSupportedProperty)
+			{
+				this.canResetColorAdjustment.Update(this.HasColorAdjustment && this.IsColorAdjustmentSupported);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Reschedule();
+			}
+			else if (property == IsContrastAdjustmentSupportedProperty)
+			{
+				this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Reschedule();
+			}
 			else if (property == IsFilteringRenderedImageNeededProperty)
 			{
 				if ((bool)newValue.AsNonNull())
@@ -1821,17 +1846,18 @@ namespace Carina.PixelViewer.ViewModels
 					this.ReportRenderedImage();
 				}
 			}
-			else if (property == IsGrayscaleFilterEnabledProperty)
-			{
-				this.updateIsFilteringImageNeededAction.Schedule();
-				this.filterImageAction.Schedule();
-			}
 			else if (property == IsFilteringRenderedImageProperty
 				|| property == IsOpeningSourceFileProperty
 				|| property == IsRenderingImageProperty
 				|| property == IsSavingRenderedImageProperty)
 			{
 				this.updateIsProcessingImageAction.Schedule();
+			}
+			else if (property == IsGrayscaleFilterEnabledProperty
+				|| property == IsGrayscaleFilterSupportedProperty)
+			{
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule();
 			}
 			else if (property == IsHistogramsVisibleProperty)
 				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
@@ -2431,6 +2457,56 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(HistogramsProperty, imageFrame?.Histograms);
 			this.SetValue(RenderedImageProperty, imageFrame?.BitmapBuffer?.CreateAvaloniaBitmap());
 		}
+
+
+		// Reset brightness adjustment.
+		void ResetBrightnessAdjustment()
+        {
+			this.VerifyAccess();
+			if (this.IsDisposed || !this.canResetBrightnessAdjustment.Value)
+				return;
+			this.BrightnessAdjustment = 0;
+        }
+
+
+		/// <summary>
+		/// Command to reset <see cref="BrightnessAdjustment"/>.
+		/// </summary>
+		public ICommand ResetBrightnessAdjustmentCommand { get; }
+
+
+		// Reset color adjustment.
+		void ResetColorAdjustment()
+		{
+			this.VerifyAccess();
+			if (this.IsDisposed || !this.canResetColorAdjustment.Value)
+				return;
+			this.BlueColorAdjustment = 0;
+			this.GreenColorAdjustment = 0;
+			this.RedColorAdjustment = 0;
+		}
+
+
+		/// <summary>
+		/// Command to reset <see cref="BlueColorAdjustment"/>, <see cref="GreenColorAdjustment"/> and <see cref="RedColorAdjustment"/>.
+		/// </summary>
+		public ICommand ResetColorAdjustmentCommand { get; }
+
+
+		// Reset contrast adjustment.
+		void ResetContrastAdjustment()
+		{
+			this.VerifyAccess();
+			if (this.IsDisposed || !this.canResetContrastAdjustment.Value)
+				return;
+			this.ContrastAdjustment = 0;
+		}
+
+
+		/// <summary>
+		/// Command to reset <see cref="ContrastAdjustment"/>.
+		/// </summary>
+		public ICommand ResetContrastAdjustmentCommand { get; }
 
 
 		// Restore state.

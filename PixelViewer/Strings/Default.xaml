@@ -39,6 +39,7 @@
 	<sys:String x:Key="String/Common.KnowMoreAbout">Know more about</sys:String>
 	<sys:String x:Key="String/Common.Options">Options</sys:String>
 	<sys:String x:Key="String/Common.Rename">Rename</sys:String>
+	<sys:String x:Key="String/Common.Reset">Reset</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All files</sys:String>
@@ -64,16 +65,15 @@
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
-	<sys:String x:Key="String/SessionControl.BrightnessAdjustment">Brightness adjustment</sys:String>
-	<sys:String x:Key="String/SessionControl.BrightnessAdjustment.Label">Brightness</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness adjustment</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte ordering</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color adjustment</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red</sys:String>
-	<sys:String x:Key="String/SessionControl.ContrastAdjustment">Contrast adjustment</sys:String>
-	<sys:String x:Key="String/SessionControl.ContrastAdjustment.Label">Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy full path</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU usage</sys:String>

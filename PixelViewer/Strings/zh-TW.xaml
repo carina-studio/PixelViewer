@@ -32,6 +32,7 @@
 	<sys:String x:Key="String/Common.KnowMoreAbout">了解更多</sys:String>
 	<sys:String x:Key="String/Common.Options">選項</sys:String>
 	<sys:String x:Key="String/Common.Rename">重新命名</sys:String>
+	<sys:String x:Key="String/Common.Reset">重設</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
@@ -56,16 +57,15 @@
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">關於 PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重設至組態參數</sys:String>
-	<sys:String x:Key="String/SessionControl.BrightnessAdjustment">亮度調整</sys:String>
-	<sys:String x:Key="String/SessionControl.BrightnessAdjustment.Label">亮度</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">調整亮度及對比</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">對比</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">位元組順序</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorAdjustment">色彩調整</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment">調整色彩</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">藍色</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">綠色</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">紅色</sys:String>
-	<sys:String x:Key="String/SessionControl.ContrastAdjustment">對比調整</sys:String>
-	<sys:String x:Key="String/SessionControl.ContrastAdjustment.Label">對比</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">複製檔案名稱</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">複製完整檔案路徑</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU 使用率</sys:String>
