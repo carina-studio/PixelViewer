@@ -1,8 +1,12 @@
 ﻿using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,6 +17,10 @@ namespace Carina.PixelViewer.Media
     /// </summary>
     class BitmapHistograms
     {
+        // Static fields.
+        static readonly ILogger? Logger = AppSuiteApplication.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapHistograms));
+
+
         /// <summary>
         /// Initialize new <see cref="BitmapHistograms"/> instance.
         /// </summary>
@@ -54,6 +62,7 @@ namespace Carina.PixelViewer.Media
         public static Task<BitmapHistograms> CreateAsync(IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken) => bitmapBuffer.Format switch
         {
             BitmapFormat.Bgra32 => CreateFromBgra32Async(bitmapBuffer, cancellationToken),
+            BitmapFormat.Bgra64 => CreateFromBgra64Async(bitmapBuffer, cancellationToken),
             _ => throw new NotSupportedException(),
         };
 
@@ -66,40 +75,134 @@ namespace Carina.PixelViewer.Media
             {
                 return await Task.Run(() =>
                 {
+                    var stopWatch = AppSuiteApplication.CurrentOrNull?.IsDebugMode == true
+                        ? new Stopwatch().Also(it => it.Start())
+                        : null;
                     var red = new int[256];
                     var green = new int[256];
                     var blue = new int[256];
                     var luminance = new int[256];
-                    var rgbToLuminance = ImageProcessing.SelectRgb24ToLuminanceConversion();
                     unsafe
                     {
                         bitmapBuffer.Memory.Pin(ptr =>
                         {
-                            var bitmapPtr = (byte*)ptr;
-                            fixed (int* redHistoram = red, greenHistogram = green, blueHistogram = blue, luminanceHistogram = luminance)
+                            var rgbToLuminance = ImageProcessing.SelectRgb24ToLuminanceConversion();
+                            var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
+                            var width = bitmapBuffer.Width;
+                            var syncLock = new object();
+                            Parallel.For(0, bitmapBuffer.Height, (y) =>
                             {
-                                var width = bitmapBuffer.Width;
-                                var bitmapRowPtr = bitmapPtr;
-                                for (var y = bitmapBuffer.Height; y > 0; --y, bitmapRowPtr += bitmapBuffer.RowBytes)
+                                fixed (int* localHistograms = new int[256 * 4])
                                 {
+                                    var r = (byte)0;
+                                    var g = (byte)0;
+                                    var b = (byte)0;
+                                    var a = (byte)0;
+                                    var localRHistogram = localHistograms;
+                                    var localGHistogram = localRHistogram + 256;
+                                    var localBHistogram = localGHistogram + 256;
+                                    var localLHistogram = localBHistogram + 256;
+                                    var pixelPtr = (uint*)((byte*)ptr + y * bitmapBuffer.RowBytes);
+                                    for (var x = width; x > 0; --x, ++pixelPtr)
+                                    {
+                                        unpackFunc(*pixelPtr, &r, &g, &b, &a);
+                                        var l = rgbToLuminance(r, g, b);
+                                        ++localRHistogram[r];
+                                        ++localGHistogram[g];
+                                        ++localBHistogram[b];
+                                        ++localLHistogram[l];
+                                    }
                                     if (cancellationToken.IsCancellationRequested)
                                         throw new TaskCanceledException();
-                                    var pixelPtr = bitmapRowPtr;
-                                    for (var x = width; x > 0; --x, pixelPtr += 4)
+                                    lock (syncLock)
                                     {
-                                        var r = pixelPtr[2];
-                                        var g = pixelPtr[1];
-                                        var b = pixelPtr[0];
-                                        var l = rgbToLuminance(r, g, b);
-                                        ++redHistoram[r];
-                                        ++greenHistogram[g];
-                                        ++blueHistogram[b];
-                                        ++luminanceHistogram[l];
+                                        for (var i = 255; i >= 0; --i)
+                                        {
+                                            red[i] += localRHistogram[i];
+                                            green[i] += localGHistogram[i];
+                                            blue[i] += localBHistogram[i];
+                                            luminance[i] += localLHistogram[i];
+                                        }
                                     }
                                 }
-                            }
+                            });
                         });
                     }
+                    if (stopWatch != null)
+                        Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
+                    return new BitmapHistograms(red, green, blue, luminance);
+                });
+            }
+            finally
+            {
+                bitmapBuffer.Dispose();
+            }
+        }
+
+
+        // Create histograms from BGRA_64 bitmap.
+        static async Task<BitmapHistograms> CreateFromBgra64Async(IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
+        {
+            bitmapBuffer = bitmapBuffer.Share();
+            try
+            {
+                return await Task.Run(() =>
+                {
+                    var stopWatch = AppSuiteApplication.CurrentOrNull?.IsDebugMode == true
+                        ? new Stopwatch().Also(it => it.Start())
+                        : null;
+                    var red = new int[65536];
+                    var green = new int[65536];
+                    var blue = new int[65536];
+                    var luminance = new int[65536];
+                    unsafe
+                    {
+                        bitmapBuffer.Memory.Pin(ptr =>
+                        {
+                            var rgbToLuminance = ImageProcessing.SelectRgb48ToLuminanceConversion();
+                            var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+                            var width = bitmapBuffer.Width;
+                            var syncLock = new object();
+                            Parallel.For(0, bitmapBuffer.Height, (y) =>
+                            {
+                                fixed (int* localHistograms = new int[65536 * 4])
+                                {
+                                    var r = (ushort)0;
+                                    var g = (ushort)0;
+                                    var b = (ushort)0;
+                                    var a = (ushort)0;
+                                    var localRHistogram = localHistograms;
+                                    var localGHistogram = localRHistogram + 65536;
+                                    var localBHistogram = localGHistogram + 65536;
+                                    var localLHistogram = localBHistogram + 65536;
+                                    var pixelPtr = (ulong*)((byte*)ptr + y * bitmapBuffer.RowBytes);
+                                    for (var x = width; x > 0; --x, ++pixelPtr)
+                                    {
+                                        unpackFunc(*pixelPtr, &r, &g, &b, &a);
+                                        var l = rgbToLuminance(r, g, b);
+                                        ++localRHistogram[r];
+                                        ++localGHistogram[g];
+                                        ++localBHistogram[b];
+                                        ++localLHistogram[l];
+                                    }
+                                    if (cancellationToken.IsCancellationRequested)
+                                        throw new TaskCanceledException();
+                                    lock (syncLock)
+                                    {
+                                        for (var i = 65535; i >= 0; --i)
+                                        {
+                                            red[i] += localRHistogram[i];
+                                            green[i] += localGHistogram[i];
+                                            blue[i] += localBHistogram[i];
+                                            luminance[i] += localLHistogram[i];
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
+                    if (stopWatch != null)
+                        Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
                     return new BitmapHistograms(red, green, blue, luminance);
                 });
             }

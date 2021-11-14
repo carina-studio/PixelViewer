@@ -306,7 +306,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Convert from RGB24 to Luminance based-on ITU-R BT.709.
-		static byte Rgb24ToLuminanceBT709(int r, int g, int b)
+		static byte Rgb24ToLuminanceBT709(byte r, byte g, byte b)
 		{
 			// L = 0.2126 R + 0.7152 G + 0.0722 B
 			return ClipToByte((13933 * r + 46871 * g + 4732 * b) >> 16);
@@ -314,7 +314,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Convert from RGB48 to Luminance based-on ITU-R BT.709.
-		static ushort Rgb48ToLuminanceBT709(int r, int g, int b)
+		static ushort Rgb48ToLuminanceBT709(ushort r, ushort g, ushort b)
 		{
 			// L = 0.2126 R + 0.7152 G + 0.0722 B
 			return ClipToUInt16((13933L * r + 46871L * g + 4732L * b) >> 16);
@@ -373,14 +373,14 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function to convert from 24-bit RGB to 8-bit luminance.
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>
-		public static Func<int, int, int, byte> SelectRgb24ToLuminanceConversion() => Rgb24ToLuminanceBT709;
+		public static delegate*<byte, byte, byte, byte> SelectRgb24ToLuminanceConversion() => &Rgb24ToLuminanceBT709;
 
 
 		/// <summary>
 		/// Select proper function to convert from 48-bit RGB to 16-bit luminance.
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>
-		public static Func<int, int, int, ushort> SelectRgb48ToLuminanceConversion() => Rgb48ToLuminanceBT709;
+		public static delegate*<ushort, ushort, ushort, ushort> SelectRgb48ToLuminanceConversion() => &Rgb48ToLuminanceBT709;
 
 
 		/// <summary>
