@@ -137,6 +137,13 @@
 				<!-- Max rendered images memory usage -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
 				<NumericUpDown Classes="Dialog_NumericUpDown" Maximum="8192" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
+
+				<!-- Log output target port -->
+				<StackPanel IsVisible="{Binding $parent[Window].Application.IsDebugMode}">
+					<Separator Classes="Dialog_Separator"/>
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.LogOutputTargetPort}"/>
+					<NumericUpDown Classes="Dialog_NumericUpDown" Maximum="65535" Minimum="1000" Value="{Binding LogOutputTargetPort, Mode=TwoWay}"/>
+				</StackPanel>
 				
 			</StackPanel>
 		</ScrollViewer>

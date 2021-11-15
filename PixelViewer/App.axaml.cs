@@ -43,8 +43,12 @@ namespace Carina.PixelViewer
         }
 
 
-		// Initialize.
-		public override void Initialize() => AvaloniaXamlLoader.Load(this);
+		/// <inheritdoc/>
+		public override int DefaultLogOutputTargetPort => 5570;
+
+
+        // Initialize.
+        public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
 
 		// Application entry point.

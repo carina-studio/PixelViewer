@@ -52,10 +52,6 @@
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
 		<sys:TimeSpan x:Key="TimeSpan/SessionControl.HistogramsPanel.Transition">0:0:0.5</sys:TimeSpan>
-
-		<!-- Slider -->
-		<SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="{DynamicResource SystemAccentColorLight1}" />
-		<SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="{DynamicResource SystemAccentColorDark1}" />
 		
 	</Styles.Resources>
 
@@ -104,15 +100,6 @@
 		<Setter Property="IsSnapToTickEnabled" Value="True"/>
 		<Setter Property="TickPlacement" Value="Outside"/>
 		<Setter Property="Width" Value="{DynamicResource Double/SessionControl.FilterParamsSlider.Width}"/>
-	</Style>
-	<Style Selector="Slider.SessionControl_FilterParamsSlider:disabled /template/ RepeatButton#PART_DecreaseButton">
-		<Setter Property="Background" Value="{DynamicResource SliderTrackFillDisabled}"/>
-	</Style>
-	<Style Selector="Slider.SessionControl_FilterParamsSlider:pointerover /template/ RepeatButton#PART_DecreaseButton">
-		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPointerOver}"/>
-	</Style>
-	<Style Selector="Slider.SessionControl_FilterParamsSlider:pressed /template/ RepeatButton#PART_DecreaseButton">
-		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPressed}"/>
 	</Style>
 	<Style Selector="StackPanel.SessionControl_FilterParamsPopup">
 		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.FilterParamsPopup.Padding}"/>
