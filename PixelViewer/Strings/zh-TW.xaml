@@ -66,6 +66,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">藍色</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">綠色</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">紅色</sys:String>
+	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">是否要儲存套用濾鏡後的影像？</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">複製檔案名稱</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">複製完整檔案路徑</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU 使用率</sys:String>
@@ -113,8 +114,8 @@
 	<sys:String x:Key="String/SessionControl.RotateRight">順時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">行步距 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">另存組態</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveImage">儲存影像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">儲存組態</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveRenderedImage">儲存繪製的影像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案總管中顯示檔案</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>

@@ -74,6 +74,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red</sys:String>
+	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save image which has been filtered?</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy full path</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU usage</sys:String>
@@ -121,8 +122,8 @@
 	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">Row-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as new profile</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveImage">Save image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveRenderedImage">Save rendered image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show file in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>

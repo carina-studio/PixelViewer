@@ -303,6 +303,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
 		/// <summary>
+		/// Property of <see cref="IsSavingFilteredImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsSavingFilteredImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingFilteredImage));
+		/// <summary>
+		/// Property of <see cref="IsSavingImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsSavingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingImage));
+		/// <summary>
 		/// Property of <see cref="IsSavingRenderedImage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSavingRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingRenderedImage));
@@ -380,6 +388,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canResetContrastAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canSaveFilteredImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
@@ -446,8 +455,9 @@ namespace Carina.PixelViewer.ViewModels
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
 			this.SaveAsNewProfileCommand = new Command<string>(name => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
+			this.SaveFilteredImageCommand = new Command<string>(fileName => _ = this.SaveFilteredImage(fileName), this.canSaveFilteredImage);
 			this.SaveProfileCommand = new Command(() => this.SaveProfile(), this.canSaveOrDeleteProfile);
-			this.SaveRenderedImageCommand = new Command<object?>(this.SaveRenderedImage, this.canSaveRenderedImage);
+			this.SaveRenderedImageCommand = new Command<string>(fileName => _ = this.SaveRenderedImage(fileName), this.canSaveRenderedImage);
 			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
 
@@ -485,7 +495,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(IsProcessingImageProperty, this.IsFilteringRenderedImage
 					|| this.IsOpeningSourceFile 
 					|| this.IsRenderingImage 
-					|| this.IsSavingRenderedImage);
+					|| this.IsSavingImage);
 			});
 			this.updateIsFilteringImageNeededAction = new ScheduledAction(() =>
 			{
@@ -1141,7 +1151,7 @@ namespace Carina.PixelViewer.ViewModels
 			// prepare
 			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 			this.imageFilteringCancellationTokenSource = cancellationTokenSource;
-			this.canSaveRenderedImage.Update(false);
+			this.canSaveFilteredImage.Update(false);
 			this.SetValue(IsFilteringRenderedImageProperty, true);
 
 			// setup swap function
@@ -1649,6 +1659,18 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether filtered image is being saved or not.
+		/// </summary>
+		public bool IsSavingFilteredImage { get => this.GetValue(IsSavingFilteredImageProperty); }
+
+
+		/// <summary>
+		/// Check whether at least one image is being saved or not.
+		/// </summary>
+		public bool IsSavingImage { get => this.GetValue(IsSavingImageProperty); }
+
+
+		/// <summary>
 		/// Check whether rendered image is being saved or not.
 		/// </summary>
 		public bool IsSavingRenderedImage { get => this.GetValue(IsSavingRenderedImageProperty); }
@@ -1849,8 +1871,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsFilteringRenderedImageProperty
 				|| property == IsOpeningSourceFileProperty
-				|| property == IsRenderingImageProperty
-				|| property == IsSavingRenderedImageProperty)
+				|| property == IsRenderingImageProperty)
 			{
 				this.updateIsProcessingImageAction.Schedule();
 			}
@@ -1862,6 +1883,12 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsHistogramsVisibleProperty)
 				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
+			else if (property == IsSavingFilteredImageProperty
+				|| property == IsSavingRenderedImageProperty)
+			{
+				this.SetValue(IsSavingImageProperty, this.IsSavingFilteredImage || this.IsSavingRenderedImage);
+				this.updateIsProcessingImageAction.Schedule();
+			}
 			else if (property == IsSourceFileOpenedProperty)
 			{
 				if (this.IsSourceFileOpened)
@@ -2459,6 +2486,7 @@ namespace Carina.PixelViewer.ViewModels
 					return;
 
 				// update state
+				this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage && this.filteredImageFrame != null);
 				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
@@ -2467,6 +2495,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else
 			{
+				this.canSaveFilteredImage.Update(false);
 				this.canSaveRenderedImage.Update(false);
 				this.SetValue(HistogramsProperty, null);
 				this.SetValue(RenderedImageProperty, null);
@@ -2822,6 +2851,100 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand SaveAsNewProfileCommand { get; }
 
 
+		// Save filtered image.
+		async Task<bool> SaveFilteredImage(string? fileName)
+		{
+			// check state
+			if (fileName == null)
+				return false;
+			if (!this.canSaveFilteredImage.Value)
+				return false;
+
+			// open file
+			this.canSaveFilteredImage.Update(false);
+			this.SetValue(IsSavingFilteredImageProperty, true);
+			var stream = await Task.Run(() =>
+			{
+				try
+				{
+					return new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+				}
+				catch (Exception ex)
+				{
+					this.Logger.LogError(ex, $"Unable to open {fileName}");
+					this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
+					this.SetValue(IsSavingFilteredImageProperty, false);
+					return null;
+				}
+			});
+			if (stream == null)
+			{
+				this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
+				this.SetValue(IsSavingFilteredImageProperty, false);
+				return false;
+			}
+
+			// save
+			var task = this.SaveFilteredImage(stream);
+			_ = this.WaitForNecessaryTaskAsync(task);
+			var result = await task;
+
+			// close file
+			await Task.Run(() =>
+			{
+				try
+				{
+					stream.Close();
+				}
+				catch
+				{ }
+			});
+
+			// complete
+			this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
+			this.SetValue(IsSavingFilteredImageProperty, false);
+			return result;
+		}
+		async Task<bool> SaveFilteredImage(Stream stream)
+		{
+			if (this.filteredImageFrame != null)
+				return await this.SaveImage(this.filteredImageFrame.BitmapBuffer, stream);
+			return false;
+		}
+
+
+		/// <summary>
+		/// Command for saving filtered image to file or stream.
+		/// </summary>
+		public ICommand SaveFilteredImageCommand { get; }
+
+
+		// Save given image.
+		async Task<bool> SaveImage(IBitmapBuffer imageBuffer, Stream stream)
+		{
+			using var sharedImageBuffer = imageBuffer.Share();
+			return await Task.Run(async () =>
+			{
+				try
+				{
+#if WINDOWS10_0_17763_0_OR_GREATER
+					using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
+					bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+#else
+					using var bitmap = await sharedImageBuffer.CreateAvaloniaBitmapAsync();
+					bitmap.Save(stream);
+#endif
+					return true;
+				}
+				catch (Exception ex)
+				{
+					this.Logger.LogError(ex, "Unable to save rendered image");
+					return false;
+				}
+			});
+		}
+
+
 		// Save current parameters to profile.
 		async void SaveProfile()
 		{
@@ -2857,15 +2980,6 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Save rendered image.
-		void SaveRenderedImage(object? param)
-		{
-			if (param is string fileName)
-				_ = this.SaveRenderedImage(fileName);
-			else if (param is Stream stream)
-				_ = this.SaveRenderedImage(stream);
-			else
-				throw new ArgumentException($"Invalid parameter to save rendered image: {param}.");
-		}
 		async Task<bool> SaveRenderedImage(string? fileName)
 		{
 			// check state
@@ -2875,6 +2989,8 @@ namespace Carina.PixelViewer.ViewModels
 				return false;
 
 			// open file
+			this.canSaveRenderedImage.Update(false);
+			this.SetValue(IsSavingRenderedImageProperty, true);
 			var stream = await Task.Run(() =>
 			{
 				try
@@ -2884,11 +3000,17 @@ namespace Carina.PixelViewer.ViewModels
 				catch (Exception ex)
 				{
 					this.Logger.LogError(ex, $"Unable to open {fileName}");
+					this.canSaveRenderedImage.Update(!this.IsRenderingImage);
+					this.SetValue(IsSavingRenderedImageProperty, false);
 					return null;
 				}
 			});
 			if (stream == null)
+			{
+				this.canSaveRenderedImage.Update(!this.IsRenderingImage);
+				this.SetValue(IsSavingRenderedImageProperty, false);
 				return false;
+			}
 
 			// save
 			var task = this.SaveRenderedImage(stream);
@@ -2907,58 +3029,15 @@ namespace Carina.PixelViewer.ViewModels
 			});
 
 			// complete
+			this.canSaveRenderedImage.Update(!this.IsRenderingImage);
+			this.SetValue(IsSavingRenderedImageProperty, false);
 			return result;
 		}
-		async Task<bool> SaveRenderedImage(Stream? stream)
+		async Task<bool> SaveRenderedImage(Stream stream)
 		{
-			// check state
-			if (stream == null)
-				return false;
-			if (!this.canSaveRenderedImage.Value)
-				return false;
-			var renderedImageBuffer = (this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame)?.BitmapBuffer;
-			if (renderedImageBuffer == null)
-			{
-				this.Logger.LogError("No rendered image to save");
-				return false;
-			}
-
-			// update state
-			this.canSaveRenderedImage.Update(false);
-			this.SetValue(IsSavingRenderedImageProperty, true);
-
-			// share bitmap data
-			IBitmapBuffer sharedImageBuffer = renderedImageBuffer.Share();
-
-			// save
-			var result = await Task.Run(async () =>
-			{
-				try
-				{
-#if WINDOWS10_0_17763_0_OR_GREATER
-					using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
-					bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-#else
-					using var bitmap = await sharedImageBuffer.CreateAvaloniaBitmapAsync();
-					bitmap.Save(stream);
-#endif
-					return true;
-				}
-				catch (Exception ex)
-				{
-					this.Logger.LogError(ex, "Unable to save rendered image");
-					return false;
-				}
-				finally
-				{
-					sharedImageBuffer.Dispose();
-				}
-			});
-
-			// complete
-			this.SetValue(IsSavingRenderedImageProperty, false);
-			this.canSaveRenderedImage.Update(!this.IsRenderingImage && !this.IsFilteringRenderedImage);
-			return result;
+			if (this.renderedImageFrame != null)
+				return await this.SaveImage(this.renderedImageFrame.BitmapBuffer, stream);
+			return false;
 		}
 
 

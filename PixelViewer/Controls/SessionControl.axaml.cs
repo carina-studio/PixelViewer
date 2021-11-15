@@ -58,7 +58,7 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canOpenSourceFile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canResetBrightnessAndContrastAdjustment = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
-		readonly MutableObservableValue<bool> canSaveRenderedImage = new MutableObservableValue<bool>();
+		readonly MutableObservableValue<bool> canSaveImage = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
 		readonly ToggleButton colorAdjustmentButton;
 		readonly Popup colorAdjustmentPopup;
@@ -87,7 +87,7 @@ namespace Carina.PixelViewer.Controls
 			this.OpenSourceFileCommand = new Command(this.OpenSourceFile, this.canOpenSourceFile);
 			this.ResetBrightnessAndContrastAdjustmentCommand = new Command(this.ResetBrightnessAndContrastAdjustment, this.canResetBrightnessAndContrastAdjustment);
 			this.SaveAsNewProfileCommand = new Command(() => this.SaveAsNewProfile(), this.canSaveAsNewProfile);
-			this.SaveRenderedImageCommand = new Command(() => this.SaveRenderedImage(), this.canSaveRenderedImage);
+			this.SaveImageCommand = new Command(() => this.SaveImage(), this.canSaveImage);
 			this.ShowEvaluateImageDimensionsMenuCommand = new Command(() =>
 			{
 				if (this.evaluateImageDimensionsMenu == null)
@@ -182,7 +182,7 @@ namespace Carina.PixelViewer.Controls
 				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = 0);
 			}
 			else
-            {
+			{
 				this.histogramsPanel.Opacity = 0;
 				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = this.histogramsPanelTransitionX);
 			}
@@ -191,7 +191,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Check for application update.
 		void CheckForAppUpdate()
-        {
+		{
 			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
 			{
 				using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
@@ -205,19 +205,19 @@ namespace Carina.PixelViewer.Controls
 					this.Application.Shutdown();
 				}
 			});
-        }
+		}
 
 
 		// Copy file name.
 		void CopyFileName()
-        {
+		{
 			if (this.DataContext is not Session session || !session.IsSourceFileOpened)
 				return;
 			session.SourceFileName?.Let(it =>
 			{
 				_ = ((App)this.Application).Clipboard.SetTextAsync(Path.GetFileName(it));
 			});
-        }
+		}
 
 
 		// Copy file path.
@@ -243,7 +243,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Move to specific frame.
 		async void MoveToSpecificFrame()
-        {
+		{
 			// check state
 			if (this.DataContext is not Session session)
 				return;
@@ -385,7 +385,7 @@ namespace Carina.PixelViewer.Controls
 						}
 					case Avalonia.Input.Key.S:
 						{
-							this.SaveRenderedImage();
+							this.SaveImage();
 							break;
 						}
 					default:
@@ -396,7 +396,7 @@ namespace Carina.PixelViewer.Controls
 			else if (e.KeyModifiers == 0)
 			{
 				switch (e.Key)
-                {
+				{
 					case Avalonia.Input.Key.End:
 						session.MoveToLastFrameCommand.TryExecute();
 						break;
@@ -508,6 +508,7 @@ namespace Carina.PixelViewer.Controls
 					oldSession.ResetBrightnessAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.ResetContrastAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.SaveAsNewProfileCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
+					oldSession.SaveFilteredImageCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.SaveRenderedImageCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 				}
 				if (change.NewValue.Value is Session newSession)
@@ -518,12 +519,14 @@ namespace Carina.PixelViewer.Controls
 					newSession.ResetBrightnessAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.ResetContrastAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.SaveAsNewProfileCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
+					newSession.SaveFilteredImageCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.SaveRenderedImageCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					this.canOpenSourceFile.Update(newSession.OpenSourceFileCommand.CanExecute(null));
 					this.canResetBrightnessAndContrastAdjustment.Update(newSession.ResetBrightnessAdjustmentCommand.CanExecute(null)
 						|| newSession.ResetContrastAdjustmentCommand.CanExecute(null));
 					this.canSaveAsNewProfile.Update(newSession.SaveAsNewProfileCommand.CanExecute(null));
-					this.canSaveRenderedImage.Update(newSession.SaveRenderedImageCommand.CanExecute(null));
+					this.canSaveImage.Update(newSession.SaveFilteredImageCommand.CanExecute(null) 
+						|| newSession.SaveRenderedImageCommand.CanExecute(null));
 					this.canShowEvaluateImageDimensionsMenu.Update(newSession.IsSourceFileOpened);
 
 					// setup histograms panel
@@ -540,7 +543,7 @@ namespace Carina.PixelViewer.Controls
 					this.canOpenSourceFile.Update(false);
 					this.canResetBrightnessAndContrastAdjustment.Update(false);
 					this.canSaveAsNewProfile.Update(false);
-					this.canSaveRenderedImage.Update(false);
+					this.canSaveImage.Update(false);
 					this.canShowEvaluateImageDimensionsMenu.Update(false);
 				}
 				this.UpdateEffectiveRenderedImageScale();
@@ -564,8 +567,12 @@ namespace Carina.PixelViewer.Controls
 			}
 			else if (sender == session.SaveAsNewProfileCommand)
 				this.canSaveAsNewProfile.Update(session.SaveAsNewProfileCommand.CanExecute(null));
-			else if (sender == session.SaveRenderedImageCommand)
-				this.canSaveRenderedImage.Update(session.SaveRenderedImageCommand.CanExecute(null));
+			else if (sender == session.SaveFilteredImageCommand
+				|| sender == session.SaveRenderedImageCommand)
+			{
+				this.canSaveImage.Update(session.SaveFilteredImageCommand.CanExecute(null)
+					|| session.SaveRenderedImageCommand.CanExecute(null));
+			}
 		}
 
 
@@ -780,21 +787,17 @@ namespace Carina.PixelViewer.Controls
 		public ICommand SaveAsNewProfileCommand { get; }
 
 
-		// Save rendered image to file.
-		async void SaveRenderedImage()
+		// Save image to file.
+		async void SaveImage()
 		{
 			// check state
-			if (!(this.DataContext is Session session))
+			if (this.DataContext is not Session session)
 			{
 				Logger.LogError("No session to save rendered image");
 				return;
 			}
-			var command = session.SaveRenderedImageCommand;
-			if (!command.CanExecute(null) || !this.canSaveRenderedImage.Value)
-			{
-				Logger.LogError("Cannot save rendered image in current state");
+			if (!this.canSaveImage.Value)
 				return;
-			}
 
 			// find window
 			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
@@ -802,6 +805,21 @@ namespace Carina.PixelViewer.Controls
 			{
 				Logger.LogError("No window to show dialog");
 				return;
+			}
+
+			// select image to save
+			var saveFilteredImage = false;
+			if (session.IsFilteringRenderedImageNeeded)
+			{
+				var result = await new MessageDialog()
+				{
+					Buttons = MessageDialogButtons.YesNoCancel,
+					Icon = MessageDialogIcon.Question,
+					Message = this.Application.GetString("SessionControl.ConfirmSavingFilteredImage")
+				}.ShowDialog(window);
+				if (result == MessageDialogResult.Cancel)
+					return;
+				saveFilteredImage = (result == MessageDialogResult.Yes);
 			}
 
 			// select file
@@ -823,14 +841,17 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// save
-			command.Execute(fileName);
+			if (saveFilteredImage)
+				session.SaveFilteredImageCommand.TryExecute(fileName);
+			else
+				session.SaveRenderedImageCommand.TryExecute(fileName);
 		}
 
 
 		/// <summary>
-		/// <see cref="ICommand"/> to save rendered image to file.
+		/// <see cref="ICommand"/> to save image to file.
 		/// </summary>
-		public ICommand SaveRenderedImageCommand { get; }
+		public ICommand SaveImageCommand { get; }
 
 
 		// Show application info.

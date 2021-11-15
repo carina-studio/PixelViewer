@@ -97,8 +97,8 @@
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 					</Button>
 
-					<!-- Save rendered image -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveRenderedImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveRenderedImage}">
+					<!-- Save image -->
+					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveImage}">
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Save}"/>
 					</Button>
 
@@ -687,7 +687,7 @@
 				<StackPanel Grid.Column="1" Orientation="Horizontal">
 					
 					<!-- Saving image -->
-					<StackPanel IsVisible="{Binding IsSavingRenderedImage}" Orientation="Horizontal">
+					<StackPanel IsVisible="{Binding IsSavingImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
 						<Border Classes="StatusBar_Icon">
 							<Image Classes="Icon">
