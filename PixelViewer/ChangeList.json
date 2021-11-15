@@ -1,22 +1,16 @@
 ﻿[
 	{
-		"Description": "Support demosaicing for Bayer Pattern format (BGGR_16/GBRG_16/GRBG_16/RGGB_16).",
+		"Description": "Support adjusting brightness/contrast and color balance to help you checking the data of image.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support turning notification OFF about application update.",
-		"Type": "NewFeature"
+		"Description": "Improve performance of demosaicing."
 	},
 	{
-		"Description": "Memory management improvement for rendering images.",
-		"Type": "BehaviorChange"
+		"Description": "Improve performance of histograms generating."
 	},
 	{
-		"Description": "Set default memory usage of rendered images to 2GB.",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "Upgrade dependent libraries."
+		"Description": "UX improvement."
 	},
 	{
 		"Description": "Bug fixing.",

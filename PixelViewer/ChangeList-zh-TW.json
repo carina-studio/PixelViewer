@@ -1,22 +1,16 @@
 ﻿[
 	{
-		"Description": "針對 Bayer Pattern (BGGR_16/GBRG_16/GRBG_16/RGGB_16) 格式支援去馬賽克。",
+		"Description": "支援調整亮度、對比及色彩平衡以幫助您確認影像內容。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援關閉應用程式更新通知。",
-		"Type": "NewFeature"
+		"Description": "提升去馬賽克效能。"
 	},
 	{
-		"Description": "改善影像繪製的記憶體管理機制。",
-		"Type": "BehaviorChange"
+		"Description": "提升色階分布計算效能。"
 	},
 	{
-		"Description": "將預設影像繪製記憶體使用上限設為 2GB。",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "更新相依程式庫。"
+		"Description": "使用者體驗改進。"
 	},
 	{
 		"Description": "錯誤修正。",
