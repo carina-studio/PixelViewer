@@ -2222,6 +2222,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.SetValue(ImageWidthProperty, it.Width);
 					this.SetValue(ImageHeightProperty, it.Height);
+					this.renderImageAction.Cancel(); // prevent re-rendering caused by change of dimensions
 				});
 			}
 
@@ -2291,11 +2292,13 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					frameNumber = 1;
 					this.SetValue(FrameNumberProperty, 1);
+					this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
 				}
 				else if (frameNumber > frameCount)
 				{
 					frameNumber = frameCount;
 					this.SetValue(FrameNumberProperty, frameCount);
+					this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
 				}
 				this.SetValue(FrameCountProperty, frameCount);
 			}
