@@ -370,6 +370,13 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Select proper maximum degree of parallel image processing.
+		/// </summary>
+		/// <returns>Maximum degree of parallel image processing.</returns>
+		public static int SelectMaxDegreeOfParallelism() => Math.Max(1, Environment.ProcessorCount / 2);
+
+
+		/// <summary>
 		/// Select proper function to convert from 24-bit RGB to 8-bit luminance.
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>

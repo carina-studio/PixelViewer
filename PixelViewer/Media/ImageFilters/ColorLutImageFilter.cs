@@ -103,7 +103,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     var aLut = this.BuildFinalLookupTable(parameters.AlphaLookupTable, bLut + 256);
 
                                     // apply
-                                    Parallel.For(0, source.Height, (y) =>
+                                    Parallel.For(0, source.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
                                     {
                                         var r = (byte)0;
                                         var g = (byte)0;
@@ -140,7 +140,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     var aLut = this.BuildFinalLookupTable(parameters.AlphaLookupTable, bLut + 65536);
 
                                     // apply
-                                    Parallel.For(0, source.Height, (y) =>
+                                    Parallel.For(0, source.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
                                     {
                                         var r = (ushort)0;
                                         var g = (ushort)0;

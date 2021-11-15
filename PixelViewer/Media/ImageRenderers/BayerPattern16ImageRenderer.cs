@@ -95,7 +95,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				// horizontal demosaicing
 				if (cancellationToken.IsCancellationRequested || !renderingOptions.Demosaicing)
 					return;
-				Parallel.For(0, height, (y) =>
+				Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];
@@ -143,7 +143,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				// vertical demosaicing
 				if (cancellationToken.IsCancellationRequested)
 					return;
-				Parallel.For(0, width, (x) =>
+				Parallel.For(0, width, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (x) =>
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];
