@@ -32,6 +32,7 @@ namespace Carina.PixelViewer
 
 
 		// Static fields.
+		static readonly SettingKey<Media.YuvConversionMode> LegacyYuvConversionModeKey = new SettingKey<Media.YuvConversionMode>("YuvConversionMode", Media.YuvConversionMode.NTSC);
 		static readonly Uri PreviewPackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
 		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
 
@@ -291,6 +292,19 @@ namespace Carina.PixelViewer
 						settings.SetValue<ThemeMode>(CarinaStudio.AppSuite.SettingKeys.ThemeMode, it ? ThemeMode.Dark : ThemeMode.Light);
 				});
 			}
+
+			// upgrade YUV conversion mode
+			if (oldVersion <= 2)
+			{
+				settings.GetValueOrDefault(LegacyYuvConversionModeKey).Let(it =>
+				{
+					settings.ResetValue(LegacyYuvConversionModeKey);
+					if (it == Media.YuvConversionMode.ITU_R)
+						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, Media.YuvConversionMode.BT_601);
+					else
+						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, it);
+				});
+			}
 		}
 #pragma warning restore CS0612
 
@@ -306,5 +320,9 @@ namespace Carina.PixelViewer
 
         // Releasing type.
         public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
+
+
+		// Version of settings.
+		protected override int SettingsVersion => 3;
     }
 }

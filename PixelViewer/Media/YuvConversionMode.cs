@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Carina.PixelViewer.Media
 {
 	/// <summary>
@@ -11,8 +12,17 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		NTSC,
 		/// <summary>
-		/// ITU-R standard.
+		/// ITU-R.
 		/// </summary>
+		[Obsolete]
 		ITU_R,
+		/// <summary>
+		/// ITU-R Recommendation BT.601.
+		/// </summary>
+		BT_601,
+		/// <summary>
+		/// ITU-R Recommendation BT.709
+		/// </summary>
+		BT_709,
 	}
 }

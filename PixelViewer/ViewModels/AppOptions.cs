@@ -51,6 +51,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Default YUV to RGB conversion mode.
+		/// </summary>
+		public YuvConversionMode DefaultYuvConversionMode
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode);
+			set => this.Settings.SetValue<YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, value);
+		}
+
+
+		/// <summary>
 		/// Evaluate image dimensions after changing image renderer.
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterChangingRenderer
@@ -89,6 +99,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)
 				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
+			else if (key == SettingKeys.DefaultYuvConversionMode)
+				this.OnPropertyChanged(nameof(this.DefaultYuvConversionMode));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterChangingRenderer)
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile)
@@ -101,8 +113,6 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.ShowProcessInfo));
 			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
-			else if (key == SettingKeys.YuvConversionMode)
-				this.OnPropertyChanged(nameof(this.YuvConversionMode));
 		}
 
 
@@ -133,16 +143,6 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile);
 			set => this.Settings.SetValue<bool>(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
-		}
-
-
-		/// <summary>
-		/// YUV to RGB conversion mode.
-		/// </summary>
-		public YuvConversionMode YuvConversionMode
-		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode);
-			set => this.Settings.SetValue<YuvConversionMode>(SettingKeys.YuvConversionMode, value);
 		}
 
 
