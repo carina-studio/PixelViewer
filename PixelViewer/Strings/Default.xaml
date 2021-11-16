@@ -50,6 +50,14 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to frame</sys:String>
 
+	<!-- ImageFormatCategory -->
+	<sys:String x:Key="String/ImageFormatCategory.ARGB">ARGB</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Bayer">Bayer Pattern</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Luminance">Luminance</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.RGB">RGB</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Unclassified">Unclassified</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.YUV">YUV</sys:String>
+
 	<!-- ImageRenderingProfile -->
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;None&gt;</sys:String>
 

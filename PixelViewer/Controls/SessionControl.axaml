@@ -486,7 +486,7 @@
 									<Grid ColumnDefinitions="*,Auto">
 										<TextBlock Text="{Binding Format.DisplayName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
 										<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Default}}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-											<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category}"/>
+											<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category, Converter={x:Static appConverters:EnumConverters.ImageFormatCategory}}"/>
 										</Border>
 									</Grid>
 								</DataTemplate>

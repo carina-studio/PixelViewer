@@ -42,6 +42,11 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至畫面</sys:String>
 
+	<!-- ImageFormatCategory -->
+	<sys:String x:Key="String/ImageFormatCategory.Bayer">Bayer 排列</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Luminance">明度/灰階</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Unclassified">未分類</sys:String>
+
 	<!-- ImageRenderingProfile -->
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;無&gt;</sys:String>
 
