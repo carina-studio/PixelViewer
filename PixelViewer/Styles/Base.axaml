@@ -30,13 +30,31 @@
 		<sys:Double x:Key="Double/MainWindow.MinWidth">600</sys:Double>
 
 		<!-- SessionControl -->
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Luminance" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.RGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.RGB}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Unclassified" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.YUV" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.YUV}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Foreground" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Foreground}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.RGB">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Foreground">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
+		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">2</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Width">150</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.FontSize">10</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageRenderingProfile.Icon.Size">16</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageViewer.Hint.FontSize">20</sys:Double>
@@ -46,6 +64,8 @@
 		<Thickness x:Key="ExpanderContentPadding">5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsPopup.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Border">1</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">2</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
@@ -100,6 +120,15 @@
 		<Setter Property="IsSnapToTickEnabled" Value="True"/>
 		<Setter Property="TickPlacement" Value="Outside"/>
 		<Setter Property="Width" Value="{DynamicResource Double/SessionControl.FilterParamsSlider.Width}"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider:disabled /template/ RepeatButton#PART_DecreaseButton">
+		<Setter Property="Background" Value="{DynamicResource SliderTrackFillDisabled}"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider:pointerover /template/ RepeatButton#PART_DecreaseButton">
+		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPointerOver}"/>
+	</Style>
+	<Style Selector="Slider.SessionControl_FilterParamsSlider:pressed /template/ RepeatButton#PART_DecreaseButton">
+		<Setter Property="Background" Value="{DynamicResource SliderTrackFillPressed}"/>
 	</Style>
 	<Style Selector="StackPanel.SessionControl_FilterParamsPopup">
 		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.FilterParamsPopup.Padding}"/>

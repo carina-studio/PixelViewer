@@ -7,6 +7,7 @@
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
 		xmlns:asViewModels="using:CarinaStudio.AppSuite.ViewModels"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
+		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -71,7 +72,12 @@
 				<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
 					<ComboBox.DataTemplates>
 						<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
-							<TextBlock Text="{Binding Format.DisplayName}"/>
+							<Grid ColumnDefinitions="*,Auto">
+								<TextBlock Text="{Binding Format.DisplayName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+								<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Default}}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+									<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category}"/>
+								</Border>
+							</Grid>
 						</DataTemplate>
 					</ComboBox.DataTemplates>
 				</ComboBox>
