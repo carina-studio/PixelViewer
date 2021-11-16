@@ -105,7 +105,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							int y1 = bitmapPixelPtr[0];
 							int y2 = bitmapPixelPtr[4];
 							this.SelectUV(vuPixelPtr[0], vuPixelPtr[1], out var u, out var v);
-							yuv422ToBgra(y1, y2, u, v, (int*)bitmapPixelPtr, (int*)(bitmapPixelPtr + 4));
+							yuv422ToBgra(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
 						}
 						++rowIndex;
 						bitmapRowPtr += bitmapRowStride;
@@ -118,7 +118,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							int y1 = bitmapPixelPtr[0];
 							int y2 = bitmapPixelPtr[4];
 							this.SelectUV(vuPixelPtr[0], vuPixelPtr[1], out var u, out var v);
-							yuv422ToBgra(y1, y2, u, v, (int*)bitmapPixelPtr, (int*)(bitmapPixelPtr + 4));
+							yuv422ToBgra(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
 						}
 
 						// check state

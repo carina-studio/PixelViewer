@@ -130,7 +130,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							// render the N column
 							int y = bitmapPixelPtr[0];
 							this.SelectUV(bitmapPixelPtr[1], uvPixelPtr[0], out var u, out var v);
-							yuv444ToBgra(y, u, v, (int*)bitmapPixelPtr);
+							yuv444ToBgra(y, u, v, (uint*)bitmapPixelPtr);
 						}
 
 						// check state

@@ -12,50 +12,6 @@ namespace Carina.PixelViewer.Media
 	static unsafe class ImageProcessing
 	{
 		/// <summary>
-		/// Method to convert YUV422 to packed 32-bit BGRA (unsafe).
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		public delegate void Yuv422ToBgra32Unsafe(int y1, int y2, int u, int v, int* bgra1, int* bgra2);
-
-
-		/// <summary>
-		/// Method to convert YUV422 to packed 64-bit BGRA (unsafe).
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		public delegate void Yuv422ToBgra64Unsafe(int y1, int y2, int u, int v, long* bgra1, long* bgra2);
-
-
-		/// <summary>
-		/// Method to convert YUV444 to 32-bit packed BGRA (unsafe).
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		public delegate void Yuv444ToBgra32Unsafe(int y, int u, int v, int* bgra);
-
-
-		/// <summary>
-		/// Method to convert YUV444 to 64-bit packed BGRA (unsafe).
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		public delegate void Yuv444ToBgra64Unsafe(int y, int u, int v, long* bgra);
-
-
-		/// <summary>
 		/// Whether system uses Big-Endian or not.
 		/// </summary>
 		public static readonly bool IsBigEndian = CarinaStudio.Global.Run(() =>
@@ -394,10 +350,10 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV422 to 32-bit BGRA conversion (unsafe).
 		/// </summary>
 		/// <returns>YUV422 to BGRA conversion function.</returns>
-		public static Yuv422ToBgra32Unsafe SelectYuv422ToBgra32ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
+		public static delegate*<int, int, int, int, uint*, uint*, void> SelectYuv422ToBgra32ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
 		{
-			YuvConversionMode.ITU_R => Yuv422ToBgra32UnsafeITUR,
-			_ => Yuv422ToBgra32UnsafeNTSC,
+			YuvConversionMode.ITU_R => &Yuv422ToBgra32UnsafeITUR,
+			_ => &Yuv422ToBgra32UnsafeNTSC,
 		};
 
 
@@ -405,10 +361,10 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV to 32-bit BGRA conversion.
 		/// </summary>
 		/// <returns>YUV to BGRA conversion function.</returns>
-		public static Yuv444ToBgra32Unsafe SelectYuv444ToBgra32ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
+		public static delegate*<int, int, int, uint*, void> SelectYuv444ToBgra32ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
 		{
-			YuvConversionMode.ITU_R => Yuv444ToBgra32UnsafeITUR,
-			_ => Yuv444ToBgra32UnsafeNTSC,
+			YuvConversionMode.ITU_R => &Yuv444ToBgra32UnsafeITUR,
+			_ => &Yuv444ToBgra32UnsafeNTSC,
 		};
 
 
@@ -416,10 +372,10 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV422 to 64-bit BGRA conversion (unsafe).
 		/// </summary>
 		/// <returns>YUV422 to BGRA conversion function.</returns>
-		public static Yuv422ToBgra64Unsafe SelectYuv422ToBgra64ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
+		public static delegate*<int, int, int, int, ulong*, ulong*, void> SelectYuv422ToBgra64ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
 		{
-			YuvConversionMode.ITU_R => Yuv422ToBgra64UnsafeITUR,
-			_ => Yuv422ToBgra64UnsafeNTSC,
+			YuvConversionMode.ITU_R => &Yuv422ToBgra64UnsafeITUR,
+			_ => &Yuv422ToBgra64UnsafeNTSC,
 		};
 
 
@@ -427,10 +383,10 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV to 64-bit BGRA conversion.
 		/// </summary>
 		/// <returns>YUV to BGRA conversion function.</returns>
-		public static Yuv444ToBgra64Unsafe SelectYuv444ToBgra64ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
+		public static delegate*<int, int, int, ulong*, void> SelectYuv444ToBgra64ConversionUnsafe() => App.Current.Settings.GetValueOrDefault(SettingKeys.YuvConversionMode) switch
 		{
-			YuvConversionMode.ITU_R => Yuv444ToBgra64UnsafeITUR,
-			_ => Yuv444ToBgra64UnsafeNTSC,
+			YuvConversionMode.ITU_R => &Yuv444ToBgra64UnsafeITUR,
+			_ => &Yuv444ToBgra64UnsafeNTSC,
 		};
 
 
@@ -516,7 +472,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
 		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra32UnsafeITUR(int y1, int y2, int u, int v, int* bgra1, int* bgra2)
+		public static unsafe void Yuv422ToBgra32UnsafeITUR(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
 		{
 			var pixel1 = (byte*)bgra1;
 			var pixel2 = (byte*)bgra2;
@@ -546,7 +502,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
 		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra32UnsafeNTSC(int y1, int y2, int u, int v, int* bgra1, int* bgra2)
+		public static unsafe void Yuv422ToBgra32UnsafeNTSC(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
 		{
 			var pixel1 = (byte*)bgra1;
 			var pixel2 = (byte*)bgra2;
@@ -578,7 +534,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
 		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra64UnsafeITUR(int y1, int y2, int u, int v, long* bgra1, long* bgra2)
+		public static unsafe void Yuv422ToBgra64UnsafeITUR(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
 		{
 			/*
 			 * ITU-R formula:
@@ -613,7 +569,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
 		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra64UnsafeNTSC(int y1, int y2, int u, int v, long* bgra1, long* bgra2)
+		public static unsafe void Yuv422ToBgra64UnsafeNTSC(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
 		{
 			var pixel1 = (ushort*)bgra1;
 			var pixel2 = (ushort*)bgra2;
@@ -643,7 +599,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="v">V.</param>
 		/// <param name="bgra">Address of packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra32UnsafeITUR(int y, int u, int v, int* bgra)
+		public static unsafe void Yuv444ToBgra32UnsafeITUR(int y, int u, int v, uint* bgra)
 		{
 			/*
 			 * ITU-R formula:
@@ -676,7 +632,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="v">V.</param>
 		/// <param name="bgra">Address of packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra32UnsafeNTSC(int y, int u, int v, int* bgra)
+		public static unsafe void Yuv444ToBgra32UnsafeNTSC(int y, int u, int v, uint* bgra)
 		{
 			/*
 			 * NTSC formula:
@@ -706,7 +662,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="v">V.</param>
 		/// <param name="bgra">Address of packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra64UnsafeITUR(int y, int u, int v, long* bgra)
+		public static unsafe void Yuv444ToBgra64UnsafeITUR(int y, int u, int v, ulong* bgra)
 		{
 			/*
 			 * ITU-R formula:
@@ -734,7 +690,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="v">V.</param>
 		/// <param name="bgra">Address of 1st packed BGRA pixel.</param>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra64UnsafeNTSC(int y, int u, int v, long* bgra)
+		public static unsafe void Yuv444ToBgra64UnsafeNTSC(int y, int u, int v, ulong* bgra)
 		{
 			var pixel1 = (ushort*)bgra;
 			var fY = 298 * (y / 256.0 - 16);
