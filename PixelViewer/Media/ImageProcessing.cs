@@ -535,7 +535,7 @@ namespace Carina.PixelViewer.Media
 			u -= 128;
 			v -= 128;
 			var bCoeff = (u + (u >> 1) + (u >> 2) + (u >> 6));
-			var gCoeff = (-((u >> 2) + (u >> 4) + (u >> 5)) - ((u >> 1) + (v >> 3) + (v >> 4) + (v >> 5)));
+			var gCoeff = (-((u >> 2) + (u >> 4) + (u >> 5)) - ((v >> 1) + (v >> 3) + (v >> 4) + (v >> 5)));
 			var rCoeff = (v + (v >> 2) + (v >> 3) + (v >> 5));
 			pixel1[0] = ClipToByte(y1 + bCoeff);
 			pixel1[1] = ClipToByte(y1 + gCoeff);
@@ -561,12 +561,12 @@ namespace Carina.PixelViewer.Media
 		public static unsafe void Yuv422ToBgra32BT709(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
 		{
 			/*
-			 * R = (y - 16) + 1.5748 * (v - 128)
-			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = (y - 16) + 1.8556 * (u - 128)
+			 * R = y + 1.5748 * (v - 128)
+			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
+			 * B = y + 1.8556 * (u - 128)
 			 * 
 			 * [Quantized by 256]
-			 * y = (y - 16) << 8
+			 * y <<= 8
 			 * u -= 128
 			 * v -= 128
 			 * R = (y + 403 * v) >> 8
@@ -578,7 +578,7 @@ namespace Carina.PixelViewer.Media
 			 * Decompose 120 = 64 + 32 + 16 + 8
 			 * Decompose 475 = 256 + 128 + 64 + 16 + 8 + 2 + 1
 			 * 
-			 * y = (y - 16) << 8
+			 * y <<= 8
 			 * u -= 128
 			 * v -= 128
 			 * R = (y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8
@@ -587,8 +587,8 @@ namespace Carina.PixelViewer.Media
 			 */
 			var pixel1 = (byte*)bgra1;
 			var pixel2 = (byte*)bgra2;
-			y1 = (y1 - 16) << 8;
-			y2 = (y2 - 16) << 8;
+			y1 <<= 8;
+			y2 <<= 8;
 			u -= 128;
 			v -= 128;
 			var rCoeff = (v << 8) + (v << 7) + (v << 4) + (v << 1) + v;
@@ -685,14 +685,14 @@ namespace Carina.PixelViewer.Media
 		public static unsafe void Yuv422ToBgra64BT709(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
 		{
 			/*
-			 * R = (y - 16) + 1.5748 * (v - 128)
-			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = (y - 16) + 1.8556 * (u - 128)
+			 * R = y + 1.5748 * (v - 128)
+			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
+			 * B = y + 1.8556 * (u - 128)
 			 */
 			var pixel1 = (ushort*)bgra1;
 			var pixel2 = (ushort*)bgra2;
-			var fY1 = ((y1 / 256.0) - 16);
-			var fY2 = ((y2 / 256.0) - 16);
+			var fY1 = (y1 / 256.0);
+			var fY2 = (y2 / 256.0);
 			var fU = ((u / 256.0) - 128);
 			var fV = ((v / 256.0) - 128);
 			pixel1[0] = ClipToUInt16((fY1 + 1.8556 * fU) * 256);
@@ -782,12 +782,12 @@ namespace Carina.PixelViewer.Media
 		public static unsafe void Yuv444ToBgra32BT709(int y, int u, int v, uint* bgra)
 		{
 			/*
-			 * R = (y - 16) + 1.5748 * (v - 128)
-			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = (y - 16) + 1.8556 * (u - 128)
+			 * R = y + 1.5748 * (v - 128)
+			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
+			 * B = y + 1.8556 * (u - 128)
 			 * 
 			 * [Quantized by 256]
-			 * y = (y - 16) << 8
+			 * y <<= 8
 			 * u -= 128
 			 * v -= 128
 			 * R = (y + 403 * v) >> 8
@@ -799,7 +799,7 @@ namespace Carina.PixelViewer.Media
 			 * Decompose 120 = 64 + 32 + 16 + 8
 			 * Decompose 475 = 256 + 128 + 64 + 16 + 8 + 2 + 1
 			 * 
-			 * y = (y - 16) << 8
+			 * y <<= 8
 			 * u -= 128
 			 * v -= 128
 			 * R = (y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8
@@ -807,7 +807,7 @@ namespace Carina.PixelViewer.Media
 			 * B = (y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8
 			 */
 			var pixel = (byte*)bgra;
-			y = (y - 16) << 8;
+			y <<= 8;
 			u -= 128;
 			v -= 128;
 			pixel[0] = ClipToByte((y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8);
@@ -885,12 +885,12 @@ namespace Carina.PixelViewer.Media
 		public static unsafe void Yuv444ToBgra64BT709(int y, int u, int v, ulong* bgra)
 		{
 			/*
-			 * R = (y - 16) + 1.5748 * (v - 128)
-			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = (y - 16) + 1.8556 * (u - 128)
+			 * R = y + 1.5748 * (v - 128)
+			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
+			 * B = y + 1.8556 * (u - 128)
 			 */
 			var pixel = (ushort*)bgra;
-			var fY = ((y / 256.0) - 16);
+			var fY = (y / 256.0);
 			var fU = ((u / 256.0) - 128);
 			var fV = ((v / 256.0) - 128);
 			pixel[0] = ClipToUInt16((fY + 1.8556 * fU) * 256);
