@@ -529,27 +529,42 @@ namespace Carina.PixelViewer.Media
 			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
 			 * B = (y - 16) + 1.8556 * (u - 128)
 			 * 
-			 * Quantized by 65536:
-			 * y = (Y - 16) << 16
+			 * [Quantized by 256]
+			 * y = (y - 16) << 8
 			 * u -= 128
 			 * v -= 128
-			 * R = (y + 103206 * v) >> 16
-			 * G = (y - 12275 * u - 30677 * v) >> 16
-			 * B = (y + 121609 * u) >> 16
+			 * R = (y + 403 * v) >> 8
+			 * G = (y - 48 * u - 120 * v) >> 8
+			 * B = (y + 475 * u) >> 8
+			 * 
+			 * Decompose 403 = 256 + 128 + 16 + 2 + 1
+			 * Decompose 48 = 32 + 16
+			 * Decompose 120 = 64 + 32 + 16 + 8
+			 * Decompose 475 = 256 + 128 + 64 + 16 + 8 + 2 + 1
+			 * 
+			 * y = (y - 16) << 8
+			 * u -= 128
+			 * v -= 128
+			 * R = (y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8
+			 * G = (y - (u << 5) - (u << 4) - (v << 6) - (v << 5) - (v << 4) - (v << 3)) >> 8
+			 * B = (y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8
 			 */
 			var pixel1 = (byte*)bgra1;
 			var pixel2 = (byte*)bgra2;
-			y1 = (y1 - 16) << 16;
-			y2 = (y2 - 16) << 16;
+			y1 = (y1 - 16) << 8;
+			y2 = (y2 - 16) << 8;
 			u -= 128;
 			v -= 128;
-			pixel1[0] = ClipToByte((y1 + 121609 * u) >> 16);
-			pixel1[1] = ClipToByte((y1 - 12275 * u - 30677 * v) >> 16);
-			pixel1[2] = ClipToByte((y1 + 103206 * v) >> 16);
+			var rCoeff = (v << 8) + (v << 7) + (v << 4) + (v << 1) + v;
+			var gCoeff = (u << 5) + (u << 4) + (v << 6) + (v << 5) + (v << 4) + (v << 3);
+			var bCoeff = (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u;
+			pixel1[0] = ClipToByte((y1 + bCoeff) >> 8);
+			pixel1[1] = ClipToByte((y1 - gCoeff) >> 8);
+			pixel1[2] = ClipToByte((y1 + rCoeff) >> 8);
 			pixel1[3] = 255;
-			pixel2[0] = ClipToByte((y2 + 121609 * u) >> 16);
-			pixel2[1] = ClipToByte((y2 - 12275 * u - 30677 * v) >> 16);
-			pixel2[2] = ClipToByte((y2 + 103206 * v) >> 16);
+			pixel2[0] = ClipToByte((y2 + bCoeff) >> 8);
+			pixel2[1] = ClipToByte((y2 - gCoeff) >> 8);
+			pixel2[2] = ClipToByte((y2 + rCoeff) >> 8);
 			pixel2[3] = 255;
 		}
 
@@ -637,14 +652,6 @@ namespace Carina.PixelViewer.Media
 			 * R = (y - 16) + 1.5748 * (v - 128)
 			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
 			 * B = (y - 16) + 1.8556 * (u - 128)
-			 * 
-			 * Quantized by 65536:
-			 * y = (Y - 16) << 16
-			 * u -= 128
-			 * v -= 128
-			 * R = (y + 103206 * v) >> 16
-			 * G = (y - 12275 * u - 30677 * v) >> 16
-			 * B = (y + 121609 * u) >> 16
 			 */
 			var pixel1 = (ushort*)bgra1;
 			var pixel2 = (ushort*)bgra2;
@@ -743,21 +750,33 @@ namespace Carina.PixelViewer.Media
 			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
 			 * B = (y - 16) + 1.8556 * (u - 128)
 			 * 
-			 * Quantized by 65536:
-			 * y = (Y - 16) << 16
+			 * [Quantized by 256]
+			 * y = (y - 16) << 8
 			 * u -= 128
 			 * v -= 128
-			 * R = (y + 103206 * v) >> 16
-			 * G = (y - 12275 * u - 30677 * v) >> 16
-			 * B = (y + 121609 * u) >> 16
+			 * R = (y + 403 * v) >> 8
+			 * G = (y - 48 * u - 120 * v) >> 8
+			 * B = (y + 475 * u) >> 8
+			 * 
+			 * Decompose 403 = 256 + 128 + 16 + 2 + 1
+			 * Decompose 48 = 32 + 16
+			 * Decompose 120 = 64 + 32 + 16 + 8
+			 * Decompose 475 = 256 + 128 + 64 + 16 + 8 + 2 + 1
+			 * 
+			 * y = (y - 16) << 8
+			 * u -= 128
+			 * v -= 128
+			 * R = (y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8
+			 * G = (y - (u << 5) - (u << 4) - (v << 6) - (v << 5) - (v << 4) - (v << 3)) >> 8
+			 * B = (y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8
 			 */
 			var pixel = (byte*)bgra;
-			y = (y - 16) << 16;
+			y = (y - 16) << 8;
 			u -= 128;
 			v -= 128;
-			pixel[0] = ClipToByte((y + 121609 * u) >> 16);
-			pixel[1] = ClipToByte((y - 12275 * u - 30677 * v) >> 16);
-			pixel[2] = ClipToByte((y + 103206 * v) >> 16);
+			pixel[0] = ClipToByte((y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8);
+			pixel[1] = ClipToByte((y - (u << 5) - (u << 4) - (v << 6) - (v << 5) - (v << 4) - (v << 3)) >> 8);
+			pixel[2] = ClipToByte((y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8);
 			pixel[3] = 255;
 		}
 
@@ -833,14 +852,6 @@ namespace Carina.PixelViewer.Media
 			 * R = (y - 16) + 1.5748 * (v - 128)
 			 * G = (y - 16) - 0.1873 * (u - 128) - 0.4681 * (v - 128);
 			 * B = (y - 16) + 1.8556 * (u - 128)
-			 * 
-			 * Quantized by 65536:
-			 * y = (Y - 16) << 16
-			 * u -= 128
-			 * v -= 128
-			 * R = (y + 103206 * v) >> 16
-			 * G = (y - 12275 * u - 30677 * v) >> 16
-			 * B = (y + 121609 * u) >> 16
 			 */
 			var pixel = (ushort*)bgra;
 			var fY = ((y / 256.0) - 16);
