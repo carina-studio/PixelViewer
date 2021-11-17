@@ -18,7 +18,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memoey usage on status bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV to RGB conversion</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">Default YUV to RGB conversion</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Ratio_1x1">1:1</sys:String>
@@ -137,6 +137,7 @@
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">User interface response time</sys:String>
+	<sys:String x:Key="String/SessionControl.YuvConversionMode">YUV to RGB conversion</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 

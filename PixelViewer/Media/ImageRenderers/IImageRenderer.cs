@@ -223,5 +223,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Whether demosaicing is needed to be performed or not.
 		/// </summary>
 		public bool Demosaicing { get; set; }
+
+
+		/// <summary>
+		/// YUV to RGB conversion mode.
+		/// </summary>
+		public YuvConversionMode YuvConversionMode { get; set; }
 	}
 }

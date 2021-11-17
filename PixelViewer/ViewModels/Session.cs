@@ -44,7 +44,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// Dispose.
 			public void Dispose() => this.session.Deactivate(this);
-        }
+		}
 
 		// Frame of image.
 		class ImageFrame : BaseDisposable
@@ -101,7 +101,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// Frame number.
 			public readonly long FrameNumber;
-        }
+		}
 
 
 		// Token of memory usage of rendered image.
@@ -319,6 +319,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
 		/// <summary>
+		/// Property of <see cref="IsYuvConversionModeSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsYuvConversionModeSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsYuvConversionModeSupported));
+		/// <summary>
 		/// Property of <see cref="LuminanceHistogramGeometry"/>.
 		/// </summary>
 		public static readonly ObservableProperty<Geometry?> LuminanceHistogramGeometryProperty = ObservableProperty.Register<Session, Geometry?>(nameof(LuminanceHistogramGeometry));
@@ -366,6 +370,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="TotalRenderedImagesMemoryUsage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
+		/// <summary>
+		/// Property of <see cref="YuvConversionMode"/>.
+		/// </summary>
+		public static readonly ObservableProperty<YuvConversionMode> YuvConversionModeProperty = ObservableProperty.Register<Session, YuvConversionMode>(nameof(YuvConversionMode),
+			coerce: it => it == YuvConversionMode.ITU_R ? YuvConversionMode.BT_601 : it);
 
 
 		// Constants.
@@ -493,8 +502,8 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsDisposed)
 					return;
 				this.SetValue(IsProcessingImageProperty, this.IsFilteringRenderedImage
-					|| this.IsOpeningSourceFile 
-					|| this.IsRenderingImage 
+					|| this.IsOpeningSourceFile
+					|| this.IsRenderingImage
 					|| this.IsSavingImage);
 			});
 			this.updateIsFilteringImageNeededAction = new ScheduledAction(() =>
@@ -524,6 +533,9 @@ namespace Carina.PixelViewer.ViewModels
 			// select default image renderer
 			this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
 
+			// select default YUV conversion mode
+			this.SetValue(YuvConversionModeProperty, this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode));
+
 			// setup title
 			this.UpdateTitle();
 
@@ -540,7 +552,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		/// <returns>Token of activation.</returns>
 		public IDisposable Activate()
-        {
+		{
 			// check state
 			this.VerifyAccess();
 			this.VerifyDisposed();
@@ -558,12 +570,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(IsActivatedProperty, true);
 			}
 			return token;
-        }
+		}
 
 
 		// Try allocating image frame for filtered image.
 		async Task<ImageFrame?> AllocateFilteredImageFrame(ImageFrame renderedImageFrame)
-        {
+		{
 			while (true)
 			{
 				try
@@ -594,7 +606,7 @@ namespace Carina.PixelViewer.ViewModels
 					}
 				}
 			}
-        }
+		}
 
 
 		// Try allocating image frame for rendered image.
@@ -638,7 +650,7 @@ namespace Carina.PixelViewer.ViewModels
 		Task<bool> ApplyImageFilterAsync(IImageFilter<ImageFilterParams> filter, ImageFrame sourceFrame, ImageFrame resultFrame, CancellationToken cancellationToken) =>
 			this.ApplyImageFilterAsync(filter, sourceFrame, resultFrame, ImageFilterParams.Empty, cancellationToken);
 		async Task<bool> ApplyImageFilterAsync<TParam>(IImageFilter<TParam> filter, ImageFrame sourceFrame, ImageFrame resultFrame, TParam parameters, CancellationToken cancellationToken) where TParam : ImageFilterParams
-        {
+		{
 			try
 			{
 				await filter.ApplyFilterAsync(sourceFrame.BitmapBuffer, resultFrame.BitmapBuffer, parameters, cancellationToken);
@@ -650,12 +662,12 @@ namespace Carina.PixelViewer.ViewModels
 					this.Logger.LogError(ex, $"Error occurred while applying filter {filter}");
 				return false;
 			}
-        }
+		}
 
 
 		// Apply parameters defined in current profile.
 		void ApplyProfile()
-        {
+		{
 			// get profile
 			var profile = this.Profile;
 
@@ -676,6 +688,9 @@ namespace Carina.PixelViewer.ViewModels
 
 				// byte ordering
 				this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
+
+				// YUV conversion mode
+				this.SetValue(YuvConversionModeProperty, profile.YuvConversionMode);
 
 				// demosaicing
 				this.SetValue(DemosaicingProperty, profile.Demosaicing);
@@ -732,7 +747,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get or set byte ordering.
 		/// </summary>
 		public ByteOrdering ByteOrdering
-        {
+		{
 			get => this.GetValue(ByteOrderingProperty);
 			set => this.SetValue(ByteOrderingProperty, value);
 		}
@@ -740,7 +755,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Cancel filtering image.
 		bool CancelFilteringImage(bool cancelPendingRendering = false)
-        {
+		{
 			// cancel
 			this.filterImageAction.Cancel();
 			if (this.imageFilteringCancellationTokenSource == null)
@@ -772,8 +787,8 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageRenderingCancellationTokenSource = null;
 
 			// update state
-			if(!this.IsDisposed)
-			this.SetValue(IsRenderingImageProperty, false);
+			if (!this.IsDisposed)
+				this.SetValue(IsRenderingImageProperty, false);
 			if (cancelPendingRendering)
 				this.hasPendingImageRendering = false;
 
@@ -823,7 +838,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Clear filtered image.
 		bool ClearFilteredImage()
-        {
+		{
 			// cancel filtering
 			this.CancelFilteringImage(true);
 
@@ -840,7 +855,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Clear rendered image.
 		bool ClearRenderedImage(bool checkActivation)
-        {
+		{
 			// check state
 			if (this.IsActivated && checkActivation)
 				return false;
@@ -859,7 +874,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 			}
 			return true;
-        }
+		}
 
 
 		// Close and clear current source file.
@@ -983,7 +998,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get or set offset to first byte of data to render image.
 		/// </summary>
 		public long DataOffset
-        {
+		{
 			get => this.GetValue(DataOffsetProperty);
 			set => this.SetValue(DataOffsetProperty, value);
 		}
@@ -991,7 +1006,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Deactivate.
 		void Deactivate(ActivationToken token)
-        {
+		{
 			// check state
 			this.VerifyAccess();
 			if (this.IsDisposed)
@@ -1004,7 +1019,7 @@ namespace Carina.PixelViewer.ViewModels
 			// deactivate
 			this.Logger.LogDebug("Deactivate");
 			this.SetValue(IsActivatedProperty, false);
-        }
+		}
 
 
 		// Delete current profile.
@@ -1134,7 +1149,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Filter image.
 		async void FilterImage(ImageFrame renderedImageFrame)
-        {
+		{
 			// check state
 			if (!this.IsFilteringRenderedImageNeeded)
 				return;
@@ -1232,12 +1247,12 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.canResetBrightnessAdjustment.Value)
 					ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
 				if (this.canResetContrastAdjustment.Value)
-                {
+				{
 					var middleColor = (rLut.Count - 1) / 2.0;
 					var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
 					ColorLut.Multiply(rLut, factor);
 					ColorLut.Translate(rLut, (1 - factor) * middleColor);
-                }
+				}
 				if (this.canResetColorAdjustment.Value)
 				{
 					var rFactor = this.RedColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
@@ -1261,7 +1276,7 @@ namespace Carina.PixelViewer.ViewModels
 					GreenLookupTable = gLut,
 					BlueLookupTable = bLut,
 					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
-			};
+				};
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (sourceImageFrame == renderedImageFrame)
@@ -1341,12 +1356,12 @@ namespace Carina.PixelViewer.ViewModels
 			this.imageFilteringCancellationTokenSource = null;
 			this.filteredImageFrame?.Dispose();
 			if (sourceImageFrame == filteredImageFrame1)
-            {
+			{
 				this.filteredImageFrame = filteredImageFrame1;
 				filteredImageFrame2?.Dispose();
-            }
+			}
 			else
-            {
+			{
 				this.filteredImageFrame = filteredImageFrame2;
 				filteredImageFrame1.Dispose();
 			}
@@ -1618,10 +1633,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Enable or disable grayscale filter.
 		/// </summary>
 		public bool IsGrayscaleFilterEnabled
-        {
+		{
 			get => this.GetValue(IsGrayscaleFilterEnabledProperty);
 			set => this.SetValue(IsGrayscaleFilterEnabledProperty, value);
-        }
+		}
 
 
 		/// <summary>
@@ -1683,6 +1698,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether <see cref="YuvConversionMode"/> is supported by current <see cref="ImageRenderer"/> or not.
+		/// </summary>
+		public bool IsYuvConversionModeSupported { get => this.GetValue(IsYuvConversionModeSupportedProperty); }
+
+
+		/// <summary>
 		/// Get <see cref="Geometry"/> of luminance histogram.
 		/// </summary>
 		public Geometry? LuminanceHistogramGeometry { get => this.GetValue(LuminanceHistogramGeometryProperty); }
@@ -1732,8 +1753,8 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
-        // Raise PropertyChanged event for effectie bits.
-        void OnEffectiveBitsChanged(int index) => this.OnPropertyChanged(index switch
+		// Raise PropertyChanged event for effectie bits.
+		void OnEffectiveBitsChanged(int index) => this.OnPropertyChanged(index switch
 		{
 			0 => nameof(this.EffectiveBits1),
 			1 => nameof(this.EffectiveBits2),
@@ -1768,9 +1789,9 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Property changed.
-        protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
-        {
-            base.OnPropertyChanged(property, oldValue, newValue);
+		protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
+		{
+			base.OnPropertyChanged(property, oldValue, newValue);
 			if (property == BlueColorAdjustmentProperty
 				|| property == GreenColorAdjustmentProperty
 				|| property == RedColorAdjustmentProperty)
@@ -1814,8 +1835,11 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
-			else if (property == FrameNumberProperty)
+			else if (property == FrameNumberProperty
+				|| property == YuvConversionModeProperty)
+			{
 				this.renderImageAction.Reschedule();
+			}
 			else if (property == HistogramsProperty)
 				this.SetValue(HasHistogramsProperty, newValue != null);
 			else if (property == ImageRendererProperty)
@@ -1827,6 +1851,7 @@ namespace Carina.PixelViewer.ViewModels
 					var imageRenderer = (IImageRenderer)newValue.AsNonNull();
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
 					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
+					this.SetValue(IsYuvConversionModeSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.YUV);
 					this.isImagePlaneOptionsResetNeeded = true;
 					this.updateFilterSupportingAction.Reschedule();
 					this.renderImageAction.Reschedule();
@@ -2308,6 +2333,7 @@ namespace Carina.PixelViewer.ViewModels
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
 				Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
+				YuvConversionMode = this.YuvConversionMode,
 			};
 			var frameNumber = this.FrameNumber;
 			var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
@@ -2597,6 +2623,7 @@ namespace Carina.PixelViewer.ViewModels
 			var dataOffset = 0L;
 			var framePaddingSize = 0L;
 			var byteOrdering = ByteOrdering.BigEndian;
+			var yuvConversionMode = this.YuvConversionMode;
 			var demosaicing = true;
 			var width = 1;
 			var height = 1;
@@ -2609,6 +2636,8 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetInt64(out framePaddingSize);
 			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty))
 				Enum.TryParse(jsonProperty.GetString(), out byteOrdering);
+			if (savedState.TryGetProperty(nameof(YuvConversionMode), out jsonProperty))
+				Enum.TryParse(jsonProperty.GetString(), out yuvConversionMode);
 			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
 				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
@@ -2707,6 +2736,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(DataOffsetProperty, dataOffset);
 			this.SetValue(FramePaddingSizeProperty, framePaddingSize);
 			this.SetValue(ByteOrderingProperty, byteOrdering);
+			this.SetValue(YuvConversionModeProperty, yuvConversionMode);
 			this.SetValue(DemosaicingProperty, demosaicing);
 			this.SetValue(ImageWidthProperty, width);
 			this.SetValue(ImageHeightProperty, height);
@@ -3072,6 +3102,7 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteNumber(nameof(DataOffset), this.DataOffset);
 				writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 				writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
+				writer.WriteString(nameof(YuvConversionMode), this.YuvConversionMode.ToString());
 				writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
 				writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
 				writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
@@ -3290,6 +3321,7 @@ namespace Carina.PixelViewer.ViewModels
 			profile.DataOffset = this.DataOffset;
 			profile.FramePaddingSize = this.FramePaddingSize;
 			profile.ByteOrdering = this.ByteOrdering;
+			profile.YuvConversionMode = this.YuvConversionMode;
 			profile.Demosaicing = this.Demosaicing;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
@@ -3297,6 +3329,25 @@ namespace Carina.PixelViewer.ViewModels
 			profile.PixelStrides = this.pixelStrides;
 			profile.RowStrides = this.rowStrides;
 		}
+
+
+		/// <summary>
+		/// Get or set YUV to RGB conversion mode.
+		/// </summary>
+		public YuvConversionMode YuvConversionMode
+        {
+			get => this.GetValue(YuvConversionModeProperty);
+			set => this.SetValue(YuvConversionModeProperty, value);
+        }
+
+
+		/// <summary>
+		/// Get available values for <see cref="YuvConversionMode"/>.
+		/// </summary>
+		public IList<YuvConversionMode> YuvConversionModes { get; } = Enum.GetValues<YuvConversionMode>()
+			.Where(it => it != Media.YuvConversionMode.ITU_R)
+			.ToArray()
+			.AsReadOnly();
 
 
 		// Zoom-in rendered image.

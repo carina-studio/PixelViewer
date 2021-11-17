@@ -18,7 +18,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">預設 YUV 轉換至 RGB 方式</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
@@ -126,6 +126,7 @@
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用者介面回應時間</sys:String>
+	<sys:String x:Key="String/SessionControl.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 

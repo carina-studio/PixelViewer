@@ -1,5 +1,6 @@
 ﻿using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Configuration;
 using CarinaStudio.IO;
 using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
@@ -49,6 +50,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
         int width = 1;
+        YuvConversionMode yuvConversionMode;
 
 
         // Constructor.
@@ -56,6 +58,7 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             this.name = name;
             this.renderer = renderer;
+            this.yuvConversionMode = App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) ?? default;
         }
         public ImageRenderingProfile(FileFormat format, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.FileFormat)
         {
@@ -63,6 +66,7 @@ namespace Carina.PixelViewer.Media.Profiles
             this.fileFormat.PropertyChanged += this.OnFileFormatPropertyChanged;
             this.name = format.Name;
             this.renderer = renderer;
+            this.yuvConversionMode = App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) ?? default;
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
@@ -370,6 +374,23 @@ namespace Carina.PixelViewer.Media.Profiles
                     Enum.TryParse(jsonProperty.GetString(), out profile.byteOrdering);
                 }
 
+                // YUV conversion mode
+                if (profile.renderer?.Format?.Category == ImageFormatCategory.YUV)
+                {
+                    if (rootElement.TryGetProperty(nameof(YuvConversionMode), out jsonProperty)
+                        && jsonProperty.ValueKind == JsonValueKind.String
+                        && Enum.TryParse(jsonProperty.GetString(), out profile.yuvConversionMode))
+                    {
+                        if (profile.yuvConversionMode == YuvConversionMode.ITU_R)
+                        {
+                            profile.yuvConversionMode = YuvConversionMode.BT_601;
+                            profile.IsUpgradedWhenLoading = true;
+                        }
+                    }
+                    else
+                        profile.IsUpgradedWhenLoading = true;
+                }
+
                 // get demosaicing
                 if (rootElement.TryGetProperty(nameof(Demosaicing), out jsonProperty))
                     profile.demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
@@ -572,6 +593,8 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteNumber(nameof(FramePaddingSize), this.framePaddingSize);
                 if (format.HasMultipleByteOrderings)
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
+                if (format.Category == ImageFormatCategory.YUV)
+                    jsonWriter.WriteString(nameof(YuvConversionMode), this.yuvConversionMode.ToString());
                 jsonWriter.WriteBoolean(nameof(Demosaicing), this.demosaicing);
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);
@@ -634,6 +657,23 @@ namespace Carina.PixelViewer.Media.Profiles
                     throw new ArgumentOutOfRangeException();
                 this.width = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Width)));
+            }
+        }
+
+
+        // Conversion mode of YUV to RGB.
+        public YuvConversionMode YuvConversionMode
+        {
+            get => this.yuvConversionMode;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.yuvConversionMode == value)
+                    return;
+                this.yuvConversionMode = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YuvConversionMode)));
             }
         }
     }
