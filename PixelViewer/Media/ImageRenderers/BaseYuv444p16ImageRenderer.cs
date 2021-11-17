@@ -77,7 +77,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 			// select color conversion
 			var yuvExtractor = this.Create16BitsTo8BitsConversion(renderingOptions.ByteOrdering, this.effectiveBits);
-			var yuv444ToBgra = ImageProcessing.SelectYuv444ToBgra32ConversionUnsafe();
+			var yuv444ToBgra = ImageProcessing.SelectYuv444ToBgra32Conversion();
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>

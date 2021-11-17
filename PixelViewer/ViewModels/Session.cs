@@ -1732,8 +1732,8 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
-		// Raise PropertyChanged event for effectie bits.
-		void OnEffectiveBitsChanged(int index) => this.OnPropertyChanged(index switch
+        // Raise PropertyChanged event for effectie bits.
+        void OnEffectiveBitsChanged(int index) => this.OnPropertyChanged(index switch
 		{
 			0 => nameof(this.EffectiveBits1),
 			1 => nameof(this.EffectiveBits2),

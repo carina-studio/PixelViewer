@@ -90,7 +90,7 @@
 
 				<!-- YUV conversion mode -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.YuvConversionMode}"/>
-				<ComboBox Classes="Dialog_ComboBox" Items="{Binding $parent[Window].YuvConversionModes}" SelectedItem="{Binding DefaultYuvConversionMode, Mode=TwoWay}">
+				<ComboBox Classes="Dialog_ComboBox" Items="{Binding $parent[Window].YuvConversionModes, Mode=OneTime}" SelectedItem="{Binding DefaultYuvConversionMode, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
 							<TextBlock Text="{Binding Converter={x:Static appConverters:EnumConverters.YuvConversionMode}}"/>
