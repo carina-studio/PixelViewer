@@ -105,7 +105,7 @@ namespace Carina.PixelViewer.Media
                                     var pixelPtr = (uint*)((byte*)ptr + y * bitmapBuffer.RowBytes);
                                     for (var x = width; x > 0; --x, ++pixelPtr)
                                     {
-                                        unpackFunc(*pixelPtr, &r, &g, &b, &a);
+                                        unpackFunc(*pixelPtr, &b, &g, &r, &a);
                                         var l = rgbToLuminance(r, g, b);
                                         ++localRHistogram[r];
                                         ++localGHistogram[g];
@@ -178,7 +178,7 @@ namespace Carina.PixelViewer.Media
                                     var pixelPtr = (ulong*)((byte*)ptr + y * bitmapBuffer.RowBytes);
                                     for (var x = width; x > 0; --x, ++pixelPtr)
                                     {
-                                        unpackFunc(*pixelPtr, &r, &g, &b, &a);
+                                        unpackFunc(*pixelPtr, &b, &g, &r, &a);
                                         var l = rgbToLuminance(r, g, b);
                                         ++localRHistogram[r];
                                         ++localGHistogram[g];
