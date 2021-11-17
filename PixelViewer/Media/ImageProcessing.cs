@@ -366,7 +366,16 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV422 to 32-bit BGRA conversion (unsafe).
 		/// </summary>
 		/// <returns>YUV422 to BGRA conversion function.</returns>
-		public static delegate*<int, int, int, int, uint*, uint*, void> SelectYuv422ToBgra32Conversion() => App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) switch
+		public static delegate*<int, int, int, int, uint*, uint*, void> SelectYuv422ToBgra32Conversion() =>
+			SelectYuv422ToBgra32Conversion(App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode));
+
+
+		/// <summary>
+		/// Select proper function for YUV422 to 32-bit BGRA conversion (unsafe).
+		/// </summary>
+		/// <param name="mode">Conversion mode.</param>
+		/// <returns>YUV422 to BGRA conversion function.</returns>
+		public static delegate*<int, int, int, int, uint*, uint*, void> SelectYuv422ToBgra32Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv422ToBgra32BT601,
 			YuvConversionMode.BT_709 => &Yuv422ToBgra32BT709,
@@ -378,7 +387,16 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV422 to 64-bit BGRA conversion (unsafe).
 		/// </summary>
 		/// <returns>YUV422 to BGRA conversion function.</returns>
-		public static delegate*<int, int, int, int, ulong*, ulong*, void> SelectYuv422ToBgra64Conversion() => App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) switch
+		public static delegate*<int, int, int, int, ulong*, ulong*, void> SelectYuv422ToBgra64Conversion() =>
+			SelectYuv422ToBgra64Conversion(App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode));
+
+
+		/// <summary>
+		/// Select proper function for YUV422 to 64-bit BGRA conversion (unsafe).
+		/// </summary>
+		/// <param name="mode">Conversion mode.</param>
+		/// <returns>YUV422 to BGRA conversion function.</returns>
+		public static delegate*<int, int, int, int, ulong*, ulong*, void> SelectYuv422ToBgra64Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv422ToBgra64BT601,
 			YuvConversionMode.BT_709 => &Yuv422ToBgra64BT709,
@@ -390,7 +408,16 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV to 32-bit BGRA conversion.
 		/// </summary>
 		/// <returns>YUV to BGRA conversion function.</returns>
-		public static delegate*<int, int, int, uint*, void> SelectYuv444ToBgra32Conversion() => App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) switch
+		public static delegate*<int, int, int, uint*, void> SelectYuv444ToBgra32Conversion() =>
+			SelectYuv444ToBgra32Conversion(App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode));
+
+
+		/// <summary>
+		/// Select proper function for YUV to 32-bit BGRA conversion.
+		/// </summary>
+		/// <param name="mode">Conversion mode.</param>
+		/// <returns>YUV to BGRA conversion function.</returns>
+		public static delegate*<int, int, int, uint*, void> SelectYuv444ToBgra32Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv444ToBgra32BT601,
 			YuvConversionMode.BT_709 => &Yuv444ToBgra32BT709,
@@ -402,7 +429,16 @@ namespace Carina.PixelViewer.Media
 		/// Select proper function for YUV to 64-bit BGRA conversion.
 		/// </summary>
 		/// <returns>YUV to BGRA conversion function.</returns>
-		public static delegate*<int, int, int, ulong*, void> SelectYuv444ToBgra64Conversion() => App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) switch
+		public static delegate*<int, int, int, ulong*, void> SelectYuv444ToBgra64Conversion() =>
+			SelectYuv444ToBgra64Conversion(App.Current.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode));
+
+
+		/// <summary>
+		/// Select proper function for YUV to 64-bit BGRA conversion.
+		/// </summary>
+		/// <param name="mode">Conversion mode.</param>
+		/// <returns>YUV to BGRA conversion function.</returns>
+		public static delegate*<int, int, int, ulong*, void> SelectYuv444ToBgra64Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv444ToBgra64BT601,
 			YuvConversionMode.BT_709 => &Yuv444ToBgra64BT709,
