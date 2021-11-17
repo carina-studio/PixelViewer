@@ -386,6 +386,11 @@ namespace Carina.PixelViewer.Media.Profiles
                             profile.yuvConversionMode = YuvConversionMode.BT_601;
                             profile.IsUpgradedWhenLoading = true;
                         }
+                        else if (profile.yuvConversionMode == YuvConversionMode.NTSC)
+                        {
+                            profile.yuvConversionMode = YuvConversionMode.BT_656;
+                            profile.IsUpgradedWhenLoading = true;
+                        }
                     }
                     else
                         profile.IsUpgradedWhenLoading = true;

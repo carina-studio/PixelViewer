@@ -47,6 +47,7 @@ namespace Carina.PixelViewer.Controls
 
 
         // Selectable YUV conversion modes.
-        Media.YuvConversionMode[] YuvConversionModes { get; } = Enum.GetValues<Media.YuvConversionMode>().Where(it => it != Media.YuvConversionMode.ITU_R).ToArray();
+        Media.YuvConversionMode[] YuvConversionModes { get; } = Enum.GetValues<Media.YuvConversionMode>()
+            .Where(it => it != Media.YuvConversionMode.ITU_R && it != Media.YuvConversionMode.NTSC).ToArray();
     }
 }

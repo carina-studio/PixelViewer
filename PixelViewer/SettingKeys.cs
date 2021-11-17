@@ -30,7 +30,7 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Default YUV to RGB conversion mode.
 		/// </summary>
-		public static readonly SettingKey<YuvConversionMode> DefaultYuvConversionMode = new SettingKey<YuvConversionMode>(nameof(DefaultYuvConversionMode), YuvConversionMode.NTSC);
+		public static readonly SettingKey<YuvConversionMode> DefaultYuvConversionMode = new SettingKey<YuvConversionMode>(nameof(DefaultYuvConversionMode), YuvConversionMode.BT_656);
 		/// <summary>
 		/// Evaluate image dimensions after changing image renderer.
 		/// </summary>

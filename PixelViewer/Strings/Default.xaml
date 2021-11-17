@@ -142,8 +142,8 @@
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 
 	<!-- YuvConversionMode -->
-	<sys:String x:Key="String/YuvConversionMode.BT_601">ITU-R Rec. 601 (BT.601)</sys:String>
-	<sys:String x:Key="String/YuvConversionMode.BT_709">ITU-R Rec. 709 (BT.709)</sys:String>
-	<sys:String x:Key="String/YuvConversionMode.NTSC">NTSC</sys:String>
+	<sys:String x:Key="String/YuvConversionMode.BT_601">ITU-R BT.601</sys:String>
+	<sys:String x:Key="String/YuvConversionMode.BT_656">ITU-R BT.656 (NTSC standard)</sys:String>
+	<sys:String x:Key="String/YuvConversionMode.BT_709">ITU-R BT.709</sys:String>
 
 </ResourceDictionary>

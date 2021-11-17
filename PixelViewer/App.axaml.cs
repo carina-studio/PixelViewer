@@ -301,6 +301,8 @@ namespace Carina.PixelViewer
 					settings.ResetValue(LegacyYuvConversionModeKey);
 					if (it == Media.YuvConversionMode.ITU_R)
 						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, Media.YuvConversionMode.BT_601);
+					else if (it == Media.YuvConversionMode.NTSC)
+						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, Media.YuvConversionMode.BT_656);
 					else
 						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, it);
 				});

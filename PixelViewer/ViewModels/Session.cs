@@ -374,7 +374,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="YuvConversionMode"/>.
 		/// </summary>
 		public static readonly ObservableProperty<YuvConversionMode> YuvConversionModeProperty = ObservableProperty.Register<Session, YuvConversionMode>(nameof(YuvConversionMode),
-			coerce: it => it == YuvConversionMode.ITU_R ? YuvConversionMode.BT_601 : it);
+			coerce: it => it switch {
+				YuvConversionMode.ITU_R => YuvConversionMode.BT_601,
+				YuvConversionMode.NTSC => YuvConversionMode.BT_656,
+				_ => it,
+			});
 
 
 		// Constants.
@@ -3345,7 +3349,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get available values for <see cref="YuvConversionMode"/>.
 		/// </summary>
 		public IList<YuvConversionMode> YuvConversionModes { get; } = Enum.GetValues<YuvConversionMode>()
-			.Where(it => it != Media.YuvConversionMode.ITU_R)
+			.Where(it => it != YuvConversionMode.NTSC && it != YuvConversionMode.ITU_R)
 			.ToArray()
 			.AsReadOnly();
 

@@ -8,14 +8,9 @@ namespace Carina.PixelViewer.Media
 	public enum YuvConversionMode
 	{
 		/// <summary>
-		/// NTSC stabdard.
+		/// ITU-R Recommendation BT.656 (NTSC).
 		/// </summary>
-		NTSC,
-		/// <summary>
-		/// ITU-R.
-		/// </summary>
-		[Obsolete]
-		ITU_R,
+		BT_656,
 		/// <summary>
 		/// ITU-R Recommendation BT.601.
 		/// </summary>
@@ -24,5 +19,15 @@ namespace Carina.PixelViewer.Media
 		/// ITU-R Recommendation BT.709
 		/// </summary>
 		BT_709,
+		/// <summary>
+		/// NTSC stabdard.
+		/// </summary>
+		[Obsolete]
+		NTSC,
+		/// <summary>
+		/// ITU-R.
+		/// </summary>
+		[Obsolete]
+		ITU_R,
 	}
 }
