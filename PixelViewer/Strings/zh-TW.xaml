@@ -131,6 +131,6 @@
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 
 	<!-- YuvConversionMode -->
-	<sys:String x:Key="String/YuvConversionMode.BT_656">ITU-R BT.656 (NTSC 標準)</sys:String>
+	<sys:String x:Key="String/YuvConversionMode.BT_656">ITU-R BT.656 (SDTV, NTSC 標準)</sys:String>
 
 </ResourceDictionary>

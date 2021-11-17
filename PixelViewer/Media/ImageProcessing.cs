@@ -378,8 +378,8 @@ namespace Carina.PixelViewer.Media
 		public static delegate*<int, int, int, int, uint*, uint*, void> SelectYuv422ToBgra32Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv422ToBgra32BT601,
-			YuvConversionMode.BT_709 => &Yuv422ToBgra32BT709,
-			_ => &Yuv422ToBgra32BT656,
+			YuvConversionMode.BT_656 => &Yuv422ToBgra32BT656,
+			_ => &Yuv422ToBgra32BT709,
 		};
 
 
@@ -399,8 +399,8 @@ namespace Carina.PixelViewer.Media
 		public static delegate*<int, int, int, int, ulong*, ulong*, void> SelectYuv422ToBgra64Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv422ToBgra64BT601,
-			YuvConversionMode.BT_709 => &Yuv422ToBgra64BT709,
-			_ => &Yuv422ToBgra64BT656,
+			YuvConversionMode.BT_656 => &Yuv422ToBgra64BT656,
+			_ => &Yuv422ToBgra64BT709,
 		};
 
 
@@ -420,8 +420,8 @@ namespace Carina.PixelViewer.Media
 		public static delegate*<int, int, int, uint*, void> SelectYuv444ToBgra32Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv444ToBgra32BT601,
-			YuvConversionMode.BT_709 => &Yuv444ToBgra32BT709,
-			_ => &Yuv444ToBgra32BT656,
+			YuvConversionMode.BT_656 => &Yuv444ToBgra32BT656,
+			_ => &Yuv444ToBgra32BT709,
 		};
 
 
@@ -441,8 +441,8 @@ namespace Carina.PixelViewer.Media
 		public static delegate*<int, int, int, ulong*, void> SelectYuv444ToBgra64Conversion(YuvConversionMode mode) => mode switch
 		{
 			YuvConversionMode.BT_601 => &Yuv444ToBgra64BT601,
-			YuvConversionMode.BT_709 => &Yuv444ToBgra64BT709,
-			_ => &Yuv444ToBgra64BT656,
+			YuvConversionMode.BT_656 => &Yuv444ToBgra64BT656,
+			_ => &Yuv444ToBgra64BT709,
 		};
 
 
