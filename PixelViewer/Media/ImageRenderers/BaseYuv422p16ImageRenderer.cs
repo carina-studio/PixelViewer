@@ -141,8 +141,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var bitmapPixelPtr = bitmapRowPtr;
 						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv2PixelStride, bitmapPixelPtr += 8)
 						{
-							int y1 = bitmapPixelPtr[0];
-							int y2 = bitmapPixelPtr[4];
+							var y1 = bitmapPixelPtr[0];
+							var y2 = bitmapPixelPtr[4];
 							this.SelectUV(bitmapPixelPtr[1], yuvExtractor(uvPixelPtr[0], uvPixelPtr[1]), out var u, out var v);
 							converter.ConvertFromYuv422ToBgra32(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
 						}
