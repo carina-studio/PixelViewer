@@ -21,7 +21,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_2020 = new YuvToBgraConverter("BT.2020",
+        public static readonly YuvToBgraConverter BT_2020 = new YuvToBgraConverter("BT.2020", BitmapColorSpace.BT_2020,
             -16, -128, -128,
             1.1632,
             0, 1.6794,
@@ -30,7 +30,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.601.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601",
+        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601", BitmapColorSpace.Srgb,
             0, -128, -128,
             1,
             0, 1.402,
@@ -39,7 +39,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.656.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656",
+        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656", BitmapColorSpace.Srgb,
             -16, -128, -128,
             1.164,
             0, 1.596,
@@ -48,7 +48,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.709.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_709 = new YuvToBgraConverter("BT.709",
+        public static readonly YuvToBgraConverter BT_709 = new YuvToBgraConverter("BT.709", BitmapColorSpace.Srgb,
             0, -128, -128,
             1,
             0, 1.5748,
@@ -86,15 +86,18 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        YuvToBgraConverter(string name, 
+        YuvToBgraConverter(string name, BitmapColorSpace colorSpace,
             int yShift, int uShift, int vShift,
             double yFactor,
             double uFactorForR, double vFactorForR,
             double uFactorForG, double vFactorForG,
             double uFactorForB, double vFactorForB)
         {
-            // setup name
+            // setup properties
+            this.ColorSpace = colorSpace;
             this.Name = name;
+
+            // register
             Converters.Add(this);
 
             // calculate quantized factors for 8-bit integer
@@ -127,6 +130,12 @@ namespace Carina.PixelViewer.Media
         /// Get all available converters.
         /// </summary>
         public static IList<YuvToBgraConverter> All { get; } = Converters.AsReadOnly();
+
+
+        /// <summary>
+        /// Color space of RGB converted by this converter.
+        /// </summary>
+        public BitmapColorSpace ColorSpace { get; }
 
 
         /// <summary>
@@ -257,14 +266,17 @@ namespace Carina.PixelViewer.Media
         /// <param name="name">Name of converter.</param>
         /// <param name="converter">Converter with specific name, or <see cref="Default"/> is no converter matches.</param>
         /// <returns>True if converter found for specific name.</returns>
-        public static bool TryGetByName(string name, out YuvToBgraConverter converter)
+        public static bool TryGetByName(string? name, out YuvToBgraConverter converter)
         {
-            foreach (var candidate in Converters)
+            if (name != null)
             {
-                if (candidate.Name == name)
+                foreach (var candidate in Converters)
                 {
-                    converter = candidate;
-                    return true;
+                    if (candidate.Name == name)
+                    {
+                        converter = candidate;
+                        return true;
+                    }
                 }
             }
             converter = Default;
