@@ -3,7 +3,6 @@ using Carina.PixelViewer.ViewModels;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.ViewModels;
 using System;
-using System.Linq;
 
 namespace Carina.PixelViewer.Controls
 {
@@ -44,10 +43,5 @@ namespace Carina.PixelViewer.Controls
 
         // Create view-model.
         protected override ApplicationOptions OnCreateViewModel() => new AppOptions();
-
-
-        // Selectable YUV conversion modes.
-        Media.YuvConversionMode[] YuvConversionModes { get; } = Enum.GetValues<Media.YuvConversionMode>()
-            .Where(it => it != Media.YuvConversionMode.ITU_R && it != Media.YuvConversionMode.NTSC).ToArray();
     }
 }

@@ -32,7 +32,7 @@ namespace Carina.PixelViewer
 
 
 		// Static fields.
-		static readonly SettingKey<Media.YuvConversionMode> LegacyYuvConversionModeKey = new SettingKey<Media.YuvConversionMode>("YuvConversionMode", Media.YuvConversionMode.NTSC);
+		static readonly SettingKey<string> LegacyYuvConversionModeKey = new SettingKey<string>("YuvConversionMode", "");
 		static readonly Uri PreviewPackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
 		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
 
@@ -299,12 +299,12 @@ namespace Carina.PixelViewer
 				settings.GetValueOrDefault(LegacyYuvConversionModeKey).Let(it =>
 				{
 					settings.ResetValue(LegacyYuvConversionModeKey);
-					if (it == Media.YuvConversionMode.ITU_R)
-						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, Media.YuvConversionMode.BT_601);
-					else if (it == Media.YuvConversionMode.NTSC)
-						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, Media.YuvConversionMode.BT_656);
-					else
-						settings.SetValue<Media.YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, it);
+					settings.SetValue<string>(SettingKeys.DefaultYuvToBgraConversion, it switch
+					{
+						"ITU_R" => Media.YuvToBgraConverter.BT_601.Name,
+						"NTSC" => Media.YuvToBgraConverter.BT_656.Name,
+						_ => Media.YuvToBgraConverter.Default.Name,
+					});
 				});
 			}
 		}

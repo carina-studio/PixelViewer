@@ -10,6 +10,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">預設 YUV 至 RGB 轉換</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
@@ -18,7 +19,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">預設 YUV 轉換至 RGB 方式</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
@@ -126,11 +126,11 @@
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用者介面回應時間</sys:String>
-	<sys:String x:Key="String/SessionControl.YuvConversionMode">YUV 轉換至 RGB 方式</sys:String>
+	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV 至 RGB 轉換</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 
-	<!-- YuvConversionMode -->
-	<sys:String x:Key="String/YuvConversionMode.BT_656">ITU-R BT.656 (SDTV, NTSC 標準)</sys:String>
+	<!-- YuvToBgraConverter -->
+	<sys:String x:Key="String/YuvToBgraConverter.BT.656">ITU-R BT.656 (SDTV，NTSC 標準)</sys:String>
 
 </ResourceDictionary>

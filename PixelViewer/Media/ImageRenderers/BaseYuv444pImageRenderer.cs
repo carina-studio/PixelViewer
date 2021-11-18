@@ -66,8 +66,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid pixel/row stride.");
 			}
 
-			// select color conversion
-			var yuv444ToBgra = ImageProcessing.SelectYuv444ToBgra32Conversion(renderingOptions.YuvConversionMode);
+			// select color converter
+			var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
@@ -130,7 +130,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							// render the N column
 							int y = bitmapPixelPtr[0];
 							this.SelectUV(bitmapPixelPtr[1], uvPixelPtr[0], out var u, out var v);
-							yuv444ToBgra(y, u, v, (uint*)bitmapPixelPtr);
+							converter.ConvertFromYuv444ToBgra32(y, u, v, (uint*)bitmapPixelPtr);
 						}
 
 						// check state

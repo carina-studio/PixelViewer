@@ -70,9 +70,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid pixel/row stride.");
 			}
 
-			// select color conversion
+			// select color converter
+			var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
 			var yuvExtractor = this.Create16BitsTo8BitsConversion(renderingOptions.ByteOrdering, this.effectiveBits);
-			var yuv422ToBgra = ImageProcessing.SelectYuv422ToBgra32Conversion(renderingOptions.YuvConversionMode);
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
@@ -115,7 +115,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							int y1 = bitmapPixelPtr[0];
 							int y2 = bitmapPixelPtr[4];
 							this.SelectUV(yuvExtractor(vuPixelPtr[0], vuPixelPtr[1]), yuvExtractor(vuPixelPtr[2], vuPixelPtr[3]), out var u, out var v);
-							yuv422ToBgra(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
+							converter.ConvertFromYuv422ToBgra32(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
 						}
 						++rowIndex;
 						bitmapRowPtr += bitmapRowStride;
@@ -128,7 +128,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							int y1 = bitmapPixelPtr[0];
 							int y2 = bitmapPixelPtr[4];
 							this.SelectUV(yuvExtractor(vuPixelPtr[0], vuPixelPtr[1]), yuvExtractor(vuPixelPtr[2], vuPixelPtr[3]), out var u, out var v);
-							yuv422ToBgra(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
+							converter.ConvertFromYuv422ToBgra32(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
 						}
 
 						// check state

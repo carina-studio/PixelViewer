@@ -51,12 +51,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Default YUV to RGB conversion mode.
+		/// Default YUV to RGB conversion.
 		/// </summary>
-		public YuvConversionMode DefaultYuvConversionMode
+		public YuvToBgraConverter DefaultYuvToBgraConverter
 		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode);
-			set => this.Settings.SetValue<YuvConversionMode>(SettingKeys.DefaultYuvConversionMode, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion).Let(name =>
+			{
+				YuvToBgraConverter.TryGetByName(name, out var converter);
+				return converter;
+			});
+			set => this.Settings.SetValue<string>(SettingKeys.DefaultYuvToBgraConversion, value.Name);
 		}
 
 
@@ -99,8 +103,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)
 				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
-			else if (key == SettingKeys.DefaultYuvConversionMode)
-				this.OnPropertyChanged(nameof(this.DefaultYuvConversionMode));
+			else if (key == SettingKeys.DefaultYuvToBgraConversion)
+				this.OnPropertyChanged(nameof(this.DefaultYuvToBgraConverter));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterChangingRenderer)
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile)
@@ -144,11 +148,5 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile);
 			set => this.Settings.SetValue<bool>(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
 		}
-
-
-		/// <summary>
-		/// List of available values for <see cref="YuvConversionMode"/>.
-		/// </summary>
-		public IEnumerable<YuvConversionMode> YuvConversionModes { get; } = (YuvConversionMode[])Enum.GetValues(typeof(YuvConversionMode));
 	}
 }

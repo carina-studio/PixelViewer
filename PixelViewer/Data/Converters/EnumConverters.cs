@@ -13,9 +13,5 @@ namespace Carina.PixelViewer.Data.Converters
         /// Convert from <see cref="ImageFormatCategory"/>.
         /// </summary>
         public static readonly EnumConverter ImageFormatCategory = new EnumConverter(App.CurrentOrNull, typeof(ImageFormatCategory));
-        /// <summary>
-        /// Convert from <see cref="YuvConversionMode"/>.
-        /// </summary>
-        public static readonly EnumConverter YuvConversionMode = new EnumConverter(App.CurrentOrNull, typeof(YuvConversionMode));
     }
 }

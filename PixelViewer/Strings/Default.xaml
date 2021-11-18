@@ -10,6 +10,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB conversion</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
@@ -18,7 +19,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memoey usage on status bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.YuvConversionMode">Default YUV to RGB conversion</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Ratio_1x1">1:1</sys:String>
@@ -137,14 +137,14 @@
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">User interface response time</sys:String>
-	<sys:String x:Key="String/SessionControl.YuvConversionMode">YUV to RGB conversion</sys:String>
+	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV to RGB conversion</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 
-	<!-- YuvConversionMode -->
-	<sys:String x:Key="String/YuvConversionMode.BT_2020">ITU-R BT.2020 (UHDTV)</sys:String>
-	<sys:String x:Key="String/YuvConversionMode.BT_601">ITU-R BT.601 (SDTV)</sys:String>
-	<sys:String x:Key="String/YuvConversionMode.BT_656">ITU-R BT.656 (SDTV, NTSC standard)</sys:String>
-	<sys:String x:Key="String/YuvConversionMode.BT_709">ITU-R BT.709 (HDTV)</sys:String>
+	<!-- YuvToBgraConverter -->
+	<sys:String x:Key="String/YuvToBgraConverter.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.601">ITU-R BT.601 (SDTV)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.656">ITU-R BT.656 (SDTV, NTSC standard)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.709">ITU-R BT.709 (HDTV)</sys:String>
 
 </ResourceDictionary>

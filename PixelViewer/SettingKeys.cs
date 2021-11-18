@@ -28,9 +28,9 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<string> DefaultImageRendererFormatName = new SettingKey<string>(nameof(DefaultImageRendererFormatName), "L8");
 		/// <summary>
-		/// Default YUV to RGB conversion mode.
+		/// Default YUV to RGB conversion.
 		/// </summary>
-		public static readonly SettingKey<YuvConversionMode> DefaultYuvConversionMode = new SettingKey<YuvConversionMode>(nameof(DefaultYuvConversionMode), YuvConversionMode.BT_709);
+		public static readonly SettingKey<string> DefaultYuvToBgraConversion = new SettingKey<string>(nameof(DefaultYuvToBgraConversion), YuvToBgraConverter.Default.Name);
 		/// <summary>
 		/// Evaluate image dimensions after changing image renderer.
 		/// </summary>

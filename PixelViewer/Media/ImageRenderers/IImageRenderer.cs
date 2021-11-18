@@ -226,8 +226,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
-		/// YUV to RGB conversion mode.
+		/// YUV to RGB converter.
 		/// </summary>
-		public YuvConversionMode YuvConversionMode { get; set; }
+		public YuvToBgraConverter? YuvToBgraConverter { get; set; }
 	}
 }

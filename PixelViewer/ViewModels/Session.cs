@@ -319,9 +319,9 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
 		/// <summary>
-		/// Property of <see cref="IsYuvConversionModeSupported"/>.
+		/// Property of <see cref="IsYuvToBgraConverterSupported"/>.
 		/// </summary>
-		public static readonly ObservableProperty<bool> IsYuvConversionModeSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsYuvConversionModeSupported));
+		public static readonly ObservableProperty<bool> IsYuvToBgraConverterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsYuvToBgraConverterSupported));
 		/// <summary>
 		/// Property of <see cref="LuminanceHistogramGeometry"/>.
 		/// </summary>
@@ -371,14 +371,9 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
 		/// <summary>
-		/// Property of <see cref="YuvConversionMode"/>.
+		/// Property of <see cref="YuvToBgraConverter"/>.
 		/// </summary>
-		public static readonly ObservableProperty<YuvConversionMode> YuvConversionModeProperty = ObservableProperty.Register<Session, YuvConversionMode>(nameof(YuvConversionMode),
-			coerce: it => it switch {
-				YuvConversionMode.ITU_R => YuvConversionMode.BT_601,
-				YuvConversionMode.NTSC => YuvConversionMode.BT_656,
-				_ => it,
-			});
+		public static readonly ObservableProperty<YuvToBgraConverter> YuvToBgraConverterProperty = ObservableProperty.Register<Session, YuvToBgraConverter>(nameof(YuvToBgraConverter), YuvToBgraConverter.Default);
 
 
 		// Constants.
@@ -537,8 +532,9 @@ namespace Carina.PixelViewer.ViewModels
 			// select default image renderer
 			this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
 
-			// select default YUV conversion mode
-			this.SetValue(YuvConversionModeProperty, this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode));
+			// select default YUV to RGB converter
+			if (YuvToBgraConverter.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion), out var converter))
+				this.SetValue(YuvToBgraConverterProperty, converter);
 
 			// setup title
 			this.UpdateTitle();
@@ -693,8 +689,8 @@ namespace Carina.PixelViewer.ViewModels
 				// byte ordering
 				this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
 
-				// YUV conversion mode
-				this.SetValue(YuvConversionModeProperty, profile.YuvConversionMode);
+				// YUV to RGB converter
+				this.SetValue(YuvToBgraConverterProperty, profile.YuvToBgraConverter);
 
 				// demosaicing
 				this.SetValue(DemosaicingProperty, profile.Demosaicing);
@@ -1702,9 +1698,9 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Check whether <see cref="YuvConversionMode"/> is supported by current <see cref="ImageRenderer"/> or not.
+		/// Check whether <see cref="YuvToBgraConverter"/> is supported by current <see cref="ImageRenderer"/> or not.
 		/// </summary>
-		public bool IsYuvConversionModeSupported { get => this.GetValue(IsYuvConversionModeSupportedProperty); }
+		public bool IsYuvToBgraConverterSupported { get => this.GetValue(IsYuvToBgraConverterSupportedProperty); }
 
 
 		/// <summary>
@@ -1840,7 +1836,7 @@ namespace Carina.PixelViewer.ViewModels
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
 			else if (property == FrameNumberProperty
-				|| property == YuvConversionModeProperty)
+				|| property == YuvToBgraConverterProperty)
 			{
 				this.renderImageAction.Reschedule();
 			}
@@ -1855,7 +1851,7 @@ namespace Carina.PixelViewer.ViewModels
 					var imageRenderer = (IImageRenderer)newValue.AsNonNull();
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
 					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
-					this.SetValue(IsYuvConversionModeSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.YUV);
+					this.SetValue(IsYuvToBgraConverterSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.YUV);
 					this.isImagePlaneOptionsResetNeeded = true;
 					this.updateFilterSupportingAction.Reschedule();
 					this.renderImageAction.Reschedule();
@@ -2337,7 +2333,7 @@ namespace Carina.PixelViewer.ViewModels
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
 				Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
-				YuvConversionMode = this.YuvConversionMode,
+				YuvToBgraConverter = this.YuvToBgraConverter,
 			};
 			var frameNumber = this.FrameNumber;
 			var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
@@ -2627,7 +2623,7 @@ namespace Carina.PixelViewer.ViewModels
 			var dataOffset = 0L;
 			var framePaddingSize = 0L;
 			var byteOrdering = ByteOrdering.BigEndian;
-			var yuvConversionMode = this.YuvConversionMode;
+			var yuvToBgraConverter = this.YuvToBgraConverter;
 			var demosaicing = true;
 			var width = 1;
 			var height = 1;
@@ -2640,8 +2636,8 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetInt64(out framePaddingSize);
 			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty))
 				Enum.TryParse(jsonProperty.GetString(), out byteOrdering);
-			if (savedState.TryGetProperty(nameof(YuvConversionMode), out jsonProperty))
-				Enum.TryParse(jsonProperty.GetString(), out yuvConversionMode);
+			if (savedState.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty))
+				YuvToBgraConverter.TryGetByName(jsonProperty.GetString().AsNonNull(), out yuvToBgraConverter);
 			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
 				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
@@ -2740,7 +2736,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(DataOffsetProperty, dataOffset);
 			this.SetValue(FramePaddingSizeProperty, framePaddingSize);
 			this.SetValue(ByteOrderingProperty, byteOrdering);
-			this.SetValue(YuvConversionModeProperty, yuvConversionMode);
+			this.SetValue(YuvToBgraConverterProperty, yuvToBgraConverter);
 			this.SetValue(DemosaicingProperty, demosaicing);
 			this.SetValue(ImageWidthProperty, width);
 			this.SetValue(ImageHeightProperty, height);
@@ -3106,7 +3102,7 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteNumber(nameof(DataOffset), this.DataOffset);
 				writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 				writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
-				writer.WriteString(nameof(YuvConversionMode), this.YuvConversionMode.ToString());
+				writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
 				writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
 				writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
 				writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
@@ -3325,7 +3321,7 @@ namespace Carina.PixelViewer.ViewModels
 			profile.DataOffset = this.DataOffset;
 			profile.FramePaddingSize = this.FramePaddingSize;
 			profile.ByteOrdering = this.ByteOrdering;
-			profile.YuvConversionMode = this.YuvConversionMode;
+			profile.YuvToBgraConverter = this.YuvToBgraConverter;
 			profile.Demosaicing = this.Demosaicing;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
@@ -3336,22 +3332,13 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Get or set YUV to RGB conversion mode.
+		/// Get or set YUV to RGB converter.
 		/// </summary>
-		public YuvConversionMode YuvConversionMode
+		public YuvToBgraConverter YuvToBgraConverter
         {
-			get => this.GetValue(YuvConversionModeProperty);
-			set => this.SetValue(YuvConversionModeProperty, value);
+			get => this.GetValue(YuvToBgraConverterProperty);
+			set => this.SetValue(YuvToBgraConverterProperty, value);
         }
-
-
-		/// <summary>
-		/// Get available values for <see cref="YuvConversionMode"/>.
-		/// </summary>
-		public IList<YuvConversionMode> YuvConversionModes { get; } = Enum.GetValues<YuvConversionMode>()
-			.Where(it => it != YuvConversionMode.NTSC && it != YuvConversionMode.ITU_R)
-			.ToArray()
-			.AsReadOnly();
 
 
 		// Zoom-in rendered image.

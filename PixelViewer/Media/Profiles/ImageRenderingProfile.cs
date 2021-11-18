@@ -50,7 +50,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
         int width = 1;
-        YuvConversionMode yuvConversionMode;
+        YuvToBgraConverter yuvToBgraConverter = YuvToBgraConverter.Default;
 
 
         // Constructor.
@@ -58,7 +58,7 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             this.name = name;
             this.renderer = renderer;
-            this.yuvConversionMode = App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) ?? default;
+            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
         }
         public ImageRenderingProfile(FileFormat format, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.FileFormat)
         {
@@ -66,7 +66,7 @@ namespace Carina.PixelViewer.Media.Profiles
             this.fileFormat.PropertyChanged += this.OnFileFormatPropertyChanged;
             this.name = format.Name;
             this.renderer = renderer;
-            this.yuvConversionMode = App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvConversionMode) ?? default;
+            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
@@ -374,23 +374,14 @@ namespace Carina.PixelViewer.Media.Profiles
                     Enum.TryParse(jsonProperty.GetString(), out profile.byteOrdering);
                 }
 
-                // YUV conversion mode
+                // YUV to RGB converter
                 if (profile.renderer?.Format?.Category == ImageFormatCategory.YUV)
                 {
-                    if (rootElement.TryGetProperty(nameof(YuvConversionMode), out jsonProperty)
-                        && jsonProperty.ValueKind == JsonValueKind.String
-                        && Enum.TryParse(jsonProperty.GetString(), out profile.yuvConversionMode))
+                    if (rootElement.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty)
+                        && jsonProperty.ValueKind == JsonValueKind.String)
                     {
-                        if (profile.yuvConversionMode == YuvConversionMode.ITU_R)
-                        {
-                            profile.yuvConversionMode = YuvConversionMode.BT_601;
+                        if (!YuvToBgraConverter.TryGetByName(jsonProperty.GetString().AsNonNull(), out profile.yuvToBgraConverter))
                             profile.IsUpgradedWhenLoading = true;
-                        }
-                        else if (profile.yuvConversionMode == YuvConversionMode.NTSC)
-                        {
-                            profile.yuvConversionMode = YuvConversionMode.BT_656;
-                            profile.IsUpgradedWhenLoading = true;
-                        }
                     }
                     else
                         profile.IsUpgradedWhenLoading = true;
@@ -599,7 +590,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 if (format.HasMultipleByteOrderings)
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 if (format.Category == ImageFormatCategory.YUV)
-                    jsonWriter.WriteString(nameof(YuvConversionMode), this.yuvConversionMode.ToString());
+                    jsonWriter.WriteString(nameof(YuvToBgraConverter), this.yuvToBgraConverter.Name);
                 jsonWriter.WriteBoolean(nameof(Demosaicing), this.demosaicing);
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);
@@ -666,19 +657,19 @@ namespace Carina.PixelViewer.Media.Profiles
         }
 
 
-        // Conversion mode of YUV to RGB.
-        public YuvConversionMode YuvConversionMode
+        // Conversion of YUV to RGB.
+        public YuvToBgraConverter YuvToBgraConverter
         {
-            get => this.yuvConversionMode;
+            get => this.yuvToBgraConverter;
             set
             {
                 this.VerifyAccess();
                 this.VerifyDisposed();
                 this.VerifyDefault();
-                if (this.yuvConversionMode == value)
+                if (this.yuvToBgraConverter == value)
                     return;
-                this.yuvConversionMode = value;
-                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YuvConversionMode)));
+                this.yuvToBgraConverter = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(YuvToBgraConverter)));
             }
         }
     }

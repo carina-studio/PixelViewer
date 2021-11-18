@@ -88,12 +88,12 @@
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator"/>
 
-				<!-- YUV conversion mode -->
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.YuvConversionMode}"/>
-				<ComboBox Classes="Dialog_ComboBox" Items="{Binding $parent[Window].YuvConversionModes, Mode=OneTime}" SelectedItem="{Binding DefaultYuvConversionMode, Mode=TwoWay}">
+				<!-- YUV to RGB conversion -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
+				<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding Converter={x:Static appConverters:EnumConverters.YuvConversionMode}}"/>
+							<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
