@@ -62,7 +62,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.session = session;
 			}
 
-			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, int width, int height)
+			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, BitmapColorSpace colorSpace, int width, int height)
 			{
 				var renderedImageDataSize = ((long)width * height * format.GetByteSize()); // no need to reserve for Avalonia bitmap
 				var memoryUsageToken = session.RequestRenderedImageMemoryUsage(renderedImageDataSize);
@@ -73,7 +73,7 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				try
 				{
-					var bitmapBuffer = new BitmapBuffer(format, width, height);
+					var bitmapBuffer = new BitmapBuffer(format, colorSpace, width, height);
 					return new ImageFrame(session, memoryUsageToken, bitmapBuffer, frameNumber);
 				}
 				catch
@@ -580,7 +580,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				try
 				{
-					return ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height);
+					return ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.ColorSpace, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height);
 				}
 				catch (Exception ex)
 				{
@@ -610,13 +610,13 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Try allocating image frame for rendered image.
-		async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, int width, int height)
+		async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, BitmapColorSpace colorSpace, int width, int height)
 		{
 			while (true)
 			{
 				try
 				{
-					return ImageFrame.Allocate(this, frameNumber, format, width, height);
+					return ImageFrame.Allocate(this, frameNumber, format, colorSpace, width, height);
 				}
 				catch (Exception ex)
 				{
@@ -2369,7 +2369,7 @@ namespace Carina.PixelViewer.ViewModels
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, this.ImageWidth, this.ImageHeight);
+			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, BitmapColorSpace.Default, this.ImageWidth, this.ImageHeight);
 			if (renderedImageFrame == null)
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)

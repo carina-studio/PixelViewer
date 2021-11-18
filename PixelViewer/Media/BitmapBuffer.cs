@@ -13,14 +13,16 @@ namespace Carina.PixelViewer.Media
 		{
 			// Fields.
 			public readonly byte[] Array;
+			public readonly BitmapColorSpace ColorSpace;
 			public readonly BitmapFormat Format;
 			public readonly int Height;
 			public readonly int RowBytes;
 			public readonly int Width;
 
 			// Constructor.
-			public HolderImpl(BitmapFormat format, int width, int height)
+			public HolderImpl(BitmapFormat format, BitmapColorSpace colorSpace, int width, int height)
 			{
+				this.ColorSpace = colorSpace;
 				this.Format = format;
 				this.Width = width;
 				this.Height = height;
@@ -42,9 +44,10 @@ namespace Carina.PixelViewer.Media
 		/// Initialize new <see cref="BitmapBuffer"/> instance.
 		/// </summary>
 		/// <param name="format">Format.</param>
+		/// <param name="colorSpace">Color space.</param>
 		/// <param name="width">Width in pixel.</param>
 		/// <param name="height">Height in pixel.</param>
-		public BitmapBuffer(BitmapFormat format, int width, int height) : base(new HolderImpl(format, width, height))
+		public BitmapBuffer(BitmapFormat format, BitmapColorSpace colorSpace, int width, int height) : base(new HolderImpl(format, colorSpace, width, height))
 		{
 			if (width <= 0)
 				throw new ArgumentOutOfRangeException(nameof(width));
@@ -62,6 +65,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Implementations.
+		public BitmapColorSpace ColorSpace => this.GetResourceHolder<HolderImpl>().ColorSpace;
 		public BitmapFormat Format => this.GetResourceHolder<HolderImpl>().Format;
 		protected override void Dispose(bool disposing)
 		{

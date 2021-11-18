@@ -1,5 +1,5 @@
 ﻿using Carina.PixelViewer.Runtime.InteropServices;
-using CarinaStudio.Configuration;
+using CarinaStudio;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.CompilerServices;
@@ -26,6 +26,18 @@ namespace Carina.PixelViewer.Media
 
 
 		// Static fields.
+		static readonly double[] colorNormalizingTable16 = new double[65536].Also(it =>
+		{
+			var d = it.Length - 1;
+			for (var n = d; n >= 0; --n)
+				it[n] = (double)n / d;
+		});
+		static readonly double[] colorNormalizingTable8 = new double[256].Also(it =>
+		{
+			var d = it.Length - 1;
+			for (var n = d; n >= 0; --n)
+				it[n] = (double)n / d;
+		});
 		static readonly ILogger logger = App.Current.LoggerFactory.CreateLogger(nameof(ImageProcessing));
 
 
@@ -226,6 +238,82 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Denormalize and pack B/G/R/A to 32-bit BGRA for Big-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint DenormalizeAndPackBgra32BE(double b, double g, double r, double a)
+		{
+			var b8 = ClipToByte(b * 255);
+			var g8 = ClipToByte(g * 255);
+			var r8 = ClipToByte(r * 255);
+			var a8 = ClipToByte(a * 255);
+			return (uint)((b8 << 24) | (g8 << 16) | (r8 << 8) | a8);
+		}
+
+
+		/// <summary>
+		/// Denormalize and pack B/G/R/A to 32-bit BGRA for Little-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint DenormalizeAndPackBgra32LE(double b, double g, double r, double a)
+		{
+			var b8 = ClipToByte(b * 255);
+			var g8 = ClipToByte(g * 255);
+			var r8 = ClipToByte(r * 255);
+			var a8 = ClipToByte(a * 255);
+			return (uint)((a8 << 24) | (r8 << 16) | (g8 << 8) | b8);
+		}
+
+
+		/// <summary>
+		/// Denormalize and pack B/G/R/A to 64-bit BGRA for Big-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong DenormalizeAndPackBgra64BE(double b, double g, double r, double a)
+		{
+			var b16 = ClipToUInt16(b * 65535);
+			var g16 = ClipToUInt16(g * 65535);
+			var r16 = ClipToUInt16(r * 65535);
+			var a16 = ClipToUInt16(a * 65535);
+			return ((ulong)b16 << 48) | ((ulong)g16 << 32) | ((ulong)r16 << 16) | a16;
+		}
+
+
+		/// <summary>
+		/// Denormalize and pack B/G/R/A to 64-bit BGRA for Little-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong DenormalizeAndPackBgra64LE(double b, double g, double r, double a)
+		{
+			var b16 = ClipToUInt16(b * 65535);
+			var g16 = ClipToUInt16(g * 65535);
+			var r16 = ClipToUInt16(r * 65535);
+			var a16 = ClipToUInt16(a * 65535);
+			return ((ulong)a16 << 48) | ((ulong)r16 << 32) | ((ulong)g16 << 16) | b16;
+		}
+
+
+		/// <summary>
 		/// Pack B/G/R/A to 32-bit BGRA for Big-Endian system.
 		/// </summary>
 		/// <param name="b">B.</param>
@@ -294,15 +382,27 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Select property function to denormalize and pack B/G/R/A into 32-bit integer.
+		/// </summary>
+		/// <returns>Pointer to denormalizing and packing function.</returns>
+		public static delegate*<double, double, double, double, uint> SelectBgra32DenormalizingAndPacking()
+		{
+			if (IsLittleEndian)
+				return &DenormalizeAndPackBgra32LE;
+			return &DenormalizeAndPackBgra32BE;
+		}
+
+
+		/// <summary>
 		/// Select property function to pack B/G/R/A into 32-bit integer.
 		/// </summary>
 		/// <returns>Pointer to packing function.</returns>
 		public static delegate*<byte, byte, byte, byte, uint> SelectBgra32Packing()
-        {
+		{
 			if (IsLittleEndian)
 				return &PackBgra32LE;
 			return &PackBgra32BE;
-        }
+		}
 
 
 		/// <summary>
@@ -314,6 +414,30 @@ namespace Carina.PixelViewer.Media
 			if (IsLittleEndian)
 				return &UnpackBgra32LE;
 			return &UnpackBgra32BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to unpack 32-bit integer into normalized B/G/R/A.
+		/// </summary>
+		/// <returns>Pointer to unpacking and normalizing function.</returns>
+		public static delegate*<uint, double*, double*, double*, double*, void> SelectBgra32UnpackingAndNormalizing()
+		{
+			if (IsLittleEndian)
+				return &UnpackAndNormalizeBgra32LE;
+			return &UnpackAndNormalizeBgra32BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to denormalize and pack B/G/R/A into 64-bit integer.
+		/// </summary>
+		/// <returns>Pointer to denormalizing and packing function.</returns>
+		public static delegate*<double, double, double, double, ulong> SelectBgra64DenormalizingAndPacking()
+		{
+			if (IsLittleEndian)
+				return &DenormalizeAndPackBgra64LE;
+			return &DenormalizeAndPackBgra64BE;
 		}
 
 
@@ -342,6 +466,18 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Select property function to unpack 64-bit integer into normalized B/G/R/A.
+		/// </summary>
+		/// <returns>Pointer to unpacking and normalizing function.</returns>
+		public static delegate*<ulong, double*, double*, double*, double*, void> SelectBgra64UnpackingAndNormalizing()
+		{
+			if (IsLittleEndian)
+				return &UnpackAndNormalizeBgra64LE;
+			return &UnpackAndNormalizeBgra64BE;
+		}
+
+
+		/// <summary>
 		/// Select proper maximum degree of parallel image processing.
 		/// </summary>
 		/// <returns>Maximum degree of parallel image processing.</returns>
@@ -360,6 +496,78 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>
 		public static delegate*<ushort, ushort, ushort, ushort> SelectRgb48ToLuminanceConversion() => &Rgb48ToLuminanceBT709;
+
+
+		/// <summary>
+		/// Unpack 32-bit integer into normalized B/G/R/A for Big-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="a">Unpacked and normalized A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgra32BE(uint bgra, double* b, double* g, double* r, double* a)
+        {
+			*b = colorNormalizingTable8[(bgra >> 24)];
+			*g = colorNormalizingTable8[((bgra >> 16) & 0xff)];
+			*r = colorNormalizingTable8[((bgra >> 8) & 0xff)];
+			*a = colorNormalizingTable8[(bgra & 0xff)];
+		}
+
+
+		/// <summary>
+		/// Unpack 32-bit integer into normalized B/G/R/A for Little-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="a">Unpacked and normalized A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgra32LE(uint bgra, double* b, double* g, double* r, double* a)
+		{
+			*a = colorNormalizingTable8[(bgra >> 24)];
+			*r = colorNormalizingTable8[((bgra >> 16) & 0xff)];
+			*g = colorNormalizingTable8[((bgra >> 8) & 0xff)];
+			*b = colorNormalizingTable8[(bgra & 0xff)];
+		}
+
+
+		/// <summary>
+		/// Unpack 62-bit integer into normalized B/G/R/A for Big-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="a">Unpacked and normalized A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgra64BE(ulong bgra, double* b, double* g, double* r, double* a)
+		{
+			*b = colorNormalizingTable16[(bgra >> 48)];
+			*g = colorNormalizingTable16[((bgra >> 32) & 0xffff)];
+			*r = colorNormalizingTable16[((bgra >> 16) & 0xffff)];
+			*a = colorNormalizingTable16[(bgra & 0xffff)];
+		}
+
+
+		/// <summary>
+		/// Unpack 62-bit integer into normalized B/G/R/A for Little-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="a">Unpacked and normalized A.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgra64LE(ulong bgra, double* b, double* g, double* r, double* a)
+		{
+			*a = colorNormalizingTable16[(bgra >> 48)];
+			*r = colorNormalizingTable16[((bgra >> 32) & 0xffff)];
+			*g = colorNormalizingTable16[((bgra >> 16) & 0xffff)];
+			*b = colorNormalizingTable16[(bgra & 0xffff)];
+		}
 
 
 		/// <summary>
@@ -431,650 +639,6 @@ namespace Carina.PixelViewer.Media
 			*r = (ushort)((bgra >> 32) & 0xffff);
 			*g = (ushort)((bgra >> 16) & 0xffff);
 			*b = (ushort)(bgra & 0xffff);
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 32-bit BGRA color based-on BT.2020.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra32BT2020(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
-		{
-			/*
-			 * R = 1.1632 * (y - 16) + 0.0002 * (u - 128) + 1.6794 * (v - 128)
-			 * G = 1.1632 * (y - 16) - 0.1870 * (u - 128) - 0.6497 * (v - 128)
-			 * B = 1.1632 * (y - 16) + 2.1421 * (u - 128) + 0.0008 * (v - 128)
-			 * 
-			 * [Quantized by 256]
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * R = (298 * y + 430 * v) >> 8
-			 * G = (298 * y - 48 * u - 166 * v) >> 8
-			 * B = (298 * y + 548 * u) >> 8
-			 * 
-			 * Decompose 298 = 256 + 32 + 8 + 2
-			 * Decompose 430 = 256 + 128 + 32 + 8 + 4 + 2
-			 * Decompose 48 = 32 + 16
-			 * Decompose 166 = 128 + 32 + 4 + 2
-			 * Decompose 548 = 512 + 32 + 4
-			 * 
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * y = (y << 8) + (y << 5) + (y << 3) + (y << 1)
-			 * R = (y + (v << 8) + (v << 7) + (v << 5) + (v << 3) + (v << 2) + (v << 1)) >> 8
-			 * G = (y - ((u << 5) + (u << 4)) - ((v << 7) + (v << 5) + (v << 2) + (v << 1))) >> 8
-			 * B = (y + (u << 9) + (u << 5) + (u << 2)) >> 8
-			 */
-			var pixel1 = (byte*)bgra1;
-			var pixel2 = (byte*)bgra2;
-			y1 -= 16;
-			y2 -= 16;
-			y1 = (y1 << 8) + (y1 << 5) + (y1 << 3) + (y1 << 1);
-			y2 = (y2 << 8) + (y2 << 5) + (y2 << 3) + (y2 << 1);
-			u -= 128;
-			v -= 128;
-			var rCoeff = (v << 7) + (v << 5) + (v << 3) + (v << 2) + (v << 1);
-			var gCoeff = (u << 5) + (u << 4) + (v << 7) + (v << 5) + (v << 2) + (v << 1);
-			var bCoeff = (u << 9) + (u << 5) + (u << 2);
-			pixel1[0] = ClipToByte((y1 + bCoeff) >> 8);
-			pixel1[1] = ClipToByte((y1 - gCoeff) >> 8);
-			pixel1[2] = ClipToByte((y1 + rCoeff) >> 8);
-			pixel1[3] = 255;
-			pixel2[0] = ClipToByte((y2 + bCoeff) >> 8);
-			pixel2[1] = ClipToByte((y2 - gCoeff) >> 8);
-			pixel2[2] = ClipToByte((y2 + rCoeff) >> 8);
-			pixel2[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 32-bit BGRA color based-on BT.601.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra32BT601(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
-		{
-			var pixel1 = (byte*)bgra1;
-			var pixel2 = (byte*)bgra2;
-			u -= 128;
-			v -= 128;
-			var bCoeff = (u + (u >> 1) + (u >> 2) + (u >> 6));
-			var gCoeff = (-((u >> 2) + (u >> 4) + (u >> 5)) - ((v >> 1) + (v >> 3) + (v >> 4) + (v >> 5)));
-			var rCoeff = (v + (v >> 2) + (v >> 3) + (v >> 5));
-			pixel1[0] = ClipToByte(y1 + bCoeff);
-			pixel1[1] = ClipToByte(y1 + gCoeff);
-			pixel1[2] = ClipToByte(y1 + rCoeff);
-			pixel1[3] = 255;
-			pixel2[0] = ClipToByte(y2 + bCoeff);
-			pixel2[1] = ClipToByte(y2 + gCoeff);
-			pixel2[2] = ClipToByte(y2 + rCoeff);
-			pixel2[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 32-bit BGRA color based-on BT.656.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra32BT656(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
-		{
-			/*
-			 * R = 1.164 * (y - 16) + 1.596 * (Cr - 128)
-			 * G = 1.164 * (y - 16) - 0.391 * (Cb - 128) - 0.813 * (Cr - 128)
-			 * B = 1.164 * (y - 16) + 2.018 * (Cb - 128)
-			 * 
-			 * [Quantized by 256]
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * R = (298 * y + 409 * v) >> 8
-			 * G = (298 * y - 100 * u - 208 * v) >> 8
-			 * B = (298 * y + 516 * u) >> 8
-			 * 
-			 * Decompose 298 = 256 + 32 + 8 + 2
-			 * Decompose 409 = 256 + 128 + 16 + 8 + 1
-			 * Decompose 100 = 64 + 32 + 4
-			 * Decompose 208 = 128 + 64 + 16
-			 * Decompose 516 = 512 + 4
-			 * 
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * R = ((y << 8) + (y << 5) + (y << 3) + y + (v << 8) + (v << 7) + (v << 4) + (v << 3) + v) >> 8
-			 * G = ((y << 8) + (y << 5) + (y << 3) + y - (u << 6) - (u << 5) - (u << 2) - (v << 7) - (v << 6) - (v << 4)) >> 8
-			 * B = ((y << 8) + (y << 5) + (y << 3) + y + (u << 9) + (u << 2)) >> 8
-			 */
-			var pixel1 = (byte*)bgra1;
-			var pixel2 = (byte*)bgra2;
-			y1 -= 16;
-			y2 -= 16;
-			y1 = (y1 << 8) + (y1 << 5) + (y1 << 3) + (y1 << 1);
-			y2 = (y2 << 8) + (y2 << 5) + (y2 << 3) + (y2 << 1);
-			u -= 128;
-			v -= 128;
-			var rCoeff = (v << 8) + (v << 7) + (v << 4) + (v << 3) + v;
-			var gCoeff = (u << 6) + (u << 5) + (u << 2) + (v << 7) + (v << 6) + (v << 4);
-			var bCoeff = (u << 9) + (u << 2);
-			pixel1[0] = ClipToByte((y1 + bCoeff) >> 8);
-			pixel1[1] = ClipToByte((y1 - gCoeff) >> 8);
-			pixel1[2] = ClipToByte((y1 + rCoeff) >> 8);
-			pixel1[3] = 255;
-			pixel2[0] = ClipToByte((y2 + bCoeff) >> 8);
-			pixel2[1] = ClipToByte((y2 - gCoeff) >> 8);
-			pixel2[2] = ClipToByte((y2 + rCoeff) >> 8);
-			pixel2[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 32-bit BGRA color based-on BT.709.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra32BT709(int y1, int y2, int u, int v, uint* bgra1, uint* bgra2)
-		{
-			/*
-			 * R = y + 1.5748 * (v - 128)
-			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128)
-			 * B = y + 1.8556 * (u - 128)
-			 * 
-			 * [Quantized by 256]
-			 * y <<= 8
-			 * u -= 128
-			 * v -= 128
-			 * R = (y + 403 * v) >> 8
-			 * G = (y - 48 * u - 120 * v) >> 8
-			 * B = (y + 475 * u) >> 8
-			 * 
-			 * Decompose 403 = 256 + 128 + 16 + 2 + 1
-			 * Decompose 48 = 32 + 16
-			 * Decompose 120 = 64 + 32 + 16 + 8
-			 * Decompose 475 = 256 + 128 + 64 + 16 + 8 + 2 + 1
-			 * 
-			 * y <<= 8
-			 * u -= 128
-			 * v -= 128
-			 * R = (y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8
-			 * G = (y - (u << 5) - (u << 4) - (v << 6) - (v << 5) - (v << 4) - (v << 3)) >> 8
-			 * B = (y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8
-			 */
-			var pixel1 = (byte*)bgra1;
-			var pixel2 = (byte*)bgra2;
-			y1 <<= 8;
-			y2 <<= 8;
-			u -= 128;
-			v -= 128;
-			var rCoeff = (v << 8) + (v << 7) + (v << 4) + (v << 1) + v;
-			var gCoeff = (u << 5) + (u << 4) + (v << 6) + (v << 5) + (v << 4) + (v << 3);
-			var bCoeff = (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u;
-			pixel1[0] = ClipToByte((y1 + bCoeff) >> 8);
-			pixel1[1] = ClipToByte((y1 - gCoeff) >> 8);
-			pixel1[2] = ClipToByte((y1 + rCoeff) >> 8);
-			pixel1[3] = 255;
-			pixel2[0] = ClipToByte((y2 + bCoeff) >> 8);
-			pixel2[1] = ClipToByte((y2 - gCoeff) >> 8);
-			pixel2[2] = ClipToByte((y2 + rCoeff) >> 8);
-			pixel2[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 64-bit BGRA color based-on BT.2020.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra64BT2020(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
-		{
-			/*
-			 * R = 1.1632 * (y - 16) + 0.0002 * (u - 128) + 1.6794 * (v - 128)
-			 * G = 1.1632 * (y - 16) - 0.1870 * (u - 128) - 0.6497 * (v - 128)
-			 * B = 1.1632 * (y - 16) + 2.1421 * (u - 128) + 0.0008 * (v - 128)
-			 */
-			var pixel1 = (ushort*)bgra1;
-			var pixel2 = (ushort*)bgra2;
-			var fY1 = 1.1632 * ((y1 / 256.0) - 16);
-			var fY2 = 1.1632 * ((y2 / 256.0) - 16);
-			var fU = ((u / 256.0) - 128);
-			var fV = ((v / 256.0) - 128);
-			var rCoeff = 0.0002 * fU + 1.6794 * fV;
-			var gCoeff = 0.1870 * fU + 0.6497 * fV;
-			var bCoeff = 2.1421 * fU + 0.0008 * fV;
-			pixel1[0] = ClipToUInt16((fY1 + bCoeff) * 256);
-			pixel1[1] = ClipToUInt16((fY1 - gCoeff) * 256);
-			pixel1[2] = ClipToUInt16((fY1 + rCoeff) * 256);
-			pixel1[3] = 65535;
-			pixel2[0] = ClipToUInt16((fY2 + bCoeff) * 256);
-			pixel2[1] = ClipToUInt16((fY2 - gCoeff) * 256);
-			pixel2[2] = ClipToUInt16((fY2 + rCoeff) * 256);
-			pixel2[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 64-bit BGRA color based-on BT.601.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra64BT601(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
-		{
-			/*
-			 * ITU-R formula:
-			 * R = clip(Y + 1.402(Cr - 128))
-			 * G = clip(Y - 0.344(Cb - 128) - 0.714(Cr - 128))
-			 * B = clip(Y + 1.772(Cb - 128))
-			 */
-			var pixel1 = (ushort*)bgra1;
-			var pixel2 = (ushort*)bgra2;
-			var fY1 = y1 / 256.0;
-			var fY2 = y2 / 256.0;
-			var fU = (u / 256.0 - 128);
-			var fV = (v / 256.0 - 128);
-			pixel1[0] = ClipToUInt16((fY1 + 1.402 * fV) * 256);
-			pixel1[1] = ClipToUInt16((fY1 - 0.344 * fU - 0.714 * fV) * 256);
-			pixel1[2] = ClipToUInt16((fY1 + 1.772 * fU) * 256);
-			pixel1[3] = 65535;
-			pixel2[0] = ClipToUInt16((fY2 + 1.402 * fV) * 256);
-			pixel2[1] = ClipToUInt16((fY2 - 0.344 * fU - 0.714 * fV) * 256);
-			pixel2[2] = ClipToUInt16((fY2 + 1.772 * fU) * 256);
-			pixel2[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 64-bit BGRA color based-on BT.656.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra64BT656(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
-		{
-			/*
-			 * R = 1.164 * (y - 16) + 1.596 * (Cr - 128)
-			 * G = 1.164 * (y - 16) - 0.391 * (Cb - 128) - 0.813 * (Cr - 128)
-			 * B = 1.164 * (y - 16) + 2.018 * (Cb - 128)
-			 */
-			var pixel1 = (ushort*)bgra1;
-			var pixel2 = (ushort*)bgra2;
-			var fY1 = 1.164 * (y1 / 256.0 - 16);
-			var fY2 = 1.164 * (y2 / 256.0 - 16);
-			var fU = (u / 256.0 - 128);
-			var fV = (v / 256.0 - 128);
-			var rCoeff = 1.596 * fV;
-			var gCoeff = 0.391 * fU + 0.813 * fV;
-			var bCoeff = 2.018 * fU;
-			pixel1[0] = ClipToUInt16((fY1 + bCoeff) * 256);
-			pixel1[1] = ClipToUInt16((fY1 - gCoeff) * 256);
-			pixel1[2] = ClipToUInt16((fY1 + rCoeff) * 256);
-			pixel1[3] = 65535;
-			pixel2[0] = ClipToUInt16((fY2 + bCoeff) * 256);
-			pixel2[1] = ClipToUInt16((fY2 - gCoeff) * 256);
-			pixel2[2] = ClipToUInt16((fY2 + rCoeff) * 256);
-			pixel2[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV422 color to packed 64-bit BGRA color based-on BT.709.
-		/// </summary>
-		/// <param name="y1">1st Y.</param>
-		/// <param name="y2">2nd Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra1">Address of 1st packed BGRA pixel.</param>
-		/// <param name="bgra2">Address of 2nd packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv422ToBgra64BT709(int y1, int y2, int u, int v, ulong* bgra1, ulong* bgra2)
-		{
-			/*
-			 * R = y + 1.5748 * (v - 128)
-			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = y + 1.8556 * (u - 128)
-			 */
-			var pixel1 = (ushort*)bgra1;
-			var pixel2 = (ushort*)bgra2;
-			var fY1 = (y1 / 256.0);
-			var fY2 = (y2 / 256.0);
-			var fU = ((u / 256.0) - 128);
-			var fV = ((v / 256.0) - 128);
-			pixel1[0] = ClipToUInt16((fY1 + 1.8556 * fU) * 256);
-			pixel1[1] = ClipToUInt16((fY1 - 0.1873 * fU - 0.4681 * fV) * 256);
-			pixel1[2] = ClipToUInt16((fY1 + 1.5748 * fV) * 256);
-			pixel1[3] = 65535;
-			pixel2[0] = ClipToUInt16((fY2 + 1.8556 * fU) * 256);
-			pixel2[1] = ClipToUInt16((fY2 - 0.1873 * fU - 0.4681 * fV) * 256);
-			pixel2[2] = ClipToUInt16((fY2 + 1.5748 * fV) * 256);
-			pixel2[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 32-bit BGRA color based-on BT.2020.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra32BT2020(int y, int u, int v, uint* bgra)
-		{
-			/*
-			 * R = 1.1632 * (y - 16) + 0.0002 * (u - 128) + 1.6794 * (v - 128)
-			 * G = 1.1632 * (y - 16) - 0.1870 * (u - 128) - 0.6497 * (v - 128)
-			 * B = 1.1632 * (y - 16) + 2.1421 * (u - 128) + 0.0008 * (v - 128)
-			 * 
-			 * [Quantized by 256]
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * R = (298 * y + 430 * v) >> 8
-			 * G = (298 * y - 48 * u - 166 * v) >> 8
-			 * B = (298 * y + 548 * u) >> 8
-			 * 
-			 * Decompose 298 = 256 + 32 + 8 + 2
-			 * Decompose 430 = 256 + 128 + 32 + 8 + 4 + 2
-			 * Decompose 48 = 32 + 16
-			 * Decompose 166 = 128 + 32 + 4 + 2
-			 * Decompose 548 = 512 + 32 + 4
-			 * 
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * y = (y << 8) + (y << 5) + (y << 3) + (y << 1)
-			 * R = (y + (v << 8) + (v << 7) + (v << 5) + (v << 3) + (v << 2) + (v << 1)) >> 8
-			 * G = (y - ((u << 5) + (u << 4)) - ((v << 7) + (v << 5) + (v << 2) + (v << 1))) >> 8
-			 * B = (y + (u << 9) + (u << 5) + (u << 2)) >> 8
-			 */
-			var pixel = (byte*)bgra;
-			y -= 16;
-			y = (y << 8) + (y << 5) + (y << 3) + (y << 1);
-			u -= 128;
-			v -= 128;
-			var rCoeff = (v << 7) + (v << 5) + (v << 3) + (v << 2) + (v << 1);
-			var gCoeff = (u << 5) + (u << 4) + (v << 7) + (v << 5) + (v << 2) + (v << 1);
-			var bCoeff = (u << 9) + (u << 5) + (u << 2);
-			pixel[0] = ClipToByte((y + bCoeff) >> 8);
-			pixel[1] = ClipToByte((y - gCoeff) >> 8);
-			pixel[2] = ClipToByte((y + rCoeff) >> 8);
-			pixel[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 32-bit BGRA color based-on BT.601.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra32BT601(int y, int u, int v, uint* bgra)
-		{
-			/*
-			 * ITU-R formula:
-			 * R = clip(Y + 1.402(Cr - 128))
-			 * G = clip(Y - 0.344(Cb - 128) - 0.714(Cr - 128))
-			 * B = clip(Y + 1.772(Cb - 128))
-			 * 
-			 * Quantized:
-			 * Cb = Cb - 128
-			 * Cr = Cr - 128
-			 * R = Y + Cr + (Cr >> 2) + (Cr >> 3) + (Cr >> 5)
-			 * G = Y - ((Cb >> 2) + (Cb >> 4) + (Cb >> 5)) - ((Cr >> 1) + (Cr >> 3) + (Cr >> 4) + (Cr >> 5))
-			 * B = Y + Cb + (Cb >> 1) + (Cb >> 2) + (Cb >> 6)
-			 */
-			var pixel = (byte*)bgra;
-			u -= 128;
-			v -= 128;
-			pixel[0] = ClipToByte(y + u + (u >> 1) + (u >> 2) + (u >> 6));
-			pixel[1] = ClipToByte(y - ((u >> 2) + (u >> 4) + (u >> 5)) - ((v >> 1) + (v >> 3) + (v >> 4) + (v >> 5)));
-			pixel[2] = ClipToByte(y + v + (v >> 2) + (v >> 3) + (v >> 5));
-			pixel[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 32-bit BGRA color based-on BT.656.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra32BT656(int y, int u, int v, uint* bgra)
-		{
-			/*
-			 * R = 1.164 * (y - 16) + 1.596 * (Cr - 128)
-			 * G = 1.164 * (y - 16) - 0.391 * (Cb - 128) - 0.813 * (Cr - 128)
-			 * B = 1.164 * (y - 16) + 2.018 * (Cb - 128)
-			 * 
-			 * [Quantized by 256]
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * R = (298 * y + 409 * v) >> 8
-			 * G = (298 * y - 100 * u - 208 * v) >> 8
-			 * B = (298 * y + 516 * u) >> 8
-			 * 
-			 * Decompose 298 = 256 + 32 + 8 + 2
-			 * Decompose 409 = 256 + 128 + 16 + 8 + 1
-			 * Decompose 100 = 64 + 32 + 4
-			 * Decompose 208 = 128 + 64 + 16
-			 * Decompose 516 = 512 + 4
-			 * 
-			 * y -= 16
-			 * u -= 128
-			 * v -= 128
-			 * R = ((y << 8) + (y << 5) + (y << 3) + y + (v << 8) + (v << 7) + (v << 4) + (v << 3) + v) >> 8
-			 * G = ((y << 8) + (y << 5) + (y << 3) + y - (u << 6) - (u << 5) - (u << 2) - (v << 7) - (v << 6) - (v << 4)) >> 8
-			 * B = ((y << 8) + (y << 5) + (y << 3) + y + (u << 9) + (u << 2)) >> 8
-			 */
-			var pixel = (byte*)bgra;
-			y -= 16;
-			y = (y << 8) + (y << 5) + (y << 3) + (y << 1);
-			u -= 128;
-			v -= 128;
-			var rCoeff = (v << 8) + (v << 7) + (v << 4) + (v << 3) + v;
-			var gCoeff = (u << 6) + (u << 5) + (u << 2) + (v << 7) + (v << 6) + (v << 4);
-			var bCoeff = (u << 9) + (u << 2);
-			pixel[0] = ClipToByte((y + bCoeff) >> 8);
-			pixel[1] = ClipToByte((y - gCoeff) >> 8);
-			pixel[2] = ClipToByte((y + rCoeff) >> 8);
-			pixel[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 32-bit BGRA color based-on BT.709.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra32BT709(int y, int u, int v, uint* bgra)
-		{
-			/*
-			 * R = y + 1.5748 * (v - 128)
-			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = y + 1.8556 * (u - 128)
-			 * 
-			 * [Quantized by 256]
-			 * y <<= 8
-			 * u -= 128
-			 * v -= 128
-			 * R = (y + 403 * v) >> 8
-			 * G = (y - 48 * u - 120 * v) >> 8
-			 * B = (y + 475 * u) >> 8
-			 * 
-			 * Decompose 403 = 256 + 128 + 16 + 2 + 1
-			 * Decompose 48 = 32 + 16
-			 * Decompose 120 = 64 + 32 + 16 + 8
-			 * Decompose 475 = 256 + 128 + 64 + 16 + 8 + 2 + 1
-			 * 
-			 * y <<= 8
-			 * u -= 128
-			 * v -= 128
-			 * R = (y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8
-			 * G = (y - (u << 5) - (u << 4) - (v << 6) - (v << 5) - (v << 4) - (v << 3)) >> 8
-			 * B = (y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8
-			 */
-			var pixel = (byte*)bgra;
-			y <<= 8;
-			u -= 128;
-			v -= 128;
-			pixel[0] = ClipToByte((y + (u << 8) + (u << 7) + (u << 6) + (u << 4) + (u << 3) + (u << 1) + u) >> 8);
-			pixel[1] = ClipToByte((y - (u << 5) - (u << 4) - (v << 6) - (v << 5) - (v << 4) - (v << 3)) >> 8);
-			pixel[2] = ClipToByte((y + (v << 8) + (v << 7) + (v << 4) + (v << 1) + v) >> 8);
-			pixel[3] = 255;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 64-bit BGRA color based-on BT.2020.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra64BT2020(int y, int u, int v, ulong* bgra)
-		{
-			/*
-			 * R = 1.1632 * (y - 16) + 0.0002 * (u - 128) + 1.6794 * (v - 128)
-			 * G = 1.1632 * (y - 16) - 0.1870 * (u - 128) - 0.6497 * (v - 128)
-			 * B = 1.1632 * (y - 16) + 2.1421 * (u - 128) + 0.0008 * (v - 128)
-			 */
-			var pixel = (ushort*)bgra;
-			var fY = 1.1632 * ((y / 256.0) - 16);
-			var fU = ((u / 256.0) - 128);
-			var fV = ((v / 256.0) - 128);
-			var rCoeff = 0.0002 * fU + 1.6794 * fV;
-			var gCoeff = 0.1870 * fU + 0.6497 * fV;
-			var bCoeff = 2.1421 * fU + 0.0008 * fV;
-			pixel[0] = ClipToUInt16((fY + bCoeff) * 256);
-			pixel[1] = ClipToUInt16((fY - gCoeff) * 256);
-			pixel[2] = ClipToUInt16((fY + rCoeff) * 256);
-			pixel[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 64-bit BGRA color based-on BT.601.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra64BT601(int y, int u, int v, ulong* bgra)
-		{
-			/*
-			 * ITU-R formula:
-			 * R = clip(Y + 1.402(Cr - 128))
-			 * G = clip(Y - 0.344(Cb - 128) - 0.714(Cr - 128))
-			 * B = clip(Y + 1.772(Cb - 128))
-			 */
-			var pixel = (ushort*)bgra;
-			var fY = y / 256.0;
-			var fU = (u / 256.0 - 128);
-			var fV = (v / 256.0 - 128);
-			pixel[0] = ClipToUInt16((fY + 1.402 * fV) * 256);
-			pixel[1] = ClipToUInt16((fY - 0.344 * fU - 0.714 * fV) * 256);
-			pixel[2] = ClipToUInt16((fY + 1.772 * fU) * 256);
-			pixel[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 64-bit BGRA color based-on BT.656.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra64BT656(int y, int u, int v, ulong* bgra)
-		{
-			/*
-			 * R = 1.164 * (y - 16) + 1.596 * (Cr - 128)
-			 * G = 1.164 * (y - 16) - 0.391 * (Cb - 128) - 0.813 * (Cr - 128)
-			 * B = 1.164 * (y - 16) + 2.018 * (Cb - 128)
-			 */
-			var pixel = (ushort*)bgra;
-			var fY1 = 1.164 * (y / 256.0 - 16);
-			var fU = (u / 256.0 - 128);
-			var fV = (v / 256.0 - 128);
-			var rCoeff = 1.596 * fV;
-			var gCoeff = 0.391 * fU + 0.813 * fV;
-			var bCoeff = 2.018 * fU;
-			pixel[0] = ClipToUInt16((fY1 + bCoeff) * 256);
-			pixel[1] = ClipToUInt16((fY1 - gCoeff) * 256);
-			pixel[2] = ClipToUInt16((fY1 + rCoeff) * 256);
-			pixel[3] = 65535;
-		}
-
-
-		/// <summary>
-		/// Convert YUV444 color to packed 64-bit BGRA color based-on BT.709.
-		/// </summary>
-		/// <param name="y">Y.</param>
-		/// <param name="u">U.</param>
-		/// <param name="v">V.</param>
-		/// <param name="bgra">Address of packed BGRA pixel.</param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static unsafe void Yuv444ToBgra64BT709(int y, int u, int v, ulong* bgra)
-		{
-			/*
-			 * R = y + 1.5748 * (v - 128)
-			 * G = y - 0.1873 * (u - 128) - 0.4681 * (v - 128);
-			 * B = y + 1.8556 * (u - 128)
-			 */
-			var pixel = (ushort*)bgra;
-			var fY = (y / 256.0);
-			var fU = ((u / 256.0) - 128);
-			var fV = ((v / 256.0) - 128);
-			pixel[0] = ClipToUInt16((fY + 1.8556 * fU) * 256);
-			pixel[1] = ClipToUInt16((fY - 0.1873 * fU - 0.4681 * fV) * 256);
-			pixel[2] = ClipToUInt16((fY + 1.5748 * fV) * 256);
-			pixel[3] = 65535;
 		}
 	}
 }
