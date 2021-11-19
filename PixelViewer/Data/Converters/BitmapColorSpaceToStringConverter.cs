@@ -3,19 +3,23 @@ using Carina.PixelViewer.Media;
 using CarinaStudio.AppSuite;
 using CarinaStudio.Controls;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Data.Converters
 {
     /// <summary>
-    /// Convert from <see cref="YuvToBgraConverter"/> to readable string.
+    /// Convert from <see cref="BitmapColorSpace"/> to readable string.
     /// </summary>
-    class YuvToBgraConverterToStringConverter : IValueConverter
+    class BitmapColorSpaceToStringConverter : IValueConverter
     {
         /// <summary>
         /// Default instance.
         /// </summary>
-        public static readonly YuvToBgraConverterToStringConverter Default = new YuvToBgraConverterToStringConverter();
+        public static readonly BitmapColorSpaceToStringConverter Default = new BitmapColorSpaceToStringConverter();
 
 
         // Fields.
@@ -29,11 +33,11 @@ namespace Carina.PixelViewer.Data.Converters
                 return null;
             if (targetType != typeof(object) && targetType != typeof(string))
                 return null;
-            if (value is YuvToBgraConverter converter)
-                value = converter.Name;
+            if (value is BitmapColorSpace colorSpace)
+                value = colorSpace.Name;
             if (value is not string name)
                 return null;
-            if (app.TryGetResource<string>($"String/YuvToBgraConverter.{name}", out var res) == true)
+            if (app.TryGetResource<string>($"String/BitmapColorSpace.{name}", out var res) == true)
                 return res;
             return name;
         }

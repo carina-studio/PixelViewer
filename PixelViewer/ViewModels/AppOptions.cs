@@ -65,6 +65,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Enable color space management on rendered image.
+		/// </summary>
+		public bool EnableColorSpaceManagement
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement);
+			set => this.Settings.SetValue<bool>(SettingKeys.EnableColorSpaceManagement, value);
+		}
+
+
+		/// <summary>
 		/// Evaluate image dimensions after changing image renderer.
 		/// </summary>
 		public bool EvaluateImageDimensionsAfterChangingRenderer
@@ -105,6 +115,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));
 			else if (key == SettingKeys.DefaultYuvToBgraConversion)
 				this.OnPropertyChanged(nameof(this.DefaultYuvToBgraConverter));
+			else if (key == SettingKeys.EnableColorSpaceManagement)
+				this.OnPropertyChanged(nameof(this.EnableColorSpaceManagement));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterChangingRenderer)
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile)
@@ -113,6 +125,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)
 				this.OnPropertyChanged(nameof(this.ResetImagePlaneOptionsAfterChangingImageDimensions));
+			else if (key == SettingKeys.ScreenColorSpace)
+				this.OnPropertyChanged(nameof(this.ScreenColorSpace));
 			else if (key == SettingKeys.ShowProcessInfo)
 				this.OnPropertyChanged(nameof(this.ShowProcessInfo));
 			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
@@ -127,6 +141,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions);
 			set => this.Settings.SetValue<bool>(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions, value);
+		}
+
+
+		/// <summary>
+		/// Color space of screen.
+		/// </summary>
+		public ScreenColorSpace ScreenColorSpace
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace);
+			set => this.Settings.SetValue<ScreenColorSpace>(SettingKeys.ScreenColorSpace, value);
 		}
 
 

@@ -7,16 +7,21 @@
 	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">Loading profiles</sys:String>
 
 	<!-- ApplicationOptionsDialog -->
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">Color space management</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will significantly impacts the performance of image rendering.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB conversion</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">Enable color space management</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max memory usage of all rendered images (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Color space of screen</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace.Description">Currently only sRGB is supported</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memoey usage on status bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 
@@ -29,6 +34,10 @@
 	<sys:String x:Key="String/AspectRatio.Ratio_4x3">4:3</sys:String>
 	<sys:String x:Key="String/AspectRatio.Ratio_9x16">9:16</sys:String>
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;Unspecified&gt;</sys:String>
+
+	<!-- BitmapColorSpace -->
+	<sys:String x:Key="String/BitmapColorSpace.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
+	<sys:String x:Key="String/BitmapColorSpace.sRGB">sRGB</sys:String>
 
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">Big-Endian</sys:String>
@@ -65,6 +74,9 @@
 	<sys:String x:Key="String/MainWindow.AppUpdateFound">Application update is available. Do you want to go to the download page?</sys:String>
 	<sys:String x:Key="String/MainWindow.CloseSession">Close this tab</sys:String>
 	<sys:String x:Key="String/MainWindow.NewSession">Add new tab</sys:String>
+	
+	<!-- ScreenColorSpace -->
+	<sys:String x:Key="String/ScreenColorSpace.Srgb">sRGB</sys:String>
 
 	<!-- Session -->
 	<sys:String x:Key="String/Session.EmptyTitle">Empty tab</sys:String>

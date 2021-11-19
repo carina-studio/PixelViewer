@@ -2369,7 +2369,7 @@ namespace Carina.PixelViewer.ViewModels
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, BitmapColorSpace.Default, this.ImageWidth, this.ImageHeight);
+			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, BitmapColorSpace.Srgb, this.ImageWidth, this.ImageHeight);
 			if (renderedImageFrame == null)
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
@@ -2402,7 +2402,7 @@ namespace Carina.PixelViewer.ViewModels
 			try
 			{
 				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
-				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);					
 			}
 			catch (Exception ex)
 			{

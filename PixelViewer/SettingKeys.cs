@@ -32,6 +32,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<string> DefaultYuvToBgraConversion = new SettingKey<string>(nameof(DefaultYuvToBgraConversion), YuvToBgraConverter.Default.Name);
 		/// <summary>
+		/// Enable color space management on image rendering.
+		/// </summary>
+		public static readonly SettingKey<bool> EnableColorSpaceManagement = new SettingKey<bool>(nameof(EnableColorSpaceManagement), false);
+		/// <summary>
 		/// Evaluate image dimensions after changing image renderer.
 		/// </summary>
 		public static readonly SettingKey<bool> EvaluateImageDimensionsAfterChangingRenderer = new SettingKey<bool>(nameof(EvaluateImageDimensionsAfterChangingRenderer), false);
@@ -59,6 +63,10 @@ namespace Carina.PixelViewer
 		/// Reset image plane options after changing image dimensions.
 		/// </summary>
 		public static readonly SettingKey<bool> ResetImagePlaneOptionsAfterChangingImageDimensions = new SettingKey<bool>(nameof(ResetImagePlaneOptionsAfterChangingImageDimensions), true);
+		/// <summary>
+		/// Color space of screen.
+		/// </summary>
+		public static readonly SettingKey<ScreenColorSpace> ScreenColorSpace = new SettingKey<ScreenColorSpace>(nameof(ScreenColorSpace), Media.ScreenColorSpace.Srgb);
 		/// <summary>
 		/// Show process info on UI or not.
 		/// </summary>

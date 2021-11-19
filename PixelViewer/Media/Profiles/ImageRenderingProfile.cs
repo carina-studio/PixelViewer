@@ -38,6 +38,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Fields.
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
+        BitmapColorSpace colorSpace = BitmapColorSpace.Default;
         long dataOffset;
         bool demosaicing = true;
         IList<int> effectiveBits = emptyEffectiveBits;
@@ -108,6 +109,23 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Check thread.
         public bool CheckAccess() => this.Application.CheckAccess();
+
+
+        // Color space of rendered image.
+        public BitmapColorSpace ColorSpace
+        {
+            get => this.colorSpace;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.colorSpace == value)
+                    return;
+                this.colorSpace = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ColorSpace)));
+            }
+        }
 
 
         // Data offset.
@@ -387,9 +405,17 @@ namespace Carina.PixelViewer.Media.Profiles
                         profile.IsUpgradedWhenLoading = true;
                 }
 
+                // color space
+                if (rootElement.TryGetProperty(nameof(ColorSpace), out jsonProperty)
+                       && jsonProperty.ValueKind == JsonValueKind.String)
+                {
+                    if (!BitmapColorSpace.TryGetByName(jsonProperty.GetString(), out profile.colorSpace))
+                        profile.IsUpgradedWhenLoading = true;
+                }
+
                 // get demosaicing
                 if (rootElement.TryGetProperty(nameof(Demosaicing), out jsonProperty))
-                    profile.demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
+                profile.demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 
                 // get dimensions
                 if (rootElement.TryGetProperty(nameof(Width), out jsonProperty) && jsonProperty.TryGetInt32(out var intValue))
@@ -591,6 +617,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 if (format.Category == ImageFormatCategory.YUV)
                     jsonWriter.WriteString(nameof(YuvToBgraConverter), this.yuvToBgraConverter.Name);
+                jsonWriter.WriteString(nameof(ColorSpace), this.colorSpace.Name);
                 jsonWriter.WriteBoolean(nameof(Demosaicing), this.demosaicing);
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);

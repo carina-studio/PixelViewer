@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media
@@ -53,6 +54,114 @@ namespace Carina.PixelViewer.Media
 	{
 		// Fields.
 		static readonly ILogger? Logger = App.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapBufferExtensions));
+
+
+		/// <summary>
+		/// Create new and convert color space of bitmap buffer to sRGB.
+		/// </summary>
+		/// <param name="bitmapBuffer">Source <see cref="IBitmapBuffer"/>.</param>
+		/// <param name="resultBitmapBuffer"><see cref="IBitmapBuffer"/> to receive converted data.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Task of conversion.</returns>
+		public static async Task ConvertToSrgbColorSpaceAsync(this IBitmapBuffer bitmapBuffer, IBitmapBuffer resultBitmapBuffer, CancellationToken cancellationToken)
+		{
+			// check parameters
+			if (resultBitmapBuffer == bitmapBuffer)
+				throw new ArgumentException("Cannot convert color space in same bitmap buffer.");
+			if (bitmapBuffer.Format != resultBitmapBuffer.Format)
+				throw new ArgumentException("Cannot convert to bitmap with different formats.");
+			if (resultBitmapBuffer.ColorSpace != BitmapColorSpace.Srgb)
+				throw new ArgumentException("Color spaces of result bitmap buffer is not sRGB.");
+			if (bitmapBuffer.Width != resultBitmapBuffer.Width || bitmapBuffer.Height != resultBitmapBuffer.Height)
+				throw new ArgumentException("Cannot convert to bitmap with different dimensions.");
+
+			// convert
+			using var sharedBitmapBuffer = bitmapBuffer.Share();
+			using var sharedResultBitmapBuffer = resultBitmapBuffer.Share();
+			await Task.Run(() =>
+			{
+				// check color space
+				var srcColorSpace = sharedBitmapBuffer.ColorSpace;
+				if (srcColorSpace == BitmapColorSpace.Srgb)
+				{
+					sharedBitmapBuffer.CopyTo(sharedResultBitmapBuffer);
+					return;
+				}
+
+				// convert to sRGB
+				var width = sharedBitmapBuffer.Width;
+				var srcRowStride = sharedBitmapBuffer.RowBytes;
+				var destRowStride = sharedResultBitmapBuffer.RowBytes;
+				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+					? new Stopwatch().Also(it => it.Start())
+					: null;
+				sharedBitmapBuffer.Memory.Pin(srcBaseAddr =>
+				{
+					sharedResultBitmapBuffer.Memory.Pin(destBaseAddr =>
+					{
+						unsafe
+						{
+							switch (sharedBitmapBuffer.Format)
+							{
+								case BitmapFormat.Bgra32:
+									{
+										var unpackFunc = ImageProcessing.SelectBgra32UnpackingAndNormalizing();
+										var packFunc = ImageProcessing.SelectBgra32DenormalizingAndPacking();
+										Parallel.For(0, sharedBitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+										{
+											var b = 0.0;
+											var g = 0.0;
+											var r = 0.0;
+											var a = 0.0;
+											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
+											var destPixelPtr = (uint*)((byte*)destBaseAddr + (y * destRowStride));
+											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+											{
+												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+												srcColorSpace.ConvertToSrgbColorSpace(&r, &g, &b);
+												*destPixelPtr = packFunc(b, g, r, a);
+											}
+											if (cancellationToken.IsCancellationRequested)
+												return;
+										});
+									}
+									break;
+								case BitmapFormat.Bgra64:
+									{
+										var unpackFunc = ImageProcessing.SelectBgra64UnpackingAndNormalizing();
+										var packFunc = ImageProcessing.SelectBgra64DenormalizingAndPacking();
+										Parallel.For(0, sharedBitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+										{
+											var b = 0.0;
+											var g = 0.0;
+											var r = 0.0;
+											var a = 0.0;
+											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
+											var destPixelPtr = (ulong*)((byte*)destBaseAddr + (y * destRowStride));
+											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+											{
+												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+												srcColorSpace.ConvertToSrgbColorSpace(&r, &g, &b);
+												*destPixelPtr = packFunc(b, g, r, a);
+											}
+											if (cancellationToken.IsCancellationRequested)
+												return;
+										});
+									}
+									break;
+							}
+						}
+					});
+				});
+				if (cancellationToken.IsCancellationRequested)
+					throw new TaskCanceledException();
+				if (stopWatch != null)
+				{
+					stopWatch.Stop();
+					Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert color space of {width}x{sharedBitmapBuffer.Height} bitmap buffer from {srcColorSpace} to sRGB");
+				}
+			});
+		}
 
 
 		/// <summary>
@@ -114,78 +223,53 @@ namespace Carina.PixelViewer.Media
 			{
 				return sharedBuffer.Memory.Pin((address) =>
 				{
-					var colorSpace = buffer.ColorSpace;
-					if (colorSpace == BitmapColorSpace.Srgb)
+					switch (buffer.Format)
 					{
-						return new Bitmap(Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul, address, new PixelSize(sharedBuffer.Width, sharedBuffer.Height), new Vector(96, 96), sharedBuffer.RowBytes);
-					}
-					else
-					{
-						var avaloniaBitmap = new WriteableBitmap(new PixelSize(sharedBuffer.Width, sharedBuffer.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
-						using var avaloniaBitmapBuffer = avaloniaBitmap.Lock();
-						var width = buffer.Width;
-						var srcRowStride = buffer.RowBytes;
-						var destRowStride = avaloniaBitmapBuffer.RowBytes;
-						var stopWatch = App.CurrentOrNull?.IsDebugMode == true
-							? new Stopwatch().Also(it => it.Start())
-							: null;
-						buffer.Memory.Pin(srcBaseAddr =>
-						{
-							unsafe
-							{
-								switch (buffer.Format)
+						case BitmapFormat.Bgra32:
+							return new Bitmap(Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul, address, new PixelSize(sharedBuffer.Width, sharedBuffer.Height), new Vector(96, 96), sharedBuffer.RowBytes);
+
+						case BitmapFormat.Bgra64:
+                            {
+								var avaloniaBitmap = new WriteableBitmap(new PixelSize(sharedBuffer.Width, sharedBuffer.Height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
+								using var avaloniaBitmapBuffer = avaloniaBitmap.Lock();
+								var width = buffer.Width;
+								var srcRowStride = buffer.RowBytes;
+								var destRowStride = avaloniaBitmapBuffer.RowBytes;
+								var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+									? new Stopwatch().Also(it => it.Start())
+									: null;
+								buffer.Memory.Pin(srcBaseAddr =>
 								{
-									case BitmapFormat.Bgra32:
-                                        {
-											var unpackFunc = ImageProcessing.SelectBgra32UnpackingAndNormalizing();
-											var packFunc = ImageProcessing.SelectBgra32DenormalizingAndPacking();
-											Parallel.For(0, buffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+									unsafe
+									{
+										var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+										var packFunc = ImageProcessing.SelectBgra32Packing();
+										Parallel.For(0, buffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+										{
+											var b = (ushort)0;
+											var g = (ushort)0;
+											var r = (ushort)0;
+											var a = (ushort)0;
+											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
+											var destPixelPtr = (uint*)((byte*)avaloniaBitmapBuffer.Address + (y * destRowStride));
+											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
 											{
-												var b = 0.0;
-												var g = 0.0;
-												var r = 0.0;
-												var a = 0.0;
-												var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-												var destPixelPtr = (uint*)((byte*)avaloniaBitmapBuffer.Address + (y * destRowStride));
-												for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
-												{
-													unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-													colorSpace.ConvertToSrgbColorSpace(&r, &g, &b);
-													*destPixelPtr = packFunc(b, g, r, a);
-												}
-											});
-                                        }
-										break;
-									case BitmapFormat.Bgra64:
-                                        {
-											var unpackFunc = ImageProcessing.SelectBgra64UnpackingAndNormalizing();
-											var packFunc = ImageProcessing.SelectBgra32DenormalizingAndPacking();
-											Parallel.For(0, buffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var b = 0.0;
-												var g = 0.0;
-												var r = 0.0;
-												var a = 0.0;
-												var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-												var destPixelPtr = (uint*)((byte*)avaloniaBitmapBuffer.Address + (y * destRowStride));
-												for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
-												{
-													unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-													colorSpace.ConvertToSrgbColorSpace(&r, &g, &b);
-													*destPixelPtr = packFunc(b, g, r, a);
-												}
-											});
-										}
-										break;
+												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+												*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
+											}
+										});
+									}
+								});
+								if (stopWatch != null)
+								{
+									stopWatch.Stop();
+									Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {width}x{buffer.Height} {buffer.Format} bitmap buffer to Avalonia bitmap");
 								}
+								return avaloniaBitmap;
 							}
-						});
-						if (stopWatch != null)
-						{
-							stopWatch.Stop();
-							Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {width}x{buffer.Height} {colorSpace} bitmap buffer to Avalonia bitmap");
-						}
-						return avaloniaBitmap;
+
+						default:
+							throw new NotSupportedException($"Unsupported bitmap format: {buffer.Format}");
 					}
 				});
 			});
