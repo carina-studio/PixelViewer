@@ -52,26 +52,28 @@ namespace Carina.PixelViewer.Media
 	/// </summary>
 	static class BitmapBufferExtensions
 	{
+		// Function to convert color space.
+		unsafe delegate void ColorSpaceConversion(double* r, double* g, double* b);
+
+
 		// Fields.
 		static readonly ILogger? Logger = App.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapBufferExtensions));
 
 
 		/// <summary>
-		/// Create new and convert color space of bitmap buffer to sRGB.
+		/// Convert color space of <paramref name="bitmapBuffer"/> to the color space of <paramref name="resultBitmapBuffer"/>.
 		/// </summary>
 		/// <param name="bitmapBuffer">Source <see cref="IBitmapBuffer"/>.</param>
 		/// <param name="resultBitmapBuffer"><see cref="IBitmapBuffer"/> to receive converted data.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Task of conversion.</returns>
-		public static async Task ConvertToSrgbColorSpaceAsync(this IBitmapBuffer bitmapBuffer, IBitmapBuffer resultBitmapBuffer, CancellationToken cancellationToken)
+		public static async Task ConvertToColorSpaceAsync(this IBitmapBuffer bitmapBuffer, IBitmapBuffer resultBitmapBuffer, CancellationToken cancellationToken)
 		{
 			// check parameters
 			if (resultBitmapBuffer == bitmapBuffer)
 				throw new ArgumentException("Cannot convert color space in same bitmap buffer.");
 			if (bitmapBuffer.Format != resultBitmapBuffer.Format)
 				throw new ArgumentException("Cannot convert to bitmap with different formats.");
-			if (resultBitmapBuffer.ColorSpace != BitmapColorSpace.Srgb)
-				throw new ArgumentException("Color spaces of result bitmap buffer is not sRGB.");
 			if (bitmapBuffer.Width != resultBitmapBuffer.Width || bitmapBuffer.Height != resultBitmapBuffer.Height)
 				throw new ArgumentException("Cannot convert to bitmap with different dimensions.");
 
@@ -80,26 +82,38 @@ namespace Carina.PixelViewer.Media
 			using var sharedResultBitmapBuffer = resultBitmapBuffer.Share();
 			await Task.Run(() =>
 			{
-				// check color space
-				var srcColorSpace = sharedBitmapBuffer.ColorSpace;
-				if (srcColorSpace == BitmapColorSpace.Srgb)
+				unsafe
 				{
-					sharedBitmapBuffer.CopyTo(sharedResultBitmapBuffer);
-					return;
-				}
-
-				// convert to sRGB
-				var width = sharedBitmapBuffer.Width;
-				var srcRowStride = sharedBitmapBuffer.RowBytes;
-				var destRowStride = sharedResultBitmapBuffer.RowBytes;
-				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
-					? new Stopwatch().Also(it => it.Start())
-					: null;
-				sharedBitmapBuffer.Memory.Pin(srcBaseAddr =>
-				{
-					sharedResultBitmapBuffer.Memory.Pin(destBaseAddr =>
+					// select color space converter
+					var srcColorSpace = sharedBitmapBuffer.ColorSpace;
+					var targetColorSpace = resultBitmapBuffer.ColorSpace;
+					var convertFunc = Global.Run(() =>
 					{
-						unsafe
+						if (targetColorSpace == BitmapColorSpace.DCI_P3)
+							return (ColorSpaceConversion)srcColorSpace.ConvertToDciP3ColorSpace;
+						else if (targetColorSpace == BitmapColorSpace.Srgb)
+							return srcColorSpace.ConvertToSrgbColorSpace;
+						else
+							throw new NotSupportedException($"Unsupported target color space: {resultBitmapBuffer.ColorSpace}");
+					});
+
+					// copy directly
+					if (srcColorSpace == resultBitmapBuffer.ColorSpace)
+					{
+						sharedBitmapBuffer.CopyTo(sharedResultBitmapBuffer);
+						return;
+					}
+
+					// convert to target color space
+					var width = sharedBitmapBuffer.Width;
+					var srcRowStride = sharedBitmapBuffer.RowBytes;
+					var destRowStride = sharedResultBitmapBuffer.RowBytes;
+					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+						? new Stopwatch().Also(it => it.Start())
+						: null;
+					sharedBitmapBuffer.Memory.Pin(srcBaseAddr =>
+					{
+						sharedResultBitmapBuffer.Memory.Pin(destBaseAddr =>
 						{
 							switch (sharedBitmapBuffer.Format)
 							{
@@ -118,7 +132,7 @@ namespace Carina.PixelViewer.Media
 											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
 											{
 												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												srcColorSpace.ConvertToSrgbColorSpace(&r, &g, &b);
+												convertFunc(&r, &g, &b);
 												*destPixelPtr = packFunc(b, g, r, a);
 											}
 											if (cancellationToken.IsCancellationRequested)
@@ -141,7 +155,7 @@ namespace Carina.PixelViewer.Media
 											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
 											{
 												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												srcColorSpace.ConvertToSrgbColorSpace(&r, &g, &b);
+												convertFunc(&r, &g, &b);
 												*destPixelPtr = packFunc(b, g, r, a);
 											}
 											if (cancellationToken.IsCancellationRequested)
@@ -150,15 +164,15 @@ namespace Carina.PixelViewer.Media
 									}
 									break;
 							}
-						}
+						});
 					});
-				});
-				if (cancellationToken.IsCancellationRequested)
-					throw new TaskCanceledException();
-				if (stopWatch != null)
-				{
-					stopWatch.Stop();
-					Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert color space of {width}x{sharedBitmapBuffer.Height} bitmap buffer from {srcColorSpace} to sRGB");
+					if (cancellationToken.IsCancellationRequested)
+						throw new TaskCanceledException();
+					if (stopWatch != null)
+					{
+						stopWatch.Stop();
+						Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert color space of {width}x{sharedBitmapBuffer.Height} bitmap buffer from {srcColorSpace} to sRGB");
+					}
 				}
 			});
 		}

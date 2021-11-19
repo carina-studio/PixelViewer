@@ -14,6 +14,14 @@ namespace Carina.PixelViewer.Media
         // Static fields.
         static readonly SortedObservableList<BitmapColorSpace> ColorSpaces = new SortedObservableList<BitmapColorSpace>((x, y) =>
             x?.Name?.CompareTo(y?.Name) ?? -1);
+        static readonly IRGBWorkingSpace DciP3WorkingSpace = new RGBWorkingSpace(Illuminants.D65,
+                new sRGBCompanding(), // refer to https://en.wikipedia.org/wiki/DCI-P3
+                new RGBPrimaries(
+                    new xyChromaticity(0.68, 0.32),
+                    new xyChromaticity(0.265, 0.69),
+                    new xyChromaticity(0.15, 0.06)
+                )
+            );
 
 
         /// <summary>
@@ -41,14 +49,14 @@ namespace Carina.PixelViewer.Media
 
 
         // BT.2020 color space.
-        class BT2020BitmapColorSpace : NonSrgbBitmapColorSpace
+        class BT2020BitmapColorSpace : BitmapColorSpace
         {
             public BT2020BitmapColorSpace() : base("BT.2020", RGBWorkingSpaces.Rec2020) { }
         }
 
 
         // BT.601 color space.
-        class BT601BitmapColorSpace : NonSrgbBitmapColorSpace
+        class BT601BitmapColorSpace : BitmapColorSpace
         {
             class BT601Companding : ICompanding
             {
@@ -72,57 +80,39 @@ namespace Carina.PixelViewer.Media
 
 
         // DCI-P3 color space.
-        class DciP3BitmapColorSpace : NonSrgbBitmapColorSpace
+        class DciP3BitmapColorSpace : BitmapColorSpace
         {
-            static readonly IRGBWorkingSpace RGBWorkingSpace = new RGBWorkingSpace(Illuminants.D65,
-                new sRGBCompanding(), // refer to https://en.wikipedia.org/wiki/DCI-P3
-                new RGBPrimaries(
-                    new xyChromaticity(0.68, 0.32),
-                    new xyChromaticity(0.265, 0.69),
-                    new xyChromaticity(0.15, 0.06)
-                )
-            );
-            public DciP3BitmapColorSpace() : base("DCI-P3", RGBWorkingSpace) { }
-        }
-
-
-        // Base class for non-sRGB color space.
-        abstract class NonSrgbBitmapColorSpace : BitmapColorSpace
-        {
-            readonly IColorConverter<RGBColor, RGBColor> toSrgbConverter;
-            public NonSrgbBitmapColorSpace(string name, IRGBWorkingSpace rgbWorkingSpace) : base(name) 
-            {
-                this.toSrgbConverter = new ConverterBuilder()
-                    .FromRGB(rgbWorkingSpace)
-                    .ToRGB(RGBWorkingSpaces.sRGB)
-                    .Build();
-            }
-            public sealed override void ConvertToSrgbColorSpace(double* r, double* g, double* b)
-            {
-                var color = this.toSrgbConverter.Convert(new RGBColor(*r, *g, *b));
-                *r = color.R;
-                *g = color.G;
-                *b = color.B;
-            }
+            public DciP3BitmapColorSpace() : base("DCI-P3", DciP3WorkingSpace) { }
+            public override unsafe void ConvertToDciP3ColorSpace(double* r, double* g, double* b) { }
         }
 
 
         // sRGB color space.
         class SrgbBitmapColorSpace : BitmapColorSpace
         {
-            public SrgbBitmapColorSpace() : base("sRGB") { }
+            public SrgbBitmapColorSpace() : base("sRGB", RGBWorkingSpaces.sRGB) { }
             public override void ConvertToSrgbColorSpace(double* r, double* g, double* b) { }
         }
 
 
-        /// <summary>
-        /// Initialize new <see cref="BitmapColorSpace"/> instance.
-        /// </summary>
-        /// <param name="name">Name of color space.</param>
-        protected BitmapColorSpace(string name)
+        // Fields.
+        readonly IColorConverter<RGBColor, RGBColor> toDciP3Converter;
+        readonly IColorConverter<RGBColor, RGBColor> toSrgbConverter;
+
+
+       // Constructor.
+        private BitmapColorSpace(string name, IRGBWorkingSpace rgbWorkingSpace)
         {
             this.Name = name;
             ColorSpaces.Add(this);
+            this.toDciP3Converter = new ConverterBuilder()
+                    .FromRGB(rgbWorkingSpace)
+                    .ToRGB(DciP3WorkingSpace)
+                    .Build();
+            this.toSrgbConverter = new ConverterBuilder()
+                    .FromRGB(rgbWorkingSpace)
+                    .ToRGB(RGBWorkingSpaces.sRGB)
+                    .Build();
         }
 
 
@@ -133,12 +123,33 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Convert RGB color from current color space to DCI-P3 color space.
+        /// </summary>
+        /// <param name="r">Pointer to normalized R.</param>
+        /// <param name="g">Pointer to normalized G.</param>
+        /// <param name="b">Pointer to normalized B.</param>
+        public virtual void ConvertToDciP3ColorSpace(double* r, double* g, double* b)
+        {
+            var color = this.toDciP3Converter.Convert(new RGBColor(*r, *g, *b));
+            *r = color.R;
+            *g = color.G;
+            *b = color.B;
+        }
+
+
+        /// <summary>
         /// Convert RGB color from current color space to sRGB color space.
         /// </summary>
         /// <param name="r">Pointer to normalized R.</param>
         /// <param name="g">Pointer to normalized G.</param>
         /// <param name="b">Pointer to normalized B.</param>
-        public abstract void ConvertToSrgbColorSpace(double* r, double* g, double* b);
+        public virtual void ConvertToSrgbColorSpace(double* r, double* g, double* b)
+        {
+            var color = this.toSrgbConverter.Convert(new RGBColor(*r, *g, *b));
+            *r = color.R;
+            *g = color.G;
+            *b = color.B;
+        }
 
 
         /// <summary>

@@ -2511,7 +2511,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (convertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
 				{
 					this.SetValue(IsConvertingColorSpaceProperty, true);
-					await renderedImageFrame.BitmapBuffer.ConvertToSrgbColorSpaceAsync(convertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+					await renderedImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(convertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
 					var tempImageFrame = renderedImageFrame;
 					renderedImageFrame = convertedImageFrame;
 					convertedImageFrame = null;
