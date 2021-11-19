@@ -94,7 +94,10 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace">Color space</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management has been disabled, click to open options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save image which has been filtered?</sys:String>
+	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">Converting color space…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy full path</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU usage</sys:String>

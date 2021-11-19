@@ -448,11 +448,11 @@
 			<!-- Options panel -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled">
-					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
+					<StackPanel IsEnabled="{Binding IsSourceFileOpened}" Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
 
 						<!-- Profile -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>
-						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
+						<ComboBox Classes="Dialog_ComboBox" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 							<ComboBox.DataTemplates>
 								<DataTemplate>
 									<StackPanel Orientation="Horizontal">
@@ -468,19 +468,19 @@
 
 						<!-- Data offset -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.DataOffset}"/>
-						<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
+						<NumericUpDown Classes="Dialog_NumericUpDown" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Frame padding bytes -->
 						<StackPanel IsVisible="{Binding HasMultipleFrames}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.FramePaddingSize}"/>
-							<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
+							<NumericUpDown Classes="Dialog_NumericUpDown" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
 						<!-- Image renderer -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
-						<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding IsSourceFileOpened}" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
+						<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
 							<ComboBox.DataTemplates>
 								<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
 									<Grid ColumnDefinitions="*,Auto">
@@ -514,6 +514,20 @@
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
+						<!-- Color space -->
+						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
+						<Panel>
+							<asControls:LinkTextBlock Command="{x:Null}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
+							<ComboBox Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:BitmapColorSpace.All}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
+								<ComboBox.ItemTemplate>
+									<DataTemplate>
+										<TextBlock Text="{Binding Converter={x:Static appConverters:BitmapColorSpaceToStringConverter.Default}}"/>
+									</DataTemplate>
+								</ComboBox.ItemTemplate>
+							</ComboBox>
+						</Panel>
+						<Separator Classes="Dialog_Separator"/>
+
 						<!-- Demisaicing -->
 						<StackPanel IsVisible="{Binding IsDemosaicingSupported}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Demosaicing}"/>
@@ -524,9 +538,9 @@
 						<!-- Dimensions -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
 						<Grid ColumnDefinitions="*,Auto,*">
-							<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
+							<NumericUpDown Classes="Dialog_NumericUpDown" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
 							<TextBlock Grid.Column="1" Text=" × " VerticalAlignment="Center"/>
-							<NumericUpDown Classes="Dialog_NumericUpDown" Grid.Column="2" IsEnabled="{Binding IsSourceFileOpened}" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
+							<NumericUpDown Classes="Dialog_NumericUpDown" Grid.Column="2" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
 						</Grid>
 						<Separator Classes="Dialog_Separator_Small"/>
 						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}"/>
@@ -536,13 +550,13 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding RowStride1, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator"/>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding PixelStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane1}"/>
@@ -551,13 +565,13 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding RowStride2, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator"/>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding PixelStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane2}"/>
@@ -566,13 +580,13 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding RowStride3, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator"/>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding PixelStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsEnabled="{Binding IsSourceFileOpened}" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane3}"/>
@@ -740,7 +754,10 @@
 								</DrawingImage>
 							</Image>
 						</Border>
-						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
+						<Panel>
+							<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding IsConvertingColorSpace}" Text="{DynamicResource String/SessionControl.ConvertingColorSpace}"/>
+							<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsConvertingColorSpace}" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
+						</Panel>
 					</StackPanel>
 
 					<!-- Process info -->

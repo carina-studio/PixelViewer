@@ -139,6 +139,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<ByteOrdering> ByteOrderingProperty = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
 		/// <summary>
+		/// Property of <see cref="ColorSpace"/>.
+		/// </summary>
+		public static readonly ObservableProperty<BitmapColorSpace> ColorSpaceProperty = ObservableProperty.Register<Session, BitmapColorSpace>(nameof(ColorSpace), BitmapColorSpace.Default);
+		/// <summary>
 		/// Property of <see cref="ContrastAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> ContrastAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, validate: it => double.IsFinite(it));
@@ -263,9 +267,17 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsColorAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsColorAdjustmentSupported));
 		/// <summary>
+		/// Property of <see cref="IsColorSpaceManagementEnabled"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsColorSpaceManagementEnabledProperty = ObservableProperty.Register<Session, bool>(nameof(IsColorSpaceManagementEnabled));
+		/// <summary>
 		/// Property of <see cref="IsContrastAdjustmentSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsContrastAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsContrastAdjustmentSupported));
+		/// <summary>
+		/// Property of <see cref="IsConvertingColorSpace"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsConvertingColorSpaceProperty = ObservableProperty.Register<Session, bool>(nameof(IsConvertingColorSpace));
 		/// <summary>
 		/// Property of <see cref="IsDemosaicingSupported"/>.
 		/// </summary>
@@ -535,6 +547,9 @@ namespace Carina.PixelViewer.ViewModels
 			// select default YUV to RGB converter
 			if (YuvToBgraConverter.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion), out var converter))
 				this.SetValue(YuvToBgraConverterProperty, converter);
+
+			// setup color space management
+			this.SetValue(IsColorSpaceManagementEnabledProperty, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
 
 			// setup title
 			this.UpdateTitle();
@@ -969,6 +984,16 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand CloseSourceFileCommand { get; }
 
 
+		/// <summary>
+		/// Get or set color space of rendered image.
+		/// </summary>
+		public BitmapColorSpace ColorSpace 
+		{
+			get => this.GetValue(ColorSpaceProperty);
+			set => this.SetValue(ColorSpaceProperty, value);
+		}
+
+
 		// Compare profiles.
 		static int CompareProfiles(ImageRenderingProfile? x, ImageRenderingProfile? y)
 		{
@@ -1199,9 +1224,9 @@ namespace Carina.PixelViewer.ViewModels
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageFilteringCancellationTokenSource = null;
-					this.SetValue(IsFilteringRenderedImageProperty, false);
 					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-					this.ReportRenderedImage();
+					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
+					this.SetValue(IsFilteringRenderedImageProperty, false);
 				}
 				else if (this.hasPendingImageFiltering)
 				{
@@ -1219,9 +1244,9 @@ namespace Carina.PixelViewer.ViewModels
 					if (!cancellationTokenSource.IsCancellationRequested)
 					{
 						this.imageFilteringCancellationTokenSource = null;
-						this.SetValue(IsFilteringRenderedImageProperty, false);
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-						this.ReportRenderedImage();
+						Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
+						this.SetValue(IsFilteringRenderedImageProperty, false);
 					}
 					else if (this.hasPendingImageFiltering)
 					{
@@ -1317,8 +1342,8 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.imageFilteringCancellationTokenSource = null;
 					this.SetValue(HasRenderingErrorProperty, true);
+					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 					this.SetValue(IsFilteringRenderedImageProperty, false);
-					this.ReportRenderedImage();
 				}
 				else if (this.hasPendingImageFiltering)
 				{
@@ -1365,8 +1390,16 @@ namespace Carina.PixelViewer.ViewModels
 				this.filteredImageFrame = filteredImageFrame2;
 				filteredImageFrame1.Dispose();
 			}
+			try
+			{
+				await this.ReportRenderedImageAsync(cancellationTokenSource);
+			}
+			catch (Exception ex)
+			{
+				if (ex is TaskCanceledException)
+					return;
+			}
 			this.SetValue(IsFilteringRenderedImageProperty, false);
-			this.ReportRenderedImage();
 		}
 
 
@@ -1606,9 +1639,21 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether color space management is enabled or not.
+		/// </summary>
+		public bool IsColorSpaceManagementEnabled { get => this.GetValue(IsColorSpaceManagementEnabledProperty); }
+
+
+		/// <summary>
 		/// Check whether contrast adjustment is supported or not.
 		/// </summary>
 		public bool IsContrastAdjustmentSupported { get => this.GetValue(IsContrastAdjustmentSupportedProperty); }
+
+
+		/// <summary>
+		/// Check whether color space of rendered image is being converted or not.
+		/// </summary>
+		public bool IsConvertingColorSpace { get => this.GetValue(IsConvertingColorSpaceProperty); }
 
 
 		/// <summary>
@@ -1815,6 +1860,11 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.HasMultipleByteOrderings)
 					this.renderImageAction.Reschedule();
 			}
+			else if (property == ColorSpaceProperty)
+			{
+				if (this.IsColorSpaceManagementEnabled)
+					this.renderImageAction.Reschedule();
+			}
 			else if (property == ContrastAdjustmentProperty)
 			{
 				this.SetValue(HasContrastAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
@@ -1835,11 +1885,8 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
-			else if (property == FrameNumberProperty
-				|| property == YuvToBgraConverterProperty)
-			{
+			else if (property == FrameNumberProperty)
 				this.renderImageAction.Reschedule();
-			}
 			else if (property == HistogramsProperty)
 				this.SetValue(HasHistogramsProperty, newValue != null);
 			else if (property == ImageRendererProperty)
@@ -1877,6 +1924,11 @@ namespace Carina.PixelViewer.ViewModels
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Reschedule();
 			}
+			else if (property == IsColorSpaceManagementEnabledProperty)
+			{
+				if (this.IsActivated)
+					this.renderImageAction.Reschedule();
+			}
 			else if (property == IsContrastAdjustmentSupportedProperty)
 			{
 				this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
@@ -1889,8 +1941,9 @@ namespace Carina.PixelViewer.ViewModels
 					this.filterImageAction.Schedule();
 				else
 				{
+					using var cancellationTokenSource = new CancellationTokenSource();
 					this.CancelFilteringImage();
-					this.ReportRenderedImage();
+					_ = this.ReportRenderedImageAsync(cancellationTokenSource);
 					this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 				}
 			}
@@ -1932,6 +1985,14 @@ namespace Carina.PixelViewer.ViewModels
 					this.SynchronizationContext.Post(() => (oldValue as IDisposable)?.Dispose());
 				this.SetValue(HasRenderedImageProperty, newValue != null);
 			}
+			else if (property == YuvToBgraConverterProperty)
+			{
+				if (this.IsYuvToBgraConverterSupported)
+				{
+					this.SetValue(ColorSpaceProperty, ((YuvToBgraConverter)newValue.AsNonNull()).ColorSpace);
+					this.renderImageAction.Reschedule();
+				}
+			}
         }
 
 
@@ -1945,8 +2006,22 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
-		// Called when total memory usage of rendered images changed.
-		void OnSharedRenderedImagesMemoryUsageChanged(long usage)
+		// Setting changed.
+        protected override void OnSettingChanged(SettingChangedEventArgs e)
+        {
+            base.OnSettingChanged(e);
+			if (e.Key == SettingKeys.EnableColorSpaceManagement)
+				this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
+			else if (e.Key == SettingKeys.ScreenColorSpace)
+			{
+				if (this.IsColorSpaceManagementEnabled && this.IsActivated)
+					this.renderImageAction.Reschedule();
+			}
+        }
+
+
+        // Called when total memory usage of rendered images changed.
+        void OnSharedRenderedImagesMemoryUsageChanged(long usage)
 		{
 			if (!this.IsDisposed)
 				this.SetValue(TotalRenderedImagesMemoryUsageProperty, usage);
@@ -2366,19 +2441,30 @@ namespace Carina.PixelViewer.ViewModels
 			this.canSaveRenderedImage.Update(false);
 			this.SetValue(IsRenderingImageProperty, true);
 
+            // check color space
+            var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : BitmapColorSpace.Srgb;
+			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace) switch
+			{
+				_ => BitmapColorSpace.Srgb,
+			};
+			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && screenColorSpace != renderedColorSpace;
+
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, BitmapColorSpace.Srgb, this.ImageWidth, this.ImageHeight);
-			if (renderedImageFrame == null)
+			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
+			var convertedImageFrame = isColorSpaceConversionNeeded
+				? await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, screenColorSpace, this.ImageWidth, this.ImageHeight)
+				: null;
+			if (renderedImageFrame == null || (isColorSpaceConversionNeeded && convertedImageFrame == null))
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageRenderingCancellationTokenSource = null;
 					if (this.IsActivated)
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 					this.SetValue(IsRenderingImageProperty, false);
-					this.ReportRenderedImage();
 				}
 				else if (this.hasPendingImageRendering)
 				{
@@ -2390,6 +2476,8 @@ namespace Carina.PixelViewer.ViewModels
 					else
 						this.hasPendingImageRendering = false;
 				}
+				renderedImageFrame?.Dispose();
+				convertedImageFrame?.Dispose();
 				return;
 			}
 
@@ -2401,8 +2489,20 @@ namespace Carina.PixelViewer.ViewModels
 			var exception = (Exception?)null;
 			try
 			{
+				// render
 				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
-				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);					
+				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+
+				// convert color space
+				if (convertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
+				{
+					this.SetValue(IsConvertingColorSpaceProperty, true);
+					await renderedImageFrame.BitmapBuffer.ConvertToSrgbColorSpaceAsync(convertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+					var tempImageFrame = renderedImageFrame;
+					renderedImageFrame = convertedImageFrame;
+					convertedImageFrame = null;
+					tempImageFrame.Dispose();
+				}
 			}
 			catch (Exception ex)
 			{
@@ -2469,15 +2569,26 @@ namespace Carina.PixelViewer.ViewModels
 					this.FilterImage(renderedImageFrame);
 				}
 				else
-					this.ReportRenderedImage();
+				{
+					try
+					{
+						await this.ReportRenderedImageAsync(cancellationTokenSource);
+					}
+					catch (Exception ex)
+					{
+						if (ex is TaskCanceledException)
+							return;
+					}
+				}
 			}
 			else
 			{
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
-				this.ReportRenderedImage();
+				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 			}
+			this.SetValue(IsConvertingColorSpaceProperty, false);
 			this.SetValue(IsRenderingImageProperty, false);
 		}
 
@@ -2500,16 +2611,25 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Report rendered image according to current state.
-		async void ReportRenderedImage()
+		async Task ReportRenderedImageAsync(CancellationTokenSource cancellationTokenSource)
 		{
 			var imageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
 			if (imageFrame != null)
 			{
 				// convert to Avalonia bitmap
-				var bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync();
-				var currentImageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
-				if (currentImageFrame != imageFrame)
-					return;
+				var bitmap = (IBitmap?)null;
+				try
+				{
+					bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync(cancellationTokenSource.Token);
+				}
+				catch (Exception ex)
+				{
+					if (ex is TaskCanceledException)
+						throw;
+					this.Logger.LogError(ex, "Failed to convert to Avalonia bitmap");
+				}
+				if (cancellationTokenSource.IsCancellationRequested)
+					throw new TaskCanceledException();
 
 				// update state
 				this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage && this.filteredImageFrame != null);
@@ -2624,6 +2744,7 @@ namespace Carina.PixelViewer.ViewModels
 			var framePaddingSize = 0L;
 			var byteOrdering = ByteOrdering.BigEndian;
 			var yuvToBgraConverter = this.YuvToBgraConverter;
+			var colorSpace = BitmapColorSpace.Srgb;
 			var demosaicing = true;
 			var width = 1;
 			var height = 1;
@@ -2637,7 +2758,9 @@ namespace Carina.PixelViewer.ViewModels
 			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty))
 				Enum.TryParse(jsonProperty.GetString(), out byteOrdering);
 			if (savedState.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty))
-				YuvToBgraConverter.TryGetByName(jsonProperty.GetString().AsNonNull(), out yuvToBgraConverter);
+				YuvToBgraConverter.TryGetByName(jsonProperty.GetString(), out yuvToBgraConverter);
+			if (savedState.TryGetProperty(nameof(ColorSpace), out jsonProperty))
+				BitmapColorSpace.TryGetByName(jsonProperty.GetString(), out colorSpace);
 			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
 				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
@@ -2737,6 +2860,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(FramePaddingSizeProperty, framePaddingSize);
 			this.SetValue(ByteOrderingProperty, byteOrdering);
 			this.SetValue(YuvToBgraConverterProperty, yuvToBgraConverter);
+			this.SetValue(ColorSpaceProperty, colorSpace);
 			this.SetValue(DemosaicingProperty, demosaicing);
 			this.SetValue(ImageWidthProperty, width);
 			this.SetValue(ImageHeightProperty, height);
@@ -3103,6 +3227,7 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 				writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
 				writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
+				writer.WriteString(nameof(ColorSpace), this.ColorSpace.Name);
 				writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
 				writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
 				writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);

@@ -215,8 +215,9 @@ namespace Carina.PixelViewer.Media
 		/// Create <see cref="IBitmap"/> which copied data from this <see cref="IBitmapBuffer"/> asynchronously.
 		/// </summary>
 		/// <param name="buffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Task of creating <see cref="IBitmap"/>.</returns>
-		public static async Task<IBitmap> CreateAvaloniaBitmapAsync(this IBitmapBuffer buffer)
+		public static async Task<IBitmap> CreateAvaloniaBitmapAsync(this IBitmapBuffer buffer, CancellationToken cancellationToken)
         {
 			using var sharedBuffer = buffer.Share();
 			return await Task.Run(() =>
@@ -257,9 +258,13 @@ namespace Carina.PixelViewer.Media
 												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
 												*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
 											}
+											if (cancellationToken.IsCancellationRequested)
+												return;
 										});
 									}
 								});
+								if (cancellationToken.IsCancellationRequested)
+									throw new TaskCanceledException();
 								if (stopWatch != null)
 								{
 									stopWatch.Stop();
