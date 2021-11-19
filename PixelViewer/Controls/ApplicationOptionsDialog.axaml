@@ -23,7 +23,7 @@
 		</Border>
 
 		<!-- Content -->
-		<ScrollViewer MaxHeight="{DynamicResource Double/ApplicationOptionsDialog.Content.MaxHeight}">
+		<ScrollViewer Name="contentScrollViewer" MaxHeight="{DynamicResource Double/ApplicationOptionsDialog.Content.MaxHeight}">
 			<StackPanel Classes="Dialog_ContentPanel">
 
 				<!-- User interface -->
@@ -122,7 +122,7 @@
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Color space management -->
-				<Border Classes="Dialog_TextBlock_Header1">
+				<Border Name="colorSpaceManagementHeader" Classes="Dialog_TextBlock_Header1">
 					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement}"/>
 				</Border>
 				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>

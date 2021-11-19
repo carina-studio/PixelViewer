@@ -866,11 +866,12 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Show application options.
-		void ShowAppOptions()
-        {
+		void ShowAppOptions() => this.ShowAppOptions(ApplicationOptionsDialogSection.First);
+		void ShowAppOptions(ApplicationOptionsDialogSection initSection)
+		{
 			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
 			{
-				switch (await new ApplicationOptionsDialog().ShowDialog<ApplicationOptionsDialogResult>(window))
+				switch (await new ApplicationOptionsDialog() { InitialFocusedSection = initSection }.ShowDialog<ApplicationOptionsDialogResult>(window))
 				{
 					case ApplicationOptionsDialogResult.RestartApplicationNeeded:
 						Logger.LogWarning("Need to restart application");
@@ -886,6 +887,10 @@ namespace Carina.PixelViewer.Controls
 				}
 			});
 		}
+
+
+		// Show color space management settings in application options.
+		void ShowColorSpaceManagementOptions() => this.ShowAppOptions(ApplicationOptionsDialogSection.ColorSpaceManagement);
 
 
 		/// <summary>

@@ -517,7 +517,7 @@
 						<!-- Color space -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
 						<Panel>
-							<asControls:LinkTextBlock Command="{x:Null}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
+							<asControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
 							<ComboBox Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:BitmapColorSpace.All}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>

@@ -707,6 +707,12 @@ namespace Carina.PixelViewer.ViewModels
 				// YUV to RGB converter
 				this.SetValue(YuvToBgraConverterProperty, profile.YuvToBgraConverter);
 
+				// color space
+				if (profile.Type != ImageRenderingProfileType.UserDefined && this.IsYuvToBgraConverterSupported)
+					this.SetValue(ColorSpaceProperty, this.YuvToBgraConverter.ColorSpace);
+				else
+					this.SetValue(ColorSpaceProperty, profile.ColorSpace);
+
 				// demosaicing
 				this.SetValue(DemosaicingProperty, profile.Demosaicing);
 
@@ -1928,6 +1934,8 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.IsActivated)
 					this.renderImageAction.Reschedule();
+				else
+					this.ClearRenderedImage(false);
 			}
 			else if (property == IsContrastAdjustmentSupportedProperty)
 			{
@@ -1973,6 +1981,15 @@ namespace Carina.PixelViewer.ViewModels
 					this.updateFilterSupportingAction.Schedule();
 				else
 					this.updateFilterSupportingAction.Execute();
+			}
+			else if (property == IsYuvToBgraConverterSupportedProperty)
+			{
+				if ((bool)newValue.AsNonNull())
+				{
+					this.SetValue(ColorSpaceProperty, this.YuvToBgraConverter.ColorSpace);
+					if (this.IsColorSpaceManagementEnabled)
+						this.renderImageAction.Reschedule();
+				}
 			}
 			else if (property == ProfileProperty)
 			{
