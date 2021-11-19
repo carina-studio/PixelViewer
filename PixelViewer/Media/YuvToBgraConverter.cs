@@ -30,7 +30,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.601.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601", BitmapColorSpace.Srgb,
+        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601", BitmapColorSpace.BT_601,
             0, -128, -128,
             1,
             0, 1.402,
@@ -39,7 +39,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.656.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656", BitmapColorSpace.Srgb,
+        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656", BitmapColorSpace.BT_601,
             -16, -128, -128,
             1.164,
             0, 1.596,

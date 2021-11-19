@@ -135,8 +135,8 @@
 
 				<!-- Screen color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
-				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:ScreenColorSpace}" IsEnabled="False" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}"/>
-				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace.Description}"/>
+				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:ScreenColorSpace}" IsEnabled="{Binding EnableColorSpaceManagement}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}"/>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/RGB_color_spaces"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Other -->

@@ -11,5 +11,27 @@ namespace Carina.PixelViewer.Media
         /// sRGB.
         /// </summary>
         Srgb,
+        /// <summary>
+        /// DCI-P3.
+        /// </summary>
+        DCI_P3,
+    }
+
+
+    /// <summary>
+    /// Extensions for <see cref="ScreenColorSpace"/>.
+    /// </summary>
+    static class ScreenColorSpaceExtensions
+    {
+        /// <summary>
+        /// Convert to <see cref="BitmapColorSpace"/>.
+        /// </summary>
+        /// <param name="colorSpace"><see cref="ScreenColorSpace"/>.</param>
+        /// <returns><see cref="BitmapColorSpace"/>.</returns>
+        public static BitmapColorSpace ToBitmapColorSpace(this ScreenColorSpace colorSpace) => colorSpace switch
+        {
+            ScreenColorSpace.DCI_P3 => BitmapColorSpace.DCI_P3,
+            _ => BitmapColorSpace.Srgb,
+        };
     }
 }

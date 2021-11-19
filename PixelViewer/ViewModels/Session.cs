@@ -2460,10 +2460,7 @@ namespace Carina.PixelViewer.ViewModels
 
             // check color space
             var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : BitmapColorSpace.Srgb;
-			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace) switch
-			{
-				_ => BitmapColorSpace.Srgb,
-			};
+			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace).ToBitmapColorSpace();
 			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && screenColorSpace != renderedColorSpace;
 
 			// create rendered image

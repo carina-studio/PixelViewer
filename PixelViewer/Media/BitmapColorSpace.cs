@@ -21,6 +21,14 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         public static readonly BitmapColorSpace BT_2020 = new BT2020BitmapColorSpace();
         /// <summary>
+        /// ITU-R BT.601.
+        /// </summary>
+        public static readonly BitmapColorSpace BT_601 = new BT601BitmapColorSpace();
+        /// <summary>
+        /// DCI-P3.
+        /// </summary>
+        public static readonly BitmapColorSpace DCI_P3 = new DciP3BitmapColorSpace();
+        /// <summary>
         /// sRGB.
         /// </summary>
         public static readonly BitmapColorSpace Srgb = new SrgbBitmapColorSpace();
@@ -36,6 +44,45 @@ namespace Carina.PixelViewer.Media
         class BT2020BitmapColorSpace : NonSrgbBitmapColorSpace
         {
             public BT2020BitmapColorSpace() : base("BT.2020", RGBWorkingSpaces.Rec2020) { }
+        }
+
+
+        // BT.601 color space.
+        class BT601BitmapColorSpace : NonSrgbBitmapColorSpace
+        {
+            class BT601Companding : ICompanding
+            {
+                public double ConvertToLinear(in double nonLinearChannel) => nonLinearChannel < 0.081
+                    ? nonLinearChannel / 4.5
+                    : Math.Pow(Math.E, Math.Log((nonLinearChannel + 0.099) / 1.099) / 0.45);
+                public double ConvertToNonLinear(in double linearChannel) => linearChannel < 0.018
+                    ? 4.5 * linearChannel
+                    : 1.099 * Math.Pow(linearChannel, 0.45) - 0.099;
+            }
+            static readonly IRGBWorkingSpace RGBWorkingSpace = new RGBWorkingSpace(Illuminants.D65, 
+                new BT601Companding(), 
+                new RGBPrimaries(
+                    new xyChromaticity(0.64, 0.33),
+                    new xyChromaticity(0.29, 0.60),
+                    new xyChromaticity(0.15, 0.06)
+                )
+            );
+            public BT601BitmapColorSpace() : base("BT.601", RGBWorkingSpace) { }
+        }
+
+
+        // DCI-P3 color space.
+        class DciP3BitmapColorSpace : NonSrgbBitmapColorSpace
+        {
+            static readonly IRGBWorkingSpace RGBWorkingSpace = new RGBWorkingSpace(Illuminants.D65,
+                new sRGBCompanding(), // refer to https://en.wikipedia.org/wiki/DCI-P3
+                new RGBPrimaries(
+                    new xyChromaticity(0.68, 0.32),
+                    new xyChromaticity(0.265, 0.69),
+                    new xyChromaticity(0.15, 0.06)
+                )
+            );
+            public DciP3BitmapColorSpace() : base("DCI-P3", RGBWorkingSpace) { }
         }
 
 

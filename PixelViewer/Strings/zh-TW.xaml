@@ -21,7 +21,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像繪製記憶體使用上限 (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">螢幕色彩空間</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace.Description">目前僅支援 sRGB</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 
