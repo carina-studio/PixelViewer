@@ -63,8 +63,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			if (effectiveBits <= 8 || effectiveBits > 16)
 				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
 
-			// select byte ordering
-			var pixelConversionFunc = this.Create16BitsTo8BitsConversion(renderingOptions.ByteOrdering, effectiveBits);
+			// prepare conversion
+			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits);
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
@@ -79,11 +79,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					{
 						imageStream.Read(row, 0, rowStride);
 						var pixelPtr = rowPtr;
-						var bitmapPixelPtr = bitmapRowPtr;
+						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						for (var x = 0; x < width; ++x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 						{
-							bitmapPixelPtr[(int)this.SelectColorComponent(x, y)] = pixelConversionFunc(pixelPtr[0], pixelPtr[1]);
-							bitmapPixelPtr[3] = 255;
+							bitmapPixelPtr[(int)this.SelectColorComponent(x, y)] = extractFunc(pixelPtr[0], pixelPtr[1]);
+							bitmapPixelPtr[3] = 65535;
 						}
 						if (cancellationToken.IsCancellationRequested)
 							break;
@@ -99,8 +99,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];
-					var bitmapPixelPtr = ((byte*)bitmapBaseAddress + bitmapRowStride * y);
-					var leftBitmapPixelPtr = (byte*)null;
+					var bitmapPixelPtr = (ushort*)((byte*)bitmapBaseAddress + bitmapRowStride * y);
+					var leftBitmapPixelPtr = (ushort*)null;
 					var rightBitmapPixelPtr = (bitmapPixelPtr + 4);
 					for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4)
 					{
@@ -131,7 +131,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						for (var i = 2; i >= 0; --i)
 						{
 							if (i != centerComponent && colorCounts[i] > 0)
-								bitmapPixelPtr[i] = (byte)(accumColors[i] / colorCounts[i]);
+								bitmapPixelPtr[i] = (ushort)(accumColors[i] / colorCounts[i]);
 							accumColors[i] = 0;
 							colorCounts[i] = 0;
 						}
@@ -147,7 +147,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];
-					var bitmapPixelPtr = ((byte*)bitmapBaseAddress + x * 4);
+					var bitmapPixelPtr = ((byte*)bitmapBaseAddress + x * sizeof(ulong));
 					var topBitmapPixelPtr = (bitmapPixelPtr - bitmapRowStride);
 					var bottomBitmapPixelPtr = (bitmapPixelPtr + bitmapRowStride);
 					for (var y = 0; y < height; ++y, bitmapPixelPtr += bitmapRowStride, topBitmapPixelPtr += bitmapRowStride, bottomBitmapPixelPtr += bitmapRowStride)
@@ -161,7 +161,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							var neighborComponent = (int)this.SelectColorComponent(x, y - 1);
 							if (neighborComponent != centerComponent)
 							{
-								accumColors[neighborComponent] += topBitmapPixelPtr[neighborComponent];
+								accumColors[neighborComponent] += ((ushort*)topBitmapPixelPtr)[neighborComponent];
 								++colorCounts[neighborComponent];
 							}
 						}
@@ -170,7 +170,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							var neighborComponent = (int)this.SelectColorComponent(x, y + 1);
 							if (neighborComponent != centerComponent)
 							{
-								accumColors[neighborComponent] += bottomBitmapPixelPtr[neighborComponent];
+								accumColors[neighborComponent] += ((ushort*)bottomBitmapPixelPtr)[neighborComponent];
 								++colorCounts[neighborComponent];
 							}
 						}
@@ -179,7 +179,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						for (var i = 2; i >= 0; --i)
 						{
 							if (i != centerComponent && colorCounts[i] > 0)
-								bitmapPixelPtr[i] = (byte)(accumColors[i] / colorCounts[i]);
+								((ushort*)bitmapPixelPtr)[i] = (ushort)(accumColors[i] / colorCounts[i]);
 							accumColors[i] = 0;
 							colorCounts[i] = 0;
 						}
@@ -191,12 +191,16 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
-		/// <summary>
-		/// Select color component for given pixel.
-		/// </summary>
-		/// <param name="x">Horizontal position of pixel.</param>
-		/// <param name="y">Vertical position of pixel.</param>
-		/// <returns>Color component.</returns>
-		protected abstract ColorComponent SelectColorComponent(int x, int y);
+		// Rendered format.
+		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+
+
+        /// <summary>
+        /// Select color component for given pixel.
+        /// </summary>
+        /// <param name="x">Horizontal position of pixel.</param>
+        /// <param name="y">Vertical position of pixel.</param>
+        /// <returns>Color component.</returns>
+        protected abstract ColorComponent SelectColorComponent(int x, int y);
 	}
 }
