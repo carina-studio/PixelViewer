@@ -314,6 +314,78 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Denormalize and pack B/G/R/X to 32-bit BGRA for Big-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="x">X.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint DenormalizeAndPackBgrx32BE(double b, double g, double r, byte x)
+		{
+			var b8 = ClipToByte(b * 255);
+			var g8 = ClipToByte(g * 255);
+			var r8 = ClipToByte(r * 255);
+			return (uint)((b8 << 24) | (g8 << 16) | (r8 << 8) | x);
+		}
+
+
+		/// <summary>
+		/// Denormalize and pack B/G/R/X to 32-bit BGRA for Little-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="x">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static uint DenormalizeAndPackBgrx32LE(double b, double g, double r, byte x)
+		{
+			var b8 = ClipToByte(b * 255);
+			var g8 = ClipToByte(g * 255);
+			var r8 = ClipToByte(r * 255);
+			return (uint)((x << 24) | (r8 << 16) | (g8 << 8) | b8);
+		}
+
+
+		/// <summary>
+		/// Denormalize and pack B/G/R/X to 64-bit BGRA for Big-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="x">X.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong DenormalizeAndPackBgrx64BE(double b, double g, double r, ushort x)
+		{
+			var b16 = ClipToUInt16(b * 65535);
+			var g16 = ClipToUInt16(g * 65535);
+			var r16 = ClipToUInt16(r * 65535);
+			return ((ulong)b16 << 48) | ((ulong)g16 << 32) | ((ulong)r16 << 16) | x;
+		}
+
+
+		/// <summary>
+		/// Denormalize and pack B/G/R/X to 64-bit BGRA for Little-Endian system.
+		/// </summary>
+		/// <param name="b">B.</param>
+		/// <param name="g">G.</param>
+		/// <param name="r">R.</param>
+		/// <param name="x">X.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong DenormalizeAndPackBgrx64LE(double b, double g, double r, ushort x)
+		{
+			var b16 = ClipToUInt16(b * 65535);
+			var g16 = ClipToUInt16(g * 65535);
+			var r16 = ClipToUInt16(r * 65535);
+			return ((ulong)x << 48) | ((ulong)r16 << 32) | ((ulong)g16 << 16) | b16;
+		}
+
+
+		/// <summary>
 		/// Pack B/G/R/A to 32-bit BGRA for Big-Endian system.
 		/// </summary>
 		/// <param name="b">B.</param>
@@ -478,6 +550,54 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Select property function to denormalize and pack B/G/R/X into 32-bit integer.
+		/// </summary>
+		/// <returns>Pointer to denormalizing and packing function.</returns>
+		public static delegate*<double, double, double, byte, uint> SelectBgrx32DenormalizingAndPacking()
+		{
+			if (IsLittleEndian)
+				return &DenormalizeAndPackBgrx32LE;
+			return &DenormalizeAndPackBgrx32BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to unpack 32-bit integer into normalized B/G/R/X.
+		/// </summary>
+		/// <returns>Pointer to unpacking and normalizing function.</returns>
+		public static delegate*<uint, double*, double*, double*, byte*, void> SelectBgrx32UnpackingAndNormalizing()
+		{
+			if (IsLittleEndian)
+				return &UnpackAndNormalizeBgrx32LE;
+			return &UnpackAndNormalizeBgrx32BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to denormalize and pack B/G/R/X into 64-bit integer.
+		/// </summary>
+		/// <returns>Pointer to denormalizing and packing function.</returns>
+		public static delegate*<double, double, double, ushort, ulong> SelectBgrx64DenormalizingAndPacking()
+		{
+			if (IsLittleEndian)
+				return &DenormalizeAndPackBgrx64LE;
+			return &DenormalizeAndPackBgrx64BE;
+		}
+
+
+		/// <summary>
+		/// Select property function to unpack 64-bit integer into normalized B/G/R/X.
+		/// </summary>
+		/// <returns>Pointer to unpacking and normalizing function.</returns>
+		public static delegate*<ulong, double*, double*, double*, ushort*, void> SelectBgrx64UnpackingAndNormalizing()
+		{
+			if (IsLittleEndian)
+				return &UnpackAndNormalizeBgrx64LE;
+			return &UnpackAndNormalizeBgrx64BE;
+		}
+
+
+		/// <summary>
 		/// Select proper maximum degree of parallel image processing.
 		/// </summary>
 		/// <returns>Maximum degree of parallel image processing.</returns>
@@ -535,7 +655,7 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
-		/// Unpack 62-bit integer into normalized B/G/R/A for Big-Endian system.
+		/// Unpack 64-bit integer into normalized B/G/R/A for Big-Endian system.
 		/// </summary>
 		/// <param name="bgra">Packed BGRA.</param>
 		/// <param name="b">Unpacked and normalized B.</param>
@@ -553,7 +673,7 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
-		/// Unpack 62-bit integer into normalized B/G/R/A for Little-Endian system.
+		/// Unpack 64-bit integer into normalized B/G/R/A for Little-Endian system.
 		/// </summary>
 		/// <param name="bgra">Packed BGRA.</param>
 		/// <param name="b">Unpacked and normalized B.</param>
@@ -564,6 +684,78 @@ namespace Carina.PixelViewer.Media
 		public static void UnpackAndNormalizeBgra64LE(ulong bgra, double* b, double* g, double* r, double* a)
 		{
 			*a = colorNormalizingTable16[(bgra >> 48)];
+			*r = colorNormalizingTable16[((bgra >> 32) & 0xffff)];
+			*g = colorNormalizingTable16[((bgra >> 16) & 0xffff)];
+			*b = colorNormalizingTable16[(bgra & 0xffff)];
+		}
+
+
+		/// <summary>
+		/// Unpack 32-bit integer into normalized B/G/R/X for Big-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="x">Unpacked X.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgrx32BE(uint bgra, double* b, double* g, double* r, byte* x)
+		{
+			*b = colorNormalizingTable8[(bgra >> 24)];
+			*g = colorNormalizingTable8[((bgra >> 16) & 0xff)];
+			*r = colorNormalizingTable8[((bgra >> 8) & 0xff)];
+			*x = (byte)(bgra & 0xff);
+		}
+
+
+		/// <summary>
+		/// Unpack 32-bit integer into normalized B/G/R/X for Little-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="x">Unpacked X.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgrx32LE(uint bgra, double* b, double* g, double* r, byte* x)
+		{
+			*x = (byte)(bgra >> 24);
+			*r = colorNormalizingTable8[((bgra >> 16) & 0xff)];
+			*g = colorNormalizingTable8[((bgra >> 8) & 0xff)];
+			*b = colorNormalizingTable8[(bgra & 0xff)];
+		}
+
+
+		/// <summary>
+		/// Unpack 64-bit integer into normalized B/G/R/X for Big-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="x">Unpacked X.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgrx64BE(ulong bgra, double* b, double* g, double* r, ushort* x)
+		{
+			*b = colorNormalizingTable16[(bgra >> 48)];
+			*g = colorNormalizingTable16[((bgra >> 32) & 0xffff)];
+			*r = colorNormalizingTable16[((bgra >> 16) & 0xffff)];
+			*x = (ushort)(bgra & 0xffff);
+		}
+
+
+		/// <summary>
+		/// Unpack 64-bit integer into normalized B/G/R/X for Little-Endian system.
+		/// </summary>
+		/// <param name="bgra">Packed BGRA.</param>
+		/// <param name="b">Unpacked and normalized B.</param>
+		/// <param name="g">Unpacked and normalized G.</param>
+		/// <param name="r">Unpacked and normalized R.</param>
+		/// <param name="x">Unpacked X.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void UnpackAndNormalizeBgrx64LE(ulong bgra, double* b, double* g, double* r, ushort* x)
+		{
+			*x = (ushort)(bgra >> 48);
 			*r = colorNormalizingTable16[((bgra >> 32) & 0xffff)];
 			*g = colorNormalizingTable16[((bgra >> 16) & 0xffff)];
 			*b = colorNormalizingTable16[(bgra & 0xffff)];
