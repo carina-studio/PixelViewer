@@ -41,8 +41,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			if (effectiveBits <= 8 || effectiveBits > 16)
 				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
 
-			// select byte ordering
-			var pixelConversionFunc = this.Create16BitsTo8BitsConversion(renderingOptions.ByteOrdering, effectiveBits);
+			// prepare conversions
+			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits);
+			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
@@ -56,13 +57,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var isLastRow = (imageStream.Read(row, 0, rowStride) < rowStride || y == 1);
 						var pixelPtr = rowPtr;
 						var bitmapPixelPtr = bitmapRowPtr;
-						for (var x = width; x > 0; --x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
+						for (var x = width; x > 0; --x, pixelPtr += pixelStride, bitmapPixelPtr += sizeof(ulong))
 						{
-							var l8 = pixelConversionFunc(pixelPtr[0], pixelPtr[1]);
-							bitmapPixelPtr[0] = l8;
-							bitmapPixelPtr[1] = l8;
-							bitmapPixelPtr[2] = l8;
-							bitmapPixelPtr[3] = 255;
+							var l16 = extractFunc(pixelPtr[0], pixelPtr[1]);
+							*(ulong*)bitmapPixelPtr = packFunc(l16, l16, l16, 65535);
 						}
 						if (isLastRow || cancellationToken.IsCancellationRequested)
 							break;
@@ -72,5 +70,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				}
 			});
 		}
-	}
+
+
+		// Rendered format.
+		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+    }
 }

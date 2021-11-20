@@ -2463,14 +2463,23 @@ namespace Carina.PixelViewer.ViewModels
 			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace).ToBitmapColorSpace();
 			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && screenColorSpace != renderedColorSpace;
 
+			// check rendered format
+			var renderedFormat = imageRenderer.RenderedFormat;
+			var isFormatConversionNeeded = (renderedFormat != BitmapFormat.Bgra32);
+
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
-			var convertedImageFrame = isColorSpaceConversionNeeded
-				? await this.AllocateRenderedImageFrame(frameNumber, imageRenderer.RenderedFormat, screenColorSpace, this.ImageWidth, this.ImageHeight)
+			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
+			var colorSpaceConvertedImageFrame = isColorSpaceConversionNeeded
+				? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, screenColorSpace, this.ImageWidth, this.ImageHeight)
 				: null;
-			if (renderedImageFrame == null || (isColorSpaceConversionNeeded && convertedImageFrame == null))
+			var formatConvertedImageFrame = isFormatConversionNeeded
+				? await this.AllocateRenderedImageFrame(frameNumber, BitmapFormat.Bgra32, screenColorSpace, this.ImageWidth, this.ImageHeight)
+				: null;
+			if (renderedImageFrame == null 
+				|| (isColorSpaceConversionNeeded && colorSpaceConvertedImageFrame == null)
+				|| (isFormatConversionNeeded && formatConvertedImageFrame == null))
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
@@ -2491,7 +2500,8 @@ namespace Carina.PixelViewer.ViewModels
 						this.hasPendingImageRendering = false;
 				}
 				renderedImageFrame?.Dispose();
-				convertedImageFrame?.Dispose();
+				colorSpaceConvertedImageFrame?.Dispose();
+				formatConvertedImageFrame?.Dispose();
 				return;
 			}
 
@@ -2508,13 +2518,23 @@ namespace Carina.PixelViewer.ViewModels
 				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 
 				// convert color space
-				if (convertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
+				if (colorSpaceConvertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
 				{
 					this.SetValue(IsConvertingColorSpaceProperty, true);
-					await renderedImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(convertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+					await renderedImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
 					var tempImageFrame = renderedImageFrame;
-					renderedImageFrame = convertedImageFrame;
-					convertedImageFrame = null;
+					renderedImageFrame = colorSpaceConvertedImageFrame;
+					colorSpaceConvertedImageFrame = null;
+					tempImageFrame.Dispose();
+				}
+
+				// convert format
+				if (formatConvertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
+				{
+					await renderedImageFrame.BitmapBuffer.ConvertToBgra32Async(formatConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+					var tempImageFrame = renderedImageFrame;
+					renderedImageFrame = formatConvertedImageFrame;
+					formatConvertedImageFrame = null;
 					tempImageFrame.Dispose();
 				}
 			}

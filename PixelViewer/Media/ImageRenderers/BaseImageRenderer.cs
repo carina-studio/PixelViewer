@@ -27,6 +27,33 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
+		/// Create function to extract from [9, 16]-bit data to 16-bit data.
+		/// </summary>
+		/// <param name="byteOrdering">Byte ordering.</param>
+		/// <param name="effectiveBits">Effective bits, range is [9, 16].</param>
+		/// <returns>Extraction function.</returns>
+		protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits)
+		{
+			if (effectiveBits < 9 || effectiveBits > 16)
+				throw new ArgumentOutOfRangeException(nameof(effectiveBits));
+			if (effectiveBits == 16)
+			{
+				return byteOrdering == ByteOrdering.LittleEndian
+					? (b1, b2) => (ushort)((b2 << 8) | b1)
+					: (b1, b2) => (ushort)((b1 << 8) | b2);
+			}
+			else
+			{
+				var effectiveBitsShiftCount = (16 - effectiveBits);
+				var effectiveBitsMask = (0xffff >> effectiveBitsShiftCount);
+				return byteOrdering == ByteOrdering.LittleEndian
+					? (b1, b2) => (ushort)((((b2 << 8) | b1) & effectiveBitsMask) << effectiveBitsShiftCount)
+					: (b1, b2) => (ushort)((((b1 << 8) | b2) & effectiveBitsMask) << effectiveBitsShiftCount);
+			}
+		}
+
+
+		/// <summary>
 		/// Create conversion function to convert from [9, 16]-bits data to 8-bits data.
 		/// </summary>
 		/// <param name="byteOrdering">Byte ordering.</param>
