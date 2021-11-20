@@ -16,7 +16,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         // Select UV component.
-        protected override void SelectUV(byte uv1, byte uv2, out byte u, out byte v)
+        protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
         {
             u = uv1;
             v = uv2;

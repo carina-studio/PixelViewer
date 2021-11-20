@@ -163,8 +163,12 @@ namespace Carina.PixelViewer.Controls
         {
             var dataCount = histogram.Count;
             var pathBuilder = new StringBuilder($"M 0,{dataCount} L {dataCount - 1},{dataCount}");
-            for (var i = dataCount - 1; i >= 0; --i)
-                pathBuilder.AppendFormat(" L {0},{1}", i, dataCount - (histogram[i] / (double)max * dataCount));
+            if (max > 0)
+            {
+                for (var i = dataCount - 1; i >= 0; --i)
+                    pathBuilder.AppendFormat(" L {0},{1}", i, dataCount - (histogram[i] / (double)max * dataCount));
+                
+            }
             pathBuilder.Append(" Z");
             return new DrawingImage()
             {

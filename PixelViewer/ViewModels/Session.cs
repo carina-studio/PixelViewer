@@ -2463,23 +2463,16 @@ namespace Carina.PixelViewer.ViewModels
 			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace).ToBitmapColorSpace();
 			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && screenColorSpace != renderedColorSpace;
 
-			// check rendered format
-			var renderedFormat = imageRenderer.RenderedFormat;
-			var isFormatConversionNeeded = (renderedFormat != BitmapFormat.Bgra32);
-
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
+			var renderedFormat = imageRenderer.RenderedFormat;
 			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
 			var colorSpaceConvertedImageFrame = isColorSpaceConversionNeeded
 				? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, screenColorSpace, this.ImageWidth, this.ImageHeight)
 				: null;
-			var formatConvertedImageFrame = isFormatConversionNeeded
-				? await this.AllocateRenderedImageFrame(frameNumber, BitmapFormat.Bgra32, screenColorSpace, this.ImageWidth, this.ImageHeight)
-				: null;
 			if (renderedImageFrame == null 
-				|| (isColorSpaceConversionNeeded && colorSpaceConvertedImageFrame == null)
-				|| (isFormatConversionNeeded && formatConvertedImageFrame == null))
+				|| (isColorSpaceConversionNeeded && colorSpaceConvertedImageFrame == null))
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
@@ -2501,7 +2494,6 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				renderedImageFrame?.Dispose();
 				colorSpaceConvertedImageFrame?.Dispose();
-				formatConvertedImageFrame?.Dispose();
 				return;
 			}
 
@@ -2525,16 +2517,6 @@ namespace Carina.PixelViewer.ViewModels
 					var tempImageFrame = renderedImageFrame;
 					renderedImageFrame = colorSpaceConvertedImageFrame;
 					colorSpaceConvertedImageFrame = null;
-					tempImageFrame.Dispose();
-				}
-
-				// convert format
-				if (formatConvertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
-				{
-					await renderedImageFrame.BitmapBuffer.ConvertToBgra32Async(formatConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
-					var tempImageFrame = renderedImageFrame;
-					renderedImageFrame = formatConvertedImageFrame;
-					formatConvertedImageFrame = null;
 					tempImageFrame.Dispose();
 				}
 			}
@@ -2666,7 +2648,7 @@ namespace Carina.PixelViewer.ViewModels
 					throw new TaskCanceledException();
 
 				// update state
-				this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage && this.filteredImageFrame != null);
+				this.canSaveFilteredImage.Update(!this.IsSavingFilteredImage && this.filteredImageFrame != null);
 				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
@@ -3111,25 +3093,31 @@ namespace Carina.PixelViewer.ViewModels
 		async Task<bool> SaveImage(IBitmapBuffer imageBuffer, Stream stream)
 		{
 			using var sharedImageBuffer = imageBuffer.Share();
-			return await Task.Run(async () =>
-			{
-				try
-				{
+			return await Task.Run(
 #if WINDOWS10_0_17763_0_OR_GREATER
-					using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
-					bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+				() =>
 #else
-					using var bitmap = await sharedImageBuffer.CreateAvaloniaBitmapAsync();
-					bitmap.Save(stream);
+				async () =>
 #endif
-					return true;
+                {
+					try
+					{
+#if WINDOWS10_0_17763_0_OR_GREATER
+						using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
+						bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+#else
+						using var bitmap = await sharedImageBuffer.CreateAvaloniaBitmapAsync();
+						bitmap.Save(stream);
+#endif
+						return true;
+					}
+					catch (Exception ex)
+					{
+						this.Logger.LogError(ex, "Unable to save rendered image");
+						return false;
+					}
 				}
-				catch (Exception ex)
-				{
-					this.Logger.LogError(ex, "Unable to save rendered image");
-					return false;
-				}
-			});
+			);
 		}
 
 
@@ -3363,6 +3351,16 @@ namespace Carina.PixelViewer.ViewModels
 					return renderedImageBuffer.Format switch
 					{
 						BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]),
+						BitmapFormat.Bgra64 => Global.Run(()=>
+                        {
+							var b = (ushort)0;
+							var g = (ushort)0;
+							var r = (ushort)0;
+							var a = (ushort)0;
+							var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+							unpackFunc(*(ulong*)pixelPtr, &b, &g, &r, &a);
+							return new Color((byte)(a >> 8), (byte)(r >> 8), (byte)(g >> 8), (byte)(b >> 8));
+						}),
 						_ => default,
 					};
 				});

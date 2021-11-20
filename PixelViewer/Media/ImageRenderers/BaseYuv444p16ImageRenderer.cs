@@ -77,7 +77,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 			// select color converter
 			var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
-			var yuvExtractor = this.Create16BitsTo8BitsConversion(renderingOptions.ByteOrdering, this.effectiveBits);
+			var yuvExtractor = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, this.effectiveBits);
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
@@ -91,7 +91,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					for (var rowIndex = 0; rowIndex < height; ++rowIndex, bitmapRowPtr += bitmapRowStride)
 					{
 						var yPixelPtr = yRowPtr;
-						var bitmapPixelPtr = bitmapRowPtr;
+						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						imageStream.Read(yRow, 0, yRowStride);
 						for (var columnIndex = 0; columnIndex < width; ++columnIndex, yPixelPtr += yPixelStride, bitmapPixelPtr += 4)
 							bitmapPixelPtr[0] = yuvExtractor(yPixelPtr[0], yPixelPtr[1]);
@@ -111,7 +111,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					{
 						// read UV row
 						var uvPixelPtr = uv1RowPtr;
-						var bitmapPixelPtr = bitmapRowPtr;
+						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						imageStream.Read(uv1Row, 0, uv1RowStride);
 						for (var columnIndex = 0; columnIndex < width; ++columnIndex, uvPixelPtr += uv1PixelStride, bitmapPixelPtr += 4)
 							bitmapPixelPtr[1] = yuvExtractor(uvPixelPtr[0], uvPixelPtr[1]);
@@ -133,14 +133,14 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					{
 						// read UV row
 						var uvPixelPtr = uv2RowPtr;
-						var bitmapPixelPtr = bitmapRowPtr;
+						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						imageStream.Read(uv2Row, 0, uv2RowStride);
 						for (var columnIndex = 0; columnIndex < width; ++columnIndex, uvPixelPtr += uv2PixelStride, bitmapPixelPtr += 4)
 						{
 							// render the N column
 							var y = bitmapPixelPtr[0];
 							this.SelectUV(bitmapPixelPtr[1], yuvExtractor(uvPixelPtr[0], uvPixelPtr[1]), out var u, out var v);
-							converter.ConvertFromYuv444ToBgra32(y, u, v, (uint*)bitmapPixelPtr);
+							converter.ConvertFromYuv444ToBgra64(y, u, v, (ulong*)bitmapPixelPtr);
 						}
 
 						// check state
@@ -154,6 +154,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
+		// Rendered format.
+		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+
+
 		/// <summary>
 		/// Select U, V component.
 		/// </summary>
@@ -161,6 +165,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="uv2">Second component read from source.</param>
 		/// <param name="u">Selected U.</param>
 		/// <param name="v">Selected V.</param>
-		protected abstract void SelectUV(byte uv1, byte uv2, out byte u, out byte v);
+		protected abstract void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v);
 	}
 }

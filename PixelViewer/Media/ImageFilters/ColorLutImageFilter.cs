@@ -128,7 +128,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                             break;
                         case BitmapFormat.Bgra64:
                             {
-                                var luts = (ushort*)Marshal.AllocHGlobal(65536 * 4);
+                                var luts = (ushort*)Marshal.AllocHGlobal(65536 * sizeof(ushort) * 4);
                                 var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 try

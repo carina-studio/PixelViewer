@@ -65,6 +65,7 @@ namespace Carina.PixelViewer.Media
 		public static System.Drawing.Imaging.PixelFormat ToSystemDrawingPixelFormat(this BitmapFormat format) => format switch
 		{
 			BitmapFormat.Bgra32 => System.Drawing.Imaging.PixelFormat.Format32bppArgb,
+			BitmapFormat.Bgra64 => System.Drawing.Imaging.PixelFormat.Format64bppArgb,
 			_ => throw new ArgumentException($"Unknown format: {format}"),
 		};
 	}

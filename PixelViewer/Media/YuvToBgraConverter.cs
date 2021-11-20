@@ -188,9 +188,9 @@ namespace Carina.PixelViewer.Media
             var y264 = ((long)y2 + this.yShift16) * this.yFactor16;
             var u64 = ((long)u + this.uShift16);
             var v64 = ((long)v + this.uShift16);
-            var rCoeff = this.uFactorForR8 * u64 + this.vFactorForR8 * v64;
-            var gCoeff = this.uFactorForG8 * u64 + this.vFactorForG8 * v64;
-            var bCoeff = this.uFactorForB8 * u64 + this.vFactorForB8 * v64;
+            var rCoeff = this.uFactorForR16 * u64 + this.vFactorForR16 * v64;
+            var gCoeff = this.uFactorForG16 * u64 + this.vFactorForG16 * v64;
+            var bCoeff = this.uFactorForB16 * u64 + this.vFactorForB16 * v64;
             pixel1[0] = ImageProcessing.ClipToUInt16((y164 + bCoeff) >> 16);
             pixel1[1] = ImageProcessing.ClipToUInt16((y164 + gCoeff) >> 16);
             pixel1[2] = ImageProcessing.ClipToUInt16((y164 + rCoeff) >> 16);
@@ -240,9 +240,9 @@ namespace Carina.PixelViewer.Media
             var y64 = ((long)y + this.yShift16) * this.yFactor16;
             var u64 = ((long)u + this.uShift16);
             var v64 = ((long)v + this.uShift16);
-            var rCoeff = this.uFactorForR8 * u64 + this.vFactorForR8 * v64;
-            var gCoeff = this.uFactorForG8 * u64 + this.vFactorForG8 * v64;
-            var bCoeff = this.uFactorForB8 * u64 + this.vFactorForB8 * v64;
+            var rCoeff = this.uFactorForR16 * u64 + this.vFactorForR16 * v64;
+            var gCoeff = this.uFactorForG16 * u64 + this.vFactorForG16 * v64;
+            var bCoeff = this.uFactorForB16 * u64 + this.vFactorForB16 * v64;
             pixel1[0] = ImageProcessing.ClipToUInt16((y64 + bCoeff) >> 16);
             pixel1[1] = ImageProcessing.ClipToUInt16((y64 + gCoeff) >> 16);
             pixel1[2] = ImageProcessing.ClipToUInt16((y64 + rCoeff) >> 16);

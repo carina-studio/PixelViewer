@@ -151,10 +151,10 @@ namespace Carina.PixelViewer.Media
                     var stopWatch = AppSuiteApplication.CurrentOrNull?.IsDebugMode == true
                         ? new Stopwatch().Also(it => it.Start())
                         : null;
-                    var red = new int[65536];
-                    var green = new int[65536];
-                    var blue = new int[65536];
-                    var luminance = new int[65536];
+                    var red = new int[256];
+                    var green = new int[256];
+                    var blue = new int[256];
+                    var luminance = new int[256];
                     unsafe
                     {
                         bitmapBuffer.Memory.Pin(ptr =>
@@ -165,31 +165,31 @@ namespace Carina.PixelViewer.Media
                             var syncLock = new object();
                             Parallel.For(0, bitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
                             {
-                                fixed (int* localHistograms = new int[65536 * 4])
+                                fixed (int* localHistograms = new int[256 * 4])
                                 {
                                     var r = (ushort)0;
                                     var g = (ushort)0;
                                     var b = (ushort)0;
                                     var a = (ushort)0;
                                     var localRHistogram = localHistograms;
-                                    var localGHistogram = localRHistogram + 65536;
-                                    var localBHistogram = localGHistogram + 65536;
-                                    var localLHistogram = localBHistogram + 65536;
+                                    var localGHistogram = localRHistogram + 256;
+                                    var localBHistogram = localGHistogram + 256;
+                                    var localLHistogram = localBHistogram + 256;
                                     var pixelPtr = (ulong*)((byte*)ptr + y * bitmapBuffer.RowBytes);
                                     for (var x = width; x > 0; --x, ++pixelPtr)
                                     {
                                         unpackFunc(*pixelPtr, &b, &g, &r, &a);
                                         var l = rgbToLuminance(r, g, b);
-                                        ++localRHistogram[r];
-                                        ++localGHistogram[g];
-                                        ++localBHistogram[b];
-                                        ++localLHistogram[l];
+                                        ++localRHistogram[r >> 8];
+                                        ++localGHistogram[g >> 8];
+                                        ++localBHistogram[b >> 8];
+                                        ++localLHistogram[l >> 8];
                                     }
                                     if (cancellationToken.IsCancellationRequested)
                                         throw new TaskCanceledException();
                                     lock (syncLock)
                                     {
-                                        for (var i = 65535; i >= 0; --i)
+                                        for (var i = 255; i >= 0; --i)
                                         {
                                             red[i] += localRHistogram[i];
                                             green[i] += localGHistogram[i];
