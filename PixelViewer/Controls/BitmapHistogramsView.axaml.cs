@@ -106,7 +106,7 @@ namespace Carina.PixelViewer.Controls
                     return;
 
                 // check visibility
-                var maxValue = (double)histograms.Maximum;
+                var maxValue = Math.Min(histograms.EffectivePixelCount / 16.0, (double)histograms.Maximum);
 
                 // update scales
                 this.SetValue<double>(RedHistogramScaleYProperty, this.IsRedHistogramVisible ? this.maxRedValue / maxValue : 0);

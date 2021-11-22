@@ -28,12 +28,13 @@ namespace Carina.PixelViewer.Media
         /// <param name="green">Histogram of green channel.</param>
         /// <param name="blue">Histogram of blue channel.</param>
         /// <param name="luminance">Histogram of luminance.</param>
-        public BitmapHistograms(IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance)
+        BitmapHistograms(int effectivePixelCount, IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance)
         {
             this.ColorCount = red.Count;
             if (this.ColorCount != green.Count || this.ColorCount != blue.Count || this.ColorCount != luminance.Count)
                 throw new ArgumentException();
             this.Blue = blue.AsReadOnly();
+            this.EffectivePixelCount = effectivePixelCount;
             this.Green = green.AsReadOnly();
             this.Luminance = luminance.AsReadOnly();
             this.Maximum = Math.Max(Math.Max(red.Max(), green.Max()), Math.Max(blue.Max(), luminance.Max()));
@@ -130,7 +131,7 @@ namespace Carina.PixelViewer.Media
                     }
                     if (stopWatch != null)
                         Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
-                    return new BitmapHistograms(red, green, blue, luminance);
+                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
                 });
             }
             finally
@@ -203,7 +204,7 @@ namespace Carina.PixelViewer.Media
                     }
                     if (stopWatch != null)
                         Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
-                    return new BitmapHistograms(red, green, blue, luminance);
+                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
                 });
             }
             finally
@@ -211,6 +212,12 @@ namespace Carina.PixelViewer.Media
                 bitmapBuffer.Dispose();
             }
         }
+
+
+        /// <summary>
+        /// Get number of effective pixels to generate this histograms.
+        /// </summary>
+        public int EffectivePixelCount { get; }
 
 
         /// <summary>
