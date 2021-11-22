@@ -2563,17 +2563,12 @@ namespace Carina.PixelViewer.ViewModels
 
 			// update state and continue filtering if needed
 			if (exception == null)
+			{
 				this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
-			else
-			{
-				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
-				renderedImageFrame.Dispose();
-			}
-			this.renderedImageFrame?.Dispose();
-			this.renderedImageFrame = renderedImageFrame;
-			if (exception == null)
-			{
+
 				// update state
+				this.renderedImageFrame?.Dispose();
+				this.renderedImageFrame = renderedImageFrame;
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
@@ -2583,7 +2578,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsFilteringRenderedImageNeeded)
 				{
 					this.Logger.LogDebug("Continue filtering image after rendering");
-					this.FilterImage(renderedImageFrame);
+					this.FilterImage(renderedImageFrame.AsNonNull());
 				}
 				else
 				{
@@ -2600,6 +2595,14 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else
 			{
+				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
+
+				// clear filtered image
+				this.ClearFilteredImage();
+
+				// update state
+				renderedImageFrame.Dispose();
+				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
