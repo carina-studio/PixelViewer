@@ -2,6 +2,7 @@
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.ImageEncoders;
 using Carina.PixelViewer.Media.ImageFilters;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
@@ -3030,56 +3031,26 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.canSaveFilteredImage.Value)
 				return false;
 
-			// open file
+			// save image
+			if (!ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out var encoder) || encoder == null)
+				return false;
 			this.canSaveFilteredImage.Update(false);
 			this.SetValue(IsSavingFilteredImageProperty, true);
-			var stream = await Task.Run(() =>
+			try
 			{
-				try
-				{
-					return new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-				}
-				catch (Exception ex)
-				{
-					this.Logger.LogError(ex, $"Unable to open {fileName}");
-					this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
-					this.SetValue(IsSavingFilteredImageProperty, false);
-					return null;
-				}
-			});
-			if (stream == null)
+				await encoder.EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(fileName), new ImageEncodingOptions(), new CancellationToken());
+				return true;
+			}
+			catch (Exception ex)
+			{
+				this.Logger.LogError(ex, "Unable to save filtered image");
+				return false;
+			}
+			finally
 			{
 				this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
 				this.SetValue(IsSavingFilteredImageProperty, false);
-				return false;
 			}
-
-			// save
-			var task = this.SaveFilteredImage(stream);
-			_ = this.WaitForNecessaryTaskAsync(task);
-			var result = await task;
-
-			// close file
-			await Task.Run(() =>
-			{
-				try
-				{
-					stream.Close();
-				}
-				catch
-				{ }
-			});
-
-			// complete
-			this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
-			this.SetValue(IsSavingFilteredImageProperty, false);
-			return result;
-		}
-		async Task<bool> SaveFilteredImage(Stream stream)
-		{
-			if (this.filteredImageFrame != null)
-				return await this.SaveImage(this.filteredImageFrame.BitmapBuffer, stream);
-			return false;
 		}
 
 
@@ -3087,38 +3058,6 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command for saving filtered image to file or stream.
 		/// </summary>
 		public ICommand SaveFilteredImageCommand { get; }
-
-
-		// Save given image.
-		async Task<bool> SaveImage(IBitmapBuffer imageBuffer, Stream stream)
-		{
-			using var sharedImageBuffer = imageBuffer.Share();
-			return await Task.Run(
-#if WINDOWS10_0_17763_0_OR_GREATER
-				() =>
-#else
-				async () =>
-#endif
-                {
-					try
-					{
-#if WINDOWS10_0_17763_0_OR_GREATER
-						using var bitmap = sharedImageBuffer.CreateSystemDrawingBitmap();
-						bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-#else
-						using var bitmap = await sharedImageBuffer.CreateAvaloniaBitmapAsync();
-						bitmap.Save(stream);
-#endif
-						return true;
-					}
-					catch (Exception ex)
-					{
-						this.Logger.LogError(ex, "Unable to save rendered image");
-						return false;
-					}
-				}
-			);
-		}
 
 
 		// Save current parameters to profile.
@@ -3164,56 +3103,26 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.canSaveRenderedImage.Value)
 				return false;
 
-			// open file
+			// save image
+			if (!ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out var encoder) || encoder == null)
+				return false;
 			this.canSaveRenderedImage.Update(false);
 			this.SetValue(IsSavingRenderedImageProperty, true);
-			var stream = await Task.Run(() =>
+			try
 			{
-				try
-				{
-					return new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-				}
-				catch (Exception ex)
-				{
-					this.Logger.LogError(ex, $"Unable to open {fileName}");
-					this.canSaveRenderedImage.Update(!this.IsRenderingImage);
-					this.SetValue(IsSavingRenderedImageProperty, false);
-					return null;
-				}
-			});
-			if (stream == null)
+				await encoder.EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(fileName), new ImageEncodingOptions(), new CancellationToken());
+				return true;
+			}
+			catch (Exception ex)
+			{
+				this.Logger.LogError(ex, "Unable to save rendered image");
+				return false;
+			}
+			finally
 			{
 				this.canSaveRenderedImage.Update(!this.IsRenderingImage);
 				this.SetValue(IsSavingRenderedImageProperty, false);
-				return false;
 			}
-
-			// save
-			var task = this.SaveRenderedImage(stream);
-			_ = this.WaitForNecessaryTaskAsync(task);
-			var result = await task;
-
-			// close file
-			await Task.Run(() =>
-			{
-				try
-				{
-					stream.Close();
-				}
-				catch
-				{ }
-			});
-
-			// complete
-			this.canSaveRenderedImage.Update(!this.IsRenderingImage);
-			this.SetValue(IsSavingRenderedImageProperty, false);
-			return result;
-		}
-		async Task<bool> SaveRenderedImage(Stream stream)
-		{
-			if (this.renderedImageFrame != null)
-				return await this.SaveImage(this.renderedImageFrame.BitmapBuffer, stream);
-			return false;
 		}
 
 

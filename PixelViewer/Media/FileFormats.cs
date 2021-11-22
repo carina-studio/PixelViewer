@@ -18,6 +18,8 @@ namespace Carina.PixelViewer.Media
         static readonly ISet<FileFormat> emptyFormats = new HashSet<FileFormat>().AsReadOnly();
         static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new Dictionary<string, ISet<FileFormat>>(PathEqualityComparer.Default);
         static readonly Dictionary<string, FileFormat> formatsById = new Dictionary<string, FileFormat>();
+        static volatile FileFormat? png;
+        static volatile FileFormat? rawBgra;
         static volatile FileFormat? yuv4mpeg2;
 
 
@@ -46,8 +48,22 @@ namespace Carina.PixelViewer.Media
                 FileFormats.app = app;
             }
             bmp = Register(new FileFormat(app, "Bmp", new string[] { ".bmp" }));
+            png = Register(new FileFormat(app, "Png", new string[] { ".png" }));
+            rawBgra = Register(new FileFormat(app, "RawBGRA", new string[] { ".bgra" }));
             yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new string[] { ".y4m" }));
         }
+
+
+        /// <summary>
+        /// Portable Network Graphic (PNG).
+        /// </summary>
+        public static FileFormat Png { get => png ?? throw new InvalidOperationException("File format is not ready yet."); }
+
+
+        /// <summary>
+        /// Raw BGRA data.
+        /// </summary>
+        public static FileFormat RawBgra { get => rawBgra ?? throw new InvalidOperationException("File format is not ready yet."); }
 
 
         // Register format.
