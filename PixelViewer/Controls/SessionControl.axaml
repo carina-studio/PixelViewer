@@ -430,7 +430,24 @@
 											<ImageBrush DestinationRect="0,0,100,100" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 										</Border.Background>
 									</Border>
-									<Image x:Name="image" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" Source="{Binding RenderedImage}"/>
+									<Image x:Name="image" Cursor="Arrow" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding RenderedImage}">
+										<ia:Interaction.Behaviors>
+											<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].IsImageViewerScrollable}" Value="True">
+												<iaCore:ChangePropertyAction PropertyName="Cursor">
+													<iaCore:ChangePropertyAction.Value>
+														<Cursor>SizeAll</Cursor>
+													</iaCore:ChangePropertyAction.Value>
+												</iaCore:ChangePropertyAction>
+											</iaCore:DataTriggerBehavior>
+											<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].IsImageViewerScrollable}" Value="False">
+												<iaCore:ChangePropertyAction PropertyName="Cursor">
+													<iaCore:ChangePropertyAction.Value>
+														<Cursor>Arrow</Cursor>
+													</iaCore:ChangePropertyAction.Value>
+												</iaCore:ChangePropertyAction>
+											</iaCore:DataTriggerBehavior>
+										</ia:Interaction.Behaviors>
+									</Image>
 								</Grid>
 							</Viewbox>
 						</Border>

@@ -48,6 +48,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Static fields.
+		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
@@ -71,10 +72,12 @@ namespace Carina.PixelViewer.Controls
 		readonly Control histogramsPanel;
 		readonly int histogramsPanelTransitionDuration;
 		readonly double histogramsPanelTransitionX;
+		Vector? imagePointerPressedContentPosition;
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
 		Vector? targetImageViewportCenter;
+		readonly ScheduledAction updateIsImageViewerScrollableAction;
 		readonly ScheduledAction updateStatusBarStateAction;
 
 
@@ -155,6 +158,12 @@ namespace Carina.PixelViewer.Controls
 			{
 				if (this.DataContext is Session session)
 					this.histogramsPanel.IsVisible = session.IsHistogramsVisible;
+			});
+			this.updateIsImageViewerScrollableAction = new ScheduledAction(() =>
+			{
+				var contentSize = this.imageScrollViewer.Extent;
+				var viewport = this.imageScrollViewer.Viewport;
+				this.SetValue<bool>(IsImageViewerScrollableProperty, contentSize.Width > viewport.Width || contentSize.Height > viewport.Height);
 			});
 			this.updateStatusBarStateAction = new ScheduledAction(() =>
 			{
@@ -238,6 +247,11 @@ namespace Carina.PixelViewer.Controls
 		public double EffectiveRenderedImageScale { get => this.GetValue<double>(EffectiveRenderedImageScaleProperty); }
 
 
+		// Check whether image viewer is scrollable in current state or not.
+		bool IsImageViewerScrollable { get => this.GetValue<bool>(IsImageViewerScrollableProperty); }
+
+
+		// OS type.
 		bool IsNotMacOS { get; } = !CarinaStudio.Platform.IsMacOS;
 
 
@@ -427,8 +441,51 @@ namespace Carina.PixelViewer.Controls
 		// Called when pointer moved on image.
 		void OnImagePointerMoved(object sender, PointerEventArgs e)
 		{
+			// move image
+			this.imagePointerPressedContentPosition?.Let(it =>
+			{
+				var point = e.GetCurrentPoint(this.imageScrollViewer);
+				if (point.Properties.IsLeftButtonPressed)
+				{
+					var bounds = this.imageScrollViewer.Bounds;
+					if (!bounds.IsEmpty)
+						this.ScrollImageScrollViewer(it, new Vector(point.Position.X / bounds.Width, point.Position.Y / bounds.Height));
+				}
+				else
+					this.imagePointerPressedContentPosition = null;
+			});
+
+			// select pixel on image
 			var position = e.GetPosition(sender as IVisual);
 			(this.DataContext as Session)?.SelectRenderedImagePixel((int)(position.X + 0.5), (int)(position.Y + 0.5));
+		}
+
+
+		// Called when pressing on image viewer.
+		void OnImagePointerPressed(object? sender, PointerPressedEventArgs e)
+		{
+			if (e.Pointer.Type == PointerType.Mouse && this.IsImageViewerScrollable)
+			{
+				var pointer = e.GetCurrentPoint(this.imageScrollViewer);
+				if (pointer.Properties.IsLeftButtonPressed)
+				{
+					var contentSize = this.imageScrollViewer.Extent;
+					var offset = this.imageScrollViewer.Offset;
+					if (contentSize.Width > 0 && contentSize.Height > 0)
+					{
+						this.imagePointerPressedContentPosition = new Vector(
+							(pointer.Position.X + offset.X) / contentSize.Width, 
+							(pointer.Position.Y + offset.Y) / contentSize.Height);
+					}
+				}
+			}
+		}
+
+
+		// Called when releasing pointer from image viewer.
+		void OnImagePointerReleased(object? sender, PointerReleasedEventArgs e)
+		{
+			this.imagePointerPressedContentPosition = null;
 		}
 
 
@@ -442,27 +499,21 @@ namespace Carina.PixelViewer.Controls
 		// Called when property of image scroll viewer changed.
 		void OnImageScrollViewerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
 		{
-			if (e.Property == ScrollViewer.ExtentProperty && this.targetImageViewportCenter.HasValue)
+			if (e.Property == ScrollViewer.ExtentProperty)
 			{
-				this.SynchronizationContext.Post(() =>
+				this.updateIsImageViewerScrollableAction.Schedule();
+				if (this.targetImageViewportCenter.HasValue)
 				{
-					var center = this.targetImageViewportCenter.Value;
-					this.targetImageViewportCenter = null;
-					var viewportSize = this.imageScrollViewer.Viewport;
-					var contentSize = this.imageScrollViewer.Extent;
-					var offsetX = (contentSize.Width * center.X) - (viewportSize.Width / 2);
-					var offsetY = (contentSize.Height * center.Y) - (viewportSize.Height / 2);
-					if (offsetX < 0)
-						offsetX = 0;
-					else if (offsetX + viewportSize.Width > contentSize.Width)
-						offsetX = contentSize.Width - viewportSize.Width;
-					if (offsetY < 0)
-						offsetY = 0;
-					else if (offsetY + viewportSize.Height > contentSize.Height)
-						offsetY = contentSize.Height - viewportSize.Height;
-					this.imageScrollViewer.Offset = new Vector(offsetX, offsetY);
-				});
+					this.SynchronizationContext.Post(() =>
+					{
+						var center = this.targetImageViewportCenter.Value;
+						this.targetImageViewportCenter = null;
+						this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
+					});
+				}
 			}
+			else if (e.Property == ScrollViewer.ViewportProperty)
+				this.updateIsImageViewerScrollableAction.Schedule();
 		}
 
 
@@ -852,6 +903,25 @@ namespace Carina.PixelViewer.Controls
 		/// <see cref="ICommand"/> to save image to file.
 		/// </summary>
 		public ICommand SaveImageCommand { get; }
+
+
+		// Scroll given point of image scroll viewer to specific position of viewport.
+		void ScrollImageScrollViewer(Vector contentPosition, Vector viewportPosition)
+		{
+			var viewportSize = this.imageScrollViewer.Viewport;
+			var contentSize = this.imageScrollViewer.Extent;
+			var offsetX = (contentSize.Width * contentPosition.X) - (viewportSize.Width * viewportPosition.X);
+			var offsetY = (contentSize.Height * contentPosition.Y) - (viewportSize.Height * viewportPosition.Y);
+			if (offsetX < 0)
+				offsetX = 0;
+			else if (offsetX + viewportSize.Width > contentSize.Width)
+				offsetX = contentSize.Width - viewportSize.Width;
+			if (offsetY < 0)
+				offsetY = 0;
+			else if (offsetY + viewportSize.Height > contentSize.Height)
+				offsetY = contentSize.Height - viewportSize.Height;
+			this.imageScrollViewer.Offset = new Vector(offsetX, offsetY);
+		}
 
 
 		// Show application info.
