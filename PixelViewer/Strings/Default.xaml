@@ -35,6 +35,7 @@
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;Unspecified&gt;</sys:String>
 
 	<!-- BitmapColorSpace -->
+	<sys:String x:Key="String/BitmapColorSpace.Adobe-RGB">Adobe RGB</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.BT.601">ITU-R BT.601 (SDTV)</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.DCI-P3">DCI-P3</sys:String>

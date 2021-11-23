@@ -25,6 +25,10 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Adobe RGB.
+        /// </summary>
+        public static readonly BitmapColorSpace AdobeRgb = new AdobeRgbBitmapColorSpace();
+        /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
         public static readonly BitmapColorSpace BT_2020 = new BT2020BitmapColorSpace();
@@ -46,6 +50,13 @@ namespace Carina.PixelViewer.Media
         /// Default color space which is sRGB.
         /// </summary>
         public static readonly BitmapColorSpace Default = Srgb;
+
+
+        // Adobe RGB color space.
+        class AdobeRgbBitmapColorSpace : BitmapColorSpace
+        {
+            public AdobeRgbBitmapColorSpace() : base("Adobe-RGB", RGBWorkingSpaces.AdobeRGB1998) { }
+        }
 
 
         // BT.2020 color space.
