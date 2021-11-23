@@ -762,7 +762,14 @@ namespace Carina.PixelViewer.Controls
 		// Called when property of window changed.
 		void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
 		{
-			if (e.Property == Avalonia.Controls.Window.WindowStateProperty)
+			var property = e.Property;
+			if (property == Avalonia.Controls.Window.HeightProperty 
+				|| property == Avalonia.Controls.Window.WidthProperty)
+			{
+				this.StartUsingSmallRenderedImage();
+				this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelay);
+			}
+			else if (property == Avalonia.Controls.Window.WindowStateProperty)
 			{
 				if ((WindowState)e.OldValue.AsNonNull() == WindowState.Maximized 
 					|| (WindowState)e.NewValue.AsNonNull() == WindowState.Maximized)

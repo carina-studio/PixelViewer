@@ -384,40 +384,47 @@
 			<!-- Image viewer -->
 			<Grid Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1">
 
-				<!-- Drag-drop hint -->
-				<Border IsVisible="{Binding !IsOpeningSourceFile}">
-					<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
-						<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
-						<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
+				<!-- Hint -->
+				<Viewbox Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
+					<Panel>
+
+						<!-- Drag-drop hint -->
+						<Border IsVisible="{Binding !IsOpeningSourceFile}">
+							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
+								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
+								<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+									<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
+								</Border>
+								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
+							</StackPanel>
 						</Border>
-						<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
-					</StackPanel>
-				</Border>
 
-				<!-- Opening file hint -->
-				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
-					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
-					</Border>
-					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
-				</StackPanel>
+						<!-- Opening file hint -->
+						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
+							<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
+							</Border>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
+						</StackPanel>
 
-				<!-- Insufficient memory hint -->
-				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
-					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Warning}"/>
-					</Border>
-					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
-				</StackPanel>
+						<!-- Insufficient memory hint -->
+						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
+							<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Warning}"/>
+							</Border>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
+						</StackPanel>
 
-				<!-- Rendering error -->
-				<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
-					<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Error}"/>
-					</Border>
-					<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
-				</StackPanel>
+						<!-- Rendering error -->
+						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
+							<Border Classes="SessionControl_ImageViewer_Hint_Icon">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Error}"/>
+							</Border>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
+						</StackPanel>
+
+					</Panel>
+				</Viewbox>
 
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" PropertyChanged="OnImageScrollViewerPropertyChanged" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
