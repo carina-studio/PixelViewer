@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using Carina.PixelViewer.Runtime.InteropServices;
 using CarinaStudio;
 using Microsoft.Extensions.Logging;
+using SkiaSharp;
 using System;
 using System.Buffers;
 using System.Diagnostics;
@@ -492,6 +493,79 @@ namespace Carina.PixelViewer.Media
 			if (cancellationToken.IsCancellationRequested)
 				throw new TaskCanceledException();
 			return bitmap;
+		}
+
+
+		/// <summary>
+		/// Create <see cref="SKBitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
+		/// </summary>
+		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <returns><see cref="SKBitmap"/>.</returns>
+		public static SKBitmap CreateSkiaBitmap(this IBitmapBuffer bitmapBuffer)
+		{
+			var skiaColorType = bitmapBuffer.Format switch
+			{
+				BitmapFormat.Bgra32
+				or BitmapFormat.Bgra64 => SKColorType.Bgra8888,
+				_ => throw new NotSupportedException($"Unsupported bitmap format: {bitmapBuffer.Format}"),
+			};
+			var skiaImageInfo = new SKImageInfo(bitmapBuffer.Width, bitmapBuffer.Height, skiaColorType, SKAlphaType.Unpremul);
+			return new SKBitmap(skiaImageInfo).Also(skiaBitmap =>
+			{
+				unsafe
+				{
+					using var skiaPixels = skiaBitmap.PeekPixels().AsNonNull();
+					var srcRowStride = bitmapBuffer.RowBytes;
+					var destRowStride = skiaPixels.RowBytes;
+					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+						? new Stopwatch().Also(it => it.Start())
+						: null;
+					bitmapBuffer.Memory.Pin(srcBaseAddr =>
+					{
+						var destBaseAddr = (byte*)skiaPixels.GetPixels();
+						switch (bitmapBuffer.Format)
+						{
+							case BitmapFormat.Bgra32:
+								{
+									var minRowStride = Math.Min(srcRowStride, destRowStride);
+									Parallel.For(0, bitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+									{
+										var srcRowPtr = (byte*)srcBaseAddr + (y * srcRowStride);
+										var destRowPtr = destBaseAddr + (y * destRowStride);
+										Marshal.Copy(srcRowPtr, destRowPtr, minRowStride);
+									});
+								}
+								break;
+							case BitmapFormat.Bgra64:
+                                {
+									var width = bitmapBuffer.Width;
+									var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+									var packFunc = ImageProcessing.SelectBgra32Packing();
+									Parallel.For(0, bitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+									{
+										var r = (ushort)0;
+										var g = (ushort)0;
+										var b = (ushort)0;
+										var a = (ushort)0;
+										var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
+										var destPixelPtr = (uint*)(destBaseAddr + (y * destRowStride));
+										for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+										{
+											unpackFunc(*srcPixelPtr, &b, &r, &b, &a);
+											*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
+										}
+									});
+								}
+								break;
+						}
+					});
+					if (stopWatch != null)
+					{
+						stopWatch.Stop();
+						Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap buffer to Skia bitmap");
+					}
+				}
+			});
 		}
 
 

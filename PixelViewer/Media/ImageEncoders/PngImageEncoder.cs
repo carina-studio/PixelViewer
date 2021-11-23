@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SkiaSharp;
+using System;
 using System.IO;
 using System.Threading;
 
@@ -23,8 +24,10 @@ namespace Carina.PixelViewer.Media.ImageEncoders
             using var bitmap = bitmapBuffer.CreateSystemDrawingBitmap();
             bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
 #else
-            using var bitmap = bitmapBuffer.CreateAvaloniaBitmap();
-            bitmap.Save(stream);
+            using var bitmap = bitmapBuffer.CreateSkiaBitmap();
+            using var memoryStream = new MemoryStream();
+            bitmap.Encode(memoryStream, SKEncodedImageFormat.Png, 0);
+            stream.Write(memoryStream.ToArray());
 #endif
         }
     }
