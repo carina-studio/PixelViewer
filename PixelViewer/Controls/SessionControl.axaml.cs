@@ -48,6 +48,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Static fields.
+		static readonly AvaloniaProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
@@ -77,6 +78,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
 		Vector? targetImageViewportCenter;
+		readonly ScheduledAction updateEffectiveRenderedImageAction;
 		readonly ScheduledAction updateIsImageViewerScrollableAction;
 		readonly ScheduledAction updateStatusBarStateAction;
 
@@ -159,6 +161,17 @@ namespace Carina.PixelViewer.Controls
 				if (this.DataContext is Session session)
 					this.histogramsPanel.IsVisible = session.IsHistogramsVisible;
 			});
+			this.updateEffectiveRenderedImageAction = new ScheduledAction(() =>
+			{
+				if (this.DataContext is not Session session)
+					this.SetValue<IImage?>(EffectiveRenderedImageProperty, null);
+				else if (!session.HasQuarterSizeRenderedImage)
+					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.RenderedImage);
+				else if (this.imagePointerPressedContentPosition.HasValue)
+					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.QuarterSizeRenderedImage);
+				else
+					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.RenderedImage);
+			});
 			this.updateIsImageViewerScrollableAction = new ScheduledAction(() =>
 			{
 				var contentSize = this.imageScrollViewer.Extent;
@@ -239,6 +252,10 @@ namespace Carina.PixelViewer.Controls
 				_ = ((App)this.Application).Clipboard.SetTextAsync(it);
 			});
 		}
+
+
+		// Effective rendered image to display.
+		IImage? EffectiveRenderedImage { get => this.GetValue<IImage?>(EffectiveRenderedImageProperty); }
 
 
 		/// <summary>
@@ -452,7 +469,10 @@ namespace Carina.PixelViewer.Controls
 						this.ScrollImageScrollViewer(it, new Vector(point.Position.X / bounds.Width, point.Position.Y / bounds.Height));
 				}
 				else
+				{
 					this.imagePointerPressedContentPosition = null;
+					this.updateEffectiveRenderedImageAction.Schedule();
+				}
 			});
 
 			// select pixel on image
@@ -476,6 +496,7 @@ namespace Carina.PixelViewer.Controls
 						this.imagePointerPressedContentPosition = new Vector(
 							(pointer.Position.X + offset.X) / contentSize.Width, 
 							(pointer.Position.Y + offset.Y) / contentSize.Height);
+						this.updateEffectiveRenderedImageAction.Schedule();
 					}
 				}
 			}
@@ -486,6 +507,7 @@ namespace Carina.PixelViewer.Controls
 		void OnImagePointerReleased(object? sender, PointerReleasedEventArgs e)
 		{
 			this.imagePointerPressedContentPosition = null;
+			this.updateEffectiveRenderedImageAction.Schedule();
 		}
 
 
@@ -576,7 +598,7 @@ namespace Carina.PixelViewer.Controls
 					this.canResetBrightnessAndContrastAdjustment.Update(newSession.ResetBrightnessAdjustmentCommand.CanExecute(null)
 						|| newSession.ResetContrastAdjustmentCommand.CanExecute(null));
 					this.canSaveAsNewProfile.Update(newSession.SaveAsNewProfileCommand.CanExecute(null));
-					this.canSaveImage.Update(newSession.SaveFilteredImageCommand.CanExecute(null) 
+					this.canSaveImage.Update(newSession.SaveFilteredImageCommand.CanExecute(null)
 						|| newSession.SaveRenderedImageCommand.CanExecute(null));
 					this.canShowEvaluateImageDimensionsMenu.Update(newSession.IsSourceFileOpened);
 
@@ -588,6 +610,9 @@ namespace Carina.PixelViewer.Controls
 						this.histogramsPanel.IsVisible = newSession.IsHistogramsVisible;
 						this.commitHistogramsPanelVisibilityAction.Cancel();
 					});
+
+					// update rendered image
+					this.updateEffectiveRenderedImageAction.Schedule();
 				}
 				else
 				{
@@ -596,15 +621,18 @@ namespace Carina.PixelViewer.Controls
 					this.canSaveAsNewProfile.Update(false);
 					this.canSaveImage.Update(false);
 					this.canShowEvaluateImageDimensionsMenu.Update(false);
+					this.updateEffectiveRenderedImageAction.Execute();
 				}
 				this.UpdateEffectiveRenderedImageScale();
 				this.updateStatusBarStateAction.Schedule();
 			}
-		}
+			else if (change.Property == EffectiveRenderedImageProperty)
+				this.UpdateEffectiveRenderedImageScale();
+        }
 
 
-		// Called when CanExecute of command of session has been changed.
-		void OnSessionCommandCanExecuteChanged(object? sender, EventArgs e)
+        // Called when CanExecute of command of session has been changed.
+        void OnSessionCommandCanExecuteChanged(object? sender, EventArgs e)
 		{
 			if (!(this.DataContext is Session session))
 				return;
@@ -662,8 +690,9 @@ namespace Carina.PixelViewer.Controls
 					this.canShowEvaluateImageDimensionsMenu.Update((sender as Session)?.IsSourceFileOpened ?? false);
 					this.updateStatusBarStateAction.Schedule();
 					break;
+				case nameof(Session.QuarterSizeRenderedImage):
 				case nameof(Session.RenderedImage):
-					this.UpdateEffectiveRenderedImageScale();
+					this.updateEffectiveRenderedImageAction.Execute();
 					break;
 				case nameof(Session.RenderedImageScale):
                     {
@@ -1021,7 +1050,7 @@ namespace Carina.PixelViewer.Controls
 		void UpdateEffectiveRenderedImageScale()
 		{
 			// get session
-			if (!(this.DataContext is Session session))
+			if (this.DataContext is not Session session)
 				return;
 
 			// get base scale
@@ -1036,6 +1065,10 @@ namespace Carina.PixelViewer.Controls
 					scale *= (Math.Min(renderedImage.Dpi.X, renderedImage.Dpi.Y) / 96.0 / screenDpi);
 				});
 			});
+
+			// apply scaling for quarter size image
+			if (this.EffectiveRenderedImage == session.QuarterSizeRenderedImage)
+				scale *= 2;
 
 			// update
 			if (Math.Abs(this.EffectiveRenderedImageScale - scale) > 0.0001)

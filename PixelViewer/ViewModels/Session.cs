@@ -208,6 +208,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasMultipleFramesProperty = ObservableProperty.Register<Session, bool>(nameof(HasMultipleFrames));
 		/// <summary>
+		/// Property of <see cref="HasQuarterSizeRenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasQuarterSizeRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(HasQuarterSizeRenderedImage));
+		/// <summary>
 		/// Property of <see cref="HasRenderedImage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderedImage));
@@ -343,6 +347,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="Profile"/>.
 		/// </summary>
 		public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default);
+		/// <summary>
+		/// Property of <see cref="QuarterSizeRenderedImage"/>.
+		/// </summary>
+		public static readonly ObservableProperty<IBitmap?> QuarterSizeRenderedImageProperty = ObservableProperty.Register<Session, IBitmap?>(nameof(QuarterSizeRenderedImage));
 		/// <summary>
 		/// Property of <see cref="RedColorAdjustment"/>.
 		/// </summary>
@@ -606,6 +614,7 @@ namespace Carina.PixelViewer.ViewModels
 						{
 							this.Logger.LogWarning("Unable to request memory usage for filtered image, dispose current images");
 							this.SetValue(HistogramsProperty, null);
+							this.SetValue(QuarterSizeRenderedImageProperty, null);
 							this.SetValue(RenderedImageProperty, null);
 							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 						}
@@ -642,6 +651,7 @@ namespace Carina.PixelViewer.ViewModels
 						{
 							this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current images");
 							this.SetValue(HistogramsProperty, null);
+							this.SetValue(QuarterSizeRenderedImageProperty, null);
 							this.SetValue(RenderedImageProperty, null);
 							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
@@ -868,6 +878,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.IsFilteringRenderedImage && this.filteredImageFrame != null)
 			{
 				this.SetValue(HistogramsProperty, null);
+				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			}
@@ -892,6 +903,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.IsRenderingImage && this.renderedImageFrame != null)
 			{
 				this.SetValue(HistogramsProperty, null);
+				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 			}
@@ -928,6 +940,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(FrameNumberProperty, 0);
 				this.SetValue(FramePaddingSizeProperty, 0L);
 				this.SetValue(HistogramsProperty, null);
+				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
 				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.SetValue(LuminanceHistogramGeometryProperty, null);
@@ -1544,6 +1557,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether <see cref="QuarterSizeRenderedImage"/> is non-null or not.
+		/// </summary>
+		public bool HasQuarterSizeRenderedImage { get => this.GetValue(HasQuarterSizeRenderedImageProperty); }
+
+
+		/// <summary>
 		/// Check whether <see cref="RenderedImage"/> is non-null or not.
 		/// </summary>
 		public bool HasRenderedImage { get => this.GetValue(HasRenderedImageProperty); }
@@ -1997,6 +2016,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.canApplyProfile.Update(((ImageRenderingProfile)newValue.AsNonNull()).Type != ImageRenderingProfileType.Default);
 				this.ApplyProfile();
 			}
+			else if (property == QuarterSizeRenderedImageProperty)
+			{
+				if (oldValue != null)
+					this.SynchronizationContext.Post(() => (oldValue as IDisposable)?.Dispose());
+				this.SetValue(HasQuarterSizeRenderedImageProperty, newValue != null);
+			}
 			else if (property == RenderedImageProperty)
 			{
 				if (oldValue != null)
@@ -2234,6 +2259,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get available profiles.
 		/// </summary>
 		public IList<ImageRenderingProfile> Profiles { get; }
+
+
+		/// <summary>
+		/// Get rendered image with quarter size.
+		/// </summary>
+		public IBitmap? QuarterSizeRenderedImage { get => this.GetValue(QuarterSizeRenderedImageProperty); }
 
 
 		/// <summary>
@@ -2638,9 +2669,15 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				// convert to Avalonia bitmap
 				var bitmap = (IBitmap?)null;
+				var quarterSizeBitmap = (IBitmap?)null;
 				try
 				{
 					bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync(cancellationTokenSource.Token);
+					if (!cancellationTokenSource.IsCancellationRequested 
+						&& (imageFrame.BitmapBuffer.Width > 2048 || imageFrame.BitmapBuffer.Height > 2048))
+					{
+						quarterSizeBitmap = await imageFrame.BitmapBuffer.CreateQuarterSizeAvaloniaBitmapAsync(cancellationTokenSource.Token);
+					}
 				}
 				catch (Exception ex)
 				{
@@ -2657,6 +2694,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 				this.SetValue(HistogramsProperty, imageFrame.Histograms);
+				this.SetValue(QuarterSizeRenderedImageProperty, quarterSizeBitmap);
 				this.SetValue(RenderedImageProperty, bitmap);
 			}
 			else
@@ -2664,6 +2702,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.canSaveFilteredImage.Update(false);
 				this.canSaveRenderedImage.Update(false);
 				this.SetValue(HistogramsProperty, null);
+				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
 			}
 		}

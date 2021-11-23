@@ -423,14 +423,14 @@
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" PropertyChanged="OnImageScrollViewerPropertyChanged" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<LayoutTransformControl Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
 						<Border>
-							<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}">
+							<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}" UseLayoutRounding="True">
 								<Grid HorizontalAlignment="Center" VerticalAlignment="Center">
 									<Border>
 										<Border.Background>
 											<ImageBrush DestinationRect="0,0,100,100" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 										</Border.Background>
 									</Border>
-									<Image x:Name="image" Cursor="Arrow" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding RenderedImage}">
+									<Image x:Name="image" Cursor="Arrow" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding $parent[UserControl].EffectiveRenderedImage}">
 										<ia:Interaction.Behaviors>
 											<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].IsImageViewerScrollable}" Value="True">
 												<iaCore:ChangePropertyAction PropertyName="Cursor">

@@ -402,6 +402,87 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Create <see cref="IBitmap"/> with quarter size which copied data from this <see cref="IBitmapBuffer"/>.
+		/// </summary>
+		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <returns><see cref="IBitmap"/>.</returns>
+		public static IBitmap CreateQuarterSizeAvaloniaBitmap(this IBitmapBuffer bitmapBuffer)
+        {
+			// check size
+			var width = bitmapBuffer.Width;
+			var height = bitmapBuffer.Height;
+			if (width <= 2 || height <= 2)
+				return bitmapBuffer.CreateAvaloniaBitmap();
+
+			// create bitmap
+			width >>= 1;
+			height >>= 1;
+			return new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul).Also(bitmap =>
+			{
+				using var bitmapFrame = bitmap.Lock();
+				var srcRowStride = bitmapBuffer.RowBytes;
+				var destRowStride = bitmapFrame.RowBytes;
+				bitmapBuffer.Memory.Pin(srcBaseAddr =>
+				{
+					var destBaseAddr = bitmapFrame.Address;
+					switch (bitmapBuffer.Format)
+					{
+						case BitmapFormat.Bgra32:
+							unsafe
+							{
+								Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+								{
+									var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * 2 * srcRowStride));
+									var destPixelPtr = (uint*)((byte*)destBaseAddr + (y * destRowStride));
+									for (var x = width; x > 0; --x, srcPixelPtr += 2, ++destPixelPtr)
+										*destPixelPtr = *srcPixelPtr;
+								});
+							}
+							break;
+						case BitmapFormat.Bgra64:
+							unsafe
+							{
+								Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+								{
+									var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * 2 * srcRowStride));
+									var destPixelPtr = (uint*)((byte*)destBaseAddr + (y * destRowStride));
+									for (var x = width; x > 0; --x, srcPixelPtr += 2, ++destPixelPtr)
+									{
+										var pixel = *srcPixelPtr;
+										var c1 = (uint)((pixel >> 56) & 0xff);
+										var c2 = (uint)((pixel >> 40) & 0xff);
+										var c3 = (uint)((pixel >> 24) & 0xff);
+										var c4 = (uint)((pixel >> 8) & 0xff);
+										*destPixelPtr = ((c1 << 24) | (c2 << 16) | (c3 << 8) | c4);
+									}
+								});
+							}
+							break;
+						default:
+							throw new NotSupportedException($"Unsupported bitmap format: {bitmapBuffer.Format}");
+					}
+				});
+			});
+        }
+
+
+		/// <summary>
+		/// Create <see cref="IBitmap"/> with quarter size which copied data from this <see cref="IBitmapBuffer"/> asynchronously.
+		/// </summary>
+		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Task of creating <see cref="IBitmap"/>.</returns>
+		public static async Task<IBitmap> CreateQuarterSizeAvaloniaBitmapAsync(this IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
+		{
+			using var sharedBitmapBuffer = bitmapBuffer.Share();
+			var bitmap = await Task.Run(() => CreateQuarterSizeAvaloniaBitmap(sharedBitmapBuffer));
+			if (cancellationToken.IsCancellationRequested)
+				throw new TaskCanceledException();
+			return bitmap;
+		}
+
+
+		/// <summary>
 		/// Get byte offset to pixel on given position.
 		/// </summary>
 		/// <param name="buffer"><see cref="IBitmapBuffer"/>.</param>
