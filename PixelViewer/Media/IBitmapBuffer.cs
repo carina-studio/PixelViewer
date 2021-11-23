@@ -551,7 +551,7 @@ namespace Carina.PixelViewer.Media
 										var destPixelPtr = (uint*)(destBaseAddr + (y * destRowStride));
 										for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
 										{
-											unpackFunc(*srcPixelPtr, &b, &r, &b, &a);
+											unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
 											*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
 										}
 									});
