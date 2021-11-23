@@ -1,16 +1,43 @@
 ﻿[
 	{
+		"Description": "支援色彩空間管理以提供更精準的色彩輸出。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援 ITU-R BT.2020 以及 ITU-R BT.709 的 YUV 至 RGB 轉換。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援在必要時使用 64 位元 RGBA 的內部影像，防止在色彩空間轉換或套用濾鏡時的色彩遺失。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "支援調整亮度、對比及色彩平衡以幫助您確認影像內容。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "提升去馬賽克效能。"
+		"Description": "支援使用滑鼠拖動以改變影像的檢視位置。",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "提升色階分布計算效能。"
+		"Description": "提升去馬賽克效能。",
+		"Type": "Improvement"
 	},
 	{
-		"Description": "使用者體驗改進。"
+		"Description": "提升色階分布計算效能。",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "提升使用者介面效能。",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "使用者體驗改進。",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "NTSC 以及 ITU-R 的 YUV 至 RGB 轉換變更為 ITU-R BT.656 以及 ITU-R BT.601。",
+		"Type": "BehaviorChange"
 	},
 	{
 		"Description": "錯誤修正。",

@@ -1,16 +1,43 @@
 ﻿[
 	{
+		"Description": "Support color space management to provide more color accuracy.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support ITU-R BT.2020 and ITU-R BT.709 YUV to RGB conversion.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Support adjusting brightness/contrast and color balance to help you checking the data of image.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Improve performance of demosaicing."
+		"Description": "Support using 64-bit RGBA for internal image representation if needed to prevent color loss when converting color space or applying filters.",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "Improve performance of histograms generating."
+		"Description": "Support moving viewport of image by mouse dragging.",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "UX improvement."
+		"Description": "Improve performance of demosaicing.",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "Improve performance of histograms generating.",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "Improve performance of UI.",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "UX improvement.",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "NTSC and ITU-R YUV to RGB conversions are changed to ITU-R BT.656 and ITU-R BT.601.",
+		"Type": "BehaviorChange"
 	},
 	{
 		"Description": "Bug fixing.",
