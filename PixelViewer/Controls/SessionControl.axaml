@@ -653,7 +653,7 @@
 				<TextBlock Classes="StatusBar_TextBlock" Grid.ColumnSpan="2" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}" Opacity="0"/>
 
 				<!-- Left part -->
-				<StackPanel Orientation="Horizontal">
+				<StackPanel ClipToBounds="True" Orientation="Horizontal">
 
 					<!-- File actions -->
 					<StackPanel Orientation="Horizontal">
