@@ -47,6 +47,10 @@ namespace Carina.PixelViewer.Controls
 		public static readonly AvaloniaProperty<double> EffectiveRenderedImageScaleProperty = AvaloniaProperty.Register<SessionControl, double>(nameof(EffectiveRenderedImageScale), 1.0);
 
 
+		// Constants.
+		const int StopUsingSmallRenderedImageDelay = 1000;
+
+
 		// Static fields.
 		static readonly AvaloniaProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
@@ -55,6 +59,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Fields.
+		Avalonia.Controls.Window? attachedWindow;
 		readonly ToggleButton brightnessAndContrastAdjustmentButton;
 		readonly Popup brightnessAndContrastAdjustmentPopup;
 		readonly MutableObservableValue<bool> canOpenSourceFile = new MutableObservableValue<bool>();
@@ -77,10 +82,12 @@ namespace Carina.PixelViewer.Controls
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
+		readonly ScheduledAction stopUsingSmallRenderedImageAction;
 		Vector? targetImageViewportCenter;
 		readonly ScheduledAction updateEffectiveRenderedImageAction;
 		readonly ScheduledAction updateIsImageViewerScrollableAction;
 		readonly ScheduledAction updateStatusBarStateAction;
+		bool useSmallRenderedImage;
 
 
 		/// <summary>
@@ -161,13 +168,19 @@ namespace Carina.PixelViewer.Controls
 				if (this.DataContext is Session session)
 					this.histogramsPanel.IsVisible = session.IsHistogramsVisible;
 			});
+			this.stopUsingSmallRenderedImageAction = new ScheduledAction(() =>
+			{
+				if (this.useSmallRenderedImage)
+				{
+					this.useSmallRenderedImage = false;
+					this.updateEffectiveRenderedImageAction?.Schedule();
+				}
+			});
 			this.updateEffectiveRenderedImageAction = new ScheduledAction(() =>
 			{
 				if (this.DataContext is not Session session)
 					this.SetValue<IImage?>(EffectiveRenderedImageProperty, null);
-				else if (!session.HasQuarterSizeRenderedImage)
-					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.RenderedImage);
-				else if (this.imagePointerPressedContentPosition.HasValue)
+				else if (this.useSmallRenderedImage && session.HasQuarterSizeRenderedImage)
 					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.QuarterSizeRenderedImage);
 				else
 					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.RenderedImage);
@@ -318,6 +331,12 @@ namespace Carina.PixelViewer.Controls
 			var settings = this.Settings;
 			settings.SettingChanged += this.OnSettingChanged;
 			this.SetValue<bool>(ShowProcessInfoProperty, settings.GetValueOrDefault(SettingKeys.ShowProcessInfo));
+
+			// attach to window
+			this.attachedWindow = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Also(it =>
+			{
+				it.PropertyChanged += this.OnWindowPropertyChanged;
+			});
 		}
 
 
@@ -333,6 +352,13 @@ namespace Carina.PixelViewer.Controls
 
 			// detach from settings
 			this.Settings.SettingChanged -= this.OnSettingChanged;
+
+			// detach from window
+			this.attachedWindow = this.attachedWindow?.Let(it =>
+			{
+				it.PropertyChanged -= this.OnWindowPropertyChanged;
+				return (Avalonia.Controls.Window?)null;
+			});
 
 			// call base
 			base.OnDetachedFromLogicalTree(e);
@@ -471,7 +497,7 @@ namespace Carina.PixelViewer.Controls
 				else
 				{
 					this.imagePointerPressedContentPosition = null;
-					this.updateEffectiveRenderedImageAction.Schedule();
+					this.stopUsingSmallRenderedImageAction.Schedule();
 				}
 			});
 
@@ -496,7 +522,7 @@ namespace Carina.PixelViewer.Controls
 						this.imagePointerPressedContentPosition = new Vector(
 							(pointer.Position.X + offset.X) / contentSize.Width, 
 							(pointer.Position.Y + offset.Y) / contentSize.Height);
-						this.updateEffectiveRenderedImageAction.Schedule();
+						this.StartUsingSmallRenderedImage();
 					}
 				}
 			}
@@ -507,7 +533,7 @@ namespace Carina.PixelViewer.Controls
 		void OnImagePointerReleased(object? sender, PointerReleasedEventArgs e)
 		{
 			this.imagePointerPressedContentPosition = null;
-			this.updateEffectiveRenderedImageAction.Schedule();
+			this.stopUsingSmallRenderedImageAction.Schedule();
 		}
 
 
@@ -537,6 +563,16 @@ namespace Carina.PixelViewer.Controls
 			else if (e.Property == ScrollViewer.ViewportProperty)
 				this.updateIsImageViewerScrollableAction.Schedule();
 		}
+
+
+		// Called when complete dragging splitter of options panel.
+		void OnOptionsPanelSplitterDragCompleted(object? sender, VectorEventArgs e) =>
+			this.stopUsingSmallRenderedImageAction.Schedule();
+
+
+		// Called when start dragging splitter of options panel.
+		void OnOptionsPanelSplitterDragStarted(object? sender, VectorEventArgs e) =>
+			this.StartUsingSmallRenderedImage();
 
 
 		// Called when changing mouse wheel.
@@ -720,6 +756,21 @@ namespace Carina.PixelViewer.Controls
 		void OnTestButtonClick()
 		{
 			this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
+		}
+
+
+		// Called when property of window changed.
+		void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
+		{
+			if (e.Property == Avalonia.Controls.Window.WindowStateProperty)
+			{
+				if ((WindowState)e.OldValue.AsNonNull() == WindowState.Maximized 
+					|| (WindowState)e.NewValue.AsNonNull() == WindowState.Maximized)
+				{
+					this.StartUsingSmallRenderedImage();
+					this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelay);
+				}
+			}
 		}
 
 
@@ -1040,6 +1091,18 @@ namespace Carina.PixelViewer.Controls
 			if (!string.IsNullOrEmpty(fileName))
 				CarinaStudio.Platform.OpenFileManager(fileName);
 		}
+
+
+		// Start using small rendered image.
+		void StartUsingSmallRenderedImage()
+        {
+			this.stopUsingSmallRenderedImageAction.Cancel();
+			if (!this.useSmallRenderedImage)
+			{
+				this.useSmallRenderedImage = true;
+				this.updateEffectiveRenderedImageAction.Schedule();
+			}
+        }
 
 
 		// Status bar state.

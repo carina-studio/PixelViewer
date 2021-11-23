@@ -628,7 +628,7 @@
 			</Border>
 
 			<!-- Splitter -->
-			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" Grid.Column="2"/>
+			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2"/>
 			
 		</Grid>
 

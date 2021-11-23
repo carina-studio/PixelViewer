@@ -422,6 +422,9 @@ namespace Carina.PixelViewer.Media
 				using var bitmapFrame = bitmap.Lock();
 				var srcRowStride = bitmapBuffer.RowBytes;
 				var destRowStride = bitmapFrame.RowBytes;
+				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+					? new Stopwatch().Also(it => it.Start())
+					: null;
 				bitmapBuffer.Memory.Pin(srcBaseAddr =>
 				{
 					var destBaseAddr = bitmapFrame.Address;
@@ -462,6 +465,11 @@ namespace Carina.PixelViewer.Media
 							throw new NotSupportedException($"Unsupported bitmap format: {bitmapBuffer.Format}");
 					}
 				});
+				if (stopWatch != null)
+				{
+					stopWatch.Stop();
+					Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap buffer to quarter size Avalonia bitmap");
+				}
 			});
         }
 
