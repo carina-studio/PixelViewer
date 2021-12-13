@@ -48,17 +48,17 @@
 		<PackageReference Include="Avalonia" Version="0.10.10" />
 		<PackageReference Include="Avalonia.Desktop" Version="0.10.10" />
 		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.10" />
-		<PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.10.3" />
+		<PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.10.4" />
 		<PackageReference Include="CarinaStudio.AppBase.Application" Version="0.31.0.1121" />
 		<PackageReference Include="CarinaStudio.AppBase.Application.Avalonia" Version="0.31.0.1121" />
 		<PackageReference Include="CarinaStudio.AppBase.AutoUpdate" Version="0.31.0.1121" />
 		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.31.0.1121" />
 		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.31.0.1121" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.24.0.1122" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.28.1.1213" />
 		<PackageReference Include="Colourful" Version="3.0.0" />
 		<PackageReference Condition="'$(Configuration)'=='Debug-Windows'" Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
 		<PackageReference Condition="'$(Configuration)'=='Release-Windows'" Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
-		<PackageReference Include="NLog" Version="4.7.12" />
+		<PackageReference Include="NLog" Version="4.7.13" />
 		<PackageReference Condition="'$(Configuration)'=='Debug-Windows'" Include="System.Drawing.Common" Version="6.0.0" />
 		<PackageReference Condition="'$(Configuration)'=='Release-Windows'" Include="System.Drawing.Common" Version="6.0.0-preview.5.21301.5" />
 	</ItemGroup>

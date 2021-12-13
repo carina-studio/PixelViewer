@@ -6,6 +6,7 @@ using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
@@ -239,7 +240,11 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Detach from view-model.
+		/// <inheritdoc/>
+		protected override ApplicationInfo OnCreateApplicationInfo() => new AppInfo();
+
+
+        // Detach from view-model.
         protected override void OnDetachFromViewModel(Workspace workspace)
         {
 			// detach from activated session
