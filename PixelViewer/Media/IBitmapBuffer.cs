@@ -439,30 +439,75 @@ namespace Carina.PixelViewer.Media
 						case BitmapFormat.Bgra32:
 							unsafe
 							{
+								var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
+								var packFunc = ImageProcessing.SelectBgra32Packing();
 								Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
 								{
-									var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * 2 * srcRowStride));
+									var r1 = (byte)0;
+									var r2 = (byte)0;
+									var g1 = (byte)0;
+									var g2 = (byte)0;
+									var b1 = (byte)0;
+									var b2 = (byte)0;
+									var a1 = (byte)0;
+									var a2 = (byte)0;
+									var selection = y;
+									var srcRowPtr = (uint*)((byte*)srcBaseAddr + (y * 2 * srcRowStride));
+									var srcNextRowPtr = (uint*)((byte*)srcRowPtr + srcRowStride);
 									var destPixelPtr = (uint*)((byte*)destBaseAddr + (y * destRowStride));
-									for (var x = width; x > 0; --x, srcPixelPtr += 2, ++destPixelPtr)
-										*destPixelPtr = *srcPixelPtr;
+									for (var x = width; x > 0; --x, srcRowPtr += 2, srcNextRowPtr += 2, ++destPixelPtr, ++selection)
+									{
+										if ((selection & 0x1) == 0)
+										{
+											unpackFunc(srcRowPtr[0], &b1, &g1, &r1, &a1);
+											unpackFunc(srcNextRowPtr[1], &b2, &g2, &r2, &a2);
+										}
+										else
+										{
+											unpackFunc(srcRowPtr[1], &b1, &g1, &r1, &a1);
+											unpackFunc(srcNextRowPtr[0], &b2, &g2, &r2, &a2);
+										}
+										*destPixelPtr = packFunc((byte)((b1 + b2) >> 1), (byte)((g1 + g2) >> 1), (byte)((r1 + r2) >> 1), (byte)((a1 + a2) >> 1));
+									}
 								});
 							}
 							break;
 						case BitmapFormat.Bgra64:
 							unsafe
 							{
+								var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+								var packFunc = ImageProcessing.SelectBgra32Packing();
 								Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
 								{
-									var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * 2 * srcRowStride));
+									var r1 = (ushort)0;
+									var r2 = (ushort)0;
+									var g1 = (ushort)0;
+									var g2 = (ushort)0;
+									var b1 = (ushort)0;
+									var b2 = (ushort)0;
+									var a1 = (ushort)0;
+									var a2 = (ushort)0;
+									var selection = y;
+									var srcRowPtr = (ulong*)((byte*)srcBaseAddr + (y * 2 * srcRowStride));
+									var srcNextRowPtr = (ulong*)((byte*)srcRowPtr + srcRowStride);
 									var destPixelPtr = (uint*)((byte*)destBaseAddr + (y * destRowStride));
-									for (var x = width; x > 0; --x, srcPixelPtr += 2, ++destPixelPtr)
+									for (var x = width; x > 0; --x, srcRowPtr += 2, srcNextRowPtr += 2, ++destPixelPtr, ++selection)
 									{
-										var pixel = *srcPixelPtr;
-										var c1 = (uint)((pixel >> 56) & 0xff);
-										var c2 = (uint)((pixel >> 40) & 0xff);
-										var c3 = (uint)((pixel >> 24) & 0xff);
-										var c4 = (uint)((pixel >> 8) & 0xff);
-										*destPixelPtr = ((c1 << 24) | (c2 << 16) | (c3 << 8) | c4);
+										if ((selection & 0x1) == 0)
+										{
+											unpackFunc(srcRowPtr[0], &b1, &g1, &r1, &a1);
+											unpackFunc(srcNextRowPtr[1], &b2, &g2, &r2, &a2);
+										}
+										else
+										{
+											unpackFunc(srcRowPtr[1], &b1, &g1, &r1, &a1);
+											unpackFunc(srcNextRowPtr[0], &b2, &g2, &r2, &a2);
+										}
+										var b = (byte)(((b1 + b2) >> 9) & 0xff);
+										var g = (byte)(((g1 + g2) >> 9) & 0xff);
+										var r = (byte)(((r1 + r2) >> 9) & 0xff);
+										var a = (byte)(((a1 + a2) >> 9) & 0xff);
+										*destPixelPtr = packFunc(b, g, r, a);
 									}
 								});
 							}
