@@ -7,12 +7,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// </summary>
 	class Gbrg16ImageRenderer : BayerPattern16ImageRenderer
 	{
-		// Static fields.
-		static readonly ColorComponent[][] ColorPattern = new ColorComponent[][]{
-			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Blue },
-			new ColorComponent[]{ ColorComponent.Red, ColorComponent.Green },
-		};
-
 
 		/// <summary>
 		/// Initialize new <see cref="Gbrg16ImageRenderer"/> instance.
@@ -22,6 +16,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Select color component.
-		protected override ColorComponent SelectColorComponent(int x, int y) => ColorPattern[y & 0x1][x & 0x1];
+		protected override ColorComponent SelectColorComponent(int x, int y) => GbrgColorPattern[y & 0x1][x & 0x1];
 	}
 }

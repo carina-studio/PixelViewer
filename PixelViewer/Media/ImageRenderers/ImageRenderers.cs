@@ -33,6 +33,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new P410ImageRenderer(),
 			new P416ImageRenderer(),
 			new AndroidYuv420ImageRenderer(),
+
 			new Rgb565ImageRenderer(),
 			new Bgr888ImageRenderer(),
 			new Rgb888ImageRenderer(),
@@ -40,10 +41,16 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new Rgbx8888ImageRenderer(),
 			new Xbgr8888ImageRenderer(),
 			new Xrgb8888ImageRenderer(),
+
 			new Abgr8888ImageRenderer(),
 			new Argb8888ImageRenderer(),
 			new Bgra8888ImageRenderer(),
 			new Rgba8888ImageRenderer(),
+
+			new BggrMipi10ImageRenderer(),
+			new GbrgMipi10ImageRenderer(),
+			new GrbgMipi10ImageRenderer(),
+			new RggbMipi10ImageRenderer(),
 			new Bggr16ImageRenderer(),
 			new Gbrg16ImageRenderer(),
 			new Grbg16ImageRenderer(),

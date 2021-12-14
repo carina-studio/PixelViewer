@@ -7,7 +7,7 @@ using System.Threading;
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
 	/// <summary>
-	/// Base implementation of <see cref="IImageRenderer"/> which renders image with bayer pattern.
+	/// Base implementation of <see cref="IImageRenderer"/> which renders image with 16-bit bayer pattern.
 	/// </summary>
 	abstract class BayerPattern16ImageRenderer : BayerPatternImageRenderer
 	{

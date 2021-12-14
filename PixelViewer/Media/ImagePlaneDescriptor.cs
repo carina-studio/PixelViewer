@@ -25,9 +25,9 @@ namespace Carina.PixelViewer.Media
 		{
 			if (pixelStride < 0)
 				throw new ArgumentOutOfRangeException(nameof(pixelStride));
-			if (minEffectiveBits < 0 || minEffectiveBits > pixelStride << 3)
+			if (minEffectiveBits < 0 || (pixelStride > 0 && minEffectiveBits > pixelStride << 3))
 				throw new ArgumentOutOfRangeException(nameof(minEffectiveBits));
-			if (maxEffectiveBits < minEffectiveBits || maxEffectiveBits > pixelStride << 3)
+			if (maxEffectiveBits < minEffectiveBits || (pixelStride > 0 && maxEffectiveBits > pixelStride << 3))
 				throw new ArgumentOutOfRangeException(nameof(maxEffectiveBits));
 			this.PixelStride = pixelStride;
 			this.MinEffectiveBits = minEffectiveBits;
@@ -39,6 +39,12 @@ namespace Carina.PixelViewer.Media
 		/// Check whether effective bits is adjustable or not.
 		/// </summary>
 		public bool IsAdjustableEffectiveBits { get => this.MinEffectiveBits < this.MaxEffectiveBits; }
+
+
+		/// <summary>
+		/// Check whether pixel stride is adjustable or not.
+		/// </summary>
+		public bool IsAdjustablePixelStride { get => this.PixelStride > 0; }
 
 
 		/// <summary>

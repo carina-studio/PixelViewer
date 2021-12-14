@@ -54,6 +54,18 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="category">Category of format.</param>
 		/// <param name="name">Name.</param>
+		/// <param name="displayName">Displayed name.</param>
+		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
+		/// <param name="planeDescriptor">Plane descriptor.</param>
+		public ImageFormat(ImageFormatCategory category, string name, string displayName, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, displayName, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor })
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
 		/// <param name="planeDescriptors">Plane descriptors.</param>
 		public ImageFormat(ImageFormatCategory category, string name, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, name, planeDescriptors)
 		{ }

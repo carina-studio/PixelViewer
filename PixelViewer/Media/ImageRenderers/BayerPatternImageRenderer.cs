@@ -33,6 +33,36 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
+		/// BGGR color pattern map.
+		/// </summary>
+		protected static readonly ColorComponent[][] BggrColorPattern = new ColorComponent[][]{
+			new ColorComponent[]{ ColorComponent.Blue, ColorComponent.Green },
+			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Red },
+		};
+		/// <summary>
+		/// GBRG color pattern map.
+		/// </summary>
+		protected static readonly ColorComponent[][] GbrgColorPattern = new ColorComponent[][]{
+			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Blue },
+			new ColorComponent[]{ ColorComponent.Red, ColorComponent.Green },
+		};
+		/// <summary>
+		/// GRBG color pattern map.
+		/// </summary>
+		protected static readonly ColorComponent[][] GrbgColorPattern = new ColorComponent[][]{
+			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Red },
+			new ColorComponent[]{ ColorComponent.Blue, ColorComponent.Green },
+		};
+		/// <summary>
+		/// RGGB color pattern map.
+		/// </summary>
+		protected static readonly ColorComponent[][] RggbColorPattern = new ColorComponent[][]{
+			new ColorComponent[]{ ColorComponent.Red, ColorComponent.Green },
+			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Blue },
+		};
+
+
+		/// <summary>
 		/// Initialize new <see cref="BayerPatternImageRenderer"/> instance.
 		/// </summary>
 		/// <param name="format">Format.</param>
