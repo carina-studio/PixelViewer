@@ -6,6 +6,7 @@ using CarinaStudio;
 using CarinaStudio.AppSuite;
 using CarinaStudio.Controls;
 using CarinaStudio.Threading;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -159,7 +160,7 @@ namespace Carina.PixelViewer.Controls
 
 
         // Generate image for histogram.
-        IImage GenerateHistogramImage(IList<int> histogram, int max, IBrush? brush)
+        IImage? GenerateHistogramImage(IList<int> histogram, int max, IBrush? brush)
         {
             var dataCount = histogram.Count;
             var pathBuilder = new StringBuilder($"M 0,{dataCount} L {dataCount - 1},{dataCount}");
@@ -170,14 +171,22 @@ namespace Carina.PixelViewer.Controls
                 
             }
             pathBuilder.Append(" Z");
-            return new DrawingImage()
+            try
             {
-                Drawing = new GeometryDrawing()
+                return new DrawingImage()
                 {
-                    Brush = brush,
-                    Geometry = PathGeometry.Parse(pathBuilder.ToString()),
-                },
-            };
+                    Drawing = new GeometryDrawing()
+                    {
+                        Brush = brush,
+                        Geometry = PathGeometry.Parse(pathBuilder.ToString()),
+                    },
+                };
+            }
+            catch (Exception ex)
+            {
+                this.Logger.LogError(ex, $"Failed to generate geometry of histogram. data count: {dataCount}, max: {max}, path: '{pathBuilder}'");
+                return null;
+            }
         }
 
 
