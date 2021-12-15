@@ -95,12 +95,6 @@
 		<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxDropdownBorderThickness}"/>
 		<Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}"/>
 	</Style>
-	<Style Selector="Border.SessionControl_ImageViewer_Hint_Icon">
-		<Setter Property="Height" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
-		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.ImageViewer.Hint.Icon.Margin}"/>
-		<Setter Property="VerticalAlignment" Value="Center"/>
-		<Setter Property="Width" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
-	</Style>
 	<Style Selector="Button.SessionControl_OptionsPanel_Button">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
@@ -108,6 +102,15 @@
 	<Style Selector="Expander.SessionControl_OptionsPanel_Expander">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+	</Style>
+	<Style Selector="Image.SessionControl_ImageViewer_Hint_Icon">
+		<Setter Property="Height" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
+		<Setter Property="IsHitTestVisible" Value="False"/>
+		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.ImageViewer.Hint.Icon.Margin}"/>
+		<Setter Property="Stretch" Value="Uniform"/>
+		<Setter Property="StretchDirection" Value="Both"/>
+		<Setter Property="VerticalAlignment" Value="Center"/>
+		<Setter Property="Width" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
 	</Style>
 	<Style Selector="Popup.SessionControl_FilterParamsPopup">
 		<Setter Property="IsLightDismissEnabled" Value="True"/>

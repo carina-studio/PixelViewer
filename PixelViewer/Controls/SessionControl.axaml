@@ -38,24 +38,18 @@
 		<ContextMenu x:Key="fileActionsMenu" PlacementMode="Top">
 			<MenuItem Command="{Binding $parent[UserControl].CopyFileName}" Header="{DynamicResource String/SessionControl.CopyFileName}">
 				<MenuItem.Icon>
-					<Border Classes="MenuItem_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Copy}"/>
-					</Border>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Copy}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[UserControl].CopyFilePath}" Header="{DynamicResource String/SessionControl.CopyFilePath}">
 				<MenuItem.Icon>
-					<Border Classes="MenuItem_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Copy}"/>
-					</Border>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Copy}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
 			<MenuItem Command="{Binding $parent[UserControl].ShowSourceFileInFileExplorer}" Header="{DynamicResource String/SessionControl.ShowFileInExplorer}" IsEnabled="{x:Static c:Platform.IsOpeningFileManagerSupported}">
 				<MenuItem.Icon>
-					<Border Classes="MenuItem_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.FileManager}"/>
-					</Border>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.FileManager}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 		</ContextMenu>
@@ -64,16 +58,12 @@
 		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Bottom">
 			<MenuItem Command="{Binding $parent[UserControl].ShowAppOptions}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
-					<Border Classes="MenuItem_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Settings}"/>
-					</Border>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Settings}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[UserControl].CheckForAppUpdate}" Header="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
 				<MenuItem.Icon>
-					<Border Classes="MenuItem_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Update}"/>
-					</Border>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Update}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
@@ -392,34 +382,26 @@
 						<Border IsVisible="{Binding !IsOpeningSourceFile}">
 							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
 								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
-								<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-									<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
-								</Border>
+								<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
 							</StackPanel>
 						</Border>
 
 						<!-- Opening file hint -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
-							</Border>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
 						</StackPanel>
 
 						<!-- Insufficient memory hint -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Warning}"/>
-							</Border>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.Warning}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
 						</StackPanel>
 
 						<!-- Rendering error -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Border Classes="SessionControl_ImageViewer_Hint_Icon">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Error}"/>
-							</Border>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.Error}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
 						</StackPanel>
 
@@ -669,13 +651,11 @@
 							<Grid ColumnDefinitions="*,Auto,Auto">
 								<TextBlock Text="{Binding SourceFileName}" TextTrimming="CharacterEllipsis"/>
 								<TextBlock Grid.Column="1" Text="{Binding SourceFileSizeString, StringFormat={} ({0})}"/>
-								<Border Classes="StatusBar_DropDownIcon" Grid.Column="2">
-									<Image Classes="Icon">
-										<DrawingImage>
-											<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.MoveUp}"/>
-										</DrawingImage>
-									</Image>
-								</Border>
+								<Image Classes="StatusBar_DropDownIcon" Grid.Column="2">
+									<DrawingImage>
+										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.MoveUp}"/>
+									</DrawingImage>
+								</Image>
 							</Grid>
 						</ToggleButton>
 						<Separator Classes="StatusBar_Separator"/>
@@ -683,13 +663,11 @@
 
 					<!-- Source data size -->
 					<StackPanel Background="{x:Static Brushes.Transparent}" IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
+							</DrawingImage>
+						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={}{0:N0} }"/>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/Common.Bytes}"/>
 					</StackPanel>
@@ -699,13 +677,11 @@
 					<StackPanel IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
 
 						<!-- Position -->
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
+							</DrawingImage>
+						</Image>
 						<TextBlock Classes="StatusBar_TextBlock">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}({0},{1})">
@@ -717,13 +693,11 @@
 
 						<!-- Color -->
 						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Color}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Color}"/>
+							</DrawingImage>
+						</Image>
 						<TextBlock Classes="StatusBar_TextBlock">
 							<TextBlock.Text>
 								<MultiBinding StringFormat="{}#{0:X2}{1:X2}{2:X2}{3:X2}">
@@ -745,39 +719,33 @@
 					<!-- Saving image -->
 					<StackPanel IsVisible="{Binding IsSavingImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Save}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Save}"/>
+							</DrawingImage>
+						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SavingRenderedImage}"/>
 					</StackPanel>
 
 					<!-- Filtering image -->
 					<StackPanel IsVisible="{Binding IsFilteringRenderedImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.ImageFilter}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.ImageFilter}"/>
+							</DrawingImage>
+						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.FilteringRenderedImage}"/>
 					</StackPanel>
 
 					<!-- Rendering image -->
 					<StackPanel IsVisible="{Binding IsRenderingImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Waiting}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Waiting}"/>
+							</DrawingImage>
+						</Image>
 						<Panel>
 							<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding IsConvertingColorSpace}" Text="{DynamicResource String/SessionControl.ConvertingColorSpace}"/>
 							<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsConvertingColorSpace}" Text="{DynamicResource String/SessionControl.RenderingImage}"/>
@@ -790,13 +758,11 @@
 						<!-- UI response duration -->
 						<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=IsDebugMode}" Orientation="Horizontal">
 							<Separator Classes="StatusBar_Separator"/>
-							<Border Classes="StatusBar_Icon">
-								<Image Classes="Icon">
-									<DrawingImage>
-										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Speed}"/>
-									</DrawingImage>
-								</Image>
-							</Border>
+							<Image Classes="StatusBar_Icon">
+								<DrawingImage>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Speed}"/>
+								</DrawingImage>
+							</Image>
 							<Panel>
 								<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="000 ms   "/>
 								<TextBlock Classes="StatusBar_TextBlock" HorizontalAlignment="Left" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.UIResponseDuration, Converter={x:Static asConverters:TimeSpanConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.UIResponseDuration}"/>
@@ -805,13 +771,11 @@
 
 						<!-- CPU usage -->
 						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Cpu}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Cpu}"/>
+							</DrawingImage>
+						</Image>
 						<Panel>
 							<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="00.0%"/>
 							<TextBlock Classes="StatusBar_TextBlock" HorizontalAlignment="Left" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.CpuUsagePercentage, StringFormat={}{0:F1}%}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.CpuUsage}"/>
@@ -819,13 +783,11 @@
 
 						<!-- Memory usage -->
 						<Separator Classes="StatusBar_Separator"/>
-						<Border Classes="StatusBar_Icon">
-							<Image Classes="Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Memory}"/>
-								</DrawingImage>
-							</Image>
-						</Border>
+						<Image Classes="StatusBar_Icon">
+							<DrawingImage>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Memory}"/>
+							</DrawingImage>
+						</Image>
 						<Panel>
 							<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="000.0%"/>
 							<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
