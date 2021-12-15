@@ -575,9 +575,9 @@
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride1, Mode=TwoWay}"/>
-								<Separator Classes="Dialog_Separator"/>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding PixelStride1, Mode=TwoWay}"/>
+								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride1}"/>
+								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
@@ -590,9 +590,9 @@
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride2, Mode=TwoWay}"/>
-								<Separator Classes="Dialog_Separator"/>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding PixelStride2, Mode=TwoWay}"/>
+								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride2}"/>
+								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
@@ -605,9 +605,9 @@
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride3, Mode=TwoWay}"/>
-								<Separator Classes="Dialog_Separator"/>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding PixelStride3, Mode=TwoWay}"/>
+								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride3}"/>
+								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>

@@ -264,6 +264,18 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
 		/// <summary>
+		/// Property of <see cref="IsAdjustablePixelStride1"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsAdjustablePixelStride1Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride1));
+		/// <summary>
+		/// Property of <see cref="IsAdjustablePixelStride2"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsAdjustablePixelStride2Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride2));
+		/// <summary>
+		/// Property of <see cref="IsAdjustablePixelStride3"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsAdjustablePixelStride3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride3));
+		/// <summary>
 		/// Property of <see cref="IsBrightnessAdjustmentSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsBrightnessAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBrightnessAdjustmentSupported));
@@ -1653,6 +1665,24 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether pixel stride for 1st image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
+		/// </summary>
+		public bool IsAdjustablePixelStride1 { get => this.GetValue(IsAdjustablePixelStride1Property); }
+
+
+		/// <summary>
+		/// Check whether pixel stride for 2nd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
+		/// </summary>
+		public bool IsAdjustablePixelStride2 { get => this.GetValue(IsAdjustablePixelStride2Property); }
+
+
+		/// <summary>
+		/// Check whether pixel stride for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
+		/// </summary>
+		public bool IsAdjustablePixelStride3 { get => this.GetValue(IsAdjustablePixelStride3Property); }
+
+
+		/// <summary>
 		/// Check whether brightness adjustment is supported or not.
 		/// </summary>
 		public bool IsBrightnessAdjustmentSupported { get => this.GetValue(IsBrightnessAdjustmentSupportedProperty); }
@@ -2419,6 +2449,13 @@ namespace Carina.PixelViewer.ViewModels
 					2 => IsAdjustableEffectiveBits3Property,
 					_ => throw new ArgumentException(),
 				}, planeDescriptors[i].IsAdjustableEffectiveBits);
+				this.SetValue(i switch
+				{
+					0 => IsAdjustablePixelStride1Property,
+					1 => IsAdjustablePixelStride2Property,
+					2 => IsAdjustablePixelStride3Property,
+					_ => throw new ArgumentException(),
+				}, planeDescriptors[i].IsAdjustablePixelStride);
 			}
 
 			// prepare plane options
