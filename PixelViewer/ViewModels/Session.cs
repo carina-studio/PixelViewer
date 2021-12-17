@@ -3467,6 +3467,8 @@ namespace Carina.PixelViewer.ViewModels
 			profile.FramePaddingSize = this.FramePaddingSize;
 			profile.ByteOrdering = this.ByteOrdering;
 			profile.YuvToBgraConverter = this.YuvToBgraConverter;
+			if (this.IsColorSpaceManagementEnabled)
+				profile.ColorSpace = this.ColorSpace;
 			profile.Demosaicing = this.Demosaicing;
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
