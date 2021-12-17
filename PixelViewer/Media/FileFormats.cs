@@ -51,7 +51,7 @@ namespace Carina.PixelViewer.Media
             bmp = Register(new FileFormat(app, "Bmp", new string[] { ".bmp" }));
             jpeg = Register(new FileFormat(app, "Jpeg", new string[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
             png = Register(new FileFormat(app, "Png", new string[] { ".png" }));
-            rawBgra = Register(new FileFormat(app, "RawBGRA", new string[] { ".bgra" }));
+            rawBgra = Register(new FileFormat(app, "RawBgra", new string[] { ".bgra" }));
             yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new string[] { ".y4m" }));
         }
 

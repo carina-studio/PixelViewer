@@ -21,6 +21,7 @@ namespace Carina.PixelViewer.Media.ImageEncoders
             {
                 new JpegImageEncoder(),
                 new PngImageEncoder(),
+                new RawBgraImageEncoder(),
             }.AsReadOnly();
             foreach(var encoder in All)
             {

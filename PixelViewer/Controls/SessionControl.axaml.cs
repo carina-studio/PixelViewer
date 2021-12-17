@@ -978,7 +978,11 @@ namespace Carina.PixelViewer.Controls
 					filter.Name = app.GetString("FileType.Png");
 					filter.Extensions.Add("png");
 				}));
-				dialog.DefaultExtension = ".png";
+				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
+				{
+					filter.Name = app.GetString("FileType.RawBgra");
+					filter.Extensions.Add("bgra");
+				}));
 			}).ShowAsync(window);
 			if (fileName == null)
 				return;
@@ -987,7 +991,6 @@ namespace Carina.PixelViewer.Controls
 			var fileFormat = (Media.FileFormat?)null;
 			if (Media.FileFormats.TryGetFormatsByFileName(fileName, out var fileFormats))
 				fileFormat = fileFormats.First();
-
 
 			// setup parameters
 			var parameters = new Session.ImageSavingParams();

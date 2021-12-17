@@ -43,6 +43,7 @@
 	<sys:String x:Key="String/FileType.Bmp">Windows 點陣圖</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG 影像</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG 影像</sys:String>
+	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位元 BGRA 像素</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至畫面</sys:String>
