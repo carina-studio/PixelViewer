@@ -46,6 +46,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new Argb8888ImageRenderer(),
 			new Bgra8888ImageRenderer(),
 			new Rgba8888ImageRenderer(),
+			new Abgr16161616ImageRenderer(),
+			new Argb16161616ImageRenderer(),
+			new Bgra16161616ImageRenderer(),
+			new Rgba16161616ImageRenderer(),
 
 			new BggrMipi10ImageRenderer(),
 			new GbrgMipi10ImageRenderer(),
