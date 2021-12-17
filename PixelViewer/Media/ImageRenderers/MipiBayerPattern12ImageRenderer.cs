@@ -167,6 +167,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Select color component.
-		protected override ColorComponent SelectColorComponent(int x, int y) => RggbColorPattern[y & 0x3][x & 0x3];
+		protected override ColorComponent SelectColorComponent(int x, int y) => RggbColorPattern[y & 0x1][x & 0x1];
 	}
 }
