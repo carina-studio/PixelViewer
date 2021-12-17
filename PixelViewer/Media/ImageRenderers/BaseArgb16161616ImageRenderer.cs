@@ -31,9 +31,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// prepare packing function
-			var unpackFunc = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian
-				? (delegate*<ulong, ushort*, ushort*, ushort*, ushort*, void>)&ImageProcessing.UnpackBgra64LE
-				: &ImageProcessing.UnpackBgra64BE;
+			var extractComponentFunc = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian
+				? new Func<byte, byte, ushort>((b1, b2) => (ushort)((b2 << 8) | b1))
+				: new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 << 8) | b2));
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
@@ -43,10 +43,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				var srcRowPtr = srcRowAddress;
 				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 				{
-					var component1 = (ushort)0;
-					var component2 = (ushort)0;
-					var component3 = (ushort)0;
-					var component4 = (ushort)0;
 					var bitmapRowPtr = (byte*)bitmapBaseAddress;
 					var bitmapRowStride = bitmapBuffer.RowBytes;
 					for (var y = height; ; --y, bitmapRowPtr += bitmapRowStride)
@@ -56,7 +52,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var bitmapPixelPtr = (ulong*)bitmapRowPtr;
 						for (var x = width; x > 0; --x, srcPixelPtr += pixelStride, ++bitmapPixelPtr)
 						{
-							unpackFunc(*(ulong*)srcPixelPtr, &component1, &component2, &component3, &component4);
+							var component1 = extractComponentFunc(srcPixelPtr[0], srcPixelPtr[1]);
+							var component2 = extractComponentFunc(srcPixelPtr[2], srcPixelPtr[3]);
+							var component3 = extractComponentFunc(srcPixelPtr[4], srcPixelPtr[5]);
+							var component4 = extractComponentFunc(srcPixelPtr[6], srcPixelPtr[7]);
 							this.SelectArgb(component1, component2, component3, component4, out var a, out var r, out var g, out var b);
 							*bitmapPixelPtr = packFunc(b, g, r, a);
 						}
