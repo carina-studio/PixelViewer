@@ -247,6 +247,14 @@ namespace Carina.PixelViewer
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
 			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
 
+			// check max rendered image memory usage
+			this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB).Let(mb =>
+			{
+				var upperBound = Environment.Is64BitProcess ? 8192 : 1324;
+				if (mb > upperBound)
+					this.Settings.SetValue<long>(SettingKeys.MaxRenderedImagesMemoryUsageMB, upperBound);
+			});
+
 			// show main window
 			if (!this.IsRestoringMainWindowsRequested)
 				this.ShowMainWindow();

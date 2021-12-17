@@ -58,7 +58,7 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Maximum memory usage for image rendering.
 		/// </summary>
-		public static readonly SettingKey<long> MaxRenderedImagesMemoryUsageMB = new SettingKey<long>(nameof(MaxRenderedImagesMemoryUsageMB), 2048);
+		public static readonly SettingKey<long> MaxRenderedImagesMemoryUsageMB = new SettingKey<long>(nameof(MaxRenderedImagesMemoryUsageMB), Environment.Is64BitProcess ? 2048 : 1024);
 		/// <summary>
 		/// Reset image plane options after changing image dimensions.
 		/// </summary>

@@ -20,6 +20,10 @@ namespace Carina.PixelViewer.Controls
         {
             this.Application.StringsUpdated += this.OnAppStringsUpdated;
             InitializeComponent();
+            this.FindControl<NumericUpDown>("maxRenderedImageMemoryUsageUpDown").AsNonNull().Let(it =>
+            {
+                it.Maximum = Environment.Is64BitProcess ? 8192 : 1324;
+            });
         }
 
 
