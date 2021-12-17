@@ -1,37 +1,29 @@
 ﻿using SkiaSharp;
 using System;
-#if WINDOWS
-using System.Drawing.Imaging;
-#endif
 using System.IO;
 using System.Threading;
 
 namespace Carina.PixelViewer.Media.ImageEncoders
 {
     /// <summary>
-    /// <see cref="IImageEncoder"/> to encode image in <see cref="FileFormats.Png"/>.
+    /// <see cref="IImageEncoder"/> to encode image in <see cref="FileFormats.Jpeg"/>.
     /// </summary>
-    class PngImageEncoder : BaseImageEncoder
+    class JpegImageEncoder : BaseImageEncoder
     {
         /// <summary>
-        /// Initialize new <see cref="PngImageEncoder"/> instance.
+        /// Initialize new <see cref="JpegImageEncoder"/> instance.
         /// </summary>
-        public PngImageEncoder() : base("Png", FileFormats.Png)
+        public JpegImageEncoder() : base("Jpeg", FileFormats.Jpeg)
         { }
 
 
         // Encode.
         protected override void OnEncode(IBitmapBuffer bitmapBuffer, Stream stream, ImageEncodingOptions options, CancellationToken cancellationToken)
         {
-#if WINDOWS
-            using var bitmap = bitmapBuffer.CreateSystemDrawingBitmap();
-            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-#else
             using var bitmap = bitmapBuffer.CreateSkiaBitmap();
             using var memoryStream = new MemoryStream();
-            bitmap.Encode(memoryStream, SKEncodedImageFormat.Png, 0);
+            bitmap.Encode(memoryStream, SKEncodedImageFormat.Jpeg, Math.Max(1, Math.Min(100, options.QualityLevel)));
             stream.Write(memoryStream.ToArray());
-#endif
         }
     }
 }

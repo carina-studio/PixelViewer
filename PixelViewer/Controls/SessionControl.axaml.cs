@@ -24,6 +24,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Carina.PixelViewer.Controls
@@ -966,23 +967,43 @@ namespace Carina.PixelViewer.Controls
 				var app = (App)this.Application;
 				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
 				{
-					filter.Name = app.GetString("FileType.Png");
-					filter.Extensions.Add("png");
+					filter.Name = app.GetString("FileType.Jpeg");
+					filter.Extensions.Add("jpg");
+					filter.Extensions.Add("jpeg");
+					filter.Extensions.Add("jpe");
+					filter.Extensions.Add("jfif");
 				}));
 				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
 				{
-					filter.Name = app.GetString("FileType.All");
-					filter.Extensions.Add("*");
+					filter.Name = app.GetString("FileType.Png");
+					filter.Extensions.Add("png");
 				}));
+				dialog.DefaultExtension = ".png";
 			}).ShowAsync(window);
 			if (fileName == null)
 				return;
 
+			// check format
+			var fileFormat = (Media.FileFormat?)null;
+			if (Media.FileFormats.TryGetFormatsByFileName(fileName, out var fileFormats))
+				fileFormat = fileFormats.First();
+
+
+			// setup parameters
+			var parameters = new Session.ImageSavingParams();
+			if (fileFormat == Media.FileFormats.Jpeg)
+				parameters.Options = (await new JpegImageEncodingOptionsDialog().ShowDialog<Media.ImageEncoders.ImageEncodingOptions?>(window)).GetValueOrDefault();
+			parameters.FileName = fileName;
+
+			// find encoder
+			if (fileFormat != null && Media.ImageEncoders.ImageEncoders.TryGetEncoderByFormat(fileFormat, out var encoder))
+				parameters.Encoder = encoder;
+
 			// save
 			if (saveFilteredImage)
-				session.SaveFilteredImageCommand.TryExecute(fileName);
+				session.SaveFilteredImageCommand.TryExecute(parameters);
 			else
-				session.SaveRenderedImageCommand.TryExecute(fileName);
+				session.SaveRenderedImageCommand.TryExecute(parameters);
 		}
 
 

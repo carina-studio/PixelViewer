@@ -41,6 +41,7 @@
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows 點陣圖</sys:String>
+	<sys:String x:Key="String/FileType.Jpeg">JPEG 影像</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG 影像</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
@@ -53,6 +54,10 @@
 
 	<!-- ImageRenderingProfile -->
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;無&gt;</sys:String>
+
+	<!-- JpegImageEncodingOptionsDialog -->
+	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">壓縮品質：</sys:String>
+	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG 選項</sys:String>
 
 	<!-- MainWindow -->
 	<sys:String x:Key="String/MainWindow.AppUpdateFound">已有新版本的應用程式，是否要前往下載頁面？</sys:String>

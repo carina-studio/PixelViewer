@@ -18,6 +18,7 @@ namespace Carina.PixelViewer.Media
         static readonly ISet<FileFormat> emptyFormats = new HashSet<FileFormat>().AsReadOnly();
         static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new Dictionary<string, ISet<FileFormat>>(PathEqualityComparer.Default);
         static readonly Dictionary<string, FileFormat> formatsById = new Dictionary<string, FileFormat>();
+        static volatile FileFormat? jpeg;
         static volatile FileFormat? png;
         static volatile FileFormat? rawBgra;
         static volatile FileFormat? yuv4mpeg2;
@@ -48,10 +49,17 @@ namespace Carina.PixelViewer.Media
                 FileFormats.app = app;
             }
             bmp = Register(new FileFormat(app, "Bmp", new string[] { ".bmp" }));
+            jpeg = Register(new FileFormat(app, "Jpeg", new string[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
             png = Register(new FileFormat(app, "Png", new string[] { ".png" }));
             rawBgra = Register(new FileFormat(app, "RawBGRA", new string[] { ".bgra" }));
             yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new string[] { ".y4m" }));
         }
+
+
+        /// <summary>
+        /// JPEG.
+        /// </summary>
+        public static FileFormat Jpeg { get => jpeg ?? throw new InvalidOperationException("File format is not ready yet."); }
 
 
         /// <summary>

@@ -105,6 +105,30 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		/// <summary>
+		/// Parameters of saving image.
+		/// </summary>
+		public struct ImageSavingParams
+        {
+			/// <summary>
+			/// Image encoder.
+			/// </summary>
+			public IImageEncoder? Encoder { get; set; }
+
+
+			/// <summary>
+			/// File name.
+			/// </summary>
+			public string? FileName { get; set; }
+
+
+			/// <summary>
+			/// Image encoding options.
+			/// </summary>
+			public ImageEncodingOptions Options { get; set; }
+        }
+
+
 		// Token of memory usage of rendered image.
 		class RenderedImageMemoryUsageToken : IDisposable
 		{
@@ -496,9 +520,9 @@ namespace Carina.PixelViewer.ViewModels
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
 			this.SaveAsNewProfileCommand = new Command<string>(name => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
-			this.SaveFilteredImageCommand = new Command<string>(fileName => _ = this.SaveFilteredImage(fileName), this.canSaveFilteredImage);
+			this.SaveFilteredImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveFilteredImage(parameters), this.canSaveFilteredImage);
 			this.SaveProfileCommand = new Command(() => this.SaveProfile(), this.canSaveOrDeleteProfile);
-			this.SaveRenderedImageCommand = new Command<string>(fileName => _ = this.SaveRenderedImage(fileName), this.canSaveRenderedImage);
+			this.SaveRenderedImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveRenderedImage(parameters), this.canSaveRenderedImage);
 			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
 
@@ -3102,22 +3126,23 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Save filtered image.
-		async Task<bool> SaveFilteredImage(string? fileName)
+		async Task<bool> SaveFilteredImage(ImageSavingParams parameters)
 		{
 			// check state
-			if (fileName == null)
+			if (parameters.FileName == null)
 				return false;
 			if (!this.canSaveFilteredImage.Value)
 				return false;
 
 			// save image
-			if (!ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out var encoder) || encoder == null)
+			var encoder = parameters.Encoder;
+			if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 				return false;
 			this.canSaveFilteredImage.Update(false);
 			this.SetValue(IsSavingFilteredImageProperty, true);
 			try
 			{
-				await encoder.EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(fileName), new ImageEncodingOptions(), new CancellationToken());
+				await encoder.AsNonNull().EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), parameters.Options, new CancellationToken());
 				return true;
 			}
 			catch (Exception ex)
@@ -3136,6 +3161,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Command for saving filtered image to file or stream.
 		/// </summary>
+		/// <remarks>Type of parameter is <see cref="ImageSavingParams"/>.</remarks>
 		public ICommand SaveFilteredImageCommand { get; }
 
 
@@ -3174,22 +3200,23 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Save rendered image.
-		async Task<bool> SaveRenderedImage(string? fileName)
+		async Task<bool> SaveRenderedImage(ImageSavingParams parameters)
 		{
 			// check state
-			if (fileName == null)
+			if (parameters.FileName == null)
 				return false;
 			if (!this.canSaveRenderedImage.Value)
 				return false;
 
 			// save image
-			if (!ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out var encoder) || encoder == null)
+			var encoder = parameters.Encoder;
+			if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 				return false;
 			this.canSaveRenderedImage.Update(false);
 			this.SetValue(IsSavingRenderedImageProperty, true);
 			try
 			{
-				await encoder.EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(fileName), new ImageEncodingOptions(), new CancellationToken());
+				await encoder.AsNonNull().EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), parameters.Options, new CancellationToken());
 				return true;
 			}
 			catch (Exception ex)
@@ -3208,6 +3235,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Command for saving rendered image to file or stream.
 		/// </summary>
+		/// <remarks>Type of parameter is <see cref="ImageSavingParams"/>.</remarks>
 		public ICommand SaveRenderedImageCommand { get; }
 
 

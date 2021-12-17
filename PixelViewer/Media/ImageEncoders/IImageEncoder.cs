@@ -38,5 +38,16 @@ namespace Carina.PixelViewer.Media.ImageEncoders
     /// Options to encode image.
     /// </summary>
     struct ImageEncodingOptions
-    { }
+    {
+        /// <summary>
+        /// Color space.
+        /// </summary>
+        public BitmapColorSpace? ColorSpace { get; set; }
+
+
+        /// <summary>
+        /// Quality level for encoding. Range is [1, 100].
+        /// </summary>
+        public int QualityLevel { get; set; }
+    }
 }
