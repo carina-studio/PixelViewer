@@ -6,29 +6,18 @@ using System.Threading;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
-	/// <summary>
-	/// Base implementation of <see cref="IImageRenderer"/> which renders image with 16-bit bayer pattern.
-	/// </summary>
-	abstract class BayerPattern16ImageRenderer : BayerPatternImageRenderer
-	{
-		/// <summary>
-		/// Initialize new <see cref="BayerPattern16ImageRenderer"/> instance.
-		/// </summary>
-		/// <param name="format">Format.</param>
-		protected BayerPattern16ImageRenderer(ImageFormat format) : base(format)
-		{ }
+    /// <summary>
+    /// Base implementation of <see cref="IImageRenderer"/> which renders image with 16-bit bayer filter pattern.
+    /// </summary>
+    class BayerPattern16ImageRenderer : BayerPatternImageRenderer
+    {
+        public BayerPattern16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_16", true, new ImagePlaneDescriptor(2, 9, 16)))
+        { }
 
 
-		// Create default plane options.
-		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new List<ImagePlaneOptions>().Also((it) =>
-		{
-			it.Add(new ImagePlaneOptions(16, 2, width * 2));
-		});
-
-
-		// Render.
-		protected override unsafe void OnRenderBayerPatternImage(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
-		{
+        /// <inheritdoc/>
+        protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int, int, int> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+        {
 			// get parameters
 			var width = bitmapBuffer.Width;
 			var height = bitmapBuffer.Height;
@@ -61,7 +50,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						for (var x = 0; x < width; ++x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 						{
-							bitmapPixelPtr[(int)this.SelectColorComponent(x, y)] = extractFunc(pixelPtr[0], pixelPtr[1]);
+							bitmapPixelPtr[colorComponentSelector(x, y)] = extractFunc(pixelPtr[0], pixelPtr[1]);
 							bitmapPixelPtr[3] = 65535;
 						}
 						if (cancellationToken.IsCancellationRequested)
@@ -72,5 +61,5 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				}
 			});
 		}
-	}
+    }
 }

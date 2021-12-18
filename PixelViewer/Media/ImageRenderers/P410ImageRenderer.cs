@@ -7,7 +7,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     /// </summary>
     class P410ImageRenderer : BaseYuv444p16ImageRenderer
     {
-        public P410ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P410", "P410 (10-bit YUV444p)", true, new ImagePlaneDescriptor[] {
+        public P410ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P410", true, new ImagePlaneDescriptor[] {
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(2),

@@ -48,6 +48,19 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至畫面</sys:String>
 
+	<!-- ImageFormat -->
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位元，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer 排列 (12 位元，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer 排列 (16 位元)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P010">P010 (10 位元 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P016">P016 (16 位元 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P210">P210 (10 位元 YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P216">P216 (16 位元 YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P410">P410 (10 位元 YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P416">P416 (16 位元 YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10 位元 YUV420sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16 位元 YUV420sp)</sys:String>
+
 	<!-- ImageFormatCategory -->
 	<sys:String x:Key="String/ImageFormatCategory.Bayer">Bayer 排列</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.Luminance">明度/灰階</sys:String>
@@ -72,6 +85,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">關於 PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重設至組態參數</sys:String>
+	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer 排列方式</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">調整亮度及對比</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">對比</sys:String>

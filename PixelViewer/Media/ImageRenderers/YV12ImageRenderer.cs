@@ -9,7 +9,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="YV12ImageRenderer"/> instance.
 		/// </summary>
-		public YV12ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "YV12", "YV12 (YUV420)", new ImagePlaneDescriptor[] {
+		public YV12ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "YV12", new ImagePlaneDescriptor[] {
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(1),

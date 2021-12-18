@@ -152,6 +152,10 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Property of <see cref="BayerPattern"/>.
+		/// </summary>
+		public static readonly ObservableProperty<BayerPattern> BayerPatternProperty = ObservableProperty.Register<Session, BayerPattern>(nameof(BayerPattern));
+		/// <summary>
 		/// Property of <see cref="BlueColorAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> BlueColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorAdjustment), 0, validate: it => double.IsFinite(it));
@@ -299,6 +303,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="IsAdjustablePixelStride3"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsAdjustablePixelStride3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride3));
+		/// <summary>
+		/// Property of <see cref="IsBayerPatternSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsBayerPatternSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBayerPatternSupported));
 		/// <summary>
 		/// Property of <see cref="IsBrightnessAdjustmentSupported"/>.
 		/// </summary>
@@ -751,6 +759,9 @@ namespace Carina.PixelViewer.ViewModels
 				// byte ordering
 				this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
 
+				// bayer pattern
+				this.SetValue(BayerPatternProperty, profile.BayerPattern);
+
 				// YUV to RGB converter
 				this.SetValue(YuvToBgraConverterProperty, profile.YuvToBgraConverter);
 
@@ -789,6 +800,16 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to apply parameters defined by current <see cref="Profile"/>.
 		/// </summary>
 		public ICommand ApplyProfileCommand { get; }
+
+
+		/// <summary>
+		/// Get or set <see cref="BayerPattern"/> for rendered image.
+		/// </summary>
+		public BayerPattern BayerPattern
+		{
+			get => this.GetValue(BayerPatternProperty);
+			set => this.SetValue(BayerPatternProperty, value);
+		}
 
 
 		/// <summary>
@@ -1707,6 +1728,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether <see cref="BayerPattern"/> is supported by current <see cref="ImageRenderer"/> or not.
+		/// </summary>
+		public bool IsBayerPatternSupported { get => this.GetValue(IsBayerPatternSupportedProperty); }
+
+
+		/// <summary>
 		/// Check whether brightness adjustment is supported or not.
 		/// </summary>
 		public bool IsBrightnessAdjustmentSupported { get => this.GetValue(IsBrightnessAdjustmentSupportedProperty); }
@@ -1917,7 +1944,12 @@ namespace Carina.PixelViewer.ViewModels
 		protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
 		{
 			base.OnPropertyChanged(property, oldValue, newValue);
-			if (property == BlueColorAdjustmentProperty
+			if (property == BayerPatternProperty)
+			{
+				if (this.IsBayerPatternSupported)
+					this.renderImageAction.Reschedule();
+			}
+			else if (property == BlueColorAdjustmentProperty
 				|| property == GreenColorAdjustmentProperty
 				|| property == RedColorAdjustmentProperty)
 			{
@@ -1977,6 +2009,7 @@ namespace Carina.PixelViewer.ViewModels
 						this.isImageDimensionsEvaluationNeeded = true;
 					var imageRenderer = (IImageRenderer)newValue.AsNonNull();
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
+					this.SetValue(IsBayerPatternSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.SetValue(IsYuvToBgraConverterSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.YUV);
 					this.isImagePlaneOptionsResetNeeded = true;
@@ -2515,6 +2548,7 @@ namespace Carina.PixelViewer.ViewModels
 			// calculate frame count and index
 			var renderingOptions = new ImageRenderingOptions()
 			{
+				BayerPattern = this.BayerPattern,
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
 				Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
@@ -3494,6 +3528,7 @@ namespace Carina.PixelViewer.ViewModels
 			profile.DataOffset = this.DataOffset;
 			profile.FramePaddingSize = this.FramePaddingSize;
 			profile.ByteOrdering = this.ByteOrdering;
+			profile.BayerPattern = this.BayerPattern;
 			profile.YuvToBgraConverter = this.YuvToBgraConverter;
 			if (this.IsColorSpaceManagementEnabled)
 				profile.ColorSpace = this.ColorSpace;

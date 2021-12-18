@@ -37,6 +37,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Fields.
+        BayerPattern bayerPattern;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         BitmapColorSpace colorSpace = BitmapColorSpace.Default;
         long dataOffset;
@@ -86,6 +87,23 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Application.
         public IApplication Application { get => app ?? throw new InvalidOperationException("Profile is not ready yet."); }
+
+
+        // Pattern of Bayer Filter.
+        public BayerPattern BayerPattern
+        {
+            get => this.bayerPattern;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.bayerPattern == value)
+                    return;
+                this.bayerPattern = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BayerPattern)));
+            }
+        }
 
 
         // Byte ordering.
@@ -198,6 +216,8 @@ namespace Carina.PixelViewer.Media.Profiles
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (!disposing)
+                return;
             this.VerifyAccess();
             this.VerifyDefault();
             if (this.fileFormat != null)
@@ -307,33 +327,54 @@ namespace Carina.PixelViewer.Media.Profiles
                     var formatName = jsonProperty.GetString().AsNonNull();
                     switch (formatName)
                     {
+                        case "BGGR_16":
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.BGGR_2x2;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
                         case "BGGR_16_BE":
-                            formatName = "BGGR_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.BGGR_2x2;
                             profile.byteOrdering = ByteOrdering.BigEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
                         case "BGGR_16_LE":
-                            formatName = "BGGR_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.BGGR_2x2;
                             profile.byteOrdering = ByteOrdering.LittleEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
+                        case "GBRG_16":
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.GBRG_2x2;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
                         case "GBRG_16_BE":
-                            formatName = "GBRG_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.GBRG_2x2;
                             profile.byteOrdering = ByteOrdering.BigEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
                         case "GBRG_16_LE":
-                            formatName = "GBRG_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.GBRG_2x2;
                             profile.byteOrdering = ByteOrdering.LittleEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
+                        case "GRBG_16":
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.GRBG_2x2;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
                         case "GRBG_16_BE":
-                            formatName = "GRBG_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.GRBG_2x2;
                             profile.byteOrdering = ByteOrdering.BigEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
                         case "GRBG_16_LE":
-                            formatName = "GRBG_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.GRBG_2x2;
                             profile.byteOrdering = ByteOrdering.LittleEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
@@ -357,13 +398,20 @@ namespace Carina.PixelViewer.Media.Profiles
                             profile.byteOrdering = ByteOrdering.LittleEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
+                        case "RGGB_16":
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.RGGB_2x2;
+                            profile.IsUpgradedWhenLoading = true;
+                            break;
                         case "RGGB_16_BE":
-                            formatName = "RGGB_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.RGGB_2x2;
                             profile.byteOrdering = ByteOrdering.BigEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
                         case "RGGB_16_BL":
-                            formatName = "RGGB_16";
+                            formatName = "Bayer_Pattern_16";
+                            profile.bayerPattern = BayerPattern.RGGB_2x2;
                             profile.byteOrdering = ByteOrdering.LittleEndian;
                             profile.IsUpgradedWhenLoading = true;
                             break;
@@ -390,6 +438,14 @@ namespace Carina.PixelViewer.Media.Profiles
                     && jsonProperty.ValueKind == JsonValueKind.String)
                 {
                     Enum.TryParse(jsonProperty.GetString(), out profile.byteOrdering);
+                }
+
+                // get bayer pattern
+                if (profile.renderer?.Format?.Category == ImageFormatCategory.Bayer
+                    && rootElement.TryGetProperty(nameof(BayerPattern), out jsonProperty)
+                    && jsonProperty.ValueKind == JsonValueKind.String)
+                {
+                    Enum.TryParse(jsonProperty.GetString(), out profile.bayerPattern);
                 }
 
                 // YUV to RGB converter
@@ -613,6 +669,8 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteNumber(nameof(DataOffset), this.dataOffset);
                 if (this.framePaddingSize != 0)
                     jsonWriter.WriteNumber(nameof(FramePaddingSize), this.framePaddingSize);
+                if (format.Category == ImageFormatCategory.Bayer)
+                    jsonWriter.WriteString(nameof(BayerPattern), this.bayerPattern.ToString());
                 if (format.HasMultipleByteOrderings)
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 if (format.Category == ImageFormatCategory.YUV)

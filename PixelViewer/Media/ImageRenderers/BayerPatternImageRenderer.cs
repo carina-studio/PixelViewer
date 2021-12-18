@@ -7,70 +7,48 @@ using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
-	/// <summary>
-	/// Base implementation of <see cref="IImageRenderer"/> which renders image with bayer pattern.
-	/// </summary>
-	abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
-	{
-		/// <summary>
-		/// Color component.
-		/// </summary>
-		protected enum ColorComponent
-		{
-			/// <summary>
-			/// Red.
-			/// </summary>
-			Red = 2,
-			/// <summary>
-			/// Green.
-			/// </summary>
-			Green = 1,
-			/// <summary>
-			/// Blue.
-			/// </summary>
-			Blue = 0,
-		}
+    /// <summary>
+    /// Base implementation of <see cref="IImageRenderer"/> which renders image with bayer filter pattern.
+    /// </summary>
+    abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
+    {
+        // Constants.
+        const int BlueColorComponent = 0;
+        const int GreenColorComponent = 1;
+        const int RedColorComponent = 2;
 
 
-		/// <summary>
-		/// BGGR color pattern map.
-		/// </summary>
-		protected static readonly ColorComponent[][] BggrColorPattern = new ColorComponent[][]{
-			new ColorComponent[]{ ColorComponent.Blue, ColorComponent.Green },
-			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Red },
-		};
-		/// <summary>
-		/// GBRG color pattern map.
-		/// </summary>
-		protected static readonly ColorComponent[][] GbrgColorPattern = new ColorComponent[][]{
-			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Blue },
-			new ColorComponent[]{ ColorComponent.Red, ColorComponent.Green },
-		};
-		/// <summary>
-		/// GRBG color pattern map.
-		/// </summary>
-		protected static readonly ColorComponent[][] GrbgColorPattern = new ColorComponent[][]{
-			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Red },
-			new ColorComponent[]{ ColorComponent.Blue, ColorComponent.Green },
-		};
-		/// <summary>
-		/// RGGB color pattern map.
-		/// </summary>
-		protected static readonly ColorComponent[][] RggbColorPattern = new ColorComponent[][]{
-			new ColorComponent[]{ ColorComponent.Red, ColorComponent.Green },
-			new ColorComponent[]{ ColorComponent.Green, ColorComponent.Blue },
-		};
+        // Static fields.
+        static readonly Dictionary<BayerPattern, int[][]> ColorPatternMap = new Dictionary<BayerPattern, int[][]>()
+        {
+            { BayerPattern.BGGR_2x2, new int[][]{
+                new int[]{ BlueColorComponent, GreenColorComponent },
+                new int[]{ GreenColorComponent, RedColorComponent },
+            } },
+            { BayerPattern.GBRG_2x2, new int[][]{
+                new int[]{ GreenColorComponent, BlueColorComponent },
+                new int[]{ RedColorComponent, GreenColorComponent },
+            } },
+            { BayerPattern.GRBG_2x2, new int[][]{
+                new int[]{ GreenColorComponent, RedColorComponent },
+                new int[]{ BlueColorComponent, GreenColorComponent },
+            } },
+            { BayerPattern.RGGB_2x2, new int[][]{
+                new int[]{ RedColorComponent, GreenColorComponent },
+                new int[]{ GreenColorComponent, BlueColorComponent },
+            } },
+        };
 
 
-		/// <summary>
-		/// Initialize new <see cref="BayerPatternImageRenderer"/> instance.
-		/// </summary>
-		/// <param name="format">Format.</param>
-		protected BayerPatternImageRenderer(ImageFormat format) : base(format)
-		{ }
+        /// <summary>
+        /// Initialize new <see cref="BayerPatternImageRenderer"/> instance.
+        /// </summary>
+        /// <param name="format">Format.</param>
+        protected BayerPatternImageRenderer(ImageFormat format) : base(format)
+        { }
 
 
-		// Render.
+		/// <inheritdoc/>
 		protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// get parameters
@@ -79,8 +57,42 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			if (width <= 0 || height <= 0)
 				throw new ArgumentException($"Invalid size: {width}x{height}.");
 
+			// select color pattern
+			var colorPattern = ColorPatternMap[renderingOptions.BayerPattern];
+			var colorPatternWidth = colorPattern[0].Length;
+			var colorPatternHeight = colorPattern.Length;
+			var colorComponentSelector = Global.Run(() =>
+			{
+				var xMask = colorPatternWidth switch
+				{
+					2 => 0x1,
+					4 => 0x3,
+					8 => 0x7,
+					_ => 0,
+				};
+				var yMask = colorPatternHeight switch
+				{
+					2 => 0x1,
+					4 => 0x3,
+					8 => 0x7,
+					_ => 0,
+				};
+				if (xMask != 0)
+				{
+					if (yMask != 0)
+						return new Func<int, int, int>((x, y) => colorPattern[y & yMask][x & xMask]);
+					return new Func<int, int, int>((x, y) => colorPattern[y % colorPatternHeight][x & xMask]);
+				}
+				else
+				{
+					if (yMask != 0)
+						return new Func<int, int, int>((x, y) => colorPattern[y & yMask][x % colorPatternWidth]);
+					return new Func<int, int, int>((x, y) => colorPattern[y % colorPatternHeight][x % colorPatternWidth]);
+				}
+			});
+
 			// render
-			this.OnRenderBayerPatternImage(source, imageStream, bitmapBuffer, renderingOptions, planeOptions, cancellationToken);
+			this.OnRender(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken);
 			if (cancellationToken.IsCancellationRequested)
 				return;
 
@@ -101,12 +113,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4)
 					{
 						// get component at current pixel
-						var centerComponent = (int)this.SelectColorComponent(x, y);
+						var centerComponent = colorComponentSelector(x, y);
 
 						// collect colors around current pixel
 						if (x > 0)
 						{
-							var neighborComponent = (int)this.SelectColorComponent(x - 1, y);
+							var neighborComponent = colorComponentSelector(x - 1, y);
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += leftBitmapPixelPtr[neighborComponent];
@@ -115,7 +127,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						}
 						if (x < width - 1)
 						{
-							var neighborComponent = (int)this.SelectColorComponent(x + 1, y);
+							var neighborComponent = colorComponentSelector(x + 1, y);
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += rightBitmapPixelPtr[neighborComponent];
@@ -149,12 +161,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					for (var y = 0; y < height; ++y, bitmapPixelPtr += bitmapRowStride, topBitmapPixelPtr += bitmapRowStride, bottomBitmapPixelPtr += bitmapRowStride)
 					{
 						// get component at current pixel
-						var centerComponent = (int)this.SelectColorComponent(x, y);
+						var centerComponent = colorComponentSelector(x, y);
 
 						// collect colors around current pixel
 						if (y > 0)
 						{
-							var neighborComponent = (int)this.SelectColorComponent(x, y - 1);
+							var neighborComponent = colorComponentSelector(x, y - 1);
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += ((ushort*)topBitmapPixelPtr)[neighborComponent];
@@ -163,7 +175,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						}
 						if (y < height - 1)
 						{
-							var neighborComponent = (int)this.SelectColorComponent(x, y + 1);
+							var neighborComponent = colorComponentSelector(x, y + 1);
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += ((ushort*)bottomBitmapPixelPtr)[neighborComponent];
@@ -188,27 +200,19 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
-		/// Called to render image in bayer pattern.
+		/// Called to render image.
 		/// </summary>
 		/// <param name="source">Source of image data.</param>
 		/// <param name="imageStream">Stream to read image data.</param>
 		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/> to put rendered bayer pattern image.</param>
+		/// <param name="colorComponentSelector">Function to select color component for given pixel poxition.</param>
 		/// <param name="renderingOptions">Rendering options.</param>
 		/// <param name="planeOptions">Plane options.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		protected abstract void OnRenderBayerPatternImage(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
+		protected abstract void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int,int,int> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
 
 
-		// Rendered format.
-		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
-
-
-        /// <summary>
-        /// Select color component for given pixel.
-        /// </summary>
-        /// <param name="x">Horizontal position of pixel.</param>
-        /// <param name="y">Vertical position of pixel.</param>
-        /// <returns>Color component.</returns>
-        protected abstract ColorComponent SelectColorComponent(int x, int y);
-	}
+        /// <inheritdoc/>
+        public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+    }
 }

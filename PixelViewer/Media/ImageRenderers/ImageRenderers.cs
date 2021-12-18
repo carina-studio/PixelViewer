@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -51,18 +50,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new Bgra16161616ImageRenderer(),
 			new Rgba16161616ImageRenderer(),
 
-			new BggrMipi10ImageRenderer(),
-			new GbrgMipi10ImageRenderer(),
-			new GrbgMipi10ImageRenderer(),
-			new RggbMipi10ImageRenderer(),
-			new BggrMipi12ImageRenderer(),
-			new GbrgMipi12ImageRenderer(),
-			new GrbgMipi12ImageRenderer(),
-			new RggbMipi12ImageRenderer(),
-			new Bggr16ImageRenderer(),
-			new Gbrg16ImageRenderer(),
-			new Grbg16ImageRenderer(),
-			new Rggb16ImageRenderer(),
+			new BayerPattern10MipiImageRenderer(),
+			new BayerPattern12MipiImageRenderer(),
+			new BayerPattern16ImageRenderer(),
 		}).AsReadOnly();
 
 

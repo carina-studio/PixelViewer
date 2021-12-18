@@ -490,7 +490,7 @@
 							<ComboBox.DataTemplates>
 								<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
 									<Grid ColumnDefinitions="*,Auto">
-										<TextBlock Text="{Binding Format.DisplayName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+										<TextBlock Text="{Binding Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
 										<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Default}}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
 											<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category, Converter={x:Static appConverters:EnumConverters.ImageFormatCategory}}"/>
 										</Border>
@@ -504,6 +504,13 @@
 						<StackPanel IsVisible="{Binding HasMultipleByteOrderings}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ByteOrdering}"/>
 							<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type app:ByteOrdering}" SelectedItem="{Binding ByteOrdering, Mode=TwoWay}"/>
+							<Separator Classes="Dialog_Separator"/>
+						</StackPanel>
+
+						<!-- Bayer Pattern -->
+						<StackPanel IsVisible="{Binding IsBayerPatternSupported}">
+							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BayerPattern}"/>
+							<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:BayerPattern}" SelectedItem="{Binding BayerPattern, Mode=TwoWay}"/>
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 

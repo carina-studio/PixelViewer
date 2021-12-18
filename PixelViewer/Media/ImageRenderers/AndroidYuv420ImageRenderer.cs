@@ -12,7 +12,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="AndroidYuv420ImageRenderer"/> instance.
 		/// </summary>
-		public AndroidYuv420ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "Android_YUV_420_888", "YUV_420_888 (Android)", new ImagePlaneDescriptor[] { 
+		public AndroidYuv420ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "Android_YUV_420_888", new ImagePlaneDescriptor[] { 
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(1),

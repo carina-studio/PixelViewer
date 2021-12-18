@@ -33,6 +33,12 @@
 	<sys:String x:Key="String/AspectRatio.Ratio_4x3">4:3</sys:String>
 	<sys:String x:Key="String/AspectRatio.Ratio_9x16">9:16</sys:String>
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;Unspecified&gt;</sys:String>
+	
+	<!-- BayerPattern -->
+	<sys:String x:Key="String/BayerPattern.BGGR_2x2">BGGR (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.GBRG_2x2">GBRG (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.GRBG_2x2">GRBG (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.RGGB_2x2">RGGB (2x2)</sys:String>
 
 	<!-- BitmapColorSpace -->
 	<sys:String x:Key="String/BitmapColorSpace.Adobe-RGB">Adobe RGB</sys:String>
@@ -62,6 +68,26 @@
 
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to frame</sys:String>
+
+	<!-- ImageFormat -->
+	<sys:String x:Key="String/ImageFormat.Android_YUV_420_888">YUV_420_888 (Android)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer Pattern (10-bit, MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer Pattern (12-bit, MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer Pattern (16-bit)</sys:String>
+	<sys:String x:Key="String/ImageFormat.I420">I420 (YUV420)</sys:String>
+	<sys:String x:Key="String/ImageFormat.NV12">NV12 (YUV420sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.NV21">NV21 (YUV420sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P010">P010 (10-bit YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P016">P016 (16-bit YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P210">P210 (10-bit YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P216">P216 (16-bit YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P410">P410 (10-bit YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P416">P416 (16-bit YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.UYVY">UYVY (YUV422)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10-bit YUV420sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16-bit YUV420sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUVY">YUVY (YUV422)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YV12">YV12 (YUV420)</sys:String>
 
 	<!-- ImageFormatCategory -->
 	<sys:String x:Key="String/ImageFormatCategory.ARGB">ARGB</sys:String>
@@ -94,6 +120,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
+	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer pattern</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness adjustment</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">Contrast</sys:String>

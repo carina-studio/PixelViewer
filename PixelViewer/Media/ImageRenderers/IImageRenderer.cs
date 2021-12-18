@@ -208,6 +208,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	struct ImageRenderingOptions
 	{
 		/// <summary>
+		/// Pattern of Bayer Filter.
+		/// </summary>
+		public BayerPattern BayerPattern { get; set; }
+
+
+		/// <summary>
 		/// Byte ordering.
 		/// </summary>
 		public ByteOrdering ByteOrdering { get; set; }

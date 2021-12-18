@@ -7,7 +7,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     /// </summary>
     class P016ImageRenderer : BaseYuv420p16ImageRenderer
     {
-        public P016ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P016", "P016 (16-bit YUV420p)", true, new ImagePlaneDescriptor[] {
+        public P016ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P016", true, new ImagePlaneDescriptor[] {
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(2),
