@@ -3,15 +3,19 @@ title: PixelViewer
 ---
 
 # Privacy Policy
-- Version: 1.0.
-- Update: 2021/6/13.
+- Version: 1.1.
+- Update: 2021/12/19.
 
 This is the privacy policy of ```PixelViewer``` which you need to read before you using ```PixelViewer```. 
-The privacy policy may be updated in the future and you can check it on the website of ```PixelViewer```. 
-We assume that you have agreed this privacy policy once you start using ```PixelViewer```.
+The Privacy Policy may be updated in the future and you can check it on the website of ```PixelViewer```. 
+We assume that you have agreed this Privacy Policy once you start using ```PixelViewer```.
 
 ## Scope of Privacy Policy
-This privacy policy will be applied when you use ```PixelViewer```.
+```PixelViewer``` is an Open Source Project. The ```PixelViewer``` mentioned after includes **ONLY** the executable files or zipped files which are exact same as the files provided by the following pages:
+* [Website of PixelViewer](https://carina-studio.github.io/PixelViewer/)
+* [Project and release pages of PixelViewer on GitHub](https://github.com/carina-studio/PixelViewer)
+
+This Privacy Policy will be applied when you use ```PixelViewer```.
 
 ## Collecting Your Personal Data
 We **DON'T** collect the following personal data:
@@ -24,6 +28,10 @@ We **DON'T** collect the following personal data:
 We **DO** collect the following data which may relate to your personal data:
 - Path/Name of files you open in ```PixelViewer``` or save in ```PixelViewer```.
 - Detailed information of application crashing.
+
+## Storing Your Personal Data
+- Path/Name of files may be written to the log file inside the directory of ```PixelViewer``` in your computer.
+- Information of application crashing will be written to the log file inside the directory of ```PixelViewer``` in your computer.
 
 ## Using Your Personal Data
 We **DON'T** have any usage of your personal data by default. All collected data mentioned in previous section are saved in your computer and we **WON'T** send or upload these data.
