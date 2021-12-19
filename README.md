@@ -1,19 +1,22 @@
-# PixelViewer
-
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blue&logo=Windows&label=Windows(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-win-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=blueviolet&logo=Apple&label=macOS(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-osx-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux(Preview))](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-linux-x64.zip)
-
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?style=for-the-badge&color=blue&logo=Windows&label=Windows)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)
-[![Download](https://img.shields.io/github/v/release/carina-studio/PixelViewer?style=for-the-badge&color=orange&logo=Linux&logoColor=ffffff&label=Linux)](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
-
-[![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.104.0.1123)
-[![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/commits/master)
-[![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
+# PixelViewer [![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.104.0.1123) [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/commits/master) [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
 
 PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixels data from file and rendering it.
 
-<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="250"/> <img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="250"/> <img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Ubuntu_Thumb.png" alt="Main window (Ubuntu)" width="250"/>
+[![Release](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=cyan&label=Preview)](https://github.com/carina-studio/PixelViewer/releases/1.104.0.1123)
+
+&nbsp;    | Windows 10/11 | Linux | macOS
+:--------:|:-------------:|:-----:|:-----:
+Download  |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-osx-x64.zip)
+Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="250"/>|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Ubuntu_Thumb.png" alt="Main window (Ubuntu)" width="250"/>|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="250"/>
+
+
+[![Release](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_releases&style=for-the-badge&color=cyan&label=Stable)](https://github.com/carina-studio/PixelViewer/releases/1.0.0.617)
+
+&nbsp;    | Windows 10/11 | Linux
+:--------:|:-------------:|:-----:
+Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
+Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Windows_Thumb_Old.png" alt="Main window (Windows)" width="250"/>|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Ubuntu_Thumb_Old.png" alt="Main window (Ubuntu)" width="250"/>
+
 
 ## ⭐Supported formats
 * Luminance
