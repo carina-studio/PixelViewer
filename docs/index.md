@@ -72,6 +72,10 @@ Screenshot|<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main
 ## 📔Topics
 - [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)
 
+## 📜User Agreement
+- [English](user_agreement.md)
+- [正體中文 (台灣)](user_agreement_zh-TW.md)
+
 ## 📜Privacy Policy
 - [English](privacy_policy.md)
 - [正體中文 (台灣)](privacy_policy_zh-TW.md)
