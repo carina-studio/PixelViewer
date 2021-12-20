@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
+using Avalonia.Visuals.Media.Imaging;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Animation;
 using Carina.PixelViewer.Media.Profiles;
@@ -54,6 +55,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Static fields.
 		static readonly AvaloniaProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
+		static readonly AvaloniaProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.Default);
 		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
@@ -86,6 +88,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ScheduledAction stopUsingSmallRenderedImageAction;
 		Vector? targetImageViewportCenter;
 		readonly ScheduledAction updateEffectiveRenderedImageAction;
+		readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
 		readonly ScheduledAction updateIsImageViewerScrollableAction;
 		readonly ScheduledAction updateStatusBarStateAction;
 		bool useSmallRenderedImage;
@@ -175,6 +178,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					this.useSmallRenderedImage = false;
 					this.updateEffectiveRenderedImageAction?.Schedule();
+					this.updateEffectiveRenderedImageIntModeAction?.Schedule();
 				}
 			});
 			this.updateEffectiveRenderedImageAction = new ScheduledAction(() =>
@@ -185,6 +189,17 @@ namespace Carina.PixelViewer.Controls
 					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.QuarterSizeRenderedImage);
 				else
 					this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.RenderedImage);
+			});
+			this.updateEffectiveRenderedImageIntModeAction = new ScheduledAction(() =>
+			{
+				if (this.DataContext is not Session session)
+					return;
+				if (useSmallRenderedImage)
+					this.SetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.LowQuality);
+				else if (session.FitRenderedImageToViewport || this.EffectiveRenderedImageScale < 1)
+					this.SetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.HighQuality);
+				else
+					this.SetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.LowQuality);
 			});
 			this.updateIsImageViewerScrollableAction = new ScheduledAction(() =>
 			{
@@ -270,6 +285,10 @@ namespace Carina.PixelViewer.Controls
 
 		// Effective rendered image to display.
 		IImage? EffectiveRenderedImage { get => this.GetValue<IImage?>(EffectiveRenderedImageProperty); }
+
+
+		// Interpolation mode for rendered image.
+		BitmapInterpolationMode EffectiveRenderedImageInterpolationMode { get => this.GetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty); }
 
 
 		/// <summary>
@@ -650,6 +669,7 @@ namespace Carina.PixelViewer.Controls
 
 					// update rendered image
 					this.updateEffectiveRenderedImageAction.Schedule();
+					this.updateEffectiveRenderedImageIntModeAction.Schedule();
 				}
 				else
 				{
@@ -1132,6 +1152,7 @@ namespace Carina.PixelViewer.Controls
 			{
 				this.useSmallRenderedImage = true;
 				this.updateEffectiveRenderedImageAction.Schedule();
+				this.updateEffectiveRenderedImageIntModeAction.Schedule();
 			}
         }
 
@@ -1167,6 +1188,7 @@ namespace Carina.PixelViewer.Controls
 			// update
 			if (Math.Abs(this.EffectiveRenderedImageScale - scale) > 0.0001)
 				this.SetValue<double>(EffectiveRenderedImageScaleProperty, scale);
+			this.updateEffectiveRenderedImageIntModeAction.Schedule();
 		}
 	}
 }
