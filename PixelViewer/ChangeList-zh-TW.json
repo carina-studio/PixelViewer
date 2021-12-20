@@ -1,34 +1,31 @@
 ﻿[
 	{
-		"Description": "支援色彩空間管理以提供更精準的色彩輸出。",
+		"Description": "支援繪製 10/12 位元 MIPI Bayer 排列之影像。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援 ITU-R BT.2020 以及 ITU-R BT.709 的 YUV 至 RGB 轉換。",
+		"Description": "支援繪製 ABGR_16161616/ARGB_16161616/BGRA_16161616/RGBA_16161616 之影像。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援在必要時使用 64 位元 RGBA 的內部影像，防止在色彩空間轉換或套用濾鏡時的色彩遺失。",
+		"Description": "支援將影像儲存為「原始 32/64 位元 BGRA 像素」。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援調整亮度、對比及色彩平衡以幫助您確認影像內容。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援使用滑鼠拖動以改變影像的檢視位置。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "提升去馬賽克效能。",
+		"Description": "升級至 .NET 6。",
+		"DetailsPageUri": "https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-6",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "提升色階分布計算效能。",
+		"Description": "更新取樣方式以提升繪製品質。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "提升使用者介面效能。",
+		"Description": "自動根據影像縮放比例調整繪製方式以改善影像品質與效能。",
+		"Type": "Improvement"
+	},
+	{
+		"Description": "支援在 Windows 7 及 Windows 8 上執行。",
 		"Type": "Improvement"
 	},
 	{
@@ -36,7 +33,7 @@
 		"Type": "Improvement"
 	},
 	{
-		"Description": "NTSC 以及 ITU-R 的 YUV 至 RGB 轉換變更為 ITU-R BT.656 以及 ITU-R BT.601。",
+		"Description": "將 BGGR_16/GBRG_16/GRBG_16/RGGB_16 合併為單一格式「Bayer 排列 (16 位元)」並允許改變其 Bayer 排列方式。",
 		"Type": "BehaviorChange"
 	},
 	{
