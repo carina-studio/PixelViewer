@@ -24,6 +24,18 @@ namespace Carina.PixelViewer.ViewModels
 
 
         // URI of privacy policy.
-        public override Uri? PrivacyPolicyUri => new Uri("https://github.com/carina-studio/PixelViewer/blob/master/PRIVACY-POLICY.md");
+        public override Uri? PrivacyPolicyUri => this.Application.CultureInfo.ToString() switch
+        {
+            "zh-TW" => new Uri("https://carina-studio.github.io/PixelViewer/privacy_policy_zh-TW.html"),
+            _ => new Uri("https://carina-studio.github.io/PixelViewer/privacy_policy.html"),
+        };
+
+
+        // URI of User Agreement.
+        public override Uri? UserAgreementUri => this.Application.CultureInfo.ToString() switch
+        {
+            "zh-TW" => new Uri("https://carina-studio.github.io/PixelViewer/user_agreement_zh-TW.html"),
+            _ => new Uri("https://carina-studio.github.io/PixelViewer/user_agreement.html"),
+        };
     }
 }

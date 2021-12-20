@@ -329,11 +329,11 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version? PrivacyPolicyVersion => null;
+		public override Version? PrivacyPolicyVersion => new Version(1, 1);
 
 
-        // Releasing type.
-        public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
+		// Releasing type.
+		public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
 
 
 		// Version of settings.
@@ -341,6 +341,6 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version? UserAgreementVersion => null;
+		public override Version? UserAgreementVersion => new Version(1, 0);
     }
 }
