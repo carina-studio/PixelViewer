@@ -8,7 +8,7 @@ title: PixelViewer
 
 This is the privacy policy of ```PixelViewer``` which you need to read before you using ```PixelViewer```. 
 The Privacy Policy may be updated in the future and you can check it on the website of ```PixelViewer```. 
-We assume that you have agreed this Privacy Policy once you start using ```PixelViewer```.
+It means that you have agreed this Privacy Policy once you start using ```PixelViewer```.
 
 ## Scope of Privacy Policy
 ```PixelViewer``` is an Open Source Project. The ```PixelViewer``` mentioned after includes **ONLY** the executable files or zipped files which are exact same as the files provided by the following pages:
