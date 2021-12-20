@@ -4,9 +4,9 @@ PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform imag
 
 [![Release](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=cyan&label=Preview)](https://github.com/carina-studio/PixelViewer/releases/1.104.0.1123)
 
-&nbsp;    | Windows 10/11 | Linux | macOS
+&nbsp;    | Windows 7/8/10/11 | Linux | macOS 10.12+/11/12
 :--------:|:-------------:|:-----:|:-----:
-Download  |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-osx-x64.zip)
+Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-arm64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-arm64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-arm64.zip)
 Screenshot|<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="250"/>|<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu_Thumb.png" alt="Main window (Ubuntu)" width="250"/>|<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="250"/>
 
 ## ⭐Supported formats
@@ -43,11 +43,14 @@ Screenshot|<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main
   * ABGR_8888
   * BGRA_8888
   * RGBA_8888
-* Bayer
-  * BGGR_16
-  * GBRG_16
-  * GRBG_16
-  * RGGB_16
+  * ARGB_16161616 (v1.105+)
+  * ABGR_16161616 (v1.105+)
+  * BGRA_16161616 (v1.105+)
+  * RGBA_16161616 (v1.105+)
+* Bayer Pattern
+  * 10-bit MIPI (v1.105+)
+  * 12-bit MIPI (v1.105+)
+  * 16-bit
   
 ## ⭐Supported color spaces (v1.104+)
 * sRGB
@@ -68,6 +71,7 @@ Screenshot|<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Main
 * Show histograms of R/G/B and luminance. (v1.102+)
 * Demosaicing for Bayer Pattern formats. (v1.103+)
 * Save rendered image as PNG file.
+* Save rendered image as JPEG/BGRA file. (v1.105+)
 
 ## 📔Topics
 - [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)

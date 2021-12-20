@@ -1,12 +1,12 @@
-# PixelViewer [![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.104.0.1123) [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/commits/master) [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
+# PixelViewer [![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/releases/tag/1.105.0.1220) [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/commits/master) [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat-square)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
 
 PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixels data from file and rendering it.
 
-[![Release](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=cyan&label=Preview)](https://github.com/carina-studio/PixelViewer/releases/1.104.0.1123)
+[![Release](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=cyan&label=Preview)](https://github.com/carina-studio/PixelViewer/releases/1.105.0.1220)
 
-&nbsp;    | Windows 10/11 | Linux | macOS
+&nbsp;    | Windows 7/8/10/11 | Linux | macOS 10.12+/11/12
 :--------:|:-------------:|:-----:|:-----:
-Download  |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-osx-x64.zip)
+Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-arm64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-arm64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-arm64.zip)
 Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="250"/>|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Ubuntu_Thumb.png" alt="Main window (Ubuntu)" width="250"/>|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="250"/>
 
 
@@ -14,7 +14,7 @@ Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/do
 
 &nbsp;    | Windows 10/11 | Linux
 :--------:|:-------------:|:-----:
-Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.104.0.1123/PixelViewer-1.104.0.1123-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
+Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
 Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Windows_Thumb_Old.png" alt="Main window (Windows)" width="250"/>|<img src="https://github.com/carina-studio/PixelViewer/blob/master/docs/Screenshot_MainWindow_Ubuntu_Thumb_Old.png" alt="Main window (Ubuntu)" width="250"/>
 
 
@@ -52,11 +52,14 @@ Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/do
   * ABGR_8888
   * BGRA_8888
   * RGBA_8888
-* Bayer
-  * BGGR_16
-  * GBRG_16
-  * GRBG_16
-  * RGGB_16
+  * ARGB_16161616 (v1.105+)
+  * ABGR_16161616 (v1.105+)
+  * BGRA_16161616 (v1.105+)
+  * RGBA_16161616 (v1.105+)
+* Bayer Pattern
+  * 10-bit MIPI (v1.105+)
+  * 12-bit MIPI (v1.105+)
+  * 16-bit
   
 ## ⭐Supported color spaces (v1.104+)
 * sRGB
@@ -77,58 +80,10 @@ Screenshot|<img src="https://github.com/carina-studio/PixelViewer/blob/master/do
 * Show histograms of R/G/B and luminance. (v1.102+)
 * Demosaicing for Bayer Pattern formats. (v1.103+)
 * Save rendered image as PNG file.
+* Save rendered image as JPEG/BGRA file. (v1.105+)
 
-## 💻Installation
-Currently PixelViewer is built as portable package, you can just unzip the package and run PixelViewer executable directly without installing .NET runtime environment.
-
-### macOS User
-If you want to run PixelViewer on macOS, please do the following steps first:
-1. Grant execution permission to PixelViewer. For ex: run command ```chmod 755 PixelViewer``` in terminal.
-2. Right click on PixelViewer > ```Open``` > Click ```Open``` on the pop-up window.
-
-You may see that system shows message like ```"XXX.dylib" can't be opened because Apple cannot check it for malicious software``` when you trying to launch PixelViewer. Once you encounter such problem, please follow the steps:
-1. Open ```System Preference``` of macOS.
-2. Choose ```Security & Privacy``` > ```General``` > Find the blocked library on the bottom and click ```Allow Anyway```.
-3. Try launching PixelViewer again.
-4. Repeat step 1~3 until all libraries are allowed. 
-
-### Ubuntu user
-Some functions of PixelViewer depend on ```libgdiplus``` before v1.99, you may need to install ```libgdiplus``` manually to let PixelViewer runs properly:
-
-```
-apt-get install libgdiplus
-```
-
-If you want to run PixelViewer on Ubuntu (also for other Linux distributions), please grant execution permission to PixelViewer first. If you want to create an entry on desktop, please follow the steps:
-1. Create a file *(name)*.desktop in ~/.local/share/applications. ex, ~/.local/share/applications/pixelviewer.desktop.
-2. Open the .desktop file and put the following content:
-
-```
-[Desktop Entry]  
-Name=PixelViewer  
-Comment=  
-Exec=(path to executable)
-Icon=(path to AppIcon_128px.png in PixelViewer folder)
-Terminal=false  
-Type=Application
-```
-
-3. After saving the file, you should see the entry shown on desktop or application list.
-
-Reference: [How can I edit/create new launcher items in Unity by hand?
-](https://askubuntu.com/questions/13758/how-can-i-edit-create-new-launcher-items-in-unity-by-hand)
-
-Currently PixelViewer lacks of ability to detect screen DPI on Linux, so you may find that UI displays too small on Hi-DPI screen. In this case you can open ```Application Options``` of PixelViewer, find ```User interface scale factor``` and change the scale factor to proper value. If you found that scale factor doesn't work on your Linux PC, please install ```xrandr``` tool then check again.
-
-## 📦Upgrade
-
-### v1.99+
-PixelViewer checks for update periodically when you are using. It will notify you to upgrade once the update found. Alternatively you can click "Check for update" item in the "Other actions" menu on the right hand side of toolbar to check whether the update is available or not.
-
-PixelViewer supports self updating on Windows and Linux, so you just need to click "Update" button and wait for updating completed. For macOS user, you just need to download and extract new package, override all existing files to upgrade.
-
-### v1.0
-PixelViewer has no installation package nor auto updater. To upgrade PixelViewer, you just need to extract new package and override all existing files.
+## 📔Topics
+- [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)
 
 ## 🤝Dependencies
 * [.NET](https://dotnet.microsoft.com/)
