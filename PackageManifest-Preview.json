@@ -11,8 +11,9 @@
 		},
 		{
 			"Architecture": "X86",
-			"FrameworkVersion": "6.0.101",
+			"FrameworkVersion": "99",
 			"OperatingSystem": "Windows",
+			"RuntimeVersion": "6.0.1",
 			"SHA256": "E237673E84608CE16A9E849662E81BF982AC5282DFF22B551E2F9B1F2919FA6A",
 			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86-fx-dependent.zip"
 		},
@@ -24,8 +25,9 @@
 		},
 		{
 			"Architecture": "X64",
-			"FrameworkVersion": "6.0.101",
+			"FrameworkVersion": "99",
 			"OperatingSystem": "Windows",
+			"RuntimeVersion": "6.0.1",
 			"SHA256": "75531EDA64A217993AC84F90BEFD910D7B248FEC4B5E291316C16B31E0592007",
 			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64-fx-dependent.zip"
 		},
@@ -37,8 +39,9 @@
 		},
 		{
 			"Architecture": "Arm64",
-			"FrameworkVersion": "6.0.101",
+			"FrameworkVersion": "99",
 			"OperatingSystem": "Windows",
+			"RuntimeVersion": "6.0.1",
 			"SHA256": "EE503661F01999BD2D0DDFC41D48CEEB676C282B65F0658870F9464BE65E395D",
 			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-arm64-fx-dependent.zip"
 		},
@@ -50,8 +53,9 @@
 		},
 		{
 			"Architecture": "X64",
-			"FrameworkVersion": "6.0.101",
+			"FrameworkVersion": "99",
 			"OperatingSystem": "Linux",
+			"RuntimeVersion": "6.0.1",
 			"SHA256": "6C6469990DCE80A935ABD99089CA1E3F2DAE0A0EFB540656FBA7A67F2FA79410",
 			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64-fx-dependent.zip"
 		},
@@ -63,8 +67,9 @@
 		},
 		{
 			"Architecture": "Arm64",
-			"FrameworkVersion": "6.0.101",
+			"FrameworkVersion": "99",
 			"OperatingSystem": "Linux",
+			"RuntimeVersion": "6.0.1",
 			"SHA256": "09008F54929EA206800D1BBBB5F03284BAD7E4780F79285D7AB70DBFCEF10BAB",
 			"Uri": "https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-arm64-fx-dependent.zip"
 		}
