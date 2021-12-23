@@ -8,7 +8,7 @@ title: PixelViewer
 PixelViewer is built as portable package. Except for Windows 7, you can just unzip the package and run PixelViewer executable directly without installing .NET Runtime.
 
 ### Windows 7 User
-You need to install [.NET Desktop Runtime 6.0.1+](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) before running ```PixelViewer```.
+You need to install [.NET Desktop Runtime 6.0.1+](https://dotnet.microsoft.com/en-us/download/dotnet/6.0) before running PixelViewer.
 
 ### macOS User
 If you want to run PixelViewer on macOS, please do the following steps first:
