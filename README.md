@@ -17,7 +17,7 @@ Screenshot|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Mai
 Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-win-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.0.0.617/PixelViewer-1.0.0.617-linux-x64.zip)
 Screenshot|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb_Old.png" alt="Main window (Windows)" width="200"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Old.png)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu_Thumb_Old.png" alt="Main window (Ubuntu)" width="200"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu_Old.png)
 
-- [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)
+- [How to Install and Upgrade PixelViewer](https://carina-studio.github.io/PixelViewer/installation_and_upgrade.html)
 
 ## ⭐Supported formats
 * Luminance
