@@ -2504,6 +2504,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.EffectiveRenderedImageScale = value;
 					this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
+					this.UpdateCanZoomInOut();
 				}
 			}
 		}
