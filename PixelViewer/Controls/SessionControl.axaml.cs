@@ -844,7 +844,7 @@ namespace Carina.PixelViewer.Controls
 			// select file
 			var fileName = (await new OpenFileDialog().ShowAsync(window)).Let((it) =>
 			{
-				if (it.IsNotEmpty())
+				if (it != null && it.IsNotEmpty())
 					return it[0];
 				return null;
 			});
