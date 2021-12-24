@@ -82,6 +82,7 @@ namespace Carina.PixelViewer.Controls
 		readonly int histogramsPanelTransitionDuration;
 		readonly double histogramsPanelTransitionX;
 		Vector? imagePointerPressedContentPosition;
+		readonly ComboBox imageRendererComboBox;
 		readonly ScrollViewer imageScrollViewer;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
@@ -149,6 +150,7 @@ namespace Carina.PixelViewer.Controls
 			});
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
 			this.histogramsPanel = this.FindControl<Control>(nameof(histogramsPanel)).AsNonNull();
+			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
@@ -334,6 +336,15 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Application string resources updated.
+		void OnApplicationStringsUpdated(object? sender, EventArgs e)
+		{
+			var imageRendererTemplate = this.imageRendererComboBox.ItemTemplate;
+			this.imageRendererComboBox.ItemTemplate = null;
+			this.imageRendererComboBox.ItemTemplate = imageRendererTemplate;
+		}
+
+
 		// Called when attached to logical tree.
 		protected override void OnAttachedToLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
@@ -345,6 +356,7 @@ namespace Carina.PixelViewer.Controls
 			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
 
 			// add event handlers
+			this.Application.StringsUpdated += this.OnApplicationStringsUpdated;
 			this.AddHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged, Avalonia.Interactivity.RoutingStrategies.Tunnel);
 
 			// attach to settings
@@ -368,6 +380,7 @@ namespace Carina.PixelViewer.Controls
 			this.RemoveHandler(DragDrop.DropEvent, this.OnDrop);
 
 			// remove event handlers
+			this.Application.StringsUpdated -= this.OnApplicationStringsUpdated;
 			this.RemoveHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged);
 
 			// detach from settings

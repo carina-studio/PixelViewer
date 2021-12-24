@@ -459,7 +459,7 @@
 						<!-- Profile -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>
 						<ComboBox Classes="Dialog_ComboBox" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
-							<ComboBox.DataTemplates>
+							<ComboBox.ItemTemplate>
 								<DataTemplate>
 									<StackPanel Orientation="Horizontal">
 										<Border Height="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}" Margin="{DynamicResource Thickness/SessionControl.ImageRenderingProfile.Icon.Margin}" VerticalAlignment="Center" Width="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}">
@@ -468,7 +468,7 @@
 										<TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
 									</StackPanel>
 								</DataTemplate>
-							</ComboBox.DataTemplates>
+							</ComboBox.ItemTemplate>
 						</ComboBox>
 						<Separator Classes="Dialog_Separator"/>
 
@@ -486,9 +486,9 @@
 
 						<!-- Image renderer -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
-						<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
-							<ComboBox.DataTemplates>
-								<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
+						<ComboBox Name="imageRendererComboBox" Classes="Dialog_ComboBox" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
+							<ComboBox.ItemTemplate>
+								<DataTemplate>
 									<Grid ColumnDefinitions="*,Auto">
 										<TextBlock Text="{Binding Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
 										<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Default}}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
@@ -496,7 +496,7 @@
 										</Border>
 									</Grid>
 								</DataTemplate>
-							</ComboBox.DataTemplates>
+							</ComboBox.ItemTemplate>
 						</ComboBox>
 						<Separator Classes="Dialog_Separator"/>
 
