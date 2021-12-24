@@ -210,13 +210,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Maximum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
 		/// </summary>
-		const double MaxRgbGain = 100;
+		public const double MaxRgbGain = 100;
 
 
 		/// <summary>
 		/// Minimum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
 		/// </summary>
-		const double MinRgbGain = 0.01;
+		public const double MinRgbGain = 0.01;
 
 
 		/// <summary>

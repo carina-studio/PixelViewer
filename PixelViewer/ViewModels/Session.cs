@@ -160,6 +160,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<double> BlueColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorAdjustment), 0, validate: it => double.IsFinite(it));
 		/// <summary>
+		/// Property of <see cref="BlueColorGain"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> BlueColorGainProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorGain), 1.0, coerce: it => ImageRenderingOptions.GetValidRgbGain(it));
+		/// <summary>
 		/// Property of <see cref="BrightnessAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> BrightnessAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BrightnessAdjustment), 0, validate: it => double.IsFinite(it));
@@ -199,6 +203,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="GreenColorAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> GreenColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorAdjustment), 0, validate: it => double.IsFinite(it));
+		/// <summary>
+		/// Property of <see cref="GreenColorGain"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> GreenColorGainProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorGain), 1.0, coerce: it => ImageRenderingOptions.GetValidRgbGain(it));
 		/// <summary>
 		/// Property of <see cref="HasBrightnessAdjustment"/>.
 		/// </summary>
@@ -364,6 +372,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
 		/// <summary>
+		/// Property of <see cref="IsRgbGainSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsRgbGainSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsRgbGainSupported));
+		/// <summary>
 		/// Property of <see cref="IsSavingFilteredImage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSavingFilteredImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingFilteredImage));
@@ -399,6 +411,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="RedColorAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> RedColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(RedColorAdjustment), 0, validate: it => double.IsFinite(it));
+		/// <summary>
+		/// Property of <see cref="RedColorGain"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> RedColorGainProperty = ObservableProperty.Register<Session, double>(nameof(RedColorGain), 1.0, coerce: it => ImageRenderingOptions.GetValidRgbGain(it));
 		/// <summary>
 		/// Property of <see cref="RenderedImage"/>.
 		/// </summary>
@@ -786,6 +802,14 @@ namespace Carina.PixelViewer.ViewModels
 					this.ChangeRowStride(i, profile.RowStrides[i]);
 				}
 
+				// RGB gain
+				if (this.IsRgbGainSupported)
+				{
+					this.SetValue(RedColorGainProperty, profile.RedColorGain);
+					this.SetValue(GreenColorGainProperty, profile.GreenColorGain);
+					this.SetValue(BlueColorGainProperty, profile.BlueColorGain);
+				}
+
 				// update state
 				if (this.renderImageAction.IsScheduled)
 				{
@@ -819,6 +843,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.GetValue(BlueColorAdjustmentProperty);
 			set => this.SetValue(BlueColorAdjustmentProperty, value);
+		}
+
+
+		/// <summary>
+		/// Get or set gain of blue color.
+		/// </summary>
+		public double BlueColorGain
+		{
+			get => this.GetValue(BlueColorGainProperty);
+			set => this.SetValue(BlueColorGainProperty, value);
 		}
 
 
@@ -1560,6 +1594,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get or set gain of green color.
+		/// </summary>
+		public double GreenColorGain
+		{
+			get => this.GetValue(GreenColorGainProperty);
+			set => this.SetValue(GreenColorGainProperty, value);
+		}
+
+
+		/// <summary>
 		/// Check whether <see cref="BrightnessAdjustment"/> is non-zero or not.
 		/// </summary>
 		public bool HasBrightnessAdjustment { get => this.GetValue(HasBrightnessAdjustmentProperty); }
@@ -1826,6 +1870,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether RGB gain is available for current <see cref="ImageRenderer"/> or not.
+		/// </summary>
+		public bool IsRgbGainSupported { get => this.GetValue(IsRgbGainSupportedProperty); }
+
+
+		/// <summary>
 		/// Check whether filtered image is being saved or not.
 		/// </summary>
 		public bool IsSavingFilteredImage { get => this.GetValue(IsSavingFilteredImageProperty); }
@@ -1960,6 +2010,13 @@ namespace Carina.PixelViewer.ViewModels
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
+			else if (property == BlueColorGainProperty
+				|| property == GreenColorGainProperty
+				|| property == RedColorGainProperty)
+			{
+				if (this.IsRgbGainSupported)
+					this.renderImageAction.Reschedule(RenderImageDelay);
+			}
 			else if (property == BrightnessAdjustmentProperty)
 			{
 				this.SetValue(HasBrightnessAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
@@ -2011,6 +2068,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
 					this.SetValue(IsBayerPatternSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
+					this.SetValue(IsRgbGainSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
 					this.SetValue(IsYuvToBgraConverterSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.YUV);
 					this.isImagePlaneOptionsResetNeeded = true;
 					this.updateFilterSupportingAction.Reschedule();
@@ -2364,6 +2422,16 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		/// <summary>
+		/// Get or set gain of red color.
+		/// </summary>
+		public double RedColorGain
+		{
+			get => this.GetValue(RedColorGainProperty);
+			set => this.SetValue(RedColorGainProperty, value);
+		}
+
+
 		// Release memory of rendered images from another session.
 		async Task<bool> ReleaseRenderedImageMemoryFromAnotherSession()
         {
@@ -2546,15 +2614,16 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// calculate frame count and index
+			var isRgbGainSupported = this.IsRgbGainSupported;
 			var renderingOptions = new ImageRenderingOptions()
 			{
 				BayerPattern = this.BayerPattern,
-				BlueGain = 1.0,
+				BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
 				Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
-				GreenGain = 1.0,
-				RedGain = 1.0,
+				GreenGain = isRgbGainSupported ? this.GreenColorGain : 1.0,
+				RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
 				YuvToBgraConverter = this.YuvToBgraConverter,
 			};
 			var frameNumber = this.FrameNumber;
@@ -2908,6 +2977,9 @@ namespace Carina.PixelViewer.ViewModels
 			var effectiveBits = new int[this.effectiveBits.Length];
 			var pixelStrides = new int[this.pixelStrides.Length];
 			var rowStrides = new int[this.rowStrides.Length];
+			var rGain = 1.0;
+			var gGain = 1.0;
+			var bGain = 1.0;
 			if (savedState.TryGetProperty(nameof(DataOffset), out jsonProperty))
 				jsonProperty.TryGetInt64(out dataOffset);
 			if (savedState.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
@@ -2960,6 +3032,12 @@ namespace Carina.PixelViewer.ViewModels
 						break;
 				}
 			}
+			if (savedState.TryGetProperty(nameof(RedColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out rGain))
+				rGain = ImageRenderingOptions.GetValidRgbGain(rGain);
+			if (savedState.TryGetProperty(nameof(GreenColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out gGain))
+				gGain = ImageRenderingOptions.GetValidRgbGain(gGain);
+			if (savedState.TryGetProperty(nameof(BlueColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out bGain))
+				bGain = ImageRenderingOptions.GetValidRgbGain(bGain);
 
 			// load filtering parameters
 			var blueColorAdjustment = 0.0;
@@ -3027,6 +3105,9 @@ namespace Carina.PixelViewer.ViewModels
 				this.ChangePixelStride(i, pixelStrides[i]);
 			for (var i = rowStrides.Length - 1; i >= 0; --i)
 				this.ChangeRowStride(i, rowStrides[i]);
+			this.SetValue(RedColorGainProperty, rGain);
+			this.SetValue(GreenColorGainProperty, gGain);
+			this.SetValue(BlueColorGainProperty, bGain);
 
 			// apply filtering parameters
 			this.SetValue(BlueColorAdjustmentProperty, blueColorAdjustment);
@@ -3321,6 +3402,12 @@ namespace Carina.PixelViewer.ViewModels
 				foreach (var n in this.rowStrides)
 					writer.WriteNumberValue(n);
 				writer.WriteEndArray();
+				if (this.IsRgbGainSupported)
+				{
+					writer.WriteNumber(nameof(RedColorGain), this.RedColorGain);
+					writer.WriteNumber(nameof(GreenColorGain), this.GreenColorGain);
+					writer.WriteNumber(nameof(BlueColorGain), this.BlueColorGain);
+				}
 
 				// filtering parameters
 				if (this.HasBrightnessAdjustment)
@@ -3541,6 +3628,12 @@ namespace Carina.PixelViewer.ViewModels
 			profile.EffectiveBits = this.effectiveBits;
 			profile.PixelStrides = this.pixelStrides;
 			profile.RowStrides = this.rowStrides;
+			if (this.IsRgbGainSupported)
+			{
+				profile.RedColorGain = this.RedColorGain;
+				profile.GreenColorGain = this.GreenColorGain;
+				profile.BlueColorGain = this.BlueColorGain;
+			}
 		}
 
 

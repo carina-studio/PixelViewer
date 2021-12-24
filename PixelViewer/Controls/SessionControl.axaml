@@ -604,6 +604,21 @@
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane3}"/>
 
+						<!-- RGB gain -->
+						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.RgbGain}" IsExpanded="True" IsVisible="{Binding IsRgbGainSupported}">
+							<StackPanel>
+								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RedColorGain}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appImageRenderers:ImageRenderingOptions.MaxRgbGain}" Minimum="{x:Static appImageRenderers:ImageRenderingOptions.MinRgbGain}" Increment="0.1" Value="{Binding RedColorGain, Mode=TwoWay}"/>
+								<Separator Classes="Dialog_Separator"/>
+								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.GreenColorGain}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appImageRenderers:ImageRenderingOptions.MaxRgbGain}" Minimum="{x:Static appImageRenderers:ImageRenderingOptions.MinRgbGain}" Increment="0.1" Value="{Binding GreenColorGain, Mode=TwoWay}"/>
+								<Separator Classes="Dialog_Separator"/>
+								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlueColorGain}"/>
+								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appImageRenderers:ImageRenderingOptions.MaxRgbGain}" Minimum="{x:Static appImageRenderers:ImageRenderingOptions.MinRgbGain}" Increment="0.1" Value="{Binding BlueColorGain, Mode=TwoWay}"/>
+							</StackPanel>
+						</Expander>
+						<Separator Classes="Dialog_Separator" IsVisible="{Binding IsRgbGainSupported}"/>
+
 						<!-- Apply profile -->
 						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ApplyProfileCommand}" Content="{DynamicResource String/SessionControl.ApplyProfile}"/>
 						<Separator Classes="Dialog_Separator_Small"/>

@@ -38,6 +38,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Fields.
         BayerPattern bayerPattern;
+        double blueColorGain = 1.0;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         BitmapColorSpace colorSpace = BitmapColorSpace.Default;
         long dataOffset;
@@ -46,9 +47,11 @@ namespace Carina.PixelViewer.Media.Profiles
         readonly FileFormat? fileFormat;
         string? fileName;
         long framePaddingSize;
+        double greenColorGain = 1.0;
         int height = 1;
         string name = "";
         IList<int> pixelStrides = emptyEffectiveBits;
+        double redColorGain = 1.0;
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
         int width = 1;
@@ -102,6 +105,24 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 this.bayerPattern = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BayerPattern)));
+            }
+        }
+
+
+        // Gain of blue color.
+        public double BlueColorGain
+        {
+            get => this.blueColorGain;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                value = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(value);
+                if (Math.Abs(this.blueColorGain - value) < 0.001)
+                    return;
+                this.blueColorGain = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlueColorGain)));
             }
         }
 
@@ -259,6 +280,24 @@ namespace Carina.PixelViewer.Media.Profiles
                     throw new ArgumentOutOfRangeException();
                 this.framePaddingSize = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(FramePaddingSize)));
+            }
+        }
+
+
+        // Gain of green color.
+        public double GreenColorGain
+        {
+            get => this.greenColorGain;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                value = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(value);
+                if (Math.Abs(this.greenColorGain - value) < 0.001)
+                    return;
+                this.greenColorGain = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GreenColorGain)));
             }
         }
 
@@ -526,6 +565,14 @@ namespace Carina.PixelViewer.Media.Profiles
                     }
                     profile.rowStrides = array.AsReadOnly();
                 }
+
+                // get RGB gain
+                if (rootElement.TryGetProperty(nameof(RedColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out profile.redColorGain))
+                    profile.redColorGain = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(profile.redColorGain);
+                if (rootElement.TryGetProperty(nameof(GreenColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out profile.greenColorGain))
+                    profile.greenColorGain = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(profile.greenColorGain);
+                if (rootElement.TryGetProperty(nameof(BlueColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out profile.blueColorGain))
+                    profile.blueColorGain = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(profile.blueColorGain);
             });
 
             // setup profile
@@ -584,6 +631,24 @@ namespace Carina.PixelViewer.Media.Profiles
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
                 this.pixelStrides = value.ToArray().AsReadOnly();
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PixelStrides)));
+            }
+        }
+
+
+        // Gain of red color.
+        public double RedColorGain
+        {
+            get => this.redColorGain;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                value = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(value);
+                if (Math.Abs(this.redColorGain - value) < 0.001)
+                    return;
+                this.redColorGain = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RedColorGain)));
             }
         }
 
@@ -694,6 +759,9 @@ namespace Carina.PixelViewer.Media.Profiles
                 for (var i = 0; i < format.PlaneCount; ++i)
                     jsonWriter.WriteNumberValue(this.rowStrides[i]);
                 jsonWriter.WriteEndArray();
+                jsonWriter.WriteNumber(nameof(RedColorGain), this.redColorGain);
+                jsonWriter.WriteNumber(nameof(GreenColorGain), this.greenColorGain);
+                jsonWriter.WriteNumber(nameof(BlueColorGain), this.blueColorGain);
                 jsonWriter.WriteEndObject();
             });
 
