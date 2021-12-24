@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
@@ -62,42 +63,60 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				: new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 | ((b2 & 0xf) << 8)) << 4));
 
 			// render
-			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
+			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
+			try
 			{
-				// render to 16-bit R/G/B
-				var bitmapRowPtr = (byte*)bitmapBaseAddress;
-				var bitmapRowStride = bitmapBuffer.RowBytes;
-				byte[] row = new byte[rowStride];
-				fixed (byte* rowPtr = row)
+				ushort** colorTransformationTables = stackalloc ushort*[3] {
+					baseColorTransformationTable,
+					baseColorTransformationTable + 65536,
+					baseColorTransformationTable + 131072,
+				};
+				BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+				BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+				BuildColorTransformationTableUnsafe(colorTransformationTables[2], ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 				{
-					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
+					// render to 16-bit R/G/B
+					var bitmapRowPtr = (byte*)bitmapBaseAddress;
+					var bitmapRowStride = bitmapBuffer.RowBytes;
+					byte[] row = new byte[rowStride];
+					fixed (byte* rowPtr = row)
 					{
-						imageStream.Read(row, 0, rowStride);
-						var packedPixelsPtr = rowPtr;
-						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
-						for (var x = 0; x < width; packedPixelsPtr += 3)
+						for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 						{
-							// 1st pixel
-							var bytes2 = packedPixelsPtr[2];
-							bitmapPixelPtr[colorComponentSelector(x, y)] = bitsCombinationFunc(packedPixelsPtr[0], bytes2);
-							bitmapPixelPtr[3] = 65535;
-							bitmapPixelPtr += 4;
-							++x;
-							bytes2 >>= 4;
+							imageStream.Read(row, 0, rowStride);
+							var packedPixelsPtr = rowPtr;
+							var bitmapPixelPtr = (ushort*)bitmapRowPtr;
+							for (var x = 0; x < width; packedPixelsPtr += 3)
+							{
+								// 1st pixel
+								var bytes2 = packedPixelsPtr[2];
+								var colorComponent = colorComponentSelector(x, y);
+								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][bitsCombinationFunc(packedPixelsPtr[0], bytes2)];
+								bitmapPixelPtr[3] = 65535;
+								bitmapPixelPtr += 4;
+								++x;
+								bytes2 >>= 4;
 
-							// 2nd pixel
-							bitmapPixelPtr[colorComponentSelector(x, y)] = bitsCombinationFunc(packedPixelsPtr[1], bytes2);
-							bitmapPixelPtr[3] = 65535;
-							bitmapPixelPtr += 4;
-							++x;
+								// 2nd pixel
+								colorComponent = colorComponentSelector(x, y);
+								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][bitsCombinationFunc(packedPixelsPtr[1], bytes2)];
+								bitmapPixelPtr[3] = 65535;
+								bitmapPixelPtr += 4;
+								++x;
+							}
+							if (cancellationToken.IsCancellationRequested)
+								break;
+							if (y < height - 1)
+								Array.Clear(row, 0, rowStride);
 						}
-						if (cancellationToken.IsCancellationRequested)
-							break;
-						if (y < height - 1)
-							Array.Clear(row, 0, rowStride);
 					}
-				}
-			});
+				});
+			}
+			finally
+            {
+				NativeMemory.Free(baseColorTransformationTable);
+            }
 		}
 	}
 }

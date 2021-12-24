@@ -48,6 +48,19 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         { }
 
 
+		/// <summary>
+		/// Build color transformation table for single color of BGRA64.
+		/// </summary>
+		/// <param name="table">Pointer to table, the length should be 65536.</param>
+		/// <param name="gain">Gain for color.</param>
+		protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain)
+		{
+			table += 65535;
+			for (var i = 65535; i >= 0; --i, --table)
+				*table = ImageProcessing.ClipToUInt16(i * gain);
+		}
+
+
 		/// <inheritdoc/>
 		protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{

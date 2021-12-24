@@ -2549,9 +2549,12 @@ namespace Carina.PixelViewer.ViewModels
 			var renderingOptions = new ImageRenderingOptions()
 			{
 				BayerPattern = this.BayerPattern,
+				BlueGain = 1.0,
 				ByteOrdering = this.ByteOrdering,
 				DataOffset = this.DataOffset,
 				Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
+				GreenGain = 1.0,
+				RedGain = 1.0,
 				YuvToBgraConverter = this.YuvToBgraConverter,
 			};
 			var frameNumber = this.FrameNumber;

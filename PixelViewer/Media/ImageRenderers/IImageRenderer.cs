@@ -208,9 +208,27 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	struct ImageRenderingOptions
 	{
 		/// <summary>
+		/// Maximum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
+		/// </summary>
+		const double MaxRgbGain = 100;
+
+
+		/// <summary>
+		/// Minimum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
+		/// </summary>
+		const double MinRgbGain = 0.01;
+
+
+		/// <summary>
 		/// Pattern of Bayer Filter.
 		/// </summary>
 		public BayerPattern BayerPattern { get; set; }
+
+
+		/// <summary>
+		/// Gain of blue color when renderering.
+		/// </summary>
+		public double BlueGain { get; set; }
 
 
 		/// <summary>
@@ -229,6 +247,35 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Whether demosaicing is needed to be performed or not.
 		/// </summary>
 		public bool Demosaicing { get; set; }
+
+
+		/// <summary>
+		/// Get valid gain of RGB color.
+		/// </summary>
+		/// <param name="gain">Original gain of RGB color.</param>
+		/// <returns>Valid gain of RGB color.</returns>
+		public static double GetValidRgbGain(double gain)
+		{
+			if (!double.IsFinite(gain))
+				return 1;
+			if (gain < MinRgbGain)
+				return MinRgbGain;
+			if (gain > MaxRgbGain)
+				return MinRgbGain;
+			return gain;
+		}
+
+
+		/// <summary>
+		/// Gain of green color when renderering.
+		/// </summary>
+		public double GreenGain { get; set; }
+
+
+		/// <summary>
+		/// Gain of red color when renderering.
+		/// </summary>
+		public double RedGain { get; set; }
 
 
 		/// <summary>
