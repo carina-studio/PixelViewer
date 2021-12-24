@@ -9,29 +9,29 @@
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|AnyCPU'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Windows|AnyCPU'">
-		<TargetFramework>net5.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.31.0.1121" />
-		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="0.31.0.1121" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.28.3.1217" />
+		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.32.0.1221" />
+		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="0.32.0.1221" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.28.8.1222" />
 		<PackageReference Include="NLog" Version="4.7.13" />
 		<PackageReference Include="NUnit" Version="3.13.2" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
