@@ -36,9 +36,13 @@
 	
 	<!-- BayerPattern -->
 	<sys:String x:Key="String/BayerPattern.BGGR_2x2">BGGR (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.BGGR_4x4">BGGR (4x4)</sys:String>
 	<sys:String x:Key="String/BayerPattern.GBRG_2x2">GBRG (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.GBRG_4x4">GBRG (4x4)</sys:String>
 	<sys:String x:Key="String/BayerPattern.GRBG_2x2">GRBG (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.GRBG_4x4">GRBG (4x4)</sys:String>
 	<sys:String x:Key="String/BayerPattern.RGGB_2x2">RGGB (2x2)</sys:String>
+	<sys:String x:Key="String/BayerPattern.RGGB_4x4">RGGB (4x4)</sys:String>
 
 	<!-- BitmapColorSpace -->
 	<sys:String x:Key="String/BitmapColorSpace.Adobe-RGB">Adobe RGB</sys:String>
