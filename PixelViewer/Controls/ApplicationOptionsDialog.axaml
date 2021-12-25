@@ -144,6 +144,13 @@
 					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptions.Others}"/>
 				</Border>
 
+				<!-- Create new tab for dropped file -->
+				<StackPanel IsVisible="{Binding $parent[Window].IsDragAndDropSupported}">
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CreateNewSessionForDroppedFile}"/>
+					<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding CreateNewSessionForDroppedFile, Mode=TwoWay}"/>
+					<Separator Classes="Dialog_Separator"/>
+				</StackPanel>
+
 				<!-- Reset plane options after changing dimensions -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ResetImagePlaneOptionsAfterChangingImageDimensions, Mode=TwoWay}"/>

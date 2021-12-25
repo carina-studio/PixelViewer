@@ -26,6 +26,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Whether new session is should be created for dropped file or not.
+		/// </summary>
+		public bool CreateNewSessionForDroppedFile
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDroppedFile);
+			set => this.Settings.SetValue<bool>(SettingKeys.CreateNewSessionForDroppedFile, value);
+		}
+
+
+		/// <summary>
 		/// Default aspect ratio for image dimensions evaluation.
 		/// </summary>
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
@@ -109,7 +119,9 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			base.OnSettingChanged(e);
 			var key = e.Key;
-			if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
+			if (key == SettingKeys.CreateNewSessionForDroppedFile)
+				this.OnPropertyChanged(nameof(this.CreateNewSessionForDroppedFile));
+			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)
 				this.OnPropertyChanged(nameof(this.DefaultImageRenderer));

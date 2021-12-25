@@ -416,7 +416,15 @@ namespace Carina.PixelViewer.Controls
 		{
 			if (e.Data.TryGetSingleFileName(out var fileName) && fileName != null)
 			{
-				this.OpenSourceFile(fileName);
+				if (this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDroppedFile) 
+					&& this.DataContext is Session session
+					&& session.IsSourceFileOpened
+					&& session.Owner is Workspace workspace)
+                {
+					workspace.CreateSession(fileName);
+				}
+				else
+					this.OpenSourceFile(fileName);
 				e.Handled = true;
 			}
 		}

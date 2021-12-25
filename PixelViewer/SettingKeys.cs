@@ -15,6 +15,10 @@ namespace Carina.PixelViewer
 		[Obsolete]
 		public static readonly SettingKey<bool> AutoSelectLanguage = new SettingKey<bool>(nameof(AutoSelectLanguage), true);
 		/// <summary>
+		/// Whether new session is should be created for dropped file or not.
+		/// </summary>
+		public static readonly SettingKey<bool> CreateNewSessionForDroppedFile = new SettingKey<bool>(nameof(CreateNewSessionForDroppedFile), true);
+		/// <summary>
 		/// Use dark interface mode.
 		/// </summary>
 		[Obsolete]

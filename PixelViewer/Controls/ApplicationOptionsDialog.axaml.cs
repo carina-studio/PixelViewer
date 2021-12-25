@@ -35,6 +35,10 @@ namespace Carina.PixelViewer.Controls
         private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
+        // Whether drag-and-drop is supported or not.
+        bool IsDragAndDropSupported { get; } = !CarinaStudio.Platform.IsLinux;
+
+
         // Called when strings updated.
         void OnAppStringsUpdated(object? sender, EventArgs e)
         {

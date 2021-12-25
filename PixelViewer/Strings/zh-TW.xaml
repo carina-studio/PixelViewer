@@ -9,6 +9,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">色彩空間管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會明顯延長影像繪製時間。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDroppedFile">建立新的分頁開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
@@ -107,7 +108,7 @@
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;無&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">刪除組態</sys:String>
 	<sys:String x:Key="String/SessionControl.Demosaicing">去馬賽克</sys:String>
-	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">拖拉檔案到這裡，或是點一下</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">拖放檔案到這裡，或是點一下</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以開啟影像檔案。</sys:String>
 	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">組態 '{0}' 已經存在。</sys:String>
 	<sys:String x:Key="String/SessionControl.EffectiveBits">有效位元數</sys:String>
