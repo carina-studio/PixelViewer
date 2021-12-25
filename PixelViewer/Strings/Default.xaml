@@ -105,6 +105,9 @@
 	<!-- ImageRenderingProfile -->
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;None&gt;</sys:String>
 
+	<!-- ImageRenderingProfileSelectionDialog -->
+	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">Select profile</sys:String>
+
 	<!-- JpegImageEncodingOptionsDialog -->
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">Compression quality:</sys:String>
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG options</sys:String>

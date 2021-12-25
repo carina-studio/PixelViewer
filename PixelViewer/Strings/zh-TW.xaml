@@ -70,6 +70,9 @@
 	<!-- ImageRenderingProfile -->
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;無&gt;</sys:String>
 
+	<!-- ImageRenderingProfileSelectionDialog -->
+	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">選擇組態</sys:String>
+
 	<!-- JpegImageEncodingOptionsDialog -->
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">壓縮品質：</sys:String>
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG 選項</sys:String>

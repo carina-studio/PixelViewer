@@ -25,6 +25,9 @@
 		<sys:Double x:Key="Double/FrameNumberSelectionDialog.Width">300</sys:Double>
 		<Thickness x:Key="Thickness/FrameNumberSelectionDialog.FrameCount.Margin">10,0,0,0</Thickness>
 
+		<!-- ImageRenderingProfileSelectionDialog -->
+		<sys:Double x:Key="Double/ImageRenderingProfileSelectionDialog.Width">400</sys:Double>
+
 		<!-- JpegImageEncodingOptionsDialog -->
 		<sys:Double x:Key="Double/JpegImageEncodingOptionsDialog.Width">300</sys:Double>
 
