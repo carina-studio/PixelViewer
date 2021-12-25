@@ -86,7 +86,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">應用程式選項…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重設至組態參數</sys:String>
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer 排列方式</sys:String>
-	<sys:String x:Key="String/SessionControl.BlueColorGain">藍色</sys:String>
+	<sys:String x:Key="String/SessionControl.BlueColorGain">藍色增益</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">調整亮度及對比</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">對比</sys:String>
@@ -116,7 +116,7 @@
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">調整至視窗大小 (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">畫面資料間格 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">灰階濾鏡</sys:String>
-	<sys:String x:Key="String/SessionControl.GreenColorGain">綠色</sys:String>
+	<sys:String x:Key="String/SessionControl.GreenColorGain">綠色增益</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Blue">藍色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Green">綠色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Luminance">亮度</sys:String>
@@ -141,11 +141,11 @@
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">處理程序的私有記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">組態</sys:String>
-	<sys:String x:Key="String/SessionControl.RedColorGain">紅色</sys:String>
+	<sys:String x:Key="String/SessionControl.RedColorGain">紅色增益</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">此分頁的影像繪製記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">繪製失敗，通常是因為使用錯誤的繪製參數。</sys:String>
-	<sys:String x:Key="String/SessionControl.RgbGain">色彩增益</sys:String>
+	<sys:String x:Key="String/SessionControl.RgbGain">色彩預先校正</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">順時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">行步距 (位元組)</sys:String>

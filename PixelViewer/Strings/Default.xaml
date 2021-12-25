@@ -121,7 +121,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer pattern</sys:String>
-	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue</sys:String>
+	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue gain</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness adjustment</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">Contrast</sys:String>
@@ -151,7 +151,7 @@
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding between frames (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">Grayscale filter</sys:String>
-	<sys:String x:Key="String/SessionControl.GreenColorGain">Green</sys:String>
+	<sys:String x:Key="String/SessionControl.GreenColorGain">Green gain</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Luminance">Luminance</sys:String>
@@ -176,11 +176,11 @@
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">Process private memory usage</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
-	<sys:String x:Key="String/SessionControl.RedColorGain">Red</sys:String>
+	<sys:String x:Key="String/SessionControl.RedColorGain">Red gain</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory usage of rendered images by this tab</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed which is usually caused by incorrect rendering parameters.</sys:String>
-	<sys:String x:Key="String/SessionControl.RgbGain">Color gain</sys:String>
+	<sys:String x:Key="String/SessionControl.RgbGain">Color pre-correction</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RowStride">Row-stride (bytes)</sys:String>
