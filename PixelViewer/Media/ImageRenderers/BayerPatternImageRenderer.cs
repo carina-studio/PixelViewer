@@ -1,6 +1,8 @@
 ﻿using CarinaStudio;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,6 +63,121 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
+		// Demosaicing for 2x2 Bayer Pattern.
+		unsafe void Demosaic2x2Pattern(IBitmapBuffer bitmapBuffer, Func<int, int, int> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+        {
+			var width = bitmapBuffer.Width;
+			var height = bitmapBuffer.Height;
+			var bitmapRowStride = bitmapBuffer.RowBytes;
+			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
+			{
+				Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+				{
+					var accumColors = stackalloc int[3];
+					var colorCounts = stackalloc int[3];
+					var bitmapPixelPtr = (ushort*)((byte*)bitmapBaseAddress + bitmapRowStride * y);
+					var leftBitmapPixelPtr = (ushort*)null;
+					var rightBitmapPixelPtr = (bitmapPixelPtr + 4);
+					var topBitmapPixelPtr = (ushort*)((byte*)bitmapPixelPtr - bitmapRowStride);
+					var bottomBitmapPixelPtr = (ushort*)((byte*)bitmapPixelPtr + bitmapRowStride);
+					var isNotTopRow = (y > 0);
+					var isNotBottomRow = (y < height - 1);
+					for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4, topBitmapPixelPtr += 4, bottomBitmapPixelPtr += 4)
+					{
+						// get component at current pixel
+						var centerComponent = colorComponentSelector(x, y);
+
+						// collect colors around current pixel
+						var neighborComponent = 0;
+						if (isNotTopRow)
+						{
+							if (x > 0)
+							{
+								neighborComponent = colorComponentSelector(x - 1, y - 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (topBitmapPixelPtr - 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+							neighborComponent = colorComponentSelector(x, y - 1);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += topBitmapPixelPtr[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+							if (x < width - 1)
+							{
+								neighborComponent = colorComponentSelector(x + 1, y - 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (topBitmapPixelPtr + 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+						}
+						if (x > 0)
+						{
+							neighborComponent = colorComponentSelector(x - 1, y);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += leftBitmapPixelPtr[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+						}
+						if (x < width - 1)
+						{
+							neighborComponent = colorComponentSelector(x + 1, y);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += rightBitmapPixelPtr[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+						}
+						if (isNotBottomRow)
+						{
+							if (x > 0)
+							{
+								neighborComponent = colorComponentSelector(x - 1, y + 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (bottomBitmapPixelPtr - 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+							neighborComponent = colorComponentSelector(x, y + 1);
+							if (neighborComponent != centerComponent)
+							{
+								accumColors[neighborComponent] += bottomBitmapPixelPtr[neighborComponent];
+								++colorCounts[neighborComponent];
+							}
+							if (x < width - 1)
+							{
+								neighborComponent = colorComponentSelector(x + 1, y + 1);
+								if (neighborComponent != centerComponent)
+								{
+									accumColors[neighborComponent] += (bottomBitmapPixelPtr + 4)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+							}
+						}
+
+						// combine to full RGB color
+						for (var i = 2; i >= 0; --i)
+						{
+							if (i != centerComponent && colorCounts[i] > 0)
+								bitmapPixelPtr[i] = (ushort)(accumColors[i] / colorCounts[i]);
+							accumColors[i] = 0;
+							colorCounts[i] = 0;
+						}
+					}
+					if (cancellationToken.IsCancellationRequested)
+						return;
+				});
+			});
+		}
+
+
 		/// <inheritdoc/>
 		protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
@@ -112,103 +229,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// demosaicing
 			if (!renderingOptions.Demosaicing)
 				return;
-			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
+			var stopwatch = new Stopwatch().Also(it => it.Start());
+			try
 			{
-				// horizontal demosaicing
-				var bitmapRowStride = bitmapBuffer.RowBytes;
-				Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-				{
-					var accumColors = stackalloc int[3];
-					var colorCounts = stackalloc int[3];
-					var bitmapPixelPtr = (ushort*)((byte*)bitmapBaseAddress + bitmapRowStride * y);
-					var leftBitmapPixelPtr = (ushort*)null;
-					var rightBitmapPixelPtr = (bitmapPixelPtr + 4);
-					for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4)
-					{
-						// get component at current pixel
-						var centerComponent = colorComponentSelector(x, y);
-
-						// collect colors around current pixel
-						if (x > 0)
-						{
-							var neighborComponent = colorComponentSelector(x - 1, y);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += leftBitmapPixelPtr[neighborComponent];
-								++colorCounts[neighborComponent];
-							}
-						}
-						if (x < width - 1)
-						{
-							var neighborComponent = colorComponentSelector(x + 1, y);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += rightBitmapPixelPtr[neighborComponent];
-								++colorCounts[neighborComponent];
-							}
-						}
-
-						// combine to full RGB color
-						for (var i = 2; i >= 0; --i)
-						{
-							if (i != centerComponent && colorCounts[i] > 0)
-								bitmapPixelPtr[i] = (ushort)(accumColors[i] / colorCounts[i]);
-							accumColors[i] = 0;
-							colorCounts[i] = 0;
-						}
-					}
-					if (cancellationToken.IsCancellationRequested)
-						return;
-				});
-
-				// vertical demosaicing
-				if (cancellationToken.IsCancellationRequested)
-					return;
-				Parallel.For(0, width, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (x) =>
-				{
-					var accumColors = stackalloc int[3];
-					var colorCounts = stackalloc int[3];
-					var bitmapPixelPtr = ((byte*)bitmapBaseAddress + x * sizeof(ulong));
-					var topBitmapPixelPtr = (bitmapPixelPtr - bitmapRowStride);
-					var bottomBitmapPixelPtr = (bitmapPixelPtr + bitmapRowStride);
-					for (var y = 0; y < height; ++y, bitmapPixelPtr += bitmapRowStride, topBitmapPixelPtr += bitmapRowStride, bottomBitmapPixelPtr += bitmapRowStride)
-					{
-						// get component at current pixel
-						var centerComponent = colorComponentSelector(x, y);
-
-						// collect colors around current pixel
-						if (y > 0)
-						{
-							var neighborComponent = colorComponentSelector(x, y - 1);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += ((ushort*)topBitmapPixelPtr)[neighborComponent];
-								++colorCounts[neighborComponent];
-							}
-						}
-						if (y < height - 1)
-						{
-							var neighborComponent = colorComponentSelector(x, y + 1);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += ((ushort*)bottomBitmapPixelPtr)[neighborComponent];
-								++colorCounts[neighborComponent];
-							}
-						}
-
-						// combine to full RGB color
-						for (var i = 2; i >= 0; --i)
-						{
-							if (i != centerComponent && colorCounts[i] > 0)
-								((ushort*)bitmapPixelPtr)[i] = (ushort)(accumColors[i] / colorCounts[i]);
-							accumColors[i] = 0;
-							colorCounts[i] = 0;
-						}
-					}
-					if (cancellationToken.IsCancellationRequested)
-						return;
-				});
-			});
+				this.Demosaic2x2Pattern(bitmapBuffer, colorComponentSelector, renderingOptions, cancellationToken);
+				if (!cancellationToken.IsCancellationRequested)
+					this.Logger.LogTrace($"Demosaicing time: {stopwatch.ElapsedMilliseconds} ms");
+			}
+			finally
+			{
+				stopwatch.Stop();
+			}
 		}
 
 
