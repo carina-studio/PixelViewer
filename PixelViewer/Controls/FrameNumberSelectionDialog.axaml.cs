@@ -1,6 +1,5 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Markup.Xaml;
 using Avalonia.VisualTree;
 using CarinaStudio;
@@ -59,12 +58,10 @@ namespace Carina.PixelViewer.Controls
         }
 
 
-        // Key up
-        protected override void OnKeyUp(KeyEventArgs e)
+        protected override void OnEnterKeyClickedOnInputControl(IControl control)
         {
-            base.OnKeyUp(e);
-            if (!e.Handled && e.Key == Key.Enter)
-                this.GenerateResultCommand.TryExecute();
+            base.OnEnterKeyClickedOnInputControl(control);
+            this.GenerateResultCommand.TryExecute();
         }
 
 
