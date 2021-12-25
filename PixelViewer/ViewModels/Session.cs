@@ -1917,7 +1917,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get maximum scaling ratio of rendered image.
 		/// </summary>
-		public double MaxRenderedImageScale { get; } = 10.0;
+		public double MaxRenderedImageScale { get; } = 20.0;
 
 
 		/// <summary>
