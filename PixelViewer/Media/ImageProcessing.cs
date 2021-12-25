@@ -453,6 +453,11 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+		// Convert from RGB to Luminance based-on ITU-R BT.709.
+		static double RgbToLuminanceBT709(double r, double g, double b) =>
+			(0.2126 * r) + (0.7152 * g) + (0.0722 * b);
+
+
 		/// <summary>
 		/// Select property function to denormalize and pack B/G/R/A into 32-bit integer.
 		/// </summary>
@@ -616,6 +621,13 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>
 		public static delegate*<ushort, ushort, ushort, ushort> SelectRgb48ToLuminanceConversion() => &Rgb48ToLuminanceBT709;
+
+
+		/// <summary>
+		/// Select proper function to convert from RGB to luminance.
+		/// </summary>
+		/// <returns>RGB to luminance conversion function.</returns>
+		public static delegate*<double, double, double, double> SelectRgbToLuminanceConversion() => &RgbToLuminanceBT709;
 
 
 		/// <summary>

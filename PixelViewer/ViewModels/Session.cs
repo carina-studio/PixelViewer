@@ -1391,18 +1391,21 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				if (this.canResetColorAdjustment.Value)
 				{
-					var rFactor = this.RedColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-					var gFactor = this.GreenColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-					var bFactor = this.BlueColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-					var correction = 3 / (rFactor + gFactor + bFactor);
-					rFactor *= correction;
-					gFactor *= correction;
-					bFactor *= correction;
-					gLut = rLut.ToArray();
-					bLut = rLut.ToArray();
-					ColorLut.Multiply(rLut, rFactor);
-					ColorLut.Multiply(gLut, gFactor);
-					ColorLut.Multiply(bLut, bFactor);
+					unsafe
+					{
+						var rFactor = this.RedColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+						var gFactor = this.GreenColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+						var bFactor = this.BlueColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+						var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
+						rFactor *= correction;
+						gFactor *= correction;
+						bFactor *= correction;
+						gLut = rLut.ToArray();
+						bLut = rLut.ToArray();
+						ColorLut.Multiply(rLut, rFactor);
+						ColorLut.Multiply(gLut, gFactor);
+						ColorLut.Multiply(bLut, bFactor);
+					}
 				}
 
 				// apply filter
