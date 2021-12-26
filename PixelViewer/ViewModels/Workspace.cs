@@ -1,4 +1,4 @@
-﻿using Carina.PixelViewer.Input;
+﻿using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.AppSuite.ViewModels;
@@ -136,6 +136,18 @@ namespace Carina.PixelViewer.ViewModels
 			// complete
 			return session;
 		}
+
+
+		/// <summary>
+		/// Create new session.
+		/// </summary>
+		/// <param name="fileName">Name of source image file.</param>
+		/// <param name="profile">Initial profile.</param>
+		/// <returns>Created <see cref="Session"/>.</returns>
+		public Session CreateSession(string fileName, ImageRenderingProfile profile) => this.CreateSession(fileName).Also(it =>
+		{
+			it.Profile = profile;
+		});
 
 
 		// Dispose.

@@ -26,12 +26,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Whether new session is should be created for dropped file or not.
+		/// Whether new session is should be created for drag-and-drop file or not.
 		/// </summary>
-		public bool CreateNewSessionForDroppedFile
+		public bool CreateNewSessionForDragDropFile
 		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDroppedFile);
-			set => this.Settings.SetValue<bool>(SettingKeys.CreateNewSessionForDroppedFile, value);
+			get => this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile);
+			set => this.Settings.SetValue<bool>(SettingKeys.CreateNewSessionForDragDropFile, value);
 		}
 
 
@@ -119,8 +119,8 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			base.OnSettingChanged(e);
 			var key = e.Key;
-			if (key == SettingKeys.CreateNewSessionForDroppedFile)
-				this.OnPropertyChanged(nameof(this.CreateNewSessionForDroppedFile));
+			if (key == SettingKeys.CreateNewSessionForDragDropFile)
+				this.OnPropertyChanged(nameof(this.CreateNewSessionForDragDropFile));
 			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)

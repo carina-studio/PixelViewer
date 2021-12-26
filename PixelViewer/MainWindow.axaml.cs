@@ -11,7 +11,6 @@ using CarinaStudio.Collections;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
-using Microsoft.Extensions.Logging;
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Microsoft.WindowsAPICodePack.Taskbar;
 #endif
@@ -280,7 +279,7 @@ namespace Carina.PixelViewer
 		{
 			if (e.Handled)
 				return;
-			if (!e.Data.TryGetSingleFileName(out var fileName))
+			if (!e.Data.HasFileNames())
 			{
 				e.DragEffects = DragDropEffects.None;
 				return;
@@ -300,28 +299,26 @@ namespace Carina.PixelViewer
 		// Called when drop.
 		void OnDrop(object? sender, DragEventArgs e)
 		{
+			// check state
 			if (e.Handled)
 				return;
-			if (e.Data.TryGetSingleFileName(out var fileName) && fileName != null)
-			{
-				// find tab
-				int mainTabIndex = this.FindMainTabItemIndex(e);
-				if (mainTabIndex < 0)
-					return;
 
-				// find session and open file
-				if (mainTabIndex < this.mainTabItems.Count - 1)
-				{
-					((this.mainTabItems[mainTabIndex] as TabItem)?.DataContext as Session)?.Let((session) =>
-					{
-						this.Logger.LogDebug($"Open source '{fileName}' by drag-drop to {session}");
-						if (!session.OpenSourceFileCommand.TryExecute(fileName))
-							this.Logger.LogError($"Cannot open source '{fileName}' by drag-drop to {session}");
-					});
-				}
-				else
-					(this.DataContext as Workspace)?.CreateSession(fileName);
-			}
+			// find tab
+			int mainTabIndex = this.FindMainTabItemIndex(e);
+			if (mainTabIndex < 0)
+				return;
+			if (mainTabIndex >= this.mainTabItems.Count - 1)
+            {
+				var session = (this.DataContext as Workspace)?.CreateSession();
+				if (session == null)
+					return;
+            }
+
+			// drop data
+			((this.mainTabItems[mainTabIndex] as TabItem)?.Content as SessionControl)?.Let(it =>
+			{
+				_ = it.DropDataAsync(e);
+			});
 		}
 
 

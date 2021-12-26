@@ -144,10 +144,10 @@
 					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptions.Others}"/>
 				</Border>
 
-				<!-- Create new tab for dropped file -->
+				<!-- Create new tab for drag-and-drop file -->
 				<StackPanel IsVisible="{Binding $parent[Window].IsDragAndDropSupported}">
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CreateNewSessionForDroppedFile}"/>
-					<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding CreateNewSessionForDroppedFile, Mode=TwoWay}"/>
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile}"/>
+					<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding CreateNewSessionForDragDropFile, Mode=TwoWay}"/>
 					<Separator Classes="Dialog_Separator"/>
 				</StackPanel>
 

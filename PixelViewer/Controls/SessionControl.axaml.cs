@@ -26,6 +26,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Carina.PixelViewer.Controls
@@ -285,6 +286,74 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		/// <summary>
+		/// Drop data to this control.
+		/// </summary>
+		/// <param name="e">Drag-and-drop data.</param>
+		/// <returns>True if data has been accepted.</returns>
+		public async Task<bool> DropDataAsync(DragEventArgs e)
+		{
+			// get file names
+			var fileNames = e.Data.GetFileNames()?.ToArray();
+			if (fileNames == null || fileNames.IsEmpty())
+				return false;
+
+			// get window
+			var window = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>();
+			if (window == null)
+				return false;
+
+			// check file count
+			if (fileNames.Length > 8)
+			{
+				await new MessageDialog()
+				{
+					Icon = MessageDialogIcon.Warning,
+					Message = this.Application.GetString("SessionControl.MaxDragDropFileCountReached"),
+				}.ShowDialog(window);
+				return false;
+			}
+
+			// open files
+			if (fileNames.Length > 1)
+			{
+				// select profile
+				var profile = await new ImageRenderingProfileSelectionDialog()
+				{
+					Message = this.Application.GetString("SessionControl.SelectProfileToOpenFiles"),
+				}.ShowDialog<ImageRenderingProfile?>(window);
+				if (profile == null)
+					return false;
+
+				// get workspace
+				if (this.DataContext is not Session session || session.Owner is not Workspace workspace)
+					return false;
+
+				// create sessions
+				foreach (var fileName in fileNames)
+				{
+					if (session.SourceFileName != null)
+						workspace.CreateSession(fileName, profile);
+					else
+					{
+						session.OpenSourceFileCommand.TryExecute(fileName);
+						session.Profile = profile;
+					}
+				}
+			}
+			else if (this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile)
+					&& this.DataContext is Session session
+					&& session.SourceFileName != null
+					&& session.Owner is Workspace workspace)
+			{
+				workspace.CreateSession(fileNames[0]);
+			}
+			else
+				this.OpenSourceFile(fileNames[0]);
+			return true;
+		}
+
+
 		// Effective rendered image to display.
 		IImage? EffectiveRenderedImage { get => this.GetValue<IImage?>(EffectiveRenderedImageProperty); }
 
@@ -401,7 +470,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when drag over.
 		void OnDragOver(object? sender, DragEventArgs e)
 		{
-			if (e.Data.TryGetSingleFileName(out var fileName))
+			if (e.Data.HasFileNames())
 			{
 				e.DragEffects = DragDropEffects.Copy;
 				e.Handled = true;
@@ -414,19 +483,8 @@ namespace Carina.PixelViewer.Controls
 		// Called when drop.
 		void OnDrop(object? sender, DragEventArgs e)
 		{
-			if (e.Data.TryGetSingleFileName(out var fileName) && fileName != null)
-			{
-				if (this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDroppedFile) 
-					&& this.DataContext is Session session
-					&& session.IsSourceFileOpened
-					&& session.Owner is Workspace workspace)
-                {
-					workspace.CreateSession(fileName);
-				}
-				else
-					this.OpenSourceFile(fileName);
-				e.Handled = true;
-			}
+			_ = this.DropDataAsync(e);
+			e.Handled = true;
 		}
 
 
@@ -951,7 +1009,7 @@ namespace Carina.PixelViewer.Controls
 				// show message for duplicate name
 				await new MessageDialog()
 				{
-					Icon = CarinaStudio.AppSuite.Controls.MessageDialogIcon.Warning,
+					Icon = MessageDialogIcon.Warning,
 					Message = string.Format(this.Application.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
 				}.ShowDialog(window);
 			}

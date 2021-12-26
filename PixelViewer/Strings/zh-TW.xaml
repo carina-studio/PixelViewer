@@ -9,7 +9,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">色彩空間管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會明顯延長影像繪製時間。</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDroppedFile">建立新的分頁開啟拖放的檔案</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
@@ -133,6 +133,7 @@
 	<sys:String x:Key="String/SessionControl.ImageRenderer">格式</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱：</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">記憶體不足。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
+	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">最多支援拖放 8 個檔案。</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一張畫面 (Home)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最後一張畫面 (End)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一張畫面 (Page Down)</sys:String>
@@ -157,6 +158,7 @@
 	<sys:String x:Key="String/SessionControl.SaveImage">儲存影像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">儲存組態</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">開啟檔案所使用的組態</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案總管中顯示檔案</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>

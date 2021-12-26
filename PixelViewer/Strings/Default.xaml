@@ -9,7 +9,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">Color space management</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will significantly impacts the performance of image rendering.</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDroppedFile">Create new tab to open dragged file</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
@@ -172,6 +172,7 @@
 	<sys:String x:Key="String/SessionControl.ImageRenderer">Format</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">Name of profile:</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in application options.</sys:String>
+	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">Max supported number of dragged files is 8.</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">Move to the first frame (Home)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToLastFrame">Move to the last frame (End)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">Move to next frame (Page Down)</sys:String>
@@ -196,6 +197,7 @@
 	<sys:String x:Key="String/SessionControl.SaveImage">Save image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to open files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show file in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
