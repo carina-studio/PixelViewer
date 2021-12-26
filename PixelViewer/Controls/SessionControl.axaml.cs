@@ -1236,7 +1236,11 @@ namespace Carina.PixelViewer.Controls
 
 		// Start using small rendered image.
 		void StartUsingSmallRenderedImage()
-        {
+		{
+			if (this.DataContext is not Session session)
+				return;
+			if (!session.FitRenderedImageToViewport && session.EffectiveRenderedImageScale >= 2)
+				return;
 			this.stopUsingSmallRenderedImageAction.Cancel();
 			if (!this.useSmallRenderedImage)
 			{
@@ -1244,7 +1248,7 @@ namespace Carina.PixelViewer.Controls
 				this.updateEffectiveRenderedImageAction.Schedule();
 				this.updateEffectiveRenderedImageIntModeAction.Schedule();
 			}
-        }
+		}
 
 
 		// Status bar state.
