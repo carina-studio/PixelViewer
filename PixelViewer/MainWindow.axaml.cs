@@ -388,12 +388,15 @@ namespace Carina.PixelViewer
 							var tabIndex = this.FindMainTabItemIndex(session);
 							if (tabIndex < 0 || this.mainTabItems[tabIndex] is not TabItem tabItem)
 								continue;
-							if (tabIndex > 0)
-								this.mainTabControl.SelectedIndex = (tabIndex - 1);
-							else if (tabIndex < this.mainTabItems.Count - 2)
-								this.mainTabControl.SelectedIndex = (tabIndex + 1);
-							else
-								this.mainTabControl.SelectedIndex = -1;
+							if (this.mainTabControl.SelectedIndex == tabIndex)
+							{
+								if (tabIndex > 0)
+									this.mainTabControl.SelectedIndex = (tabIndex - 1);
+								else if (tabIndex < this.mainTabItems.Count - 2)
+									this.mainTabControl.SelectedIndex = (tabIndex + 1);
+								else
+									this.mainTabControl.SelectedIndex = -1;
+							}
 							this.mainTabItems.RemoveAt(tabIndex);
 						}
 						(this.DataContext as Workspace)?.Let((it) =>
@@ -418,7 +421,10 @@ namespace Carina.PixelViewer
 				var activatedSession = workspace.ActivatedSession;
 				var tabIndex = activatedSession != null ? this.FindMainTabItemIndex(activatedSession) : -1;
 				if (tabIndex < 0)
-					this.mainTabControl.SelectedIndex = 0;
+				{
+					if (activatedSession != null)
+						this.mainTabControl.SelectedIndex = 0;
+				}
 				else if (this.mainTabControl.SelectedIndex != tabIndex)
 					this.mainTabControl.SelectedIndex = tabIndex;
 				if (activatedSession != null)
