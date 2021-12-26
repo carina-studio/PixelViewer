@@ -1,5 +1,6 @@
 ﻿using CarinaStudio;
 using CarinaStudio.IO;
+using CarinaStudio.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// </summary>
 	abstract class BaseImageRenderer : IImageRenderer
 	{
+		// Statis fields.
+		static readonly TaskFactory RenderingTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(Math.Min(2, Environment.ProcessorCount)));
+
+
 		/// <summary>
 		/// Initialize new <see cref="BaseImageRenderer"/> instance.
 		/// </summary>
@@ -120,7 +125,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// render
 			try
             {
-				await Task.Run(() =>
+				await RenderingTaskFactory.StartNew(() =>
 				{
 					if (renderingOptions.DataOffset > 0)
 						stream.Seek(renderingOptions.DataOffset, SeekOrigin.Begin);

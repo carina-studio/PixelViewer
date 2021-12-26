@@ -669,10 +669,16 @@ namespace Carina.PixelViewer.ViewModels
 		// Try allocating image frame for filtered image.
 		async Task<ImageFrame?> AllocateFilteredImageFrame(ImageFrame renderedImageFrame)
 		{
+			var extraWaitingPerformed = false;
 			while (true)
 			{
 				try
 				{
+					if (!this.IsActivated)
+					{
+						this.Logger.LogWarning("No need to allocate filtered image frame because session has been deactivated");
+						return null;
+					}
 					return ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.ColorSpace, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height);
 				}
 				catch (Exception ex)
@@ -689,8 +695,16 @@ namespace Carina.PixelViewer.ViewModels
 						}
 						else if (!(await this.HibernateAnotherSessionAsync()))
 						{
-							this.Logger.LogWarning("Unable to release rendered image from another session");
-							return null;
+							if (extraWaitingPerformed)
+							{
+								this.Logger.LogWarning("Unable to release rendered image from another session");
+								return null;
+							}
+							else
+							{
+								extraWaitingPerformed = true;
+								await Task.Delay(1000);
+							}
 						}
 					}
 					else
@@ -706,10 +720,16 @@ namespace Carina.PixelViewer.ViewModels
 		// Try allocating image frame for rendered image.
 		async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, BitmapColorSpace colorSpace, int width, int height)
 		{
+			var extraWaitingPerformed = false;
 			while (true)
 			{
 				try
 				{
+					if (!this.IsActivated)
+					{
+						this.Logger.LogWarning("No need to allocate rendered image frame because session has been deactivated");
+						return null;
+					}
 					return ImageFrame.Allocate(this, frameNumber, format, colorSpace, width, height);
 				}
 				catch (Exception ex)
@@ -727,8 +747,16 @@ namespace Carina.PixelViewer.ViewModels
 						}
 						else if (!(await this.HibernateAnotherSessionAsync()))
 						{
-							this.Logger.LogWarning("Unable to release rendered image from another session");
-							return null;
+							if (extraWaitingPerformed)
+							{
+								this.Logger.LogWarning("Unable to release rendered image from another session");
+								return null;
+							}
+							else
+							{
+								extraWaitingPerformed = true;
+								await Task.Delay(1000);
+							}
 						}
 					}
 					else
@@ -1160,6 +1188,13 @@ namespace Carina.PixelViewer.ViewModels
 			// deactivate
 			this.Logger.LogDebug("Deactivate");
 			this.SetValue(IsActivatedProperty, false);
+
+			// hibernate directly
+			if (!this.HasRenderedImage)
+			{
+				this.Logger.LogWarning("No rendered image before deactivation, hibernate the session");
+				this.Hibernate();
+			}
 		}
 
 
@@ -1340,9 +1375,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageFilteringCancellationTokenSource = null;
-					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
 					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 					this.SetValue(IsFilteringRenderedImageProperty, false);
+					if (!this.IsActivated && !this.IsHibernated)
+					{
+						this.Logger.LogWarning("Ubable to allocate filtered image frame after deactivation, hibernate the session");
+						this.Hibernate();
+					}
 				}
 				else if (this.hasPendingImageFiltering)
 				{
@@ -2578,6 +2618,15 @@ namespace Carina.PixelViewer.ViewModels
 				this.hasPendingImageRendering = true;
 				return;
 			}
+			if (!this.IsActivated && !this.HasRenderedImage)
+			{
+				if (!this.IsHibernated)
+				{
+					this.Logger.LogWarning("No image rendered before deactivation, hibernate the session");
+					this.Hibernate();
+				}
+				return;
+			}
 			this.isFirstImageRenderingForSource = false;
 			this.hasPendingImageRendering = false;
 
@@ -2713,10 +2762,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageRenderingCancellationTokenSource = null;
-					if (this.IsActivated)
-						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
 					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 					this.SetValue(IsRenderingImageProperty, false);
+					if (!this.IsActivated && !this.IsHibernated)
+					{
+						this.Logger.LogWarning("Ubable to allocate rendered image frame after deactivation, hibernate the session");
+						this.Hibernate();
+					}
 				}
 				else if (this.hasPendingImageRendering)
 				{
