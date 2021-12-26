@@ -356,6 +356,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsGrayscaleFilterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterSupported));
 		/// <summary>
+		/// Property of <see cref="IsHibernated"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsHibernatedProperty = ObservableProperty.Register<Session, bool>(nameof(IsHibernated));
+		/// <summary>
 		/// Property of <see cref="IsHistogramsVisible"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
@@ -649,6 +653,11 @@ namespace Carina.PixelViewer.ViewModels
 			if (this.activationTokens.Count == 1)
 			{
 				this.Logger.LogDebug("Activate");
+				if (this.IsHibernated)
+				{
+					this.Logger.LogWarning("Leave hibernation");
+					this.SetValue(IsHibernatedProperty, false);
+				}
 				if (!this.HasRenderedImage)
 					this.renderImageAction.Reschedule();
 				this.SetValue(IsActivatedProperty, true);
@@ -678,7 +687,7 @@ namespace Carina.PixelViewer.ViewModels
 							this.SetValue(RenderedImageProperty, null);
 							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 						}
-						else if (!(await this.ReleaseRenderedImageMemoryFromAnotherSession()))
+						else if (!(await this.HibernateAnotherSessionAsync()))
 						{
 							this.Logger.LogWarning("Unable to release rendered image from another session");
 							return null;
@@ -716,7 +725,7 @@ namespace Carina.PixelViewer.ViewModels
 							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 						}
-						else if (!(await this.ReleaseRenderedImageMemoryFromAnotherSession()))
+						else if (!(await this.HibernateAnotherSessionAsync()))
 						{
 							this.Logger.LogWarning("Unable to release rendered image from another session");
 							return null;
@@ -978,12 +987,8 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Clear rendered image.
-		bool ClearRenderedImage(bool checkActivation)
+		bool ClearRenderedImage()
 		{
-			// check state
-			if (this.IsActivated && checkActivation)
-				return false;
-
 			// clear filtered image
 			this.ClearFilteredImage();
 
@@ -1684,6 +1689,59 @@ namespace Carina.PixelViewer.ViewModels
 		public bool HasSelectedRenderedImagePixel { get => this.GetValue(HasSelectedRenderedImagePixelProperty); }
 
 
+		// Hibernate.
+		bool Hibernate()
+        {
+			// check state
+			if (this.IsDisposed || this.IsActivated)
+				return false;
+			if (this.IsHibernated)
+				return true;
+
+			this.Logger.LogWarning("Hibernate");
+
+			// update state
+			this.SetValue(IsHibernatedProperty, true);
+
+			// clear images
+			this.ClearRenderedImage();
+
+			// complete
+			return true;
+        }
+
+
+		// Hibernate another session.
+		async Task<bool> HibernateAnotherSessionAsync()
+		{
+			var maxMemoryUsage = 0L;
+			var sessionToClearRenderedImage = (Session?)null;
+			foreach (var candidateSession in ((Workspace)this.Owner.AsNonNull()).Sessions)
+			{
+				if (candidateSession == this || candidateSession.IsActivated || candidateSession.IsHibernated)
+					continue;
+				if (candidateSession.RenderedImagesMemoryUsage > maxMemoryUsage)
+				{
+					maxMemoryUsage = candidateSession.RenderedImagesMemoryUsage;
+					sessionToClearRenderedImage = candidateSession;
+				}
+			}
+			if (sessionToClearRenderedImage != null)
+			{
+				this.Logger.LogWarning($"Hibernate {sessionToClearRenderedImage}");
+				if (sessionToClearRenderedImage.Hibernate())
+				{
+					await Task.Delay(1000);
+					return true;
+				}
+				this.Logger.LogError($"Failed to hibernate {sessionToClearRenderedImage}");
+				return false;
+			}
+			this.Logger.LogWarning("No deactivated session to hibernate");
+			return false;
+		}
+
+
 		/// <summary>
 		/// Get histograms of <see cref="RenderedImage"/>.
 		/// </summary>
@@ -1842,6 +1900,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether grayscale filter is supported or not.
 		/// </summary>
 		public bool IsGrayscaleFilterSupported { get => this.GetValue(IsGrayscaleFilterSupportedProperty); }
+
+
+		/// <summary>
+		/// Check whether instance is hibernated or not.
+		/// </summary>
+		public bool IsHibernated { get => this.GetValue(IsHibernatedProperty); }
 
 
 		/// <summary>
@@ -2103,7 +2167,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsActivated)
 					this.renderImageAction.Reschedule();
 				else
-					this.ClearRenderedImage(false);
+					this.ClearRenderedImage();
 			}
 			else if (property == IsContrastAdjustmentSupportedProperty)
 			{
@@ -2432,37 +2496,6 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.GetValue(RedColorGainProperty);
 			set => this.SetValue(RedColorGainProperty, value);
-		}
-
-
-		// Release memory of rendered images from another session.
-		async Task<bool> ReleaseRenderedImageMemoryFromAnotherSession()
-        {
-			var maxMemoryUsage = 0L;
-			var sessionToClearRenderedImage = (Session?)null;
-			foreach (var candidateSession in ((Workspace)this.Owner.AsNonNull()).Sessions)
-			{
-				if (candidateSession == this || candidateSession.IsActivated)
-					continue;
-				if (candidateSession.RenderedImagesMemoryUsage > maxMemoryUsage)
-				{
-					maxMemoryUsage = candidateSession.RenderedImagesMemoryUsage;
-					sessionToClearRenderedImage = candidateSession;
-				}
-			}
-			if (sessionToClearRenderedImage != null)
-			{
-				this.Logger.LogWarning($"Release rendered image of {sessionToClearRenderedImage}");
-				if (sessionToClearRenderedImage.ClearRenderedImage(true))
-				{
-					await Task.Delay(1000);
-					return true;
-				}
-				this.Logger.LogError($"Failed to release rendered image of {sessionToClearRenderedImage}");
-				return false;
-			}
-			this.Logger.LogWarning("No deactivated session to release rendered image");
-			return false;
 		}
 
 

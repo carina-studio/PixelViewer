@@ -18,7 +18,7 @@
 			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto" DragDrop.AllowDrop="True">
 				<Panel Classes="TabItem_Icon">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
-					<Panel IsVisible="{Binding IsSourceFileOpened}">
+					<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceFileOpened}">
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image}" IsVisible="{Binding InsufficientMemoryForRenderedImage}"/>
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image.Active}" IsVisible="{Binding !InsufficientMemoryForRenderedImage}"/>
 					</Panel>
