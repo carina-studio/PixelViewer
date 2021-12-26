@@ -441,8 +441,19 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Called when detached from logical tree.
-		protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
+		// Called when attached to visual tree.
+        protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
+        {
+            base.OnAttachedToVisualTree(e);
+
+			// [Workaround] Force refreshing status bar state to make background applied as expected
+			this.SetValue<StatusBarState>(StatusBarStateProperty, StatusBarState.None);
+			this.updateStatusBarStateAction.Reschedule();
+		}
+
+
+        // Called when detached from logical tree.
+        protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
 			// disable drag-drop
 			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
