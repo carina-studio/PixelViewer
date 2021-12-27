@@ -238,6 +238,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];
+					var use5x5BlockColors = stackalloc bool[3];
 					var bitmapPixelPtr = (ushort*)((byte*)bitmapBaseAddress + bitmapRowStride * y);
 					var top1BitmapPixelPtr = (ushort*)((byte*)bitmapPixelPtr - bitmapRowStride);
 					var top2BitmapPixelPtr = (ushort*)((byte*)bitmapPixelPtr - bitmapRowStride - bitmapRowStride);
@@ -252,78 +253,24 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						// get component at current pixel
 						var centerComponent = colorComponentSelector(x, y);
 
-						// collect colors around current pixel
+						// collect colors in 3x3 sub block first
 						var neighborComponent = 0;
-						if (isNotTop2Row)
-						{
-							if (x > 1)
-							{
-								neighborComponent = colorComponentSelector(x - 2, y - 2);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (top2BitmapPixelPtr - 8)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
-							if (x > 0)
-							{
-								neighborComponent = colorComponentSelector(x - 1, y - 2);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (top2BitmapPixelPtr - 4)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
-							neighborComponent = colorComponentSelector(x, y - 2);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += (top2BitmapPixelPtr)[neighborComponent];
-								++colorCounts[neighborComponent];
-							}
-							if (x < width - 1)
-							{
-								neighborComponent = colorComponentSelector(x + 1, y - 2);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (top2BitmapPixelPtr + 4)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
-							if (x < width - 2)
-							{
-								neighborComponent = colorComponentSelector(x + 2, y - 2);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (top2BitmapPixelPtr + 8)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
-						}
 						if (isNotTop1Row)
 						{
-							if (x > 1)
-							{
-								neighborComponent = colorComponentSelector(x - 2, y - 1);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (top1BitmapPixelPtr - 8)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
 							if (x > 0)
 							{
 								neighborComponent = colorComponentSelector(x - 1, y - 1);
 								if (neighborComponent != centerComponent)
 								{
 									accumColors[neighborComponent] += (top1BitmapPixelPtr - 4)[neighborComponent];
-									colorCounts[neighborComponent] += 2;
+									++colorCounts[neighborComponent];
 								}
 							}
 							neighborComponent = colorComponentSelector(x, y - 1);
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += (top1BitmapPixelPtr)[neighborComponent];
-								colorCounts[neighborComponent] += 2;
+								++colorCounts[neighborComponent];
 							}
 							if (x < width - 1)
 							{
@@ -331,26 +278,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								if (neighborComponent != centerComponent)
 								{
 									accumColors[neighborComponent] += (top1BitmapPixelPtr + 4)[neighborComponent];
-									colorCounts[neighborComponent] += 2;
-								}
-							}
-							if (x < width - 2)
-							{
-								neighborComponent = colorComponentSelector(x + 2, y - 1);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (top1BitmapPixelPtr + 8)[neighborComponent];
 									++colorCounts[neighborComponent];
 								}
-							}
-						}
-						if (x > 1)
-						{
-							neighborComponent = colorComponentSelector(x - 2, y);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += (bitmapPixelPtr - 8)[neighborComponent];
-								++colorCounts[neighborComponent];
 							}
 						}
 						if (x > 0)
@@ -359,7 +288,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += (bitmapPixelPtr - 4)[neighborComponent];
-								colorCounts[neighborComponent] += 2;
+								++colorCounts[neighborComponent];
 							}
 						}
 						if (x < width - 1)
@@ -368,43 +297,25 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += (bitmapPixelPtr + 4)[neighborComponent];
-								colorCounts[neighborComponent] += 2;
-							}
-						}
-						if (x < width - 2)
-						{
-							neighborComponent = colorComponentSelector(x + 2, y);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += (bitmapPixelPtr + 8)[neighborComponent];
 								++colorCounts[neighborComponent];
 							}
 						}
 						if (isNotBottom1Row)
 						{
-							if (x > 1)
-							{
-								neighborComponent = colorComponentSelector(x - 2, y + 1);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (bottom1BitmapPixelPtr - 8)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
 							if (x > 0)
 							{
 								neighborComponent = colorComponentSelector(x - 1, y + 1);
 								if (neighborComponent != centerComponent)
 								{
 									accumColors[neighborComponent] += (bottom1BitmapPixelPtr - 4)[neighborComponent];
-									colorCounts[neighborComponent] += 2;
+									++colorCounts[neighborComponent];
 								}
 							}
 							neighborComponent = colorComponentSelector(x, y + 1);
 							if (neighborComponent != centerComponent)
 							{
 								accumColors[neighborComponent] += (bottom1BitmapPixelPtr)[neighborComponent];
-								colorCounts[neighborComponent] += 2;
+								++colorCounts[neighborComponent];
 							}
 							if (x < width - 1)
 							{
@@ -412,61 +323,171 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								if (neighborComponent != centerComponent)
 								{
 									accumColors[neighborComponent] += (bottom1BitmapPixelPtr + 4)[neighborComponent];
-									colorCounts[neighborComponent] += 2;
-								}
-							}
-							if (x < width - 2)
-							{
-								neighborComponent = colorComponentSelector(x + 2, y + 1);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (bottom1BitmapPixelPtr + 8)[neighborComponent];
 									++colorCounts[neighborComponent];
 								}
 							}
 						}
-						if (isNotBottom2Row)
+
+						// collect colors in 5x5 sub block if needed
+						var is5x5BlockNeeded = false;
+						for (var i = 2; i >= 0; --i)
 						{
+							if (centerComponent != i && colorCounts[i] == 0)
+							{
+								is5x5BlockNeeded = true;
+								use5x5BlockColors[i] = true;
+							}
+						}
+						if (is5x5BlockNeeded)
+						{
+							if (isNotTop2Row)
+							{
+								if (x > 1)
+								{
+									neighborComponent = colorComponentSelector(x - 2, y - 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (top2BitmapPixelPtr - 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								if (x > 0)
+								{
+									neighborComponent = colorComponentSelector(x - 1, y - 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (top2BitmapPixelPtr - 4)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								neighborComponent = colorComponentSelector(x, y - 2);
+								if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+								{
+									accumColors[neighborComponent] += (top2BitmapPixelPtr)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+								if (x < width - 1)
+								{
+									neighborComponent = colorComponentSelector(x + 1, y - 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (top2BitmapPixelPtr + 4)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								if (x < width - 2)
+								{
+									neighborComponent = colorComponentSelector(x + 2, y - 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (top2BitmapPixelPtr + 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+							}
+							if (isNotTop1Row)
+							{
+								if (x > 1)
+								{
+									neighborComponent = colorComponentSelector(x - 2, y - 1);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (top1BitmapPixelPtr - 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								if (x < width - 2)
+								{
+									neighborComponent = colorComponentSelector(x + 2, y - 1);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (top1BitmapPixelPtr + 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+							}
 							if (x > 1)
 							{
-								neighborComponent = colorComponentSelector(x - 2, y + 2);
-								if (neighborComponent != centerComponent)
+								neighborComponent = colorComponentSelector(x - 2, y);
+								if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 								{
-									accumColors[neighborComponent] += (bottom2BitmapPixelPtr - 8)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
-							if (x > 0)
-							{
-								neighborComponent = colorComponentSelector(x - 1, y + 2);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (bottom2BitmapPixelPtr - 4)[neighborComponent];
-									++colorCounts[neighborComponent];
-								}
-							}
-							neighborComponent = colorComponentSelector(x, y + 2);
-							if (neighborComponent != centerComponent)
-							{
-								accumColors[neighborComponent] += (bottom2BitmapPixelPtr)[neighborComponent];
-								++colorCounts[neighborComponent];
-							}
-							if (x < width - 1)
-							{
-								neighborComponent = colorComponentSelector(x + 1, y + 2);
-								if (neighborComponent != centerComponent)
-								{
-									accumColors[neighborComponent] += (bottom2BitmapPixelPtr + 4)[neighborComponent];
+									accumColors[neighborComponent] += (bitmapPixelPtr - 8)[neighborComponent];
 									++colorCounts[neighborComponent];
 								}
 							}
 							if (x < width - 2)
 							{
-								neighborComponent = colorComponentSelector(x + 2, y + 2);
-								if (neighborComponent != centerComponent)
+								neighborComponent = colorComponentSelector(x + 2, y);
+								if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 								{
-									accumColors[neighborComponent] += (bottom2BitmapPixelPtr + 8)[neighborComponent];
+									accumColors[neighborComponent] += (bitmapPixelPtr + 8)[neighborComponent];
 									++colorCounts[neighborComponent];
+								}
+							}
+							if (isNotBottom1Row)
+							{
+								if (x > 1)
+								{
+									neighborComponent = colorComponentSelector(x - 2, y + 1);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (bottom1BitmapPixelPtr - 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								if (x < width - 2)
+								{
+									neighborComponent = colorComponentSelector(x + 2, y + 1);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (bottom1BitmapPixelPtr + 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+							}
+							if (isNotBottom2Row)
+							{
+								if (x > 1)
+								{
+									neighborComponent = colorComponentSelector(x - 2, y + 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (bottom2BitmapPixelPtr - 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								if (x > 0)
+								{
+									neighborComponent = colorComponentSelector(x - 1, y + 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (bottom2BitmapPixelPtr - 4)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								neighborComponent = colorComponentSelector(x, y + 2);
+								if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+								{
+									accumColors[neighborComponent] += (bottom2BitmapPixelPtr)[neighborComponent];
+									++colorCounts[neighborComponent];
+								}
+								if (x < width - 1)
+								{
+									neighborComponent = colorComponentSelector(x + 1, y + 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (bottom2BitmapPixelPtr + 4)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
+								}
+								if (x < width - 2)
+								{
+									neighborComponent = colorComponentSelector(x + 2, y + 2);
+									if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
+									{
+										accumColors[neighborComponent] += (bottom2BitmapPixelPtr + 8)[neighborComponent];
+										++colorCounts[neighborComponent];
+									}
 								}
 							}
 						}
@@ -478,6 +499,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								bitmapPixelPtr[i] = (ushort)(accumColors[i] / colorCounts[i]);
 							accumColors[i] = 0;
 							colorCounts[i] = 0;
+							use5x5BlockColors[i] = false;
 						}
 					}
 					if (cancellationToken.IsCancellationRequested)
