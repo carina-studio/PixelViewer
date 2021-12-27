@@ -3848,6 +3848,11 @@ namespace Carina.PixelViewer.ViewModels
 			// start zooming
 			this.zoomAnimator = new DoubleAnimator(this.EffectiveRenderedImageScale, scale).Also(it =>
 			{
+				it.Completed += (_, e) =>
+				{
+					this.EffectiveRenderedImageScale = scale;
+					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
+				};
 				it.Duration = ZoomAnimationDuration;
 				it.Interpolator = Interpolators.Deleceleration;
 				it.ProgressChanged += (_, e) =>

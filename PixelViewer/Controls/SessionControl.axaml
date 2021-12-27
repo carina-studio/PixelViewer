@@ -419,7 +419,7 @@
 											<ImageBrush DestinationRect="0,0,100,100" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 										</Border.Background>
 									</Border>
-									<Image x:Name="image" Cursor="Arrow" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}">
+									<Image x:Name="image" Cursor="Arrow" DoubleTapped="OnImageDoubleTapped" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}">
 										<ia:Interaction.Behaviors>
 											<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].IsImageViewerScrollable}" Value="True">
 												<iaCore:ChangePropertyAction PropertyName="Cursor">

@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
@@ -614,6 +615,20 @@ namespace Carina.PixelViewer.Controls
 				}
 				e.Handled = true;
 			}
+		}
+
+
+		// Called when double tap on image.
+		void OnImageDoubleTapped(object? sender, RoutedEventArgs e)
+		{
+			if (this.DataContext is not Session session)
+				return;
+			if (session.FitRenderedImageToViewport)
+				session.FitRenderedImageToViewport = false;
+			else if (session.ZoomInCommand.CanExecute(null))
+				session.ZoomInCommand.TryExecute();
+			else if (session.ZoomToCommand.CanExecute(1.0))
+				session.ZoomToCommand.TryExecute(1.0);
 		}
 
 
