@@ -9,6 +9,7 @@ using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
+using CarinaStudio.Animation;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.IO;
@@ -400,6 +401,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsYuvToBgraConverterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsYuvToBgraConverterSupported));
 		/// <summary>
+		/// Property of <see cref="IsZooming"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsZoomingProperty = ObservableProperty.Register<Session, bool>(nameof(IsZooming));
+		/// <summary>
 		/// Property of <see cref="LuminanceHistogramGeometry"/>.
 		/// </summary>
 		public static readonly ObservableProperty<Geometry?> LuminanceHistogramGeometryProperty = ObservableProperty.Register<Session, Geometry?>(nameof(LuminanceHistogramGeometry));
@@ -463,6 +468,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Constants.
 		const int RenderImageDelay = 500;
+		const int ZoomAnimationDuration = 500;
 
 
 		// Static fields.
@@ -485,6 +491,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canZoomTo = new MutableObservableBoolean();
 		readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
 		ImageRenderingProfile? fileFormatProfile;
 		readonly ScheduledAction filterImageAction;
@@ -508,6 +515,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly ScheduledAction updateFilterSupportingAction;
 		readonly ScheduledAction updateIsFilteringImageNeededAction;
 		readonly ScheduledAction updateIsProcessingImageAction;
+		DoubleAnimator? zoomAnimator;
 
 
 		/// <summary>
@@ -553,6 +561,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SaveRenderedImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveRenderedImage(parameters), this.canSaveRenderedImage);
 			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
+			this.ZoomToCommand = new Command<double>(this.ZoomTo, this.canZoomTo);
 
 			// setup operations
 			this.filterImageAction = new ScheduledAction(() =>
@@ -1056,6 +1065,9 @@ namespace Carina.PixelViewer.ViewModels
 			// clear selected pixel
 			this.SelectRenderedImagePixel(-1, -1);
 
+			// complete zooming
+			this.CompleteZooming(false, !disposing);
+
 			// update state
 			if (!disposing)
 			{
@@ -1088,6 +1100,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// update zooming state
+			this.canZoomTo.Update(false);
 			this.UpdateCanZoomInOut();
 
 			// cancel rendering image
@@ -1150,6 +1163,23 @@ namespace Carina.PixelViewer.ViewModels
 				return result;
 			result = x.Name.CompareTo(y.Name);
 			return result != 0 ? result : x.GetHashCode() - y.GetHashCode();
+		}
+
+
+		// Complete current smooth zooming.
+		void CompleteZooming(bool isCancelling, bool resetIsZooming)
+		{
+			if (this.zoomAnimator == null)
+				return;
+			this.zoomAnimator.Cancel();
+			this.zoomAnimator = null;
+			if (!isCancelling && !this.fitRenderedImageToViewport)
+			{
+				this.EffectiveRenderedImageScale = this.RenderedImageScale;
+				this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
+			}
+			if (resetIsZooming)
+				this.SetValue(IsZoomingProperty, false);
 		}
 
 
@@ -1577,10 +1607,14 @@ namespace Carina.PixelViewer.ViewModels
 				this.fitRenderedImageToViewport = value;
 				this.OnPropertyChanged(nameof(this.FitRenderedImageToViewport));
 				if (value)
+				{
 					this.EffectiveRenderedImageScale = 1.0;
+					this.CompleteZooming(false, true);
+				}
 				else
 					this.EffectiveRenderedImageScale = this.renderedImageScale;
 				this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
+				this.canZoomTo.Update(!value && this.IsSourceFileOpened);
 				this.UpdateCanZoomInOut();
 			}
 		}
@@ -2013,6 +2047,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether smooth zooming is on-going or not.
+		/// </summary>
+		public bool IsZooming { get => this.GetValue(IsZoomingProperty); }
+
+
+		/// <summary>
 		/// Get <see cref="Geometry"/> of luminance histogram.
 		/// </summary>
 		public Geometry? LuminanceHistogramGeometry { get => this.GetValue(LuminanceHistogramGeometryProperty); }
@@ -2399,6 +2439,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.SetValue(IsOpeningSourceFileProperty, false);
 				this.canOpenSourceFile.Update(true);
+				this.canZoomTo.Update(!this.fitRenderedImageToViewport);
 
 				// update title
 				this.UpdateTitle();
@@ -2576,11 +2617,12 @@ namespace Carina.PixelViewer.ViewModels
 					return;
 				this.renderedImageScale = value;
 				this.OnPropertyChanged(nameof(this.RenderedImageScale));
+				this.UpdateCanZoomInOut();
+				this.CompleteZooming(true, true);
 				if (!this.fitRenderedImageToViewport)
 				{
 					this.EffectiveRenderedImageScale = value;
 					this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
-					this.UpdateCanZoomInOut();
 				}
 			}
 		}
@@ -3740,14 +3782,17 @@ namespace Carina.PixelViewer.ViewModels
 		// Zoom-in rendered image.
 		void ZoomIn()
 		{
+			this.VerifyAccess();
+			this.VerifyDisposed();
 			if (!this.canZoomIn.Value)
 				return;
-			this.RenderedImageScale = this.RenderedImageScale.Let((it) =>
+			var scale = this.renderedImageScale.Let((it) =>
 			{
 				if (it <= 0.999)
 					return (Math.Floor(it * 20) + 1) / 20;
 				return (Math.Floor(it * 2) + 1) / 2;
 			});
+			this.ZoomTo(scale);
 		}
 
 
@@ -3760,14 +3805,17 @@ namespace Carina.PixelViewer.ViewModels
 		// Zoom-out rendered image.
 		void ZoomOut()
 		{
+			this.VerifyAccess();
+			this.VerifyDisposed();
 			if (!this.canZoomOut.Value)
 				return;
-			this.RenderedImageScale = this.RenderedImageScale.Let((it) =>
+			var scale = this.renderedImageScale.Let((it) =>
 			{
 				if (it <= 1.001)
 					return (Math.Ceiling(it * 20) - 1) / 20;
 				return (Math.Ceiling(it * 2) - 1) / 2;
 			});
+			this.ZoomTo(scale);
 		}
 
 
@@ -3775,5 +3823,53 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command of zooming-out rendered image.
 		/// </summary>
 		public ICommand ZoomOutCommand { get; }
+
+
+		// Start smooth zooming to given scale.
+		void ZoomTo(double scale)
+        {
+			// check state
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			if (!this.canZoomTo.Value)
+				return;
+
+			// check zoom
+			if (scale < MinRenderedImageScale)
+				scale = MinRenderedImageScale;
+			else if (scale > MaxRenderedImageScale)
+				scale = MaxRenderedImageScale;
+			if (Math.Abs(this.renderedImageScale - scale) < 0.001)
+				return;
+
+			// cancel current zooming
+			this.CompleteZooming(true, false);
+
+			// start zooming
+			this.zoomAnimator = new DoubleAnimator(this.EffectiveRenderedImageScale, scale).Also(it =>
+			{
+				it.Duration = ZoomAnimationDuration;
+				it.Interpolator = Interpolators.Deleceleration;
+				it.ProgressChanged += (_, e) =>
+				{
+					this.EffectiveRenderedImageScale = it.Value;
+					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
+				};
+				it.Start();
+			});
+			this.SetValue(IsZoomingProperty, true);
+
+			// update state
+			this.renderedImageScale = scale;
+			this.OnPropertyChanged(nameof(RenderedImageScale));
+			this.UpdateCanZoomInOut();
+        }
+
+
+		/// <summary>
+		/// Command to start smooth zooming to given scale.
+		/// </summary>
+		/// <remarks>Type of parameter is <see cref="double"/>.</remarks>
+		public ICommand ZoomToCommand { get; }
 	}
 }

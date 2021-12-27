@@ -499,11 +499,13 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Called when key up.
-		protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
-		{
+        // Called when key down.
+        protected override void OnKeyDown(Avalonia.Input.KeyEventArgs e)
+        {
 			// call base
-			base.OnKeyUp(e);
+			base.OnKeyDown(e);
+			if (e.Handled)
+				return;
 
 			// check focus
 			var focusedElement = Avalonia.Input.FocusManager.Instance.Current;
@@ -531,8 +533,13 @@ namespace Carina.PixelViewer.Controls
 						}
 					case Avalonia.Input.Key.D1:
 						{
-							session.RenderedImageScale = 1.0;
-							session.FitRenderedImageToViewport = false;
+							if (session.FitRenderedImageToViewport)
+							{
+								session.RenderedImageScale = 1.0;
+								session.FitRenderedImageToViewport = false;
+							}
+							else
+								session.ZoomToCommand.TryExecute(1.0);
 							break;
 						}
 					case Avalonia.Input.Key.O:
@@ -560,7 +567,33 @@ namespace Carina.PixelViewer.Controls
 				}
 				e.Handled = true;
 			}
-			else if (e.KeyModifiers == 0)
+		}
+
+
+        // Called when key up.
+        protected override void OnKeyUp(Avalonia.Input.KeyEventArgs e)
+		{
+			// call base
+			base.OnKeyUp(e);
+			if (e.Handled)
+				return;
+
+			// check focus
+			var focusedElement = Avalonia.Input.FocusManager.Instance.Current;
+			if (focusedElement != null)
+			{
+				if (focusedElement is TextBox || focusedElement is NumericUpDown)
+					return;
+				if (focusedElement.FindAncestorOfType<SessionControl>(true) != this)
+					return;
+			}
+
+			// get session
+			if (this.DataContext is not Session session)
+				return;
+
+			// handle key event
+			if (e.KeyModifiers == 0)
 			{
 				switch (e.Key)
 				{
@@ -810,7 +843,18 @@ namespace Carina.PixelViewer.Controls
 			switch (e.PropertyName)
 			{
 				case nameof(Session.EffectiveRenderedImageScale):
-					this.UpdateEffectiveRenderedImageScale();
+                    {
+						if (!session.FitRenderedImageToViewport)
+                        {
+							var viewportSize = this.imageScrollViewer.Viewport;
+							var viewportOffset = this.imageScrollViewer.Offset;
+							var contentSize = this.imageScrollViewer.Extent;
+							var centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
+							var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
+							this.targetImageViewportCenter = new Vector(centerX, centerY);
+						}
+						this.UpdateEffectiveRenderedImageScale();
+					}
 					break;
 				case nameof(Session.FitRenderedImageToViewport):
 					{
@@ -837,19 +881,15 @@ namespace Carina.PixelViewer.Controls
 					this.canShowEvaluateImageDimensionsMenu.Update((sender as Session)?.IsSourceFileOpened ?? false);
 					this.updateStatusBarStateAction.Schedule();
 					break;
+				case nameof(Session.IsZooming):
+					if (session.IsZooming)
+						this.StartUsingSmallRenderedImage();
+					else if (!this.stopUsingSmallRenderedImageAction.IsScheduled)
+						this.stopUsingSmallRenderedImageAction.Execute();
+					break;
 				case nameof(Session.QuarterSizeRenderedImage):
 				case nameof(Session.RenderedImage):
 					this.updateEffectiveRenderedImageAction.Execute();
-					break;
-				case nameof(Session.RenderedImageScale):
-                    {
-						var viewportSize = this.imageScrollViewer.Viewport;
-						var viewportOffset = this.imageScrollViewer.Offset;
-						var contentSize = this.imageScrollViewer.Extent;
-						var centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
-						var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
-						this.targetImageViewportCenter = new Vector(centerX, centerY);
-					}
 					break;
 			}
 		}
