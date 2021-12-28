@@ -3388,11 +3388,14 @@ namespace Carina.PixelViewer.ViewModels
 			var encoder = parameters.Encoder;
 			if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 				return false;
+			var options = parameters.Options;
+			if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
+				options.Orientation = (int)(this.EffectiveRenderedImageRotation + 0.5);
 			this.canSaveFilteredImage.Update(false);
 			this.SetValue(IsSavingFilteredImageProperty, true);
 			try
 			{
-				await encoder.AsNonNull().EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), parameters.Options, new CancellationToken());
+				await encoder.AsNonNull().EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 				return true;
 			}
 			catch (Exception ex)
@@ -3462,11 +3465,14 @@ namespace Carina.PixelViewer.ViewModels
 			var encoder = parameters.Encoder;
 			if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 				return false;
+			var options = parameters.Options;
+			if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
+				options.Orientation = (int)(this.EffectiveRenderedImageRotation + 0.5);
 			this.canSaveRenderedImage.Update(false);
 			this.SetValue(IsSavingRenderedImageProperty, true);
 			try
 			{
-				await encoder.AsNonNull().EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), parameters.Options, new CancellationToken());
+				await encoder.AsNonNull().EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 				return true;
 			}
 			catch (Exception ex)

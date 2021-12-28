@@ -68,6 +68,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<bool> ResetImagePlaneOptionsAfterChangingImageDimensions = new SettingKey<bool>(nameof(ResetImagePlaneOptionsAfterChangingImageDimensions), true);
 		/// <summary>
+		/// Apply orientation on saved rendered image.
+		/// </summary>
+		public static readonly SettingKey<bool> SaveRenderedImageWithOrientation = new SettingKey<bool>(nameof(SaveRenderedImageWithOrientation), true);
+		/// <summary>
 		/// Color space of screen.
 		/// </summary>
 		public static readonly SettingKey<ScreenColorSpace> ScreenColorSpace = new SettingKey<ScreenColorSpace>(nameof(ScreenColorSpace), Media.ScreenColorSpace.Srgb);

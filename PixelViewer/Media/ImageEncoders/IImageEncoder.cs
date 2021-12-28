@@ -46,6 +46,12 @@ namespace Carina.PixelViewer.Media.ImageEncoders
 
 
         /// <summary>
+        /// Orientation to be applied on saved image.
+        /// </summary>
+        public int Orientation { get; set; }
+
+
+        /// <summary>
         /// Quality level for encoding. Range is [1, 100].
         /// </summary>
         public int QualityLevel { get; set; }

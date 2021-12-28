@@ -24,10 +24,10 @@ namespace Carina.PixelViewer.Media.ImageEncoders
         protected override void OnEncode(IBitmapBuffer bitmapBuffer, Stream stream, ImageEncodingOptions options, CancellationToken cancellationToken)
         {
 #if WINDOWS
-            using var bitmap = bitmapBuffer.CreateSystemDrawingBitmap();
+            using var bitmap = bitmapBuffer.CreateSystemDrawingBitmap(options.Orientation);
             bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
 #else
-            using var bitmap = bitmapBuffer.CreateSkiaBitmap();
+            using var bitmap = bitmapBuffer.CreateSkiaBitmap(options.Orientation);
             using var memoryStream = new MemoryStream();
             bitmap.Encode(memoryStream, SKEncodedImageFormat.Png, 0);
             stream.Write(memoryStream.ToArray());
