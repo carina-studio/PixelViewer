@@ -2971,7 +2971,7 @@ namespace Carina.PixelViewer.ViewModels
 				var quarterSizeBitmap = (IBitmap?)null;
 				try
 				{
-					bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync(cancellationTokenSource.Token);
+					bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync(cancellationToken: cancellationTokenSource.Token);
 					if (!cancellationTokenSource.IsCancellationRequested 
 						&& (imageFrame.BitmapBuffer.Width > 2048 || imageFrame.BitmapBuffer.Height > 2048))
 					{
