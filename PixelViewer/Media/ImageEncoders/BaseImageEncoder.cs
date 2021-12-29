@@ -1,5 +1,6 @@
 ﻿using CarinaStudio;
 using CarinaStudio.IO;
+using CarinaStudio.Threading.Tasks;
 using System;
 using System.IO;
 using System.Threading;
@@ -12,6 +13,10 @@ namespace Carina.PixelViewer.Media.ImageEncoders
     /// </summary>
     abstract class BaseImageEncoder : IImageEncoder
     {
+        // Static fields.
+        static readonly TaskFactory EncodingTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
+
+
         /// <summary>
         /// Initialize new <see cref="BaseImageEncoder"/> instance.
         /// </summary>
@@ -39,7 +44,7 @@ namespace Carina.PixelViewer.Media.ImageEncoders
             // encode
             try
             {
-                await Task.Run(() => this.OnEncode(sharedBitmapBuffer, stream, options, cancellationToken));
+                await EncodingTaskFactory.StartNew(() => this.OnEncode(sharedBitmapBuffer, stream, options, cancellationToken));
             }
             catch (Exception ex)
             {
