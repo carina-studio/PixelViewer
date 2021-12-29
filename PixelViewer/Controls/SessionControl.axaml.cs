@@ -1148,6 +1148,7 @@ namespace Carina.PixelViewer.Controls
 					filter.Name = app.GetString("FileType.RawBgra");
 					filter.Extensions.Add("bgra");
 				}));
+				dialog.InitialFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg";
 			}).ShowAsync(window);
 			if (fileName == null)
 				return;
