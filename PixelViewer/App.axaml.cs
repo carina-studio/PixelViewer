@@ -107,54 +107,41 @@ namespace Carina.PixelViewer
 
 
 		// Load strings.
-        protected override IResourceProvider? OnLoadStringResource(CultureInfo cultureInfo)
-        {
-			var resources = (IResourceProvider?)null;
-			try
-			{
-				resources = new ResourceInclude().Also(it =>
-				{
-					it.Source = new Uri($"avares://PixelViewer/Strings/{cultureInfo}.xaml");
-					_ = it.Loaded;
-				});
-			}
-			catch
+		protected override IResourceProvider? OnLoadStringResource(CultureInfo cultureInfo)
+		{
+			var resources = this.LoadStringResource(new Uri($"avares://PixelViewer/Strings/{cultureInfo}.xaml"));
+			if (resources == null)
 			{
 				this.Logger.LogWarning($"No string resources for {cultureInfo}");
 				return null;
 			}
-			try
+			if (CarinaStudio.Platform.IsLinux)
 			{
-				if (CarinaStudio.Platform.IsLinux)
+				var platformResources = this.LoadStringResource(new Uri($"avares://PixelViewer/Strings/{cultureInfo}-Linux.xaml"));
+				if (platformResources != null)
 				{
-					var platformResources = new ResourceInclude().Also(it =>
-					{
-						it.Source = new Uri($"avares://PixelViewer/Strings/{cultureInfo}-Linux.xaml");
-						_ = it.Loaded;
-					});
 					resources = new ResourceDictionary().Also(it =>
 					{
 						it.MergedDictionaries.Add(resources);
 						it.MergedDictionaries.Add(platformResources);
 					});
 				}
-				else if (CarinaStudio.Platform.IsMacOS)
-				{
-					var platformResources = new ResourceInclude().Also(it =>
-					{
-						it.Source = new Uri($"avares://PixelViewer/Strings/{cultureInfo}-OSX.xaml");
-						_ = it.Loaded;
-					});
-					resources = new ResourceDictionary().Also(it =>
-					{
-						it.MergedDictionaries.Add(resources);
-						it.MergedDictionaries.Add(platformResources);
-					});
-				}
+				else
+					this.Logger.LogWarning($"No platform-specific string resources for {cultureInfo}");
 			}
-			catch
+			else if (CarinaStudio.Platform.IsMacOS)
 			{
-				this.Logger.LogWarning($"No platform-specific string resources for {cultureInfo}");
+				var platformResources = this.LoadStringResource(new Uri($"avares://PixelViewer/Strings/{cultureInfo}-OSX.xaml"));
+				if (platformResources != null)
+				{
+					resources = new ResourceDictionary().Also(it =>
+					{
+						it.MergedDictionaries.Add(resources);
+						it.MergedDictionaries.Add(platformResources);
+					});
+				}
+				else
+					this.Logger.LogWarning($"No platform-specific string resources for {cultureInfo}");
 			}
 			return resources;
 		}
