@@ -76,19 +76,13 @@ namespace Carina.PixelViewer
 		// Load default strings.
         protected override IResourceProvider? OnLoadDefaultStringResource()
         {
-			var resources = (IResourceProvider)new ResourceInclude()
-			{
-				Source = new Uri("avares://PixelViewer/Strings/Default.xaml")
-			};
+			var resources = this.LoadStringResource(new Uri("avares://PixelViewer/Strings/Default.xaml")).AsNonNull();
 			if (CarinaStudio.Platform.IsLinux)
 			{
 				resources = new ResourceDictionary().Also(it =>
 				{
 					it.MergedDictionaries.Add(resources);
-					it.MergedDictionaries.Add(new ResourceInclude()
-					{
-						Source = new Uri("avares://PixelViewer/Strings/Default-Linux.xaml")
-					});
+					it.MergedDictionaries.Add(this.LoadStringResource(new Uri("avares://PixelViewer/Strings/Default-Linux.xaml")).AsNonNull());
 				});
 			}
 			else if (CarinaStudio.Platform.IsMacOS)
@@ -96,10 +90,7 @@ namespace Carina.PixelViewer
 				resources = new ResourceDictionary().Also(it =>
 				{
 					it.MergedDictionaries.Add(resources);
-					it.MergedDictionaries.Add(new ResourceInclude()
-					{
-						Source = new Uri("avares://PixelViewer/Strings/Default-OSX.xaml")
-					});
+					it.MergedDictionaries.Add(this.LoadStringResource(new Uri("avares://PixelViewer/Strings/Default-OSX.xaml")).AsNonNull());
 				});
 			}
 			return resources;
