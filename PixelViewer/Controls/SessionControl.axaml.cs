@@ -1160,7 +1160,12 @@ namespace Carina.PixelViewer.Controls
 			// setup parameters
 			var parameters = new Session.ImageSavingParams();
 			if (fileFormat == Media.FileFormats.Jpeg)
-				parameters.Options = (await new JpegImageEncodingOptionsDialog().ShowDialog<Media.ImageEncoders.ImageEncodingOptions?>(window)).GetValueOrDefault();
+			{
+				var jpegOptions = await new JpegImageEncodingOptionsDialog().ShowDialog<Media.ImageEncoders.ImageEncodingOptions?>(window);
+				if (jpegOptions == null)
+					return;
+				parameters.Options = jpegOptions.Value;
+			}
 			parameters.FileName = fileName;
 
 			// find encoder
