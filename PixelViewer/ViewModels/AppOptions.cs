@@ -137,6 +137,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)
 				this.OnPropertyChanged(nameof(this.ResetImagePlaneOptionsAfterChangingImageDimensions));
+			else if (key == SettingKeys.SaveRenderedImageWithOrientation)
+				this.OnPropertyChanged(nameof(this.SaveRenderedImageWithOrientation));
 			else if (key == SettingKeys.ScreenColorSpace)
 				this.OnPropertyChanged(nameof(this.ScreenColorSpace));
 			else if (key == SettingKeys.ShowProcessInfo)
@@ -153,6 +155,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions);
 			set => this.Settings.SetValue<bool>(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions, value);
+		}
+
+
+		/// <summary>
+		/// Apply orientation on saved rendered image.
+		/// </summary>
+		public bool SaveRenderedImageWithOrientation
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation);
+			set => this.Settings.SetValue<bool>(SettingKeys.SaveRenderedImageWithOrientation, value);
 		}
 
 

@@ -156,6 +156,11 @@
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ResetImagePlaneOptionsAfterChangingImageDimensions, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator"/>
 
+				<!-- Apply orientation on saved images -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding SaveRenderedImageWithOrientation, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
 				<!-- Show process info -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ShowProcessInfo}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ShowProcessInfo, Mode=TwoWay}"/>

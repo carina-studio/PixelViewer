@@ -313,6 +313,192 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+		// Copy bitmap data with same format and size including rotated size.
+		static unsafe void CopyTo(IntPtr srcBaseAddress, BitmapFormat format, int width, int height, int srcRowStride, IntPtr destBaseAddress, int destRowStride, int orientation)
+		{
+			switch (format)
+			{
+				case BitmapFormat.Bgra32:
+					switch (orientation)
+					{
+						case 0:
+							var minRowStride = Math.Min(srcRowStride, destRowStride);
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcRowPtr = ((byte*)srcBaseAddress + (y * srcRowStride));
+								var destRowPtr = ((byte*)destBaseAddress + (y * destRowStride));
+								Marshal.Copy(srcRowPtr, destRowPtr, minRowStride);
+							});
+							break;
+						case 90:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = ((byte*)destBaseAddress + ((height - y - 1) * sizeof(uint)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
+									*(uint*)destPixelPtr = *srcPixelPtr;
+							});
+							break;
+						case 180:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = (uint*)((byte*)destBaseAddress + ((height - y - 1) * destRowStride) + ((width - 1) * sizeof(uint)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
+									*destPixelPtr = *srcPixelPtr;
+							});
+							break;
+						case 270:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = ((byte*)destBaseAddress + ((width - 1) * destRowStride) + (y * sizeof(uint)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
+									*(uint*)destPixelPtr = *srcPixelPtr;
+							});
+							break;
+						default:
+							throw new ArgumentException();
+					}
+					break;
+
+				case BitmapFormat.Bgra64:
+					switch (orientation)
+					{
+						case 0:
+							var minRowStride = Math.Min(srcRowStride, destRowStride);
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcRowPtr = ((byte*)srcBaseAddress + (y * srcRowStride));
+								var destRowPtr = ((byte*)destBaseAddress + (y * destRowStride));
+								Marshal.Copy(srcRowPtr, destRowPtr, minRowStride);
+							});
+							break;
+						case 90:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = ((byte*)destBaseAddress + ((height - y - 1) * sizeof(ulong)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
+									*(ulong*)destPixelPtr = *srcPixelPtr;
+							});
+							break;
+						case 180:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = (ulong*)((byte*)destBaseAddress + ((height - y - 1) * destRowStride) + ((width - 1) * sizeof(ulong)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
+									*destPixelPtr = *srcPixelPtr;
+							});
+							break;
+						case 270:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = ((byte*)destBaseAddress + ((width - 1) * destRowStride) + (y * sizeof(ulong)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
+									*(ulong*)destPixelPtr = *srcPixelPtr;
+							});
+							break;
+						default:
+							throw new ArgumentException();
+					}
+					break;
+
+				default:
+					throw new NotSupportedException();
+			}
+		}
+
+
+		// Copy bitmap data to BGRA32 with same size including rotated size.
+		static unsafe void CopyToBgra32(IntPtr srcBaseAddress, BitmapFormat srcFormat, int width, int height, int srcRowStride, IntPtr destBaseAddress, int destRowStride, int orientation)
+		{
+			switch (srcFormat)
+			{
+				case BitmapFormat.Bgra32:
+					CopyTo(srcBaseAddress, srcFormat, width, height, srcRowStride, destBaseAddress, destRowStride, orientation);
+					break;
+
+				case BitmapFormat.Bgra64:
+					var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+					var packFunc = ImageProcessing.SelectBgra32Packing();
+					switch (orientation)
+					{
+						case 0:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var b = (ushort)0;
+								var g = (ushort)0;
+								var r = (ushort)0;
+								var a = (ushort)0;
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+								{
+									unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+									*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
+								}
+							});
+							break;
+						case 90:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var b = (ushort)0;
+								var g = (ushort)0;
+								var r = (ushort)0;
+								var a = (ushort)0;
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = ((byte*)destBaseAddress + ((height - y - 1) * sizeof(uint)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
+								{
+									unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+									*(uint*)destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
+								}
+							});
+							break;
+						case 180:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var b = (ushort)0;
+								var g = (ushort)0;
+								var r = (ushort)0;
+								var a = (ushort)0;
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = (uint*)((byte*)destBaseAddress + ((height - y - 1) * destRowStride) + ((width - 1) * sizeof(uint)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
+								{
+									unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+									*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
+								}
+							});
+							break;
+						case 270:
+							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							{
+								var b = (ushort)0;
+								var g = (ushort)0;
+								var r = (ushort)0;
+								var a = (ushort)0;
+								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+								var destPixelPtr = ((byte*)destBaseAddress + ((width - 1) * destRowStride) + (y * sizeof(uint)));
+								for (var x = width; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
+								{
+									unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
+									*(uint*)destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
+								}
+							});
+							break;
+					}
+					break;
+
+				default:
+					throw new NotSupportedException();
+			}
+		}
+
+
 		/// <summary>
 		/// Create <see cref="IBitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
 		/// </summary>
@@ -334,130 +520,16 @@ namespace Carina.PixelViewer.Media
 						_ => throw new ArgumentException(),
 					};
 					using var avaloniaBitmapBuffer = avaloniaBitmap.Lock();
-					var srcRowStride = buffer.RowBytes;
-					var destRowStride = avaloniaBitmapBuffer.RowBytes;
 					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
 						? new Stopwatch().Also(it => it.Start())
 						: null;
 					switch (buffer.Format)
 					{
 						case BitmapFormat.Bgra32:
-							{
-								switch (orientation)
-								{
-									case 0:
-										{
-											var minRowStride = Math.Min(srcRowStride, destRowStride);
-											Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var srcRowPtr = ((byte*)srcBaseAddr + (y * srcRowStride));
-												var destRowPtr = ((byte*)avaloniaBitmapBuffer.Address + (y * destRowStride));
-												Marshal.Copy(srcRowPtr, destRowPtr, minRowStride);
-											});
-										}
-										break;
-									case 90:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)avaloniaBitmapBuffer.Address + ((srcHeight - y - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
-												*(uint*)destPixelPtr = *srcPixelPtr;
-										});
-										break;
-									case 180:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (uint*)((byte*)avaloniaBitmapBuffer.Address + ((srcHeight - y - 1) * destRowStride) + ((srcWidth - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
-												*destPixelPtr = *srcPixelPtr;
-										});
-										break;
-									case 270:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)avaloniaBitmapBuffer.Address + ((srcWidth - 1) * destRowStride) + (y * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
-												*(uint*)destPixelPtr = *srcPixelPtr;
-										});
-										break;
-								}
-							}
+							CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, buffer.RowBytes, avaloniaBitmapBuffer.Address, avaloniaBitmapBuffer.RowBytes, orientation);
 							break;
 						case BitmapFormat.Bgra64:
-							{
-								var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
-								var packFunc = ImageProcessing.SelectBgra32Packing();
-								switch (orientation)
-								{
-									case 0:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var b = (ushort)0;
-											var g = (ushort)0;
-											var r = (ushort)0;
-											var a = (ushort)0;
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (uint*)((byte*)avaloniaBitmapBuffer.Address + (y * destRowStride));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
-											{
-												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-											}
-										});
-										break;
-									case 90:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var b = (ushort)0;
-											var g = (ushort)0;
-											var r = (ushort)0;
-											var a = (ushort)0;
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)avaloniaBitmapBuffer.Address + ((srcHeight - y - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
-											{
-												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												*(uint*)destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-											}
-										});
-										break;
-									case 180:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var b = (ushort)0;
-											var g = (ushort)0;
-											var r = (ushort)0;
-											var a = (ushort)0;
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (uint*)((byte*)avaloniaBitmapBuffer.Address + ((srcHeight - y - 1) * destRowStride) + ((srcWidth - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
-											{
-												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-											}
-										});
-										break;
-									case 270:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var b = (ushort)0;
-											var g = (ushort)0;
-											var r = (ushort)0;
-											var a = (ushort)0;
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)avaloniaBitmapBuffer.Address + ((srcWidth - 1) * destRowStride) + (y * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
-											{
-												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												*(uint*)destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-											}
-										});
-										break;
-								}
-							}
+							CopyToBgra32(srcBaseAddr, buffer.Format, srcWidth, srcHeight, buffer.RowBytes, avaloniaBitmapBuffer.Address, avaloniaBitmapBuffer.RowBytes, orientation);
 							break;
 						default:
 							throw new NotSupportedException($"Unsupported bitmap format: {buffer.Format}");
@@ -504,144 +576,39 @@ namespace Carina.PixelViewer.Media
 				var srcWidth = buffer.Width;
 				var srcHeight = buffer.Height;
 				var srcRowStride = buffer.RowBytes;
-				switch (buffer.Format)
+				switch (orientation)
 				{
-					case BitmapFormat.Bgra32:
-						switch (orientation)
+					case 0:
+						return new System.Drawing.Bitmap(srcWidth, srcHeight, srcRowStride, buffer.Format.ToSystemDrawingPixelFormat(), srcBaseAddr);
+					case 90:
+					case 270:
+						return new System.Drawing.Bitmap(srcHeight, srcWidth, buffer.Format.ToSystemDrawingPixelFormat()).Also(bitmap =>
 						{
-							case 0:
-								return new System.Drawing.Bitmap(srcWidth, srcHeight, srcRowStride, PixelFormat.Format32bppArgb, srcBaseAddr);
-							case 90:
-								return new System.Drawing.Bitmap(srcHeight, srcWidth, PixelFormat.Format32bppArgb).Also(bitmap =>
-								{
-									var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-									try
-									{
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var destRowStride = bitmapData.Stride;
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)bitmapData.Scan0 + ((srcHeight - y - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
-												*(uint*)destPixelPtr = *srcPixelPtr;
-										});
-									}
-									finally
-									{
-										bitmap.UnlockBits(bitmapData);
-									}
-								});
-							case 180:
-								return new System.Drawing.Bitmap(srcWidth, srcHeight, PixelFormat.Format32bppArgb).Also(bitmap =>
-								{
-									var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-									try
-									{
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (uint*)((byte*)bitmapData.Scan0 + ((srcHeight - y - 1) * bitmapData.Stride) + ((srcWidth - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
-												*destPixelPtr = *srcPixelPtr;
-										});
-									}
-									finally
-									{
-										bitmap.UnlockBits(bitmapData);
-									}
-								});
-							case 270:
-								return new System.Drawing.Bitmap(srcHeight, srcWidth, PixelFormat.Format32bppArgb).Also(bitmap =>
-								{
-									var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-									try
-									{
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var destRowStride = bitmapData.Stride;
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)bitmapData.Scan0 + ((srcWidth - 1) * destRowStride) + (y * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
-												*(uint*)destPixelPtr = *srcPixelPtr;
-										});
-									}
-									finally
-									{
-										bitmap.UnlockBits(bitmapData);
-									}
-								});
-							default:
-								throw new ArgumentException();
-						}
-					case BitmapFormat.Bgra64:
-						switch (orientation)
+							var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+							try
+							{
+								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation);
+							}
+							finally
+							{
+								bitmap.UnlockBits(bitmapData);
+							}
+						});
+					case 180:
+						return new System.Drawing.Bitmap(srcWidth, srcHeight, buffer.Format.ToSystemDrawingPixelFormat()).Also(bitmap =>
 						{
-							case 0:
-								return new System.Drawing.Bitmap(srcWidth, srcHeight, srcRowStride, PixelFormat.Format64bppArgb, srcBaseAddr);
-							case 90:
-								return new System.Drawing.Bitmap(srcHeight, srcWidth, PixelFormat.Format64bppArgb).Also(bitmap =>
-								{
-									var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-									try
-									{
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var destRowStride = bitmapData.Stride;
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)bitmapData.Scan0 + ((srcHeight - y - 1) * sizeof(ulong)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
-												*(ulong*)destPixelPtr = *srcPixelPtr;
-										});
-									}
-									finally
-									{
-										bitmap.UnlockBits(bitmapData);
-									}
-								});
-							case 180:
-								return new System.Drawing.Bitmap(srcWidth, srcHeight, PixelFormat.Format64bppArgb).Also(bitmap =>
-								{
-									var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-									try
-									{
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (ulong*)((byte*)bitmapData.Scan0 + ((srcHeight - y - 1) * bitmapData.Stride) + ((srcWidth - 1) * sizeof(ulong)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
-												*destPixelPtr = *srcPixelPtr;
-										});
-									}
-									finally
-									{
-										bitmap.UnlockBits(bitmapData);
-									}
-								});
-							case 270:
-								return new System.Drawing.Bitmap(srcHeight, srcWidth, PixelFormat.Format64bppArgb).Also(bitmap =>
-								{
-									var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
-									try
-									{
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var destRowStride = bitmapData.Stride;
-											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = ((byte*)bitmapData.Scan0 + ((srcWidth - 1) * destRowStride) + (y * sizeof(ulong)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
-												*(ulong*)destPixelPtr = *srcPixelPtr;
-										});
-									}
-									finally
-									{
-										bitmap.UnlockBits(bitmapData);
-									}
-								});
-							default:
-								throw new ArgumentException();
-						}
+							var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+							try
+							{
+								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation);
+							}
+							finally
+							{
+								bitmap.UnlockBits(bitmapData);
+							}
+						});
 					default:
-						throw new NotSupportedException();
+						throw new ArgumentException();
 				}
 			});
 		}
@@ -810,130 +777,18 @@ namespace Carina.PixelViewer.Media
 				{
 					using var skiaPixels = skiaBitmap.PeekPixels().AsNonNull();
 					var srcRowStride = bitmapBuffer.RowBytes;
-					var destRowStride = skiaPixels.RowBytes;
 					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
 						? new Stopwatch().Also(it => it.Start())
 						: null;
 					bitmapBuffer.Memory.Pin(srcBaseAddr =>
 					{
-						var destBaseAddr = (byte*)skiaPixels.GetPixels();
 						switch (bitmapBuffer.Format)
 						{
 							case BitmapFormat.Bgra32:
-								switch(orientation)
-                                {
-									case 0:
-										{
-											var minRowStride = Math.Min(srcRowStride, destRowStride);
-											Parallel.For(0, bitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var srcRowPtr = (byte*)srcBaseAddr + (y * srcRowStride);
-												var destRowPtr = destBaseAddr + (y * destRowStride);
-												Marshal.Copy(srcRowPtr, destRowPtr, minRowStride);
-											});
-										}
-										break;
-									case 90:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (destBaseAddr + ((srcHeight - y - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
-												*(uint*)destPixelPtr = *srcPixelPtr;
-										});
-										break;
-									case 180:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (uint*)(destBaseAddr + ((srcHeight - y - 1) * destRowStride) + ((srcWidth - 1) * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
-												*destPixelPtr = *srcPixelPtr;
-										});
-										break;
-									case 270:
-										Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-										{
-											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
-											var destPixelPtr = (destBaseAddr + ((srcWidth - 1) * destRowStride) + (y * sizeof(uint)));
-											for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
-												*(uint*)destPixelPtr = *srcPixelPtr;
-										});
-										break;
-								}
+								CopyTo(srcBaseAddr, bitmapBuffer.Format, srcWidth, srcHeight, bitmapBuffer.RowBytes, skiaPixels.GetPixels(), skiaPixels.RowBytes, orientation);
 								break;
 							case BitmapFormat.Bgra64:
-                                {
-									var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
-									var packFunc = ImageProcessing.SelectBgra32Packing();
-									switch (orientation)
-									{
-										case 0:
-											Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var b = (ushort)0;
-												var g = (ushort)0;
-												var r = (ushort)0;
-												var a = (ushort)0;
-												var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-												var destPixelPtr = (uint*)(destBaseAddr + (y * destRowStride));
-												for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
-												{
-													unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-													*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-												}
-											});
-											break;
-										case 90:
-											Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var b = (ushort)0;
-												var g = (ushort)0;
-												var r = (ushort)0;
-												var a = (ushort)0;
-												var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-												var destPixelPtr = (destBaseAddr + ((srcHeight - y - 1) * sizeof(uint)));
-												for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr += destRowStride)
-												{
-													unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-													*(uint*)destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-												}
-											});
-											break;
-										case 180:
-											Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var b = (ushort)0;
-												var g = (ushort)0;
-												var r = (ushort)0;
-												var a = (ushort)0;
-												var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-												var destPixelPtr = (uint*)(destBaseAddr + ((srcHeight - y - 1) * destRowStride) + ((srcWidth - 1) * sizeof(uint)));
-												for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
-												{
-													unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-													*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-												}
-											});
-											break;
-										case 270:
-											Parallel.For(0, srcHeight, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
-											{
-												var b = (ushort)0;
-												var g = (ushort)0;
-												var r = (ushort)0;
-												var a = (ushort)0;
-												var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
-												var destPixelPtr = (destBaseAddr + ((srcWidth - 1) * destRowStride) + (y * sizeof(uint)));
-												for (var x = srcWidth; x > 0; --x, ++srcPixelPtr, destPixelPtr -= destRowStride)
-												{
-													unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-													*(uint*)destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
-												}
-											});
-											break;
-									}
-								}
+								CopyToBgra32(srcBaseAddr, bitmapBuffer.Format, srcWidth, srcHeight, bitmapBuffer.RowBytes, skiaPixels.GetPixels(), skiaPixels.RowBytes, orientation);
 								break;
 						}
 					});
@@ -955,5 +810,38 @@ namespace Carina.PixelViewer.Media
 		/// <param name="y">Vertical position of pixel.</param>
 		/// <returns>Byte offset to pixel.</returns>
 		public static int GetPixelOffset(this IBitmapBuffer buffer, int x, int y) => (y * buffer.RowBytes) + (x * buffer.Format.GetByteSize());
+
+
+		/// <summary>
+		/// Rotate <see cref="IBitmapBuffer"/> with given orientation to new <see cref="IBitmapBuffer"/> instance.
+		/// </summary>
+		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <param name="orientation">Orientation, must be one of 0, 90, 180 and 270.</param>
+		/// <returns>Rotated <see cref="IBitmapBuffer"/>.</returns>
+		public static IBitmapBuffer Rotate(this IBitmapBuffer bitmapBuffer, int orientation) => orientation switch
+		{
+			0 => bitmapBuffer.Copy(),
+			90 or 270 => new BitmapBuffer(bitmapBuffer.Format, bitmapBuffer.ColorSpace, bitmapBuffer.Height, bitmapBuffer.Width).Also(rotatedBitmapBuffer=>
+            {
+				bitmapBuffer.Memory.Pin(srcBaseAddr =>
+				{
+					rotatedBitmapBuffer.Memory.Pin(destBaseAddr =>
+					{
+						CopyTo(srcBaseAddr, bitmapBuffer.Format, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.RowBytes, destBaseAddr, rotatedBitmapBuffer.RowBytes, orientation);
+					});
+				});
+            }),
+			180 => new BitmapBuffer(bitmapBuffer.Format, bitmapBuffer.ColorSpace, bitmapBuffer.Width, bitmapBuffer.Height).Also(rotatedBitmapBuffer =>
+			{
+				bitmapBuffer.Memory.Pin(srcBaseAddr =>
+				{
+					rotatedBitmapBuffer.Memory.Pin(destBaseAddr =>
+					{
+						CopyTo(srcBaseAddr, bitmapBuffer.Format, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.RowBytes, destBaseAddr, rotatedBitmapBuffer.RowBytes, orientation);
+					});
+				});
+			}),
+			_ => throw new ArgumentException(),
+		};
 	}
 }

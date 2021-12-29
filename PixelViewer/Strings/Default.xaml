@@ -21,6 +21,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max memory usage of all rendered images (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">Apply current rotation on saved images.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Color space of screen</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memoey usage on status bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>

@@ -19,7 +19,10 @@ namespace Carina.PixelViewer.Media.ImageEncoders
         // Encode.
         protected override void OnEncode(IBitmapBuffer bitmapBuffer, Stream stream, ImageEncodingOptions options, CancellationToken cancellationToken)
         {
-            stream.Write(bitmapBuffer.Memory.Span);
+            using var bitmapBufferToSave = options.Orientation == 0
+                ? bitmapBuffer.Share()
+                : bitmapBuffer.Rotate(options.Orientation);
+            stream.Write(bitmapBufferToSave.Memory.Span);
         }
     }
 }
