@@ -31,6 +31,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     throw new InvalidOperationException();
                 logger = app.LoggerFactory.CreateLogger(nameof(FileFormatParsers));
             }
+            new DngFileFormatParser().Let(it => parsers[it.FileFormat] = it);
             new Yuv4Mpeg2FileFormatParser().Let(it => parsers[it.FileFormat] = it);
         }
 

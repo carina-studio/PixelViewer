@@ -15,6 +15,7 @@ namespace Carina.PixelViewer.Media
         // Fields.
         static volatile IApplication? app;
         static volatile FileFormat? bmp;
+        static volatile FileFormat? dng;
         static readonly ISet<FileFormat> emptyFormats = new HashSet<FileFormat>().AsReadOnly();
         static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new Dictionary<string, ISet<FileFormat>>(PathEqualityComparer.Default);
         static readonly Dictionary<string, FileFormat> formatsById = new Dictionary<string, FileFormat>();
@@ -28,6 +29,12 @@ namespace Carina.PixelViewer.Media
         /// Windows Bitmap.
         /// </summary>
         public static FileFormat Bmp { get => bmp ?? throw new InvalidOperationException("File format is not ready yet."); }
+
+
+        /// <summary>
+        /// Digital Negative (DNG).
+        /// </summary>
+        public static FileFormat Dng { get => dng ?? throw new InvalidOperationException("File format is not ready yet."); }
 
 
         /// <summary>
@@ -49,6 +56,7 @@ namespace Carina.PixelViewer.Media
                 FileFormats.app = app;
             }
             bmp = Register(new FileFormat(app, "Bmp", new string[] { ".bmp" }));
+            dng = Register(new FileFormat(app, "Dng", new string[] { ".dng" }));
             jpeg = Register(new FileFormat(app, "Jpeg", new string[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
             png = Register(new FileFormat(app, "Png", new string[] { ".png" }));
             rawBgra = Register(new FileFormat(app, "RawBgra", new string[] { ".bgra" }));

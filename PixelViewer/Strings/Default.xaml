@@ -67,6 +67,7 @@
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All files</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows Bitmap</sys:String>
+	<sys:String x:Key="String/FileType.Dng">Digital Negative (DNG)</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG image</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">Raw 32/64-bit BGRA pixels</sys:String>
