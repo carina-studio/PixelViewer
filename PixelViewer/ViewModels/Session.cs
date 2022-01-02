@@ -468,12 +468,12 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Constants.
 		const int RenderImageDelay = 500;
-		const int ZoomAnimationDuration = 500;
 
 
 		// Static fields.
 		static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new SettingKey<bool>("Session.IsInitHistogramsPanelVisible", false);
 		static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new MutableObservableInt64();
+		static readonly TimeSpan ZoomAnimationDuration = TimeSpan.FromMilliseconds(500);
 
 
 		// Fields.
