@@ -44,7 +44,11 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override int DefaultLogOutputTargetPort => 5570;
+		protected override bool AllowMultipleMainWindows => true;
+
+
+        /// <inheritdoc/>
+        public override int DefaultLogOutputTargetPort => 5570;
 
 
         // Initialize.
@@ -159,19 +163,26 @@ namespace Carina.PixelViewer
 			// call base
 			base.OnNewInstanceLaunched(launchOptions);
 
-			// open image in current workspace
-			if (this.MainWindows.IsNotEmpty() && this.MainWindows[0].DataContext is Workspace workspace)
+			// get file path to open
+			var filePath = launchOptions.TryGetValue(FilePathKey, out var value) ? value as string : null;
+
+			// create new main window
+			if (filePath == null || this.MainWindows.IsEmpty())
+				this.ShowMainWindow();
+
+			// open file
+			if (filePath != null)
 			{
-				if (launchOptions.TryGetValue(FilePathKey, out var value) && value is string filePath)
+				if (this.MainWindows[0].DataContext is Workspace workspace)
 				{
-					var emptySession = workspace.Sessions.FirstOrDefault(it => !it.IsSourceFileOpened);
+					var emptySession = workspace.Sessions.FirstOrDefault(it => string.IsNullOrEmpty(it.SourceFileName));
 					if (emptySession == null || !emptySession.OpenSourceFileCommand.TryExecute(filePath))
 						workspace.CreateSession(filePath);
+					this.MainWindows[0].ActivateAndBringToFront();
 				}
-				this.MainWindows[0].ActivateAndBringToFront();
+				else
+					this.Logger.LogError("No main window or worksapce to handle new instance");
 			}
-			else
-				this.Logger.LogError("No main window or worksapce to handle new instance");
 		}
 
 
