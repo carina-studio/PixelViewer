@@ -5,6 +5,7 @@
         xmlns:app="clr-namespace:Carina.PixelViewer"
         xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
         xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
+		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
 		Classes="Tabbed"
@@ -15,7 +16,7 @@
 	<!-- Data templates -->
 	<Window.DataTemplates>
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
-			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto" DragDrop.AllowDrop="True">
+			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto">
 				<Panel Classes="TabItem_Icon">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
 					<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceFileOpened}">
@@ -32,17 +33,17 @@
 	</Window.DataTemplates>
 
 	<!-- Layout -->
-	<TabControl x:Name="tabControl" Padding="0">
+	<asControls:TabControl x:Name="tabControl" DragDrop.AllowDrop="True" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" Padding="0">
 
 		<!-- New tab -->
 		<TabItem Classes="Empty">
 			<TabItem.Header>
-				<Border Classes="AddTabItemButton" DragDrop.AllowDrop="True" ToolTip.Tip="{DynamicResource String/MainWindow.NewSession}">
+				<Border Classes="AddTabItemButton" ToolTip.Tip="{DynamicResource String/MainWindow.NewSession}">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
 				</Border>
 			</TabItem.Header>
 		</TabItem>
 
-	</TabControl>
+	</asControls:TabControl>
 	
 </Window>

@@ -290,12 +290,13 @@ namespace Carina.PixelViewer.Controls
 		/// <summary>
 		/// Drop data to this control.
 		/// </summary>
-		/// <param name="e">Drag-and-drop data.</param>
+		/// <param name="data">Dropped data.</param>
+		/// <param name="keyModifiers">Key modifiers.</param>
 		/// <returns>True if data has been accepted.</returns>
-		public async Task<bool> DropDataAsync(DragEventArgs e)
+		public async Task<bool> DropDataAsync(IDataObject data, KeyModifiers keyModifiers)
 		{
 			// get file names
-			var fileNames = e.Data.GetFileNames()?.ToArray();
+			var fileNames = data.GetFileNames()?.ToArray();
 			if (fileNames == null || fileNames.IsEmpty())
 				return false;
 
@@ -495,7 +496,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when drop.
 		void OnDrop(object? sender, DragEventArgs e)
 		{
-			_ = this.DropDataAsync(e);
+			_ = this.DropDataAsync(e.Data, e.KeyModifiers);
 			e.Handled = true;
 		}
 

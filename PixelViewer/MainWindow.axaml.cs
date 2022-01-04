@@ -6,6 +6,7 @@ using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
 using CarinaStudio.Input;
@@ -21,16 +22,18 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows.Input;
 
+using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
+
 namespace Carina.PixelViewer
 {
 	/// <summary>
 	/// Main window of PixelViewer.
 	/// </summary>
-	class MainWindow : CarinaStudio.AppSuite.Controls.MainWindow<Workspace>
+	class MainWindow : MainWindow<Workspace>
 	{
 		// Fields.
 		Session? attachedActivatedSession;
-		readonly TabControl mainTabControl;
+		readonly AsTabControl mainTabControl;
 		readonly IList mainTabItems;
 		readonly ScheduledAction updateTitleBarAction;
 
@@ -47,7 +50,7 @@ namespace Carina.PixelViewer
 			InitializeComponent();
 
 			// setup main tab control
-			this.mainTabControl = this.FindControl<TabControl>("tabControl").AsNonNull().Also((it) =>
+			this.mainTabControl = this.FindControl<AsTabControl>("tabControl").AsNonNull().Also((it) =>
 			{
 				it.SelectionChanged += (s, e) => this.OnMainTabControlSelectionChanged();
 			});
@@ -149,20 +152,6 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Find index of main tab item contains dragging point.
-		int FindMainTabItemIndex(DragEventArgs e)
-		{
-			for (var i = this.mainTabItems.Count - 1; i >= 0; --i)
-			{
-				if (!((this.mainTabItems[i] as TabItem)?.Header is IVisual headerVisual))
-					continue;
-				if (e.IsContainedBy(headerVisual))
-					return i;
-			}
-			return -1;
-		}
-
-
 		// Find index of main tab item attached to given session.
 		int FindMainTabItemIndex(Session session)
 		{
@@ -226,19 +215,6 @@ namespace Carina.PixelViewer
 		}
 
 
-        // Called when window closed.
-        protected override void OnClosed(EventArgs e)
-		{
-			// disable drag-drop
-			this.RemoveHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
-			this.RemoveHandler(DragDrop.DragOverEvent, this.OnDragOver);
-			this.RemoveHandler(DragDrop.DropEvent, this.OnDrop);
-
-			// call super
-			base.OnClosed(e);
-		}
-
-
 		/// <inheritdoc/>
 		protected override ApplicationInfo OnCreateApplicationInfo() => new AppInfo();
 
@@ -267,47 +243,33 @@ namespace Carina.PixelViewer
         }
 
 
-        // Called when drag enter.
-        void OnDragEnter(object? sender, DragEventArgs e)
-		{
-			this.ActivateAndBringToFront();
-		}
-
-
 		// Called when drag over.
-		void OnDragOver(object? sender, DragEventArgs e)
+		void OnDragOverTabItem(object? sender, DragOnTabItemEventArgs e)
 		{
 			if (e.Handled)
 				return;
 			if (!e.Data.HasFileNames())
 			{
 				e.DragEffects = DragDropEffects.None;
+				e.Handled = true;
 				return;
 			}
-			int mainTabIndex = this.FindMainTabItemIndex(e);
-			if (mainTabIndex < 0)
-			{
-				e.DragEffects = DragDropEffects.None;
-				return;
-			}
-			if (mainTabIndex < this.mainTabItems.Count - 1)
-				this.mainTabControl.SelectedIndex = mainTabIndex;
+			if (e.ItemIndex < this.mainTabItems.Count - 1)
+				this.mainTabControl.SelectedIndex = e.ItemIndex;
 			e.DragEffects = DragDropEffects.Copy;
+			e.Handled = true;
 		}
 
 
 		// Called when drop.
-		void OnDrop(object? sender, DragEventArgs e)
+		void OnDropOnTabItem(object? sender, DragOnTabItemEventArgs e)
 		{
 			// check state
 			if (e.Handled)
 				return;
 
 			// find tab
-			int mainTabIndex = this.FindMainTabItemIndex(e);
-			if (mainTabIndex < 0)
-				return;
-			if (mainTabIndex >= this.mainTabItems.Count - 1)
+			if (e.ItemIndex >= this.mainTabItems.Count - 1)
             {
 				var session = (this.DataContext as Workspace)?.CreateSession();
 				if (session == null)
@@ -315,10 +277,11 @@ namespace Carina.PixelViewer
             }
 
 			// drop data
-			((this.mainTabItems[mainTabIndex] as TabItem)?.Content as SessionControl)?.Let(it =>
+			((this.mainTabItems[e.ItemIndex] as TabItem)?.Content as SessionControl)?.Let(it =>
 			{
-				_ = it.DropDataAsync(e);
+				_ = it.DropDataAsync(e.Data, e.KeyModifiers);
 			});
+			e.Handled = true;
 		}
 
 
@@ -345,19 +308,6 @@ namespace Carina.PixelViewer
 					((this.mainTabControl.SelectedItem as TabItem)?.Content as IInputElement)?.Focus();
 				});
 			}
-		}
-
-
-		// Called when opened.
-		protected override void OnOpened(EventArgs e)
-		{
-			// call base
-			base.OnOpened(e);
-
-			// enable drag-drop
-			this.AddHandler(DragDrop.DragEnterEvent, this.OnDragEnter);
-			this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
-			this.AddHandler(DragDrop.DropEvent, this.OnDrop);
 		}
 
 
