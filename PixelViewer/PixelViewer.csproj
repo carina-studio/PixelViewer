@@ -45,15 +45,9 @@
 		<PackageReference Include="Avalonia.Desktop" Version="0.10.10" />
 		<PackageReference Include="Avalonia.Diagnostics" Version="0.10.10" />
 		<PackageReference Include="Avalonia.Xaml.Behaviors" Version="0.10.10.4" />
-		<PackageReference Include="CarinaStudio.AppBase.Application" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppBase.Application.Avalonia" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppBase.AutoUpdate" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppBase.Configuration" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.29.0.101" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.30.0.104" />
 		<PackageReference Include="Colourful" Version="3.1.0" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
-		<PackageReference Include="NLog" Version="4.7.13" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">

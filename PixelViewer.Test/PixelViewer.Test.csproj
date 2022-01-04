@@ -29,10 +29,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CarinaStudio.AppBase.Core" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="0.33.0.1231" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.29.0.101" />
-		<PackageReference Include="NLog" Version="4.7.13" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.30.0.104" />
 		<PackageReference Include="NUnit" Version="3.13.2" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.1.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
