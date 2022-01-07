@@ -143,7 +143,7 @@
 						<Separator Classes="ToolBar_Separator"/>
 
 						<!-- Histograms -->
-						<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
+						<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
 							<Panel>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -297,6 +297,14 @@
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Lab}"/>
 					</Button>
 
+					<!-- Rendering params panel -->
+					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding IsRenderingParametersPanelVisible}" ToolTip.Tip="{DynamicResource String/SessionControl.RenderingParametersPanel}">
+						<Panel>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.SidePanel}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.SidePanel.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
+
 					<!-- Other actions -->
 					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
 						<Panel>
@@ -312,7 +320,7 @@
 		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
 
 		<!-- Viewer -->
-		<Grid Grid.Row="1">
+		<Grid Name="workingAreaGrid" Grid.Row="1">
 
 			<!-- Columns -->
 			<Grid.ColumnDefinitions>
@@ -324,10 +332,7 @@
 
 			<!-- Histograms -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
-			<Border Name="histogramsPanel" Background="{DynamicResource Brush/WorkingArea.Panel.Background}">
-				<Border.RenderTransform>
-					<TranslateTransform/>
-				</Border.RenderTransform>
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
 
@@ -363,7 +368,7 @@
 			</Border>
 
 			<!-- Image viewer -->
-			<Grid Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1">
+			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1">
 
 				<!-- Hint -->
 				<Viewbox Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
@@ -442,8 +447,8 @@
 				
 			</Grid>
 
-			<!-- Options panel -->
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3">
+			<!-- Rendering parameters panel -->
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3" IsVisible="{Binding IsRenderingParametersPanelVisible}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 					<StackPanel IsEnabled="{Binding IsSourceFileOpened}" Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
 
@@ -630,7 +635,7 @@
 			</Border>
 
 			<!-- Splitter -->
-			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2"/>
+			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2" IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
 			
 		</Grid>
 

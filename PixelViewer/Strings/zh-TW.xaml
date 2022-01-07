@@ -152,6 +152,7 @@
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">此分頁的影像繪製記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">繪製失敗，通常是因為使用錯誤的繪製參數。</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">繪製參數面板</sys:String>
 	<sys:String x:Key="String/SessionControl.RgbGain">色彩預先校正</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆時針旋轉</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">順時針旋轉</sys:String>

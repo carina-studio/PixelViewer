@@ -377,6 +377,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
 		/// <summary>
+		/// Property of <see cref="IsRenderingParametersPanelVisible"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsRenderingParametersPanelVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingParametersPanelVisible), true);
+		/// <summary>
 		/// Property of <see cref="IsRgbGainSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsRgbGainSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsRgbGainSupported));
@@ -432,6 +436,17 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="RenderedImagesMemoryUsage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<long> RenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(RenderedImagesMemoryUsage));
+		/// <summary>
+		/// Property of <see cref="RenderingParametersPanelSize"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), 300, coerce: it =>
+		{
+			if (it >= 400)
+				return 400;
+			if (it <= 300)
+				return 300;
+			return it;
+		}, validate: it => double.IsFinite(it));
 		/// <summary>
 		/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
 		/// </summary>
@@ -2011,6 +2026,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get or set whether panel of rendering parameters is visible or not.
+		/// </summary>
+		public bool IsRenderingParametersPanelVisible
+        {
+			get => this.GetValue(IsRenderingParametersPanelVisibleProperty);
+			set => this.SetValue(IsRenderingParametersPanelVisibleProperty, value);
+        }
+
+
+		/// <summary>
 		/// Check whether RGB gain is available for current <see cref="ImageRenderer"/> or not.
 		/// </summary>
 		public bool IsRgbGainSupported { get => this.GetValue(IsRgbGainSupportedProperty); }
@@ -2943,6 +2968,16 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		/// <summary>
+		/// Get or set width/height of panel of rendering parameters.
+		/// </summary>
+		public double RenderingParametersPanelSize
+        {
+			get => this.GetValue(RenderingParametersPanelSizeProperty);
+			set => this.SetValue(RenderingParametersPanelSizeProperty, value);
+        }
+
+
 		// Request token for rendered image memory usage.
 		IDisposable? RequestRenderedImageMemoryUsage(long dataSize)
 		{
@@ -3195,6 +3230,8 @@ namespace Carina.PixelViewer.ViewModels
 			var fitToViewport = true;
 			var frameNumber = 1L;
 			var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
+			var isRenderingParamsPanelVisible = true;
+			var renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
 			var rotation = 0;
 			var scale = 1.0;
 			if (savedState.TryGetProperty(nameof(FitRenderedImageToViewport), out jsonProperty))
@@ -3205,8 +3242,17 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetInt32(out rotation);
 			if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
 				isHistogramsVisible = jsonProperty.ValueKind != JsonValueKind.False;
+			if (savedState.TryGetProperty(nameof(IsRenderingParametersPanelVisible), out jsonProperty))
+				isRenderingParamsPanelVisible = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(RenderedImageScale), out jsonProperty))
 				jsonProperty.TryGetDouble(out scale);
+			if (savedState.TryGetProperty(nameof(RenderingParametersPanelSize), out jsonProperty)
+				&& jsonProperty.TryGetDouble(out renderingParamsPanelSize))
+			{
+				renderingParamsPanelSize = RenderingParametersPanelSizeProperty.CoercionFunction?.Invoke(renderingParamsPanelSize) ?? renderingParamsPanelSize;
+				if (RenderingParametersPanelSizeProperty.ValidationFunction?.Invoke(renderingParamsPanelSize) == false)
+					renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
+			}
 
 			// open source file
 			await this.OpenSourceFile(fileName);
@@ -3254,7 +3300,9 @@ namespace Carina.PixelViewer.ViewModels
 			this.FitRenderedImageToViewport = fitToViewport;
 			this.FrameNumber = frameNumber;
 			this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
+			this.SetValue(IsRenderingParametersPanelVisibleProperty, isRenderingParamsPanelVisible);
 			this.RenderedImageScale = scale;
+			this.SetValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
 
 			this.Logger.LogWarning("State restored");
 
@@ -3565,7 +3613,9 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteBoolean(nameof(FitRenderedImageToViewport), this.fitRenderedImageToViewport);
 				writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
 				writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
+				writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
 				writer.WriteNumber(nameof(RenderedImageScale), this.renderedImageScale);
+				writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
 			}
 			writer.WriteEndObject();
 		}

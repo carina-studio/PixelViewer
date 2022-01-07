@@ -191,6 +191,7 @@
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory usage of rendered images by this tab</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed which is usually caused by incorrect rendering parameters.</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">Rendering parameters panel</sys:String>
 	<sys:String x:Key="String/SessionControl.RgbGain">Color pre-correction</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
