@@ -13,6 +13,7 @@ using Carina.PixelViewer.Animation;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.Animation;
 using CarinaStudio.AppSuite;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.Collections;
@@ -74,15 +75,13 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
 		readonly ToggleButton colorAdjustmentButton;
 		readonly Popup colorAdjustmentPopup;
-		readonly ScheduledAction commitHistogramsPanelVisibilityAction;
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
 		readonly ContextMenu fileActionsMenu;
 		readonly ToggleButton histogramsButton;
 		readonly Control histogramsPanel;
-		readonly int histogramsPanelTransitionDuration;
-		readonly double histogramsPanelTransitionX;
+		DoubleAnimator? histogramsPanelAnimator;
 		Vector? imagePointerPressedContentPosition;
 		readonly ComboBox imageRendererComboBox;
 		readonly ScrollViewer imageScrollViewer;
@@ -164,18 +163,7 @@ namespace Carina.PixelViewer.Controls
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
 
-			// load resources
-			if (this.Application.TryGetResource<double>("Double/SessionControl.Histogram.Width", out var doubleValue) && doubleValue.HasValue)
-				this.histogramsPanelTransitionX = doubleValue.Value / -2;
-			if (this.Application.TryGetResource<TimeSpan>("TimeSpan/SessionControl.HistogramsPanel.Transition", out var duration) && duration.HasValue)
-				this.histogramsPanelTransitionDuration = (int)duration.Value.TotalMilliseconds;
-
 			// create scheduled actions
-			this.commitHistogramsPanelVisibilityAction = new ScheduledAction(() =>
-			{
-				if (this.DataContext is Session session)
-					this.histogramsPanel.IsVisible = session.IsHistogramsVisible;
-			});
 			this.stopUsingSmallRenderedImageAction = new ScheduledAction(() =>
 			{
 				if (this.useSmallRenderedImage)
@@ -230,17 +218,42 @@ namespace Carina.PixelViewer.Controls
 		// Animate histograms panel according to current state
 		void AnimateHistogramsPanel()
 		{
+			// cancel current animation
+			this.histogramsPanelAnimator?.Cancel();
+			this.histogramsPanelAnimator = null;
+
+			// get parameters
+			var duration = this.Application.TryGetResource<TimeSpan>("TimeSpan/Animation.Fast", out var timeSpan) ? timeSpan.GetValueOrDefault() : TimeSpan.FromMilliseconds(500);
+
+			// start animation
+			var targetTranslateX = 0.0;
 			if (this.DataContext is Session session && session.IsHistogramsVisible)
-			{
 				this.histogramsPanel.IsVisible = true;
-				this.histogramsPanel.Opacity = 1;
-				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = 0);
-			}
 			else
 			{
-				this.histogramsPanel.Opacity = 0;
-				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = this.histogramsPanelTransitionX);
+				if (this.Application.TryGetResource<double>("Double/SessionControl.Histogram.Width", out var doubleValue))
+					targetTranslateX -= doubleValue.GetValueOrDefault();
+				if (this.Application.TryGetResource<Thickness>("Thickness/SessionControl.OptionsPanel.Padding", out var thickness))
+				{
+					var padding = thickness.GetValueOrDefault();
+					targetTranslateX -= (padding.Left + padding.Right);
+				}
 			}
+			(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(transform =>
+			{
+				this.histogramsPanelAnimator = new DoubleAnimator(transform.X, targetTranslateX).Also(it =>
+				{
+					it.Completed += (_, e) =>
+					{
+						this.histogramsPanelAnimator = null;
+						this.CompleteAnimatingHistogramsPanel();
+					};
+					it.Duration = duration;
+					it.Interpolator = Interpolators.Deleceleration;
+					it.ProgressChanged += (_, e) => transform.X = it.Value;
+					it.Start();
+				});
+			});
 		}
 
 
@@ -261,6 +274,35 @@ namespace Carina.PixelViewer.Controls
 				}
 			});
 		}
+
+
+		// Complete histograms panel animation.
+		void CompleteAnimatingHistogramsPanel()
+		{
+			if (this.histogramsPanelAnimator != null)
+			{
+				this.histogramsPanelAnimator.Cancel();
+				this.histogramsPanelAnimator = null;
+			}
+			if (this.DataContext is Session session && session.IsHistogramsVisible)
+			{
+				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it => it.X = 0);
+				this.histogramsPanel.IsVisible = true;
+			}
+			else
+			{
+				(this.histogramsPanel.RenderTransform as TranslateTransform)?.Let(it =>
+				{
+					if (this.Application.TryGetResource<double>("Double/SessionControl.Histogram.Width", out var doubleValue)
+						&& this.Application.TryGetResource<Thickness>("Thickness/SessionControl.OptionsPanel.Padding", out var thickness))
+					{
+						var padding = thickness.GetValueOrDefault();
+						it.X = -doubleValue.GetValueOrDefault() - padding.Left - padding.Right;
+					}
+				});
+				this.histogramsPanel.IsVisible = false;
+			}
+        }
 
 
 		// Copy file name.
@@ -799,12 +841,7 @@ namespace Carina.PixelViewer.Controls
 
 					// setup histograms panel
 					this.histogramsButton.IsChecked = newSession.IsHistogramsVisible;
-					this.histogramsPanel.DisableTransitionsAndRun(() =>
-					{
-						this.AnimateHistogramsPanel();
-						this.histogramsPanel.IsVisible = newSession.IsHistogramsVisible;
-						this.commitHistogramsPanelVisibilityAction.Cancel();
-					});
+					this.CompleteAnimatingHistogramsPanel();
 
 					// update rendered image
 					this.updateEffectiveRenderedImageAction.Schedule();
@@ -887,10 +924,6 @@ namespace Carina.PixelViewer.Controls
 					break;
 				case nameof(Session.IsHistogramsVisible):
 					this.AnimateHistogramsPanel();
-					if (session.IsHistogramsVisible)
-						this.commitHistogramsPanelVisibilityAction.Cancel();
-					else
-						this.commitHistogramsPanelVisibilityAction.Reschedule(this.histogramsPanelTransitionDuration);
 					this.histogramsButton.IsChecked = session.IsHistogramsVisible;
 					break;
 				case nameof(Session.IsSourceFileOpened):

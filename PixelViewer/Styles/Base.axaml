@@ -77,7 +77,6 @@
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
-		<sys:TimeSpan x:Key="TimeSpan/SessionControl.HistogramsPanel.Transition">0:0:0.5</sys:TimeSpan>
 		
 	</Styles.Resources>
 

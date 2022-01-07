@@ -80,212 +80,214 @@
 			<Grid ColumnDefinitions="*,Auto">
 
 				<!-- Image actions -->
-				<WrapPanel Orientation="Horizontal">
-
-					<!-- Open file -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
-					</Button>
-
-					<!-- Save image -->
-					<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveImage}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Save}"/>
-					</Button>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Fit to viewport -->
-					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
-						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-						</Panel>
-					</ToggleButton>
-
-					<!-- Zoom-out -->
-					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomOut}"/>
-					</RepeatButton>
-
-					<!-- Zoom -->
-					<Panel>
-						<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000%"/>
-						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RenderedImageScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
-					</Panel>
-
-					<!-- Zoom-in -->
-					<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomIn}"/>
-					</RepeatButton>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Rotate-left -->
-					<Button Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateLeft}"/>
-					</Button>
-
-					<!-- Rotation -->
-					<Panel>
-						<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000"/>
-						<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
-					</Panel>
-
-					<!-- Rotate-right -->
-					<Button Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateRight}"/>
-					</Button>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Histograms -->
-					<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
-						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-						</Panel>
-					</ToggleButton>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Frame navigation -->
+				<asControls:ToolBarScrollViewer>
 					<StackPanel Orientation="Horizontal">
 
-						<!-- First frame -->
-						<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastBackward}"/>
+						<!-- Open file -->
+						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
 						</Button>
 
-						<!-- Previous frame -->
-						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Backward}"/>
-						</RepeatButton>
+						<!-- Save image -->
+						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveImage}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Save}"/>
+						</Button>
 
-						<!-- Frame -->
-						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+						<!-- Separator -->
+						<Separator Classes="ToolBar_Separator"/>
+
+						<!-- Fit to viewport -->
+						<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 							<Panel>
-								<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
-								<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
-									<TextBlock.Text>
-										<MultiBinding StringFormat="{}{0} / {1}">
-											<Binding Path="FrameNumber"/>
-											<Binding Path="FrameCount"/>
-										</MultiBinding>
-									</TextBlock.Text>
-								</TextBlock>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
-						</Button>
+						</ToggleButton>
 
-						<!-- Next frame -->
-						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Forward}"/>
+						<!-- Zoom-out -->
+						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomOut}"/>
 						</RepeatButton>
 
-						<!-- Last frame -->
-						<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
+						<!-- Zoom -->
+						<Panel>
+							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000%"/>
+							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RenderedImageScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
+						</Panel>
+
+						<!-- Zoom-in -->
+						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomIn}"/>
+						</RepeatButton>
+
+						<!-- Separator -->
+						<Separator Classes="ToolBar_Separator"/>
+
+						<!-- Rotate-left -->
+						<Button Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateLeft}"/>
 						</Button>
-						
+
+						<!-- Rotation -->
+						<Panel>
+							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000"/>
+							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
+						</Panel>
+
+						<!-- Rotate-right -->
+						<Button Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateRight}"/>
+						</Button>
+
+						<!-- Separator -->
+						<Separator Classes="ToolBar_Separator"/>
+
+						<!-- Histograms -->
+						<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowHideHistograms}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
+							<Panel>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							</Panel>
+						</ToggleButton>
+
+						<!-- Separator -->
+						<Separator Classes="ToolBar_Separator"/>
+
+						<!-- Frame navigation -->
+						<StackPanel Orientation="Horizontal">
+
+							<!-- First frame -->
+							<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastBackward}"/>
+							</Button>
+
+							<!-- Previous frame -->
+							<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Backward}"/>
+							</RepeatButton>
+
+							<!-- Frame -->
+							<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToSpecificFrame}" Width="NaN">
+								<Panel>
+									<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="000 / 000"/>
+									<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center">
+										<TextBlock.Text>
+											<MultiBinding StringFormat="{}{0} / {1}">
+												<Binding Path="FrameNumber"/>
+												<Binding Path="FrameCount"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</Panel>
+							</Button>
+
+							<!-- Next frame -->
+							<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Forward}"/>
+							</RepeatButton>
+
+							<!-- Last frame -->
+							<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
+							</Button>
+
+						</StackPanel>
+
+						<!-- Separator -->
+						<Separator Classes="ToolBar_Separator"/>
+
+						<!-- Brightness and contrast adjustment -->
+						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment}">
+							<Panel>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasContrastAdjustment}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
+									<Border Classes="SessionControl_FilterParamsPopup">
+										<DockPanel>
+											<Border Classes="Dialog_ControlButtonsPanel" Background="{x:Null}" DockPanel.Dock="Bottom">
+												<StackPanel Classes="Dialog_ControlButtonsPanel">
+													<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
+												</StackPanel>
+											</Border>
+											<StackPanel Classes="Dialog_ContentPanel">
+
+												<!-- Brightness -->
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" Ticks="-2,-1.84,-1.67,-1.5,-1.33,-1.17,-1,-0.84,-0.67,-0.5,-0.33,-0.17,0,0.17,0.33,0.5,0.67,0.84,1,1.17,1.33,1.5,1.67,1.84,2" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator"/>
+
+												<!-- Contrast -->
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+
+											</StackPanel>
+										</DockPanel>
+									</Border>
+								</Popup>
+							</Panel>
+						</ToggleButton>
+
+						<!-- Color adjustment -->
+						<ToggleButton Name="colorAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ColorAdjustment}">
+							<Panel>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Active}" IsVisible="{Binding HasColorAdjustment}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
+									<Border Classes="SessionControl_FilterParamsPopup">
+										<DockPanel>
+											<Border Classes="Dialog_ControlButtonsPanel" Background="{x:Null}" DockPanel.Dock="Bottom">
+												<StackPanel Classes="Dialog_ControlButtonsPanel">
+													<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
+												</StackPanel>
+											</Border>
+											<StackPanel Classes="Dialog_ContentPanel">
+												<StackPanel.Styles>
+													<Style Selector="Slider">
+														<Setter Property="Maximum" Value="1"/>
+														<Setter Property="Minimum" Value="-1"/>
+														<Setter Property="Ticks" Value="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1"/>
+													</Style>
+												</StackPanel.Styles>
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator"/>
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator"/>
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
+											</StackPanel>
+										</DockPanel>
+									</Border>
+								</Popup>
+							</Panel>
+						</ToggleButton>
+
 					</StackPanel>
-
-					<!-- Separator -->
-					<Separator Classes="ToolBar_Separator"/>
-
-					<!-- Brightness and contrast adjustment -->
-					<ToggleButton Name="brightnessAndContrastAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment}">
-						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasContrastAdjustment}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-							<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
-								<Border Classes="SessionControl_FilterParamsPopup">
-									<DockPanel>
-										<Border Classes="Dialog_ControlButtonsPanel" Background="{x:Null}" DockPanel.Dock="Bottom">
-											<StackPanel Classes="Dialog_ControlButtonsPanel">
-												<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
-											</StackPanel>
-										</Border>
-										<StackPanel Classes="Dialog_ContentPanel">
-
-											<!-- Brightness -->
-											<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness}" VerticalAlignment="Center"/>
-												<Separator Classes="Dialog_Separator_Small"/>
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" VerticalAlignment="Center"/>
-											</StackPanel>
-											<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" Ticks="-2,-1.84,-1.67,-1.5,-1.33,-1.17,-1,-0.84,-0.67,-0.5,-0.33,-0.17,0,0.17,0.33,0.5,0.67,0.84,1,1.17,1.33,1.5,1.67,1.84,2" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
-											<Separator Classes="Dialog_Separator"/>
-
-											<!-- Contrast -->
-											<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast}" VerticalAlignment="Center"/>
-												<Separator Classes="Dialog_Separator_Small"/>
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
-											</StackPanel>
-											<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" Ticks="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
-
-										</StackPanel>
-									</DockPanel>
-								</Border>
-							</Popup>
-						</Panel>
-					</ToggleButton>
-
-					<!-- Color adjustment -->
-					<ToggleButton Name="colorAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ColorAdjustment}">
-						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Active}" IsVisible="{Binding HasColorAdjustment}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-							<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
-								<Border Classes="SessionControl_FilterParamsPopup">
-									<DockPanel>
-										<Border Classes="Dialog_ControlButtonsPanel" Background="{x:Null}" DockPanel.Dock="Bottom">
-											<StackPanel Classes="Dialog_ControlButtonsPanel">
-												<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
-											</StackPanel>
-										</Border>
-										<StackPanel Classes="Dialog_ContentPanel">
-											<StackPanel.Styles>
-												<Style Selector="Slider">
-													<Setter Property="Maximum" Value="1"/>
-													<Setter Property="Minimum" Value="-1"/>
-													<Setter Property="Ticks" Value="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1"/>
-												</Style>
-											</StackPanel.Styles>
-											<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" VerticalAlignment="Center"/>
-												<Separator Classes="Dialog_Separator_Small"/>
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
-											</StackPanel>
-											<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
-											<Separator Classes="Dialog_Separator"/>
-											<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" VerticalAlignment="Center"/>
-												<Separator Classes="Dialog_Separator_Small"/>
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
-											</StackPanel>
-											<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
-											<Separator Classes="Dialog_Separator"/>
-											<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" VerticalAlignment="Center"/>
-												<Separator Classes="Dialog_Separator_Small"/>
-												<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
-											</StackPanel>
-											<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
-										</StackPanel>
-									</DockPanel>
-								</Border>
-							</Popup>
-						</Panel>
-					</ToggleButton>
-
-				</WrapPanel>
+				</asControls:ToolBarScrollViewer>
 
 				<!-- Other actions -->
 				<StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
@@ -324,19 +326,8 @@
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
 			<Border Name="histogramsPanel" Background="{DynamicResource Brush/WorkingArea.Panel.Background}">
 				<Border.RenderTransform>
-					<TranslateTransform>
-						<TranslateTransform.Transitions>
-							<Transitions>
-								<DoubleTransition Property="X" Duration="{StaticResource TimeSpan/SessionControl.HistogramsPanel.Transition}" Easing="ExponentialEaseOut"/>
-							</Transitions>
-						</TranslateTransform.Transitions>
-					</TranslateTransform>
+					<TranslateTransform/>
 				</Border.RenderTransform>
-				<Border.Transitions>
-					<Transitions>
-						<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/SessionControl.HistogramsPanel.Transition}" Easing="ExponentialEaseOut"/>
-					</Transitions>
-				</Border.Transitions>
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
 
