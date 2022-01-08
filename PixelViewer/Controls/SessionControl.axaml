@@ -67,6 +67,22 @@
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
+			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}">
+				<MenuItem.Icon>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Horizontal}"/>
+				</MenuItem.Icon>
+			</MenuItem>
+			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Vertical}">
+				<MenuItem.Icon>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Vertical}"/>
+				</MenuItem.Icon>
+			</MenuItem>
+			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Tile}">
+				<MenuItem.Icon>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Tile}"/>
+				</MenuItem.Icon>
+			</MenuItem>
+			<Separator/>
 			<MenuItem Command="{Binding $parent[UserControl].ShowAppInfo}" Header="{DynamicResource String/SessionControl.ApplicationInfo}"/>
 		</ContextMenu>
 		
