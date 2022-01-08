@@ -115,9 +115,9 @@
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG options</sys:String>
 
 	<!-- MainWindow -->
-	<sys:String x:Key="String/MainWindow.AppUpdateFound">Application update is available. Do you want to go to the download page?</sys:String>
-	<sys:String x:Key="String/MainWindow.CloseSession">Close this tab</sys:String>
-	<sys:String x:Key="String/MainWindow.NewSession">Add new tab</sys:String>
+	<sys:String x:Key="String/MainWindow.ResetSessionTitle">Reset title</sys:String>
+	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">Custom title…</sys:String>
+	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">Custom title</sys:String>
 	
 	<!-- ScreenColorSpace -->
 	<sys:String x:Key="String/ScreenColorSpace.DCI_P3">DCI-P3</sys:String>

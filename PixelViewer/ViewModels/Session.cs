@@ -181,6 +181,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<double> ContrastAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, validate: it => double.IsFinite(it));
 		/// <summary>
+		/// Property of <see cref="CustomTitle"/>.
+		/// </summary>
+		public static readonly ObservableProperty<string?> CustomTitleProperty = ObservableProperty.Register<Session, string?>(nameof(CustomTitle));
+		/// <summary>
 		/// Property of <see cref="DataOffset"/>.
 		/// </summary>
 		public static readonly ObservableProperty<long> DataOffsetProperty = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
@@ -1209,6 +1213,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get or set custom title.
+		/// </summary>
+		public string? CustomTitle
+        {
+			get => this.GetValue(CustomTitleProperty);
+			set => this.SetValue(CustomTitleProperty, value);
+        }
+
+
+		/// <summary>
 		/// Get or set offset to first byte of data to render image.
 		/// </summary>
 		public long DataOffset
@@ -2213,6 +2227,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
+			else if (property == CustomTitleProperty)
+				this.UpdateTitle();
 			else if (property == DataOffsetProperty
 				|| property == FramePaddingSizeProperty
 				|| property == ImageHeightProperty)
@@ -3254,6 +3270,10 @@ namespace Carina.PixelViewer.ViewModels
 					renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
 			}
 
+			// load other state
+			if (savedState.TryGetProperty(nameof(CustomTitle), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
+				this.SetValue(CustomTitleProperty, jsonProperty.GetString());
+
 			// open source file
 			await this.OpenSourceFile(fileName);
 			if (!this.IsSourceFileOpened)
@@ -3616,6 +3636,10 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
 				writer.WriteNumber(nameof(RenderedImageScale), this.renderedImageScale);
 				writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
+
+				// other state
+				if (this.CustomTitle != null)
+					writer.WriteString(nameof(CustomTitle), this.CustomTitle ?? "");
 			}
 			writer.WriteEndObject();
 		}
@@ -3784,11 +3808,14 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 
 			// generate title
-			string? title = null;
-			if (this.SourceFileName != null)
-				title = Path.GetFileName(this.SourceFileName);
-			else
-				title = this.Application.GetString("Session.EmptyTitle");
+			var title = this.CustomTitle;
+			if (title == null)
+			{
+				if (this.SourceFileName != null)
+					title = Path.GetFileName(this.SourceFileName);
+				else
+					title = this.Application.GetString("Session.EmptyTitle");
+			}
 
 			// update property
 			if (this.Title != title)

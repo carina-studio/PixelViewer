@@ -6,6 +6,7 @@
         xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
         xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
 		Classes="Tabbed"
@@ -18,6 +19,22 @@
 	<Window.DataTemplates>
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
 			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto">
+				<Grid.ContextMenu>
+					<ContextMenu>
+						<MenuItem Command="{Binding $parent[Window].SetCustomSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
+							<MenuItem.Icon>
+								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
+							</MenuItem.Icon>
+						</MenuItem>
+						<MenuItem Command="{Binding $parent[Window].ResetSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
+						<Separator/>
+						<MenuItem Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}">
+							<MenuItem.Icon>
+								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.CloseTab}"/>
+							</MenuItem.Icon>
+						</MenuItem>
+					</ContextMenu>
+				</Grid.ContextMenu>
 				<Panel Classes="TabItem_Icon">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
 					<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceFileOpened}">
@@ -26,7 +43,7 @@
 					</Panel>
 				</Panel>
 				<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}" ToolTip.Tip="{Binding SourceFileName}"/>
-				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/MainWindow.CloseSession}">
+				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/Common.CloseTab}">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Close}"/>
 				</Button>
 			</Grid>
@@ -39,7 +56,7 @@
 		<!-- New tab -->
 		<TabItem Classes="Empty">
 			<TabItem.Header>
-				<Border Classes="AddTabItemButton" ToolTip.Tip="{DynamicResource String/MainWindow.NewSession}">
+				<Border Classes="AddTabItemButton" ToolTip.Tip="{DynamicResource String/Common.CreateTab}">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
 				</Border>
 			</TabItem.Header>

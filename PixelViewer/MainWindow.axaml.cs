@@ -43,9 +43,6 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public MainWindow()
 		{
-			// create commands
-			this.CloseMainTabItemCommand = new Command<TabItem>(this.CloseMainTabItem);
-
 			// initialize Avalonia resources
 			InitializeComponent();
 
@@ -125,12 +122,6 @@ namespace Carina.PixelViewer
 			// close session
 			(this.DataContext as Workspace)?.CloseSession(session);
 		}
-
-
-		/// <summary>
-		/// Command for closing given tab item.
-		/// </summary>
-		public ICommand CloseMainTabItemCommand { get; }
 
 
 		// Detach from activated session.
@@ -383,5 +374,34 @@ namespace Carina.PixelViewer
 					this.DetachFromActivatedSession();
 			}
         }
-    }
+
+
+		// Reset title of session.
+		void ResetSessionTitle(TabItem tabItem)
+        {
+			if (tabItem.DataContext is Session session)
+				session.CustomTitle = null;
+		}
+
+
+		// Set custom title of session.
+		async void SetCustomSessionTitle(TabItem tabItem)
+		{
+			// check session
+			if (tabItem.DataContext is not Session session)
+				return;
+
+			// input custom title
+			var customTitle = await new TextInputDialog()
+			{
+				InitialText = session.CustomTitle,
+				Message = this.Application.GetString("MainWindow.SetCustomSessionTitle.Message"),
+			}.ShowDialog(this);
+			if (string.IsNullOrWhiteSpace(customTitle))
+				return;
+
+			// set title
+			session.CustomTitle = customTitle;
+		}
+	}
 }
