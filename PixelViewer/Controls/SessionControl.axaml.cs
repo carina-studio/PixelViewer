@@ -51,6 +51,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Constants.
+		const int HidePanelsByImageViewerSizeDelay = 500;
 		const int StopUsingSmallRenderedImageDelay = 1000;
 
 
@@ -77,11 +78,16 @@ namespace Carina.PixelViewer.Controls
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
 		readonly ContextMenu fileActionsMenu;
+		readonly ScheduledAction hidePanelsByImageViewerSizeAction;
 		readonly ToggleButton histogramsButton;
 		Vector? imagePointerPressedContentPosition;
 		readonly ComboBox imageRendererComboBox;
 		readonly ScrollViewer imageScrollViewer;
 		readonly Control imageViewerGrid;
+		bool isFirstImageViewerBoundsChanged = true;
+		bool keepHistogramsVisible;
+		bool keepRenderingParamsPanelVisible;
+		readonly double minImageViewerSizeToHidePanels;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
 		readonly ColumnDefinition renderingParamsPanelColumn;
@@ -150,7 +156,19 @@ namespace Carina.PixelViewer.Controls
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
 			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
-			this.imageViewerGrid = this.FindControl<Control>(nameof(imageViewerGrid)).AsNonNull();
+			this.imageViewerGrid = this.FindControl<Control>(nameof(imageViewerGrid)).AsNonNull().Also(it =>
+			{
+				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>((_) =>
+				{
+					if (this.isFirstImageViewerBoundsChanged)
+					{
+						this.isFirstImageViewerBoundsChanged = false;
+						this.hidePanelsByImageViewerSizeAction?.Reschedule();
+					}
+					else
+						this.hidePanelsByImageViewerSizeAction?.Schedule(HidePanelsByImageViewerSizeDelay);
+				}));
+			});
 			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 			{
@@ -159,17 +177,42 @@ namespace Carina.PixelViewer.Controls
 			});
 			this.renderingParamsPanelColumn = this.FindControl<Grid>("workingAreaGrid").AsNonNull().ColumnDefinitions.Last().Also(column =>
 			{
-				column.PropertyChanged += (_, e) =>
+				column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>((_) =>
 				{
-					if (e.Property == ColumnDefinition.WidthProperty)
-						(this.DataContext as Session)?.Let(it => it.RenderingParametersPanelSize = column.Width.Value);
-				};
+					(this.DataContext as Session)?.Let(it => it.RenderingParametersPanelSize = column.Width.Value);
+				}));
 			});
 #if DEBUG
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
 
+			// load resources
+			if (this.Application.TryGetResource<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels", out var doubleRes))
+				this.minImageViewerSizeToHidePanels = doubleRes.GetValueOrDefault();
+
 			// create scheduled actions
+			this.hidePanelsByImageViewerSizeAction = new ScheduledAction(() =>
+			{
+				if (this.imageViewerGrid.Bounds.Width > this.minImageViewerSizeToHidePanels)
+				{
+					this.keepHistogramsVisible = false;
+					this.keepRenderingParamsPanelVisible = false;
+					return;
+				}
+				if (this.DataContext is not Session session)
+					return;
+				if (session.IsRenderingParametersPanelVisible && !this.keepRenderingParamsPanelVisible)
+				{
+					session.IsRenderingParametersPanelVisible = false;
+					return;
+				}
+				else
+					this.keepRenderingParamsPanelVisible = false;
+				if (!this.keepHistogramsVisible)
+					session.IsHistogramsVisible = false;
+				else
+					this.keepHistogramsVisible = false;
+			});
 			this.stopUsingSmallRenderedImageAction = new ScheduledAction(() =>
 			{
 				if (this.useSmallRenderedImage)
@@ -423,7 +466,11 @@ namespace Carina.PixelViewer.Controls
 		// Called when attached to visual tree.
         protected override void OnAttachedToVisualTree(VisualTreeAttachmentEventArgs e)
         {
+			// call base
             base.OnAttachedToVisualTree(e);
+
+			// update state
+			this.isFirstImageViewerBoundsChanged = true;
 
 			// [Workaround] Force refreshing status bar state to make background applied as expected
 			this.SetValue<StatusBarState>(StatusBarStateProperty, StatusBarState.None);
@@ -791,10 +838,12 @@ namespace Carina.PixelViewer.Controls
 					this.canShowEvaluateImageDimensionsMenu.Update(false);
 					this.updateEffectiveRenderedImageAction.Execute();
 				}
+				this.keepHistogramsVisible = false;
+				this.keepRenderingParamsPanelVisible = false;
 				this.UpdateEffectiveRenderedImageScale();
 				this.updateStatusBarStateAction.Schedule();
 			}
-			else if (change.Property == EffectiveRenderedImageProperty)
+			else if (property == EffectiveRenderedImageProperty)
 				this.UpdateEffectiveRenderedImageScale();
         }
 
@@ -857,8 +906,18 @@ namespace Carina.PixelViewer.Controls
 				case nameof(Session.InsufficientMemoryForRenderedImage):
 					this.updateStatusBarStateAction.Schedule();
 					break;
+				case nameof(Session.IsHistogramsVisible):
+					if (session.IsHistogramsVisible)
+						this.keepHistogramsVisible = true;
+					break;
 				case nameof(Session.IsRenderingParametersPanelVisible):
-					Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 1 : 3);
+					if (session.IsRenderingParametersPanelVisible)
+					{
+						Grid.SetColumnSpan(this.imageViewerGrid, 1);
+						this.keepRenderingParamsPanelVisible = true;
+					}
+					else
+						Grid.SetColumnSpan(this.imageViewerGrid, 3);
 					break;
 				case nameof(Session.IsSourceFileOpened):
 					this.canShowEvaluateImageDimensionsMenu.Update((sender as Session)?.IsSourceFileOpened ?? false);

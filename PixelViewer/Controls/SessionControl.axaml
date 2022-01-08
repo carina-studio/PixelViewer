@@ -143,7 +143,7 @@
 						<Separator Classes="ToolBar_Separator"/>
 
 						<!-- Histograms -->
-						<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
+						<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !$parent[UserControl].IsHistogramsDisabled}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
 							<Panel>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -332,15 +332,15 @@
 
 			<!-- Histograms -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}" Width="{DynamicResource Double/SessionControl.HistogramsPanel.Width}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-					<StackPanel Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
+					<StackPanel Margin="{DynamicResource Thickness/SessionControl.HistogramsPanel.Padding}">
 
 						<!-- Styles -->
 						<StackPanel.Styles>
 							<Style Selector="appControls|BitmapHistogramsView">
 								<Setter Property="Height" Value="{DynamicResource Double/SessionControl.Histogram.Height}"/>
-								<Setter Property="Width" Value="{DynamicResource Double/SessionControl.Histogram.Width}"/>
+								<Setter Property="HorizontalAlignment" Value="Stretch"/>
 							</Style>
 						</StackPanel.Styles>
 

@@ -32,8 +32,8 @@
 		<sys:Double x:Key="Double/JpegImageEncodingOptionsDialog.Width">300</sys:Double>
 
 		<!-- MainWindow -->
-		<sys:Double x:Key="Double/MainWindow.MinHeight">400</sys:Double>
-		<sys:Double x:Key="Double/MainWindow.MinWidth">600</sys:Double>
+		<sys:Double x:Key="Double/MainWindow.MinHeight">300</sys:Double>
+		<sys:Double x:Key="Double/MainWindow.MinWidth">400</sys:Double>
 
 		<!-- SessionControl -->
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
@@ -59,11 +59,12 @@
 		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">2</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
-		<sys:Double x:Key="Double/SessionControl.Histogram.Width">150</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.HistogramsPanel.Width">170</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.FontSize">10</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageRenderingProfile.Icon.Size">16</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageViewer.Hint.FontSize">20</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.ImageViewer.MinSizeToHidePanels">50</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.OptionsPanel.SeparatorSize">15</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.StatusBar.FileActions.MaxWidth">500</sys:Double>
