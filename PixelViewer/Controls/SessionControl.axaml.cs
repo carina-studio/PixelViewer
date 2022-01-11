@@ -290,7 +290,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 			session.SourceFileName?.Let(it =>
 			{
-				_ = ((App)this.Application).Clipboard.SetTextAsync(Path.GetFileName(it));
+				_ = ((App)this.Application)?.Clipboard?.SetTextAsync(Path.GetFileName(it));
 			});
 		}
 
@@ -302,7 +302,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 			session.SourceFileName?.Let(it =>
 			{
-				_ = ((App)this.Application).Clipboard.SetTextAsync(it);
+				_ = ((App)this.Application)?.Clipboard?.SetTextAsync(it);
 			});
 		}
 
@@ -534,7 +534,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// check focus
-			var focusedElement = Avalonia.Input.FocusManager.Instance.Current;
+			var focusedElement = Avalonia.Input.FocusManager.Instance?.Current;
 			if (focusedElement != null)
 			{
 				if (focusedElement is TextBox || focusedElement is NumericUpDown)
@@ -605,7 +605,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// check focus
-			var focusedElement = Avalonia.Input.FocusManager.Instance.Current;
+			var focusedElement = Avalonia.Input.FocusManager.Instance?.Current;
 			if (focusedElement != null)
 			{
 				if (focusedElement is TextBox || focusedElement is NumericUpDown)

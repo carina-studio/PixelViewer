@@ -15,7 +15,7 @@ namespace Carina.PixelViewer.ViewModels
         // Icon.
         public override IBitmap Icon => AvaloniaLocator.Current.GetService<IAssetLoader>().Let(loader =>
         {
-            return loader.Open(new Uri("avares://PixelViewer/AppIcon.ico")).Use(stream => new Bitmap(stream));
+            return loader.AsNonNull().Open(new Uri("avares://PixelViewer/AppIcon.ico")).Use(stream => new Bitmap(stream));
         });
 
 
