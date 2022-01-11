@@ -352,10 +352,15 @@ namespace Carina.PixelViewer.Controls
 					return false;
 
 				// create sessions
+				var index = workspace.Sessions.IndexOf(session);
+				if (index >= 0)
+					++index;
+				else
+					index = workspace.Sessions.Count;
 				foreach (var fileName in fileNames)
 				{
 					if (session.SourceFileName != null)
-						workspace.CreateSession(fileName, profile);
+						workspace.CreateSession(index++, fileName, profile);
 					else
 					{
 						session.OpenSourceFileCommand.TryExecute(fileName);
@@ -948,7 +953,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when test button clicked.
 		void OnTestButtonClick()
 		{
-			this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
+			//this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
 		}
 
 

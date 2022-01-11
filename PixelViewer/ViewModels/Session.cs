@@ -52,14 +52,25 @@ namespace Carina.PixelViewer.ViewModels
 		class ImageFrame : BaseDisposable
 		{
 			// Fields.
+			readonly long dataSize;
+			bool isTransferred;
 			readonly IDisposable memoryUsageToken;
 			readonly Session session;
 
 			// Constructor
-			ImageFrame(Session session, IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, long frameNumber)
+			ImageFrame(Session session, IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, long dataSize, long frameNumber)
 			{
 				this.BitmapBuffer = bitmapBuffer;
+				this.dataSize = dataSize;
 				this.FrameNumber = frameNumber;
+				this.memoryUsageToken = memoryUsageToken;
+				this.session = session;
+			}
+			ImageFrame(Session session, IDisposable memoryUsageToken, ImageFrame source)
+            {
+				this.BitmapBuffer = source.BitmapBuffer.Share();
+				this.dataSize = source.dataSize;
+				this.FrameNumber = source.FrameNumber;
 				this.memoryUsageToken = memoryUsageToken;
 				this.session = session;
 			}
@@ -76,7 +87,7 @@ namespace Carina.PixelViewer.ViewModels
 				try
 				{
 					var bitmapBuffer = new BitmapBuffer(format, colorSpace, width, height);
-					return new ImageFrame(session, memoryUsageToken, bitmapBuffer, frameNumber);
+					return new ImageFrame(session, memoryUsageToken, bitmapBuffer, renderedImageDataSize, frameNumber);
 				}
 				catch
 				{
@@ -103,7 +114,33 @@ namespace Carina.PixelViewer.ViewModels
 
 			// Frame number.
 			public readonly long FrameNumber;
-		}
+
+			// Transfer resource ownership.
+			public ImageFrame? Transfer(Session session)
+			{
+				// check state
+				this.session.VerifyAccess();
+				if (this.isTransferred)
+					throw new InvalidOperationException();
+
+				// update state
+				this.isTransferred = true;
+
+				// release memory usage
+				this.memoryUsageToken.Dispose();
+
+                // request memory usage
+                var memoryUsageToken = session.RequestRenderedImageMemoryUsage(this.dataSize);
+				if (memoryUsageToken == null)
+				{
+					this.session.Logger.LogError($"Failed to transfer image frame to {session}");
+					return null;
+				}
+
+				// transfer
+				return new ImageFrame(session, memoryUsageToken, this);
+            }
+        }
 
 
 		/// <summary>
@@ -135,6 +172,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// Fields.
 			public readonly long DataSize;
+			bool isDisposed;
 			public readonly Session Session;
 
 			// Constructor.
@@ -147,6 +185,9 @@ namespace Carina.PixelViewer.ViewModels
 			// Dispose.
 			public void Dispose()
 			{
+				if (this.isDisposed)
+					return;
+				this.isDisposed = true;
 				this.Session.ReleaseRenderedImageMemoryUsage(this);
 			}
 		}
@@ -3762,50 +3803,6 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get total memory usage for rendered images in bytes.
 		/// </summary>
 		public long TotalRenderedImagesMemoryUsage { get => this.GetValue(TotalRenderedImagesMemoryUsageProperty); }
-
-
-		/// <summary>
-		/// Transfer state to another <see cref="Session"/>.
-		/// </summary>
-		/// <param name="target">Target <see cref="Session"/>.</param>
-		public void TransferStateTo(Session target)
-		{
-			// check state
-			this.VerifyAccess();
-			if (target == this)
-				return;
-
-			this.Logger.LogWarning($"Start transfering state to {target}");
-
-			// close source file in target
-			target.CloseSourceFile(false);
-
-			// copy rendering parameters
-
-			// copy filter parameters
-
-			// copy other state
-			target.SetValue(CustomTitleProperty, this.CustomTitle);
-
-			// transfer images
-			if (this.renderedImageFrame != null || this.filteredImageFrame != null)
-			{
-				//target.renderedImageFrame = this.renderedImageFrame?.Sh
-				this.renderImageAction.Cancel();
-			}
-			else if (this.IsActivated)
-				this.renderImageAction.Reschedule();
-			else
-			{
-				this.Hibernate();
-				this.renderImageAction.Cancel();
-			}
-
-			this.Logger.LogWarning($"Complete transfering state to {target}");
-
-			// close source file
-			this.CloseSourceFile(false);
-		}
 
 
 		// Update CanSaveOrDeleteProfile and CanSaveAsNewProfile according to current state.

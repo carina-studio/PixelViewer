@@ -111,9 +111,9 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Create new session.
 		/// </summary>
-		/// <param name="fileName">Name of source image file.</param>
+		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession(string? fileName = null)
+		public Session CreateSession(int index)
 		{
 			// check state
 			this.VerifyAccess();
@@ -122,8 +122,37 @@ namespace Carina.PixelViewer.ViewModels
 			// create session
 			var session = new Session(this, null);
 			session.PropertyChanged += this.OnSessionPropertyChanged;
-			this.sessions.Add(session);
-			this.Logger.LogDebug($"Create session {session}, count: {this.sessions.Count}");
+			this.sessions.Insert(index, session);
+			this.Logger.LogDebug($"Create session {session} at {index}, count: {this.sessions.Count}");
+
+			// complete
+			return session;
+		}
+
+
+		/// <summary>
+		/// Create new session.
+		/// </summary>
+		/// <param name="fileName">Name of source image file.</param>
+		/// <returns>Created <see cref="Session"/>.</returns>
+		public Session CreateSession(string? fileName = null) =>
+			this.CreateSession(this.Sessions.Count, fileName);
+
+
+		/// <summary>
+		/// Create new session.
+		/// </summary>
+		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
+		/// <param name="fileName">Name of source image file.</param>
+		/// <returns>Created <see cref="Session"/>.</returns>
+		public Session CreateSession(int index, string? fileName = null)
+		{
+			// check state
+			this.VerifyAccess();
+			this.VerifyDisposed();
+
+			// create session
+			var session = this.CreateSession(index);
 
 			// open file
 			if (fileName != null)
@@ -141,10 +170,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Create new session.
 		/// </summary>
+		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
 		/// <param name="fileName">Name of source image file.</param>
 		/// <param name="profile">Initial profile.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession(string fileName, ImageRenderingProfile profile) => this.CreateSession(fileName).Also(it =>
+		public Session CreateSession(int index, string fileName, ImageRenderingProfile profile) => this.CreateSession(index, fileName).Also(it =>
 		{
 			it.Profile = profile;
 		});
