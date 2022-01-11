@@ -33,7 +33,7 @@ namespace Carina.PixelViewer.Data.Converters
 
 
 		// Convert.
-		public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+		public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			if(value is string name)
 			{
@@ -48,7 +48,7 @@ namespace Carina.PixelViewer.Data.Converters
 
 
 		// Convert back.
-		public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+		public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
 		{
 			if (value is IImageRenderer imageRenderer)
 				return imageRenderer.Format.Name;

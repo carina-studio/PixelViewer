@@ -22,7 +22,7 @@ namespace Carina.PixelViewer.Data.Converters
 
 
         /// <inheritdoc/>
-        public object? Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
             if (targetType != typeof(object) && targetType != typeof(string))
                 return null;
@@ -33,6 +33,6 @@ namespace Carina.PixelViewer.Data.Converters
 
 
         /// <inheritdoc/>
-        public object? ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) => null;
+        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => null;
     }
 }
