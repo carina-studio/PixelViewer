@@ -36,10 +36,14 @@ namespace Carina.PixelViewer
 		static readonly AvaloniaProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
 
 
+		// Constants.
+		const string DraggingSessionKey = "DraggingSettion";
+
+
 		// Fields.
 		Session? attachedActivatedSession;
 		readonly AsTabControl mainTabControl;
-		readonly IList mainTabItems;
+		readonly ObservableList<TabItem> mainTabItems = new ObservableList<TabItem>();
 		readonly ScheduledAction updateTitleBarAction;
 
 
@@ -56,7 +60,8 @@ namespace Carina.PixelViewer
 			{
 				it.SelectionChanged += (s, e) => this.OnMainTabControlSelectionChanged();
 			});
-			this.mainTabItems = (IList)this.mainTabControl.Items;
+			this.mainTabItems.AddRange(((IList)this.mainTabControl.Items).Cast<TabItem>());
+			this.mainTabControl.Items = this.mainTabItems;
 
 			// create scheduled actions
 			this.updateTitleBarAction = new ScheduledAction(() =>
@@ -153,7 +158,7 @@ namespace Carina.PixelViewer
 		{
 			for (var i = this.mainTabItems.Count - 1; i >= 0; --i)
 			{
-				if ((this.mainTabItems[i] as TabItem)?.DataContext == session)
+				if (this.mainTabItems[i].DataContext == session)
 					return i;
 			}
 			return -1;
@@ -284,9 +289,7 @@ namespace Carina.PixelViewer
 			this.mainTabControl.SelectedIndex = 0;
 			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
 			{
-				if (this.mainTabItems[i] is not TabItem tabItem)
-					continue;
-				this.DetachTabItemFromSession(tabItem);
+				this.DetachTabItemFromSession(this.mainTabItems[i]);
 				this.mainTabItems.RemoveAt(i);
 			}
 
@@ -299,21 +302,70 @@ namespace Carina.PixelViewer
         }
 
 
+		// Called when drag leave tab item.
+		void OnDragLeaveTabItem(object? sender, TabItemEventArgs e)
+		{
+			if (e.Item is not TabItem tabItem)
+				return;
+			ItemInsertionIndicator.SetInsertingItemAfter(tabItem, false);
+			ItemInsertionIndicator.SetInsertingItemBefore(tabItem, false);
+		}
+
+
 		// Called when drag over.
 		void OnDragOverTabItem(object? sender, DragOnTabItemEventArgs e)
 		{
-			if (e.Handled)
+			// check state
+			if (e.Handled || e.Item is not TabItem tabItem)
 				return;
-			if (!e.Data.HasFileNames())
+			
+			// setup
+			e.DragEffects = DragDropEffects.None;
+			e.Handled = true;
+
+			// handle file dragging
+			if (e.Data.HasFileNames())
 			{
-				e.DragEffects = DragDropEffects.None;
-				e.Handled = true;
+				if (e.ItemIndex < this.mainTabItems.Count - 1)
+				this.mainTabControl.SelectedIndex = e.ItemIndex;
+				e.DragEffects = DragDropEffects.Copy;
 				return;
 			}
-			if (e.ItemIndex < this.mainTabItems.Count - 1)
-				this.mainTabControl.SelectedIndex = e.ItemIndex;
-			e.DragEffects = DragDropEffects.Copy;
-			e.Handled = true;
+			
+			// handle session dragging
+			var session = e.Data.Get(DraggingSessionKey) as Session;
+			if (session != null)
+			{
+				// find source position
+				var workspace = (Workspace)session.Owner.AsNonNull();
+				var srcIndex = workspace.Sessions.IndexOf(session);
+				if (srcIndex < 0)
+					return;
+				
+				// select target position
+				var targetIndex = e.PointerPosition.X <= e.HeaderVisual.Bounds.Width / 2
+					? e.ItemIndex
+					: e.ItemIndex + 1;
+				
+				// update insertion indicator
+				if (workspace != this.DataContext
+					|| (srcIndex != targetIndex && srcIndex + 1 != targetIndex))
+				{
+					var insertAfter = (targetIndex != e.ItemIndex);
+					ItemInsertionIndicator.SetInsertingItemAfter(tabItem, insertAfter);
+					ItemInsertionIndicator.SetInsertingItemBefore(tabItem, !insertAfter);
+				}
+				else
+				{
+					ItemInsertionIndicator.SetInsertingItemAfter(tabItem, false);
+					ItemInsertionIndicator.SetInsertingItemBefore(tabItem, false);
+				}
+				
+				// complete
+				this.mainTabControl.ScrollHeaderIntoView(e.ItemIndex);
+				e.DragEffects = DragDropEffects.Move;
+				return;
+			}
 		}
 
 
@@ -321,23 +373,86 @@ namespace Carina.PixelViewer
 		void OnDropOnTabItem(object? sender, DragOnTabItemEventArgs e)
 		{
 			// check state
-			if (e.Handled)
+			if (e.Handled || e.Item is not TabItem tabItem)
 				return;
-
-			// find tab
-			if (e.ItemIndex >= this.mainTabItems.Count - 1)
-            {
-				var session = (this.DataContext as Workspace)?.CreateSession();
-				if (session == null)
-					return;
-            }
-
-			// drop data
-			((this.mainTabItems[e.ItemIndex] as TabItem)?.Content as SessionControl)?.Let(it =>
+			
+			// clear insertion indicators
+			ItemInsertionIndicator.SetInsertingItemAfter(tabItem, false);
+			ItemInsertionIndicator.SetInsertingItemBefore(tabItem, false);
+			
+			// drop files
+			var session = (Session?)null;
+			if (e.Data.HasFileNames())
 			{
-				_ = it.DropDataAsync(e.Data, e.KeyModifiers);
-			});
-			e.Handled = true;
+				// find tab
+				if (e.ItemIndex >= this.mainTabItems.Count - 1)
+				{
+					session = (this.DataContext as Workspace)?.CreateSession();
+					if (session == null)
+						return;
+				}
+
+				// drop data
+				(this.mainTabItems[e.ItemIndex].Content as SessionControl)?.Let(it =>
+				{
+					_ = it.DropDataAsync(e.Data, e.KeyModifiers);
+				});
+
+				// complete
+				e.Handled = true;
+				return;
+			}
+
+			// drop session
+			session = e.Data.Get(DraggingSessionKey) as Session;
+			if (session != null)
+			{
+				// find source position
+				var srcWorkspace = (Workspace)session.Owner.AsNonNull();
+				var srcIndex = srcWorkspace.Sessions.IndexOf(session);
+				if (srcIndex < 0)
+					return;
+				
+				// select target position
+				var targetIndex = e.PointerPosition.X <= e.HeaderVisual.Bounds.Width / 2
+					? e.ItemIndex
+					: e.ItemIndex + 1;
+				
+				// move session
+				if (srcWorkspace == this.DataContext)
+				{
+					if (srcIndex != targetIndex && srcIndex + 1 != targetIndex)
+					{
+						if (srcIndex < targetIndex)
+							srcWorkspace.MoveSession(srcIndex, targetIndex - 1);
+						else
+							srcWorkspace.MoveSession(srcIndex, targetIndex);
+					}
+				}
+				else if (this.DataContext is Workspace targetWorkspace)
+				{
+					// create session
+					var newSession = targetWorkspace.CreateSession(targetIndex);
+					targetWorkspace.ActivatedSession = newSession;
+
+					// save session state
+					var savedState = new MemoryStream().Use(stream =>
+					{
+						using (var stateWriter = new Utf8JsonWriter(stream))
+							session.SaveState(stateWriter);
+						stream.Position = 0;
+						return JsonDocument.Parse(stream).RootElement;
+					});
+
+					// restore state to new session
+					newSession.RestoreState(savedState);
+
+					// close session
+					srcWorkspace.CloseSession(session);
+				}
+				e.Handled = true;
+				return;
+			}
 		}
 
 
@@ -385,6 +500,15 @@ namespace Carina.PixelViewer
 						}
 					}
 					break;
+				case NotifyCollectionChangedAction.Move:
+					{
+						this.mainTabItems.Move(e.OldStartingIndex, e.NewStartingIndex);
+						
+						// [Workaround] prevent unexepected selection state after moving tab item
+						for (var i = this.mainTabItems.Count - 1 ; i >= 0 ; --i)
+							this.mainTabItems[i].IsSelected = (this.mainTabControl.SelectedIndex == i);
+					}
+					break;
 				case NotifyCollectionChangedAction.Remove:
 					{
 						foreach (Session? session in e.OldItems.AsNonNull())
@@ -392,7 +516,7 @@ namespace Carina.PixelViewer
 							if (session == null)
 								continue;
 							var tabIndex = this.FindMainTabItemIndex(session);
-							if (tabIndex < 0 || this.mainTabItems[tabIndex] is not TabItem tabItem)
+							if (tabIndex < 0)
 								continue;
 							if (this.mainTabControl.SelectedIndex == tabIndex)
 							{
@@ -428,7 +552,17 @@ namespace Carina.PixelViewer
 		// Called when teb item dragged.
 		void OnTabItemDragged(object? sender, TabItemDraggedEventArgs e)
 		{
-			//
+			// get session
+			var session = (e.Item as TabItem)?.DataContext as Session;
+			if (session == null)
+				return;
+			
+			// prepare dragging data
+			var data = new DataObject();
+			data.Set(DraggingSessionKey, session);
+
+			// start dragging session
+			DragDrop.DoDragDrop(e.PointerEventArgs, data, DragDropEffects.Move);
 		}
 
 

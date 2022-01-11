@@ -197,6 +197,29 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		/// <summary>
+		/// Move given session in <see cref="Sessions"/>.
+		/// </summary>
+		/// <param name="index">Index of session to be moved.</param>
+		/// <param name="newIndex">Index of new position in <see cref="Sessions"/> before moving.</param>
+		public void MoveSession(int index, int newIndex)
+		{
+			this.VerifyAccess();
+			if (index < 0 || index >= this.sessions.Count)
+				throw new ArgumentOutOfRangeException();
+			if (newIndex < 0 || newIndex >= this.sessions.Count)
+				throw new ArgumentOutOfRangeException();
+			if (index == newIndex)
+				return;
+				/*
+			var session = this.sessions[index];
+			this.sessions.RemoveAt(index);
+			this.sessions.Insert(newIndex, session);
+			*/
+			this.sessions.Move(index, newIndex);
+		}
+
+
 		// Property changed.
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {

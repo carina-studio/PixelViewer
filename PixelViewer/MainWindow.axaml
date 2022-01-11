@@ -57,7 +57,7 @@
 	</Window.DataTemplates>
 
 	<!-- Layout -->
-	<asControls:TabControl x:Name="tabControl" DragDrop.AllowDrop="True" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" ItemDragged="OnTabItemDragged" Padding="0">
+	<asControls:TabControl x:Name="tabControl" DragDrop.AllowDrop="True" DragLeaveItem="OnDragLeaveTabItem" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" ItemDragged="OnTabItemDragged" Padding="0">
 
 		<!-- New tab -->
 		<TabItem Classes="Empty">
