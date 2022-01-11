@@ -1,9 +1,8 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Markup.Xaml;
-using Avalonia.VisualTree;
 using Carina.PixelViewer.Controls;
-using Carina.PixelViewer.Input;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
@@ -11,7 +10,7 @@ using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
-using CarinaStudio.Windows.Input;
+using Microsoft.Extensions.Logging;
 #if WINDOWS10_0_17763_0_OR_GREATER
 using Microsoft.WindowsAPICodePack.Taskbar;
 #endif
@@ -19,8 +18,10 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Text.Json;
 using System.Threading;
-using System.Windows.Input;
 
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
 
@@ -31,6 +32,10 @@ namespace Carina.PixelViewer
 	/// </summary>
 	class MainWindow : MainWindow<Workspace>
 	{
+		// Statis fields.
+		static readonly AvaloniaProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
+
+
 		// Fields.
 		Session? attachedActivatedSession;
 		readonly AsTabControl mainTabControl;
@@ -159,6 +164,64 @@ namespace Carina.PixelViewer
 		private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
+		// Move given session to new workspace.
+		void MoveSessionToNewWorkspace(TabItem tabItem)
+        {
+			// check state
+			if (tabItem.DataContext is not Session session)
+				return;
+
+			// create new window
+			if (!this.Application.ShowMainWindow())
+			{
+				this.Logger.LogError("Unable to create new main window for session to be moved");
+				return;
+			}
+			var newWindow = this.Application.MainWindows.Last();
+
+			// wait for new workspace ready and move session
+			if (newWindow.DataContext is Workspace newWorkspace)
+				this.MoveSessionToNewWorkspace(session, newWorkspace);
+			else
+			{
+				var observerToken = (IDisposable?)null;
+				observerToken = newWindow.GetObservable(DataContextProperty).Subscribe(dataContext =>
+				{
+					if (dataContext is Workspace newWorkspace)
+					{
+						observerToken?.Dispose();
+						this.MoveSessionToNewWorkspace(session, newWorkspace);
+					}
+				});
+			}
+        }
+		void MoveSessionToNewWorkspace(Session session, Workspace newWorkspace)
+		{
+			// find session
+			var newSession = (newWorkspace != null && newWorkspace.Sessions.Count == 1) ? newWorkspace.Sessions[0] : null;
+			if (newSession == null || newSession.IsSourceFileOpened || newSession.IsOpeningSourceFile)
+			{
+				this.Logger.LogError("Unable to find new worksapce for session to be moved");
+				return;
+			}
+
+			// save session state
+			var savedState = new MemoryStream().Use(stream =>
+			{
+				using (var stateWriter = new Utf8JsonWriter(stream))
+					session.SaveState(stateWriter);
+				stream.Position = 0;
+				return JsonDocument.Parse(stream).RootElement;
+			});
+
+			// restore state to new session
+			newSession.RestoreState(savedState);
+
+			// close session
+			(this.DataContext as Workspace)?.CloseSession(session);
+		}
+
+
 		// Called when property of activated session changed.
 		void OnActivatedSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
@@ -188,6 +251,7 @@ namespace Carina.PixelViewer
 
 			// attach to workspace
 			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
+			this.SetValue<bool>(HasMultipleSessionsProperty, workspace.Sessions.Count > 1);
 
 			// select tab item according to activated session
 			if (workspace.Sessions.IsNotEmpty())
@@ -227,6 +291,7 @@ namespace Carina.PixelViewer
 			}
 
 			// detach from workspace
+			this.SetValue<bool>(HasMultipleSessionsProperty, false);
 			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
 
 			// call base
@@ -318,8 +383,8 @@ namespace Carina.PixelViewer
 							this.mainTabItems.Insert(tabIndex, tabItem);
 							this.mainTabControl.SelectedIndex = tabIndex++;
 						}
-						break;
 					}
+					break;
 				case NotifyCollectionChangedAction.Remove:
 					{
 						foreach (Session? session in e.OldItems.AsNonNull())
@@ -343,11 +408,20 @@ namespace Carina.PixelViewer
 						(this.DataContext as Workspace)?.Let((it) =>
 						{
 							if (it.Sessions.IsEmpty() && !this.IsClosed)
-								it.CreateSession();
+							{
+								if (this.HasMultipleMainWindows)
+								{
+									this.Logger.LogWarning("Close window because all sessions were closed");
+									this.Close();
+								}
+								else
+									it.CreateSession();
+							}
 						});
-						break;
 					}
+					break;
 			}
+			this.SetValue<bool>(HasMultipleSessionsProperty, (this.DataContext as Workspace)?.Sessions?.Count > 1);
 		}
 
 

@@ -20,13 +20,19 @@
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
 			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto">
 				<Grid.ContextMenu>
-					<ContextMenu>
+					<ContextMenu PlacementMode="Bottom">
 						<MenuItem Command="{Binding $parent[Window].SetCustomSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
 							<MenuItem.Icon>
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
 							</MenuItem.Icon>
 						</MenuItem>
 						<MenuItem Command="{Binding $parent[Window].ResetSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
+						<Separator/>
+						<MenuItem Command="{Binding $parent[Window].MoveSessionToNewWorkspace}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $parent[Window].HasMultipleSessions}">
+							<MenuItem.Icon>
+								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.AddWindow}"/>
+							</MenuItem.Icon>
+						</MenuItem>
 						<Separator/>
 						<MenuItem Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}">
 							<MenuItem.Icon>

@@ -3149,8 +3149,11 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand ResetContrastAdjustmentCommand { get; }
 
 
-		// Restore state.
-		async void RestoreState(JsonElement savedState)
+		/// <summary>
+		/// Restore state.
+		/// </summary>
+		/// <param name="savedState">Root JSON element represents saved state.</param>
+		public async void RestoreState(JsonElement savedState)
         {
 			// check parameter
 			if (savedState.ValueKind != JsonValueKind.Object)
