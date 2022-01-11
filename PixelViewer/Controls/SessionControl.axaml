@@ -92,11 +92,11 @@
 	<Grid RowDefinitions="Auto,*,Auto">
 
 		<!-- Tool bar -->
-		<Border Classes="ToolBar">
-			<Grid ColumnDefinitions="*,Auto">
+		<Grid ColumnDefinitions="*,Auto">
 
-				<!-- Image actions -->
-				<asControls:ToolBarScrollViewer>
+			<!-- Image actions -->
+			<asControls:ToolBarScrollViewer>
+				<Border Classes="ToolBar">
 					<StackPanel Orientation="Horizontal">
 
 						<!-- Open file -->
@@ -303,10 +303,12 @@
 						</ToggleButton>
 
 					</StackPanel>
-				</asControls:ToolBarScrollViewer>
+				</Border>
+			</asControls:ToolBarScrollViewer>
 
-				<!-- Other actions -->
-				<StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Top">
+			<!-- Other actions -->
+			<Border Classes="ToolBar" Grid.Column="1">
+				<StackPanel Orientation="Horizontal">
 
 					<!-- Test -->
 					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
@@ -328,11 +330,11 @@
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
-					
-				</StackPanel>
 
-			</Grid>
-		</Border>
+				</StackPanel>
+			</Border>
+
+		</Grid>
 		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
 
 		<!-- Viewer -->
