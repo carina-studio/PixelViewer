@@ -3764,6 +3764,50 @@ namespace Carina.PixelViewer.ViewModels
 		public long TotalRenderedImagesMemoryUsage { get => this.GetValue(TotalRenderedImagesMemoryUsageProperty); }
 
 
+		/// <summary>
+		/// Transfer state to another <see cref="Session"/>.
+		/// </summary>
+		/// <param name="target">Target <see cref="Session"/>.</param>
+		public void TransferStateTo(Session target)
+		{
+			// check state
+			this.VerifyAccess();
+			if (target == this)
+				return;
+
+			this.Logger.LogWarning($"Start transfering state to {target}");
+
+			// close source file in target
+			target.CloseSourceFile(false);
+
+			// copy rendering parameters
+
+			// copy filter parameters
+
+			// copy other state
+			target.SetValue(CustomTitleProperty, this.CustomTitle);
+
+			// transfer images
+			if (this.renderedImageFrame != null || this.filteredImageFrame != null)
+			{
+				//target.renderedImageFrame = this.renderedImageFrame?.Sh
+				this.renderImageAction.Cancel();
+			}
+			else if (this.IsActivated)
+				this.renderImageAction.Reschedule();
+			else
+			{
+				this.Hibernate();
+				this.renderImageAction.Cancel();
+			}
+
+			this.Logger.LogWarning($"Complete transfering state to {target}");
+
+			// close source file
+			this.CloseSourceFile(false);
+		}
+
+
 		// Update CanSaveOrDeleteProfile and CanSaveAsNewProfile according to current state.
 		void UpdateCanSaveDeleteProfile()
 		{

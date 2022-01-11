@@ -351,6 +351,13 @@ namespace Carina.PixelViewer
 		}
 
 
+		// Called when teb item dragged.
+		void OnTabItemDragged(object? sender, TabItemDraggedEventArgs e)
+		{
+			//
+		}
+
+
 		// Property of view-model changed.
         protected override void OnViewModelPropertyChanged(PropertyChangedEventArgs e)
         {
