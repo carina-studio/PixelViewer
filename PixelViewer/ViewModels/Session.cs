@@ -10,6 +10,7 @@ using Carina.PixelViewer.Platform;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.Animation;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.IO;
@@ -33,7 +34,7 @@ namespace Carina.PixelViewer.ViewModels
 	/// <summary>
 	/// A session of rendering and displaying image.
 	/// </summary>
-	class Session : ViewModel
+	class Session : ViewModel<IAppSuiteApplication>
 	{
 		// Activation token.
 		class ActivationToken : IDisposable
@@ -581,7 +582,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Initialize new <see cref="Session"/> instance.
 		/// </summary>
-		public Session(Workspace workspace, JsonElement? savedState) : base(workspace)
+		public Session(IAppSuiteApplication app, JsonElement? savedState) : base(app)
 		{
 			// create commands
 			var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceFileOpenedProperty);
@@ -3981,7 +3982,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
 				};
 				it.Duration = ZoomAnimationDuration;
-				it.Interpolator = Interpolators.Deleceleration;
+				it.Interpolator = Interpolators.Deceleration;
 				it.ProgressChanged += (_, e) =>
 				{
 					this.EffectiveRenderedImageScale = it.Value;

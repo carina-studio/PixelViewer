@@ -52,7 +52,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (savedState.TryGetProperty(nameof(Sessions), out var jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
 				{
 					foreach (var jsonValue in jsonProperty.EnumerateArray())
-						this.sessions.Add(new Session(this, jsonValue));
+						this.sessions.Add(new Session(this.Application, jsonValue) { Owner = this });
 				}
 
 				// restore activated session
@@ -120,7 +120,8 @@ namespace Carina.PixelViewer.ViewModels
 			this.VerifyDisposed();
 
 			// create session
-			var session = new Session(this, null);
+			var session = new Session(this.Application, null);
+			session.Owner = this;
 			session.PropertyChanged += this.OnSessionPropertyChanged;
 			this.sessions.Insert(index, session);
 			this.Logger.LogDebug($"Create session {session} at {index}, count: {this.sessions.Count}");
@@ -272,7 +273,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <inheritdoc/>
-        public override void SaveState(Utf8JsonWriter writer)
+        public override bool SaveState(Utf8JsonWriter writer)
         {
 			// start object
 			writer.WriteStartObject();
@@ -291,6 +292,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// complete
 			writer.WriteEndObject();
+			return true;
 		}
 
 
