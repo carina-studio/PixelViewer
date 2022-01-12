@@ -80,31 +80,30 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Close given session.
+		/// Attach given <see cref="Session"/> to this instance.
 		/// </summary>
-		/// <param name="session">Session to close.</param>
-		public async void CloseSession(Session session)
-		{
+		/// <param name="index">Index of session to be placed in <see cref="Sessions"/>.</param>
+		/// <param name="session"><see cref="Session"/> to attach.</param>
+		public void AttachSession(int index, Session session)
+        {
 			// check state
 			this.VerifyAccess();
 			this.VerifyDisposed();
-			if (!this.sessions.Contains(session))
-				throw new ArgumentException($"Unknown session {session} to close.");
+			if (session.Owner == this)
+				return;
 
-			// deactivate
-			if (this.ActivatedSession == session)
-				this.ActivatedSession = null;
+			// check parameter
+			if (index < 0 || index > this.sessions.Count)
+				throw new ArgumentOutOfRangeException();
 
-			// detach
-			session.PropertyChanged -= this.OnSessionPropertyChanged;
-			this.sessions.Remove(session);
-			this.Logger.LogDebug($"Close session {session}, count: {this.sessions.Count}");
+			// detach from current workspace
+			(session.Owner as Workspace)?.DetachSession(session);
 
-			// wait for completion
-			await this.WaitForNecessaryTaskAsync(session.WaitForNecessaryTasksAsync());
-
-			// dispose session
-			session.Dispose();
+			// attach
+			session.Owner = this;
+			session.PropertyChanged += this.OnSessionPropertyChanged;
+			this.sessions.Insert(index, session);
+			this.Logger.LogDebug($"Attach session {session} at {index}, count: {this.sessions.Count}");
 		}
 
 
@@ -113,7 +112,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession(int index)
+		public Session CreateAndAttachSession(int index)
 		{
 			// check state
 			this.VerifyAccess();
@@ -121,10 +120,10 @@ namespace Carina.PixelViewer.ViewModels
 
 			// create session
 			var session = new Session(this.Application, null);
-			session.Owner = this;
-			session.PropertyChanged += this.OnSessionPropertyChanged;
-			this.sessions.Insert(index, session);
-			this.Logger.LogDebug($"Create session {session} at {index}, count: {this.sessions.Count}");
+			this.Logger.LogDebug($"Create session {session}");
+
+			// attach
+			this.AttachSession(index, session);
 
 			// complete
 			return session;
@@ -136,8 +135,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		/// <param name="fileName">Name of source image file.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession(string? fileName = null) =>
-			this.CreateSession(this.Sessions.Count, fileName);
+		public Session CreateAndAttachSession(string? fileName = null) =>
+			this.CreateAndAttachSession(this.Sessions.Count, fileName);
 
 
 		/// <summary>
@@ -146,14 +145,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
 		/// <param name="fileName">Name of source image file.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession(int index, string? fileName = null)
+		public Session CreateAndAttachSession(int index, string? fileName = null)
 		{
 			// check state
 			this.VerifyAccess();
 			this.VerifyDisposed();
 
 			// create session
-			var session = this.CreateSession(index);
+			var session = this.CreateAndAttachSession(index);
 
 			// open file
 			if (fileName != null)
@@ -175,10 +174,56 @@ namespace Carina.PixelViewer.ViewModels
 		/// <param name="fileName">Name of source image file.</param>
 		/// <param name="profile">Initial profile.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateSession(int index, string fileName, ImageRenderingProfile profile) => this.CreateSession(index, fileName).Also(it =>
+		public Session CreateAndAttachSession(int index, string fileName, ImageRenderingProfile profile) => this.CreateAndAttachSession(index, fileName).Also(it =>
 		{
 			it.Profile = profile;
 		});
+
+
+		/// <summary>
+		/// Detach given <see cref="Session"/> and close it.
+		/// </summary>
+		/// <param name="session">Session to close.</param>
+		public async void DetachAndCloseSession(Session session)
+		{
+			// check state
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			if (session.Owner != this)
+				return;
+
+			// detach
+			this.DetachSession(session);
+
+			// wait for completion
+			await this.WaitForNecessaryTaskAsync(session.WaitForNecessaryTasksAsync());
+
+			// dispose session
+			session.Dispose();
+		}
+
+
+		/// <summary>
+		/// Detach given <see cref="Session"/> from this instance.
+		/// </summary>
+		/// <param name="session"><see cref="Session"/> to detach.</param>
+		public void DetachSession(Session session)
+        {
+			// check state
+			this.VerifyAccess();
+			if (session.Owner != this)
+				return;
+
+			// deactivate
+			if (this.ActivatedSession == session && !this.IsDisposed)
+				this.ActivatedSession = null;
+
+			// detach
+			session.PropertyChanged -= this.OnSessionPropertyChanged;
+			session.Owner = null;
+			this.sessions.Remove(session);
+			this.Logger.LogDebug($"Detach session {session}, count: {this.sessions.Count}");
+		}
 
 
 		// Dispose.
@@ -212,11 +257,6 @@ namespace Carina.PixelViewer.ViewModels
 				throw new ArgumentOutOfRangeException();
 			if (index == newIndex)
 				return;
-				/*
-			var session = this.sessions[index];
-			this.sessions.RemoveAt(index);
-			this.sessions.Insert(newIndex, session);
-			*/
 			this.sessions.Move(index, newIndex);
 		}
 

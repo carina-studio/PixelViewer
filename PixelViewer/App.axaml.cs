@@ -72,7 +72,7 @@ namespace Carina.PixelViewer
 		{
 			this.LaunchOptions.TryGetValue(FilePathKey, out var filePath);
 			if (filePath != null || it.Sessions.IsEmpty())
-				it.ActivatedSession = it.CreateSession(filePath as string);
+				it.ActivatedSession = it.CreateAndAttachSession(filePath as string);
 		});
 
 
@@ -177,7 +177,7 @@ namespace Carina.PixelViewer
 				{
 					var emptySession = workspace.Sessions.FirstOrDefault(it => string.IsNullOrEmpty(it.SourceFileName));
 					if (emptySession == null || !emptySession.OpenSourceFileCommand.TryExecute(filePath))
-						workspace.CreateSession(filePath);
+						workspace.CreateAndAttachSession(filePath);
 					this.MainWindows[0].ActivateAndBringToFront();
 				}
 				else

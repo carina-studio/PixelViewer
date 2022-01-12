@@ -360,7 +360,7 @@ namespace Carina.PixelViewer.Controls
 				foreach (var fileName in fileNames)
 				{
 					if (session.SourceFileName != null)
-						workspace.CreateSession(index++, fileName, profile);
+						workspace.CreateAndAttachSession(index++, fileName, profile);
 					else
 					{
 						session.OpenSourceFileCommand.TryExecute(fileName);
@@ -373,7 +373,7 @@ namespace Carina.PixelViewer.Controls
 					&& session.SourceFileName != null
 					&& session.Owner is Workspace workspace)
 			{
-				workspace.CreateSession(fileNames[0]);
+				workspace.CreateAndAttachSession(fileNames[0]);
 			}
 			else
 				this.OpenSourceFile(fileNames[0]);

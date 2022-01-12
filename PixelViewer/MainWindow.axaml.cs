@@ -18,9 +18,7 @@ using System;
 using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
@@ -130,7 +128,7 @@ namespace Carina.PixelViewer
 				return;
 
 			// close session
-			(this.DataContext as Workspace)?.CloseSession(session);
+			(this.DataContext as Workspace)?.DetachAndCloseSession(session);
 		}
 
 
@@ -177,53 +175,28 @@ namespace Carina.PixelViewer
 				return;
 
 			// create new window
-			if (!this.Application.ShowMainWindow())
+			if (!this.Application.ShowMainWindow(newWindow =>
+            {
+				if (newWindow.DataContext is Workspace newWorkspace)
+					this.MoveSessionToNewWorkspace(session, newWorkspace);
+			}))
 			{
 				this.Logger.LogError("Unable to create new main window for session to be moved");
 				return;
 			}
-			var newWindow = this.Application.MainWindows.Last();
-
-			// wait for new workspace ready and move session
-			if (newWindow.DataContext is Workspace newWorkspace)
-				this.MoveSessionToNewWorkspace(session, newWorkspace);
-			else
-			{
-				var observerToken = (IDisposable?)null;
-				observerToken = newWindow.GetObservable(DataContextProperty).Subscribe(dataContext =>
-				{
-					if (dataContext is Workspace newWorkspace)
-					{
-						observerToken?.Dispose();
-						this.MoveSessionToNewWorkspace(session, newWorkspace);
-					}
-				});
-			}
         }
 		void MoveSessionToNewWorkspace(Session session, Workspace newWorkspace)
 		{
-			// find session
-			var newSession = (newWorkspace != null && newWorkspace.Sessions.Count == 1) ? newWorkspace.Sessions[0] : null;
-			if (newSession == null || newSession.IsSourceFileOpened || newSession.IsOpeningSourceFile)
-			{
-				this.Logger.LogError("Unable to find new worksapce for session to be moved");
-				return;
-			}
+			// find empty session
+			var emptySession = newWorkspace.Sessions.FirstOrDefault();
 
-			// save session state
-			var savedState = new MemoryStream().Use(stream =>
-			{
-				using (var stateWriter = new Utf8JsonWriter(stream))
-					session.SaveState(stateWriter);
-				stream.Position = 0;
-				return JsonDocument.Parse(stream).RootElement;
-			});
+			// transfer session
+			newWorkspace.AttachSession(0, session);
+			newWorkspace.ActivatedSession = session;
 
-			// restore state to new session
-			newSession.RestoreState(savedState);
-
-			// close session
-			(this.DataContext as Workspace)?.CloseSession(session);
+			// close empty session
+			if (emptySession != null)
+				newWorkspace.DetachAndCloseSession(emptySession);
 		}
 
 
@@ -268,7 +241,7 @@ namespace Carina.PixelViewer
 					this.mainTabControl.SelectedIndex = 0;
 			}
 			else
-				workspace.CreateSession();
+				workspace.CreateAndAttachSession();
 
 			// attach to activated session
 			workspace.ActivatedSession?.Let(it => this.AttachToActivatedSession(it));
@@ -334,7 +307,7 @@ namespace Carina.PixelViewer
 			
 			// handle session dragging
 			var session = e.Data.Get(DraggingSessionKey) as Session;
-			if (session != null)
+			if (session != null && e.ItemIndex != this.mainTabItems.Count - 1)
 			{
 				// find source position
 				var workspace = (Workspace)session.Owner.AsNonNull();
@@ -387,7 +360,7 @@ namespace Carina.PixelViewer
 				// find tab
 				if (e.ItemIndex >= this.mainTabItems.Count - 1)
 				{
-					session = (this.DataContext as Workspace)?.CreateSession();
+					session = (this.DataContext as Workspace)?.CreateAndAttachSession();
 					if (session == null)
 						return;
 				}
@@ -431,24 +404,9 @@ namespace Carina.PixelViewer
 				}
 				else if (this.DataContext is Workspace targetWorkspace)
 				{
-					// create session
-					var newSession = targetWorkspace.CreateSession(targetIndex);
-					targetWorkspace.ActivatedSession = newSession;
-
-					// save session state
-					var savedState = new MemoryStream().Use(stream =>
-					{
-						using (var stateWriter = new Utf8JsonWriter(stream))
-							session.SaveState(stateWriter);
-						stream.Position = 0;
-						return JsonDocument.Parse(stream).RootElement;
-					});
-
-					// restore state to new session
-					newSession.RestoreState(savedState);
-
-					// close session
-					srcWorkspace.CloseSession(session);
+					// attach to target workspace
+					targetWorkspace.AttachSession(targetIndex, session);
+					targetWorkspace.ActivatedSession = session;
 				}
 				e.Handled = true;
 				return;
@@ -462,7 +420,7 @@ namespace Carina.PixelViewer
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.IsClosed)
 			{
 				if (this.mainTabItems.Count > 1)
-					(this.DataContext as Workspace)?.CreateSession();
+					(this.DataContext as Workspace)?.CreateAndAttachSession();
 			}
 			else
 			{
@@ -539,7 +497,7 @@ namespace Carina.PixelViewer
 									this.Close();
 								}
 								else
-									it.CreateSession();
+									it.CreateAndAttachSession();
 							}
 						});
 					}
