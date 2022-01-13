@@ -41,7 +41,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.33.0.112" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.34.0.113" />
 		<PackageReference Include="Colourful" Version="3.1.0" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
 	</ItemGroup>
