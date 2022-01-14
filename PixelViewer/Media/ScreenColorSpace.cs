@@ -12,6 +12,10 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         Srgb,
         /// <summary>
+        /// Display-P3.
+        /// </summary>
+        Display_P3,
+        /// <summary>
         /// DCI-P3.
         /// </summary>
         DCI_P3,
@@ -31,6 +35,7 @@ namespace Carina.PixelViewer.Media
         public static BitmapColorSpace ToBitmapColorSpace(this ScreenColorSpace colorSpace) => colorSpace switch
         {
             ScreenColorSpace.DCI_P3 => BitmapColorSpace.DCI_P3,
+            ScreenColorSpace.Display_P3 => BitmapColorSpace.Display_P3,
             _ => BitmapColorSpace.Srgb,
         };
     }

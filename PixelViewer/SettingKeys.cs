@@ -74,7 +74,7 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Color space of screen.
 		/// </summary>
-		public static readonly SettingKey<ScreenColorSpace> ScreenColorSpace = new SettingKey<ScreenColorSpace>(nameof(ScreenColorSpace), CarinaStudio.Platform.IsMacOS ? Media.ScreenColorSpace.DCI_P3 : Media.ScreenColorSpace.Srgb);
+		public static readonly SettingKey<ScreenColorSpace> ScreenColorSpace = new SettingKey<ScreenColorSpace>(nameof(ScreenColorSpace), CarinaStudio.Platform.IsMacOS ? Media.ScreenColorSpace.Display_P3 : Media.ScreenColorSpace.Srgb);
 		/// <summary>
 		/// Show process info on UI or not.
 		/// </summary>

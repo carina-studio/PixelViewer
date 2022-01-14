@@ -52,6 +52,7 @@
 	<sys:String x:Key="String/BitmapColorSpace.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.BT.601">ITU-R BT.601 (SDTV)</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.DCI-P3">DCI-P3</sys:String>
+	<sys:String x:Key="String/BitmapColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.sRGB">sRGB</sys:String>
 
 	<!-- ByteOrdering -->
@@ -124,6 +125,7 @@
 	
 	<!-- ScreenColorSpace -->
 	<sys:String x:Key="String/ScreenColorSpace.DCI_P3">DCI-P3</sys:String>
+	<sys:String x:Key="String/ScreenColorSpace.Display_P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/ScreenColorSpace.Srgb">sRGB</sys:String>
 
 	<!-- Session -->

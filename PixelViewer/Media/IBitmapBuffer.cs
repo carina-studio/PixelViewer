@@ -179,6 +179,8 @@ namespace Carina.PixelViewer.Media
 					{
 						if (targetColorSpace == BitmapColorSpace.DCI_P3)
 							return (ColorSpaceConversion)srcColorSpace.ConvertToDciP3ColorSpace;
+						else if (targetColorSpace == BitmapColorSpace.Display_P3)
+							return (ColorSpaceConversion)srcColorSpace.ConvertToDisplayP3ColorSpace;
 						else if (targetColorSpace == BitmapColorSpace.Srgb)
 							return srcColorSpace.ConvertToSrgbColorSpace;
 						else
