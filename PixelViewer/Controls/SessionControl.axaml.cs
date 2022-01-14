@@ -169,7 +169,11 @@ namespace Carina.PixelViewer.Controls
 						this.hidePanelsByImageViewerSizeAction?.Schedule(HidePanelsByImageViewerSizeDelay);
 				}));
 			});
-			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
+			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull().Also(it =>
+			{
+				if (CarinaStudio.Platform.IsMacOS)
+					it.IsVisible = false;
+			});
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 			{
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
@@ -260,25 +264,6 @@ namespace Carina.PixelViewer.Controls
 						return StatusBarState.Active;
 					return StatusBarState.Inactive;
 				}));
-			});
-		}
-
-
-		// Check for application update.
-		void CheckForAppUpdate()
-		{
-			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
-			{
-				using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
-				var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater)
-				{
-					CheckForUpdateWhenShowing = true
-				}.ShowDialog(window);
-				if (result == ApplicationUpdateDialogResult.ShutdownNeeded)
-				{
-					Logger.LogWarning("Shut down to continue updating");
-					this.Application.Shutdown();
-				}
 			});
 		}
 
@@ -1238,43 +1223,9 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Show application info.
-		void ShowAppInfo()
-        {
-			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
-			{
-				using var appInfo = new AppInfo();
-				await new ApplicationInfoDialog(appInfo).ShowDialog(window);
-			});
-        }
-
-
-		// Show application options.
-		void ShowAppOptions() => this.ShowAppOptions(ApplicationOptionsDialogSection.First);
-		void ShowAppOptions(ApplicationOptionsDialogSection initSection)
-		{
-			this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Let(async (window) =>
-			{
-				switch (await new ApplicationOptionsDialog() { InitialFocusedSection = initSection }.ShowDialog<ApplicationOptionsDialogResult>(window))
-				{
-					case ApplicationOptionsDialogResult.RestartApplicationNeeded:
-						Logger.LogWarning("Need to restart application");
-						if (this.Application.IsDebugMode)
-							this.Application.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}");
-						else
-							this.Application.Restart(App.RestoreMainWindowsArgument);
-						break;
-					case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
-						Logger.LogWarning("Need to restart main windows");
-						this.Application.RestartMainWindows();
-						break;
-				}
-			});
-		}
-
-
 		// Show color space management settings in application options.
-		void ShowColorSpaceManagementOptions() => this.ShowAppOptions(ApplicationOptionsDialogSection.ColorSpaceManagement);
+		void ShowColorSpaceManagementOptions() => 
+			this.FindDescendantOfType<MainWindow>()?.ShowAppOptions(ApplicationOptionsDialogSection.ColorSpaceManagement);
 
 
 		/// <summary>

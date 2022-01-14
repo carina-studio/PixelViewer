@@ -5,6 +5,7 @@
 
 	<!-- App -->
 	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">Loading profiles</sys:String>
+	<sys:String x:Key="String/App.Shutdown">Exit</sys:String>
 
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">Color space management</sys:String>
@@ -118,6 +119,8 @@
 	<sys:String x:Key="String/MainWindow.ResetSessionTitle">Reset title</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">Custom title…</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">Custom title</sys:String>
+	<sys:String x:Key="String/MainWindow.Tabs">Tabs</sys:String>
+	<sys:String x:Key="String/MainWindow.Windows">Windows</sys:String>
 	
 	<!-- ScreenColorSpace -->
 	<sys:String x:Key="String/ScreenColorSpace.DCI_P3">DCI-P3</sys:String>

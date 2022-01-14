@@ -52,6 +52,8 @@ namespace Carina.PixelViewer
 		{
 			// initialize Avalonia resources
 			InitializeComponent();
+			if (CarinaStudio.Platform.IsMacOS)
+				NativeMenu.SetMenu(this, this.Resources["nativeMenu"] as NativeMenu);
 
 			// setup main tab control
 			this.mainTabControl = this.FindControl<AsTabControl>("tabControl").AsNonNull().Also((it) =>
@@ -96,6 +98,8 @@ namespace Carina.PixelViewer
 
 			// create tab item header
 			var header = this.DataTemplates[0].Build(session);
+			if (CarinaStudio.Platform.IsMacOS)
+				(header as Control)?.Let(it => it.ContextMenu = null);
 
 			// create tab item
 			var tabItem = new TabItem()
@@ -120,6 +124,30 @@ namespace Carina.PixelViewer
 		}
 
 
+		/// <summary>
+		/// Check for application update.
+		/// </summary>
+		public async void CheckForAppUpdate()
+		{
+			this.VerifyAccess();
+			using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
+			var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater)
+			{
+				CheckForUpdateWhenShowing = true
+			}.ShowDialog(this);
+			if (result == ApplicationUpdateDialogResult.ShutdownNeeded)
+			{
+				Logger.LogWarning("Shut down to continue updating");
+				this.Application.Shutdown();
+			}
+		}
+
+
+		// Close current tab item.
+		void CloseCurrentMainTabItem() =>
+			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.CloseMainTabItem(it));
+
+
 		// Close given tab item.
 		void CloseMainTabItem(TabItem tabItem)
 		{
@@ -130,6 +158,11 @@ namespace Carina.PixelViewer
 			// close session
 			(this.DataContext as Workspace)?.DetachAndCloseSession(session);
 		}
+
+
+		// Create new window.
+		void CreateMainWindow() =>
+			this.Application.ShowMainWindow();
 
 
 		// Detach from activated session.
@@ -165,6 +198,11 @@ namespace Carina.PixelViewer
 
 		// Initialize Avalonia component.
 		private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
+
+
+		// Move current session to new workspace.
+		void MoveCurrentSessionToNewWorkspace() =>
+			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.MoveSessionToNewWorkspace(it));
 
 
 		// Move given session to new workspace.
@@ -549,12 +587,22 @@ namespace Carina.PixelViewer
         }
 
 
+		// Reset title of current session.
+		void ResetCurrentSessionTitle() =>
+			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.ResetSessionTitle(it));
+
+
 		// Reset title of session.
 		void ResetSessionTitle(TabItem tabItem)
         {
 			if (tabItem.DataContext is Session session)
 				session.CustomTitle = null;
 		}
+
+
+		// Set custom title of current session.
+		void SetCurrentCustomSessionTitle() =>
+			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.SetCustomSessionTitle(it));
 
 
 		// Set custom title of session.
@@ -575,6 +623,46 @@ namespace Carina.PixelViewer
 
 			// set title
 			session.CustomTitle = customTitle;
+		}
+
+
+		/// <summary>
+		/// Show application info.
+		/// </summary>
+		public async void ShowAppInfo()
+        {
+			using var appInfo = new AppInfo();
+			await new ApplicationInfoDialog(appInfo).ShowDialog(this);
+        }
+
+
+		/// <summary>
+		/// Show application options.
+		/// </summary>
+		public void ShowAppOptions() => this.ShowAppOptions(ApplicationOptionsDialogSection.First);
+
+
+		/// <summary>
+		/// Show application options.
+		/// </summary>
+		/// <param name="initSection">Initial section to show.</param>
+		public async void ShowAppOptions(ApplicationOptionsDialogSection initSection)
+		{
+			this.VerifyAccess();
+			switch (await new ApplicationOptionsDialog() { InitialFocusedSection = initSection }.ShowDialog<ApplicationOptionsDialogResult>(this))
+			{
+				case ApplicationOptionsDialogResult.RestartApplicationNeeded:
+					Logger.LogWarning("Need to restart application");
+					if (this.Application.IsDebugMode)
+						this.Application.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}");
+					else
+						this.Application.Restart(App.RestoreMainWindowsArgument);
+					break;
+				case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
+					Logger.LogWarning("Need to restart main windows");
+					this.Application.RestartMainWindows();
+					break;
+			}
 		}
 	}
 }

@@ -5,6 +5,7 @@
 
 	<!-- App -->
 	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">載入組態</sys:String>
+	<sys:String x:Key="String/App.Shutdown">結束</sys:String>
 	
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">色彩空間管理</sys:String>
@@ -83,6 +84,8 @@
 	<sys:String x:Key="String/MainWindow.ResetSessionTitle">重設標題</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">自訂標題…</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">自訂標題</sys:String>
+	<sys:String x:Key="String/MainWindow.Tabs">分頁</sys:String>
+	<sys:String x:Key="String/MainWindow.Windows">視窗</sys:String>
 
 	<!-- Session -->
 	<sys:String x:Key="String/Session.EmptyTitle">空白分頁</sys:String>
