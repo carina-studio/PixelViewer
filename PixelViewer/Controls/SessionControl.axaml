@@ -487,13 +487,13 @@
 
 						<!-- Data offset -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.DataOffset}"/>
-						<NumericUpDown Classes="Dialog_NumericUpDown" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
+						<asControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Frame padding bytes -->
 						<StackPanel IsVisible="{Binding HasMultipleFrames}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.FramePaddingSize}"/>
-							<NumericUpDown Classes="Dialog_NumericUpDown" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
+							<asControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
@@ -576,13 +576,13 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride1, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" Value="{Binding RowStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride1}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane1}"/>
@@ -591,13 +591,13 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride2, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" Value="{Binding RowStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride2}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane2}"/>
@@ -606,13 +606,13 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" Value="{Binding RowStride3, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" Value="{Binding RowStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride3}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
+								<asControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane3}"/>
