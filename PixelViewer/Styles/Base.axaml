@@ -75,7 +75,7 @@
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">2</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
 		
