@@ -40,8 +40,11 @@ namespace Carina.PixelViewer
 
 		// Fields.
 		Session? attachedActivatedSession;
+		readonly Border baseBorder;
+		bool isPerformingContentRelayout;
 		readonly AsTabControl mainTabControl;
 		readonly ObservableList<TabItem> mainTabItems = new ObservableList<TabItem>();
+		readonly ScheduledAction relayoutContentAction;
 		readonly ScheduledAction updateTitleBarAction;
 
 
@@ -55,6 +58,20 @@ namespace Carina.PixelViewer
 			if (CarinaStudio.Platform.IsMacOS)
 				NativeMenu.SetMenu(this, this.Resources["nativeMenu"] as NativeMenu);
 
+			// setup controls
+			this.baseBorder = this.FindControl<Border>(nameof(baseBorder)).AsNonNull().Also(it => 
+			{
+				it.GetObservable(BoundsProperty).Subscribe(_ =>
+				{
+					if (this.isPerformingContentRelayout)
+					{
+						// [Workaround] Trigger layout to make sure that content will be placed correctly after changing size of window by code
+						this.isPerformingContentRelayout = false;
+						it.Padding = new Thickness();
+					}
+				});
+			});
+
 			// setup main tab control
 			this.mainTabControl = this.FindControl<AsTabControl>("tabControl").AsNonNull().Also((it) =>
 			{
@@ -64,6 +81,12 @@ namespace Carina.PixelViewer
 			this.mainTabControl.Items = this.mainTabItems;
 
 			// create scheduled actions
+			this.relayoutContentAction = new ScheduledAction(() =>
+			{
+				// [Workaround] Trigger layout to make sure that content will be placed correctly after changing size of window by code
+				this.isPerformingContentRelayout = true;
+				this.baseBorder.Padding = new Thickness(0, 0, 0, -1);
+			});
 			this.updateTitleBarAction = new ScheduledAction(() =>
 			{
 				if (this.IsClosed)
@@ -474,6 +497,23 @@ namespace Carina.PixelViewer
 				{
 					((this.mainTabControl.SelectedItem as TabItem)?.Content as IInputElement)?.Focus();
 				});
+			}
+		}
+
+
+		// Called when property changed.
+		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+		{
+			base.OnPropertyChanged<T>(change);
+			var property = change.Property;
+			if (property == HeightProperty 
+				|| property == WidthProperty
+				|| property == WindowStateProperty)
+			{
+				if (this.WindowState == WindowState.Normal)
+					this.relayoutContentAction?.Reschedule();
+				else
+					this.relayoutContentAction?.Cancel();
 			}
 		}
 

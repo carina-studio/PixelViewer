@@ -32,7 +32,7 @@
 		<sys:Double x:Key="Double/JpegImageEncodingOptionsDialog.Width">300</sys:Double>
 
 		<!-- MainWindow -->
-		<sys:Double x:Key="Double/MainWindow.MinHeight">300</sys:Double>
+		<sys:Double x:Key="Double/MainWindow.MinHeight">100</sys:Double>
 		<sys:Double x:Key="Double/MainWindow.MinWidth">400</sys:Double>
 
 		<!-- SessionControl -->

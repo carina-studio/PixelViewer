@@ -89,17 +89,19 @@
 	</Window.Resources>
 
 	<!-- Layout -->
-	<asControls:TabControl x:Name="tabControl" DragDrop.AllowDrop="True" DragLeaveItem="OnDragLeaveTabItem" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" ItemDragged="OnTabItemDragged" Padding="0">
+	<Border Name="baseBorder">
+		<asControls:TabControl Name="tabControl" DragDrop.AllowDrop="True" DragLeaveItem="OnDragLeaveTabItem" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" ItemDragged="OnTabItemDragged" Padding="0">
 
-		<!-- New tab -->
-		<TabItem Classes="Empty">
-			<TabItem.Header>
-				<Border Classes="AddTabItemButton" ToolTip.Tip="{DynamicResource String/Common.CreateTab}">
-					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
-				</Border>
-			</TabItem.Header>
-		</TabItem>
+			<!-- New tab -->
+			<TabItem Classes="Empty">
+				<TabItem.Header>
+					<Border Classes="AddTabItemButton" ToolTip.Tip="{DynamicResource String/Common.CreateTab}">
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
+					</Border>
+				</TabItem.Header>
+			</TabItem>
 
-	</asControls:TabControl>
+		</asControls:TabControl>
+	</Border>
 	
 </Window>
