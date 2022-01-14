@@ -11,6 +11,7 @@
              xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
              xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
 			 xmlns:appProfiles="using:Carina.PixelViewer.Media.Profiles"
+			 xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
 			 xmlns:ia="using:Avalonia.Xaml.Interactivity"
              xmlns:iaCore="using:Avalonia.Xaml.Interactions.Core"
 			 xmlns:sys="using:System"
@@ -343,7 +344,7 @@
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition MaxWidth="400" MinWidth="300" Width="300"/>
+				<ColumnDefinition MaxWidth="{x:Static appViewModels:Session.MaxRenderingParametersPanelSize}" MinWidth="{x:Static appViewModels:Session.MinRenderingParametersPanelSize}" Width="0"/>
 			</Grid.ColumnDefinitions>
 
 			<!-- Histograms -->
@@ -563,9 +564,9 @@
 						<!-- Dimensions -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
 						<Grid ColumnDefinitions="*,Auto,*">
-							<NumericUpDown Classes="Dialog_NumericUpDown" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
+							<asControls:IntegerTextBox Classes="Dialog_TextBox" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
 							<TextBlock Grid.Column="1" Text=" × " VerticalAlignment="Center"/>
-							<NumericUpDown Classes="Dialog_NumericUpDown" Grid.Column="2" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
+							<asControls:IntegerTextBox Classes="Dialog_TextBox" Grid.Column="2" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
 						</Grid>
 						<Separator Classes="Dialog_Separator_Small"/>
 						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}"/>

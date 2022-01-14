@@ -195,6 +195,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Maximum size of panel of rendering parameters in pixels.
+		/// </summary>
+		public const double MaxRenderingParametersPanelSize = 400;
+		/// <summary>
+		/// Minimum size of panel of rendering parameters in pixels.
+		/// </summary>
+		public const double MinRenderingParametersPanelSize = 200;
+
+
+		/// <summary>
 		/// Property of <see cref="BayerPattern"/>.
 		/// </summary>
 		public static readonly ObservableProperty<BayerPattern> BayerPatternProperty = ObservableProperty.Register<Session, BayerPattern>(nameof(BayerPattern));
@@ -485,12 +495,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="RenderingParametersPanelSize"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), 300, coerce: it =>
+		public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, coerce: it =>
 		{
-			if (it >= 400)
-				return 400;
-			if (it <= 300)
-				return 300;
+			if (it >= MaxRenderingParametersPanelSize)
+				return MaxRenderingParametersPanelSize;
+			if (it <= MinRenderingParametersPanelSize)
+				return MinRenderingParametersPanelSize;
 			return it;
 		}, validate: it => double.IsFinite(it));
 		/// <summary>
@@ -533,6 +543,7 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Static fields.
 		static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new SettingKey<bool>("Session.IsInitHistogramsPanelVisible", false);
+		static readonly SettingKey<int> LatestRenderingParamsPanelSize = new SettingKey<int>("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
 		static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new MutableObservableInt64();
 		static readonly TimeSpan ZoomAnimationDuration = TimeSpan.FromMilliseconds(500);
 
@@ -701,7 +712,10 @@ namespace Carina.PixelViewer.ViewModels
 			if (savedState.HasValue)
 				this.RestoreState(savedState.Value);
 			else
+			{
 				this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
+				this.SetValue(RenderingParametersPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
+			}
 		}
 
 
@@ -2403,6 +2417,8 @@ namespace Carina.PixelViewer.ViewModels
 					this.SynchronizationContext.Post(() => (oldValue as IDisposable)?.Dispose());
 				this.SetValue(HasRenderedImageProperty, newValue != null);
 			}
+			else if (property == RenderingParametersPanelSizeProperty)
+				this.PersistentState.SetValue<int>(LatestRenderingParamsPanelSize, (int)(this.RenderingParametersPanelSize + 0.5));
 			else if (property == YuvToBgraConverterProperty)
 			{
 				if (this.IsYuvToBgraConverterSupported)

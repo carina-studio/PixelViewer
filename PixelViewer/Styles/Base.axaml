@@ -64,7 +64,7 @@
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageRenderingProfile.Icon.Size">16</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageViewer.Hint.FontSize">20</sys:Double>
-		<sys:Double x:Key="Double/SessionControl.ImageViewer.MinSizeToHidePanels">50</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.ImageViewer.MinSizeToHidePanels">70</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.OptionsPanel.SeparatorSize">15</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.StatusBar.FileActions.MaxWidth">500</sys:Double>
