@@ -2858,7 +2858,9 @@ namespace Carina.PixelViewer.ViewModels
 			try
 			{
 				var totalDataSize = imageDataSource.Size - this.DataOffset;
-				var frameCount = Math.Max(1, totalDataSize / frameDataSize);
+				var frameCount = (totalDataSize <= frameDataSize)
+					? 1
+					: 1 + (totalDataSize - frameDataSize) / (frameDataSize + this.FramePaddingSize);
 				if (frameNumber < 1)
 				{
 					frameNumber = 1;
