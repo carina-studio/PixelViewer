@@ -309,6 +309,11 @@ namespace Carina.PixelViewer
 						settings.SetValue<ThemeMode>(CarinaStudio.AppSuite.SettingKeys.ThemeMode, it ? ThemeMode.Dark : ThemeMode.Light);
 				});
 			}
+			else if (oldVersion <= 3)
+			{
+				if (CarinaStudio.Platform.IsMacOS && settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.ThemeMode) == ThemeMode.Light)
+					settings.SetValue<ThemeMode>(CarinaStudio.AppSuite.SettingKeys.ThemeMode, ThemeMode.System);
+			}
 
 			// upgrade YUV conversion mode
 			if (oldVersion <= 2)
@@ -346,7 +351,7 @@ namespace Carina.PixelViewer
 
 
 		// Version of settings.
-		protected override int SettingsVersion => 3;
+		protected override int SettingsVersion => 4;
 
 
 		/// <inheritdoc/>
