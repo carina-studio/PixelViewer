@@ -183,6 +183,11 @@ namespace Carina.PixelViewer
 		}
 
 
+		// Create tab item and its session.
+		void CreateMainTabItem() =>
+			(this.DataContext as Workspace)?.Let(it => it.CreateAndAttachSession(it.Sessions.Count));
+
+
 		// Create new window.
 		void CreateMainWindow() =>
 			this.Application.ShowMainWindow();
@@ -481,7 +486,7 @@ namespace Carina.PixelViewer
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.IsClosed)
 			{
 				if (this.mainTabItems.Count > 1)
-					(this.DataContext as Workspace)?.CreateAndAttachSession();
+					this.CreateMainTabItem();
 			}
 			else
 			{

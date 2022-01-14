@@ -75,6 +75,8 @@
 			<NativeMenuItem Header="{DynamicResource String/MainWindow.Tabs}">
 				<NativeMenuItem.Menu>
 					<NativeMenu>
+						<NativeMenuItem Command="{Binding $self.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}"  Gesture="Cmd+T"/>
+						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding $self.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}"/>
 						<NativeMenuItem Command="{Binding $self.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
 						<NativeMenuItemSeparator/>
