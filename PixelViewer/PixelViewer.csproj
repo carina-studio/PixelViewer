@@ -5,7 +5,7 @@
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
 		<Copyright>©2021 Carina Studio</Copyright>
-		<OutputType>WinExe</OutputType>
+		<OutputType>Exe</OutputType>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<RootNamespace>Carina.PixelViewer</RootNamespace>
