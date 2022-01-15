@@ -466,8 +466,15 @@
 
 			<!-- Rendering parameters panel -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3" IsVisible="{Binding IsRenderingParametersPanelVisible}">
-				<ScrollViewer HorizontalScrollBarVisibility="Disabled">
+				<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
 					<StackPanel IsEnabled="{Binding IsSourceFileOpened}" Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
+
+						<!-- Styles -->
+						<StackPanel.Styles>
+							<Style Selector="TextBlock">
+								<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+							</Style>
+						</StackPanel.Styles>
 
 						<!-- Profile -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>

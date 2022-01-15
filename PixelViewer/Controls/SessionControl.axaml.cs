@@ -91,6 +91,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
 		readonly ColumnDefinition renderingParamsPanelColumn;
+		readonly ScrollViewer renderingParamsPanelScrollViewer;
 		readonly ScheduledAction stopUsingSmallRenderedImageAction;
 		Vector? targetImageViewportCenter;
 		readonly ScheduledAction updateEffectiveRenderedImageAction;
@@ -186,6 +187,7 @@ namespace Carina.PixelViewer.Controls
 					(this.DataContext as Session)?.Let(it => it.RenderingParametersPanelSize = column.Width.Value);
 				}));
 			});
+			this.renderingParamsPanelScrollViewer = this.FindControl<ScrollViewer>(nameof(renderingParamsPanelScrollViewer)).AsNonNull();
 #if DEBUG
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
@@ -751,6 +753,12 @@ namespace Carina.PixelViewer.Controls
 		// Called when changing mouse wheel.
 		void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
 		{
+			if (FocusManager.Instance?.Current is TextBox textBox && textBox.FindAncestorOfType<NumericUpDown>() != null)
+			{
+				this.renderingParamsPanelScrollViewer.Focus();
+				e.Handled = true;
+				return;
+			}
 			if (!this.imageScrollViewer.IsPointerOver || (e.KeyModifiers & KeyModifiers.Control) == 0)
 				return;
 			if (this.DataContext is not Session session || !session.IsSourceFileOpened || session.FitRenderedImageToViewport)
