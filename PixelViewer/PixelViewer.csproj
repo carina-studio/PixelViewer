@@ -19,17 +19,21 @@
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
 		<TargetFramework>net6.0</TargetFramework>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx.11.0-arm64</RuntimeIdentifiers>
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Debug-Windows'">
 		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release'">
 		<TargetFramework>net6.0</TargetFramework>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx.11.0-arm64</RuntimeIdentifiers>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release-Windows'">
 		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='MSStore-Debug'">
 		<TargetFramework>net6.0-windows10.0.17763.0</TargetFramework>
@@ -40,9 +44,20 @@
 		<DefineConstants>MSSTORE</DefineConstants>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<CFBundleName>PixelViewer</CFBundleName>
+		<CFBundleExecutable>PixelViewer</CFBundleExecutable>
+		<CFBundleIdentifier>com.carina-studio.pixelviewer</CFBundleIdentifier>
+		<CFBundleShortVersionString>$(Version)</CFBundleShortVersionString>
+		<CFBundlePackageType>APPL</CFBundlePackageType>
+		<NSPrincipalClass>NSApplication</NSPrincipalClass>
+    	<NSHighResolutionCapable>True</NSHighResolutionCapable>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="0.34.0.113" />
 		<PackageReference Include="Colourful" Version="3.1.0" />
+		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
 	</ItemGroup>
 
