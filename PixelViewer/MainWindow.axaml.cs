@@ -568,6 +568,7 @@ namespace Carina.PixelViewer
 								else
 									this.mainTabControl.SelectedIndex = -1;
 							}
+							this.DetachTabItemFromSession(this.mainTabItems[tabIndex]);
 							this.mainTabItems.RemoveAt(tabIndex);
 						}
 						(this.DataContext as Workspace)?.Let((it) =>

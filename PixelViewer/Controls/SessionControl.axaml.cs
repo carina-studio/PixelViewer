@@ -753,7 +753,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when changing mouse wheel.
 		void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
 		{
-			if (FocusManager.Instance?.Current is TextBox textBox && textBox.FindAncestorOfType<NumericUpDown>() != null)
+			if (Avalonia.Input.FocusManager.Instance?.Current is TextBox textBox && textBox.FindAncestorOfType<NumericUpDown>() != null)
 			{
 				this.renderingParamsPanelScrollViewer.Focus();
 				e.Handled = true;

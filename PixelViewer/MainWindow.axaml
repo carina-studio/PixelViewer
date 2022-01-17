@@ -97,9 +97,9 @@
 			<!-- New tab -->
 			<TabItem Classes="Empty">
 				<TabItem.Header>
-					<Border Classes="AddTabItemButton" ToolTip.Tip="{DynamicResource String/Common.CreateTab}">
+					<Button Classes="AddTabItem" Command="{Binding $parent[Window].CreateMainTabItem}">
 						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
-					</Border>
+					</Button>
 				</TabItem.Header>
 			</TabItem>
 
