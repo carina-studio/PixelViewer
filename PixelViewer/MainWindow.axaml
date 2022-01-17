@@ -34,7 +34,7 @@
 							</MenuItem.Icon>
 						</MenuItem>
 						<Separator/>
-						<MenuItem Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}">
+						<MenuItem Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}" InputGesture="Ctrl+W">
 							<MenuItem.Icon>
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.CloseTab}"/>
 							</MenuItem.Icon>
@@ -49,7 +49,7 @@
 					</Panel>
 				</Panel>
 				<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}" ToolTip.Tip="{Binding SourceFileName}"/>
-				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/Common.CloseTab}">
+				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/Common.CloseTab.WithGesture}">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Close}"/>
 				</Button>
 			</Grid>

@@ -480,8 +480,29 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Called when selection of main tab control changed.
-		void OnMainTabControlSelectionChanged()
+		// Handle key down.
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+			if (e.Handled || (e.KeyModifiers & KeyModifiers.Control) == 0)
+				return;
+			switch (e.Key)
+			{
+				case Key.T:
+					this.CreateMainTabItem();
+					break;
+				case Key.W:
+					this.CloseCurrentMainTabItem();
+					break;
+				default:
+					return;
+			}
+			e.Handled = true;
+        }
+
+
+        // Called when selection of main tab control changed.
+        void OnMainTabControlSelectionChanged()
 		{
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.IsClosed)
 			{
