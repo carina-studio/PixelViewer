@@ -68,6 +68,12 @@
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
+			<MenuItem Command="{Binding $parent[Window].CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" InputGesture="Ctrl+N">
+				<MenuItem.Icon>
+					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.AddWindow}"/>
+				</MenuItem.Icon>
+			</MenuItem>
+			<Separator/>
 			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Horizontal}"/>

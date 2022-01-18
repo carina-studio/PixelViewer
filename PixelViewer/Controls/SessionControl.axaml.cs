@@ -560,6 +560,11 @@ namespace Carina.PixelViewer.Controls
 								session.ZoomToCommand.TryExecute(1.0);
 							break;
 						}
+					case Avalonia.Input.Key.N:
+						if (CarinaStudio.Platform.IsMacOS)
+							return;
+						this.FindAncestorOfType<MainWindow>()?.CreateMainWindow();
+						break;
 					case Avalonia.Input.Key.O:
 						{
 							this.OpenSourceFile();

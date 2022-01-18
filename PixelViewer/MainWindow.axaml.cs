@@ -188,8 +188,10 @@ namespace Carina.PixelViewer
 			(this.DataContext as Workspace)?.Let(it => it.CreateAndAttachSession(it.Sessions.Count));
 
 
-		// Create new window.
-		void CreateMainWindow() =>
+		/// <summary>
+		/// Create new main window.
+		/// </summary>
+		public void CreateMainWindow() =>
 			this.Application.ShowMainWindow();
 
 
@@ -484,7 +486,7 @@ namespace Carina.PixelViewer
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-			if (e.Handled || (e.KeyModifiers & KeyModifiers.Control) == 0)
+			if (e.Handled || (e.KeyModifiers & KeyModifiers.Control) == 0 || CarinaStudio.Platform.IsMacOS)
 				return;
 			switch (e.Key)
 			{
