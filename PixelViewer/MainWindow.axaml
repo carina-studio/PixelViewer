@@ -82,7 +82,7 @@
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding $self.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $self.HasMultipleSessions}"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.CloseCurrentMainTabItem}" Header="{DynamicResource String/Common.CloseTab}"/>
+						<NativeMenuItem Command="{Binding $self.CloseCurrentMainTabItem}" Header="{DynamicResource String/Common.CloseTab}" Gesture="Cmd+W"/>
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>
