@@ -6,9 +6,6 @@ CERT_NAME="" # Name of certification to sign the application
 
 # Reset output directory
 rm -r ./Packages
-if [ "$?" != "0" ]; then
-    exit
-fi
 mkdir ./Packages
 if [ "$?" != "0" ]; then
     exit

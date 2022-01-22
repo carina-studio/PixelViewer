@@ -565,13 +565,7 @@ namespace Carina.PixelViewer
 					}
 					break;
 				case NotifyCollectionChangedAction.Move:
-					{
-						this.mainTabItems.Move(e.OldStartingIndex, e.NewStartingIndex);
-						
-						// [Workaround] prevent unexepected selection state after moving tab item
-						for (var i = this.mainTabItems.Count - 1 ; i >= 0 ; --i)
-							this.mainTabItems[i].IsSelected = (this.mainTabControl.SelectedIndex == i);
-					}
+					this.mainTabItems.Move(e.OldStartingIndex, e.NewStartingIndex);
 					break;
 				case NotifyCollectionChangedAction.Remove:
 					{
@@ -614,7 +608,7 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Called when teb item dragged.
+		// Called when tab item dragged.
 		void OnTabItemDragged(object? sender, TabItemDraggedEventArgs e)
 		{
 			// get session
