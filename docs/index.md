@@ -2,16 +2,31 @@
 
 PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixels data from file and rendering it.
 
-[![Release](https://img.shields.io/github/v/release/carina-studio/PixelViewer?include_prereleases&style=for-the-badge&color=cyan&label=Preview)](https://github.com/carina-studio/PixelViewer/releases/1.104.0.1123)
+## 📥 Download
 
-&nbsp;    | Windows 7<br/>*(.NET Runtime needed)* | Windows 8/10/11 | Linux | macOS 10.12+/11/12
-:--------:|:-------------------------------------:|:---------------:|:-----:|:-----:
-Download  |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86-fx-dependent.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64-fx-dependent.zip)|[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-arm64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-arm64.zip)|[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-arm64.zip)
-Screenshot|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7_Thumb.png" alt="Main window (Windows 7)" width="200"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7.png)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="200"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows.png)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu_Thumb.png" alt="Main window (Ubuntu)" width="200"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu.png)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="200"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
+Operating System                      | Download | Version | Screenshot
+:------------------------------------:|:--------:|:-------:|:----------:
+Windows 8/10/11                       |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64.zip)|1.105.0.1220 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows.png)
+Windows 7<br/>*(.NET Runtime needed)* |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x86-fx-dependent.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-win-x64-fx-dependent.zip)|1.105.0.1220 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7_Thumb.png" alt="Main window (Windows 7)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7.png)
+macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-osx-x64.zip)|1.105.0.1220 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
+Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.105.0.1220/PixelViewer-1.105.0.1220-linux-x64.zip)|1.105.0.1220 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu_Thumb.png" alt="Main window (Ubuntu)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Ubuntu.png)
 
 - [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)
 
-## ⭐Supported formats
+## 📣 What's Change in 1.105.0.1220
+- Support rendering ```10/12-bit MIPI Bayer Pattern``` images.
+- Support rendering ```ABGR_16161616```/```ARGB_16161616```/```BGRA_16161616```/```RGBA_16161616``` images.
+- Support saving image as ```Raw 32/64-bit BGRA pixels```.
+- Upgrade to [.NET 6](https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-6).
+- Update sampling mode to improve quality of rendering image.
+- Automatically change quality of rendering image according to scale of image for better image quality and performance.
+- Support running on ```Windows 7``` and ```Windows 8```.
+- Support running on ```x86``` PC.
+- UX improvement.
+- Merge ```BGGR_16```/```GBRG_16```/```GRBG_16```/```RGGB_16``` into single format ```Bayer Pattern (16-bit)``` which allows changing Bayer Pattern.
+- Bug fixing.
+
+## ⭐ Supported formats
 * Luminance
   * L8
   * L16
@@ -54,14 +69,14 @@ Screenshot|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Mai
   * 12-bit MIPI (v1.105+)
   * 16-bit
   
-## ⭐Supported color spaces (v1.104+)
+## ⭐ Supported color spaces (v1.104+)
 * sRGB
 * DCI-P3
 * Adobe RGB
 * ITU-R BT.601
 * ITU-R BT.2020
 
-## ⭐Supported functions
+## ⭐ Supported functions
 * Rendering image from raw pixel file.
 * Evaluate image dimensions according to file name, file size and format.
 * Specify pixel-stride and row-stride for each plane.
@@ -75,10 +90,10 @@ Screenshot|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_Mai
 * Save rendered image as PNG file.
 * Save rendered image as JPEG/BGRA file. (v1.105+)
 
-## 📜User Agreement
+## 📜 User Agreement
 - [English](user_agreement.md)
 - [正體中文 (台灣)](user_agreement_zh-TW.md)
 
-## 📜Privacy Policy
+## 📜 Privacy Policy
 - [English](privacy_policy.md)
 - [正體中文 (台灣)](privacy_policy_zh-TW.md)
