@@ -1,43 +1,89 @@
 ﻿[
 	{
-		"Description": "Support rendering 10/12-bit MIPI Bayer Pattern images.",
+		"Description": "Add Display-P3 color space and set as default screen color space on macOS.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support rendering ABGR_16161616/ARGB_16161616/BGRA_16161616/RGBA_16161616 images.",
+		"Description": "Limited support of parsing DNG file.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support saving image as 'Raw 32/64-bit BGRA pixels'.",
+		"Description": "Support saving image with orientation.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Upgrade to .NET 6.",
-		"DetailsPageUri": "https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-6",
+		"Description": "Support 4x4 Bayer Patterns.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support RGB gain for Bayer Pattern formats.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support arranging tabs by dragging.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support opening tab in new window.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support drag and drop multiple files to open.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support layouting windows in horizontal, vertical or tile mode.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support using system theme mode on macOS.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support hiding rendering parameters panel to get more space for viewing image.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Improve tab scrolling UX.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Update sampling mode to improve quality of rendering image.",
+		"Description": "Improve toolbar scrolling UX.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Automatically change quality of rendering image according to scale of image for better image quality and performance.",
+		"Description": "Reduce size of update packages for auto updating.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Support running on Windows 7 and Windows 8.",
+		"Description": "Other UX improvement.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "UX improvement.",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "Merge BGGR_16/GBRG_16/GRBG_16/RGGB_16 into single format 'Bayer Pattern (16-bit)' which allows changing Bayer Pattern.",
+		"Description": "Use system menu bar on macOS.",
 		"Type": "BehaviorChange"
 	},
 	{
-		"Description": "Bug fixing.",
+		"Description": "Use single process to manage all windows.",
+		"Type": "BehaviorChange"
+	},
+	{
+		"Description": "Update dependent libraries."
+	},
+	{
+		"Description": "Correct parameters of DCI-P3 color space.",
+		"Type": "BugFixing"
+	},
+	{
+		"Description": "Correct algorithm of demosaicing.",
+		"Type": "BugFixing"
+	},
+	{
+		"Description": "Fix issue of unable to launch on ARM64 PC.",
+		"Type": "BugFixing"
+	},
+	{
+		"Description": "Other bug fixing.",
 		"Type": "BugFixing"
 	}
 ]

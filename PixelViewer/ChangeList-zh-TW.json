@@ -1,43 +1,89 @@
 ﻿[
 	{
-		"Description": "支援繪製 10/12 位元 MIPI Bayer 排列之影像。",
+		"Description": "新增 Display-P3 色彩空間，並設定為 macOS 之預設螢幕色彩空間。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援繪製 ABGR_16161616/ARGB_16161616/BGRA_16161616/RGBA_16161616 之影像。",
+		"Description": "有限度的支援 DNG 檔案之解析。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援將影像儲存為「原始 32/64 位元 BGRA 像素」。",
+		"Description": "支援套用旋轉方向至儲存的影像。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "升級至 .NET 6。",
-		"DetailsPageUri": "https://docs.microsoft.com/en-us/dotnet/core/whats-new/dotnet-6",
+		"Description": "支援 4x4 Bayer 排列。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "針對 Bayer 排列格式支援 RGB 增益設定。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援使用拖動方式來排列分頁。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援在新的視窗開啟分頁。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援拖放多個檔案並開啟。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援以水平、垂直或網格方式排列視窗。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援在 macOS 上使用系統佈景。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "支援隱藏繪製參數面板以提升圖片檢視空間。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "改善分頁捲動的使用體驗。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "更新取樣方式以提升繪製品質。",
+		"Description": "改善工具列捲動的使用體驗。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "自動根據影像縮放比例調整繪製方式以改善影像品質與效能。",
+		"Description": "減少自動更新時的升級封裝大小。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "支援在 Windows 7 及 Windows 8 上執行。",
+		"Description": "其他使用者體驗改善。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "使用者體驗改進。",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "將 BGGR_16/GBRG_16/GRBG_16/RGGB_16 合併為單一格式「Bayer 排列 (16 位元)」並允許改變其 Bayer 排列方式。",
+		"Description": "在 macOS 上使用系統選單列。",
 		"Type": "BehaviorChange"
 	},
 	{
-		"Description": "錯誤修正。",
+		"Description": "使用單一處理程序來管理所有使窗。",
+		"Type": "BehaviorChange"
+	},
+	{
+		"Description": "更新相依程式庫。"
+	},
+	{
+		"Description": "修正 DCI-P3 色彩空間的相關參數。",
+		"Type": "BugFixing"
+	},
+	{
+		"Description": "修正去馬賽克之演算法。",
+		"Type": "BugFixing"
+	},
+	{
+		"Description": "修正在 ARM64 平台之電腦無法啟動的問題。",
+		"Type": "BugFixing"
+	},
+	{
+		"Description": "其他錯誤修正。",
 		"Type": "BugFixing"
 	}
 ]
