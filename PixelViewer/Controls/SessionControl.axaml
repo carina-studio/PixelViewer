@@ -229,10 +229,8 @@
 								<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Classes="SessionControl_FilterParamsPopup">
 										<DockPanel>
-											<Border Classes="Dialog_ControlButtonsPanel" Background="{x:Null}" DockPanel.Dock="Bottom">
-												<StackPanel Classes="Dialog_ControlButtonsPanel">
-													<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
-												</StackPanel>
+											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
+												<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}" HorizontalAlignment="Center"/>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
 
@@ -269,10 +267,8 @@
 								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Classes="SessionControl_FilterParamsPopup">
 										<DockPanel>
-											<Border Classes="Dialog_ControlButtonsPanel" Background="{x:Null}" DockPanel.Dock="Bottom">
-												<StackPanel Classes="Dialog_ControlButtonsPanel">
-													<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
-												</StackPanel>
+											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
+												<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}" HorizontalAlignment="Center"/>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
 												<StackPanel.Styles>
@@ -696,15 +692,19 @@
 					<StackPanel Orientation="Horizontal">
 						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}"/>
 						<ToggleButton Name="fileActionsButton" Classes="StatusBar_ToggleButton" Command="{Binding $parent[UserControl].ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{DynamicResource Double/SessionControl.StatusBar.FileActions.MaxWidth}">
-							<Grid ColumnDefinitions="*,Auto,Auto">
-								<TextBlock Text="{Binding SourceFileName}" TextTrimming="CharacterEllipsis"/>
-								<TextBlock Grid.Column="1" Text="{Binding SourceFileSizeString, StringFormat={} ({0})}"/>
-								<Image Classes="StatusBar_DropDownIcon" Grid.Column="2">
+							<StackPanel Orientation="Horizontal">
+								<Image Classes="StatusBar_Icon">
+									<DrawingImage>
+										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.File}"/>
+									</DrawingImage>
+								</Image>
+								<TextBlock Text="{Binding SourceFileSizeString}"/>
+								<Image Classes="StatusBar_DropDownIcon">
 									<DrawingImage>
 										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.MoveUp}"/>
 									</DrawingImage>
 								</Image>
-							</Grid>
+							</StackPanel>
 						</ToggleButton>
 						<Separator Classes="StatusBar_Separator"/>
 					</StackPanel>
