@@ -20,7 +20,7 @@
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support arranging tabs by dragging.",
+		"Description": "Support arranging tabs by dragging (not supported yet on Linux).",
 		"Type": "NewFeature"
 	},
 	{
@@ -41,6 +41,10 @@
 	},
 	{
 		"Description": "Support hiding rendering parameters panel to get more space for viewing image.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Support auto update on macOS.",
 		"Type": "NewFeature"
 	},
 	{

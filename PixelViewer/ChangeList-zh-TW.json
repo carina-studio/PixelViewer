@@ -20,7 +20,7 @@
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援使用拖動方式來排列分頁。",
+		"Description": "支援使用拖動方式來排列分頁 (Linux 尚未支援)。",
 		"Type": "NewFeature"
 	},
 	{
@@ -41,6 +41,10 @@
 	},
 	{
 		"Description": "支援隱藏繪製參數面板以提升圖片檢視空間。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "在 macOS 上支援自動更新。",
 		"Type": "NewFeature"
 	},
 	{
