@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using Avalonia.VisualTree;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.Threading;
@@ -23,14 +22,17 @@ namespace Carina.PixelViewer.Controls
 
 
         // Fields.
-        readonly NumericUpDown frameNumberUpDown;
+        readonly IntegerTextBox frameNumberTextBox;
 
 
         // Constructor.
         public FrameNumberSelectionDialog()
         {
             InitializeComponent();
-            this.frameNumberUpDown = this.FindControl<NumericUpDown>(nameof(frameNumberUpDown)).AsNonNull();
+            this.frameNumberTextBox = this.FindControl<IntegerTextBox>(nameof(frameNumberTextBox)).AsNonNull().Also(it =>
+            {
+                it.GetObservable(IntegerTextBox.ValueProperty).Subscribe(_ => this.InvalidateInput());
+            });
         }
 
 
@@ -47,7 +49,7 @@ namespace Carina.PixelViewer.Controls
 
 
         // Generate result.
-        protected override Task<object?> GenerateResultAsync(CancellationToken cancellationToken) => Task.FromResult((object?)(int)frameNumberUpDown.Value);
+        protected override Task<object?> GenerateResultAsync(CancellationToken cancellationToken) => Task.FromResult((object?)(int)frameNumberTextBox.Value.GetValueOrDefault());
 
 
         // Initial frame number.
@@ -68,8 +70,13 @@ namespace Carina.PixelViewer.Controls
         // Window opened.
         protected override void OnOpened(EventArgs e)
         {
-            this.SynchronizationContext.Post(() => this.frameNumberUpDown.FindDescendantOfType<TextBox>()?.Focus());
+            this.SynchronizationContext.Post(() => this.frameNumberTextBox.Focus());
             base.OnOpened(e);
         }
+
+
+        // Validate input
+        protected override bool OnValidateInput() =>
+            base.OnValidateInput() && this.frameNumberTextBox.Value.HasValue;
     }
 }
