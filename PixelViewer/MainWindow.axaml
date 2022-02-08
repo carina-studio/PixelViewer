@@ -2,9 +2,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:app="clr-namespace:Carina.PixelViewer"
-        xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
-        xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
+		xmlns:aConverters="using:Avalonia.Data.Converters"
+        xmlns:app="using:Carina.PixelViewer"
+        xmlns:appControls="using:Carina.PixelViewer.Controls"
+		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
+        xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -18,38 +20,85 @@
 	<!-- Data templates -->
 	<Window.DataTemplates>
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
-			<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*,Auto">
-				<Grid.ContextMenu>
-					<ContextMenu PlacementMode="Bottom">
-						<MenuItem Command="{Binding $parent[Window].SetCustomSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
-							<MenuItem.Icon>
-								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
-							</MenuItem.Icon>
-						</MenuItem>
-						<MenuItem Command="{Binding $parent[Window].ResetSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
-						<Separator/>
-						<MenuItem Command="{Binding $parent[Window].MoveSessionToNewWorkspace}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $parent[Window].HasMultipleSessions}">
-							<MenuItem.Icon>
-								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.AddWindow}"/>
-							</MenuItem.Icon>
-						</MenuItem>
-						<Separator/>
-						<MenuItem Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}" InputGesture="Ctrl+W">
-							<MenuItem.Icon>
-								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.CloseTab}"/>
-							</MenuItem.Icon>
-						</MenuItem>
-					</ContextMenu>
-				</Grid.ContextMenu>
-				<Panel Classes="TabItem_Icon">
-					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
-					<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceFileOpened}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image}" IsVisible="{Binding InsufficientMemoryForRenderedImage}"/>
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image.Active}" IsVisible="{Binding !InsufficientMemoryForRenderedImage}"/>
+			<Grid ColumnDefinitions="*,Auto">
+				<Grid Background="{x:Static Brushes.Transparent}" ColumnDefinitions="Auto,*">
+					<Grid.ContextMenu>
+						<ContextMenu PlacementMode="Bottom">
+							<MenuItem Command="{Binding $parent[Window].SetCustomSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
+								<MenuItem.Icon>
+									<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
+								</MenuItem.Icon>
+							</MenuItem>
+							<MenuItem Command="{Binding $parent[Window].ResetSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
+							<Separator/>
+							<MenuItem Command="{Binding $parent[Window].MoveSessionToNewWorkspace}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $parent[Window].HasMultipleSessions}">
+								<MenuItem.Icon>
+									<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.AddWindow}"/>
+								</MenuItem.Icon>
+							</MenuItem>
+							<Separator/>
+							<MenuItem Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}" InputGesture="Ctrl+W">
+								<MenuItem.Icon>
+									<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.CloseTab}"/>
+								</MenuItem.Icon>
+							</MenuItem>
+						</ContextMenu>
+					</Grid.ContextMenu>
+					<ToolTip.Tip>
+						<StackPanel Margin="{DynamicResource Thickness/MainWindow.TabItem.ToolTip.Padding}">
+							<StackPanel.Styles>
+								<Style Selector="Image.ToolTipIcon">
+									<Setter Property="Height" Value="{DynamicResource Double/MainWindow.TabItem.ToolTip.Icon.Size}"/>
+									<Setter Property="Margin" Value="{DynamicResource Thickness/MainWindow.TabItem.ToolTip.Icon.Margin}"/>
+									<Setter Property="Stretch" Value="Uniform"/>
+									<Setter Property="VerticalAlignment" Value="Center"/>
+									<Setter Property="Width" Value="{DynamicResource Double/MainWindow.TabItem.ToolTip.Icon.Size}"/>
+								</Style>
+								<Style Selector="TextBlock.ToolTipText">
+									<Setter Property="VerticalAlignment" Value="Center"/>
+								</Style>
+							</StackPanel.Styles>
+							<Panel>
+								<TextBlock FontWeight="Bold" IsVisible="{Binding SourceFileName, Converter={x:Static asConverters:ValueToBooleanConverters.NonEmptyStringToTrue}}" Text="{Binding SourceFileName}" TextWrapping="Wrap"/>
+								<TextBlock FontWeight="Bold" IsVisible="{Binding SourceFileName, Converter={x:Static asConverters:ValueToBooleanConverters.EmptyStringToTrue}}" Text="{DynamicResource String/Session.EmptyTitle}"/>
+							</Panel>
+							<StackPanel IsVisible="{Binding SourceFileName, Converter={x:Static asConverters:ValueToBooleanConverters.NonEmptyStringToTrue}}">
+								<Separator Classes="Dialog_Separator_Small"/>
+								<StackPanel IsVisible="{Binding !IsHibernated}">
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Classes="ToolTipText">
+											<TextBlock.Text>
+												<MultiBinding StringFormat="{}{0}x{1}">
+													<Binding Path="ImageWidth"/>
+													<Binding Path="ImageHeight"/>
+												</MultiBinding>
+											</TextBlock.Text>
+										</TextBlock>
+										<Separator Classes="Dialog_Separator_Small"/>
+										<TextBlock Classes="ToolTipText" Text="{Binding ImageRenderer.Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}"/>
+									</StackPanel>
+									<StackPanel Orientation="Horizontal">
+										<TextBlock Classes="ToolTipText" Text="{DynamicResource String/MainWindow.Session.RenderedImagesMemoryUsage}"/>
+										<TextBlock Classes="ToolTipText" Text="{Binding RenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}}"/>
+									</StackPanel>
+								</StackPanel>
+								<StackPanel IsVisible="{Binding IsHibernated}" Orientation="Horizontal">
+									<Image Classes="ToolTipIcon" Source="{DynamicResource Image/Icon.Leaf}"/>
+									<TextBlock Classes="ToolTipText" Text="{DynamicResource String/MainWindow.Session.Hibernated}"/>
+								</StackPanel>
+							</StackPanel>
+						</StackPanel>
+					</ToolTip.Tip>
+					<Panel Classes="TabItem_Icon">
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
+						<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceFileOpened}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image}" IsVisible="{Binding InsufficientMemoryForRenderedImage}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image.Active}" IsVisible="{Binding !InsufficientMemoryForRenderedImage}"/>
+						</Panel>
 					</Panel>
-				</Panel>
-				<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}" ToolTip.Tip="{Binding SourceFileName}"/>
-				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="2" ToolTip.Tip="{DynamicResource String/Common.CloseTab.WithGesture}">
+					<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}"/>
+				</Grid>
+				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItem}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="1" ToolTip.Tip="{DynamicResource String/Common.CloseTab.WithGesture}">
 					<Image Classes="Icon" Source="{DynamicResource Image/Icon.Close}"/>
 				</Button>
 			</Grid>

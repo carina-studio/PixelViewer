@@ -118,6 +118,8 @@
 
 	<!-- MainWindow -->
 	<sys:String x:Key="String/MainWindow.ResetSessionTitle">Reset title</sys:String>
+	<sys:String x:Key="String/MainWindow.Session.Hibernated">Hibernated to save resources</sys:String>
+	<sys:String x:Key="String/MainWindow.Session.RenderedImagesMemoryUsage">Memory usage:</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">Custom title…</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">Custom title</sys:String>
 	<sys:String x:Key="String/MainWindow.Tabs">Tabs</sys:String>
