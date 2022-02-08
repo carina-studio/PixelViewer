@@ -2396,6 +2396,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.updateFilterSupportingAction.Schedule();
 				else
 					this.updateFilterSupportingAction.Execute();
+				this.UpdateCanZoomInOut();
 			}
 			else if (property == IsYuvToBgraConverterSupportedProperty)
 			{

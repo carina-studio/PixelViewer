@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:c="using:CarinaStudio"
+			 xmlns:aConverters="using:Avalonia.Data.Converters"
 			 xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 			 xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
 			 xmlns:app="using:Carina.PixelViewer"
@@ -128,18 +129,24 @@
 						</ToggleButton>
 
 						<!-- Zoom-out -->
-						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
+						<RepeatButton Name="zoomOutButton" Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomOut}"/>
 						</RepeatButton>
 
 						<!-- Zoom -->
 						<Panel>
+							<Panel.IsEnabled>
+								<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+									<Binding Path="IsEffectivelyEnabled" ElementName="zoomOutButton"/>
+									<Binding Path="IsEffectivelyEnabled" ElementName="zoomInButton"/>
+								</MultiBinding>
+							</Panel.IsEnabled>
 							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000%"/>
 							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RenderedImageScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
 						</Panel>
 
 						<!-- Zoom-in -->
-						<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
+						<RepeatButton Name="zoomInButton" Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomIn}"/>
 						</RepeatButton>
 
@@ -147,18 +154,24 @@
 						<Separator Classes="ToolBar_Separator"/>
 
 						<!-- Rotate-left -->
-						<Button Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
+						<Button Name="rotateLeftButton" Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateLeft}"/>
 						</Button>
 
 						<!-- Rotation -->
 						<Panel>
+							<Panel.IsEnabled>
+								<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+									<Binding Path="IsEffectivelyEnabled" ElementName="rotateLeftButton"/>
+									<Binding Path="IsEffectivelyEnabled" ElementName="rotateRightButton"/>
+								</MultiBinding>
+							</Panel.IsEnabled>
 							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000"/>
 							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
 						</Panel>
 
 						<!-- Rotate-right -->
-						<Button Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
+						<Button Name="rotateRightButton" Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateRight}"/>
 						</Button>
 
@@ -351,7 +364,7 @@
 
 			<!-- Histograms -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}" Width="{DynamicResource Double/SessionControl.HistogramsPanel.Width}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Dark}" BorderThickness="0,0,1,0" IsVisible="{Binding IsHistogramsVisible}" Width="{DynamicResource Double/SessionControl.HistogramsPanel.Width}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{DynamicResource Thickness/SessionControl.HistogramsPanel.Padding}">
 
@@ -661,7 +674,7 @@
 			</Border>
 
 			<!-- Splitter -->
-			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2" IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
+			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Light}" BorderThickness="1,0,0,0" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2" IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
 			
 		</Grid>
 
