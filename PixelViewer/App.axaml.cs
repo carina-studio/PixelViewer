@@ -59,7 +59,16 @@ namespace Carina.PixelViewer
 		[STAThread]
 		public static void Main(string[] args)
 		{
-			BuildApplication<App>().StartWithClassicDesktopLifetime(args);
+			BuildApplication<App>(builder =>
+			{
+				if (CarinaStudio.Platform.IsMacOS)
+				{
+					builder.With(new MacOSPlatformOptions()
+					{
+						DisableDefaultApplicationMenuItems = true,
+					});
+				}
+			}).StartWithClassicDesktopLifetime(args);
 		}
 
 
