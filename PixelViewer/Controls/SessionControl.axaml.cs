@@ -755,9 +755,12 @@ namespace Carina.PixelViewer.Controls
 				{
 					this.SynchronizationContext.Post(() =>
 					{
-						var center = this.targetImageViewportCenter.Value;
-						this.targetImageViewportCenter = null;
-						this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
+						if (this.targetImageViewportCenter.HasValue)
+						{
+							var center = this.targetImageViewportCenter.Value;
+							this.targetImageViewportCenter = null;
+							this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
+						}
 					});
 				}
 			}
@@ -1339,7 +1342,7 @@ namespace Carina.PixelViewer.Controls
 			{
 				this.FindAncestorOfType<Avalonia.Controls.Window>()?.Let((window) =>
 				{
-					var screenDpi = window.Screens.Primary.PixelDensity;
+					var screenDpi = window.Screens.Primary?.PixelDensity ?? 1.0;
 					scale *= (Math.Min(renderedImage.Dpi.X, renderedImage.Dpi.Y) / 96.0 / screenDpi);
 				});
 			});
