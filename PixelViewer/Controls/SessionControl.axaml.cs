@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -90,6 +91,7 @@ namespace Carina.PixelViewer.Controls
 		readonly double minImageViewerSizeToHidePanels;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
+		readonly HashSet<Avalonia.Input.Key> pressedKeys = new();
 		readonly ColumnDefinition renderingParamsPanelColumn;
 		readonly ScrollViewer renderingParamsPanelScrollViewer;
 		readonly ScheduledAction stopUsingSmallRenderedImageAction;
@@ -540,7 +542,11 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// handle key event
-			if ((e.KeyModifiers & KeyModifiers.Control) != 0)
+			this.pressedKeys.Add(e.Key);
+			var isCtrlPressed = CarinaStudio.Platform.IsMacOS 
+				? this.pressedKeys.Contains(Avalonia.Input.Key.LWin) || this.pressedKeys.Contains(Avalonia.Input.Key.RWin) 
+				: (e.KeyModifiers & KeyModifiers.Control) != 0;
+			if (isCtrlPressed)
 			{
 				switch (e.Key)
 				{
@@ -599,24 +605,38 @@ namespace Carina.PixelViewer.Controls
 			// call base
 			base.OnKeyUp(e);
 			if (e.Handled)
+			{
+				this.pressedKeys.Remove(e.Key);
 				return;
+			}
 
 			// check focus
 			var focusedElement = Avalonia.Input.FocusManager.Instance?.Current;
 			if (focusedElement != null)
 			{
 				if (focusedElement is TextBox || focusedElement is NumericUpDown)
+				{
+					this.pressedKeys.Remove(e.Key);
 					return;
+				}
 				if (focusedElement.FindAncestorOfType<SessionControl>(true) != this)
+				{
+					this.pressedKeys.Remove(e.Key);
 					return;
+				}
 			}
+
+			// prevent handling key without pressing
+			if (!this.pressedKeys.Contains(e.Key))
+				return;
 
 			// get session
 			if (this.DataContext is not Session session)
 				return;
 
 			// handle key event
-			if (e.KeyModifiers == 0)
+			var isCmdPressed = (this.pressedKeys.Contains(Avalonia.Input.Key.LWin) || this.pressedKeys.Contains(Avalonia.Input.Key.RWin));
+			if (e.KeyModifiers == 0 && !isCmdPressed)
 			{
 				switch (e.Key)
 				{
@@ -637,6 +657,7 @@ namespace Carina.PixelViewer.Controls
 				}
 				e.Handled = true;
 			}
+			this.pressedKeys.Remove(e.Key);
 		}
 
 
