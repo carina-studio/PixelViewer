@@ -413,6 +413,10 @@ namespace Carina.PixelViewer
 		// Called when drop.
 		void OnDropOnTabItem(object? sender, DragOnTabItemEventArgs e)
 		{
+			// drag and drop is not supported properly on Linux
+			if (CarinaStudio.Platform.IsLinux)
+				return;
+			
 			// check state
 			if (e.Handled || e.Item is not TabItem tabItem)
 				return;
