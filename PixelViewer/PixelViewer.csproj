@@ -10,7 +10,7 @@
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<RootNamespace>Carina.PixelViewer</RootNamespace>
 		<StartupObject>Carina.PixelViewer.App</StartupObject>
-		<ApplicationIcon>AppIcon.ico</ApplicationIcon>
+		<ApplicationIcon>PixelViewer.ico</ApplicationIcon>
 		<NoWin32Manifest>true</NoWin32Manifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
@@ -69,9 +69,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<AvaloniaResource Include="AppIcon.ico" />
+		<AvaloniaResource Include="PixelViewer.ico" />
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
-		<AvaloniaResource Include="Resources/AppIcon.ico" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml" />
@@ -85,14 +84,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<None Update="AppIcon_128px.png">
+		<None Update="PixelViewer.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Update="Strings/Default.xaml">
-			<Generator>MSBuild:Compile</Generator>
-		</None>
-		<None Update="Strings/zh-TW.xaml">
-			<Generator>MSBuild:Compile</Generator>
 		</None>
 	</ItemGroup>
 	

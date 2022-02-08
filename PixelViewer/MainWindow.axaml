@@ -11,7 +11,7 @@
         x:Class="Carina.PixelViewer.MainWindow"
 		Classes="Tabbed"
 		ExtendClientAreaTitleBarHeightHint="{Binding #tabControl.TabStripSize}"
-        Icon="/Resources/AppIcon.ico"
+        Icon="/PixelViewer.ico"
 		MinHeight="{DynamicResource Double/MainWindow.MinHeight}"
 		MinWidth="{DynamicResource Double/MainWindow.MinWidth}">
 
