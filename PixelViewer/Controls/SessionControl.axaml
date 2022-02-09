@@ -438,43 +438,74 @@
 
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" PropertyChanged="OnImageScrollViewerPropertyChanged" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
-					<LayoutTransformControl Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
-						<Border>
-							<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}" UseLayoutRounding="True">
-								<Grid HorizontalAlignment="Center" VerticalAlignment="Center">
-									<Border>
-										<Border.Background>
-											<ImageBrush DestinationRect="0,0,100,100" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
-										</Border.Background>
-									</Border>
-									<Image x:Name="image" Cursor="Arrow" DoubleTapped="OnImageDoubleTapped" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}">
-										<ia:Interaction.Behaviors>
-											<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].IsImageViewerScrollable}" Value="True">
-												<iaCore:ChangePropertyAction PropertyName="Cursor">
-													<iaCore:ChangePropertyAction.Value>
-														<Cursor>SizeAll</Cursor>
-													</iaCore:ChangePropertyAction.Value>
-												</iaCore:ChangePropertyAction>
-											</iaCore:DataTriggerBehavior>
-											<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].IsImageViewerScrollable}" Value="False">
-												<iaCore:ChangePropertyAction PropertyName="Cursor">
-													<iaCore:ChangePropertyAction.Value>
-														<Cursor>Arrow</Cursor>
-													</iaCore:ChangePropertyAction.Value>
-												</iaCore:ChangePropertyAction>
-											</iaCore:DataTriggerBehavior>
-										</ia:Interaction.Behaviors>
-									</Image>
-								</Grid>
-							</Viewbox>
+					<Panel Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
+						<Border Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
+							<Border.Background>
+								<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
+							</Border.Background>
+							<LayoutTransformControl>
+								<Border>
+									<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}" UseLayoutRounding="True">
+										<Image x:Name="image" Cursor="None" DoubleTapped="OnImageDoubleTapped" HorizontalAlignment="Center" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center">
+											<ia:Interaction.Behaviors>
+												<iaCore:DataTriggerBehavior Value="True">
+													<iaCore:DataTriggerBehavior.Binding>
+														<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+															<Binding Path="IsImageViewerScrollable" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+															<Binding Path="IsPointerPressedOnImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+														</MultiBinding>
+													</iaCore:DataTriggerBehavior.Binding>
+													<iaCore:ChangePropertyAction PropertyName="Cursor">
+														<iaCore:ChangePropertyAction.Value>
+															<Cursor>SizeAll</Cursor>
+														</iaCore:ChangePropertyAction.Value>
+													</iaCore:ChangePropertyAction>
+												</iaCore:DataTriggerBehavior>
+												<iaCore:DataTriggerBehavior Value="True">
+													<iaCore:DataTriggerBehavior.Binding>
+														<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+															<Binding Path="!IsImageViewerScrollable" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+															<Binding Path="!IsPointerPressedOnImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+														</MultiBinding>
+													</iaCore:DataTriggerBehavior.Binding>
+													<iaCore:ChangePropertyAction PropertyName="Cursor">
+														<iaCore:ChangePropertyAction.Value>
+															<Cursor>None</Cursor>
+														</iaCore:ChangePropertyAction.Value>
+													</iaCore:ChangePropertyAction>
+												</iaCore:DataTriggerBehavior>
+											</ia:Interaction.Behaviors>
+										</Image>
+									</Viewbox>
+								</Border>
+								<LayoutTransformControl.LayoutTransform>
+									<TransformGroup>
+										<ScaleTransform ScaleX="{Binding $parent[UserControl].EffectiveRenderedImageScale}" ScaleY="{Binding $parent[UserControl].EffectiveRenderedImageScale}"/>
+										<RotateTransform Angle="{Binding EffectiveRenderedImageRotation}"/>
+									</TransformGroup>
+								</LayoutTransformControl.LayoutTransform>
+							</LayoutTransformControl>
 						</Border>
-						<LayoutTransformControl.LayoutTransform>
-							<TransformGroup>
-								<ScaleTransform ScaleX="{Binding $parent[UserControl].EffectiveRenderedImageScale}" ScaleY="{Binding $parent[UserControl].EffectiveRenderedImageScale}"/>
-								<RotateTransform Angle="{Binding EffectiveRenderedImageRotation}"/>
-							</TransformGroup>
-						</LayoutTransformControl.LayoutTransform>
-					</LayoutTransformControl>
+						<Canvas ClipToBounds="False" Height="{Binding #imageContainerBorder.Bounds.Height}" HorizontalAlignment="Center" IsVisible="{Binding HasRenderedImage}" VerticalAlignment="Center" Width="{Binding #imageContainerBorder.Bounds.Width}">
+							<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" BorderThickness="1" Canvas.Left="{Binding $parent[UserControl].PointerPositionOnImageControl.X}" Canvas.Top="{Binding $parent[UserControl].PointerPositionOnImageControl.Y}" Height="9" IsHitTestVisible="False" Width="9">
+								<Border.IsVisible>
+									<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+										<Binding Path="IsPointerOverImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+											<Binding Path="!IsImageViewerScrollable" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+											<Binding Path="!IsPointerPressedOnImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
+										</MultiBinding>
+									</MultiBinding>
+								</Border.IsVisible>
+								<Border.RenderTransform>
+									<TranslateTransform X="-5" Y="-5"/>
+								</Border.RenderTransform>
+								<Border BorderBrush="{DynamicResource TextControlForeground}" BorderThickness="1">
+									<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" BorderThickness="1"/>
+								</Border>
+							</Border>
+						</Canvas>
+					</Panel>
 				</ScrollViewer>
 				
 			</Grid>

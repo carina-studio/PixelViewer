@@ -60,6 +60,9 @@ namespace Carina.PixelViewer.Controls
 		static readonly AvaloniaProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 		static readonly AvaloniaProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.Default);
 		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
+		static readonly AvaloniaProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
+		static readonly AvaloniaProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
+		static readonly AvaloniaProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
@@ -81,9 +84,11 @@ namespace Carina.PixelViewer.Controls
 		readonly ContextMenu fileActionsMenu;
 		readonly ScheduledAction hidePanelsByImageViewerSizeAction;
 		readonly ToggleButton histogramsButton;
+		readonly Border imageContainerBorder;
 		Vector? imagePointerPressedContentPosition;
 		readonly ComboBox imageRendererComboBox;
 		readonly ScrollViewer imageScrollViewer;
+		readonly Viewbox imageViewbox;
 		readonly Control imageViewerGrid;
 		bool isFirstImageViewerBoundsChanged = true;
 		bool keepHistogramsVisible;
@@ -157,8 +162,21 @@ namespace Carina.PixelViewer.Controls
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 			});
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
+			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerMovedEvent, this.OnImageContainerPointerMoved, RoutingStrategies.Tunnel);
+			});
 			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
+			this.imageViewbox = this.FindControl<Viewbox>(nameof(imageViewbox)).AsNonNull().Also(it =>
+			{
+				// [Workaround] Force relayout
+				it.GetObservable(BoundsProperty).Subscribe(_ =>
+				{
+					if (Math.Abs(it.Margin.Left) > 0.1)
+						it.Margin = new Thickness();
+				});
+			});
 			this.imageViewerGrid = this.FindControl<Control>(nameof(imageViewerGrid)).AsNonNull().Also(it =>
 			{
 				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>((_) =>
@@ -661,6 +679,15 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Called when pointer moved on image container.
+		void OnImageContainerPointerMoved(object? sender, PointerEventArgs e)
+		{
+			var point = e.GetCurrentPoint(this.imageContainerBorder).Position;
+			this.SetValue<Point>(PointerPositionOnImageControlProperty, point);
+			this.SetValue<bool>(IsPointerOverImageProperty, true);
+		}
+
+
 		// Called when double tap on image.
 		void OnImageDoubleTapped(object? sender, RoutedEventArgs e)
 		{
@@ -676,14 +703,16 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Called when pointer leave from image.
-		void OnImagePointerLeave(object sender, PointerEventArgs e)
+		void OnImagePointerLeave(object? sender, PointerEventArgs e)
 		{
+			this.SetValue<bool>(IsPointerOverImageProperty, false);
+			this.SetValue<Point>(PointerPositionOnImageControlProperty, new Point(-1, -1));
 			(this.DataContext as Session)?.SelectRenderedImagePixel(-1, -1);
 		}
 
 
 		// Called when pointer moved on image.
-		void OnImagePointerMoved(object sender, PointerEventArgs e)
+		void OnImagePointerMoved(object? sender, PointerEventArgs e)
 		{
 			// move image
 			this.imagePointerPressedContentPosition?.Let(it =>
@@ -711,19 +740,23 @@ namespace Carina.PixelViewer.Controls
 		// Called when pressing on image viewer.
 		void OnImagePointerPressed(object? sender, PointerPressedEventArgs e)
 		{
-			if (e.Pointer.Type == PointerType.Mouse && this.IsImageViewerScrollable)
+			if (e.Pointer.Type == PointerType.Mouse)
 			{
-				var pointer = e.GetCurrentPoint(this.imageScrollViewer);
-				if (pointer.Properties.IsLeftButtonPressed)
+				this.SetValue<bool>(IsPointerPressedOnImageProperty, true);
+				if (this.IsImageViewerScrollable)
 				{
-					var contentSize = this.imageScrollViewer.Extent;
-					var offset = this.imageScrollViewer.Offset;
-					if (contentSize.Width > 0 && contentSize.Height > 0)
+					var pointer = e.GetCurrentPoint(this.imageScrollViewer);
+					if (pointer.Properties.IsLeftButtonPressed)
 					{
-						this.imagePointerPressedContentPosition = new Vector(
-							(pointer.Position.X + offset.X) / contentSize.Width, 
-							(pointer.Position.Y + offset.Y) / contentSize.Height);
-						this.StartUsingSmallRenderedImage();
+						var contentSize = this.imageScrollViewer.Extent;
+						var offset = this.imageScrollViewer.Offset;
+						if (contentSize.Width > 0 && contentSize.Height > 0)
+						{
+							this.imagePointerPressedContentPosition = new Vector(
+								(pointer.Position.X + offset.X) / contentSize.Width, 
+								(pointer.Position.Y + offset.Y) / contentSize.Height);
+							this.StartUsingSmallRenderedImage();
+						}
 					}
 				}
 			}
@@ -735,6 +768,7 @@ namespace Carina.PixelViewer.Controls
 		{
 			this.imagePointerPressedContentPosition = null;
 			this.stopUsingSmallRenderedImageAction.Schedule();
+			this.SetValue<bool>(IsPointerPressedOnImageProperty, false);
 		}
 
 
@@ -927,6 +961,9 @@ namespace Carina.PixelViewer.Controls
 						this.imageScrollViewer.Padding = new Thickness(-1);
 						this.imageScrollViewer.Padding = padding;
 						this.targetImageViewportCenter = new Vector(0.5, 0.5);
+
+						// [Workaround] Force relayout
+						this.imageViewbox.Margin = new Thickness(-1);
 						break;
 					}
 				case nameof(Session.HasRenderingError):
