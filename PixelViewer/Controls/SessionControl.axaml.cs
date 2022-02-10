@@ -84,7 +84,9 @@ namespace Carina.PixelViewer.Controls
 		readonly ContextMenu fileActionsMenu;
 		readonly ScheduledAction hidePanelsByImageViewerSizeAction;
 		readonly ToggleButton histogramsButton;
+		readonly Image image;
 		readonly Border imageContainerBorder;
+		StandardCursorType imageCursorType = StandardCursorType.Arrow;
 		Vector? imagePointerPressedContentPosition;
 		readonly ComboBox imageRendererComboBox;
 		readonly ScrollViewer imageScrollViewer;
@@ -103,6 +105,7 @@ namespace Carina.PixelViewer.Controls
 		Vector? targetImageViewportCenter;
 		readonly ScheduledAction updateEffectiveRenderedImageAction;
 		readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
+		readonly ScheduledAction updateImageCursorAction;
 		readonly ScheduledAction updateIsImageViewerScrollableAction;
 		readonly ScheduledAction updateStatusBarStateAction;
 		bool useSmallRenderedImage;
@@ -162,10 +165,8 @@ namespace Carina.PixelViewer.Controls
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 			});
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
-			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerMovedEvent, this.OnImageContainerPointerMoved, RoutingStrategies.Tunnel);
-			});
+			this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
+			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull();
 			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
 			this.imageViewbox = this.FindControl<Viewbox>(nameof(imageViewbox)).AsNonNull().Also(it =>
@@ -267,6 +268,22 @@ namespace Carina.PixelViewer.Controls
 					this.SetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.HighQuality);
 				else
 					this.SetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.LowQuality);
+			});
+			this.updateImageCursorAction = new ScheduledAction(() =>
+			{
+				var cursorType = StandardCursorType.Arrow;
+				if (this.GetValue<bool>(IsPointerOverImageProperty))
+				{
+					if (this.GetValue<bool>(IsPointerPressedOnImageProperty) && this.IsImageViewerScrollable)
+						cursorType = StandardCursorType.SizeAll;
+					else
+						cursorType = StandardCursorType.None;
+				}
+				if (this.imageCursorType != cursorType)
+                {
+					this.imageCursorType = cursorType;
+					this.image.Cursor = new Avalonia.Input.Cursor(cursorType);
+                }
 			});
 			this.updateIsImageViewerScrollableAction = new ScheduledAction(() =>
 			{
@@ -679,15 +696,6 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Called when pointer moved on image container.
-		void OnImageContainerPointerMoved(object? sender, PointerEventArgs e)
-		{
-			var point = e.GetCurrentPoint(this.imageContainerBorder).Position;
-			this.SetValue<Point>(PointerPositionOnImageControlProperty, point);
-			this.SetValue<bool>(IsPointerOverImageProperty, true);
-		}
-
-
 		// Called when double tap on image.
 		void OnImageDoubleTapped(object? sender, RoutedEventArgs e)
 		{
@@ -714,10 +722,15 @@ namespace Carina.PixelViewer.Controls
 		// Called when pointer moved on image.
 		void OnImagePointerMoved(object? sender, PointerEventArgs e)
 		{
+			// report position
+			var point = e.GetCurrentPoint(this.imageContainerBorder);
+			this.SetValue<Point>(PointerPositionOnImageControlProperty, point.Position);
+			this.SetValue<bool>(IsPointerOverImageProperty, true);
+
 			// move image
 			this.imagePointerPressedContentPosition?.Let(it =>
 			{
-				var point = e.GetCurrentPoint(this.imageScrollViewer);
+				point = e.GetCurrentPoint(this.imageScrollViewer);
 				if (point.Properties.IsLeftButtonPressed)
 				{
 					var bounds = this.imageScrollViewer.Bounds;
@@ -906,6 +919,12 @@ namespace Carina.PixelViewer.Controls
 			}
 			else if (property == EffectiveRenderedImageProperty)
 				this.UpdateEffectiveRenderedImageScale();
+			else if (property == IsImageViewerScrollableProperty
+				|| property == IsPointerOverImageProperty
+				|| property == IsPointerPressedOnImageProperty)
+            {
+				this.updateImageCursorAction.Schedule();
+            }
         }
 
 

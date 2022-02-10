@@ -446,36 +446,7 @@
 							<LayoutTransformControl>
 								<Border>
 									<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}" UseLayoutRounding="True">
-										<Image x:Name="image" Cursor="None" DoubleTapped="OnImageDoubleTapped" HorizontalAlignment="Center" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center">
-											<ia:Interaction.Behaviors>
-												<iaCore:DataTriggerBehavior Value="True">
-													<iaCore:DataTriggerBehavior.Binding>
-														<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
-															<Binding Path="IsImageViewerScrollable" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-															<Binding Path="IsPointerPressedOnImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-														</MultiBinding>
-													</iaCore:DataTriggerBehavior.Binding>
-													<iaCore:ChangePropertyAction PropertyName="Cursor">
-														<iaCore:ChangePropertyAction.Value>
-															<Cursor>SizeAll</Cursor>
-														</iaCore:ChangePropertyAction.Value>
-													</iaCore:ChangePropertyAction>
-												</iaCore:DataTriggerBehavior>
-												<iaCore:DataTriggerBehavior Value="True">
-													<iaCore:DataTriggerBehavior.Binding>
-														<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
-															<Binding Path="!IsImageViewerScrollable" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-															<Binding Path="!IsPointerPressedOnImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-														</MultiBinding>
-													</iaCore:DataTriggerBehavior.Binding>
-													<iaCore:ChangePropertyAction PropertyName="Cursor">
-														<iaCore:ChangePropertyAction.Value>
-															<Cursor>None</Cursor>
-														</iaCore:ChangePropertyAction.Value>
-													</iaCore:ChangePropertyAction>
-												</iaCore:DataTriggerBehavior>
-											</ia:Interaction.Behaviors>
-										</Image>
+										<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" HorizontalAlignment="Center" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center"/>
 									</Viewbox>
 								</Border>
 								<LayoutTransformControl.LayoutTransform>
