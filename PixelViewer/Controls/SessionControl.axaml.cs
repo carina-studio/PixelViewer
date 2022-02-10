@@ -95,6 +95,7 @@ namespace Carina.PixelViewer.Controls
 		bool isFirstImageViewerBoundsChanged = true;
 		bool keepHistogramsVisible;
 		bool keepRenderingParamsPanelVisible;
+		PointerEventArgs? latestPointerEventArgsOnImage;
 		readonly double minImageViewerSizeToHidePanels;
 		readonly ToggleButton otherActionsButton;
 		readonly ContextMenu otherActionsMenu;
@@ -166,9 +167,38 @@ namespace Carina.PixelViewer.Controls
 			});
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
 			this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
-			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull();
+			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull().Also(it =>
+			{
+				it.GetObservable(BoundsProperty).Subscribe(_ =>
+				{
+					if (this.GetValue<bool>(IsPointerOverImageProperty) && this.latestPointerEventArgsOnImage != null)
+						this.SetValue<Point>(PointerPositionOnImageControlProperty, this.latestPointerEventArgsOnImage.GetCurrentPoint(it).Position);
+				});
+			});
 			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
-			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull();
+			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull().Also(it =>
+			{
+				it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(_ =>
+				{
+					this.updateIsImageViewerScrollableAction?.Schedule();
+					if (this.targetImageViewportCenter.HasValue)
+					{
+						this.SynchronizationContext.Post(() =>
+						{
+							if (this.targetImageViewportCenter.HasValue)
+							{
+								var center = this.targetImageViewportCenter.Value;
+								this.targetImageViewportCenter = null;
+								this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
+							}
+						});
+					}
+				});
+				it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(_ =>
+				{
+					this.updateIsImageViewerScrollableAction?.Schedule();
+				});
+			});
 			this.imageViewbox = this.FindControl<Viewbox>(nameof(imageViewbox)).AsNonNull().Also(it =>
 			{
 				// [Workaround] Force relayout
@@ -272,12 +302,11 @@ namespace Carina.PixelViewer.Controls
 			this.updateImageCursorAction = new ScheduledAction(() =>
 			{
 				var cursorType = StandardCursorType.Arrow;
-				if (this.GetValue<bool>(IsPointerOverImageProperty))
+				if (this.GetValue<bool>(IsPointerOverImageProperty)
+					&& this.GetValue<bool>(IsPointerPressedOnImageProperty) 
+					&& this.IsImageViewerScrollable)
 				{
-					if (this.GetValue<bool>(IsPointerPressedOnImageProperty) && this.IsImageViewerScrollable)
 						cursorType = StandardCursorType.SizeAll;
-					else
-						cursorType = StandardCursorType.None;
 				}
 				if (this.imageCursorType != cursorType)
                 {
@@ -713,6 +742,7 @@ namespace Carina.PixelViewer.Controls
 		// Called when pointer leave from image.
 		void OnImagePointerLeave(object? sender, PointerEventArgs e)
 		{
+			this.latestPointerEventArgsOnImage = null;
 			this.SetValue<bool>(IsPointerOverImageProperty, false);
 			this.SetValue<Point>(PointerPositionOnImageControlProperty, new Point(-1, -1));
 			(this.DataContext as Session)?.SelectRenderedImagePixel(-1, -1);
@@ -724,6 +754,7 @@ namespace Carina.PixelViewer.Controls
 		{
 			// report position
 			var point = e.GetCurrentPoint(this.imageContainerBorder);
+			this.latestPointerEventArgsOnImage = e;
 			this.SetValue<Point>(PointerPositionOnImageControlProperty, point.Position);
 			this.SetValue<bool>(IsPointerOverImageProperty, true);
 
@@ -789,30 +820,6 @@ namespace Carina.PixelViewer.Controls
 		void OnImageScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
 		{
 			this.imageScrollViewer.Focus();
-		}
-
-
-		// Called when property of image scroll viewer changed.
-		void OnImageScrollViewerPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
-		{
-			if (e.Property == ScrollViewer.ExtentProperty)
-			{
-				this.updateIsImageViewerScrollableAction.Schedule();
-				if (this.targetImageViewportCenter.HasValue)
-				{
-					this.SynchronizationContext.Post(() =>
-					{
-						if (this.targetImageViewportCenter.HasValue)
-						{
-							var center = this.targetImageViewportCenter.Value;
-							this.targetImageViewportCenter = null;
-							this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
-						}
-					});
-				}
-			}
-			else if (e.Property == ScrollViewer.ViewportProperty)
-				this.updateIsImageViewerScrollableAction.Schedule();
 		}
 
 

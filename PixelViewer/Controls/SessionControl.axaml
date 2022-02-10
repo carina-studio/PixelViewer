@@ -400,7 +400,7 @@
 			</Border>
 
 			<!-- Image viewer -->
-			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1">
+			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1" RowDefinitions="*,Auto">
 
 				<!-- Hint -->
 				<Viewbox Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
@@ -437,7 +437,7 @@
 				</Viewbox>
 
 				<!-- Image -->
-				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" PropertyChanged="OnImageScrollViewerPropertyChanged" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
+				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<Panel Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
 						<Border Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
 							<Border.Background>
@@ -457,27 +457,47 @@
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
 						</Border>
-						<Canvas ClipToBounds="False" Height="{Binding #imageContainerBorder.Bounds.Height}" HorizontalAlignment="Center" IsVisible="{Binding HasRenderedImage}" VerticalAlignment="Center" Width="{Binding #imageContainerBorder.Bounds.Width}">
-							<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" BorderThickness="1" Canvas.Left="{Binding $parent[UserControl].PointerPositionOnImageControl.X}" Canvas.Top="{Binding $parent[UserControl].PointerPositionOnImageControl.Y}" Height="9" IsHitTestVisible="False" Width="9">
-								<Border.IsVisible>
-									<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
-										<Binding Path="IsPointerOverImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
-											<Binding Path="!IsImageViewerScrollable" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-											<Binding Path="!IsPointerPressedOnImage" RelativeSource="{RelativeSource AncestorType={x:Type UserControl}}"/>
-										</MultiBinding>
-									</MultiBinding>
-								</Border.IsVisible>
-								<Border.RenderTransform>
-									<TranslateTransform X="-5" Y="-5"/>
-								</Border.RenderTransform>
-								<Border BorderBrush="{DynamicResource TextControlForeground}" BorderThickness="1">
-									<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" BorderThickness="1"/>
-								</Border>
-							</Border>
-						</Canvas>
+						<Canvas ClipToBounds="False" Height="{Binding #imageContainerBorder.Bounds.Height}" HorizontalAlignment="Center" IsVisible="{Binding HasRenderedImage}" VerticalAlignment="Center" Width="{Binding #imageContainerBorder.Bounds.Width}"/>
 					</Panel>
 				</ScrollViewer>
+
+				<!-- Pixel information -->
+				<Border Classes="StatusBar" Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Light}" BorderThickness="0,1,0,0" Grid.Row="1" IsVisible="{Binding HasRenderedImage}">
+					<Panel>
+						<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="{DynamicResource String/SessionControl.SelectedPixel.None}"/>
+						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !HasSelectedRenderedImagePixel}" Text="{DynamicResource String/SessionControl.SelectedPixel.None}"/>
+						<StackPanel IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
+							<!-- Position -->
+							<Image Classes="StatusBar_Icon">
+								<DrawingImage>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
+								</DrawingImage>
+							</Image>
+							<TextBlock Classes="StatusBar_TextBlock">
+								<TextBlock.Text>
+									<MultiBinding StringFormat="{}({0}, {1})">
+										<Binding Path="SelectedRenderedImagePixelPositionX"/>
+										<Binding Path="SelectedRenderedImagePixelPositionY"/>
+									</MultiBinding>
+								</TextBlock.Text>
+							</TextBlock>
+
+							<!-- Color -->
+							<Separator Classes="StatusBar_Separator"/>
+							<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedPixel.Color.Argb}"/>
+							<TextBlock Classes="StatusBar_TextBlock">
+								<TextBlock.Text>
+									<MultiBinding StringFormat="{}({0}, {1}, {2}, {3}) #{0:x2}{1:x2}{2:x2}{3:x2}">
+										<Binding Path="SelectedRenderedImagePixelColor.A"/>
+										<Binding Path="SelectedRenderedImagePixelColor.R"/>
+										<Binding Path="SelectedRenderedImagePixelColor.G"/>
+										<Binding Path="SelectedRenderedImagePixelColor.B"/>
+									</MultiBinding>
+								</TextBlock.Text>
+							</TextBlock>
+						</StackPanel>
+					</Panel>
+				</Border>
 				
 			</Grid>
 
@@ -735,44 +755,6 @@
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/Common.Bytes}"/>
 					</StackPanel>
 					<Separator Classes="StatusBar_Separator" IsVisible="{Binding HasRenderedImage}"/>
-
-					<!-- Selected pixel -->
-					<StackPanel IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
-
-						<!-- Position -->
-						<Image Classes="StatusBar_Icon">
-							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
-							</DrawingImage>
-						</Image>
-						<TextBlock Classes="StatusBar_TextBlock">
-							<TextBlock.Text>
-								<MultiBinding StringFormat="{}({0},{1})">
-									<Binding Path="SelectedRenderedImagePixelPositionX"/>
-									<Binding Path="SelectedRenderedImagePixelPositionY"/>
-								</MultiBinding>
-							</TextBlock.Text>
-						</TextBlock>
-
-						<!-- Color -->
-						<Separator Classes="StatusBar_Separator"/>
-						<Image Classes="StatusBar_Icon">
-							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Color}"/>
-							</DrawingImage>
-						</Image>
-						<TextBlock Classes="StatusBar_TextBlock">
-							<TextBlock.Text>
-								<MultiBinding StringFormat="{}#{0:X2}{1:X2}{2:X2}{3:X2}">
-									<Binding Path="SelectedRenderedImagePixelColor.A"/>
-									<Binding Path="SelectedRenderedImagePixelColor.R"/>
-									<Binding Path="SelectedRenderedImagePixelColor.G"/>
-									<Binding Path="SelectedRenderedImagePixelColor.B"/>
-								</MultiBinding>
-							</TextBlock.Text>
-						</TextBlock>
-
-					</StackPanel>
 
 				</StackPanel>
 

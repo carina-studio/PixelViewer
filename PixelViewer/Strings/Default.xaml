@@ -207,6 +207,8 @@
 	<sys:String x:Key="String/SessionControl.SaveImage">Save image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedPixel.Color.Argb">ARGB:</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedPixel.None">Move cursor on image to view pixel information.</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to open files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show file in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
