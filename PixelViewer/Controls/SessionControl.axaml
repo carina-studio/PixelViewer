@@ -492,6 +492,16 @@
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
+							<!-- Color -->
+							<StackPanel Orientation="Horizontal">
+								<Border BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}" BorderThickness="1" Height="{DynamicResource Double/StatusBar.Icon.Size}" Width="{DynamicResource Double/StatusBar.Icon.Size}">
+									<Border.Background>
+										<SolidColorBrush Color="{Binding SelectedRenderedImagePixelColor}"/>
+									</Border.Background>
+								</Border>
+								<Separator Classes="StatusBar_Separator"/>
+							</StackPanel>
+
 							<!-- ARGB Color -->
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
 								<Panel>
