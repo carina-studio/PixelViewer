@@ -8,7 +8,7 @@
 	<sys:String x:Key="String/App.Shutdown">結束</sys:String>
 	
 	<!-- ApplicationOptionsDialog -->
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">色彩空間管理</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會明顯延長影像繪製時間。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
@@ -25,6 +25,9 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">儲存影像時套用目前的旋轉方向</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">螢幕色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">顯示選取像素的 ARGB 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">顯示選取像素的 L*a*b* 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">顯示選取像素的 XYZ 色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 
 	<!-- AspectRatio -->

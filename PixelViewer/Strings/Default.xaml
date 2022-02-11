@@ -8,7 +8,7 @@
 	<sys:String x:Key="String/App.Shutdown">Exit</sys:String>
 
 	<!-- ApplicationOptionsDialog -->
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement">Color space management</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will significantly impacts the performance of image rendering.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
@@ -25,6 +25,9 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">Apply current rotation on saved images.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Color space of screen</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memory usage on status bar</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB color of selected pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* color of selected pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">Show XYZ color of selected pixel</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 
 	<!-- AspectRatio -->

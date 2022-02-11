@@ -143,6 +143,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.ScreenColorSpace));
 			else if (key == SettingKeys.ShowProcessInfo)
 				this.OnPropertyChanged(nameof(this.ShowProcessInfo));
+			else if (key == SettingKeys.ShowSelectedRenderedImagePixelArgbColor)
+				this.OnPropertyChanged(nameof(this.ShowSelectedRenderedImagePixelArgbColor));
+			else if (key == SettingKeys.ShowSelectedRenderedImagePixelLabColor)
+				this.OnPropertyChanged(nameof(this.ShowSelectedRenderedImagePixelLabColor));
+			else if (key == SettingKeys.ShowSelectedRenderedImagePixelXyzColor)
+				this.OnPropertyChanged(nameof(this.ShowSelectedRenderedImagePixelXyzColor));
 			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
 		}
@@ -185,6 +191,36 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ShowProcessInfo);
 			set => this.Settings.SetValue<bool>(SettingKeys.ShowProcessInfo, value);
+		}
+
+
+		/// <summary>
+		/// Show ARGB color of selected pixel of rendered image or not.
+		/// </summary>
+		public bool ShowSelectedRenderedImagePixelArgbColor
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelArgbColor);
+			set => this.Settings.SetValue<bool>(SettingKeys.ShowSelectedRenderedImagePixelArgbColor, value);
+		}
+
+
+		/// <summary>
+		/// Show L*a*b* color of selected pixel of rendered image or not.
+		/// </summary>
+		public bool ShowSelectedRenderedImagePixelLabColor
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelLabColor);
+			set => this.Settings.SetValue<bool>(SettingKeys.ShowSelectedRenderedImagePixelLabColor, value);
+		}
+
+
+		/// <summary>
+		/// Show XYZ color of selected pixel of rendered image or not.
+		/// </summary>
+		public bool ShowSelectedRenderedImagePixelXyzColor
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelXyzColor);
+			set => this.Settings.SetValue<bool>(SettingKeys.ShowSelectedRenderedImagePixelXyzColor, value);
 		}
 
 

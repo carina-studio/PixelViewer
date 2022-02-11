@@ -121,16 +121,30 @@
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
-				<!-- Color space management -->
+				<!-- Colors -->
 				<Border Name="colorSpaceManagementHeader" Classes="Dialog_TextBlock_Header1">
-					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement}"/>
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.Colors}"/>
 				</Border>
-				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
+
+				<!-- Show ARGB color -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ShowSelectedRenderedImagePixelArgbColor, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Show L*a*b* color -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ShowSelectedRenderedImagePixelLabColor, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Show XYZ color -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ShowSelectedRenderedImagePixelXyzColor, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Enable color space management -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>
+				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Screen color space -->

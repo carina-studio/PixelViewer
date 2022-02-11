@@ -64,6 +64,9 @@ namespace Carina.PixelViewer.Controls
 		static readonly AvaloniaProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
 		static readonly AvaloniaProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
+		static readonly AvaloniaProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
+		static readonly AvaloniaProperty<bool> ShowSelectedRenderedImagePixelLabColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
+		static readonly AvaloniaProperty<bool> ShowSelectedRenderedImagePixelXyzColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelXyzColor));
 		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
 
@@ -512,6 +515,9 @@ namespace Carina.PixelViewer.Controls
 			var settings = this.Settings;
 			settings.SettingChanged += this.OnSettingChanged;
 			this.SetValue<bool>(ShowProcessInfoProperty, settings.GetValueOrDefault(SettingKeys.ShowProcessInfo));
+			this.SetValue<bool>(ShowSelectedRenderedImagePixelArgbColorProperty, settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
+			this.SetValue<bool>(ShowSelectedRenderedImagePixelLabColorProperty, settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
+			this.SetValue<bool>(ShowSelectedRenderedImagePixelXyzColorProperty, settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelXyzColor));
 
 			// attach to window
 			this.attachedWindow = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Also(it =>
@@ -1032,6 +1038,12 @@ namespace Carina.PixelViewer.Controls
 		{
 			if (e.Key == SettingKeys.ShowProcessInfo)
 				this.SetValue<bool>(ShowProcessInfoProperty, (bool)e.Value);
+			else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelArgbColor)
+				this.SetValue<bool>(ShowSelectedRenderedImagePixelArgbColorProperty, (bool)e.Value);
+			else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelLabColor)
+				this.SetValue<bool>(ShowSelectedRenderedImagePixelLabColorProperty, (bool)e.Value);
+			else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelXyzColor)
+				this.SetValue<bool>(ShowSelectedRenderedImagePixelXyzColorProperty, (bool)e.Value);
 		}
 
 

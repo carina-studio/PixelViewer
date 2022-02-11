@@ -80,6 +80,18 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<bool> ShowProcessInfo = new SettingKey<bool>(nameof(ShowProcessInfo), false);
 		/// <summary>
+		/// Show ARGB color of selected pixel of rendered image or not.
+		/// </summary>
+		public static readonly SettingKey<bool> ShowSelectedRenderedImagePixelArgbColor = new SettingKey<bool>(nameof(ShowSelectedRenderedImagePixelArgbColor), true);
+		/// <summary>
+		/// Show L*a*b* color of selected pixel of rendered image or not.
+		/// </summary>
+		public static readonly SettingKey<bool> ShowSelectedRenderedImagePixelLabColor = new SettingKey<bool>(nameof(ShowSelectedRenderedImagePixelLabColor), true);
+		/// <summary>
+		/// Show XYZ color of selected pixel of rendered image or not.
+		/// </summary>
+		public static readonly SettingKey<bool> ShowSelectedRenderedImagePixelXyzColor = new SettingKey<bool>(nameof(ShowSelectedRenderedImagePixelXyzColor), true);
+		/// <summary>
 		/// Change to default image renderer after opening file.
 		/// </summary>
 		public static readonly SettingKey<bool> UseDefaultImageRendererAfterOpeningSourceFile = new SettingKey<bool>(nameof(UseDefaultImageRendererAfterOpeningSourceFile), false);

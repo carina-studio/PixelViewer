@@ -493,7 +493,7 @@
 							</StackPanel>
 
 							<!-- ARGB Color -->
-							<StackPanel Orientation="Horizontal">
+							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
 								<Panel>
 									<TextBlock Text="ARGB(000, 000, 000, 000)" Opacity="0"/>
 									<TextBlock>
@@ -511,7 +511,7 @@
 							</StackPanel>
 
 							<!-- CIELAB Color -->
-							<StackPanel Orientation="Horizontal">
+							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
 								<Panel>
 									<TextBlock Text="L*a*b*(000.000, 000.000, 000.000)" Opacity="0"/>
 									<TextBlock>
@@ -528,7 +528,7 @@
 							</StackPanel>
 
 							<!-- XYZ Color -->
-							<Panel>
+							<Panel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelXyzColor}">
 								<TextBlock Text="XYZ(0.000, 0.000, 0.000)" Opacity="0"/>
 								<TextBlock>
 									<TextBlock.Text>

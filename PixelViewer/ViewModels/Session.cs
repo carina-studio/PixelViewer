@@ -3785,7 +3785,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Get Lab color of selected pixel on rendered image.
+		/// Get L*a*b* color of selected pixel on rendered image.
 		/// </summary>
 		public Tuple<double, double, double> SelectedRenderedImagePixelLabColor { get => this.GetValue(SelectedRenderedImagePixelLabColorProperty); }
 
