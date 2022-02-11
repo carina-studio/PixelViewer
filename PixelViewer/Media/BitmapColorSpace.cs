@@ -135,7 +135,9 @@ namespace Carina.PixelViewer.Media
         readonly bool isGamma26;
         readonly IColorConverter<RGBColor, RGBColor> toDciP3Converter;
         readonly IColorConverter<RGBColor, RGBColor> toDisplayP3Converter;
+        readonly IColorConverter<RGBColor, LabColor> toLabConverter;
         readonly IColorConverter<RGBColor, RGBColor> toSrgbConverter;
+        readonly IColorConverter<RGBColor, XYZColor> toXyzConverter;
 
 
        // Constructor.
@@ -156,9 +158,17 @@ namespace Carina.PixelViewer.Media
                     .FromRGB(rgbWorkingSpace)
                     .ToRGB(DisplayP3WorkingSpace)
                     .Build();
+            this.toLabConverter = new ConverterBuilder()
+                    .FromRGB(rgbWorkingSpace)
+                    .ToLab(rgbWorkingSpace.WhitePoint)
+                    .Build();
             this.toSrgbConverter = new ConverterBuilder()
                     .FromRGB(rgbWorkingSpace)
                     .ToRGB(RGBWorkingSpaces.sRGB)
+                    .Build();
+            this.toXyzConverter = new ConverterBuilder()
+                    .FromRGB(rgbWorkingSpace)
+                    .ToXYZ(rgbWorkingSpace.WhitePoint)
                     .Build();
         }
 
@@ -220,6 +230,24 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Convert RGB color from current color space to Lab color space.
+        /// </summary>
+        /// <param name="red">Normalized R.</param>
+        /// <param name="green">Normalized G.</param>
+        /// <param name="blue">Normalized B.</param>
+        /// <param name="l">Pointer to receive converted L.</param>
+        /// <param name="a">Pointer to receive converted a.</param>
+        /// <param name="b">Pointer to receive converted b.</param>
+        public virtual void ConvertToLabColorSpace(double red, double green, double blue, double* l, double* a, double* b)
+        {
+            var color = this.toLabConverter.Convert(new RGBColor(red, green, blue));
+            *l = color.L;
+            *a = color.a;
+            *b = color.b;
+        }
+
+
+        /// <summary>
         /// Convert RGB color from current color space to sRGB color space.
         /// </summary>
         /// <param name="r">Pointer to normalized R.</param>
@@ -241,6 +269,24 @@ namespace Carina.PixelViewer.Media
                 *g = Math.Pow(Math.E, coeff * Math.Log(color.G));
                 *b = Math.Pow(Math.E, coeff * Math.Log(color.B));
             }
+        }
+
+
+        /// <summary>
+        /// Convert RGB color from current color space to XYZ color space.
+        /// </summary>
+        /// <param name="red">Normalized R.</param>
+        /// <param name="green">Normalized G.</param>
+        /// <param name="blue">Normalized B.</param>
+        /// <param name="x">Pointer to receive converted X.</param>
+        /// <param name="y">Pointer to receive converted Y.</param>
+        /// <param name="z">Pointer to receive converted Z.</param>
+        public virtual void ConvertToXyzColorSpace(double red, double green, double blue, double* x, double* y, double* z)
+        {
+            var color = this.toXyzConverter.Convert(new RGBColor(red, green, blue));
+            *x = color.X;
+            *y = color.Y;
+            *z = color.Z;
         }
 
 

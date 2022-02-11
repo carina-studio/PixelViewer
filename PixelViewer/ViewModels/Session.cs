@@ -508,6 +508,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<Color> SelectedRenderedImagePixelColorProperty = ObservableProperty.Register<Session, Color>(nameof(SelectedRenderedImagePixelColor));
 		/// <summary>
+		/// Property of <see cref="SelectedRenderedImagePixelLabColor"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Tuple<double, double, double>> SelectedRenderedImagePixelLabColorProperty = ObservableProperty.Register<Session, Tuple<double, double, double>>(nameof(SelectedRenderedImagePixelLabColor), new(0, 0, 0));
+		/// <summary>
+		/// Property of <see cref="SelectedRenderedImagePixelXyzColor"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Tuple<double, double, double>> SelectedRenderedImagePixelXyzColorProperty = ObservableProperty.Register<Session, Tuple<double, double, double>>(nameof(SelectedRenderedImagePixelXyzColor), new(0, 0, 0));
+		/// <summary>
 		/// Property of <see cref="SelectedRenderedImagePixelPositionX"/>.
 		/// </summary>
 		public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionXProperty = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionX), -1);
@@ -3777,6 +3785,18 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get Lab color of selected pixel on rendered image.
+		/// </summary>
+		public Tuple<double, double, double> SelectedRenderedImagePixelLabColor { get => this.GetValue(SelectedRenderedImagePixelLabColorProperty); }
+
+
+		/// <summary>
+		/// Get XYZ color of selected pixel on rendered image.
+		/// </summary>
+		public Tuple<double, double, double> SelectedRenderedImagePixelXyzColor { get => this.GetValue(SelectedRenderedImagePixelXyzColorProperty); }
+
+
+		/// <summary>
 		/// Get horizontal position of selected pixel on rendered image. Return -1 if no pixel selected.
 		/// </summary>
 		public int SelectedRenderedImagePixelPositionX { get => this.GetValue(SelectedRenderedImagePixelPositionXProperty); }
@@ -3805,7 +3825,9 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.HasSelectedRenderedImagePixel)
 				{
 					this.SetValue(HasSelectedRenderedImagePixelProperty, false);
-					this.SetValue(SelectedRenderedImagePixelColorProperty, default);
+					this.SetValue(SelectedRenderedImagePixelColorProperty, SelectedRenderedImagePixelColorProperty.DefaultValue);
+					this.SetValue(SelectedRenderedImagePixelLabColorProperty, SelectedRenderedImagePixelLabColorProperty.DefaultValue);
+					this.SetValue(SelectedRenderedImagePixelXyzColorProperty, SelectedRenderedImagePixelXyzColorProperty.DefaultValue);
 					this.SetValue(SelectedRenderedImagePixelPositionXProperty, -1);
 					this.SetValue(SelectedRenderedImagePixelPositionYProperty, -1);
 				}
@@ -3821,20 +3843,35 @@ namespace Carina.PixelViewer.ViewModels
 						BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]),
 						BitmapFormat.Bgra64 => Global.Run(()=>
                         {
-							var b = (ushort)0;
-							var g = (ushort)0;
-							var r = (ushort)0;
-							var a = (ushort)0;
+							var blue = (ushort)0;
+							var green = (ushort)0;
+							var red = (ushort)0;
+							var alpha = (ushort)0;
 							var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
-							unpackFunc(*(ulong*)pixelPtr, &b, &g, &r, &a);
-							return new Color((byte)(a >> 8), (byte)(r >> 8), (byte)(g >> 8), (byte)(b >> 8));
+							unpackFunc(*(ulong*)pixelPtr, &blue, &green, &red, &alpha);
+							return new Color((byte)(alpha >> 8), (byte)(red >> 8), (byte)(green >> 8), (byte)(blue >> 8));
 						}),
 						_ => default,
 					};
 				});
 
+				// convert to Lab color
+				var labL = 0.0;
+				var labA = 0.0;
+				var labB = 0.0;
+				var colorSpace = this.ColorSpace;
+				colorSpace.ConvertToLabColorSpace(color.R / 255.0, color.G / 255.5, color.B / 255.0, &labL, &labA, &labB);
+
+				// convert to XYZ color
+				var xyzX = 0.0;
+				var xyzY = 0.0;
+				var xyzZ = 0.0;
+				colorSpace.ConvertToXyzColorSpace(color.R / 255.0, color.G / 255.5, color.B / 255.0, &xyzX, &xyzY, &xyzZ);
+
 				// update state
 				this.SetValue(SelectedRenderedImagePixelColorProperty, color);
+				this.SetValue(SelectedRenderedImagePixelLabColorProperty, new Tuple<double, double, double>(labL, labA, labB));
+				this.SetValue(SelectedRenderedImagePixelXyzColorProperty, new Tuple<double, double, double>(xyzX, xyzY, xyzZ));
 				this.SetValue(SelectedRenderedImagePixelPositionXProperty, x);
 				this.SetValue(SelectedRenderedImagePixelPositionYProperty, y);
 				this.SetValue(HasSelectedRenderedImagePixelProperty, true);

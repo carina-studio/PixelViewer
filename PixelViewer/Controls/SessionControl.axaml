@@ -463,39 +463,84 @@
 
 				<!-- Pixel information -->
 				<Border Classes="StatusBar" Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Light}" BorderThickness="0,1,0,0" Grid.Row="1" IsVisible="{Binding HasRenderedImage}">
+					<Border.Styles>
+						<Style Selector="TextBlock">
+							<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+							<Setter Property="Margin" Value="{DynamicResource Thickness/StatusBar.Item.Margin}"/>
+							<Setter Property="VerticalAlignment" Value="Center"/>
+						</Style>
+					</Border.Styles>
 					<Panel>
-						<TextBlock Classes="StatusBar_TextBlock" Opacity="0" Text="{DynamicResource String/SessionControl.SelectedPixel.None}"/>
-						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !HasSelectedRenderedImagePixel}" Text="{DynamicResource String/SessionControl.SelectedPixel.None}"/>
-						<StackPanel IsVisible="{Binding HasSelectedRenderedImagePixel}" Orientation="Horizontal">
+						<TextBlock Opacity="0" Text="{DynamicResource String/SessionControl.SelectedPixel.None}"/>
+						<TextBlock IsVisible="{Binding !HasSelectedRenderedImagePixel}" Text="{DynamicResource String/SessionControl.SelectedPixel.None}" TextWrapping="Wrap"/>
+						<WrapPanel Opacity="{Binding HasSelectedRenderedImagePixel, Converter={x:Static asConverters:BooleanToValueConverters.BooleanToOpacity}}" Orientation="Horizontal">
+							
 							<!-- Position -->
-							<Image Classes="StatusBar_Icon">
-								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Coordinates}"/>
-								</DrawingImage>
-							</Image>
-							<TextBlock Classes="StatusBar_TextBlock">
-								<TextBlock.Text>
-									<MultiBinding StringFormat="{}({0}, {1})">
-										<Binding Path="SelectedRenderedImagePixelPositionX"/>
-										<Binding Path="SelectedRenderedImagePixelPositionY"/>
-									</MultiBinding>
-								</TextBlock.Text>
-							</TextBlock>
+							<StackPanel Orientation="Horizontal">
+								<Image Classes="StatusBar_Icon" Source="{DynamicResource Image/Icon.Coordinates}"/>
+								<Panel>
+									<TextBlock Text="(0000, 0000)" Opacity="0"/>
+									<TextBlock>
+										<TextBlock.Text>
+											<MultiBinding StringFormat="{}({0}, {1})">
+												<Binding Path="SelectedRenderedImagePixelPositionX"/>
+												<Binding Path="SelectedRenderedImagePixelPositionY"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</Panel>
+								<Separator Classes="StatusBar_Separator"/>
+							</StackPanel>
 
-							<!-- Color -->
-							<Separator Classes="StatusBar_Separator"/>
-							<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SelectedPixel.Color.Argb}"/>
-							<TextBlock Classes="StatusBar_TextBlock">
-								<TextBlock.Text>
-									<MultiBinding StringFormat="{}({0}, {1}, {2}, {3}) #{0:x2}{1:x2}{2:x2}{3:x2}">
-										<Binding Path="SelectedRenderedImagePixelColor.A"/>
-										<Binding Path="SelectedRenderedImagePixelColor.R"/>
-										<Binding Path="SelectedRenderedImagePixelColor.G"/>
-										<Binding Path="SelectedRenderedImagePixelColor.B"/>
-									</MultiBinding>
-								</TextBlock.Text>
-							</TextBlock>
-						</StackPanel>
+							<!-- ARGB Color -->
+							<StackPanel Orientation="Horizontal">
+								<Panel>
+									<TextBlock Text="ARGB(000, 000, 000, 000)" Opacity="0"/>
+									<TextBlock>
+										<TextBlock.Text>
+											<MultiBinding StringFormat="{}ARGB({0}, {1}, {2}, {3})">
+												<Binding Path="SelectedRenderedImagePixelColor.A"/>
+												<Binding Path="SelectedRenderedImagePixelColor.R"/>
+												<Binding Path="SelectedRenderedImagePixelColor.G"/>
+												<Binding Path="SelectedRenderedImagePixelColor.B"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</Panel>
+								<Separator Classes="StatusBar_Separator"/>
+							</StackPanel>
+
+							<!-- CIELAB Color -->
+							<StackPanel Orientation="Horizontal">
+								<Panel>
+									<TextBlock Text="L*a*b*(000.000, 000.000, 000.000)" Opacity="0"/>
+									<TextBlock>
+										<TextBlock.Text>
+											<MultiBinding StringFormat="{}L*a*b*({0:F3}, {1:F3}, {2:F3})">
+												<Binding Path="SelectedRenderedImagePixelLabColor.Item1"/>
+												<Binding Path="SelectedRenderedImagePixelLabColor.Item2"/>
+												<Binding Path="SelectedRenderedImagePixelLabColor.Item3"/>
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</Panel>
+								<Separator Classes="StatusBar_Separator"/>
+							</StackPanel>
+
+							<!-- XYZ Color -->
+							<Panel>
+								<TextBlock Text="XYZ(0.000, 0.000, 0.000)" Opacity="0"/>
+								<TextBlock>
+									<TextBlock.Text>
+										<MultiBinding StringFormat="{}XYZ({0:F3}, {1:F3}, {2:F3})">
+											<Binding Path="SelectedRenderedImagePixelXyzColor.Item1"/>
+											<Binding Path="SelectedRenderedImagePixelXyzColor.Item2"/>
+											<Binding Path="SelectedRenderedImagePixelXyzColor.Item3"/>
+										</MultiBinding>
+									</TextBlock.Text>
+								</TextBlock>
+							</Panel>
+						</WrapPanel>
 					</Panel>
 				</Border>
 				

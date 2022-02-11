@@ -306,7 +306,7 @@ namespace Carina.PixelViewer.Controls
 					&& this.GetValue<bool>(IsPointerPressedOnImageProperty) 
 					&& this.IsImageViewerScrollable)
 				{
-						cursorType = StandardCursorType.SizeAll;
+					cursorType = StandardCursorType.SizeAll;
 				}
 				if (this.imageCursorType != cursorType)
                 {

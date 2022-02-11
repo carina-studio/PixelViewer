@@ -57,6 +57,9 @@
 	<DrawingImage x:Key="Image/Icon.Contrast.Light">
 		<GeometryDrawing Brush="{DynamicResource Brush/Icon.Light}" Geometry="{StaticResource Geometry/Icon.Contrast}"/>
 	</DrawingImage>
+	<DrawingImage x:Key="Image/Icon.Coordinates">
+		<GeometryDrawing Brush="{DynamicResource Brush/Icon}" Geometry="{StaticResource Geometry/Icon.Coordinates}"/>
+	</DrawingImage>
 	<DrawingImage x:Key="Image/Icon.FitToScreen" Drawing="{StaticResource Drawing/Icon.FitToScreen}"/>
 	<DrawingImage x:Key="Image/Icon.FitToScreen.Light" Drawing="{StaticResource Drawing/Icon.FitToScreen.Light}"/>
 	<DrawingImage x:Key="Image/Icon.Grayscale">
