@@ -32,6 +32,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "支援根據影像檔案名稱自動選取影像格式。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "支援使用拖動方式來排列分頁 (Linux 尚未支援)。",
 		"Type": "NewFeature"
 	},

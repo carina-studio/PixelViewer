@@ -9,7 +9,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Abgr8888ImageRenderer"/> instance.
 		/// </summary>
-		public Abgr8888ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_8888", new ImagePlaneDescriptor(4)))
+		public Abgr8888ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_8888", new ImagePlaneDescriptor(4), new string[]{ "ABGR", "ABGR8888", "ABGR_8888", "ABGR32" }))
 		{ }
 
 

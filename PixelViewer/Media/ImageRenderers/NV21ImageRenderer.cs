@@ -12,7 +12,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		public NV21ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "NV21", new ImagePlaneDescriptor[] { 
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(2),
-		}))
+		}, new string[]{ "NV21" }))
 		{ }
 
 

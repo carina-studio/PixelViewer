@@ -105,6 +105,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Evaluate image renderer by file name of image.
+		/// </summary>
+		public bool EvaluateImageRendererByFileName
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageRendererByFileName);
+			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageRendererByFileName, value);
+		}
+
+
+		/// <summary>
 		/// Maximum memory usage for rendering images.
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
@@ -133,6 +143,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterChangingRenderer));
 			else if (key == SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
+			else if (key == SettingKeys.EvaluateImageRendererByFileName)
+				this.OnPropertyChanged(nameof(this.EvaluateImageRendererByFileName));
 			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)

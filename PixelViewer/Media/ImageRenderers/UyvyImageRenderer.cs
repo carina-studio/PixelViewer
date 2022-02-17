@@ -9,7 +9,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="UyvyImageRenderer"/> instance.
 		/// </summary>
-		public UyvyImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "UYVY", new ImagePlaneDescriptor(4)))
+		public UyvyImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "UYVY", new ImagePlaneDescriptor(4), new string[]{ "UYVY" }))
 		{ }
 
 

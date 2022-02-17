@@ -9,7 +9,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Rgbx8888ImageRenderer"/> instance.
 		/// </summary>
-		public Rgbx8888ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGBX_8888", new ImagePlaneDescriptor(4)))
+		public Rgbx8888ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGBX_8888", new ImagePlaneDescriptor(4), new string[]{ "RGBX", "RGBX8888", "RGBX_8888", "RGBX32" }))
 		{ }
 
 

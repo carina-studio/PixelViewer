@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initiaize new <see cref="Rgb565ImageRenderer"/> instance.
 		/// </summary>
-		public Rgb565ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_565", true, new ImagePlaneDescriptor(2)))
+		public Rgb565ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_565", true, new ImagePlaneDescriptor(2), new string[]{ "RGB565", "RGB_565", "RGB16" }))
 		{ }
 
 

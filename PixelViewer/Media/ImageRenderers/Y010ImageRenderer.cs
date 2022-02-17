@@ -10,7 +10,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         public Y010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "Y010", true, new ImagePlaneDescriptor[] {
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(4),
-        }), 10)
+        }, new string[]{ "Y010" }), 10)
         { }
 
 

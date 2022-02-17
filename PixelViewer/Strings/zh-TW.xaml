@@ -18,6 +18,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">啟用色彩空間管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">優先嘗試從檔案名稱判斷影像格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像繪製記憶體使用上限 (MB)</sys:String>

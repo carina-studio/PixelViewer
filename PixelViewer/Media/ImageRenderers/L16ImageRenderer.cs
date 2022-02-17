@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initiaize new <see cref="L16ImageRenderer"/> instance.
 		/// </summary>
-		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16)))
+		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16), new string[]{ "L16", "Y16" }))
 		{ }
 
 

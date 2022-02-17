@@ -9,7 +9,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Bgr888ImageRenderer"/> instance.
 		/// </summary>
-		public Bgr888ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_888", new ImagePlaneDescriptor(3)))
+		public Bgr888ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_888", new ImagePlaneDescriptor(3), new string[]{ "BGR", "BGR888", "BGR_888", "BGR24" }))
 		{ }
 
 

@@ -2689,6 +2689,23 @@ namespace Carina.PixelViewer.ViewModels
 			catch
 			{ }
 
+			// select image renderer by file name
+			var evaluatedImageRenderer = (IImageRenderer?)null;
+			if (this.fileFormatProfile == null 
+				&& this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageRendererByFileName)
+				&& ImageFormat.TryGetByFileName(fileName, out var imageFormat)
+				&& imageFormat != null)
+			{
+				foreach (var candidateRenderer in ImageRenderers.All)
+				{
+					if (candidateRenderer.Format == imageFormat)
+					{
+						evaluatedImageRenderer = candidateRenderer;
+						break;
+					}
+				}
+			}
+
 			// update state
 			this.SetValue(DataOffsetProperty, 0L);
 			this.SetValue(FrameNumberProperty, 1);
@@ -2702,6 +2719,13 @@ namespace Carina.PixelViewer.ViewModels
 			// use profile of file format or reset to default renderer
 			if (this.fileFormatProfile != null)
 				this.Profile = this.fileFormatProfile;
+			else if (evaluatedImageRenderer != null)
+			{
+				this.SetValue(ImageRendererProperty, evaluatedImageRenderer);
+				if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
+					this.isImageDimensionsEvaluationNeeded = true;
+				this.isImagePlaneOptionsResetNeeded = true;
+			}
 			else if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
 			{
 				this.Logger.LogWarning($"Use default image renderer after opening source '{fileName}'");

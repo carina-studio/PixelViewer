@@ -11,7 +11,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(2),
             new ImagePlaneDescriptor(2),
-        }), 16)
+        }, new string[]{ "P216" }), 16)
         { }
 
 

@@ -92,7 +92,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Bgr161616ImageRenderer"/> instance.
 		/// </summary>
-		public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6)))
+		public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6), new string[]{ "BGR161616", "BGR_161616", "BGR48" }))
 		{ }
 
 
@@ -114,7 +114,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Rgb161616ImageRenderer"/> instance.
 		/// </summary>
-		public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6)))
+		public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6), new string[]{ "RGB161616", "RGB_161616", "RGB48" }))
 		{ }
 
 

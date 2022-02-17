@@ -48,6 +48,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<bool> EvaluateImageDimensionsAfterOpeningSourceFile = new SettingKey<bool>(nameof(EvaluateImageDimensionsAfterOpeningSourceFile), true);
 		/// <summary>
+		/// Evaluate image renderer by file name of image.
+		/// </summary>
+		public static readonly SettingKey<bool> EvaluateImageRendererByFileName = new SettingKey<bool>(nameof(EvaluateImageRendererByFileName), true);
+		/// <summary>
 		/// Height of main window.
 		/// </summary>
 		public static readonly SettingKey<int> MainWindowHeight = new SettingKey<int>(nameof(MainWindowHeight), 0);

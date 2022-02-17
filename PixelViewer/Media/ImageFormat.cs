@@ -1,4 +1,5 @@
-﻿using CarinaStudio;
+﻿using System.IO;
+using CarinaStudio;
 using CarinaStudio.Collections;
 using System;
 using System.Collections.Generic;
@@ -17,13 +18,42 @@ namespace Carina.PixelViewer.Media
 		public const int MaxPlaneCount = 4;
 
 
+		// Static fields.
+		static readonly SortedList<string, ImageFormat> formatsByKeyword = new(Comparer<string>.Create((x, y) =>
+		{
+			if (x == null)
+			{
+				if (y == null)
+					return 0;
+				return 1;
+			}
+			if (y == null)
+				return -1;
+			var result = x.Length - y.Length;
+			if (result != 0)
+				return result;
+			return string.Compare(x, y, true);
+		}));
+
+
 		/// <summary>
 		/// Initialize new <see cref="ImageFormat"/> instance.
 		/// </summary>
 		/// <param name="category">Category of format.</param>
 		/// <param name="name">Name.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
-		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor) : this(category, name, new ImagePlaneDescriptor[] { planeDescriptor })
+		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor) : this(category, name, new ImagePlaneDescriptor[] { planeDescriptor }, new string[0])
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="planeDescriptor">Plane descriptor.</param>
+		/// <param name="keywords">Keywords.</param>
+		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, new ImagePlaneDescriptor[] { planeDescriptor }, keywords)
 		{ }
 
 
@@ -34,7 +64,19 @@ namespace Carina.PixelViewer.Media
 		/// <param name="name">Name.</param>
 		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
-		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor })
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor }, new string[0])
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
+		/// <param name="planeDescriptor">Plane descriptor.</param>
+		/// <param name="keywords">Keywords.</param>
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor }, keywords)
 		{ }
 
 
@@ -44,7 +86,18 @@ namespace Carina.PixelViewer.Media
 		/// <param name="category">Category of format.</param>
 		/// <param name="name">Name.</param>
 		/// <param name="planeDescriptors">Plane descriptors.</param>
-		public ImageFormat(ImageFormatCategory category, string name, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, false, planeDescriptors)
+		public ImageFormat(ImageFormatCategory category, string name, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, false, planeDescriptors, new string[0])
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="planeDescriptors">Plane descriptors.</param>
+		/// <param name="keywords">Keywords.</param>
+		public ImageFormat(ImageFormatCategory category, string name, IList<ImagePlaneDescriptor> planeDescriptors, IEnumerable<string> keywords) : this(category, name, false, planeDescriptors, keywords)
 		{ }
 
 
@@ -55,10 +108,24 @@ namespace Carina.PixelViewer.Media
 		/// <param name="name">Name.</param>
 		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 		/// <param name="planeDescriptors">Plane descriptors.</param>
-		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors)
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, false, planeDescriptors, new string[0])
+		{ }
+
+
+		/// <summary>
+		/// Initialize new <see cref="ImageFormat"/> instance.
+		/// </summary>
+		/// <param name="category">Category of format.</param>
+		/// <param name="name">Name.</param>
+		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
+		/// <param name="planeDescriptors">Plane descriptors.</param>
+		/// <param name="keywords">Keywords.</param>
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors, IEnumerable<string> keywords)
 		{
 			if (planeDescriptors.IsEmpty())
 				throw new ArgumentException("Empty image plane descriptor.");
+			foreach (var keyword in keywords)
+				formatsByKeyword.Add(keyword, this);
 			this.Category = category;
 			this.Name = name;
 			this.HasMultipleByteOrderings = hasMultiByteOrderings;
@@ -99,6 +166,28 @@ namespace Carina.PixelViewer.Media
 		/// Get number of planes of this format.
 		/// </summary>
 		public int PlaneCount { get => this.PlaneDescriptors.Count; }
+
+
+		/// <summary>
+		/// Try get <see cref="ImageFormat"/> by given file name.
+		/// </summary>
+		/// <param name="fileName">File name.</param>
+		/// <param name="format">Format found by file name.</param>
+		/// <returns>True if format found.</returns>
+		public static bool TryGetByFileName(string fileName, out ImageFormat? format)
+		{
+			fileName = Path.GetFileNameWithoutExtension(fileName);
+			foreach (var (keyword, candidate) in formatsByKeyword)
+			{
+				if (fileName.Contains(keyword, StringComparison.OrdinalIgnoreCase))
+				{
+					format = candidate;
+					return true;
+				}
+			}
+			format = null;
+			return false;
+		}
 
 
 		// Implementations.

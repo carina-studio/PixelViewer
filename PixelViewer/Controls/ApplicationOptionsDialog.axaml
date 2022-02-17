@@ -83,6 +83,11 @@
 				</ComboBox>
 				<Separator Classes="Dialog_Separator"/>
 
+				<!-- Evaluate by file name -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageRendererByFileName}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EvaluateImageRendererByFileName, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
 				<!-- Reset renderer after opening file -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>

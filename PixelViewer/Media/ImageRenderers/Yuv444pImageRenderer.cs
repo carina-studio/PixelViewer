@@ -13,7 +13,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(1),
 			new ImagePlaneDescriptor(1),
-		}))
+		}, new string[]{ "YUV444p" }))
 		{ }
 
 

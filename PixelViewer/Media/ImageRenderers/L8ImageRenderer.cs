@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="L8ImageRenderer"/> instance.
 		/// </summary>
-		public L8ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L8", new ImagePlaneDescriptor(1)))
+		public L8ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L8", new ImagePlaneDescriptor(1), new string[]{ "L8", "Y8" }))
 		{ }
 
 

@@ -95,7 +95,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Abgr16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Abgr16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_16161616", true, new ImagePlaneDescriptor(8)))
+		public Abgr16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_16161616", true, new ImagePlaneDescriptor(8), new string[]{ "ABGR16161616", "ABGR_16161616", "ABGR64" }))
 		{ }
 
 
@@ -118,7 +118,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Argb16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Argb16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ARGB_16161616", true, new ImagePlaneDescriptor(8)))
+		public Argb16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ARGB_16161616", true, new ImagePlaneDescriptor(8), new string[]{ "ARGB16161616", "ARGB_16161616", "ARGB64" }))
 		{ }
 
 
@@ -141,7 +141,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Bgra16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Bgra16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "BGRA_16161616", true, new ImagePlaneDescriptor(8)))
+		public Bgra16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "BGRA_16161616", true, new ImagePlaneDescriptor(8), new string[]{ "BGRA16161616", "BGRA_16161616", "BGRA64" }))
 		{ }
 
 
@@ -164,7 +164,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Rgba16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Rgba16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "RGBA_16161616", true, new ImagePlaneDescriptor(8)))
+		public Rgba16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "RGBA_16161616", true, new ImagePlaneDescriptor(8), new string[]{ "RGBA16161616", "RGBA_16161616", "RGBA64" }))
 		{ }
 
 
