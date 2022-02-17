@@ -3835,12 +3835,22 @@ namespace Carina.PixelViewer.ViewModels
 			else
 			{
 				// get color of pixel
+				var argbA = 0.0;
+				var argbR = 0.0;
+				var argbG = 0.0;
+				var argbB = 0.0;
 				var color = renderedImageBuffer.Memory.Pin((baseAddress) =>
 				{
 					var pixelPtr = (byte*)baseAddress + renderedImageBuffer.GetPixelOffset(x, y);
 					return renderedImageBuffer.Format switch
 					{
-						BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]),
+						BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also(it =>
+						{
+							argbA = it.A / 255.0;
+							argbR = it.R / 255.0;
+							argbG = it.G / 255.0;
+							argbB = it.B / 255.0;
+						}),
 						BitmapFormat.Bgra64 => Global.Run(()=>
                         {
 							var blue = (ushort)0;
@@ -3849,6 +3859,10 @@ namespace Carina.PixelViewer.ViewModels
 							var alpha = (ushort)0;
 							var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
 							unpackFunc(*(ulong*)pixelPtr, &blue, &green, &red, &alpha);
+							argbA = alpha / 65535.0;
+							argbR = red / 65535.0;
+							argbG = green / 65535.0;
+							argbB = blue / 65535.0;
 							return new Color((byte)(alpha >> 8), (byte)(red >> 8), (byte)(green >> 8), (byte)(blue >> 8));
 						}),
 						_ => default,
@@ -3860,13 +3874,13 @@ namespace Carina.PixelViewer.ViewModels
 				var labA = 0.0;
 				var labB = 0.0;
 				var colorSpace = this.ColorSpace;
-				colorSpace.ConvertToLabColorSpace(color.R / 255.0, color.G / 255.5, color.B / 255.0, &labL, &labA, &labB);
+				colorSpace.ConvertToLabColorSpace(argbR, argbG, argbB, &labL, &labA, &labB);
 
 				// convert to XYZ color
 				var xyzX = 0.0;
 				var xyzY = 0.0;
 				var xyzZ = 0.0;
-				colorSpace.ConvertToXyzColorSpace(color.R / 255.0, color.G / 255.5, color.B / 255.0, &xyzX, &xyzY, &xyzZ);
+				colorSpace.ConvertToXyzColorSpace(argbR, argbG, argbB, &xyzX, &xyzY, &xyzZ);
 
 				// update state
 				this.SetValue(SelectedRenderedImagePixelColorProperty, color);
