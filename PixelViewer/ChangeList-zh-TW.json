@@ -72,6 +72,10 @@
 		"Type": "BehaviorChange"
 	},
 	{
+		"Description": "在 macOS 上預設啟用色彩空間管理。",
+		"Type": "BehaviorChange"
+	},
+	{
 		"Description": "使用單一處理程序來管理所有使窗。",
 		"Type": "BehaviorChange"
 	},

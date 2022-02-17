@@ -72,6 +72,10 @@
 		"Type": "BehaviorChange"
 	},
 	{
+		"Description": "Enable Color Space Management by default on macOS.",
+		"Type": "BehaviorChange"
+	},
+	{
 		"Description": "Use single process to manage all windows.",
 		"Type": "BehaviorChange"
 	},
