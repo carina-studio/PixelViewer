@@ -104,6 +104,8 @@
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">亮度及對比</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">對比</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight">亮部</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">暗部</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">位元組順序</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment">色彩平衡：在亮度不變的原則下，調整紅色/綠色/藍色的相對比例。</sys:String>

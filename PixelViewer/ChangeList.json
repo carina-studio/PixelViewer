@@ -28,6 +28,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Add highlight/shadow adjustment on image.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Support arranging tabs by dragging (not supported yet on Linux).",
 		"Type": "NewFeature"
 	},

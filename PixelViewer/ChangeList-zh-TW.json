@@ -28,6 +28,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "新增影像的亮部/暗部調整。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "支援使用拖動方式來排列分頁 (Linux 尚未支援)。",
 		"Type": "NewFeature"
 	},

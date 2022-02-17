@@ -145,6 +145,8 @@
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness and Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">Contrast</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight">Highlight</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">Shadow</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte ordering</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color balance: Adjust ratio of R/G/B without changing the luminance.</sys:String>
