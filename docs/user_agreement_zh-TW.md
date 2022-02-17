@@ -3,8 +3,8 @@ title: PixelViewer
 ---
 
 # 使用者協議
-- 版本：1.0。
-- 更新時間：2021/12/20。
+- 版本：1.1。
+- 更新時間：2022/2/17。
 
 這是 ```PixelViewer``` 的使用者協議，您應該要在使用 ```PixelViewer``` 之前詳細閱讀本協議。
 使用者協議可能會在未來有所更新，您可以在 ```PixelViewer``` 網站中查看。
@@ -49,6 +49,15 @@ title: PixelViewer
 * ```PixelViewer``` 升級封裝。
 
 其他由 ```PixelViewer``` 執行檔以外的網路存取不受本協議之約束。
+
+## 執行外部命令
+在執行 ```PixelViewer``` 時有些必要情況需要執行外部命令：
+* 執行 ```dotnet``` 以確認在裝置上安裝的 .NET 版本。
+* 執行 ```explorer``` 以在 Windows 上開啟檔案總管。
+* 執行 ```open``` 以在 macOS 上開啟 Finder。
+* 執行 ```defaults``` 以確認在 macOS 上的系統語系與佈景設定。
+* 執行 ```nautilus``` 或 ```xdg-open``` 以在 Linux 上開啟檔案管理器。
+* 執行 ```gnome-shell``` 以在 Linux 上確認圖形化介面環境。
 
 ## 變更您的電腦
 除了檔案存取，```PixelViewer``` **不會** 變更您電腦的設定。

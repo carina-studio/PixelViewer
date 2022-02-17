@@ -3,8 +3,8 @@ title: PixelViewer
 ---
 
 # User Agreement
-- Version: 1.0.
-- Update: 2021/12/20.
+- Version: 1.1.
+- Update: 2022/2/17.
 
 This is the User Agreement of ```PixelViewer``` which you need to read before you using ```PixelViewer```. 
 The User Agreement may be updated in the future and you can check it on the website of ```PixelViewer```. 
@@ -49,6 +49,15 @@ There are 4 type of data will be downloaded when updating ```PixelViewer```:
 * Update package of ```PixelViewer```.
 
 Other network access outside from executable of ```PixelViewer``` are not dominated by this User Agreement.
+
+## External Command Execution
+There are some necessary external command execution when running ```PixelViewer```:
+* Run ```dotnet``` to check the version of .NET installed on device.
+* Run ```explorer``` to open File Explorer on Windows.
+* Run ```open``` to open Finder on mscOS.
+* Run ```defaults``` to check system language and theme mode on macOS.
+* Run ```nautilus``` or ```xdg-open``` to open File Manager on Linux.
+* Run ```gnome-shell``` to check GUI environment on Linux.
 
 ## Modification of Your Computer
 Except for file access, ```PixelViewer``` **WON'T** change the settings of your computer.
