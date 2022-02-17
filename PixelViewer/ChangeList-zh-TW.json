@@ -20,6 +20,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "新增 BGR_161616/RGB_161616 格式支援。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "支援使用拖動方式來排列分頁 (Linux 尚未支援)。",
 		"Type": "NewFeature"
 	},

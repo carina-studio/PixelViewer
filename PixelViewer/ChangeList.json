@@ -20,6 +20,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Support BGR_161616/RGB_161616 formats.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Support arranging tabs by dragging (not supported yet on Linux).",
 		"Type": "NewFeature"
 	},
