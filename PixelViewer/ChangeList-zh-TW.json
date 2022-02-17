@@ -4,6 +4,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "新增資訊列以顯示選取像素的 ARGB/L*a*b*/XYZ 色彩。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "有限度的支援 DNG 檔案之解析。",
 		"Type": "NewFeature"
 	},
@@ -60,6 +64,10 @@
 		"Type": "Improvement"
 	},
 	{
+		"Description": "更精確的計算繪製影像所使用的記憶體。",
+		"Type": "Improvement"
+	},
+	{
 		"Description": "減少自動更新時的升級封裝大小。",
 		"Type": "Improvement"
 	},
@@ -73,6 +81,10 @@
 	},
 	{
 		"Description": "在 macOS 上預設啟用色彩空間管理。",
+		"Type": "BehaviorChange"
+	},
+	{
+		"Description": "在 macOS 上改為使用 Command 按鍵而非 Ctrl。",
 		"Type": "BehaviorChange"
 	},
 	{

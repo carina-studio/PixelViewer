@@ -4,6 +4,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Add information bar to show ARGB/L*a*b*/XYZ colors of selected pixel.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Limited support of parsing DNG file.",
 		"Type": "NewFeature"
 	},
@@ -60,6 +64,10 @@
 		"Type": "Improvement"
 	},
 	{
+		"Description": "Calculate memory usage of rendered images with more accuracy.",
+		"Type": "Improvement"
+	},
+	{
 		"Description": "Reduce size of update packages for auto updating.",
 		"Type": "Improvement"
 	},
@@ -73,6 +81,10 @@
 	},
 	{
 		"Description": "Enable Color Space Management by default on macOS.",
+		"Type": "BehaviorChange"
+	},
+	{
+		"Description": "Use Command key instead of Ctrl key on macOS.",
 		"Type": "BehaviorChange"
 	},
 	{
