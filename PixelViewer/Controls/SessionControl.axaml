@@ -240,8 +240,16 @@
 						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment}">
 							<Panel>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasContrastAdjustment}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}">
+									<Image.IsVisible>
+										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+											<Binding Path="HasBrightnessAdjustment"/>
+											<Binding Path="HasContrastAdjustment"/>
+											<Binding Path="HasHighlightAdjustment"/>
+											<Binding Path="HasShadowAdjustment"/>
+										</MultiBinding>
+									</Image.IsVisible>
+								</Image>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Classes="SessionControl_FilterParamsPopup">
