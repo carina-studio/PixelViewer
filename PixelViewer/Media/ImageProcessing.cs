@@ -1,5 +1,7 @@
-﻿using Carina.PixelViewer.Runtime.InteropServices;
+﻿using System.Threading.Tasks;
+using Carina.PixelViewer.Runtime.InteropServices;
 using CarinaStudio;
+using CarinaStudio.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.CompilerServices;
@@ -435,6 +437,20 @@ namespace Carina.PixelViewer.Media
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static ulong PackBgra64LE(ushort b, ushort g, ushort r, ushort a) =>
 			((ulong)a << 48) | ((ulong)r << 32) | ((ulong)g << 16) | b;
+		
+
+		/// <summary>
+		/// Perform parallel for-loop for image processing.
+		/// </summary>
+		/// <param name="fromInclusive">Inclusive number which loop starts from.</param>
+		/// <param name="toExclusive">Exclusive number which loop ends to.</param>
+		/// <param name="body">Body of loop.</param>
+		public static void ParallelFor(int fromInclusive, int toExclusive, Action<int> body)
+		{
+			var processorRatio = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.MaxProcessorRatioOfParallImageProcessing) ?? 0.5;
+			var degree = processorRatio > 0 ? Math.Max(1, (int)(Environment.ProcessorCount * processorRatio + 0.5)) : 1;
+			Parallel.For(fromInclusive, toExclusive, new ParallelOptions(){ MaxDegreeOfParallelism = degree }, body);
+		}
 
 
 		// Convert from RGB24 to Luminance based-on ITU-R BT.709.

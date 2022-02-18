@@ -115,7 +115,7 @@ namespace Carina.PixelViewer.Media
 									{
 										var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
 										var packFunc = ImageProcessing.SelectBgra32Packing();
-										Parallel.For(0, sharedBitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+										ImageProcessing.ParallelFor(0, sharedBitmapBuffer.Height, (y) =>
 										{
 											var b = (ushort)0;
 											var g = (ushort)0;
@@ -211,7 +211,7 @@ namespace Carina.PixelViewer.Media
 									{
 										var unpackFunc = ImageProcessing.SelectBgrx32UnpackingAndNormalizing();
 										var packFunc = ImageProcessing.SelectBgrx32DenormalizingAndPacking();
-										Parallel.For(0, sharedBitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+										ImageProcessing.ParallelFor(0, sharedBitmapBuffer.Height, (y) =>
 										{
 											var b = 0.0;
 											var g = 0.0;
@@ -234,7 +234,7 @@ namespace Carina.PixelViewer.Media
 									{
 										var unpackFunc = ImageProcessing.SelectBgrx64UnpackingAndNormalizing();
 										var packFunc = ImageProcessing.SelectBgrx64DenormalizingAndPacking();
-										Parallel.For(0, sharedBitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+										ImageProcessing.ParallelFor(0, sharedBitmapBuffer.Height, (y) =>
 										{
 											var b = 0.0;
 											var g = 0.0;
@@ -325,7 +325,7 @@ namespace Carina.PixelViewer.Media
 					{
 						case 0:
 							var minRowStride = Math.Min(srcRowStride, destRowStride);
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcRowPtr = ((byte*)srcBaseAddress + (y * srcRowStride));
 								var destRowPtr = ((byte*)destBaseAddress + (y * destRowStride));
@@ -333,7 +333,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 90:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
 								var destPixelPtr = ((byte*)destBaseAddress + ((height - y - 1) * sizeof(uint)));
@@ -342,7 +342,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 180:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
 								var destPixelPtr = (uint*)((byte*)destBaseAddress + ((height - y - 1) * destRowStride) + ((width - 1) * sizeof(uint)));
@@ -351,7 +351,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 270:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
 								var destPixelPtr = ((byte*)destBaseAddress + ((width - 1) * destRowStride) + (y * sizeof(uint)));
@@ -369,7 +369,7 @@ namespace Carina.PixelViewer.Media
 					{
 						case 0:
 							var minRowStride = Math.Min(srcRowStride, destRowStride);
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcRowPtr = ((byte*)srcBaseAddress + (y * srcRowStride));
 								var destRowPtr = ((byte*)destBaseAddress + (y * destRowStride));
@@ -377,7 +377,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 90:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
 								var destPixelPtr = ((byte*)destBaseAddress + ((height - y - 1) * sizeof(ulong)));
@@ -386,7 +386,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 180:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
 								var destPixelPtr = (ulong*)((byte*)destBaseAddress + ((height - y - 1) * destRowStride) + ((width - 1) * sizeof(ulong)));
@@ -395,7 +395,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 270:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
 								var destPixelPtr = ((byte*)destBaseAddress + ((width - 1) * destRowStride) + (y * sizeof(ulong)));
@@ -429,7 +429,7 @@ namespace Carina.PixelViewer.Media
 					switch (orientation)
 					{
 						case 0:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var b = (ushort)0;
 								var g = (ushort)0;
@@ -445,7 +445,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 90:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var b = (ushort)0;
 								var g = (ushort)0;
@@ -461,7 +461,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 180:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var b = (ushort)0;
 								var g = (ushort)0;
@@ -477,7 +477,7 @@ namespace Carina.PixelViewer.Media
 							});
 							break;
 						case 270:
-							Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+							ImageProcessing.ParallelFor(0, height, (y) =>
 							{
 								var b = (ushort)0;
 								var g = (ushort)0;
@@ -651,7 +651,7 @@ namespace Carina.PixelViewer.Media
 							{
 								var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
 								var packFunc = ImageProcessing.SelectBgra32Packing();
-								Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+								ImageProcessing.ParallelFor(0, height, (y) =>
 								{
 									var r1 = (byte)0;
 									var r2 = (byte)0;
@@ -687,7 +687,7 @@ namespace Carina.PixelViewer.Media
 							{
 								var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
 								var packFunc = ImageProcessing.SelectBgra32Packing();
-								Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+								ImageProcessing.ParallelFor(0, height, (y) =>
 								{
 									var r1 = (ushort)0;
 									var r2 = (ushort)0;

@@ -91,7 +91,7 @@ namespace Carina.PixelViewer.Media
                             var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
                             var width = bitmapBuffer.Width;
                             var syncLock = new object();
-                            Parallel.For(0, bitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+                            ImageProcessing.ParallelFor(0, bitmapBuffer.Height, (y) =>
                             {
                                 fixed (int* localHistograms = new int[256 * 4])
                                 {
@@ -164,7 +164,7 @@ namespace Carina.PixelViewer.Media
                             var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                             var width = bitmapBuffer.Width;
                             var syncLock = new object();
-                            Parallel.For(0, bitmapBuffer.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+                            ImageProcessing.ParallelFor(0, bitmapBuffer.Height, (y) =>
                             {
                                 fixed (int* localHistograms = new int[256 * 4])
                                 {

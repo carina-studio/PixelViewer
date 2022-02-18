@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -119,7 +118,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var bitmapRowStride = bitmapBuffer.RowBytes;
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
-				Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+				ImageProcessing.ParallelFor(0, height, (y) =>
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];
@@ -234,7 +233,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var bitmapRowStride = bitmapBuffer.RowBytes;
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
-				Parallel.For(0, height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+				ImageProcessing.ParallelFor(0, height, (y) =>
 				{
 					var accumColors = stackalloc int[3];
 					var colorCounts = stackalloc int[3];

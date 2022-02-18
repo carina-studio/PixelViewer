@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageFilters
 {
@@ -103,7 +102,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     var aLut = this.BuildFinalLookupTable(parameters.AlphaLookupTable, bLut + 256);
 
                                     // apply
-                                    Parallel.For(0, source.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+                                    ImageProcessing.ParallelFor(0, source.Height, (y) =>
                                     {
                                         var r = (byte)0;
                                         var g = (byte)0;
@@ -140,7 +139,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     var aLut = this.BuildFinalLookupTable(parameters.AlphaLookupTable, bLut + 65536);
 
                                     // apply
-                                    Parallel.For(0, source.Height, new ParallelOptions() { MaxDegreeOfParallelism = ImageProcessing.SelectMaxDegreeOfParallelism() }, (y) =>
+                                    ImageProcessing.ParallelFor(0, source.Height, (y) =>
                                     {
                                         var r = (ushort)0;
                                         var g = (ushort)0;
