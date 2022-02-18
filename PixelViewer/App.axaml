@@ -16,6 +16,7 @@
 		<NativeMenu>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="AppOptions" Header="{DynamicResource String/SessionControl.ApplicationOptions}"/>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="CheckForUpdate" Header="{DynamicResource String/SessionControl.CheckForApplicationUpdate}"/>
+			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="EditConfiguration" Header="Edit Configurations…"/>
 			<NativeMenuItemSeparator/>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="AppInfo" Header="{DynamicResource String/SessionControl.ApplicationInfo}"/>
 			<NativeMenuItemSeparator/>

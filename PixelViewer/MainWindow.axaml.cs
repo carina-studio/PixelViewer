@@ -8,6 +8,7 @@ using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
+using CarinaStudio.Configuration;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using Microsoft.Extensions.Logging;
@@ -16,6 +17,7 @@ using Microsoft.WindowsAPICodePack.Taskbar;
 #endif
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -730,6 +732,22 @@ namespace Carina.PixelViewer
 					this.Application.RestartMainWindows();
 					break;
 			}
+		}
+
+
+		/// <summary>
+		/// Show editor of application configuration.
+		/// </summary>
+		public void ShowConfigurationEditor()
+		{
+			var keys = new List<SettingKey>();
+			keys.AddRange(SettingKey.GetDefinedKeys<CarinaStudio.AppSuite.ConfigurationKeys>());
+			keys.AddRange(SettingKey.GetDefinedKeys<ConfigurationKeys>());
+			_ = new SettingsEditorDialog()
+			{
+				SettingKeys = keys,
+				Settings = this.Configuration,
+			}.ShowDialog(this);
 		}
 	}
 }

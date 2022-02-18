@@ -1,3 +1,4 @@
+using System.ComponentModel.Design;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -172,6 +173,9 @@ namespace Carina.PixelViewer
 				case "CheckForUpdate":
 					(this.LatestActiveMainWindow as MainWindow)?.CheckForAppUpdate();
 					break;
+				case "EditConfiguration":
+					(this.LatestActiveMainWindow as MainWindow)?.ShowConfigurationEditor();
+					break;
 				case "Shutdown":
 					this.Shutdown();
 					break;
@@ -246,6 +250,21 @@ namespace Carina.PixelViewer
 				this.Shutdown();
 				return;
 			}
+
+			// remove debug menu items
+#if !DEBUG
+			NativeMenu.GetMenu(this)?.Let(menu =>
+			{
+				foreach (var item in menu)
+				{
+					if (item is NativeMenuItem menuItem && (menuItem.CommandParameter as string) == "EditConfiguration")
+					{
+						menu.Items.Remove(item);
+						break;
+					}
+				}
+			});
+#endif
 
 			// initialize file formats
 			Media.FileFormats.Initialize(this);

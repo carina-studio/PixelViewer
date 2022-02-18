@@ -231,6 +231,16 @@ namespace Carina.PixelViewer.Controls
 			});
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 			{
+#if DEBUG
+				foreach (var item in it.Items)
+				{
+					if (item is MenuItem menuItem && menuItem.Name == "editConfigMenuItem")
+					{
+						menuItem.IsVisible = true;
+						break;
+					}
+				}
+#endif
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 			});

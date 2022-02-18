@@ -65,9 +65,13 @@
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[Window].CheckForAppUpdate}" Header="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Update}"/>
+					<Panel>
+						<Image Classes="MenuItem_Icon" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static asConverters:ValueToBooleanConverters.NullToTrue}}" Source="{DynamicResource Image/Icon.Update}"/>
+						<Image Classes="MenuItem_Icon" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}" Source="{DynamicResource Image/Icon.Update.Colored}"/>
+					</Panel>
 				</MenuItem.Icon>
 			</MenuItem>
+			<MenuItem Name="editConfigMenuItem" Command="{Binding $parent[Window].ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False"/>
 			<Separator/>
 			<MenuItem Command="{Binding $parent[Window].CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" InputGesture="Ctrl+N">
 				<MenuItem.Icon>
@@ -360,6 +364,9 @@
 						<Panel>
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Border Classes="ToolBar_NotificationIndicator" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}">
+								<Image Classes="ToolBar_NotificationIndicator" Source="{DynamicResource Image/Icon.Information.Colored}"/>
+							</Border>
 						</Panel>
 					</ToggleButton>
 
