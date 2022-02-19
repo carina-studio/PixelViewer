@@ -61,6 +61,9 @@ namespace Carina.PixelViewer.Controls
 		static readonly AvaloniaProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.Default);
 		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 		static readonly AvaloniaProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
+		static readonly AvaloniaProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
+		static readonly AvaloniaProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnColorAdjustmentUI");
+		static readonly AvaloniaProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnContrastAdjustmentUI");
 		static readonly AvaloniaProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
 		static readonly AvaloniaProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
 		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
@@ -74,6 +77,7 @@ namespace Carina.PixelViewer.Controls
 		Avalonia.Controls.Window? attachedWindow;
 		readonly ToggleButton brightnessAndContrastAdjustmentButton;
 		readonly Popup brightnessAndContrastAdjustmentPopup;
+		readonly Border brightnessAndContrastAdjustmentPopupBorder;
 		readonly MutableObservableValue<bool> canOpenSourceFile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canResetBrightnessAndContrastAdjustment = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
@@ -81,6 +85,7 @@ namespace Carina.PixelViewer.Controls
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
 		readonly ToggleButton colorAdjustmentButton;
 		readonly Popup colorAdjustmentPopup;
+		readonly Border colorAdjustmentPopupBorder;
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
@@ -110,6 +115,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ScheduledAction updateEffectiveRenderedImageAction;
 		readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
 		readonly ScheduledAction updateImageCursorAction;
+		readonly ScheduledAction updateImageFilterParamsPopupOpacityAction;
 		readonly ScheduledAction updateIsImageViewerScrollableAction;
 		readonly ScheduledAction updateStatusBarStateAction;
 		bool useSmallRenderedImage;
@@ -142,6 +148,16 @@ namespace Carina.PixelViewer.Controls
 			this.canOpenSourceFile.Update(false);
 
 			// setup controls
+			this.FindControl<Slider>("blueColorAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+			});
+			this.FindControl<Slider>("brightnessAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
+			});
 			this.brightnessAndContrastAdjustmentButton = this.FindControl<ToggleButton>(nameof(brightnessAndContrastAdjustmentButton)).AsNonNull();
 			this.brightnessAndContrastAdjustmentPopup = this.FindControl<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).AsNonNull().Also(it =>
 			{
@@ -149,12 +165,19 @@ namespace Carina.PixelViewer.Controls
 				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = false);
 				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = true);
 			});
+			this.brightnessAndContrastAdjustmentPopupBorder = this.FindControl<Border>(nameof(brightnessAndContrastAdjustmentPopupBorder)).AsNonNull();
 			this.colorAdjustmentButton = this.FindControl<ToggleButton>(nameof(colorAdjustmentButton)).AsNonNull();
 			this.colorAdjustmentPopup = this.FindControl<Popup>(nameof(colorAdjustmentPopup)).AsNonNull().Also(it =>
 			{
 				it.PlacementTarget = this.colorAdjustmentButton;
 				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = false);
 				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = true);
+			});
+			this.colorAdjustmentPopupBorder = this.FindControl<Border>(nameof(colorAdjustmentPopupBorder)).AsNonNull();
+			this.FindControl<Slider>("contrastAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnContrastAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnContrastAdjustmentUI, RoutingStrategies.Tunnel);
 			});
 			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
 			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
@@ -167,6 +190,16 @@ namespace Carina.PixelViewer.Controls
 			{
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
+			});
+			this.FindControl<Slider>("greenColorAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+			});
+			this.FindControl<Slider>("highlightAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
 			});
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
 			this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
@@ -244,6 +277,11 @@ namespace Carina.PixelViewer.Controls
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 			});
+			this.FindControl<Slider>("redColorAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+			});
 			this.renderingParamsPanelColumn = this.FindControl<Grid>("workingAreaGrid").AsNonNull().ColumnDefinitions.Last().Also(column =>
 			{
 				column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>((_) =>
@@ -252,6 +290,11 @@ namespace Carina.PixelViewer.Controls
 				}));
 			});
 			this.renderingParamsPanelScrollViewer = this.FindControl<ScrollViewer>(nameof(renderingParamsPanelScrollViewer)).AsNonNull();
+			this.FindControl<Slider>("shadowAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
+			});
 #if DEBUG
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
@@ -326,6 +369,11 @@ namespace Carina.PixelViewer.Controls
 					this.imageCursorType = cursorType;
 					this.image.Cursor = new Avalonia.Input.Cursor(cursorType);
                 }
+			});
+			this.updateImageFilterParamsPopupOpacityAction = new ScheduledAction(() =>
+			{
+				this.brightnessAndContrastAdjustmentPopupBorder.Opacity = (this.GetValue<bool>(IsPointerPressedOnBrightnessAdjustmentUIProperty) || this.GetValue<bool>(IsPointerPressedOnContrastAdjustmentUIProperty)) ? 0.5 : 1;
+				this.colorAdjustmentPopupBorder.Opacity = this.GetValue<bool>(IsPointerPressedOnColorAdjustmentUIProperty) ? 0.5 : 1;
 			});
 			this.updateIsImageViewerScrollableAction = new ScheduledAction(() =>
 			{
@@ -847,6 +895,45 @@ namespace Carina.PixelViewer.Controls
 		// Called when start dragging splitter of options panel.
 		void OnOptionsPanelSplitterDragStarted(object? sender, VectorEventArgs e) =>
 			this.StartUsingSmallRenderedImage();
+		
+
+		// Called when pointer pressed on brightness adjustment UI.
+		void OnPointerPressedOnBrightnessAdjustmentUI(object? sender, PointerEventArgs e)
+		{
+			if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+				this.SetValue<bool>(IsPointerPressedOnBrightnessAdjustmentUIProperty, true);
+		}
+
+
+		// Called when pointer released on brightness adjustment UI.
+		void OnPointerReleasedOnBrightnessAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
+			this.SetValue<bool>(IsPointerPressedOnBrightnessAdjustmentUIProperty, false);
+		
+
+		// Called when pointer pressed on color adjustment UI.
+		void OnPointerPressedOnColorAdjustmentUI(object? sender, PointerEventArgs e)
+		{
+			if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+				this.SetValue<bool>(IsPointerPressedOnColorAdjustmentUIProperty, true);
+		}
+
+
+		// Called when pointer released on color adjustment UI.
+		void OnPointerReleasedOnColorAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
+			this.SetValue<bool>(IsPointerPressedOnColorAdjustmentUIProperty, false);
+		
+
+		// Called when pointer pressed on contrast adjustment UI.
+		void OnPointerPressedOnContrastAdjustmentUI(object? sender, PointerEventArgs e)
+		{
+			if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+				this.SetValue<bool>(IsPointerPressedOnContrastAdjustmentUIProperty, true);
+		}
+
+
+		// Called when pointer released on contrast adjustment UI.
+		void OnPointerReleasedOnContrastAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
+			this.SetValue<bool>(IsPointerPressedOnContrastAdjustmentUIProperty, false);
 
 
 		// Called when changing mouse wheel.
@@ -954,6 +1041,12 @@ namespace Carina.PixelViewer.Controls
             {
 				this.updateImageCursorAction.Schedule();
             }
+			else if (property == IsPointerPressedOnBrightnessAdjustmentUIProperty
+				|| property == IsPointerPressedOnColorAdjustmentUIProperty
+				|| property == IsPointerPressedOnContrastAdjustmentUIProperty)
+			{
+				this.updateImageFilterParamsPopupOpacityAction.Schedule();
+			}
         }
 
 
