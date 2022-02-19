@@ -3997,7 +3997,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (this.IsDisposed)
 				return;
-			var renderedImageBuffer = this.renderedImageFrame?.BitmapBuffer;
+			var renderedImageBuffer = (this.filteredImageFrame ?? this.renderedImageFrame)?.BitmapBuffer;
 			if (renderedImageBuffer == null 
 				|| x < 0 || x >= renderedImageBuffer.Width
 				|| y < 0 || y >= renderedImageBuffer.Height)
