@@ -266,33 +266,33 @@
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" VerticalAlignment="Center"/>
 												</StackPanel>
 												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" Ticks="-2,-1.84,-1.67,-1.5,-1.33,-1.17,-1,-0.84,-0.67,-0.5,-0.33,-0.17,0,0.17,0.33,0.5,0.67,0.84,1,1.17,1.33,1.5,1.67,1.84,2" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
-												<Separator Classes="Dialog_Separator"/>
+												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Contrast -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" TickFrequency="0.1" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
-												<Separator Classes="Dialog_Separator"/>
+												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" TickFrequency="0.05" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Highlight -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding HighlightAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding HighlightAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="0.2" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
-												<Separator Classes="Dialog_Separator"/>
+												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Shadow -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ShadowAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ShadowAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="0.2" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
+												<Slider Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
 
 											</StackPanel>
 										</DockPanel>
@@ -318,27 +318,27 @@
 													<Style Selector="Slider">
 														<Setter Property="Maximum" Value="1"/>
 														<Setter Property="Minimum" Value="-1"/>
-														<Setter Property="Ticks" Value="-1,-0.9,-0.8,-0.7,-0.6,-0.5,-0.4,-0.3,-0.2,-0.1,0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1"/>
+														<Setter Property="TickFrequency" Value="0.01"/>
 													</Style>
 												</StackPanel.Styles>
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
 												<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
-												<Separator Classes="Dialog_Separator"/>
+												<Separator Classes="Dialog_Separator_Small"/>
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
 												<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
-												<Separator Classes="Dialog_Separator"/>
+												<Separator Classes="Dialog_Separator_Small"/>
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.0;-0.0}}" VerticalAlignment="Center"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
 												<Slider Classes="SessionControl_FilterParamsSlider" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
 											</StackPanel>
