@@ -1593,20 +1593,40 @@ namespace Carina.PixelViewer.ViewModels
 				var gLut = rLut;
 				var bLut = rLut;
 				if (this.canResetBrightnessAdjustment.Value)
-					ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
+				{
+					try
+					{
+						var gamma = await ColorLut.SelectGammaByEvAsync((renderedImageFrame?.Histograms).AsNonNull(), this.BrightnessAdjustment, cancellationTokenSource.Token);
+						if (double.IsFinite(gamma))
+							ColorLut.GammaTransform(rLut, gamma);
+						else
+							this.Logger.LogError("Failed to select gamma for brightness adjustment");
+					}
+					catch (Exception ex)
+					{
+						if (!cancellationTokenSource.IsCancellationRequested)
+							this.Logger.LogError(ex, "Failed to select gamma for brightness adjustment");
+					}
+				}
 				if (this.canResetHighlightAdjustment.Value)
 				{
-					var middleColor = rLut[rLut.Count / 2];
-					var coef = Math.Pow(2, this.HighlightAdjustment);
-					for (int end = rLut.Count, i = end / 2 + 1; i < end; ++i)
-						rLut[i] = ((rLut[i] - middleColor) * coef) + middleColor;
+					var gamma = this.HighlightAdjustment.Let(it =>
+					{
+						if (it >= 0)
+							return 1 / (it + 1);
+						return 1 - it;
+					});
+					ColorLut.GammaTransform(rLut, rLut.Count / 2, rLut.Count, gamma);
 				}
 				if (this.canResetShadowAdjustment.Value)
 				{
-					var middleColor = rLut[rLut.Count / 2];
-					var coef = Math.Pow(2, -this.ShadowAdjustment);
-					for (var i = rLut.Count / 2 - 1; i >= 0; --i)
-						rLut[i] = middleColor - ((middleColor - rLut[i]) * coef);
+					var gamma = this.ShadowAdjustment.Let(it =>
+					{
+						if (it >= 0)
+							return 1 / (it + 1);
+						return 1 - it;
+					});
+					ColorLut.GammaTransform(rLut, 0, rLut.Count / 2, gamma);
 				}
 				if (this.canResetContrastAdjustment.Value)
 				{
