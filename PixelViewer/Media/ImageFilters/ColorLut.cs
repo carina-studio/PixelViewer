@@ -76,14 +76,6 @@ namespace Carina.PixelViewer.Media.ImageFilters
                     lut[n] = baseColor + (Math.Pow(input, gamma) * count);
                 }
             }
-            /*
-            for (var n = start + 1; n < end; ++n)
-            {
-                var input = (lut[n] - baseColor) / count;
-                if (Math.Abs(input) > 0.00001)
-                    lut[n] = baseColor + (Math.Pow(input, gamma) * count);
-            }
-            */
         }
 
 

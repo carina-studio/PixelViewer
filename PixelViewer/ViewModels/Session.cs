@@ -1594,18 +1594,23 @@ namespace Carina.PixelViewer.ViewModels
 				var bLut = rLut;
 				if (this.canResetBrightnessAdjustment.Value)
 				{
-					try
+					if (this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.UseLinearTransformationForBrightnessAdjustment))
+						ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
+					else
 					{
-						var gamma = await ColorLut.SelectGammaByEvAsync((renderedImageFrame?.Histograms).AsNonNull(), this.BrightnessAdjustment, cancellationTokenSource.Token);
-						if (double.IsFinite(gamma))
-							ColorLut.GammaTransform(rLut, gamma);
-						else
-							this.Logger.LogError("Failed to select gamma for brightness adjustment");
-					}
-					catch (Exception ex)
-					{
-						if (!cancellationTokenSource.IsCancellationRequested)
-							this.Logger.LogError(ex, "Failed to select gamma for brightness adjustment");
+						try
+						{
+							var gamma = await ColorLut.SelectGammaByEvAsync((renderedImageFrame?.Histograms).AsNonNull(), this.BrightnessAdjustment, cancellationTokenSource.Token);
+							if (double.IsFinite(gamma))
+								ColorLut.GammaTransform(rLut, gamma);
+							else
+								this.Logger.LogError("Failed to select gamma for brightness adjustment");
+						}
+						catch (Exception ex)
+						{
+							if (!cancellationTokenSource.IsCancellationRequested)
+								this.Logger.LogError(ex, "Failed to select gamma for brightness adjustment");
+						}
 					}
 				}
 				if (this.canResetHighlightAdjustment.Value)
@@ -1616,7 +1621,7 @@ namespace Carina.PixelViewer.ViewModels
 							return 1 / (it + 1);
 						return 1 - it;
 					});
-					ColorLut.GammaTransform(rLut, rLut.Count / 2, rLut.Count, gamma);
+					ColorLut.GammaTransform(rLut, rLut.Count * 2 / 3, rLut.Count, gamma);
 				}
 				if (this.canResetShadowAdjustment.Value)
 				{
@@ -1626,30 +1631,34 @@ namespace Carina.PixelViewer.ViewModels
 							return 1 / (it + 1);
 						return 1 - it;
 					});
-					ColorLut.GammaTransform(rLut, 0, rLut.Count / 2, gamma);
+					ColorLut.GammaTransform(rLut, 0, rLut.Count / 3, gamma);
 				}
 				if (this.canResetContrastAdjustment.Value)
 				{
-					var gammaL = this.ContrastAdjustment.Let(it =>
+					if (this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.UseLinearTransformationForContrastAdjustment))
 					{
-						if (it < 0)
-							return 1 / (1 - it);
-						return 1 + it;
-					});
-					var gammaR = this.ContrastAdjustment.Let(it =>
+						var middleColor = (rLut.Count - 1) / 2.0;
+						var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+						ColorLut.Multiply(rLut, factor);
+						ColorLut.Translate(rLut, (1 - factor) * middleColor);
+					}
+					else
 					{
-						if (it >= 0)
-							return 1 / (it + 1);
-						return 1 - it;
-					});
-					ColorLut.GammaTransform(rLut, 0, rLut.Count / 2, gammaL);
-					ColorLut.GammaTransform(rLut, rLut.Count / 2, rLut.Count, gammaR);
-					/*
-					var middleColor = (rLut.Count - 1) / 2.0;
-					var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-					ColorLut.Multiply(rLut, factor);
-					ColorLut.Translate(rLut, (1 - factor) * middleColor);
-					*/
+						var gammaL = this.ContrastAdjustment.Let(it =>
+						{
+							if (it < 0)
+								return 1 / (1 - it);
+							return 1 + it;
+						});
+						var gammaR = this.ContrastAdjustment.Let(it =>
+						{
+							if (it >= 0)
+								return 1 / (it + 1);
+							return 1 - it;
+						});
+						ColorLut.GammaTransform(rLut, 0, rLut.Count / 2, gammaL);
+						ColorLut.GammaTransform(rLut, rLut.Count / 2, rLut.Count, gammaR);
+					}
 				}
 				if (this.canResetColorAdjustment.Value)
 				{
