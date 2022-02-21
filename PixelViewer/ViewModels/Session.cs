@@ -1630,10 +1630,26 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				if (this.canResetContrastAdjustment.Value)
 				{
+					var gammaL = this.ContrastAdjustment.Let(it =>
+					{
+						if (it < 0)
+							return 1 / (1 - it);
+						return 1 + it;
+					});
+					var gammaR = this.ContrastAdjustment.Let(it =>
+					{
+						if (it >= 0)
+							return 1 / (it + 1);
+						return 1 - it;
+					});
+					ColorLut.GammaTransform(rLut, 0, rLut.Count / 2, gammaL);
+					ColorLut.GammaTransform(rLut, rLut.Count / 2, rLut.Count, gammaR);
+					/*
 					var middleColor = (rLut.Count - 1) / 2.0;
 					var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
 					ColorLut.Multiply(rLut, factor);
 					ColorLut.Translate(rLut, (1 - factor) * middleColor);
+					*/
 				}
 				if (this.canResetColorAdjustment.Value)
 				{

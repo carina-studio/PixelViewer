@@ -274,7 +274,7 @@
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" TickFrequency="0.05" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+												<Slider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Highlight -->
