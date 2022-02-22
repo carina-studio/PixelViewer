@@ -28,6 +28,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Allow specifying transformation function of brightness/contrast adjustment.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Add highlight/shadow adjustment on image.",
 		"Type": "NewFeature"
 	},

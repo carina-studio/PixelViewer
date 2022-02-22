@@ -28,6 +28,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "允許指定亮度/對比調整所使用的轉換函數。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "新增影像的亮部/暗部調整。",
 		"Type": "NewFeature"
 	},
