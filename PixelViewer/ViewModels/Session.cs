@@ -1593,6 +1593,16 @@ namespace Carina.PixelViewer.ViewModels
 				var gLut = rLut;
 				var bLut = rLut;
 				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
+				if (this.canResetHighlightAdjustment.Value)
+				{
+					var intensity = this.HighlightAdjustment * 30;
+					ColorLut.ArctanTransform(rLut, rLut.Count / 2, rLut.Count, intensity);
+				}
+				if (this.canResetShadowAdjustment.Value)
+				{
+					var intensity = this.ShadowAdjustment * 30;
+					ColorLut.ArctanTransform(rLut, 0, rLut.Count / 2, intensity);
+				}
 				if (this.canResetBrightnessAdjustment.Value)
 				{
 					try
@@ -1604,16 +1614,6 @@ namespace Carina.PixelViewer.ViewModels
 						if (!cancellationTokenSource.IsCancellationRequested)
 							this.Logger.LogError(ex, "Failed to prepare LUT for brightness adjustment");
 					}
-				}
-				if (this.canResetHighlightAdjustment.Value)
-				{
-					var intensity = this.HighlightAdjustment * 2;
-					ColorLut.ArctanTransform(rLut, rLut.Count / 2, rLut.Count, intensity);
-				}
-				if (this.canResetShadowAdjustment.Value)
-				{
-					var intensity = this.ShadowAdjustment * 2;
-					ColorLut.ArctanTransform(rLut, 0, rLut.Count / 2, intensity);
 				}
 				if (this.canResetContrastAdjustment.Value)
 				{

@@ -40,6 +40,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
             // apply
             var sensitivity = Math.Max(0.1, App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
             var startColor = lut[start];
+            var colorThreshold = (1 / count);
             if (intensity >= 0)
             {
                 intensity = Math.Pow(intensity, sensitivity);
@@ -47,6 +48,8 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 for (var i = start; i < end; ++i)
                 {
                     var color = (lut[i] - startColor) / count;
+                    if (Math.Abs(color) < colorThreshold)
+                        color = color >= 0 ? colorThreshold : -colorThreshold;
                     lut[i] = startColor + (Math.Atan(intensity * color) * coeff * count);
                 }
             }
@@ -57,6 +60,8 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 for (var i = start; i < end; ++i)
                 {
                     var color = (lut[i] - startColor) / count;
+                    if (Math.Abs(color - 1) < colorThreshold)
+                        color = color > 1 ? 1 + colorThreshold : 1 - colorThreshold;
                     lut[i] = startColor + ((Math.Atan(intensity * (color - 1)) * coeff + 1) * count);
                 }
             }
