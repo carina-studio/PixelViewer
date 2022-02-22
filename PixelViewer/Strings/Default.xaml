@@ -8,6 +8,7 @@
 	<sys:String x:Key="String/App.Shutdown">Exit</sys:String>
 
 	<!-- ApplicationOptionsDialog -->
+	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will significantly impacts the performance of image rendering.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
@@ -20,6 +21,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">Try selecting image format according to file name first</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">Image filter</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max memory usage of all rendered images (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
@@ -58,6 +60,11 @@
 	<sys:String x:Key="String/BitmapColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/BitmapColorSpace.sRGB">sRGB</sys:String>
+
+	<!-- BrightnessTransformationFunction -->
+	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangen-based transformation</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma transformation</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">Linear transformation</sys:String>
 
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">Big-Endian</sys:String>

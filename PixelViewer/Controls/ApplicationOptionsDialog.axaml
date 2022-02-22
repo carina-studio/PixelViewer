@@ -8,6 +8,7 @@
 		xmlns:asViewModels="using:CarinaStudio.AppSuite.ViewModels"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
+		xmlns:appImageFilters="using:Carina.PixelViewer.Media.ImageFilters"
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -156,6 +157,16 @@
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
 				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:ScreenColorSpace}" IsEnabled="{Binding EnableColorSpaceManagement}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}"/>
 				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/RGB_color_spaces"/>
+				<Separator Classes="Dialog_Separator_Large"/>
+
+				<!-- Image filter -->
+				<Border Classes="Dialog_TextBlock_Header1">
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ApplicationOptionsDialog.ImageFilter}"/>
+				</Border>
+
+				<!-- Brightness transformation -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.BrightnessTransformationFunction}"/>
+				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appImageFilters:BrightnessTransformationFunction}" SelectedItem="{Binding BrightnessTransformationFunction, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Other -->

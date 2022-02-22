@@ -1,5 +1,5 @@
-﻿using System.Runtime.CompilerServices;
-using CarinaStudio;
+﻿using CarinaStudio;
+using CarinaStudio.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -12,6 +12,95 @@ namespace Carina.PixelViewer.Media.ImageFilters
     /// </summary>
     static class ColorLut
     {
+        /// <summary>
+        /// Apply arctangent transformation.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="intensity">Intensity.</param>
+        public static void ArctanTransform(IList<double> lut, double intensity) =>
+            ArctanTransform(lut, 0, lut.Count, intensity);
+
+        
+        /// <summary>
+        /// Apply arctangent transformation on specific range of LUT.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="start">Inclusive start of range of LUT.</param>
+        /// <param name="end">Exclusive end of range of LUT.</param>
+        /// <param name="intensity">Intensity.</param>
+        public static void ArctanTransform(IList<double> lut, int start, int end, double intensity)
+        {
+            // check parameter
+            var count = (end - start - 1.0);
+            if (count < -0.1)
+                return;
+            if (Math.Abs(intensity) < 0.001)
+                return;
+            
+            // apply
+            var sensitivity = Math.Max(0.1, App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
+            var startColor = lut[start];
+            if (intensity >= 0)
+            {
+                intensity = Math.Pow(intensity, sensitivity);
+                var coeff = 1 / Math.Atan(intensity);
+                for (var i = start; i < end; ++i)
+                {
+                    var color = (lut[i] - startColor) / count;
+                    lut[i] = startColor + (Math.Atan(intensity * color) * coeff * count);
+                }
+            }
+            else
+            {
+                intensity = Math.Pow(-intensity, sensitivity);
+                var coeff = -1 / Math.Atan(-intensity);
+                for (var i = start; i < end; ++i)
+                {
+                    var color = (lut[i] - startColor) / count;
+                    lut[i] = startColor + ((Math.Atan(intensity * (color - 1)) * coeff + 1) * count);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Transform brightness with given transformation function.
+        /// </summary>
+        /// <param name="histograms">Histograms of original image.</param>
+        /// <param name="lut">LUT.</param>
+        /// <param name="targetEv">Target brightness in EV.</param>
+        /// <param name="function">Transformation function.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of transformation.</returns>
+        public static async Task BrightnessTransformAsync(BitmapHistograms histograms, IList<double> lut, double targetEv, BrightnessTransformationFunction function, CancellationToken cancellationToken = default)
+        {
+            if (Math.Abs(targetEv) < 0.01)
+                return;
+            switch (function)
+            {
+                case BrightnessTransformationFunction.Arctan:
+                    {
+                        var intensity = await SelectArctanIntensityForBrightnessAsync(histograms, targetEv, cancellationToken);
+                        if (double.IsFinite(intensity))
+                            ArctanTransform(lut, intensity);
+                    }
+                    break;
+                case BrightnessTransformationFunction.Gamma:
+                    {
+                        var gamma = await SelectGammaForBrightnessAsync(histograms, targetEv, cancellationToken);
+                        if (double.IsFinite(gamma))
+                            GammaTransform(lut, gamma);
+                    }
+                    break;
+                case BrightnessTransformationFunction.Linear:
+                    Multiply(lut, Math.Pow(2, targetEv));
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+
         /// <summary>
         /// Build LUT with identity transformation.
         /// </summary>
@@ -103,13 +192,81 @@ namespace Carina.PixelViewer.Media.ImageFilters
 
 
         /// <summary>
+        /// Select intensity of arctangen transformation for brightness adjustment by given EV.
+        /// </summary>
+        /// <param name="histograms">Histograms of original image.</param>
+        /// <param name="ev">EV.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Selected intensity.</returns>
+        public static Task<double> SelectArctanIntensityForBrightnessAsync(BitmapHistograms histograms, double ev, CancellationToken cancellationToken = default) => Task.Run(() =>
+        {
+            // check parameter
+            if (Math.Abs(ev) < 0.001)
+                return 0;
+            
+            // calculate original luminance
+            var colorCount = histograms.ColorCount;
+            var pixelCount = histograms.EffectivePixelCount;
+            var maxColor = (colorCount - 1.0);
+            if (maxColor <= 0.01)
+                return double.NaN;
+            var histogram = histograms.Luminance;
+            var originalLuminance = 0.0;
+            for (var i = colorCount - 1; i >= 0; --i)
+                originalLuminance += (i / maxColor) * histogram[i] / pixelCount;
+            
+            // find target intensity
+            var sensitivity = Math.Max(0.1, App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
+            var targetLuminance = originalLuminance * Math.Pow(2, ev);
+            var min = 0.0;
+            var max = 0.0;
+            if (ev >= 0)
+                max = 1000;
+            else
+                min = -1000;
+            while (Math.Abs(max - min) >= 0.01)
+            {
+                var intensity = (min + max) / 2;
+                var luminance = 0.0;
+                if (intensity >= 0)
+                {
+                    var expoIntensity = Math.Pow(intensity, sensitivity);
+                    var coeff = 1 / Math.Atan(expoIntensity);
+                    for (var i = colorCount - 1; i >= 0; --i)
+                    {
+                        var color = i / maxColor;
+                        luminance += (Math.Atan(expoIntensity * color) * coeff) * histogram[i] / pixelCount;
+                    }
+                }
+                else
+                {
+                    var expoIntensity = Math.Pow(-intensity, sensitivity);
+                    var coeff = -1 / Math.Atan(-expoIntensity);
+                    for (var i = colorCount - 1; i >= 0; --i)
+                    {
+                        var color = i / maxColor;
+                        luminance += (Math.Atan(expoIntensity * (color - 1)) * coeff + 1) * histogram[i] / pixelCount;
+                    }
+                }
+                if (Math.Abs(luminance - targetLuminance) <= 0.01)
+                    return intensity;
+                if (luminance < targetLuminance)
+                    min = intensity;
+                else
+                    max = intensity;
+            }
+            return min;
+        });
+
+
+        /// <summary>
         /// Select gamma for brightness adjustment by given EV.
         /// </summary>
         /// <param name="histograms">Histograms of original image.</param>
         /// <param name="ev">EV.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Selected Gamma.</returns>
-        public static Task<double> SelectGammaByEvAsync(BitmapHistograms histograms, double ev, CancellationToken cancellationToken = default) => Task.Run(() =>
+        public static Task<double> SelectGammaForBrightnessAsync(BitmapHistograms histograms, double ev, CancellationToken cancellationToken = default) => Task.Run(() =>
         {
             // check parameter
             if (Math.Abs(ev) < 0.001)
@@ -117,13 +274,14 @@ namespace Carina.PixelViewer.Media.ImageFilters
             
             // calculate original luminance
             var colorCount = histograms.ColorCount;
+            var pixelCount = histograms.EffectivePixelCount;
             var maxColor = (colorCount - 1.0);
             if (maxColor <= 0.01)
                 return double.NaN;
             var histogram = histograms.Luminance;
             var originalLuminance = 0.0;
             for (var i = colorCount - 1; i >= 0; --i)
-                originalLuminance += (i / maxColor) * histogram[i];
+                originalLuminance += (i / maxColor) * histogram[i] / pixelCount;
             
             // find target gamma
             var targetLuminance = originalLuminance * Math.Pow(2, ev);
@@ -144,8 +302,8 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 var gamma = (min + max) / 2;
                 var luminance = 0.0;
                 for (var i = colorCount - 1; i >= 0; --i)
-                    luminance += Math.Pow((i / maxColor), gamma) * histogram[i];
-                if (Math.Abs((luminance / originalLuminance) - targetLuminance) <= 0.01)
+                    luminance += Math.Pow((i / maxColor), gamma) * histogram[i] / pixelCount;
+                if (Math.Abs(luminance - targetLuminance) <= 0.01)
                     return gamma;
                 if (luminance < targetLuminance)
                     max = gamma;
@@ -166,5 +324,25 @@ namespace Carina.PixelViewer.Media.ImageFilters
             for (var n = lut.Count - 1; n >= 0; --n)
                 lut[n] += offset;
         }
+    }
+
+
+    /// <summary>
+    /// Function to transform brightness.
+    /// </summary>
+    enum BrightnessTransformationFunction
+    {
+        /// <summary>
+        /// Linear transformation.
+        /// </summary>
+        Linear,
+        /// <summary>
+        /// Gamma transformation.
+        /// </summary>
+        Gamma,
+        /// <summary>
+        /// Arctangen transformation.
+        /// </summary>
+        Arctan,
     }
 }

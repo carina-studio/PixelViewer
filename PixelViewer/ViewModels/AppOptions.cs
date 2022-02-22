@@ -26,6 +26,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Brightness transformation function.
+		/// </summary>
+		public Media.ImageFilters.BrightnessTransformationFunction BrightnessTransformationFunction
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction);
+			set => this.Settings.SetValue<Media.ImageFilters.BrightnessTransformationFunction>(SettingKeys.BrightnessTransformationFunction, value);
+		}
+
+
+		/// <summary>
 		/// Whether new session is should be created for drag-and-drop file or not.
 		/// </summary>
 		public bool CreateNewSessionForDragDropFile
@@ -131,6 +141,8 @@ namespace Carina.PixelViewer.ViewModels
 			var key = e.Key;
 			if (key == SettingKeys.CreateNewSessionForDragDropFile)
 				this.OnPropertyChanged(nameof(this.CreateNewSessionForDragDropFile));
+			else if (key == SettingKeys.BrightnessTransformationFunction)
+				this.OnPropertyChanged(nameof(this.BrightnessTransformationFunction));
 			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)

@@ -1592,50 +1592,32 @@ namespace Carina.PixelViewer.ViewModels
 				var rLut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
 				var gLut = rLut;
 				var bLut = rLut;
+				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
 				if (this.canResetBrightnessAdjustment.Value)
 				{
-					if (this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.UseLinearTransformationForBrightnessAdjustment))
-						ColorLut.Multiply(rLut, Math.Pow(2, this.BrightnessAdjustment));
-					else
+					try
 					{
-						try
-						{
-							var gamma = await ColorLut.SelectGammaByEvAsync((renderedImageFrame?.Histograms).AsNonNull(), this.BrightnessAdjustment, cancellationTokenSource.Token);
-							if (double.IsFinite(gamma))
-								ColorLut.GammaTransform(rLut, gamma);
-							else
-								this.Logger.LogError("Failed to select gamma for brightness adjustment");
-						}
-						catch (Exception ex)
-						{
-							if (!cancellationTokenSource.IsCancellationRequested)
-								this.Logger.LogError(ex, "Failed to select gamma for brightness adjustment");
-						}
+						await ColorLut.BrightnessTransformAsync(histograms, rLut, this.BrightnessAdjustment, this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction), cancellationTokenSource.Token);
+					}
+					catch (Exception ex)
+					{
+						if (!cancellationTokenSource.IsCancellationRequested)
+							this.Logger.LogError(ex, "Failed to adjustment brightness");
 					}
 				}
 				if (this.canResetHighlightAdjustment.Value)
 				{
-					var gamma = this.HighlightAdjustment.Let(it =>
-					{
-						if (it >= 0)
-							return 1 / (it + 1);
-						return 1 - it;
-					});
-					ColorLut.GammaTransform(rLut, rLut.Count * 2 / 3, rLut.Count, gamma);
+					var intensity = this.HighlightAdjustment * 2;
+					ColorLut.ArctanTransform(rLut, rLut.Count / 2, rLut.Count, intensity);
 				}
 				if (this.canResetShadowAdjustment.Value)
 				{
-					var gamma = this.ShadowAdjustment.Let(it =>
-					{
-						if (it >= 0)
-							return 1 / (it + 1);
-						return 1 - it;
-					});
-					ColorLut.GammaTransform(rLut, 0, rLut.Count / 3, gamma);
+					var intensity = this.ShadowAdjustment * 2;
+					ColorLut.ArctanTransform(rLut, 0, rLut.Count / 2, intensity);
 				}
 				if (this.canResetContrastAdjustment.Value)
 				{
-					if (this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.UseLinearTransformationForContrastAdjustment))
+					if (true)
 					{
 						var middleColor = (rLut.Count - 1) / 2.0;
 						var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
@@ -1644,29 +1626,19 @@ namespace Carina.PixelViewer.ViewModels
 					}
 					else
 					{
-						var gammaL = this.ContrastAdjustment.Let(it =>
-						{
-							if (it < 0)
-								return 1 / (1 - it);
-							return 1 + it;
-						});
-						var gammaR = this.ContrastAdjustment.Let(it =>
-						{
-							if (it >= 0)
-								return 1 / (it + 1);
-							return 1 - it;
-						});
-						ColorLut.GammaTransform(rLut, 0, rLut.Count / 2, gammaL);
-						ColorLut.GammaTransform(rLut, rLut.Count / 2, rLut.Count, gammaR);
+						var intensityL = this.ContrastAdjustment * -3;
+						var intensityR = this.ContrastAdjustment * 3;
+						ColorLut.ArctanTransform(rLut, 0, rLut.Count / 2, intensityL);
+						ColorLut.ArctanTransform(rLut, rLut.Count / 2, rLut.Count, intensityR);
 					}
 				}
 				if (this.canResetColorAdjustment.Value)
 				{
 					unsafe
 					{
-						var rFactor = this.RedColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-						var gFactor = this.GreenColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-						var bFactor = this.BlueColorAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
+						var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
 						var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
 						rFactor *= correction;
 						gFactor *= correction;
@@ -2620,7 +2592,14 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnSettingChanged(SettingChangedEventArgs e)
         {
             base.OnSettingChanged(e);
-			if (e.Key == SettingKeys.EnableColorSpaceManagement)
+			if (e.Key == SettingKeys.BrightnessTransformationFunction)
+			{
+				if (this.IsActivated)
+					this.filterImageAction.Reschedule();
+				else
+					this.ClearFilteredImage();
+			}
+			else if (e.Key == SettingKeys.EnableColorSpaceManagement)
 				this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
 			else if (e.Key == SettingKeys.ScreenColorSpace)
 			{

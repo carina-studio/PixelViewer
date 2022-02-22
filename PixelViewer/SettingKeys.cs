@@ -15,6 +15,10 @@ namespace Carina.PixelViewer
 		[Obsolete]
 		public static readonly SettingKey<bool> AutoSelectLanguage = new SettingKey<bool>(nameof(AutoSelectLanguage), true);
 		/// <summary>
+		/// Brightness transformation function.
+		/// </summary>
+		public static readonly SettingKey<Media.ImageFilters.BrightnessTransformationFunction> BrightnessTransformationFunction = new(nameof(BrightnessTransformationFunction), Media.ImageFilters.BrightnessTransformationFunction.Arctan);
+		/// <summary>
 		/// Whether new session is should be created for drag-and-drop file or not.
 		/// </summary>
 		public static readonly SettingKey<bool> CreateNewSessionForDragDropFile = new SettingKey<bool>(nameof(CreateNewSessionForDragDropFile), true);

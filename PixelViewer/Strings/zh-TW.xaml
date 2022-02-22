@@ -8,6 +8,7 @@
 	<sys:String x:Key="String/App.Shutdown">結束</sys:String>
 	
 	<!-- ApplicationOptionsDialog -->
+	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會明顯延長影像繪製時間。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
@@ -20,6 +21,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">優先嘗試從檔案名稱判斷影像格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">影像濾鏡</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像繪製記憶體使用上限 (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
@@ -33,6 +35,11 @@
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
+
+	<!-- BrightnessTransformationFunction -->
+	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">反正切 (Arctangen) 轉換</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma 轉換</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">線性轉換</sys:String>
 
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">大端序 (Big-Endian)</sys:String>
