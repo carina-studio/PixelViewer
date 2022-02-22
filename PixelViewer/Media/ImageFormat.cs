@@ -29,7 +29,7 @@ namespace Carina.PixelViewer.Media
 			}
 			if (y == null)
 				return -1;
-			var result = x.Length - y.Length;
+			var result = y.Length - x.Length;
 			if (result != 0)
 				return result;
 			return string.Compare(x, y, true);

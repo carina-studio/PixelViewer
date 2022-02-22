@@ -19,6 +19,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		{ }
 
 
+		/// <inheritdoc/>
+		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new ImagePlaneOptions[]{
+			new ImagePlaneOptions(16, 6, width * 6)
+		};
+
+
         /// <inheritdoc/>
         protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
@@ -31,9 +37,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// prepare packing function
-			var extractComponentFunc = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian
-				? new Func<byte, byte, ushort>((b1, b2) => (ushort)((b2 << 8) | b1))
-				: new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 << 8) | b2));
+			var extractComponentFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, planeOptions[0].EffectiveBits);
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
@@ -92,7 +96,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Bgr161616ImageRenderer"/> instance.
 		/// </summary>
-		public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6), new string[]{ "BGR161616", "BGR_161616", "BGR48" }))
+		public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6, 9, 16), new string[]{ "BGR161616", "BGR_161616", "BGR48" }))
 		{ }
 
 
@@ -114,7 +118,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Rgb161616ImageRenderer"/> instance.
 		/// </summary>
-		public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6), new string[]{ "RGB161616", "RGB_161616", "RGB48" }))
+		public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6, 9, 16), new string[]{ "RGB161616", "RGB_161616", "RGB48" }))
 		{ }
 
 
