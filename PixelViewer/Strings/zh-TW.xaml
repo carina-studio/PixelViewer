@@ -11,6 +11,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會明顯延長影像繪製時間。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">對比調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
@@ -37,7 +38,7 @@
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
 
 	<!-- BrightnessTransformationFunction -->
-	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">反正切 (Arctangen) 轉換</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">反正切 (Arctangent) 轉換</sys:String>
 	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma 轉換</sys:String>
 	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">線性轉換</sys:String>
 
@@ -51,6 +52,10 @@
 	<sys:String x:Key="String/Common.Options">選項</sys:String>
 	<sys:String x:Key="String/Common.Rename">重新命名</sys:String>
 	<sys:String x:Key="String/Common.Reset">重設</sys:String>
+
+	<!-- ContrastTransformationFunction -->
+	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">雙反正切 (Arctangent) 轉換</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Linear">線性轉換</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>

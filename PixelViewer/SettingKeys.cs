@@ -19,6 +19,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<Media.ImageFilters.BrightnessTransformationFunction> BrightnessTransformationFunction = new(nameof(BrightnessTransformationFunction), Media.ImageFilters.BrightnessTransformationFunction.Arctan);
 		/// <summary>
+		/// Contrast transformation function.
+		/// </summary>
+		public static readonly SettingKey<Media.ImageFilters.ContrastTransformationFunction> ContrastTransformationFunction = new(nameof(ContrastTransformationFunction), Media.ImageFilters.ContrastTransformationFunction.Arctan);
+		/// <summary>
 		/// Whether new session is should be created for drag-and-drop file or not.
 		/// </summary>
 		public static readonly SettingKey<bool> CreateNewSessionForDragDropFile = new SettingKey<bool>(nameof(CreateNewSessionForDragDropFile), true);

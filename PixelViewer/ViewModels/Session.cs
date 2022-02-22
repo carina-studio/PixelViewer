@@ -1602,7 +1602,7 @@ namespace Carina.PixelViewer.ViewModels
 					catch (Exception ex)
 					{
 						if (!cancellationTokenSource.IsCancellationRequested)
-							this.Logger.LogError(ex, "Failed to adjustment brightness");
+							this.Logger.LogError(ex, "Failed to prepare LUT for brightness adjustment");
 					}
 				}
 				if (this.canResetHighlightAdjustment.Value)
@@ -1617,19 +1617,14 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				if (this.canResetContrastAdjustment.Value)
 				{
-					if (true)
+					try
 					{
-						var middleColor = (rLut.Count - 1) / 2.0;
-						var factor = this.ContrastAdjustment.Let(it => it > 0.1 ? it + 1 : -1 / (it - 1));
-						ColorLut.Multiply(rLut, factor);
-						ColorLut.Translate(rLut, (1 - factor) * middleColor);
+						await ColorLut.ContrastTransformAsync(rLut, this.ContrastAdjustment, this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction), cancellationTokenSource.Token);
 					}
-					else
+					catch (Exception ex)
 					{
-						var intensityL = this.ContrastAdjustment * -3;
-						var intensityR = this.ContrastAdjustment * 3;
-						ColorLut.ArctanTransform(rLut, 0, rLut.Count / 2, intensityL);
-						ColorLut.ArctanTransform(rLut, rLut.Count / 2, rLut.Count, intensityR);
+						if (!cancellationTokenSource.IsCancellationRequested)
+							this.Logger.LogError(ex, "Failed to prepare LUT for contrast adjustment");
 					}
 				}
 				if (this.canResetColorAdjustment.Value)
@@ -2592,16 +2587,18 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnSettingChanged(SettingChangedEventArgs e)
         {
             base.OnSettingChanged(e);
-			if (e.Key == SettingKeys.BrightnessTransformationFunction)
+			var key = e.Key;
+			if (key == SettingKeys.BrightnessTransformationFunction
+				|| key == SettingKeys.ContrastTransformationFunction)
 			{
 				if (this.IsActivated)
 					this.filterImageAction.Reschedule();
 				else
 					this.ClearFilteredImage();
 			}
-			else if (e.Key == SettingKeys.EnableColorSpaceManagement)
+			else if (key == SettingKeys.EnableColorSpaceManagement)
 				this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
-			else if (e.Key == SettingKeys.ScreenColorSpace)
+			else if (key == SettingKeys.ScreenColorSpace)
 			{
 				if (this.IsColorSpaceManagementEnabled && this.IsActivated)
 					this.renderImageAction.Reschedule();

@@ -167,6 +167,11 @@
 				<!-- Brightness transformation -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.BrightnessTransformationFunction}"/>
 				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appImageFilters:BrightnessTransformationFunction}" SelectedItem="{Binding BrightnessTransformationFunction, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Contrast transformation -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ContrastTransformationFunction}"/>
+				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appImageFilters:ContrastTransformationFunction}" SelectedItem="{Binding ContrastTransformationFunction, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Other -->

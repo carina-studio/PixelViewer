@@ -118,6 +118,49 @@ namespace Carina.PixelViewer.Media.ImageFilters
 
 
         /// <summary>
+        /// Transform contrast with given transformation function.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="intensity">Intensity of contrast. Range is [-1.0, 1.0].</param>
+        /// <param name="function">Transformation function.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of transformation.</returns>
+        public static Task ContrastTransformAsync(IList<double> lut, double intensity, ContrastTransformationFunction function, CancellationToken cancellationToken = default)
+        {
+            if (Math.Abs(intensity) < 0.01)
+                return Task.CompletedTask;
+            if (!double.IsFinite(intensity))
+                throw new ArgumentException();
+            if (intensity < -1)
+                intensity = -1;
+            else if (intensity > 1)
+                intensity = 1;
+            switch (function)
+            {
+                case ContrastTransformationFunction.Arctan:
+                    {
+                        var intensityL = intensity * -30;
+						var intensityR = intensity * 30;
+						ArctanTransform(lut, 0, lut.Count / 2, intensityL);
+						ArctanTransform(lut, lut.Count / 2, lut.Count, intensityR);
+                    }
+                    break;
+                case ContrastTransformationFunction.Linear:
+                    {
+                        var middleColor = (lut.Count - 1) / 2.0;
+						var factor = intensity.Let(it => it >= 0 ? it + 1 : -1 / (it - 1));
+						Multiply(lut, factor);
+						Translate(lut, (1 - factor) * middleColor);
+                    }
+                    break;
+                default:
+                    throw new ArgumentException();
+            }
+            return Task.CompletedTask;
+        }
+
+
+        /// <summary>
         /// Apply gamma transformation.
         /// </summary>
         /// <param name="lut">LUT.</param>
@@ -340,6 +383,22 @@ namespace Carina.PixelViewer.Media.ImageFilters
         /// Gamma transformation.
         /// </summary>
         Gamma,
+        /// <summary>
+        /// Arctangen transformation.
+        /// </summary>
+        Arctan,
+    }
+
+
+    /// <summary>
+    /// Function to transform contrast.
+    /// </summary>
+    enum ContrastTransformationFunction
+    {
+        /// <summary>
+        /// Linear transformation.
+        /// </summary>
+        Linear,
         /// <summary>
         /// Arctangen transformation.
         /// </summary>

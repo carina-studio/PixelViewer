@@ -11,6 +11,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will significantly impacts the performance of image rendering.</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
@@ -62,7 +63,7 @@
 	<sys:String x:Key="String/BitmapColorSpace.sRGB">sRGB</sys:String>
 
 	<!-- BrightnessTransformationFunction -->
-	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangen-based transformation</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangent-based transformation</sys:String>
 	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma transformation</sys:String>
 	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">Linear transformation</sys:String>
 
@@ -76,6 +77,10 @@
 	<sys:String x:Key="String/Common.Options">Options</sys:String>
 	<sys:String x:Key="String/Common.Rename">Rename</sys:String>
 	<sys:String x:Key="String/Common.Reset">Reset</sys:String>
+
+	<!-- ContrastTransformationFunction -->
+	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">Dual arctangent-based transformation</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Linear">Linear transformation</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All files</sys:String>
