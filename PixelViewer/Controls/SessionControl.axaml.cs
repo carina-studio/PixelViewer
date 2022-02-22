@@ -1452,7 +1452,7 @@ namespace Carina.PixelViewer.Controls
 
 		// Show color space management settings in application options.
 		void ShowColorSpaceManagementOptions() => 
-			this.FindDescendantOfType<MainWindow>()?.ShowAppOptions(ApplicationOptionsDialogSection.ColorSpaceManagement);
+			this.FindAncestorOfType<MainWindow>()?.ShowAppOptions(ApplicationOptionsDialogSection.ColorSpaceManagement);
 
 
 		/// <summary>
