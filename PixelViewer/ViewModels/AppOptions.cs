@@ -56,6 +56,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Default byte ordering.
+		/// </summary>
+		public ByteOrdering DefaultByteOrdering
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering);
+			set => this.Settings.SetValue<ByteOrdering>(SettingKeys.DefaultByteOrdering, value);
+		}
+
+
+		/// <summary>
 		/// Default aspect ratio for image dimensions evaluation.
 		/// </summary>
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
@@ -155,6 +165,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.ContrastTransformationFunction));
 			else if (key == SettingKeys.CreateNewSessionForDragDropFile)
 				this.OnPropertyChanged(nameof(this.CreateNewSessionForDragDropFile));
+			else if (key == SettingKeys.DefaultByteOrdering)
+				this.OnPropertyChanged(nameof(this.DefaultByteOrdering));
 			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)

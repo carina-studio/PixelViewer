@@ -40,6 +40,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Support specifying default byte ordering.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Support arranging tabs by dragging (not supported yet on Linux).",
 		"Type": "NewFeature"
 	},

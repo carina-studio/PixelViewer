@@ -742,6 +742,9 @@ namespace Carina.PixelViewer.ViewModels
 			// select default image renderer
 			this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
 
+			// select default byte ordering
+			this.SetValue(ByteOrderingProperty, this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering));
+
 			// select default YUV to RGB converter
 			if (YuvToBgraConverter.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion), out var converter))
 				this.SetValue(YuvToBgraConverterProperty, converter);

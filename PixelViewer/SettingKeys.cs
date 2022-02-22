@@ -32,6 +32,10 @@ namespace Carina.PixelViewer
 		[Obsolete]
 		public static readonly SettingKey<bool> DarkMode = new SettingKey<bool>(nameof(DarkMode), true);
 		/// <summary>
+		/// Default byte ordering.
+		/// </summary>
+		public static readonly SettingKey<ByteOrdering> DefaultByteOrdering = new(nameof(ByteOrdering), ByteOrdering.LittleEndian);
+		/// <summary>
 		/// Default aspect ratio for image dimensions evaluation.
 		/// </summary>
 		public static readonly SettingKey<AspectRatio> DefaultImageDimensionsEvaluationAspectRatio = new SettingKey<AspectRatio>(nameof(DefaultImageDimensionsEvaluationAspectRatio), AspectRatio.Unknown);
