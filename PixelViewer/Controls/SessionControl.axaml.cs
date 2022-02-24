@@ -219,15 +219,9 @@ namespace Carina.PixelViewer.Controls
 					this.updateIsImageViewerScrollableAction?.Schedule();
 					if (this.targetImageViewportCenter.HasValue)
 					{
-						this.SynchronizationContext.Post(() =>
-						{
-							if (this.targetImageViewportCenter.HasValue)
-							{
-								var center = this.targetImageViewportCenter.Value;
-								this.targetImageViewportCenter = null;
-								this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
-							}
-						});
+						var center = this.targetImageViewportCenter.Value;
+						this.targetImageViewportCenter = null;
+						this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
 					}
 				});
 				it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(_ =>
