@@ -429,8 +429,7 @@ namespace Carina.PixelViewer.Controls
 				return false;
 
 			// get window
-			var window = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>();
-			if (window == null)
+			if (this.attachedWindow == null)
 				return false;
 
 			// check file count
@@ -440,7 +439,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					Icon = MessageDialogIcon.Warning,
 					Message = this.Application.GetString("SessionControl.MaxDragDropFileCountReached"),
-				}.ShowDialog(window);
+				}.ShowDialog(this.attachedWindow);
 				return false;
 			}
 
@@ -451,7 +450,7 @@ namespace Carina.PixelViewer.Controls
 				var profile = await new ImageRenderingProfileSelectionDialog()
 				{
 					Message = this.Application.GetString("SessionControl.SelectProfileToOpenFiles"),
-				}.ShowDialog<ImageRenderingProfile?>(window);
+				}.ShowDialog<ImageRenderingProfile?>(this.attachedWindow);
 				if (profile == null)
 					return false;
 
@@ -521,8 +520,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// find window
-			var window = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>();
-			if (window == null)
+			if (this.attachedWindow == null)
 				return;
 
 			// select frame number
@@ -530,7 +528,7 @@ namespace Carina.PixelViewer.Controls
 			{
 				FrameCount = session.FrameCount,
 				InitialFrameNumber = session.FrameNumber,
-			}.ShowDialog<int?>(window);
+			}.ShowDialog<int?>(this.attachedWindow);
 			if (selectFrameNumber == null)
 				return;
 
@@ -1202,15 +1200,14 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// find window
-			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
-			if (window == null)
+			if (this.attachedWindow == null)
 			{
 				Logger.LogError("No window to show open file dialog");
 				return;
 			}
 
 			// select file
-			var fileName = (await new OpenFileDialog().ShowAsync(window)).Let((it) =>
+			var fileName = (await new OpenFileDialog().ShowAsync(this.attachedWindow)).Let((it) =>
 			{
 				if (it != null && it.IsNotEmpty())
 					return it[0];
@@ -1286,8 +1283,7 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// find window
-			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
-			if (window == null)
+			if (this.attachedWindow == null)
 			{
 				Logger.LogError("No window to show dialog");
 				return;
@@ -1302,7 +1298,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					InitialText = name,
 					Message = this.Application.GetString("SessionControl.InputNameOfProfile"),
-				}.ShowDialog(window);
+				}.ShowDialog(this.attachedWindow);
 				if (string.IsNullOrWhiteSpace(name))
 					return;
 
@@ -1315,7 +1311,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					Icon = MessageDialogIcon.Warning,
 					Message = string.Format(this.Application.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
-				}.ShowDialog(window);
+				}.ShowDialog(this.attachedWindow);
 			}
 
 			// save as new profile
@@ -1342,8 +1338,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 
 			// find window
-			var window = this.FindAncestorOfType<Avalonia.Controls.Window>();
-			if (window == null)
+			if (this.attachedWindow == null)
 			{
 				Logger.LogError("No window to show dialog");
 				return;
@@ -1358,7 +1353,7 @@ namespace Carina.PixelViewer.Controls
 					Buttons = MessageDialogButtons.YesNoCancel,
 					Icon = MessageDialogIcon.Question,
 					Message = this.Application.GetString("SessionControl.ConfirmSavingFilteredImage")
-				}.ShowDialog(window);
+				}.ShowDialog(this.attachedWindow);
 				if (result == MessageDialogResult.Cancel)
 					return;
 				saveFilteredImage = (result == MessageDialogResult.Yes);
@@ -1387,7 +1382,7 @@ namespace Carina.PixelViewer.Controls
 					filter.Extensions.Add("bgra");
 				}));
 				dialog.InitialFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg";
-			}).ShowAsync(window);
+			}).ShowAsync(this.attachedWindow);
 			if (fileName == null)
 				return;
 
@@ -1400,7 +1395,7 @@ namespace Carina.PixelViewer.Controls
 			var parameters = new Session.ImageSavingParams();
 			if (fileFormat == Media.FileFormats.Jpeg)
 			{
-				var jpegOptions = await new JpegImageEncodingOptionsDialog().ShowDialog<Media.ImageEncoders.ImageEncodingOptions?>(window);
+				var jpegOptions = await new JpegImageEncodingOptionsDialog().ShowDialog<Media.ImageEncoders.ImageEncodingOptions?>(this.attachedWindow);
 				if (jpegOptions == null)
 					return;
 				parameters.Options = jpegOptions.Value;
@@ -1524,9 +1519,9 @@ namespace Carina.PixelViewer.Controls
 			// apply screen DPI
 			session.RenderedImage?.Let((renderedImage) =>
 			{
-				this.FindAncestorOfType<Avalonia.Controls.Window>()?.Let((window) =>
+				this.attachedWindow?.Let((window) =>
 				{
-					var screenDpi = window.Screens.Primary?.PixelDensity ?? 1.0;
+					var screenDpi = window.Screens.ScreenFromVisual(window).PixelDensity;
 					scale *= (Math.Min(renderedImage.Dpi.X, renderedImage.Dpi.Y) / 96.0 / screenDpi);
 				});
 			});
