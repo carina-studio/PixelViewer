@@ -726,10 +726,18 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsDisposed)
 					return;
 				var viewport = this.GetValue(ImageViewportSizeProperty);
-				if (viewport.Width <= 0 || viewport.Height <= 0)
+				var viewportWidth = viewport.Width;
+				var viewportHeight = viewport.Height;
+				if (viewportWidth <= 0 || viewportHeight <= 0)
 				{
 					this.ResetValue(ImageDisplaySizeProperty);
 					return;
+				}
+				if (((int)(this.EffectiveRenderedImageRotation + 0.5) % 180) != 0)
+				{
+					var t = viewportHeight;
+					viewportHeight = viewportWidth;
+					viewportWidth = t;
 				}
 				var image = this.GetValue(RenderedImageProperty);
 				if (image == null)
@@ -741,7 +749,7 @@ namespace Carina.PixelViewer.ViewModels
 				var imageWidth = image.Size.Width / screenPixelDensity;
 				var imageHeight = image.Size.Height / screenPixelDensity;
 				var scale = this.fitRenderedImageToViewport
-					? Math.Min(viewport.Width / imageWidth, viewport.Height / imageHeight)
+					? Math.Min(viewportWidth / imageWidth, viewportHeight / imageHeight)
 					: this.EffectiveRenderedImageScale;
 				this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
 			});
@@ -3737,6 +3745,7 @@ namespace Carina.PixelViewer.ViewModels
 				_ => 0.0,
 			};
 			this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
+			this.updateImageDisplaySizeAction.Schedule();
 		}
 
 
@@ -3759,6 +3768,7 @@ namespace Carina.PixelViewer.ViewModels
 				_ => 0.0,
 			};
 			this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
+			this.updateImageDisplaySizeAction.Schedule();
 		}
 
 

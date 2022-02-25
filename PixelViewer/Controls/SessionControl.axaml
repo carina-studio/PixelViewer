@@ -471,22 +471,17 @@
 
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
-					<Panel Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}">
+					<Panel Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
 						<Border Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
 							<Border.Background>
 								<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 							</Border.Background>
 							<LayoutTransformControl>
 								<Border>
-									<Viewbox x:Name="imageViewbox" Stretch="{Binding FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToMediaStretchConverter}}" UseLayoutRounding="True">
-										<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" HorizontalAlignment="Center" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center"/>
-									</Viewbox>
+									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
 								</Border>
 								<LayoutTransformControl.LayoutTransform>
-									<TransformGroup>
-										<ScaleTransform ScaleX="{Binding $parent[UserControl].EffectiveRenderedImageScale}" ScaleY="{Binding $parent[UserControl].EffectiveRenderedImageScale}"/>
-										<RotateTransform Angle="{Binding EffectiveRenderedImageRotation}"/>
-									</TransformGroup>
+									<RotateTransform Angle="{Binding EffectiveRenderedImageRotation}"/>
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
 						</Border>
