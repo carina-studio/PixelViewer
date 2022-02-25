@@ -98,6 +98,7 @@ namespace Carina.PixelViewer.Controls
 		Vector? imagePointerPressedContentPosition;
 		readonly ComboBox imageRendererComboBox;
 		readonly ScrollViewer imageScrollViewer;
+		readonly Thickness imageScrollViewerPadding;
 		readonly Viewbox imageViewbox;
 		readonly Control imageViewerGrid;
 		bool isFirstImageViewerBoundsChanged = true;
@@ -214,6 +215,7 @@ namespace Carina.PixelViewer.Controls
 			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull().Also(it =>
 			{
+				it.GetObservable(BoundsProperty).Subscribe(_ => this.ReportImageViewportSize());
 				it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(_ =>
 				{
 					this.updateIsImageViewerScrollableAction?.Schedule();
@@ -296,6 +298,8 @@ namespace Carina.PixelViewer.Controls
 			// load resources
 			if (this.Application.TryGetResource<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels", out var doubleRes))
 				this.minImageViewerSizeToHidePanels = doubleRes.GetValueOrDefault();
+			if (this.Application.TryGetResource<Thickness>("Thickness/SessionControl.ImageViewer.Padding", out var thicknessRes))
+				this.imageScrollViewerPadding = thicknessRes.GetValueOrDefault();
 
 			// create scheduled actions
 			this.hidePanelsByImageViewerSizeAction = new ScheduledAction(() =>
@@ -589,6 +593,9 @@ namespace Carina.PixelViewer.Controls
 			// [Workaround] Force refreshing status bar state to make background applied as expected
 			this.SetValue<StatusBarState>(StatusBarStateProperty, StatusBarState.None);
 			this.updateStatusBarStateAction.Reschedule();
+
+			// report pixel density
+			this.ReportScreenPixelDensity();
 		}
 
 
@@ -1022,6 +1029,8 @@ namespace Carina.PixelViewer.Controls
 				}
 				this.keepHistogramsVisible = false;
 				this.keepRenderingParamsPanelVisible = false;
+				this.ReportImageViewportSize();
+				this.ReportScreenPixelDensity();
 				this.UpdateEffectiveRenderedImageScale();
 				this.updateStatusBarStateAction.Schedule();
 			}
@@ -1169,6 +1178,11 @@ namespace Carina.PixelViewer.Controls
 				this.StartUsingSmallRenderedImage();
 				this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelay);
 			}
+			else if (property == CarinaStudio.AppSuite.Controls.Window.IsOpenedProperty)
+			{
+				if ((bool)((object?)e.NewValue).AsNonNull())
+					this.ReportScreenPixelDensity();
+			}
 			else if (property == Avalonia.Controls.Window.WindowStateProperty)
 			{
 				if ((WindowState)e.OldValue.AsNonNull() == WindowState.Maximized 
@@ -1243,6 +1257,30 @@ namespace Carina.PixelViewer.Controls
 		/// <see cref="ICommand"/> to open source file.
 		/// </summary>
 		public ICommand OpenSourceFileCommand { get; }
+
+
+		// Report viewport of image to Session.
+		void ReportImageViewportSize()
+		{
+			if (this.DataContext is not Session session)
+				return;
+			var bounds = this.imageScrollViewer.Bounds;
+			var padding = this.imageScrollViewerPadding;
+			var width = Math.Max(0, bounds.Width - padding.Left - padding.Right);
+			var height = Math.Max(0, bounds.Height - padding.Top - padding.Bottom);
+			session.ImageViewportSize = new Size(width, height);
+		}
+
+
+		// Report screen pixel density to Session.
+		void ReportScreenPixelDensity()
+		{
+			if (this.DataContext is not Session session)
+				return;
+			if (this.attachedWindow == null)
+				return;
+			session.ScreenPixelDensity = (this.attachedWindow.Screens.ScreenFromVisual(this.attachedWindow) ?? this.attachedWindow.Screens.Primary).PixelDensity;
+		}
 
 
 		// Reset brightness and contrast.

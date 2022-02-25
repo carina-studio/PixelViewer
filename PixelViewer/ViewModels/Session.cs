@@ -333,6 +333,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<BitmapHistograms?> HistogramsProperty = ObservableProperty.Register<Session, BitmapHistograms?>(nameof(Histograms));
 		/// <summary>
+		/// Property of <see cref="ImageDisplaySize"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Size> ImageDisplaySizeProperty = ObservableProperty.Register<Session, Size>(nameof(ImageDisplaySize));
+		/// <summary>
 		/// Property of <see cref="ImageHeight"/>.
 		/// </summary>
 		public static readonly ObservableProperty<int> ImageHeightProperty = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: it => Math.Max(1, it));
@@ -340,6 +344,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="ImagePlaneCount"/>.
 		/// </summary>
 		public static readonly ObservableProperty<int> ImagePlaneCountProperty = ObservableProperty.Register<Session, int>(nameof(ImagePlaneCount), 1);
+		/// <summary>
+		/// Property of <see cref="ImageViewportSize"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Size> ImageViewportSizeProperty = ObservableProperty.Register<Session, Size>(nameof(ImageViewportSize));
 		/// <summary>
 		/// Property of <see cref="ImageRenderer"/>.
 		/// </summary>
@@ -515,14 +523,22 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="RenderingParametersPanelSize"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, coerce: it =>
-		{
-			if (it >= MaxRenderingParametersPanelSize)
-				return MaxRenderingParametersPanelSize;
-			if (it <= MinRenderingParametersPanelSize)
-				return MinRenderingParametersPanelSize;
-			return it;
-		}, validate: it => double.IsFinite(it));
+		public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, 
+			coerce: it =>
+			{
+				if (it >= MaxRenderingParametersPanelSize)
+					return MaxRenderingParametersPanelSize;
+				if (it <= MinRenderingParametersPanelSize)
+					return MinRenderingParametersPanelSize;
+				return it;
+			}, 
+			validate: it => double.IsFinite(it));
+		/// <summary>
+		/// Property of <see cref="ScreenPixelDensity"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> ScreenPixelDensityProperty = ObservableProperty.Register<Session, double>(nameof(ScreenPixelDensity), 1, 
+			coerce: it => Math.Max(1, it),
+			validate: it => double.IsFinite(it));
 		/// <summary>
 		/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
 		/// </summary>
@@ -621,6 +637,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly IDisposable sharedRenderedImagesMemoryUsageObserverToken;
 		readonly ScheduledAction updateFilterSupportingAction;
+		readonly ScheduledAction updateImageDisplaySizeAction;
 		readonly ScheduledAction updateIsFilteringImageNeededAction;
 		readonly ScheduledAction updateIsProcessingImageAction;
 		DoubleAnimator? zoomAnimator;
@@ -703,6 +720,30 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(IsHighlightAdjustmentSupportedProperty, true);
 					this.SetValue(IsShadowAdjustmentSupportedProperty, true);
 				}
+			});
+			this.updateImageDisplaySizeAction = new ScheduledAction(() =>
+			{
+				if (this.IsDisposed)
+					return;
+				var viewport = this.GetValue(ImageViewportSizeProperty);
+				if (viewport.Width <= 0 || viewport.Height <= 0)
+				{
+					this.ResetValue(ImageDisplaySizeProperty);
+					return;
+				}
+				var image = this.GetValue(RenderedImageProperty);
+				if (image == null)
+				{
+					this.ResetValue(ImageDisplaySizeProperty);
+					return;
+				}
+				var screenPixelDensity = this.GetValue(ScreenPixelDensityProperty);
+				var imageWidth = image.Size.Width / screenPixelDensity;
+				var imageHeight = image.Size.Height / screenPixelDensity;
+				var scale = this.fitRenderedImageToViewport
+					? Math.Min(viewport.Width / imageWidth, viewport.Height / imageHeight)
+					: this.EffectiveRenderedImageScale;
+				this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
 			});
 			this.updateIsProcessingImageAction = new ScheduledAction(() =>
 			{
@@ -1782,6 +1823,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
 				this.canZoomTo.Update(!value && this.IsSourceFileOpened);
 				this.UpdateCanZoomInOut();
+				this.updateImageDisplaySizeAction.Schedule();
 			}
 		}
 
@@ -2011,6 +2053,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Get proper size for displaying rendered image.
+		/// </summary>
+		public Size ImageDisplaySize { get => this.GetValue(ImageDisplaySizeProperty); }
+
+
+		/// <summary>
 		/// Get or set the requested height of <see cref="RenderedImage"/> in pixels.
 		/// </summary>
 		public int ImageHeight
@@ -2033,6 +2081,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.GetValue(ImageRendererProperty).AsNonNull();
 			set => this.SetValue(ImageRendererProperty, value.AsNonNull());
+		}
+
+
+		/// <summary>
+		/// Get or set size of viewport of showing rendered image.
+		/// </summary>
+		public Size ImageViewportSize
+		{
+			get => this.GetValue(ImageViewportSizeProperty);
+			set => this.SetValue(ImageViewportSizeProperty, value);
 		}
 
 
@@ -2401,10 +2459,11 @@ namespace Carina.PixelViewer.ViewModels
 			else if (property == CustomTitleProperty)
 				this.UpdateTitle();
 			else if (property == DataOffsetProperty
+				|| property == FrameNumberProperty
 				|| property == FramePaddingSizeProperty
 				|| property == ImageHeightProperty)
 			{
-				this.renderImageAction.Reschedule(RenderImageDelay);
+				this.renderImageAction.Reschedule();
 			}
 			else if (property == DemosaicingProperty)
 			{
@@ -2413,8 +2472,6 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
-			else if (property == FrameNumberProperty)
-				this.renderImageAction.Reschedule();
 			else if (property == HighlightAdjustmentProperty)
 			{
 				this.SetValue(HasHighlightAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
@@ -2443,11 +2500,16 @@ namespace Carina.PixelViewer.ViewModels
 				else
 					this.Logger.LogError($"{newValue} is not part of available image renderer list");
 			}
+			else if (property == ImageViewportSizeProperty
+				|| property == ScreenPixelDensityProperty)
+			{
+				this.updateImageDisplaySizeAction.Schedule();
+			}
 			else if (property == ImageWidthProperty)
 			{
 				if (this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions))
 					this.isImagePlaneOptionsResetNeeded = true;
-				this.renderImageAction.Reschedule(RenderImageDelay);
+				this.renderImageAction.Reschedule();
 			}
 			else if (property == IsBrightnessAdjustmentSupportedProperty)
 			{
@@ -2555,6 +2617,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (newValue == null)
 					this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.SetValue(HasRenderedImageProperty, newValue != null);
+				this.updateImageDisplaySizeAction.Execute();
 			}
 			else if (property == RenderingParametersPanelSizeProperty)
 				this.PersistentState.SetValue<int>(LatestRenderingParamsPanelSize, (int)(this.RenderingParametersPanelSize + 0.5));
@@ -2901,6 +2964,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.EffectiveRenderedImageScale = value;
 					this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
+					this.updateImageDisplaySizeAction.Schedule();
 				}
 			}
 		}
@@ -3973,6 +4037,16 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		/// <summary>
+		/// Get or set pixel density of current screen.
+		/// </summary>
+		public double ScreenPixelDensity
+		{
+			get => this.GetValue(ScreenPixelDensityProperty);
+			set => this.SetValue(ScreenPixelDensityProperty, value);
+		}
+
+
 		// Select default image renderer according to settings.
 		IImageRenderer SelectDefaultImageRenderer()
 		{
@@ -4316,6 +4390,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.EffectiveRenderedImageScale = scale;
 					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
+					this.updateImageDisplaySizeAction.Execute();
 				};
 				it.Duration = ZoomAnimationDuration;
 				it.Interpolator = Interpolators.Deceleration;
@@ -4323,6 +4398,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.EffectiveRenderedImageScale = it.Value;
 					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
+					this.updateImageDisplaySizeAction.Execute();
 				};
 				it.Start();
 			});
