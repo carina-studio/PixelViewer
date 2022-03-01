@@ -715,11 +715,21 @@ namespace Carina.PixelViewer.Controls
 						}
 					case Avalonia.Input.Key.OemPlus:
 						{
+							if (session.FitImageToViewport)
+							{
+								session.RequestedImageDisplayScale = session.ImageDisplayScale;
+								session.FitImageToViewport = false;
+							}
 							session.ZoomInCommand.Execute(null);
 							break;
 						}
 					case Avalonia.Input.Key.OemMinus:
 						{
+							if (session.FitImageToViewport)
+							{
+								session.RequestedImageDisplayScale = session.ImageDisplayScale;
+								session.FitImageToViewport = false;
+							}
 							session.ZoomOutCommand.Execute(null);
 							break;
 						}
