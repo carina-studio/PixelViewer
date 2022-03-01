@@ -195,9 +195,17 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Maximum scaling ratio of rendered image.
+		/// </summary>
+		public const double MaxRenderedImageScale = 20.0;
+		/// <summary>
 		/// Maximum size of panel of rendering parameters in pixels.
 		/// </summary>
 		public const double MaxRenderingParametersPanelSize = 400;
+		/// <summary>
+		/// Minimum scaling ratio of rendered image.
+		/// </summary>
+		public const double MinRenderedImageScale = 0.1;
 		/// <summary>
 		/// Minimum size of panel of rendering parameters in pixels.
 		/// </summary>
@@ -244,6 +252,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="Demosaicing"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> DemosaicingProperty = ObservableProperty.Register<Session, bool>(nameof(Demosaicing), true);
+		/// <summary>
+		/// Property of <see cref="FitImageToViewport"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> FitImageToViewportProperty = ObservableProperty.Register<Session, bool>(nameof(FitImageToViewport), true);
 		/// <summary>
 		/// Property of <see cref="FrameCount"/>.
 		/// </summary>
@@ -332,6 +344,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="Histograms"/>.
 		/// </summary>
 		public static readonly ObservableProperty<BitmapHistograms?> HistogramsProperty = ObservableProperty.Register<Session, BitmapHistograms?>(nameof(Histograms));
+		/// <summary>
+		/// Property of <see cref="ImageDisplayRotation"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> ImageDisplayRotationProperty = ObservableProperty.Register<Session, double>(nameof(ImageDisplayRotation));
+		/// <summary>
+		/// Property of <see cref="ImageDisplayScale"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> ImageDisplayScaleProperty = ObservableProperty.Register<Session, double>(nameof(ImageDisplayScale), double.NaN);
 		/// <summary>
 		/// Property of <see cref="ImageDisplaySize"/>.
 		/// </summary>
@@ -532,13 +552,26 @@ namespace Carina.PixelViewer.ViewModels
 					return MinRenderingParametersPanelSize;
 				return it;
 			}, 
-			validate: it => double.IsFinite(it));
+			validate: double.IsFinite);
+		/// <summary>
+		/// Property of <see cref="RequestedImageDisplayScale"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> RequestedImageDisplayScaleProperty = ObservableProperty.Register<Session, double>(nameof(RequestedImageDisplayScale), 1.0,
+			coerce: it =>
+			{
+				if (it < MinRenderedImageScale)
+					return MinRenderedImageScale;
+				if (it > MaxRenderedImageScale)
+					return MaxRenderedImageScale;
+				return it;
+			},
+			validate: double.IsFinite);
 		/// <summary>
 		/// Property of <see cref="ScreenPixelDensity"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> ScreenPixelDensityProperty = ObservableProperty.Register<Session, double>(nameof(ScreenPixelDensity), 1, 
 			coerce: it => Math.Max(1, it),
-			validate: it => double.IsFinite(it));
+			validate: double.IsFinite);
 		/// <summary>
 		/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
 		/// </summary>
@@ -620,19 +653,19 @@ namespace Carina.PixelViewer.ViewModels
 		ImageRenderingProfile? fileFormatProfile;
 		readonly ScheduledAction filterImageAction;
 		ImageFrame? filteredImageFrame;
-		bool fitRenderedImageToViewport = true;
+		double fitRenderedImageToViewportScale = double.NaN;
 		bool hasPendingImageFiltering;
 		bool hasPendingImageRendering;
 		IImageDataSource? imageDataSource;
 		CancellationTokenSource? imageFilteringCancellationTokenSource;
 		CancellationTokenSource? imageRenderingCancellationTokenSource;
+		DoubleAnimator? imageScalingAnimator;
 		bool isFirstImageRenderingForSource = true;
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
 		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>(CompareProfiles);
 		ImageFrame? renderedImageFrame;
-		double renderedImageScale = 1.0;
 		readonly ScheduledAction renderImageAction;
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly IDisposable sharedRenderedImagesMemoryUsageObserverToken;
@@ -640,7 +673,6 @@ namespace Carina.PixelViewer.ViewModels
 		readonly ScheduledAction updateImageDisplaySizeAction;
 		readonly ScheduledAction updateIsFilteringImageNeededAction;
 		readonly ScheduledAction updateIsProcessingImageAction;
-		DoubleAnimator? zoomAnimator;
 
 
 		/// <summary>
@@ -688,7 +720,12 @@ namespace Carina.PixelViewer.ViewModels
 			this.SaveRenderedImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveRenderedImage(parameters), this.canSaveRenderedImage);
 			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
-			this.ZoomToCommand = new Command<double>(this.ZoomTo, this.canZoomTo);
+			this.ZoomToCommand = new Command<double>(scale => 
+			{
+				scale = this.ZoomTo(scale);
+				if (double.IsFinite(scale))
+					this.SetValue(RequestedImageDisplayScaleProperty, scale);
+			}, this.canZoomTo);
 
 			// setup operations
 			this.filterImageAction = new ScheduledAction(() =>
@@ -723,22 +760,11 @@ namespace Carina.PixelViewer.ViewModels
 			});
 			this.updateImageDisplaySizeAction = new ScheduledAction(() =>
 			{
+				// check state
 				if (this.IsDisposed)
 					return;
-				var viewport = this.GetValue(ImageViewportSizeProperty);
-				var viewportWidth = viewport.Width;
-				var viewportHeight = viewport.Height;
-				if (viewportWidth <= 0 || viewportHeight <= 0)
-				{
-					this.ResetValue(ImageDisplaySizeProperty);
-					return;
-				}
-				if (((int)(this.EffectiveRenderedImageRotation + 0.5) % 180) != 0)
-				{
-					var t = viewportHeight;
-					viewportHeight = viewportWidth;
-					viewportWidth = t;
-				}
+				
+				// get original image size
 				var image = this.GetValue(RenderedImageProperty);
 				if (image == null)
 				{
@@ -748,9 +774,54 @@ namespace Carina.PixelViewer.ViewModels
 				var screenPixelDensity = this.GetValue(ScreenPixelDensityProperty);
 				var imageWidth = image.Size.Width / screenPixelDensity;
 				var imageHeight = image.Size.Height / screenPixelDensity;
-				var scale = this.fitRenderedImageToViewport
-					? Math.Min(viewportWidth / imageWidth, viewportHeight / imageHeight)
-					: this.EffectiveRenderedImageScale;
+
+				// calculate display size
+				var scale = 1.0;
+				if (!this.GetValue(FitImageToViewportProperty))
+				{
+					scale = this.GetValue(ImageDisplayScaleProperty);
+					if (!double.IsFinite(scale))
+					{
+						scale = this.GetValue(RequestedImageDisplayScaleProperty);
+						this.SetValue(ImageDisplayScaleProperty, scale);
+						this.CompleteZooming(true);
+					}
+				}
+				else if (double.IsFinite(this.fitRenderedImageToViewportScale))
+				{
+					scale = this.GetValue(ImageDisplayScaleProperty);
+					if (!double.IsFinite(scale))
+					{
+						scale = this.fitRenderedImageToViewportScale;
+						this.SetValue(ImageDisplayScaleProperty, scale);
+						this.CompleteZooming(true);
+					}
+				}
+				else
+				{
+					// get size of viewport
+					var viewport = this.GetValue(ImageViewportSizeProperty);
+					var viewportWidth = viewport.Width;
+					var viewportHeight = viewport.Height;
+					if (viewportWidth <= 0 || viewportHeight <= 0)
+					{
+						this.ResetValue(ImageDisplaySizeProperty);
+						return;
+					}
+					if (((int)(this.ImageDisplayRotation + 0.5) % 180) != 0)
+					{
+						var t = viewportHeight;
+						viewportHeight = viewportWidth;
+						viewportWidth = t;
+					}
+
+					// calculate display size
+					scale = Math.Min(viewportWidth / imageWidth, viewportHeight / imageHeight);
+					this.fitRenderedImageToViewportScale = scale;
+					this.CompleteZooming(true);
+					this.SetValue(ImageDisplayScaleProperty, scale);
+					this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
+				}
 				this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
 			});
 			this.updateIsProcessingImageAction = new ScheduledAction(() =>
@@ -1237,7 +1308,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SelectRenderedImagePixel(-1, -1);
 
 			// complete zooming
-			this.CompleteZooming(false, !disposing);
+			this.CompleteZooming(!disposing);
 
 			// update state
 			if (!disposing)
@@ -1259,15 +1330,11 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-			if (Math.Abs(this.EffectiveRenderedImageRotation) > 0.1)
-			{
-				this.EffectiveRenderedImageRotation = 0.0;
-				this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
-			}
 			if (!disposing)
 			{
-				this.SetValue(HasRenderingErrorProperty, false);
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+				this.ResetValue(ImageDisplayRotationProperty);
+				this.ResetValue(HasRenderingErrorProperty);
+				this.ResetValue(InsufficientMemoryForRenderedImageProperty);
 			}
 
 			// release memory usage tokens
@@ -1342,17 +1409,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Complete current smooth zooming.
-		void CompleteZooming(bool isCancelling, bool resetIsZooming)
+		void CompleteZooming(bool resetIsZooming)
 		{
-			if (this.zoomAnimator == null)
+			if (this.imageScalingAnimator == null)
 				return;
-			this.zoomAnimator.Cancel();
-			this.zoomAnimator = null;
-			if (!isCancelling && !this.fitRenderedImageToViewport)
-			{
-				this.EffectiveRenderedImageScale = this.RenderedImageScale;
-				this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
-			}
+			this.imageScalingAnimator.Cancel();
+			this.imageScalingAnimator = null;
 			if (resetIsZooming)
 				this.SetValue(IsZoomingProperty, false);
 		}
@@ -1497,18 +1559,6 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.effectiveBits[2];
 			set => this.ChangeEffectiveBits(2, value);
 		}
-
-
-		/// <summary>
-		/// Get effective rotation of rendered image in degrees.
-		/// </summary>
-		public double EffectiveRenderedImageRotation { get; private set; } = 0.0;
-
-
-		/// <summary>
-		/// Get effective scaling ratio of rendered image.
-		/// </summary>
-		public double EffectiveRenderedImageScale { get; private set; } = 1.0;
 
 
 		// Evaluate image dimensions.
@@ -1810,29 +1860,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get or set whether rendered image should be fitted into viewport or not.
 		/// </summary>
-		public bool FitRenderedImageToViewport
+		public bool FitImageToViewport
 		{
-			get => this.fitRenderedImageToViewport;
-			set
-			{
-				this.VerifyAccess();
-				this.VerifyDisposed();
-				if (this.fitRenderedImageToViewport == value)
-					return;
-				this.fitRenderedImageToViewport = value;
-				this.OnPropertyChanged(nameof(this.FitRenderedImageToViewport));
-				if (value)
-				{
-					this.EffectiveRenderedImageScale = 1.0;
-					this.CompleteZooming(false, true);
-				}
-				else
-					this.EffectiveRenderedImageScale = this.renderedImageScale;
-				this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
-				this.canZoomTo.Update(!value && this.IsSourceFileOpened);
-				this.UpdateCanZoomInOut();
-				this.updateImageDisplaySizeAction.Schedule();
-			}
+			get => this.GetValue(FitImageToViewportProperty);
+			set => this.SetValue(FitImageToViewportProperty, value);
 		}
 
 
@@ -2058,6 +2089,18 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get histograms of <see cref="RenderedImage"/>.
 		/// </summary>
 		public BitmapHistograms? Histograms { get => this.GetValue(HistogramsProperty); }
+
+
+		/// <summary>
+		/// Get rotation for displaying rendered image.
+		/// </summary>
+		public double ImageDisplayRotation { get => this.GetValue(ImageDisplayRotationProperty); }
+
+
+		/// <summary>
+		/// Get proper scale for displaying rendered image.
+		/// </summary>
+		public double ImageDisplayScale { get => this.GetValue(ImageDisplayScaleProperty); }
 
 
 		/// <summary>
@@ -2335,18 +2378,6 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Get maximum scaling ratio of rendered image.
-		/// </summary>
-		public double MaxRenderedImageScale { get; } = 20.0;
-
-
-		/// <summary>
-		/// Get minimum scaling ratio of rendered image.
-		/// </summary>
-		public double MinRenderedImageScale { get; } = 0.1;
-
-
-		/// <summary>
 		/// Command to move to first frame and render.
 		/// </summary>
 		public ICommand MoveToFirstFrameCommand { get; }
@@ -2478,6 +2509,18 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.IsDemosaicingSupported)
 					this.renderImageAction.Reschedule();
 			}
+			else if (property == FitImageToViewportProperty)
+			{
+				var fitToViewport = (bool)newValue.AsNonNull();
+				this.canZoomTo.Update(!fitToViewport && this.IsSourceFileOpened);
+				this.UpdateCanZoomInOut();
+				if (!fitToViewport)
+					this.ZoomTo(this.GetValue(RequestedImageDisplayScaleProperty));
+				else if (double.IsFinite(this.fitRenderedImageToViewportScale))
+					this.ZoomTo(this.fitRenderedImageToViewportScale);
+				else
+					this.updateImageDisplaySizeAction.Execute();
+			}
 			else if (property == FrameCountProperty)
 				this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
 			else if (property == HighlightAdjustmentProperty)
@@ -2511,6 +2554,7 @@ namespace Carina.PixelViewer.ViewModels
 			else if (property == ImageViewportSizeProperty
 				|| property == ScreenPixelDensityProperty)
 			{
+				this.fitRenderedImageToViewportScale = double.NaN;
 				this.updateImageDisplaySizeAction.Schedule();
 			}
 			else if (property == ImageWidthProperty)
@@ -2625,10 +2669,24 @@ namespace Carina.PixelViewer.ViewModels
 				if (newValue == null)
 					this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.SetValue(HasRenderedImageProperty, newValue != null);
+				this.fitRenderedImageToViewportScale = double.NaN;
 				this.updateImageDisplaySizeAction.Execute();
 			}
 			else if (property == RenderingParametersPanelSizeProperty)
 				this.PersistentState.SetValue<int>(LatestRenderingParamsPanelSize, (int)(this.RenderingParametersPanelSize + 0.5));
+			else if (property == RequestedImageDisplayScaleProperty)
+			{
+				if (!this.GetValue(FitImageToViewportProperty))
+				{
+					var scale = (double)newValue.AsNonNull();
+					this.UpdateCanZoomInOut();
+					if (this.imageScalingAnimator == null 
+						|| Math.Abs(this.imageScalingAnimator.EndValue - scale) > 0.0001)
+					{
+						this.ZoomTo(scale, false);
+					}
+				}
+			}
 			else if (property == ShadowAdjustmentProperty)
 			{
 				this.SetValue(HasShadowAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
@@ -2764,7 +2822,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(IsSourceFileOpenedProperty, false);
 				this.SetValue(IsOpeningSourceFileProperty, false);
 				this.canOpenSourceFile.Update(true);
-				this.canZoomTo.Update(!this.fitRenderedImageToViewport);
+				this.canZoomTo.Update(false);
 
 				// update title
 				this.UpdateTitle();
@@ -2944,38 +3002,6 @@ namespace Carina.PixelViewer.ViewModels
 		/// Get rendered image.
 		/// </summary>
 		public IBitmap? RenderedImage { get => this.GetValue(RenderedImageProperty); }
-
-
-		/// <summary>
-		/// Get or set scaling ratio of rendered image.
-		/// </summary>
-		public double RenderedImageScale
-		{
-			get => this.renderedImageScale;
-			set
-			{
-				this.VerifyAccess();
-				this.VerifyDisposed();
-				if (!double.IsFinite(value))
-					throw new ArgumentOutOfRangeException();
-				if (value < this.MinRenderedImageScale)
-					value = this.MinRenderedImageScale;
-				else if (value > this.MaxRenderedImageScale)
-					value = this.MaxRenderedImageScale;
-				if (Math.Abs(this.renderedImageScale - value) <= 0.001)
-					return;
-				this.renderedImageScale = value;
-				this.OnPropertyChanged(nameof(this.RenderedImageScale));
-				this.UpdateCanZoomInOut();
-				this.CompleteZooming(true, true);
-				if (!this.fitRenderedImageToViewport)
-				{
-					this.EffectiveRenderedImageScale = value;
-					this.OnPropertyChanged(nameof(this.EffectiveRenderedImageScale));
-					this.updateImageDisplaySizeAction.Schedule();
-				}
-			}
-		}
 
 
 		/// <summary>
@@ -3303,6 +3329,16 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.GetValue(RenderingParametersPanelSizeProperty);
 			set => this.SetValue(RenderingParametersPanelSizeProperty, value);
         }
+
+
+		/// <summary>
+		/// Get or set requested scaling ratio of rendered image.
+		/// </summary>
+		public double RequestedImageDisplayScale
+		{
+			get => this.GetValue(RequestedImageDisplayScaleProperty);
+			set => this.SetValue(RequestedImageDisplayScaleProperty, value);
+		}
 
 
 		// Request token for rendered image memory usage.
@@ -3644,17 +3680,17 @@ namespace Carina.PixelViewer.ViewModels
 			var renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
 			var rotation = 0;
 			var scale = 1.0;
-			if (savedState.TryGetProperty(nameof(FitRenderedImageToViewport), out jsonProperty))
+			if (savedState.TryGetProperty(nameof(FitImageToViewport), out jsonProperty))
 				fitToViewport = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(FrameNumber), out jsonProperty) && jsonProperty.TryGetInt64(out frameNumber))
 				frameNumber = Math.Max(1, frameNumber);
-			if (savedState.TryGetProperty(nameof(EffectiveRenderedImageRotation), out jsonProperty))
+			if (savedState.TryGetProperty(nameof(ImageDisplayRotation), out jsonProperty))
 				jsonProperty.TryGetInt32(out rotation);
 			if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
 				isHistogramsVisible = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(IsRenderingParametersPanelVisible), out jsonProperty))
 				isRenderingParamsPanelVisible = jsonProperty.ValueKind != JsonValueKind.False;
-			if (savedState.TryGetProperty(nameof(RenderedImageScale), out jsonProperty))
+			if (savedState.TryGetProperty(nameof(RequestedImageDisplayScale), out jsonProperty))
 				jsonProperty.TryGetDouble(out scale);
 			if (savedState.TryGetProperty(nameof(RenderingParametersPanelSize), out jsonProperty)
 				&& jsonProperty.TryGetDouble(out renderingParamsPanelSize))
@@ -3712,12 +3748,12 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(ShadowAdjustmentProperty, shadowAdjustment);
 
 			// apply displaying parameters
-			this.EffectiveRenderedImageRotation = rotation;
-			this.FitRenderedImageToViewport = fitToViewport;
-			this.FrameNumber = frameNumber;
+			this.SetValue(FitImageToViewportProperty, fitToViewport);
+			this.SetValue(FrameNumberProperty, frameNumber);
+			this.SetValue(ImageDisplayRotationProperty, rotation);
 			this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
 			this.SetValue(IsRenderingParametersPanelVisibleProperty, isRenderingParamsPanelVisible);
-			this.RenderedImageScale = scale;
+			this.SetValue(RequestedImageDisplayScaleProperty, scale);
 			this.SetValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
 
 			this.Logger.LogWarning("State restored");
@@ -3737,14 +3773,15 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (!this.IsSourceFileOpened)
 				return;
-			this.EffectiveRenderedImageRotation = (int)(this.EffectiveRenderedImageRotation + 0.5) switch
+			var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
 			{
 				0 => 270.0,
 				180 => 90.0,
 				270 => 180.0,
 				_ => 0.0,
 			};
-			this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
+			this.SetValue(ImageDisplayRotationProperty, rotation);
+			this.fitRenderedImageToViewportScale = double.NaN;
 			this.updateImageDisplaySizeAction.Schedule();
 		}
 
@@ -3760,14 +3797,15 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (!this.IsSourceFileOpened)
 				return;
-			this.EffectiveRenderedImageRotation = (int)(this.EffectiveRenderedImageRotation + 0.5) switch
+			var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
 			{
 				0 => 90.0,
 				90 => 180.0,
 				180 => 270.0,
 				_ => 0.0,
 			};
-			this.OnPropertyChanged(nameof(this.EffectiveRenderedImageRotation));
+			this.SetValue(ImageDisplayRotationProperty, rotation);
+			this.fitRenderedImageToViewportScale = double.NaN;
 			this.updateImageDisplaySizeAction.Schedule();
 		}
 
@@ -3856,7 +3894,7 @@ namespace Carina.PixelViewer.ViewModels
 				return false;
 			var options = parameters.Options;
 			if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
-				options.Orientation = (int)(this.EffectiveRenderedImageRotation + 0.5);
+				options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 			this.canSaveFilteredImage.Update(false);
 			this.SetValue(IsSavingFilteredImageProperty, true);
 			try
@@ -3933,7 +3971,7 @@ namespace Carina.PixelViewer.ViewModels
 				return false;
 			var options = parameters.Options;
 			if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
-				options.Orientation = (int)(this.EffectiveRenderedImageRotation + 0.5);
+				options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 			this.canSaveRenderedImage.Update(false);
 			this.SetValue(IsSavingRenderedImageProperty, true);
 			try
@@ -4031,12 +4069,12 @@ namespace Carina.PixelViewer.ViewModels
 				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 
 				// displaying parameters
-				writer.WriteNumber(nameof(EffectiveRenderedImageRotation), (int)(this.EffectiveRenderedImageRotation + 0.5));
-				writer.WriteBoolean(nameof(FitRenderedImageToViewport), this.fitRenderedImageToViewport);
+				writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProperty));
 				writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
+				writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
 				writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
 				writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
-				writer.WriteNumber(nameof(RenderedImageScale), this.renderedImageScale);
+				writer.WriteNumber(nameof(RequestedImageDisplayScale), this.GetValue(RequestedImageDisplayScaleProperty));
 				writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
 
 				// other state
@@ -4252,15 +4290,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (this.IsDisposed)
 				return;
-			if (this.fitRenderedImageToViewport || !this.IsSourceFileOpened)
+			if (this.GetValue(FitImageToViewportProperty) || !this.IsSourceFileOpened)
 			{
 				this.canZoomIn.Update(false);
 				this.canZoomOut.Update(false);
 			}
 			else
 			{
-				this.canZoomIn.Update(this.renderedImageScale < (this.MaxRenderedImageScale - 0.001));
-				this.canZoomOut.Update(this.renderedImageScale > (this.MinRenderedImageScale + 0.001));
+				var scale = this.GetValue(RequestedImageDisplayScaleProperty);
+				this.canZoomIn.Update(scale < (MaxRenderedImageScale - 0.001));
+				this.canZoomOut.Update(scale > (MinRenderedImageScale + 0.001));
 			}
 		}
 
@@ -4334,13 +4373,14 @@ namespace Carina.PixelViewer.ViewModels
 			this.VerifyDisposed();
 			if (!this.canZoomIn.Value)
 				return;
-			var scale = this.renderedImageScale.Let((it) =>
+			var scale = this.GetValue(RequestedImageDisplayScaleProperty).Let((it) =>
 			{
 				if (it <= 0.999)
 					return (Math.Floor(it * 20) + 1) / 20;
 				return (Math.Floor(it * 2) + 1) / 2;
 			});
-			this.ZoomTo(scale);
+			scale = this.ZoomTo(scale);
+			this.SetValue(RequestedImageDisplayScaleProperty, scale);
 		}
 
 
@@ -4357,13 +4397,14 @@ namespace Carina.PixelViewer.ViewModels
 			this.VerifyDisposed();
 			if (!this.canZoomOut.Value)
 				return;
-			var scale = this.renderedImageScale.Let((it) =>
+			var scale = this.GetValue(RequestedImageDisplayScaleProperty).Let((it) =>
 			{
 				if (it <= 1.001)
 					return (Math.Ceiling(it * 20) - 1) / 20;
 				return (Math.Ceiling(it * 2) - 1) / 2;
 			});
-			this.ZoomTo(scale);
+			scale = this.ZoomTo(scale);
+			this.SetValue(RequestedImageDisplayScaleProperty, scale);
 		}
 
 
@@ -4373,51 +4414,60 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand ZoomOutCommand { get; }
 
 
-		// Start smooth zooming to given scale.
-		void ZoomTo(double scale)
+		// Start zooming to given scale.
+		double ZoomTo(double scale, bool animate = true)
         {
 			// check state
 			this.VerifyAccess();
 			this.VerifyDisposed();
-			if (!this.canZoomTo.Value)
-				return;
+			if (!this.GetValue(FitImageToViewportProperty) && !this.canZoomTo.Value)
+				return double.NaN;
+			if (!double.IsFinite(scale))
+				return double.NaN;
 
 			// check zoom
-			if (scale < MinRenderedImageScale)
-				scale = MinRenderedImageScale;
-			else if (scale > MaxRenderedImageScale)
-				scale = MaxRenderedImageScale;
-			if (Math.Abs(this.renderedImageScale - scale) < 0.001)
-				return;
+			if (!this.GetValue(FitImageToViewportProperty))
+			{
+				if (scale < MinRenderedImageScale)
+					scale = MinRenderedImageScale;
+				else if (scale > MaxRenderedImageScale)
+					scale = MaxRenderedImageScale;
+			}
+			var initScale = this.GetValue(ImageDisplayScaleProperty);
+			if (!double.IsFinite(initScale))
+				animate = false;
 
 			// cancel current zooming
-			this.CompleteZooming(true, false);
+			this.CompleteZooming(false);
 
 			// start zooming
-			this.zoomAnimator = new DoubleAnimator(this.EffectiveRenderedImageScale, scale).Also(it =>
+			if (animate)
 			{
-				it.Completed += (_, e) =>
+				this.imageScalingAnimator = new DoubleAnimator(initScale, scale).Also(it =>
 				{
-					this.EffectiveRenderedImageScale = scale;
-					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
-					this.updateImageDisplaySizeAction.Execute();
-				};
-				it.Duration = ZoomAnimationDuration;
-				it.Interpolator = Interpolators.Deceleration;
-				it.ProgressChanged += (_, e) =>
-				{
-					this.EffectiveRenderedImageScale = it.Value;
-					this.OnPropertyChanged(nameof(EffectiveRenderedImageScale));
-					this.updateImageDisplaySizeAction.Execute();
-				};
-				it.Start();
-			});
-			this.SetValue(IsZoomingProperty, true);
-
-			// update state
-			this.renderedImageScale = scale;
-			this.OnPropertyChanged(nameof(RenderedImageScale));
-			this.UpdateCanZoomInOut();
+					it.Completed += (_, e) => 
+					{
+						this.SetValue(ImageDisplayScaleProperty, it.EndValue);
+						this.updateImageDisplaySizeAction.Execute();
+						this.CompleteZooming(true);
+					};
+					it.Duration = ZoomAnimationDuration;
+					it.Interpolator = Interpolators.Deceleration;
+					it.ProgressChanged += (_, e) =>
+					{
+						this.SetValue(ImageDisplayScaleProperty, it.Value);
+						this.updateImageDisplaySizeAction.Execute();
+					};
+					it.Start();
+				});
+				this.SetValue(IsZoomingProperty, true);
+			}
+			else
+			{
+				this.SetValue(ImageDisplayScaleProperty, scale);
+				this.SetValue(IsZoomingProperty, false);
+			}
+			return scale;
         }
 
 

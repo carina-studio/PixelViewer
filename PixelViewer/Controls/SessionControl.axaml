@@ -125,7 +125,7 @@
 						<Separator Classes="ToolBar_Separator"/>
 
 						<!-- Fit to viewport -->
-						<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitRenderedImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
+						<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 							<Panel>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -146,7 +146,7 @@
 								</MultiBinding>
 							</Panel.IsEnabled>
 							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000%"/>
-							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RenderedImageScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
+							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding RequestedImageDisplayScale, Converter={x:Static asConverters:RatioToPercentageConverter.Default}}"/>
 						</Panel>
 
 						<!-- Zoom-in -->
@@ -171,7 +171,7 @@
 								</MultiBinding>
 							</Panel.IsEnabled>
 							<TextBlock Classes="ToolBar_TextBlock" Opacity="0" Text="0000"/>
-							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding EffectiveRenderedImageRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
+							<TextBlock Classes="ToolBar_TextBlock" HorizontalAlignment="Center" Text="{Binding ImageDisplayRotation, Converter={x:Static appConverters:DegreesToStringConverter.Default}}"/>
 						</Panel>
 
 						<!-- Rotate-right -->
@@ -470,7 +470,7 @@
 				</Viewbox>
 
 				<!-- Image -->
-				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitRenderedImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
+				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<Panel Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
 						<Border Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
 							<Border.Background>
@@ -481,7 +481,7 @@
 									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerLeave="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
 								</Border>
 								<LayoutTransformControl.LayoutTransform>
-									<RotateTransform Angle="{Binding EffectiveRenderedImageRotation}"/>
+									<RotateTransform Angle="{Binding ImageDisplayRotation}"/>
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
 						</Border>

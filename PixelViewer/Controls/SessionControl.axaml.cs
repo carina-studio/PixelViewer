@@ -689,15 +689,15 @@ namespace Carina.PixelViewer.Controls
 				{
 					case Avalonia.Input.Key.D0:
 						{
-							session.FitRenderedImageToViewport = true;
+							session.FitImageToViewport = true;
 							break;
 						}
 					case Avalonia.Input.Key.D1:
 						{
-							if (session.FitRenderedImageToViewport)
+							if (session.FitImageToViewport)
 							{
-								session.RenderedImageScale = 1.0;
-								session.FitRenderedImageToViewport = false;
+								session.RequestedImageDisplayScale = 1.0;
+								session.FitImageToViewport = false;
 							}
 							else
 								session.ZoomToCommand.TryExecute(1.0);
@@ -803,8 +803,8 @@ namespace Carina.PixelViewer.Controls
 		{
 			if (this.DataContext is not Session session)
 				return;
-			if (session.FitRenderedImageToViewport)
-				session.FitRenderedImageToViewport = false;
+			if (session.FitImageToViewport)
+				session.FitImageToViewport = false;
 			else if (session.ZoomInCommand.CanExecute(null))
 				session.ZoomInCommand.TryExecute();
 			else if (session.ZoomToCommand.CanExecute(1.0))
@@ -968,7 +968,7 @@ namespace Carina.PixelViewer.Controls
 			}
 			if (!this.imageScrollViewer.IsPointerOver || (e.KeyModifiers & KeyModifiers.Control) == 0)
 				return;
-			if (this.DataContext is not Session session || !session.IsSourceFileOpened || session.FitRenderedImageToViewport)
+			if (this.DataContext is not Session session || !session.IsSourceFileOpened || session.FitImageToViewport)
 				return;
 			var zoomed = false;
 			if (e.Delta.Y > 0)
@@ -1107,20 +1107,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 			switch (e.PropertyName)
 			{
-				case nameof(Session.EffectiveRenderedImageScale):
-                    {
-						if (!session.FitRenderedImageToViewport)
-                        {
-							var viewportSize = this.imageScrollViewer.Viewport;
-							var viewportOffset = this.imageScrollViewer.Offset;
-							var contentSize = this.imageScrollViewer.Extent;
-							var centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
-							var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
-							this.targetImageViewportCenter = new Vector(centerX, centerY);
-						}
-					}
-					break;
-				case nameof(Session.FitRenderedImageToViewport):
+				case nameof(Session.FitImageToViewport):
 					{
 						// [Workaround] rearrange scroll viewer of the image viewer
 						var padding = this.imageScrollViewer.Padding;
@@ -1132,6 +1119,17 @@ namespace Carina.PixelViewer.Controls
 				case nameof(Session.HasRenderingError):
 				case nameof(Session.InsufficientMemoryForRenderedImage):
 					this.updateStatusBarStateAction.Schedule();
+					break;
+				case nameof(Session.ImageDisplayScale):
+                    if (!session.FitImageToViewport)
+					{
+						var viewportSize = this.imageScrollViewer.Viewport;
+						var viewportOffset = this.imageScrollViewer.Offset;
+						var contentSize = this.imageScrollViewer.Extent;
+						var centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
+						var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
+						this.targetImageViewportCenter = new Vector(centerX, centerY);
+					}
 					break;
 				case nameof(Session.ImageDisplaySize):
 					this.updateEffectiveRenderedImageIntModeAction.Schedule();
@@ -1548,7 +1546,7 @@ namespace Carina.PixelViewer.Controls
 		{
 			if (this.DataContext is not Session session)
 				return;
-			if (!session.FitRenderedImageToViewport && session.EffectiveRenderedImageScale >= 2)
+			if (!session.FitImageToViewport && session.ImageDisplayScale >= 2)
 				return;
 			this.stopUsingSmallRenderedImageAction.Cancel();
 			if (!this.useSmallRenderedImage)
