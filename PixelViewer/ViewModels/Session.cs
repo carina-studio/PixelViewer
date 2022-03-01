@@ -654,6 +654,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly ScheduledAction filterImageAction;
 		ImageFrame? filteredImageFrame;
 		double fitRenderedImageToViewportScale = double.NaN;
+		double fitRenderedImageToViewportScaleSwapped = double.NaN;
 		bool hasPendingImageFiltering;
 		bool hasPendingImageRendering;
 		IImageDataSource? imageDataSource;
@@ -808,17 +809,13 @@ namespace Carina.PixelViewer.ViewModels
 						this.ResetValue(ImageDisplaySizeProperty);
 						return;
 					}
-					if (((int)(this.ImageDisplayRotation + 0.5) % 180) != 0)
-					{
-						var t = viewportHeight;
-						viewportHeight = viewportWidth;
-						viewportWidth = t;
-					}
+					var useSwappedScale = (((int)(this.ImageDisplayRotation + 0.5) % 180) != 0);
 
 					// calculate display size
-					scale = Math.Min(viewportWidth / imageWidth, viewportHeight / imageHeight);
-					this.fitRenderedImageToViewportScale = scale;
+					this.fitRenderedImageToViewportScale = Math.Min(viewportWidth / imageWidth, viewportHeight / imageHeight);
+					this.fitRenderedImageToViewportScaleSwapped = Math.Min(viewportHeight / imageWidth, viewportWidth / imageHeight);
 					this.CompleteZooming(true);
+					scale = useSwappedScale ? this.fitRenderedImageToViewportScaleSwapped : this.fitRenderedImageToViewportScale;
 					this.SetValue(ImageDisplayScaleProperty, scale);
 					this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
 				}
@@ -2517,7 +2514,12 @@ namespace Carina.PixelViewer.ViewModels
 				if (!fitToViewport)
 					this.ZoomTo(this.GetValue(RequestedImageDisplayScaleProperty));
 				else if (double.IsFinite(this.fitRenderedImageToViewportScale))
-					this.ZoomTo(this.fitRenderedImageToViewportScale);
+				{
+					var scale = ((int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) % 180) == 0
+						? this.fitRenderedImageToViewportScale
+						: this.fitRenderedImageToViewportScaleSwapped;
+					this.ZoomTo(scale);
+				}
 				else
 					this.updateImageDisplaySizeAction.Execute();
 			}
@@ -3775,14 +3777,22 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
 			{
-				0 => 270.0,
-				180 => 90.0,
-				270 => 180.0,
-				_ => 0.0,
+				0 => 270,
+				180 => 90,
+				270 => 180,
+				_ => 0,
 			};
 			this.SetValue(ImageDisplayRotationProperty, rotation);
-			this.fitRenderedImageToViewportScale = double.NaN;
-			this.updateImageDisplaySizeAction.Schedule();
+			if (this.GetValue(FitImageToViewportProperty) 
+				&& double.IsFinite(this.fitRenderedImageToViewportScale))
+			{
+				var scale = (rotation % 180) == 0
+					? this.fitRenderedImageToViewportScale
+					: this.fitRenderedImageToViewportScaleSwapped;
+				this.ZoomTo(scale, false);
+			}
+			else
+				this.updateImageDisplaySizeAction.Schedule();
 		}
 
 
@@ -3799,14 +3809,22 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
 			{
-				0 => 90.0,
-				90 => 180.0,
-				180 => 270.0,
-				_ => 0.0,
+				0 => 90,
+				90 => 180,
+				180 => 270,
+				_ => 0,
 			};
 			this.SetValue(ImageDisplayRotationProperty, rotation);
-			this.fitRenderedImageToViewportScale = double.NaN;
-			this.updateImageDisplaySizeAction.Schedule();
+			if (this.GetValue(FitImageToViewportProperty) 
+				&& double.IsFinite(this.fitRenderedImageToViewportScale))
+			{
+				var scale = (rotation % 180) == 0
+					? this.fitRenderedImageToViewportScale
+					: this.fitRenderedImageToViewportScaleSwapped;
+				this.ZoomTo(scale, false);
+			}
+			else
+				this.updateImageDisplaySizeAction.Schedule();
 		}
 
 
@@ -4466,6 +4484,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.SetValue(ImageDisplayScaleProperty, scale);
 				this.SetValue(IsZoomingProperty, false);
+				this.updateImageDisplaySizeAction.Execute();
 			}
 			return scale;
         }
