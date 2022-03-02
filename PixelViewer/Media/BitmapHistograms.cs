@@ -21,14 +21,8 @@ namespace Carina.PixelViewer.Media
         static readonly ILogger? Logger = AppSuiteApplication.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapHistograms));
 
 
-        /// <summary>
-        /// Initialize new <see cref="BitmapHistograms"/> instance.
-        /// </summary>
-        /// <param name="red">Histogram of red channel.</param>
-        /// <param name="green">Histogram of green channel.</param>
-        /// <param name="blue">Histogram of blue channel.</param>
-        /// <param name="luminance">Histogram of luminance.</param>
-        BitmapHistograms(int effectivePixelCount, IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance)
+        // Constructor.
+        BitmapHistograms(int effectivePixelCount, IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance, int medianOfLuminance)
         {
             this.ColorCount = red.Count;
             if (this.ColorCount != green.Count || this.ColorCount != blue.Count || this.ColorCount != luminance.Count)
@@ -38,6 +32,7 @@ namespace Carina.PixelViewer.Media
             this.Green = green.AsReadOnly();
             this.Luminance = luminance.AsReadOnly();
             this.Maximum = Math.Max(Math.Max(red.Max(), green.Max()), Math.Max(blue.Max(), luminance.Max()));
+            this.MedianOfLuminance = medianOfLuminance;
             this.Red = red.AsReadOnly();
         }
 
@@ -129,9 +124,21 @@ namespace Carina.PixelViewer.Media
                             });
                         });
                     }
+                    var halfPixelCount = (bitmapBuffer.Width * bitmapBuffer.Height) >> 1;
+                    var accuPixelCount = 0;
+                    var medianOfLuminance = 0;
+                    for (int i = 0, colorCount = luminance.Length; i < colorCount; ++i)
+                    {
+                        accuPixelCount += luminance[i];
+                        if (accuPixelCount >= halfPixelCount)
+                        {
+                            medianOfLuminance = i;
+                            break;
+                        }
+                    }
                     if (stopWatch != null)
                         Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
-                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
+                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance, medianOfLuminance);
                 });
             }
             finally
@@ -202,9 +209,21 @@ namespace Carina.PixelViewer.Media
                             });
                         });
                     }
+                    var halfPixelCount = (bitmapBuffer.Width * bitmapBuffer.Height) >> 1;
+                    var accuPixelCount = 0;
+                    var medianOfLuminance = 0;
+                    for (int i = 0, colorCount = luminance.Length; i < colorCount; ++i)
+                    {
+                        accuPixelCount += luminance[i];
+                        if (accuPixelCount >= halfPixelCount)
+                        {
+                            medianOfLuminance = i;
+                            break;
+                        }
+                    }
                     if (stopWatch != null)
                         Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
-                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
+                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance, medianOfLuminance);
                 });
             }
             finally
@@ -236,6 +255,12 @@ namespace Carina.PixelViewer.Media
         /// Get maximum value in all histograms.
         /// </summary>
         public int Maximum { get; }
+
+
+        /// <summary>
+        /// Get median value of luminance.
+        /// </summary>
+        public int MedianOfLuminance { get; }
 
 
         /// <summary>

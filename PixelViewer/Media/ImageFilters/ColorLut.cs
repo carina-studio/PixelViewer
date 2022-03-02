@@ -31,38 +31,46 @@ namespace Carina.PixelViewer.Media.ImageFilters
         public static void ArctanTransform(IList<double> lut, int start, int end, double intensity)
         {
             // check parameter
-            var count = (end - start - 1.0);
-            if (count < -0.1)
+            if (end <= start)
                 return;
             if (Math.Abs(intensity) < 0.001)
                 return;
             
             // apply
             var sensitivity = Math.Max(0.1, App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
-            var startColor = lut[start];
-            var colorThreshold = (1 / count);
+            var maxColor = lut.Count - 1.0;
+            var startNormColor = start / maxColor;
+            var endNormColor = (end - 1) / maxColor;
+            var colorRatio = (end - start - 1) / maxColor;
+            var colorThreshold = (1 / maxColor);
             if (intensity >= 0)
             {
                 intensity = Math.Pow(intensity, sensitivity);
                 var coeff = 1 / Math.Atan(intensity);
-                for (var i = start; i < end; ++i)
+                for (var i = lut.Count - 1; i >= 0; --i)
                 {
-                    var color = (lut[i] - startColor) / count;
-                    if (Math.Abs(color) < colorThreshold)
-                        color = color >= 0 ? colorThreshold : -colorThreshold;
-                    lut[i] = startColor + (Math.Atan(intensity * color) * coeff * count);
+                    var normColor = lut[i] / maxColor;
+                    if (normColor < startNormColor || normColor > endNormColor)
+                        continue;
+                    normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
+                    if (Math.Abs(normColor) < colorThreshold)
+                        normColor = normColor >= 0 ? colorThreshold : -colorThreshold;
+                    lut[i] = (startNormColor + (Math.Atan(intensity * normColor) * coeff * colorRatio)) * maxColor;
                 }
             }
             else
             {
                 intensity = Math.Pow(-intensity, sensitivity);
                 var coeff = -1 / Math.Atan(-intensity);
-                for (var i = start; i < end; ++i)
+                for (var i = lut.Count - 1; i >= 0; --i)
                 {
-                    var color = (lut[i] - startColor) / count;
-                    if (Math.Abs(color - 1) < colorThreshold)
-                        color = color > 1 ? 1 + colorThreshold : 1 - colorThreshold;
-                    lut[i] = startColor + ((Math.Atan(intensity * (color - 1)) * coeff + 1) * count);
+                    var normColor = lut[i] / maxColor;
+                    if (normColor < startNormColor || normColor > endNormColor)
+                        continue;
+                    normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
+                    if (Math.Abs(normColor - 1) < colorThreshold)
+                        normColor = normColor > 1 ? 1 + colorThreshold : 1 - colorThreshold;
+                    lut[i] = (startNormColor + ((Math.Atan(intensity * (normColor - 1)) * coeff + 1) * colorRatio)) * maxColor;
                 }
             }
         }
@@ -184,35 +192,107 @@ namespace Carina.PixelViewer.Media.ImageFilters
         public static void GammaTransform(IList<double> lut, int start, int end, double gamma)
         {
             // check parameter
-            var count = (end - start - 1.0);
-            if (count < -0.1)
+            if (end <= start)
                 return;
             if (Math.Abs(gamma - 1) < 0.001)
                 return;
 
             // apply
-            var baseColor = lut[start];
-            var colorThreshold = (1 / count);
+            var maxColor = lut.Count - 1.0;
+            var startNormColor = start / maxColor;
+            var endNormColor = (end - 1) / maxColor;
+            var colorRatio = (end - start - 1) / maxColor;
+            var colorThreshold = (1 / maxColor);
             if (gamma < 1)
             {
-                for (var n = start; n < end; ++n)
+                for (var n = lut.Count - 1; n >= 0; --n)
                 {
-                    var input = (lut[n] - baseColor) / count;
-                    if (Math.Abs(input) < colorThreshold)
-                        input = (input >= 0) ? colorThreshold : -colorThreshold;
-                    lut[n] = baseColor + (Math.Pow(input, gamma) * count);
+                    var normColor = lut[n] / maxColor;
+                    if (normColor < startNormColor || normColor > endNormColor)
+                        continue;
+                    normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
+                    if (Math.Abs(normColor) < colorThreshold)
+                        normColor = (normColor >= 0) ? colorThreshold : -colorThreshold;
+                    lut[n] = (startNormColor + Math.Pow(normColor, gamma) * colorRatio) * maxColor;
                 }
             }
             else
             {
-                for (var n = start; n < end; ++n)
+                for (var n = lut.Count - 1; n >= 0; --n)
                 {
-                    var input = (lut[n] - baseColor) / count;
-                    if (Math.Abs(input - 1) < colorThreshold)
-                        input = (input >= 1) ? 1 + colorThreshold : 1 - colorThreshold;
-                    lut[n] = baseColor + (Math.Pow(input, gamma) * count);
+                    var normColor = lut[n] / maxColor;
+                    if (normColor < startNormColor || normColor > endNormColor)
+                        continue;
+                    normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
+                    if (Math.Abs(normColor - 1) < colorThreshold)
+                        normColor = (normColor >= 1) ? 1 + colorThreshold : 1 - colorThreshold;
+                    lut[n] = (startNormColor + Math.Pow(normColor, gamma) * colorRatio) * maxColor;
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Apply highlight transformation.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="intensity">Intensity, range is [-1.0, 1.0].</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of applying transformation.</returns>
+        public static Task HighlightTransformAsync(IList<double> lut, double intensity, CancellationToken cancellationToken = default)
+        {
+            if (!double.IsFinite(intensity))
+                throw new ArgumentException();
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            if (lut.Count <= 2)
+                return Task.CompletedTask;
+            if (intensity < -1)
+                intensity = -1;
+            else if (intensity > 1)
+                intensity = 1;
+            else if (Math.Abs(intensity) < 0.001)
+                return Task.CompletedTask;
+            var maxColor = lut.Count - 1;
+            if (intensity >= 0)
+            {
+                /*
+                 * [intensity > 0]
+                 * y = (-1 + (1 - 2cx)^0.5) / (-c)
+                 */
+                var a = (-2 * intensity);
+                for (var i = lut.Count - 1; i >= 0; --i)
+                {
+                    var normColor = (lut[i] / maxColor);
+                    if (normColor < 0.5)
+                        continue;
+                    normColor = (normColor - 0.5) * 2;
+                    var b = (1 + a * normColor);
+                    if (b > 0)
+                        lut[i] = (0.5 + ((1 - Math.Sqrt(b)) / intensity) * 0.5) * maxColor;
+                    else
+                        lut[i] = maxColor;
+                }
+            }
+            else
+            {
+                /*
+                 * [intensity < 0]
+                 i = -i
+                 * y = -0.5cx^2 + x
+                 */
+                intensity = -intensity;
+                var a = (-0.5 * intensity);
+                for (var i = lut.Count - 1; i >= 0; --i)
+                {
+                    var normColor = (lut[i] / maxColor);
+                    if (normColor < 0.5)
+                        continue;
+                    normColor = (normColor - 0.5) * 2;
+                    lut[i] = (0.5 + (a * normColor * normColor + normColor) * 0.5) * maxColor;
+                }
+            }
+            return Task.CompletedTask;
         }
 
 
@@ -360,6 +440,74 @@ namespace Carina.PixelViewer.Media.ImageFilters
             }
             return min;
         });
+
+
+        /// <summary>
+        /// Apply shadow transformation.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="intensity">Intensity, range is [-1.0, 1.0].</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of applying transformation.</returns>
+        public static Task ShadowTransformAsync(IList<double> lut, double intensity, CancellationToken cancellationToken = default)
+        {
+            if (!double.IsFinite(intensity))
+                throw new ArgumentException();
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            if (lut.Count <= 2)
+                return Task.CompletedTask;
+            if (intensity < -1)
+                intensity = -1;
+            else if (intensity > 1)
+                intensity = 1;
+            else if (Math.Abs(intensity) < 0.001)
+                return Task.CompletedTask;
+            var maxColor = lut.Count - 1;
+            if (intensity >= 0)
+            {
+                /*
+                 * [intensity > 0]
+                 * y = 0.5ix^2 + (1 - i)x + 0.5i
+                 */
+                var a = (0.5 * intensity);
+                var b = (1 - intensity);
+                var c = a;
+                for (var i = lut.Count - 1; i >= 0; --i)
+                {
+                    var normColor = (lut[i] / maxColor);
+                    if (normColor > 0.5)
+                        continue;
+                    normColor *= 2;
+                    lut[i] = ((a * normColor * normColor) + (b * normColor) + c) * 0.5 * maxColor;
+                }
+            }
+            else
+            {
+                /*
+                 * [intensity < 0]
+                 * i = -i
+                 * y = ((i - 1) + (1 - 2i + 2ix)^0.5) / i
+                 */
+                intensity = -intensity;
+                var a = (intensity - 1);
+                var b = (1 - 2 * intensity);
+                var c = (2 * intensity);
+                for (var i = lut.Count - 1; i >= 0; --i)
+                {
+                    var normColor = (lut[i] / maxColor);
+                    if (normColor > 0.5)
+                        continue;
+                    normColor *= 2;
+                    var d = (b + c * normColor);
+                    if (d > 0)
+                        lut[i] = ((a + Math.Sqrt(d)) / intensity) * 0.5 * maxColor;
+                    else
+                        lut[i] = 0;
+                }
+            }
+            return Task.CompletedTask;
+        }
 
 
         /// <summary>

@@ -1692,57 +1692,39 @@ namespace Carina.PixelViewer.ViewModels
 				var gLut = rLut;
 				var bLut = rLut;
 				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
-				if (this.canResetHighlightAdjustment.Value)
+				try
 				{
-					var intensity = this.HighlightAdjustment * 30;
-					ColorLut.ArctanTransform(rLut, rLut.Count / 2, rLut.Count, intensity);
-				}
-				if (this.canResetShadowAdjustment.Value)
-				{
-					var intensity = this.ShadowAdjustment * 30;
-					ColorLut.ArctanTransform(rLut, 0, rLut.Count / 2, intensity);
-				}
-				if (this.canResetBrightnessAdjustment.Value)
-				{
-					try
-					{
+					if (this.canResetBrightnessAdjustment.Value)
 						await ColorLut.BrightnessTransformAsync(histograms, rLut, this.BrightnessAdjustment, this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction), cancellationTokenSource.Token);
-					}
-					catch (Exception ex)
-					{
-						if (!cancellationTokenSource.IsCancellationRequested)
-							this.Logger.LogError(ex, "Failed to prepare LUT for brightness adjustment");
-					}
-				}
-				if (this.canResetContrastAdjustment.Value)
-				{
-					try
-					{
+					if (this.canResetContrastAdjustment.Value)
 						await ColorLut.ContrastTransformAsync(rLut, this.ContrastAdjustment, this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction), cancellationTokenSource.Token);
-					}
-					catch (Exception ex)
+					if (this.canResetHighlightAdjustment.Value)
+						await ColorLut.HighlightTransformAsync(rLut, this.HighlightAdjustment, cancellationTokenSource.Token);
+					if (this.canResetShadowAdjustment.Value)
+						await ColorLut.ShadowTransformAsync(rLut, this.ShadowAdjustment, cancellationTokenSource.Token);
+					if (this.canResetColorAdjustment.Value)
 					{
-						if (!cancellationTokenSource.IsCancellationRequested)
-							this.Logger.LogError(ex, "Failed to prepare LUT for contrast adjustment");
+						unsafe
+						{
+							var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+							var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+							var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+							var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
+							rFactor *= correction;
+							gFactor *= correction;
+							bFactor *= correction;
+							gLut = rLut.ToArray();
+							bLut = rLut.ToArray();
+							ColorLut.Multiply(rLut, rFactor);
+							ColorLut.Multiply(gLut, gFactor);
+							ColorLut.Multiply(bLut, bFactor);
+						}
 					}
 				}
-				if (this.canResetColorAdjustment.Value)
+				catch (Exception ex)
 				{
-					unsafe
-					{
-						var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-						var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-						var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-						var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
-						rFactor *= correction;
-						gFactor *= correction;
-						bFactor *= correction;
-						gLut = rLut.ToArray();
-						bLut = rLut.ToArray();
-						ColorLut.Multiply(rLut, rFactor);
-						ColorLut.Multiply(gLut, gFactor);
-						ColorLut.Multiply(bLut, bFactor);
-					}
+					if (!cancellationTokenSource.IsCancellationRequested)
+						this.Logger.LogError(ex, "Failed to prepare LUT to filter image");
 				}
 
 				// apply filter
