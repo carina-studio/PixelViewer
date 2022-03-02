@@ -1617,17 +1617,22 @@ namespace Carina.PixelViewer.ViewModels
 
 			// check filters needed
 			var filterCount = 0;
+			var isLuminanceLutFilterNeeded = false;
 			var isColorLutFilterNeeded = false;
+			var isGrayscaleFilterNeeded = false;
 			if (this.canResetBrightnessAdjustment.Value 
-				|| this.canResetColorAdjustment.Value 
 				|| this.canResetContrastAdjustment.Value
 				|| this.canResetHighlightAdjustment.Value
 				|| this.canResetShadowAdjustment.Value)
 			{
+				isLuminanceLutFilterNeeded = true;
+				++filterCount;
+			}
+			if (this.canResetColorAdjustment.Value)
+			{
 				isColorLutFilterNeeded = true;
 				++filterCount;
 			}
-			var isGrayscaleFilterNeeded = false;
 			if (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported)
 			{
 				isGrayscaleFilterNeeded = true;
@@ -1687,21 +1692,12 @@ namespace Carina.PixelViewer.ViewModels
 			// apply color LUT filter
 			if (isColorLutFilterNeeded)
 			{
-				// prepare color LUT
+				// prepare LUT
 				var rLut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
-				var gLut = rLut;
-				var bLut = rLut;
-				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
+				var gLut = rLut.ToArray();
+				var bLut = rLut.ToArray();
 				try
 				{
-					if (this.canResetBrightnessAdjustment.Value)
-						await ColorLut.BrightnessTransformAsync(histograms, rLut, this.BrightnessAdjustment, this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction), cancellationTokenSource.Token);
-					if (this.canResetContrastAdjustment.Value)
-						await ColorLut.ContrastTransformAsync(rLut, this.ContrastAdjustment, this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction), cancellationTokenSource.Token);
-					if (this.canResetHighlightAdjustment.Value)
-						await ColorLut.HighlightTransformAsync(rLut, this.HighlightAdjustment, cancellationTokenSource.Token);
-					if (this.canResetShadowAdjustment.Value)
-						await ColorLut.ShadowTransformAsync(rLut, this.ShadowAdjustment, cancellationTokenSource.Token);
 					if (this.canResetColorAdjustment.Value)
 					{
 						unsafe
@@ -1713,8 +1709,6 @@ namespace Carina.PixelViewer.ViewModels
 							rFactor *= correction;
 							gFactor *= correction;
 							bFactor *= correction;
-							gLut = rLut.ToArray();
-							bLut = rLut.ToArray();
 							ColorLut.Multiply(rLut, rFactor);
 							ColorLut.Multiply(gLut, gFactor);
 							ColorLut.Multiply(bLut, bFactor);
@@ -1724,7 +1718,7 @@ namespace Carina.PixelViewer.ViewModels
 				catch (Exception ex)
 				{
 					if (!cancellationTokenSource.IsCancellationRequested)
-						this.Logger.LogError(ex, "Failed to prepare LUT to filter image");
+						this.Logger.LogError(ex, "Failed to prepare color LUT to filter image");
 				}
 
 				// apply filter
@@ -1749,7 +1743,52 @@ namespace Carina.PixelViewer.ViewModels
 					failedToApply = true;
 			}
 
-			// apply luminance filter
+			// apply luminance LUT filter
+			if (isLuminanceLutFilterNeeded)
+			{
+				// prepare LUT
+				var lut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
+				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
+				try
+				{
+					if (this.canResetBrightnessAdjustment.Value)
+						await ColorLut.BrightnessTransformAsync(histograms, lut, this.BrightnessAdjustment, this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction), cancellationTokenSource.Token);
+					if (this.canResetContrastAdjustment.Value)
+						await ColorLut.ContrastTransformAsync(lut, this.ContrastAdjustment, this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction), cancellationTokenSource.Token);
+					if (this.canResetHighlightAdjustment.Value)
+						await ColorLut.HighlightTransformAsync(lut, this.HighlightAdjustment, cancellationTokenSource.Token);
+					if (this.canResetShadowAdjustment.Value)
+						await ColorLut.ShadowTransformAsync(lut, this.ShadowAdjustment, cancellationTokenSource.Token);
+				}
+				catch (Exception ex)
+				{
+					if (!cancellationTokenSource.IsCancellationRequested)
+						this.Logger.LogError(ex, "Failed to prepare luminance LUT to filter image");
+				}
+
+				// apply filter
+				var parameters = new ColorLutImageFilter.Params()
+				{
+					RedLookupTable = lut,
+					GreenLookupTable = lut,
+					BlueLookupTable = lut,
+					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
+				};
+				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
+				{
+					if (sourceImageFrame == renderedImageFrame)
+					{
+						sourceImageFrame = resultImageFrame;
+						resultImageFrame = filteredImageFrame2;
+					}
+					else
+						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+				}
+				else
+					failedToApply = true;
+			}
+
+			// apply grayscale filter
 			if (!failedToApply && isGrayscaleFilterNeeded)
 			{
 				if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), cancellationTokenSource.Token))
