@@ -155,7 +155,11 @@ namespace Carina.PixelViewer.Controls
 			{
 				it.PlacementTarget = this.brightnessAndContrastAdjustmentButton;
 				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = false);
-				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = true);
+				it.Opened += (_, e) => this.SynchronizationContext.Post(() => 
+				{
+					this.brightnessAndContrastAdjustmentButton.IsChecked = true;
+					ToolTip.SetIsOpen(this.brightnessAndContrastAdjustmentButton, false);
+				});
 			});
 			this.brightnessAndContrastAdjustmentPopupBorder = this.FindControl<Border>(nameof(brightnessAndContrastAdjustmentPopupBorder)).AsNonNull();
 			this.colorAdjustmentButton = this.FindControl<ToggleButton>(nameof(colorAdjustmentButton)).AsNonNull();
@@ -163,7 +167,11 @@ namespace Carina.PixelViewer.Controls
 			{
 				it.PlacementTarget = this.colorAdjustmentButton;
 				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = false);
-				it.Opened += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = true);
+				it.Opened += (_, e) => this.SynchronizationContext.Post(() => 
+				{
+					this.colorAdjustmentButton.IsChecked = true;
+					ToolTip.SetIsOpen(this.colorAdjustmentButton, false);
+				});
 			});
 			this.colorAdjustmentPopupBorder = this.FindControl<Border>(nameof(colorAdjustmentPopupBorder)).AsNonNull();
 			this.FindControl<Slider>("contrastAdjustmentSlider").AsNonNull().Also(it =>
