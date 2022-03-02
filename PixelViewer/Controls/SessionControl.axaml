@@ -18,7 +18,7 @@
 			 xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.SessionControl"
-			 Background="{DynamicResource Brush/WorkingArea.Background}">
+			 Background="{DynamicResource Brush/Window.Background}">
 	
 	<!-- Resources -->
 	<UserControl.Resources>
