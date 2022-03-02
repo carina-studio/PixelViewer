@@ -336,6 +336,8 @@ namespace Carina.PixelViewer.Controls
 						else
 							this.SetValue<IImage?>(EffectiveRenderedImageProperty, session.RenderedImage);
 					}
+					else
+						this.SetValue<IImage?>(EffectiveRenderedImageProperty, null);
 				}
 			});
 			this.updateEffectiveRenderedImageIntModeAction = new ScheduledAction(() =>

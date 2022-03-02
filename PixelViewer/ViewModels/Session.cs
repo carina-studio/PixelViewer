@@ -2692,7 +2692,8 @@ namespace Carina.PixelViewer.ViewModels
 				if (newValue == null)
 					this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.SetValue(HasRenderedImageProperty, newValue != null);
-				this.fitRenderedImageToViewportScale = double.NaN;
+				if (oldValue == null || newValue == null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
+					this.fitRenderedImageToViewportScale = double.NaN;
 				this.updateImageDisplaySizeAction.Execute();
 			}
 			else if (property == RenderingParametersPanelSizeProperty)
