@@ -374,7 +374,7 @@
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							<Border Classes="ToolBar_NotificationIndicator" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}">
-								<Image Classes="ToolBar_NotificationIndicator" Source="{DynamicResource Image/Icon.Information.Colored}"/>
+								<Image Classes="ToolBar_NotificationIndicator" Source="{DynamicResource Image/Icon.Update.Colored}"/>
 							</Border>
 						</Panel>
 					</ToggleButton>
@@ -925,7 +925,7 @@
 							<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding RenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.RenderedImagesMemoryUsage}"/>
 								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding TotalRenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.TotalRenderedImagesMemoryUsage}"/>
-								<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding $parent[UserControl].IsNotMacOS}" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
+								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
 							</StackPanel>
 						</Panel>
 

@@ -530,10 +530,6 @@ namespace Carina.PixelViewer.Controls
 		bool IsImageViewerScrollable { get => this.GetValue<bool>(IsImageViewerScrollableProperty); }
 
 
-		// OS type.
-		bool IsNotMacOS { get; } = !CarinaStudio.Platform.IsMacOS;
-
-
 		// Move to specific frame.
 		async void MoveToSpecificFrame()
 		{
