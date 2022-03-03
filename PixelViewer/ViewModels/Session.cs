@@ -337,6 +337,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasShadowAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasShadowAdjustment));
 		/// <summary>
+		/// Property of <see cref="HasVibranceAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasVibranceAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasVibranceAdjustment));
+		/// <summary>
 		/// Property of <see cref="HighlightAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> HighlightAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(HighlightAdjustment), 0, validate: it => double.IsFinite(it));
@@ -505,6 +509,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
 		/// <summary>
+		/// Property of <see cref="IsVibranceAdjustmentSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsVibranceAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsVibranceAdjustmentSupported));
+		/// <summary>
 		/// Property of <see cref="IsYuvToBgraConverterSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsYuvToBgraConverterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsYuvToBgraConverterSupported));
@@ -613,6 +621,19 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
 		/// <summary>
+		/// Property of <see cref="VibranceAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> VibranceAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(VibranceAdjustment), 0, 
+			coerce: it => 
+			{
+				if (it < -1)
+					return -1;
+				if (it > 1)
+					return 1;
+				return it;
+			},
+			validate: double.IsFinite);
+		/// <summary>
 		/// Property of <see cref="YuvToBgraConverter"/>.
 		/// </summary>
 		public static readonly ObservableProperty<YuvToBgraConverter> YuvToBgraConverterProperty = ObservableProperty.Register<Session, YuvToBgraConverter>(nameof(YuvToBgraConverter), YuvToBgraConverter.Default);
@@ -642,6 +663,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canResetContrastAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canResetHighlightAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canResetShadowAdjustment = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canResetVibranceAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveFilteredImage = new MutableObservableBoolean();
@@ -714,6 +736,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
 			this.ResetHighlightAdjustmentCommand = new Command(this.ResetHighlightAdjustment, this.canResetHighlightAdjustment);
 			this.ResetShadowAdjustmentCommand = new Command(this.ResetShadowAdjustment, this.canResetShadowAdjustment);
+			this.ResetVibranceAdjustmentCommand = new Command(this.ResetVibranceAdjustment, this.canResetVibranceAdjustment);
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 			this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
 			this.SaveAsNewProfileCommand = new Command<string>(name => this.SaveAsNewProfile(name), this.canSaveAsNewProfile);
@@ -841,6 +864,7 @@ namespace Carina.PixelViewer.ViewModels
 					|| this.canResetContrastAdjustment.Value
 					|| this.canResetHighlightAdjustment.Value
 					|| this.canResetShadowAdjustment.Value
+					|| this.canResetVibranceAdjustment.Value
 					|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 			});
 
@@ -1621,6 +1645,7 @@ namespace Carina.PixelViewer.ViewModels
 			var filterCount = 0;
 			var isLuminanceLutFilterNeeded = false;
 			var isColorLutFilterNeeded = false;
+			var isVibranceFilterNeeded = false;
 			var isGrayscaleFilterNeeded = false;
 			if (this.canResetBrightnessAdjustment.Value 
 				|| this.canResetContrastAdjustment.Value
@@ -1628,6 +1653,11 @@ namespace Carina.PixelViewer.ViewModels
 				|| this.canResetShadowAdjustment.Value)
 			{
 				isLuminanceLutFilterNeeded = true;
+				++filterCount;
+			}
+			if (this.canResetVibranceAdjustment.Value)
+			{
+				isVibranceFilterNeeded = true;
 				++filterCount;
 			}
 			if (this.canResetColorAdjustment.Value)
@@ -1732,6 +1762,27 @@ namespace Carina.PixelViewer.ViewModels
 					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
 				};
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
+				{
+					if (sourceImageFrame == renderedImageFrame)
+					{
+						sourceImageFrame = resultImageFrame;
+						resultImageFrame = filteredImageFrame2;
+					}
+					else
+						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+				}
+				else
+					failedToApply = true;
+			}
+
+			// apply vibrance filter
+			if (!failedToApply && isVibranceFilterNeeded)
+			{
+				var parameters = new VibranceImageFilter.Params()
+				{
+					Vibrance = this.VibranceAdjustment,
+				};
+				if (await this.ApplyImageFilterAsync(new VibranceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (sourceImageFrame == renderedImageFrame)
 					{
@@ -2040,6 +2091,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether <see cref="ShadowAdjustment"/> is non-zero or not.
 		/// </summary>
 		public bool HasShadowAdjustment { get => this.GetValue(HasShadowAdjustmentProperty); }
+
+
+		/// <summary>
+		/// Check whether <see cref="VibranceAdjustment"/> is non-zero or not.
+		/// </summary>
+		public bool HasVibranceAdjustment { get => this.GetValue(HasVibranceAdjustmentProperty); }
 
 
 		// Hibernate.
@@ -2380,6 +2437,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether vibrance adjustment is supported or not.
+		/// </summary>
+		public bool IsVibranceAdjustmentSupported { get => this.GetValue(IsVibranceAdjustmentSupportedProperty); }
+
+
+		/// <summary>
 		/// Check whether <see cref="YuvToBgraConverter"/> is supported by current <see cref="ImageRenderer"/> or not.
 		/// </summary>
 		public bool IsYuvToBgraConverterSupported { get => this.GetValue(IsYuvToBgraConverterSupportedProperty); }
@@ -2590,13 +2653,13 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsBrightnessAdjustmentSupportedProperty)
 			{
-				this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
+				this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && (bool)newValue.AsNonNull());
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Reschedule();
 			}
 			else if (property == IsColorAdjustmentSupportedProperty)
 			{
-				this.canResetColorAdjustment.Update(this.HasColorAdjustment && this.IsColorAdjustmentSupported);
+				this.canResetColorAdjustment.Update(this.HasColorAdjustment && (bool)newValue.AsNonNull());
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Reschedule();
 			}
@@ -2609,7 +2672,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsContrastAdjustmentSupportedProperty)
 			{
-				this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
+				this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && (bool)newValue.AsNonNull());
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Reschedule();
 			}
@@ -2639,7 +2702,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsHighlightAdjustmentSupportedProperty)
 			{
-				this.canResetHighlightAdjustment.Update(this.HasHighlightAdjustment && this.IsHighlightAdjustmentSupported);
+				this.canResetHighlightAdjustment.Update(this.HasHighlightAdjustment && (bool)newValue.AsNonNull());
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Reschedule();
 			}
@@ -2653,7 +2716,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsShadowAdjustmentSupportedProperty)
 			{
-				this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && this.IsShadowAdjustmentSupported);
+				this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && (bool)newValue.AsNonNull());
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Reschedule();
 			}
@@ -2664,6 +2727,12 @@ namespace Carina.PixelViewer.ViewModels
 				else
 					this.updateFilterSupportingAction.Execute();
 				this.UpdateCanZoomInOut();
+			}
+			else if (property == IsVibranceAdjustmentSupportedProperty)
+			{
+				this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && (bool)newValue.AsNonNull());
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Reschedule();
 			}
 			else if (property == IsYuvToBgraConverterSupportedProperty)
 			{
@@ -2718,6 +2787,13 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.SetValue(HasShadowAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 				this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && this.IsShadowAdjustmentSupported);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule(RenderImageDelay);
+			}
+			else if (property == VibranceAdjustmentProperty)
+			{
+				this.SetValue(HasVibranceAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+				this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsShadowAdjustmentSupported);
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
@@ -3556,6 +3632,22 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand ResetShadowAdjustmentCommand { get; }
 
 
+		// Reset vibrance adjustment.
+		void ResetVibranceAdjustment()
+		{
+			this.VerifyAccess();
+			if (this.IsDisposed || !this.canResetVibranceAdjustment.Value)
+				return;
+			this.SetValue(VibranceAdjustmentProperty, 0);
+		}
+
+
+		/// <summary>
+		/// Command to reset <see cref="VibranceAdjustment"/>.
+		/// </summary>
+		public ICommand ResetVibranceAdjustmentCommand { get; }
+
+
 		/// <summary>
 		/// Restore state.
 		/// </summary>
@@ -3682,6 +3774,7 @@ namespace Carina.PixelViewer.ViewModels
 			var isGrayscaleFilterEnabled = false;
 			var redColorAdjustment = 0.0;
 			var shadowAdjustment = 0.0;
+			var vibranceAdjustment = 0.0;
 			if (savedState.TryGetProperty(nameof(BlueColorAdjustment), out jsonProperty))
 				jsonProperty.TryGetDouble(out blueColorAdjustment);
 			if (savedState.TryGetProperty(nameof(BrightnessAdjustment), out jsonProperty))
@@ -3698,6 +3791,8 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetDouble(out redColorAdjustment);
 			if (savedState.TryGetProperty(nameof(ShadowAdjustment), out jsonProperty))
 				jsonProperty.TryGetDouble(out shadowAdjustment);
+			if (savedState.TryGetProperty(nameof(VibranceAdjustment), out jsonProperty))
+				jsonProperty.TryGetDouble(out vibranceAdjustment);
 
 			// load displaying parameters
 			var fitToViewport = true;
@@ -3773,6 +3868,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(IsGrayscaleFilterEnabledProperty, isGrayscaleFilterEnabled);
 			this.SetValue(RedColorAdjustmentProperty, redColorAdjustment);
 			this.SetValue(ShadowAdjustmentProperty, shadowAdjustment);
+			this.SetValue(VibranceAdjustmentProperty, vibranceAdjustment);
 
 			// apply displaying parameters
 			this.SetValue(FitImageToViewportProperty, fitToViewport);
@@ -4109,6 +4205,8 @@ namespace Carina.PixelViewer.ViewModels
 					writer.WriteNumber(nameof(HighlightAdjustment), this.HighlightAdjustment);
 				if (this.HasShadowAdjustment)
 					writer.WriteNumber(nameof(ShadowAdjustment), this.ShadowAdjustment);
+				if (this.HasVibranceAdjustment)
+					writer.WriteNumber(nameof(VibranceAdjustment), this.VibranceAdjustment);
 				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 
 				// displaying parameters
@@ -4474,6 +4572,16 @@ namespace Carina.PixelViewer.ViewModels
 				this.Title = title;
 				this.OnPropertyChanged(nameof(this.Title));
 			}
+		}
+
+
+		/// <summary>
+		/// Get or set vibrance adjustment. Range is [-1.0, 1.0].
+		/// </summary>
+		public double VibranceAdjustment
+		{
+			get => this.GetValue(VibranceAdjustmentProperty);
+			set => this.SetValue(VibranceAdjustmentProperty, value);
 		}
 
 

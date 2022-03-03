@@ -163,10 +163,11 @@
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">Shadow</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte ordering</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color balance: Adjust ratio of R/G/B without changing the luminance.</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color: Adjust ratio of R/G/B without changing the luminance.</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">Vibrance</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">Color space</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management has been disabled, click to open options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save image which has been filtered?</sys:String>

@@ -72,6 +72,7 @@ namespace Carina.PixelViewer.Controls
 		readonly Border brightnessAndContrastAdjustmentPopupBorder;
 		readonly MutableObservableValue<bool> canOpenSourceFile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canResetBrightnessAndContrastAdjustment = new MutableObservableValue<bool>();
+		readonly MutableObservableValue<bool> canResetColorAdjustment = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveAsNewProfile = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canSaveImage = new MutableObservableValue<bool>();
 		readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new MutableObservableValue<bool>();
@@ -121,6 +122,7 @@ namespace Carina.PixelViewer.Controls
 			// create commands
 			this.OpenSourceFileCommand = new Command(this.OpenSourceFile, this.canOpenSourceFile);
 			this.ResetBrightnessAndContrastAdjustmentCommand = new Command(this.ResetBrightnessAndContrastAdjustment, this.canResetBrightnessAndContrastAdjustment);
+			this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 			this.SaveAsNewProfileCommand = new Command(() => this.SaveAsNewProfile(), this.canSaveAsNewProfile);
 			this.SaveImageCommand = new Command(() => this.SaveImage(), this.canSaveImage);
 			this.ShowEvaluateImageDimensionsMenuCommand = new Command(() =>
@@ -284,6 +286,11 @@ namespace Carina.PixelViewer.Controls
 #if DEBUG
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
+			this.FindControl<Slider>("vibranceAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+			});
 
 			// load resources
 			if (this.Application.TryGetResource<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels", out var doubleRes))
@@ -1019,9 +1026,11 @@ namespace Carina.PixelViewer.Controls
 					oldSession.PropertyChanged -= this.OnSessionPropertyChanged;
 					oldSession.OpenSourceFileCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.ResetBrightnessAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
+					oldSession.ResetColorAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.ResetContrastAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.ResetHighlightAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.ResetShadowAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
+					oldSession.ResetVibranceAdjustmentCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.SaveAsNewProfileCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.SaveFilteredImageCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
 					oldSession.SaveRenderedImageCommand.CanExecuteChanged -= this.OnSessionCommandCanExecuteChanged;
@@ -1032,9 +1041,11 @@ namespace Carina.PixelViewer.Controls
 					newSession.PropertyChanged += this.OnSessionPropertyChanged;
 					newSession.OpenSourceFileCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.ResetBrightnessAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
+					newSession.ResetColorAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.ResetContrastAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.ResetHighlightAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.ResetShadowAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
+					newSession.ResetVibranceAdjustmentCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.SaveAsNewProfileCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.SaveFilteredImageCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
 					newSession.SaveRenderedImageCommand.CanExecuteChanged += this.OnSessionCommandCanExecuteChanged;
@@ -1043,6 +1054,8 @@ namespace Carina.PixelViewer.Controls
 						|| newSession.ResetContrastAdjustmentCommand.CanExecute(null)
 						|| newSession.ResetHighlightAdjustmentCommand.CanExecute(null)
 						|| newSession.ResetShadowAdjustmentCommand.CanExecute(null));
+					this.canResetColorAdjustment.Update(newSession.ResetColorAdjustmentCommand.CanExecute(null)
+						|| newSession.ResetVibranceAdjustmentCommand.CanExecute(null));
 					this.canSaveAsNewProfile.Update(newSession.SaveAsNewProfileCommand.CanExecute(null));
 					this.canSaveImage.Update(newSession.SaveFilteredImageCommand.CanExecute(null)
 						|| newSession.SaveRenderedImageCommand.CanExecute(null));
@@ -1060,6 +1073,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					this.canOpenSourceFile.Update(false);
 					this.canResetBrightnessAndContrastAdjustment.Update(false);
+					this.canResetColorAdjustment.Update(false);
 					this.canSaveAsNewProfile.Update(false);
 					this.canSaveImage.Update(false);
 					this.canShowEvaluateImageDimensionsMenu.Update(false);
@@ -1104,6 +1118,12 @@ namespace Carina.PixelViewer.Controls
 					|| session.ResetContrastAdjustmentCommand.CanExecute(null)
 					|| session.ResetHighlightAdjustmentCommand.CanExecute(null)
 					|| session.ResetShadowAdjustmentCommand.CanExecute(null));
+			}
+			else if (sender == session.ResetColorAdjustmentCommand
+				|| sender == session.ResetVibranceAdjustmentCommand)
+			{
+				this.canResetColorAdjustment.Update(session.ResetColorAdjustmentCommand.CanExecute(null)
+					|| session.ResetVibranceAdjustmentCommand.CanExecute(null));
 			}
 			else if (sender == session.SaveAsNewProfileCommand)
 				this.canSaveAsNewProfile.Update(session.SaveAsNewProfileCommand.CanExecute(null));
@@ -1337,6 +1357,20 @@ namespace Carina.PixelViewer.Controls
 
 		// Command to reset brightness and contrast.
 		ICommand ResetBrightnessAndContrastAdjustmentCommand { get; }
+
+
+		// Reset color adjustment.
+		void ResetColorAdjustment()
+		{
+			if (!this.canResetColorAdjustment.Value || this.DataContext is not Session session)
+				return;
+			session.ResetColorAdjustmentCommand.TryExecute();
+			session.ResetVibranceAdjustmentCommand.TryExecute();
+		}
+
+
+		// Command to reset color adjustment.
+		ICommand ResetColorAdjustmentCommand { get; }
 
 
 		// Save as new profile.

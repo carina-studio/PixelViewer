@@ -306,7 +306,14 @@
 						<ToggleButton Name="colorAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ColorAdjustment}">
 							<Panel>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Active}" IsVisible="{Binding HasColorAdjustment}"/>
+								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Active}">
+									<Image.IsVisible>
+										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+											<Binding Path="HasColorAdjustment"/>
+											<Binding Path="HasVibranceAdjustment"/>
+										</MultiBinding>
+									</Image.IsVisible>
+								</Image>
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="colorAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
@@ -314,7 +321,7 @@
 											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<Button Classes="Dialog_ControlButton" Command="{Binding SelectColorAdjustmentCommand}" Content="{DynamicResource String/SessionControl.SelectColorAdjustment}"/>
-													<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
+													<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
 												</StackPanel>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
@@ -345,6 +352,13 @@
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
 												<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator_Small"/>
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Vibrance}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding VibranceAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
 											</StackPanel>
 										</DockPanel>
 									</Border>
