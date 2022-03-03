@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,8 +20,35 @@ namespace Carina.PixelViewer.Media
         static readonly ILogger? Logger = AppSuiteApplication.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapHistograms));
 
 
+        // Fields.
+        readonly int highlightOfBlue;
+        readonly int highlightOfGreen;
+        readonly int highlightOfLuminance;
+        readonly int highlightOfRed;
+        readonly int maxOfBlue;
+        readonly int maxOfGreen;
+        readonly int maxOfLuminance;
+        readonly int maxOfRed;
+        readonly double meanOfBlue;
+        readonly double meanOfGreen;
+        readonly double meanOfLuminance;
+        readonly double meanOfRed;
+        readonly int medianOfBlue;
+        readonly int medianOfGreen;
+        readonly int medianOfLuminance;
+        readonly int medianOfRed;
+        readonly int minOfBlue;
+        readonly int minOfGreen;
+        readonly int minOfLuminance;
+        readonly int minOfRed;
+        readonly int shadowOfBlue;
+        readonly int shadowOfGreen;
+        readonly int shadowOfLuminance;
+        readonly int shadowOfRed;
+
+
         // Constructor.
-        BitmapHistograms(int effectivePixelCount, IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance, int medianOfLuminance)
+        BitmapHistograms(int effectivePixelCount, IList<int> red, IList<int> green, IList<int> blue, IList<int> luminance)
         {
             this.ColorCount = red.Count;
             if (this.ColorCount != green.Count || this.ColorCount != blue.Count || this.ColorCount != luminance.Count)
@@ -32,8 +58,54 @@ namespace Carina.PixelViewer.Media
             this.Green = green.AsReadOnly();
             this.Luminance = luminance.AsReadOnly();
             this.Maximum = Math.Max(Math.Max(red.Max(), green.Max()), Math.Max(blue.Max(), luminance.Max()));
-            this.MedianOfLuminance = medianOfLuminance;
             this.Red = red.AsReadOnly();
+            Analyze(luminance, effectivePixelCount, out this.meanOfLuminance, out this.minOfLuminance, out this.shadowOfLuminance, out this.medianOfLuminance, out this.highlightOfLuminance, out this.maxOfLuminance);
+            Analyze(red, effectivePixelCount, out this.meanOfRed, out this.minOfRed, out this.shadowOfRed, out this.medianOfRed, out this.highlightOfRed, out this.maxOfRed);
+            Analyze(green, effectivePixelCount, out this.meanOfGreen, out this.minOfGreen, out this.shadowOfGreen, out this.medianOfGreen, out this.highlightOfGreen, out this.maxOfGreen);
+            Analyze(blue, effectivePixelCount, out this.meanOfBlue, out this.minOfBlue, out this.shadowOfBlue, out this.medianOfBlue, out this.highlightOfBlue, out this.maxOfBlue);
+        }
+
+
+        // Analyze histogram.
+        static void Analyze(IList<int> histogram, int pixelCount, out double mean, out int min, out int shadow, out int median, out int highlight, out int max)
+        {
+            var shadowPixelCount = pixelCount >> 2;
+            var medianPixelCount = pixelCount >> 1;
+            var highlightPixelCount = (pixelCount * 3) >> 2;
+            var accuPixelCount = 0;
+            mean = 0.0;
+            min = 0;
+            shadow = 0;
+            median = 0;
+            highlight = 0;
+            max = 0;
+            for (int i = 0, colorCount = histogram.Count; i < colorCount; ++i)
+            {
+                var count = histogram[i];
+                if (count == 0)
+                    continue;
+                var prevAccuPixelCount = accuPixelCount;
+                accuPixelCount += count;
+                mean += i * (double)count / pixelCount;
+                if (prevAccuPixelCount == 0)
+                    min = i;
+                if (prevAccuPixelCount < shadowPixelCount)
+                {
+                    if (accuPixelCount >= shadowPixelCount)
+                        shadow = i;
+                }
+                if (prevAccuPixelCount < medianPixelCount)
+                {
+                    if (accuPixelCount >= medianPixelCount)
+                        median = i;
+                }
+                if (prevAccuPixelCount < highlightPixelCount)
+                {
+                    if (accuPixelCount >= highlightPixelCount)
+                        highlight = i;
+                }
+                max = i;
+            }
         }
 
 
@@ -124,21 +196,9 @@ namespace Carina.PixelViewer.Media
                             });
                         });
                     }
-                    var halfPixelCount = (bitmapBuffer.Width * bitmapBuffer.Height) >> 1;
-                    var accuPixelCount = 0;
-                    var medianOfLuminance = 0;
-                    for (int i = 0, colorCount = luminance.Length; i < colorCount; ++i)
-                    {
-                        accuPixelCount += luminance[i];
-                        if (accuPixelCount >= halfPixelCount)
-                        {
-                            medianOfLuminance = i;
-                            break;
-                        }
-                    }
                     if (stopWatch != null)
                         Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
-                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance, medianOfLuminance);
+                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
                 });
             }
             finally
@@ -209,21 +269,9 @@ namespace Carina.PixelViewer.Media
                             });
                         });
                     }
-                    var halfPixelCount = (bitmapBuffer.Width * bitmapBuffer.Height) >> 1;
-                    var accuPixelCount = 0;
-                    var medianOfLuminance = 0;
-                    for (int i = 0, colorCount = luminance.Length; i < colorCount; ++i)
-                    {
-                        accuPixelCount += luminance[i];
-                        if (accuPixelCount >= halfPixelCount)
-                        {
-                            medianOfLuminance = i;
-                            break;
-                        }
-                    }
                     if (stopWatch != null)
                         Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
-                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance, medianOfLuminance);
+                    return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
                 });
             }
             finally
@@ -246,6 +294,30 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Get highlight value of blue channel.
+        /// </summary>
+        public int HighlightOfBlue { get => this.highlightOfBlue; }
+
+
+        /// <summary>
+        /// Get highlight value of green channel.
+        /// </summary>
+        public int HighlightOfGreen { get => this.highlightOfGreen; }
+
+
+        /// <summary>
+        /// Get highlight value of luminance.
+        /// </summary>
+        public int HighlightOfLuminance { get => this.highlightOfLuminance; }
+
+
+        /// <summary>
+        /// Get highlight value of red channel.
+        /// </summary>
+        public int HighlightOfRed { get => this.highlightOfRed; }
+
+
+        /// <summary>
         /// Histogram of luminance.
         /// </summary>
         public IList<int> Luminance { get; }
@@ -258,14 +330,128 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Get maximum value of blue channel.
+        /// </summary>
+        public int MaxOfBlue { get => this.maxOfBlue; }
+
+
+        /// <summary>
+        /// Get maximum value of green channel.
+        /// </summary>
+        public int MaxOfGreen { get => this.maxOfGreen; }
+
+
+        /// <summary>
+        /// Get maximum value of luminance.
+        /// </summary>
+        public int MaxOfLuminance { get => this.maxOfLuminance; }
+
+
+        /// <summary>
+        /// Get maximum value of red channel.
+        /// </summary>
+        public int MaxOfRed { get => this.maxOfRed; }
+
+
+        /// <summary>
+        /// Get mean value of blue channel.
+        /// </summary>
+        public double MeanOfBlue { get => this.meanOfBlue; }
+
+
+        /// <summary>
+        /// Get mean value of green channel.
+        /// </summary>
+        public double MeanOfGreen { get => this.meanOfGreen; }
+
+
+        /// <summary>
+        /// Get mean value of luminance.
+        /// </summary>
+        public double MeanOfLuminance { get => this.meanOfLuminance; }
+
+
+        /// <summary>
+        /// Get mean value of red channel.
+        /// </summary>
+        public double MeanOfRed { get => this.meanOfRed; }
+
+
+        /// <summary>
+        /// Get median value of blue channel.
+        /// </summary>
+        public int MedianOfBlue { get => this.medianOfBlue; }
+
+
+        /// <summary>
+        /// Get median value of green channel.
+        /// </summary>
+        public int MedianOfGreen { get => this.medianOfGreen; }
+
+
+        /// <summary>
         /// Get median value of luminance.
         /// </summary>
-        public int MedianOfLuminance { get; }
+        public int MedianOfLuminance { get => this.medianOfLuminance; }
+
+
+        /// <summary>
+        /// Get median value of red channel.
+        /// </summary>
+        public int MedianOfRed { get => this.medianOfRed; }
+
+
+        /// <summary>
+        /// Get minimum value of blue channel.
+        /// </summary>
+        public int MinOfBlue { get => this.minOfBlue; }
+
+
+        /// <summary>
+        /// Get minimum value of green channel.
+        /// </summary>
+        public int MinOfGreen { get => this.minOfGreen; }
+
+
+        /// <summary>
+        /// Get minimum value of luminance.
+        /// </summary>
+        public int MinOfLuminance { get => this.minOfLuminance; }
+
+
+        /// <summary>
+        /// Get minimum value of red channel.
+        /// </summary>
+        public int MinOfRed { get => this.minOfRed; }
 
 
         /// <summary>
         /// Histogram of red channel.
         /// </summary>
         public IList<int> Red { get; }
+
+
+        /// <summary>
+        /// Get shadow value of blue channel.
+        /// </summary>
+        public int ShadowOfBlue { get => this.shadowOfBlue; }
+
+
+        /// <summary>
+        /// Get shadow value of green channel.
+        /// </summary>
+        public int ShadowOfGreen { get => this.shadowOfGreen; }
+
+
+        /// <summary>
+        /// Get shadow value of luminance.
+        /// </summary>
+        public int ShadowOfLuminance { get => this.shadowOfLuminance; }
+
+
+        /// <summary>
+        /// Get shadow value of red channel.
+        /// </summary>
+        public int ShadowOfRed { get => this.shadowOfRed; }
     }
 }

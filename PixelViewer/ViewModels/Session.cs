@@ -646,6 +646,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveFilteredImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canSelectColorAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomTo = new MutableObservableBoolean();
@@ -719,6 +720,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SaveFilteredImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveFilteredImage(parameters), this.canSaveFilteredImage);
 			this.SaveProfileCommand = new Command(() => this.SaveProfile(), this.canSaveOrDeleteProfile);
 			this.SaveRenderedImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveRenderedImage(parameters), this.canSaveRenderedImage);
+			this.SelectColorAdjustmentCommand = new Command(this.SelectColorAdjustment, this.canSelectColorAdjustment);
 			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
 			this.ZoomToCommand = new Command<double>(scale => 
@@ -1690,7 +1692,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
 			// apply color LUT filter
-			if (isColorLutFilterNeeded)
+			if (!failedToApply && isColorLutFilterNeeded)
 			{
 				// prepare LUT
 				var rLut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
@@ -1744,7 +1746,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// apply luminance LUT filter
-			if (isLuminanceLutFilterNeeded)
+			if (!failedToApply && isLuminanceLutFilterNeeded)
 			{
 				// prepare LUT
 				var lut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
@@ -2692,6 +2694,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (newValue == null)
 					this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.SetValue(HasRenderedImageProperty, newValue != null);
+				this.canSelectColorAdjustment.Update(newValue != null && this.renderedImageFrame?.Histograms != null);
 				if (oldValue == null || newValue == null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
 					this.fitRenderedImageToViewportScale = double.NaN;
 				this.updateImageDisplaySizeAction.Execute();
@@ -4133,6 +4136,110 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.GetValue(ScreenPixelDensityProperty);
 			set => this.SetValue(ScreenPixelDensityProperty, value);
 		}
+
+
+		// Perform auto color adjustment.
+		void SelectColorAdjustment()
+		{
+			// check state
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			if (!this.canSelectColorAdjustment.Value)
+				return;
+			
+			// get histigram
+			var histograms = this.renderedImageFrame?.Histograms;
+			if (histograms == null)
+				return;
+			
+			// calculate ratio of RGB
+			var rRatio = 0.0;
+			var gRatio = 0.0;
+			var bRatio = 0.0;
+			var refR = histograms.MeanOfRed;
+			var refG = histograms.MeanOfGreen;
+			var refB = histograms.MeanOfBlue;
+			if (refR > refG)
+			{
+				if (refR > refB)
+				{
+					if (refG > refB) // R > G > B
+					{
+						rRatio = refG / refR;
+						gRatio = 1.0;
+						bRatio = refG / refB;
+					}
+					else // R > B >= G
+					{
+						rRatio = refB / refR;
+						gRatio = refB / refG;
+						bRatio = 1.0;
+					}
+				}
+				else // B >= R > G
+				{
+					rRatio = 1.0;
+					gRatio = refR / refG;
+					bRatio = refR / refB;
+				}
+			}
+			else if (refG > refB)
+			{
+				if (refR > refB) // G > R > B
+				{
+					rRatio = 1.0;
+					gRatio = refR / refG;
+					bRatio = refR / refB;
+				}
+				else // G > B >= R
+				{
+					rRatio = refB / refR;
+					gRatio = refB / refG;
+					bRatio = 1.0;
+				}
+			}
+			else // B >= G >= R
+			{
+				rRatio = refG / refR;
+				gRatio = 1.0;
+				bRatio = refG / refB;
+			}
+			if (!double.IsFinite(rRatio) || !double.IsFinite(gRatio) || !double.IsFinite(bRatio))
+				return;
+			if (rRatio == 0 || gRatio == 0 || bRatio == 0)
+				return;
+			
+			// apply color adjustment
+			this.SetValue(RedColorAdjustmentProperty, rRatio < 0.5
+				? -1
+				: rRatio > 2
+					? 1
+					: rRatio >= 1
+						? rRatio - 1
+						: 1 - 1 / rRatio);
+			this.SetValue(GreenColorAdjustmentProperty, gRatio < 0.5
+				? -1
+				: gRatio > 2
+					? 1
+					: gRatio >= 1
+						? gRatio - 1
+						: 1 - 1 / gRatio);
+			this.SetValue(BlueColorAdjustmentProperty, bRatio < 0.5
+				? -1
+				: bRatio > 2
+					? 1
+					: bRatio >= 1
+						? bRatio - 1
+						: 1 - 1 / bRatio);
+			if (this.filterImageAction.IsScheduled)
+				this.filterImageAction.Reschedule();
+		}
+
+
+		/// <summary>
+		/// Command to apply auto color adjustment.
+		/// </summary>
+		public ICommand SelectColorAdjustmentCommand { get; }
 
 
 		// Select default image renderer according to settings.

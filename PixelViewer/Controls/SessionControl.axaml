@@ -312,7 +312,10 @@
 									<Border Name="colorAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
 										<DockPanel>
 											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
-												<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}" HorizontalAlignment="Center"/>
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<Button Classes="Dialog_ControlButton" Command="{Binding SelectColorAdjustmentCommand}" Content="{DynamicResource String/SessionControl.SelectColorAdjustment}"/>
+													<Button Classes="Dialog_ControlButton" Command="{Binding ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
+												</StackPanel>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
 												<StackPanel.Styles>
