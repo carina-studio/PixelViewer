@@ -162,6 +162,9 @@ namespace Carina.PixelViewer.Controls
 					this.brightnessAndContrastAdjustmentButton.IsChecked = true;
 					ToolTip.SetIsOpen(this.brightnessAndContrastAdjustmentButton, false);
 				});
+
+				// [Workaround] Prevent handling pointer event by parent button
+				it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 			});
 			this.brightnessAndContrastAdjustmentPopupBorder = this.FindControl<Border>(nameof(brightnessAndContrastAdjustmentPopupBorder)).AsNonNull();
 			this.colorAdjustmentButton = this.FindControl<ToggleButton>(nameof(colorAdjustmentButton)).AsNonNull();
@@ -174,6 +177,9 @@ namespace Carina.PixelViewer.Controls
 					this.colorAdjustmentButton.IsChecked = true;
 					ToolTip.SetIsOpen(this.colorAdjustmentButton, false);
 				});
+
+				// [Workaround] Prevent handling pointer event by parent button
+				it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 			});
 			this.colorAdjustmentPopupBorder = this.FindControl<Border>(nameof(colorAdjustmentPopupBorder)).AsNonNull();
 			this.FindControl<Slider>("contrastAdjustmentSlider").AsNonNull().Also(it =>
