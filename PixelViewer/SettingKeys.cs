@@ -36,6 +36,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<ByteOrdering> DefaultByteOrdering = new(nameof(ByteOrdering), ByteOrdering.LittleEndian);
 		/// <summary>
+		/// Name of default color space.
+		/// </summary>
+		public static readonly SettingKey<string> DefaultColorSpaceName = new(nameof(DefaultColorSpaceName), "sRGB");
+		/// <summary>
 		/// Default aspect ratio for image dimensions evaluation.
 		/// </summary>
 		public static readonly SettingKey<AspectRatio> DefaultImageDimensionsEvaluationAspectRatio = new SettingKey<AspectRatio>(nameof(DefaultImageDimensionsEvaluationAspectRatio), AspectRatio.Unknown);

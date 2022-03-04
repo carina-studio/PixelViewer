@@ -894,6 +894,8 @@ namespace Carina.PixelViewer.ViewModels
 
 			// setup color space management
 			this.SetValue(IsColorSpaceManagementEnabledProperty, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
+			if (BitmapColorSpace.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
+				this.SetValue(ColorSpaceProperty, colorSpace);
 
 			// setup title
 			this.UpdateTitle();

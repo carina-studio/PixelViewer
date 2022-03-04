@@ -75,6 +75,7 @@ namespace Carina.PixelViewer.Media.Profiles
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
+            BitmapColorSpace.TryGetByName(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
             this.Type = type;
             if (type == ImageRenderingProfileType.Default)
             {

@@ -159,10 +159,21 @@
 				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
 				<Separator Classes="Dialog_Separator"/>
 
+				<!-- Default color space -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
+				<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:BitmapColorSpace.All}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<TextBlock Text="{Binding Converter={x:Static appConverters:BitmapColorSpaceToStringConverter.Default}}"/>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/RGB_color_spaces"/>
+				<Separator Classes="Dialog_Separator"/>
+
 				<!-- Screen color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
 				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:ScreenColorSpace}" IsEnabled="{Binding EnableColorSpaceManagement}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}"/>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/RGB_color_spaces"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Image filter -->

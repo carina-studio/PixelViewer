@@ -66,6 +66,20 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Default color space for image rendering.
+		/// </summary>
+		public BitmapColorSpace DefaultColorSpace
+		{
+			get 
+			{
+				BitmapColorSpace.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
+				return colorSpace;
+			}
+			set => this.Settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, value.Name);
+		}
+
+
+		/// <summary>
 		/// Default aspect ratio for image dimensions evaluation.
 		/// </summary>
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
@@ -167,6 +181,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.CreateNewSessionForDragDropFile));
 			else if (key == SettingKeys.DefaultByteOrdering)
 				this.OnPropertyChanged(nameof(this.DefaultByteOrdering));
+			else if (key == SettingKeys.DefaultColorSpaceName)
+				this.OnPropertyChanged(nameof(this.DefaultColorSpace));
 			else if (key == SettingKeys.DefaultImageDimensionsEvaluationAspectRatio)
 				this.OnPropertyChanged(nameof(this.DefaultImageDimensionsEvaluationAspectRatio));
 			else if (key == SettingKeys.DefaultImageRendererFormatName)
