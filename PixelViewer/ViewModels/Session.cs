@@ -2886,6 +2886,13 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			}
 
+			// reset filter parameters
+			if (this.Settings.GetValueOrDefault(SettingKeys.ResetFilterParamsAfterOpeningSourceFile))
+			{
+				this.ResetFilterParams();
+				this.filterImageAction.Cancel();
+			}
+
 			// close current source file
 			this.CloseSourceFile(false);
 
@@ -3598,6 +3605,19 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to reset <see cref="ContrastAdjustment"/>.
 		/// </summary>
 		public ICommand ResetContrastAdjustmentCommand { get; }
+
+
+		// Reset all filter parameters.
+		void ResetFilterParams()
+		{
+			this.ResetBrightnessAdjustment();
+			this.ResetColorAdjustment();
+			this.ResetContrastAdjustment();
+			this.ResetHighlightAdjustment();
+			this.ResetShadowAdjustment();
+			this.ResetVibranceAdjustment();
+			this.SetValue(IsGrayscaleFilterEnabledProperty, false);
+		}
 
 
 		// Reset highlight adjustment.

@@ -80,6 +80,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<long> MaxRenderedImagesMemoryUsageMB = new SettingKey<long>(nameof(MaxRenderedImagesMemoryUsageMB), Environment.Is64BitProcess ? 2048 : 1024);
 		/// <summary>
+		/// Reset image filter parameters after opening image source file.
+		/// </summary>
+		public static readonly SettingKey<bool> ResetFilterParamsAfterOpeningSourceFile = new (nameof(ResetFilterParamsAfterOpeningSourceFile), true);
+		/// <summary>
 		/// Reset image plane options after changing image dimensions.
 		/// </summary>
 		public static readonly SettingKey<bool> ResetImagePlaneOptionsAfterChangingImageDimensions = new SettingKey<bool>(nameof(ResetImagePlaneOptionsAfterChangingImageDimensions), true);

@@ -178,6 +178,11 @@
 				<!-- Contrast transformation -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ContrastTransformationFunction}"/>
 				<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appImageFilters:ContrastTransformationFunction}" SelectedItem="{Binding ContrastTransformationFunction, Mode=TwoWay}"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Reset filter params after opening file -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile}"/>
+				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ResetFilterParamsAfterOpeningSourceFile, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Other -->

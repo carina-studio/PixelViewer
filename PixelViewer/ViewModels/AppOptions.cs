@@ -183,6 +183,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EvaluateImageRendererByFileName));
 			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
+			else if (key == SettingKeys.ResetFilterParamsAfterOpeningSourceFile)
+				this.OnPropertyChanged(nameof(this.ResetFilterParamsAfterOpeningSourceFile));
 			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)
 				this.OnPropertyChanged(nameof(this.ResetImagePlaneOptionsAfterChangingImageDimensions));
 			else if (key == SettingKeys.SaveRenderedImageWithOrientation)
@@ -199,6 +201,16 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.ShowSelectedRenderedImagePixelXyzColor));
 			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
+		}
+
+
+		/// <summary>
+		/// Reset image filter parameters after opening image source file.
+		/// </summary>
+		public bool ResetFilterParamsAfterOpeningSourceFile
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ResetFilterParamsAfterOpeningSourceFile);
+			set => this.Settings.SetValue<bool>(SettingKeys.ResetFilterParamsAfterOpeningSourceFile, value);
 		}
 
 
