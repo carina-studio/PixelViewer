@@ -152,8 +152,8 @@ namespace Carina.PixelViewer.Media.ImageFilters
             {
                 case ContrastTransformationFunction.Arctan:
                     {
-                        var intensityL = intensity * -30;
-						var intensityR = intensity * 30;
+                        var intensityL = intensity * -20;
+						var intensityR = intensity * 20;
 						ArctanTransform(lut, 0, lut.Count / 2, intensityL);
 						ArctanTransform(lut, lut.Count / 2, lut.Count, intensityR);
                     }
