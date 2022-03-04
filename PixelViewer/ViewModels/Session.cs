@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -1723,6 +1724,9 @@ namespace Carina.PixelViewer.ViewModels
 			var failedToApply = false;
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
+			// prepare for performance check
+			var stopwatch = this.Application.IsDebugMode ? new Stopwatch() : null;
+
 			// apply color LUT filter
 			if (!failedToApply && isColorLutFilterNeeded)
 			{
@@ -1732,22 +1736,22 @@ namespace Carina.PixelViewer.ViewModels
 				var bLut = rLut.ToArray();
 				try
 				{
-					if (this.canResetColorAdjustment.Value)
+					stopwatch?.Restart();
+					unsafe
 					{
-						unsafe
-						{
-							var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-							var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-							var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-							var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
-							rFactor *= correction;
-							gFactor *= correction;
-							bFactor *= correction;
-							ColorLut.Multiply(rLut, rFactor);
-							ColorLut.Multiply(gLut, gFactor);
-							ColorLut.Multiply(bLut, bFactor);
-						}
+						var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
+						rFactor *= correction;
+						gFactor *= correction;
+						bFactor *= correction;
+						ColorLut.Multiply(rLut, rFactor);
+						ColorLut.Multiply(gLut, gFactor);
+						ColorLut.Multiply(bLut, bFactor);
 					}
+					if (stopwatch != null)
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to prepare color LUT");
 				}
 				catch (Exception ex)
 				{
@@ -1763,8 +1767,11 @@ namespace Carina.PixelViewer.ViewModels
 					BlueLookupTable = bLut,
 					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
 				};
+				stopwatch?.Restart();
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
+					if (stopwatch != null)
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply color LUT filter");
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
@@ -1784,8 +1791,11 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					Vibrance = this.VibranceAdjustment,
 				};
+				stopwatch?.Restart();
 				if (await this.ApplyImageFilterAsync(new VibranceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
+					if (stopwatch != null)
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply vibrance filter");
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
@@ -1806,6 +1816,7 @@ namespace Carina.PixelViewer.ViewModels
 				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
 				try
 				{
+					stopwatch?.Restart();
 					if (this.canResetBrightnessAdjustment.Value)
 						await ColorLut.BrightnessTransformAsync(histograms, lut, this.BrightnessAdjustment, this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction), cancellationTokenSource.Token);
 					if (this.canResetContrastAdjustment.Value)
@@ -1814,6 +1825,8 @@ namespace Carina.PixelViewer.ViewModels
 						await ColorLut.HighlightTransformAsync(lut, this.HighlightAdjustment, cancellationTokenSource.Token);
 					if (this.canResetShadowAdjustment.Value)
 						await ColorLut.ShadowTransformAsync(lut, this.ShadowAdjustment, cancellationTokenSource.Token);
+					if (stopwatch != null)
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to prepare luminance LUT");
 				}
 				catch (Exception ex)
 				{
@@ -1829,8 +1842,11 @@ namespace Carina.PixelViewer.ViewModels
 					BlueLookupTable = lut,
 					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
 				};
+				stopwatch?.Restart();
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
+					if (stopwatch != null)
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply luminance LUT filter");
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
@@ -1846,8 +1862,11 @@ namespace Carina.PixelViewer.ViewModels
 			// apply grayscale filter
 			if (!failedToApply && isGrayscaleFilterNeeded)
 			{
+				stopwatch?.Restart();
 				if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), cancellationTokenSource.Token))
 				{
+					if (stopwatch != null)
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply grayscale filter");
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
