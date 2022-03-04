@@ -1,6 +1,7 @@
 using CarinaStudio;
 using CarinaStudio.Configuration;
 using System;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Carina.PixelViewer.Media.ImageFilters
@@ -43,12 +44,71 @@ namespace Carina.PixelViewer.Media.ImageFilters
         }
 
 
+        // Find min and max color.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void FindMinMax(byte x, byte y, byte z, out byte min, out byte max)
+        {
+            if (x > y)
+            {
+                if (x > z)
+                {
+                    min = (y > z) ? z : y;
+                    max = x;
+                }
+                else
+                {
+                    min = y;
+                    max = z;
+                }
+            }
+            else if (x > z)
+            {
+                min = z;
+                max = y;
+            }
+            else
+            {
+                min = x;
+                max = (y > z) ? y : z;
+            }
+        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        static void FindMinMax(ushort x, ushort y, ushort z, out ushort min, out ushort max)
+        {
+            if (x > y)
+            {
+                if (x > z)
+                {
+                    min = (y > z) ? z : y;
+                    max = x;
+                }
+                else
+                {
+                    min = y;
+                    max = z;
+                }
+            }
+            else if (x > z)
+            {
+                min = z;
+                max = y;
+            }
+            else
+            {
+                min = x;
+                max = (y > z) ? y : z;
+            }
+        }
+
+
         /// <inheritdoc/>
         protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
         {
             this.VerifyFormats(source, result);
             var sensitivity = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity)
                         ?? ConfigurationKeys.VibranceAdjustmentSensitivity.DefaultValue;
+            var redMajorPixelRatio = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentRedMajorPixelRatio)
+                        ?? ConfigurationKeys.VibranceAdjustmentRedMajorPixelRatio.DefaultValue;
             var vibrance = parameters.Vibrance * sensitivity;
             if (Math.Abs(vibrance) >= 0.01)
             {
@@ -63,7 +123,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                             {
                                 var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
-                                vibrance /= 255;
+                                var normTable = ImageProcessing.ColorNormalizingTableUnsafe8;
                                 ImageProcessing.ParallelFor(0, source.Height, y =>
                                 {
                                     var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (srcRowStride * y));
@@ -75,18 +135,21 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
                                     {
                                         unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-                                        var avg = (r + g + b) / 3.0;
-                                        var max = Math.Max(r, Math.Max(g, b));
-                                        var ratio = Math.Abs(max - avg) * vibrance;
-                                        var rDiff = (max - r);
-                                        var gDiff = (max - g);
-                                        var bDiff = (max - b);
-                                        if (rDiff != 0)
-                                            r = ImageProcessing.ClipToByte(r - rDiff * ratio);
-                                        if (gDiff != 0)
-                                            g = ImageProcessing.ClipToByte(g - gDiff * ratio);
-                                        if (bDiff != 0)
-                                            b = ImageProcessing.ClipToByte(b - bDiff * ratio);
+                                        FindMinMax(r, g, b, out var min, out var max);
+                                        var minMaxDiff = (max - min);
+                                        if (minMaxDiff == 0)
+                                        {
+                                            *destPixelPtr = *srcPixelPtr;
+                                            continue;
+                                        }
+                                        var avg = (r + g + g + b) >> 2;
+                                        var satRatio = normTable[minMaxDiff];
+                                        var shiftRatio = (1 - satRatio) * vibrance;
+                                        if (max == r)
+                                            shiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                        r = ImageProcessing.ClipToByte(r + (r - avg) * shiftRatio);
+                                        g = ImageProcessing.ClipToByte(g + (g - avg) * shiftRatio);
+                                        b = ImageProcessing.ClipToByte(b + (b - avg) * shiftRatio);
                                         *destPixelPtr = packFunc(b, g, r, a);
                                     }
                                 });
@@ -96,7 +159,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                             {
                                 var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
-                                vibrance /= 65535;
+                                var normTable = ImageProcessing.ColorNormalizingTableUnsafe16;
                                 ImageProcessing.ParallelFor(0, source.Height, y =>
                                 {
                                     var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (srcRowStride * y));
@@ -108,18 +171,21 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                     for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
                                     {
                                         unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-                                        var avg = (r + g + b) / 3.0;
-                                        var max = Math.Max(r, Math.Max(g, b));
-                                        var ratio = Math.Abs(max - avg) * vibrance;
-                                        var rDiff = (max - r);
-                                        var gDiff = (max - g);
-                                        var bDiff = (max - b);
-                                        if (rDiff != 0)
-                                            r = ImageProcessing.ClipToUInt16(r - rDiff * ratio);
-                                        if (gDiff != 0)
-                                            g = ImageProcessing.ClipToUInt16(g - gDiff * ratio);
-                                        if (bDiff != 0)
-                                            b = ImageProcessing.ClipToUInt16(b - bDiff * ratio);
+                                        FindMinMax(r, g, b, out var min, out var max);
+                                        var minMaxDiff = (max - min);
+                                        if (minMaxDiff == 0)
+                                        {
+                                            *destPixelPtr = *srcPixelPtr;
+                                            continue;
+                                        }
+                                        var avg = (r + g + g + b) >> 2;
+                                        var satRatio = normTable[minMaxDiff];
+                                        var shiftRatio = (1 - satRatio) * vibrance;
+                                        if (max == r)
+                                            shiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                        r = ImageProcessing.ClipToUInt16(r + (r - avg) * shiftRatio);
+                                        g = ImageProcessing.ClipToUInt16(g + (g - avg) * shiftRatio);
+                                        b = ImageProcessing.ClipToUInt16(b + (b - avg) * shiftRatio);
                                         *destPixelPtr = packFunc(b, g, r, a);
                                     }
                                 });

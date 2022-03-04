@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
-using Carina.PixelViewer.Runtime.InteropServices;
+﻿using Carina.PixelViewer.Runtime.InteropServices;
 using CarinaStudio;
 using CarinaStudio.Configuration;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media
 {
@@ -28,19 +28,26 @@ namespace Carina.PixelViewer.Media
 
 
 		// Static fields.
-		static readonly double[] colorNormalizingTable16 = new double[65536].Also(it =>
-		{
-			var d = it.Length - 1;
-			for (var n = d; n >= 0; --n)
-				it[n] = (double)n / d;
-		});
-		static readonly double[] colorNormalizingTable8 = new double[256].Also(it =>
-		{
-			var d = it.Length - 1;
-			for (var n = d; n >= 0; --n)
-				it[n] = (double)n / d;
-		});
+		static readonly double* colorNormalizingTable16 = (double*)System.Runtime.InteropServices.NativeMemory.Alloc(65536 * sizeof(double));
+		static readonly double* colorNormalizingTable8 = (double*)System.Runtime.InteropServices.NativeMemory.Alloc(256 * sizeof(double));
 		static readonly ILogger logger = App.Current.LoggerFactory.CreateLogger(nameof(ImageProcessing));
+
+
+		// Static initializer.
+		static ImageProcessing()
+		{
+			// setup 16-bit color normalization table
+			var table = colorNormalizingTable16;
+			var valuePtr = table + 65535;
+			for (var n = 65535; n >= 0; --n, --valuePtr)
+				*valuePtr = n / 65535.0;
+			
+			// setup 8-bit color normalization table
+			table = colorNormalizingTable8;
+			valuePtr = table + 255;
+			for (var n = 255; n >= 0; --n, --valuePtr)
+				*valuePtr = n / 255.0;
+		}
 
 
 		/// <summary>
@@ -105,6 +112,18 @@ namespace Carina.PixelViewer.Media
 				return 65535;
 			return (ushort)value;
 		}
+
+
+		/// <summary>
+		/// Get pointer to access table directly for 16-bit color normalization.
+		/// </summary>
+		public static double* ColorNormalizingTableUnsafe16 { get => colorNormalizingTable16; }
+
+
+		/// <summary>
+		/// Get pointer to access table directly for 8-bit color normalization.
+		/// </summary>
+		public static double* ColorNormalizingTableUnsafe8 { get => colorNormalizingTable8; }
 
 
 		/// <summary>
