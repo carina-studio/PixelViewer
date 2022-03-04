@@ -253,45 +253,10 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 intensity = 1;
             else if (Math.Abs(intensity) < 0.001)
                 return Task.CompletedTask;
-            var maxColor = lut.Count - 1;
-            if (intensity >= 0)
-            {
-                /*
-                 * [intensity > 0]
-                 * y = (-1 + (1 - 2cx)^0.5) / (-c)
-                 */
-                var a = (-2 * intensity);
-                for (var i = lut.Count - 1; i >= 0; --i)
-                {
-                    var normColor = (lut[i] / maxColor);
-                    if (normColor < 0.5)
-                        continue;
-                    normColor = (normColor - 0.5) * 2;
-                    var b = (1 + a * normColor);
-                    if (b > 0)
-                        lut[i] = (0.5 + ((1 - Math.Sqrt(b)) / intensity) * 0.5) * maxColor;
-                    else
-                        lut[i] = maxColor;
-                }
-            }
-            else
-            {
-                /*
-                 * [intensity < 0]
-                 i = -i
-                 * y = -0.5cx^2 + x
-                 */
-                intensity = -intensity;
-                var a = (-0.5 * intensity);
-                for (var i = lut.Count - 1; i >= 0; --i)
-                {
-                    var normColor = (lut[i] / maxColor);
-                    if (normColor < 0.5)
-                        continue;
-                    normColor = (normColor - 0.5) * 2;
-                    lut[i] = (0.5 + (a * normColor * normColor + normColor) * 0.5) * maxColor;
-                }
-            }
+            var sensitivity = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity)
+                ?? ConfigurationKeys.HighlightShadowAdjustmentSensitivity.DefaultValue;
+            var range = (int)(lut.Count * Math.Abs(intensity)) >> 1;
+            ArctanTransform(lut, lut.Count - range, lut.Count, intensity * sensitivity);
             return Task.CompletedTask;
         }
 
@@ -463,49 +428,10 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 intensity = 1;
             else if (Math.Abs(intensity) < 0.001)
                 return Task.CompletedTask;
-            var maxColor = lut.Count - 1;
-            if (intensity >= 0)
-            {
-                /*
-                 * [intensity > 0]
-                 * y = 0.5ix^2 + (1 - i)x + 0.5i
-                 */
-                var a = (0.5 * intensity);
-                var b = (1 - intensity);
-                var c = a;
-                for (var i = lut.Count - 1; i >= 0; --i)
-                {
-                    var normColor = (lut[i] / maxColor);
-                    if (normColor > 0.5)
-                        continue;
-                    normColor *= 2;
-                    lut[i] = ((a * normColor * normColor) + (b * normColor) + c) * 0.5 * maxColor;
-                }
-            }
-            else
-            {
-                /*
-                 * [intensity < 0]
-                 * i = -i
-                 * y = ((i - 1) + (1 - 2i + 2ix)^0.5) / i
-                 */
-                intensity = -intensity;
-                var a = (intensity - 1);
-                var b = (1 - 2 * intensity);
-                var c = (2 * intensity);
-                for (var i = lut.Count - 1; i >= 0; --i)
-                {
-                    var normColor = (lut[i] / maxColor);
-                    if (normColor > 0.5)
-                        continue;
-                    normColor *= 2;
-                    var d = (b + c * normColor);
-                    if (d > 0)
-                        lut[i] = ((a + Math.Sqrt(d)) / intensity) * 0.5 * maxColor;
-                    else
-                        lut[i] = 0;
-                }
-            }
+            var sensitivity = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity)
+                ?? ConfigurationKeys.HighlightShadowAdjustmentSensitivity.DefaultValue;
+            var range = (int)(lut.Count * Math.Abs(intensity)) >> 1;
+            ArctanTransform(lut, 0, range, intensity * sensitivity);
             return Task.CompletedTask;
         }
 
