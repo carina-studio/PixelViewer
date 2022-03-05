@@ -1,90 +1,30 @@
 ﻿[
 	{
-		"Description": "新增 Display-P3 色彩空間，並設定為 macOS 之預設螢幕色彩空間。",
+		"Description": "新增自然飽和度調整。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "新增資訊列以顯示選取像素的 ARGB/L*a*b*/XYZ 色彩。",
+		"Description": "新增自動色彩比例調整。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "有限度的支援 DNG 檔案之解析。",
+		"Description": "支援在開啟影像檔案後重設影像濾鏡參數。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援套用旋轉方向至儲存的影像。",
+		"Description": "支援指定預設的影像色彩空間。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援 4x4 Bayer 排列。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "針對 Bayer 排列格式支援 RGB 增益設定。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增 BGR_161616/RGB_161616 格式支援。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "允許指定亮度/對比調整所使用的轉換函數。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增影像的亮部/暗部調整。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援根據影像檔案名稱自動選取影像格式。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援指定預設的位元組順序。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援使用拖動方式來排列分頁 (Linux 尚未支援)。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援在新的視窗開啟分頁。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援拖放多個檔案並開啟。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援以水平、垂直或網格方式排列視窗。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援在 macOS 上使用系統佈景。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援隱藏繪製參數面板以提升圖片檢視空間。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "在 macOS 上支援自動更新。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "改善分頁捲動的使用體驗。",
+		"Description": "支援在 \"調整至視窗大小\" 開啟時使用 Ctrl/Cmd +/- 縮放影像。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "改善工具列捲動的使用體驗。",
+		"Description": "更新亮部/暗部調整的演算法。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "更精確的計算繪製影像所使用的記憶體。",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "減少自動更新時的升級封裝大小。",
+		"Description": "保留最近指定的 JPEG 壓縮品質。",
 		"Type": "Improvement"
 	},
 	{
@@ -92,35 +32,7 @@
 		"Type": "Improvement"
 	},
 	{
-		"Description": "在 macOS 上使用系統選單列。",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "在 macOS 上預設啟用色彩空間管理。",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "在 macOS 上改為使用 Command 按鍵而非 Ctrl。",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "使用單一處理程序來管理所有使窗。",
-		"Type": "BehaviorChange"
-	},
-	{
 		"Description": "更新相依程式庫。"
-	},
-	{
-		"Description": "修正 DCI-P3 色彩空間的相關參數。",
-		"Type": "BugFixing"
-	},
-	{
-		"Description": "修正去馬賽克之演算法。",
-		"Type": "BugFixing"
-	},
-	{
-		"Description": "修正在 ARM64 平台之電腦無法啟動的問題。",
-		"Type": "BugFixing"
 	},
 	{
 		"Description": "其他錯誤修正。",

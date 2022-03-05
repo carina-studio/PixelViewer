@@ -1,90 +1,30 @@
 ﻿[
 	{
-		"Description": "Add Display-P3 color space and set as default screen color space on macOS.",
+		"Description": "Add vibrance adjustment.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Add information bar to show ARGB/L*a*b*/XYZ colors of selected pixel.",
+		"Description": "Add auto color adjustment.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Limited support of parsing DNG file.",
+		"Description": "Support resetting image filter parameters after opening image file.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support saving image with orientation.",
+		"Description": "Support specifying default color space of image.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support 4x4 Bayer Patterns.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support RGB gain for Bayer Pattern formats.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support BGR_161616/RGB_161616 formats.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Allow specifying transformation function of brightness/contrast adjustment.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Add highlight/shadow adjustment on image.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support selecting image format automatically according to file name of image.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support specifying default byte ordering.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support arranging tabs by dragging (not supported yet on Linux).",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support opening tab in new window.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support drag and drop multiple files to open.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support layouting windows in horizontal, vertical or tile mode.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support using system theme mode on macOS.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support hiding rendering parameters panel to get more space for viewing image.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support auto update on macOS.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Improve tab scrolling UX.",
+		"Description": "Support using Ctrl/Cmd +/- to zoom image when \"Fit to viewport\" is ON.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Improve toolbar scrolling UX.",
+		"Description": "Update algorithm of highlight/shadow adjustment.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Calculate memory usage of rendered images with more accuracy.",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "Reduce size of update packages for auto updating.",
+		"Description": "Keep latest selected compression quality of JPEG.",
 		"Type": "Improvement"
 	},
 	{
@@ -92,35 +32,7 @@
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Use system menu bar on macOS.",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "Enable Color Space Management by default on macOS.",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "Use Command key instead of Ctrl key on macOS.",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "Use single process to manage all windows.",
-		"Type": "BehaviorChange"
-	},
-	{
 		"Description": "Update dependent libraries."
-	},
-	{
-		"Description": "Correct parameters of DCI-P3 color space.",
-		"Type": "BugFixing"
-	},
-	{
-		"Description": "Correct algorithm of demosaicing.",
-		"Type": "BugFixing"
-	},
-	{
-		"Description": "Fix issue of unable to launch on ARM64 PC.",
-		"Type": "BugFixing"
 	},
 	{
 		"Description": "Other bug fixing.",
