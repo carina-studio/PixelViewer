@@ -1,5 +1,6 @@
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
+using CarinaStudio.Configuration;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using System.Threading.Tasks;
@@ -12,6 +13,10 @@ namespace Carina.PixelViewer.Controls
     /// </summary>
     partial class JpegImageEncodingOptionsDialog : InputDialog
     {
+        // Static fields.
+        static readonly SettingKey<int> LatestQualityLevelKey = new("JpegImageEncodingOptionsDialog.LatestQualityLevel", 90);
+
+
         // Fields.
         readonly Slider qualityLevelSlider;
 
@@ -20,16 +25,23 @@ namespace Carina.PixelViewer.Controls
         public JpegImageEncodingOptionsDialog()
         {
             InitializeComponent();
-            this.qualityLevelSlider = this.FindControl<Slider>(nameof(qualityLevelSlider)).AsNonNull();
+            this.qualityLevelSlider = this.FindControl<Slider>(nameof(qualityLevelSlider)).AsNonNull().Also(it =>
+            {
+                it.Value = this.PersistentState.GetValueOrDefault(LatestQualityLevelKey);
+            });
         }
 
 
         // Generate result.
-        protected override Task<object?> GenerateResultAsync(CancellationToken cancellationToken) =>
-            Task.FromResult((object?)new Media.ImageEncoders.ImageEncodingOptions()
+        protected override Task<object?> GenerateResultAsync(CancellationToken cancellationToken)
+        {
+            var qualityLevel = (int)(this.qualityLevelSlider.Value + 0.5);
+            this.PersistentState.SetValue<int>(LatestQualityLevelKey, qualityLevel);
+            return Task.FromResult((object?)new Media.ImageEncoders.ImageEncodingOptions()
             {
-                QualityLevel = (int)this.qualityLevelSlider.Value,
+                QualityLevel = qualityLevel,
             });
+        }
 
 
         // Initialize.

@@ -24,7 +24,7 @@
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/JpegImageEncodingOptionsDialog.QualityLevel}" VerticalAlignment="Center"/>
 				<TextBlock Classes="Dialog_TextBlock" Text="{Binding #qualityLevelSlider.Value, StringFormat={}{0:F0}}" VerticalAlignment="Center"/>
 			</StackPanel>
-			<Slider Name="qualityLevelSlider" Classes="Dialog_Slider" Maximum="100" Minimum="10" SmallChange="1" TickFrequency="10" TickPlacement="Outside" Value="90"/>
+			<Slider Name="qualityLevelSlider" Classes="Dialog_Slider" Maximum="100" Minimum="10" SmallChange="1" TickFrequency="10" TickPlacement="Outside"/>
 		</StackPanel>
 
 	</DockPanel>
