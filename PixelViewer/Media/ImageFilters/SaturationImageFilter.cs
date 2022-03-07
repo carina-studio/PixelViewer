@@ -7,9 +7,9 @@ using System.Threading;
 namespace Carina.PixelViewer.Media.ImageFilters
 {
     /// <summary>
-    /// Image filter to adjust vibrance.
+    /// Image filter to adjust saturation and vibrance.
     /// </summary>
-    class VibranceImageFilter : BaseImageFilter<VibranceImageFilter.Params>
+    class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
     {
         /// <summary>
         /// Parameters.
@@ -17,14 +17,32 @@ namespace Carina.PixelViewer.Media.ImageFilters
         public class Params : ImageFilterParams
         {
             // Fields.
+            double saturation;
             double vibrance;
 
 
             /// <inheritdoc/>
             public override object Clone() => new Params()
             {
+                saturation = this.saturation,
                 vibrance = this.vibrance,
             };
+
+
+            /// <summary>
+            /// Get or set vibrance. The range is [-1.0, 1.0].
+            /// </summary>
+            /// <value></value>
+            public double Saturation
+            {
+                get => this.saturation;
+                set
+                {
+                    if (!double.IsFinite(value) || value < -1 || value > 1)
+                        throw new ArgumentOutOfRangeException();
+                    this.saturation = value;
+                }
+            }
 
 
             /// <summary>
@@ -105,12 +123,11 @@ namespace Carina.PixelViewer.Media.ImageFilters
         protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
         {
             this.VerifyFormats(source, result);
-            var sensitivity = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity)
-                        ?? ConfigurationKeys.VibranceAdjustmentSensitivity.DefaultValue;
-            var redMajorPixelRatio = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentRedMajorPixelRatio)
-                        ?? ConfigurationKeys.VibranceAdjustmentRedMajorPixelRatio.DefaultValue;
-            var vibrance = parameters.Vibrance * sensitivity;
-            if (Math.Abs(vibrance) >= 0.01)
+            var saturation = Math.Max(-1, parameters.Saturation * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity));
+            var redMajorPixelRatio = (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentRedMajorPixelRatio);
+            var vibrance = parameters.Vibrance * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity);
+            var hasVibrance = Math.Abs(vibrance) >= 0.001;
+            if (Math.Abs(saturation) >= 0.001 || hasVibrance)
             {
                 (source.Memory, result.Memory).Pin((srcBaseAddress, destBaseAddress) =>
                 {
@@ -143,10 +160,17 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                             continue;
                                         }
                                         var avg = (r + g + g + b) >> 2;
-                                        var satRatio = normTable[minMaxDiff];
-                                        var shiftRatio = (1 - satRatio) * vibrance;
-                                        if (max == r)
-                                            shiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                        var shiftRatio = saturation;
+                                        if (hasVibrance)
+                                        {
+                                            var satRatio = normTable[minMaxDiff];
+                                            var vibrationShiftRatio = (1 - satRatio) * vibrance;
+                                            if (max == r)
+                                                vibrationShiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                            shiftRatio += vibrationShiftRatio;
+                                            if (shiftRatio < -1)
+                                                shiftRatio = -1;
+                                        }
                                         r = ImageProcessing.ClipToByte(r + (r - avg) * shiftRatio);
                                         g = ImageProcessing.ClipToByte(g + (g - avg) * shiftRatio);
                                         b = ImageProcessing.ClipToByte(b + (b - avg) * shiftRatio);
@@ -179,10 +203,17 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                             continue;
                                         }
                                         var avg = (r + g + g + b) >> 2;
-                                        var satRatio = normTable[minMaxDiff];
-                                        var shiftRatio = (1 - satRatio) * vibrance;
-                                        if (max == r)
-                                            shiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                        var shiftRatio = saturation;
+                                        if (hasVibrance)
+                                        {
+                                            var satRatio = normTable[minMaxDiff];
+                                            var vibrationShiftRatio = (1 - satRatio) * vibrance;
+                                            if (max == r)
+                                                vibrationShiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                            shiftRatio += vibrationShiftRatio;
+                                            if (shiftRatio < -1)
+                                                shiftRatio = -1;
+                                        }
                                         r = ImageProcessing.ClipToUInt16(r + (r - avg) * shiftRatio);
                                         g = ImageProcessing.ClipToUInt16(g + (g - avg) * shiftRatio);
                                         b = ImageProcessing.ClipToUInt16(b + (b - avg) * shiftRatio);

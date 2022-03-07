@@ -77,6 +77,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ForwardedObservableBoolean canResetColorAndVibranceAdjustment;
 		readonly ObservableCommandState canResetContrastAdjustment = new();
 		readonly ObservableCommandState canResetHighlightAdjustment = new();
+		readonly ObservableCommandState canResetSaturationAdjustment = new();
 		readonly ObservableCommandState canResetShadowAdjustment = new();
 		readonly ObservableCommandState canResetVibranceAdjustment = new();
 		readonly ObservableCommandState canSaveAsNewProfile = new();
@@ -137,6 +138,7 @@ namespace Carina.PixelViewer.Controls
 			this.canResetColorAndVibranceAdjustment = new(ForwardedObservableBoolean.CombinationMode.Or,
 				false,
 				this.canResetColorAdjustment,
+				this.canResetSaturationAdjustment,
 				this.canResetVibranceAdjustment);
 			this.canSaveImage = new(ForwardedObservableBoolean.CombinationMode.Or,
 				false,
@@ -296,6 +298,11 @@ namespace Carina.PixelViewer.Controls
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 			});
 			this.FindControl<Slider>("redColorAdjustmentSlider").AsNonNull().Also(it =>
+			{
+				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
+			});
+			this.FindControl<Slider>("saturationAdjustmentSlider").AsNonNull().Also(it =>
 			{
 				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
 				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
@@ -1062,6 +1069,7 @@ namespace Carina.PixelViewer.Controls
 					this.canResetColorAdjustment.Bind(newSession.ResetColorAdjustmentCommand);
 					this.canResetContrastAdjustment.Bind(newSession.ResetContrastAdjustmentCommand);
 					this.canResetHighlightAdjustment.Bind(newSession.ResetHighlightAdjustmentCommand);
+					this.canResetSaturationAdjustment.Bind(newSession.ResetSaturationAdjustmentCommand);
 					this.canResetShadowAdjustment.Bind(newSession.ResetShadowAdjustmentCommand);
 					this.canResetVibranceAdjustment.Bind(newSession.ResetVibranceAdjustmentCommand);
 					this.canSaveAsNewProfile.Bind(newSession.SaveAsNewProfileCommand);
@@ -1084,6 +1092,7 @@ namespace Carina.PixelViewer.Controls
 					this.canResetColorAdjustment.Unbind();
 					this.canResetContrastAdjustment.Unbind();
 					this.canResetHighlightAdjustment.Unbind();
+					this.canResetSaturationAdjustment.Unbind();
 					this.canResetShadowAdjustment.Unbind();
 					this.canResetVibranceAdjustment.Unbind();
 					this.canSaveAsNewProfile.Unbind();
@@ -1332,6 +1341,7 @@ namespace Carina.PixelViewer.Controls
 			if (this.DataContext is not Session session)
 				return;
 			session.ResetColorAdjustmentCommand.TryExecute();
+			session.ResetSaturationAdjustmentCommand.TryExecute();
 			session.ResetVibranceAdjustmentCommand.TryExecute();
 		}
 

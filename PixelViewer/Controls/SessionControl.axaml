@@ -354,6 +354,13 @@
 												<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
 												<Separator Classes="Dialog_Separator_Small"/>
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Saturation}" VerticalAlignment="Center"/>
+													<Separator Classes="Dialog_Separator_Small"/>
+													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding SaturationAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
+												</StackPanel>
+												<Slider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
+												<Separator Classes="Dialog_Separator_Small"/>
+												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Vibrance}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding VibranceAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>

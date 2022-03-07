@@ -330,6 +330,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasRenderingErrorProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderingError));
 		/// <summary>
+		/// Property of <see cref="HasSaturationAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasSaturationAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasSaturationAdjustment));
+		/// <summary>
 		/// Property of <see cref="HasSelectedRenderedImagePixel"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProperty = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
@@ -490,6 +494,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsRgbGainSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsRgbGainSupported));
 		/// <summary>
+		/// Property of <see cref="IsSaturationAdjustmentSupported"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsSaturationAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSaturationAdjustmentSupported));
+		/// <summary>
 		/// Property of <see cref="IsSavingFilteredImage"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsSavingFilteredImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingFilteredImage));
@@ -572,6 +580,19 @@ namespace Carina.PixelViewer.ViewModels
 					return MinRenderedImageScale;
 				if (it > MaxRenderedImageScale)
 					return MaxRenderedImageScale;
+				return it;
+			},
+			validate: double.IsFinite);
+		/// <summary>
+		/// Property of <see cref="SaturationAdjustment"/>.
+		/// </summary>
+		public static readonly ObservableProperty<double> SaturationAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(SaturationAdjustment), 0, 
+			coerce: it => 
+			{
+				if (it < -1)
+					return -1;
+				if (it > 1)
+					return 1;
 				return it;
 			},
 			validate: double.IsFinite);
@@ -663,6 +684,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canResetColorAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canResetContrastAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canResetHighlightAdjustment = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canResetSaturationAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canResetShadowAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canResetVibranceAdjustment = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
@@ -736,6 +758,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 			this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
 			this.ResetHighlightAdjustmentCommand = new Command(this.ResetHighlightAdjustment, this.canResetHighlightAdjustment);
+			this.ResetSaturationAdjustmentCommand = new Command(this.ResetSaturationAdjustment, this.canResetSaturationAdjustment);
 			this.ResetShadowAdjustmentCommand = new Command(this.ResetShadowAdjustment, this.canResetShadowAdjustment);
 			this.ResetVibranceAdjustmentCommand = new Command(this.ResetVibranceAdjustment, this.canResetVibranceAdjustment);
 			this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
@@ -772,7 +795,9 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(IsContrastAdjustmentSupportedProperty, false);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, false);
 					this.SetValue(IsHighlightAdjustmentSupportedProperty, false);
+					this.SetValue(IsSaturationAdjustmentSupportedProperty, false);
 					this.SetValue(IsShadowAdjustmentSupportedProperty, false);
+					this.SetValue(IsVibranceAdjustmentSupportedProperty, false);
 				}
 				else
 				{
@@ -782,7 +807,9 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(IsContrastAdjustmentSupportedProperty, true);
 					this.SetValue(IsGrayscaleFilterSupportedProperty, format.Category != ImageFormatCategory.Luminance);
 					this.SetValue(IsHighlightAdjustmentSupportedProperty, true);
+					this.SetValue(IsSaturationAdjustmentSupportedProperty, true);
 					this.SetValue(IsShadowAdjustmentSupportedProperty, true);
+					this.SetValue(IsVibranceAdjustmentSupportedProperty, true);
 				}
 			});
 			this.updateImageDisplaySizeAction = new ScheduledAction(() =>
@@ -864,6 +891,7 @@ namespace Carina.PixelViewer.ViewModels
 					|| this.canResetColorAdjustment.Value
 					|| this.canResetContrastAdjustment.Value
 					|| this.canResetHighlightAdjustment.Value
+					|| this.canResetSaturationAdjustment.Value
 					|| this.canResetShadowAdjustment.Value
 					|| this.canResetVibranceAdjustment.Value
 					|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
@@ -1648,7 +1676,7 @@ namespace Carina.PixelViewer.ViewModels
 			var filterCount = 0;
 			var isLuminanceLutFilterNeeded = false;
 			var isColorLutFilterNeeded = false;
-			var isVibranceFilterNeeded = false;
+			var isSaturationFilterNeeded = false;
 			var isGrayscaleFilterNeeded = false;
 			if (this.canResetBrightnessAdjustment.Value 
 				|| this.canResetContrastAdjustment.Value
@@ -1658,9 +1686,10 @@ namespace Carina.PixelViewer.ViewModels
 				isLuminanceLutFilterNeeded = true;
 				++filterCount;
 			}
-			if (this.canResetVibranceAdjustment.Value)
+			if (this.canResetSaturationAdjustment.Value 
+				|| this.canResetVibranceAdjustment.Value)
 			{
-				isVibranceFilterNeeded = true;
+				isSaturationFilterNeeded = true;
 				++filterCount;
 			}
 			if (this.canResetColorAdjustment.Value)
@@ -1784,18 +1813,19 @@ namespace Carina.PixelViewer.ViewModels
 					failedToApply = true;
 			}
 
-			// apply vibrance filter
-			if (!failedToApply && isVibranceFilterNeeded)
+			// apply saturation filter
+			if (!failedToApply && isSaturationFilterNeeded)
 			{
-				var parameters = new VibranceImageFilter.Params()
+				var parameters = new SaturationImageFilter.Params()
 				{
+					Saturation = this.SaturationAdjustment,
 					Vibrance = this.VibranceAdjustment,
 				};
 				stopwatch?.Restart();
-				if (await this.ApplyImageFilterAsync(new VibranceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
+				if (await this.ApplyImageFilterAsync(new SaturationImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply vibrance filter");
+						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply saturation filter");
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
@@ -2100,6 +2130,12 @@ namespace Carina.PixelViewer.ViewModels
 		/// Check whether error was occurred when rendering or not.
 		/// </summary>
 		public bool HasRenderingError { get => this.GetValue(HasRenderingErrorProperty); }
+
+
+		/// <summary>
+		/// Check whether <see cref="SaturationAdjustment"/> is non-zero or not.
+		/// </summary>
+		public bool HasSaturationAdjustment { get => this.GetValue(HasSaturationAdjustmentProperty); }
 
 
 		/// <summary>
@@ -2428,6 +2464,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether saturation adjustment is supported or not.
+		/// </summary>
+		public bool IsSaturationAdjustmentSupported { get => this.GetValue(IsSaturationAdjustmentSupportedProperty); }
+
+
+		/// <summary>
 		/// Check whether filtered image is being saved or not.
 		/// </summary>
 		public bool IsSavingFilteredImage { get => this.GetValue(IsSavingFilteredImageProperty); }
@@ -2729,6 +2771,12 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == IsHistogramsVisibleProperty)
 				this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
+			else if (property == IsSaturationAdjustmentSupportedProperty)
+			{
+				this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && (bool)newValue.AsNonNull());
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Reschedule();
+			}
 			else if (property == IsSavingFilteredImageProperty
 				|| property == IsSavingRenderedImageProperty)
 			{
@@ -2803,6 +2851,13 @@ namespace Carina.PixelViewer.ViewModels
 						this.ZoomTo(scale, false);
 					}
 				}
+			}
+			else if (property == SaturationAdjustmentProperty)
+			{
+				this.SetValue(HasSaturationAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+				this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && this.IsSaturationAdjustmentSupported);
+				this.updateIsFilteringImageNeededAction.Schedule();
+				this.filterImageAction.Schedule(RenderImageDelay);
 			}
 			else if (property == ShadowAdjustmentProperty)
 			{
@@ -3582,7 +3637,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ResetBrightnessAdjustment()
         {
 			this.VerifyAccess();
-			if (this.IsDisposed || !this.canResetBrightnessAdjustment.Value)
+			if (this.IsDisposed)
 				return;
 			this.SetValue(BrightnessAdjustmentProperty, 0);
         }
@@ -3598,7 +3653,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ResetColorAdjustment()
 		{
 			this.VerifyAccess();
-			if (this.IsDisposed || !this.canResetColorAdjustment.Value)
+			if (this.IsDisposed)
 				return;
 			this.SetValue(BlueColorAdjustmentProperty, 0);
 			this.SetValue(GreenColorAdjustmentProperty, 0);
@@ -3616,7 +3671,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ResetContrastAdjustment()
 		{
 			this.VerifyAccess();
-			if (this.IsDisposed || !this.canResetContrastAdjustment.Value)
+			if (this.IsDisposed)
 				return;
 			this.SetValue(ContrastAdjustmentProperty, 0);
 		}
@@ -3635,6 +3690,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.ResetColorAdjustment();
 			this.ResetContrastAdjustment();
 			this.ResetHighlightAdjustment();
+			this.ResetSaturationAdjustment();
 			this.ResetShadowAdjustment();
 			this.ResetVibranceAdjustment();
 			this.SetValue(IsGrayscaleFilterEnabledProperty, false);
@@ -3645,7 +3701,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ResetHighlightAdjustment()
 		{
 			this.VerifyAccess();
-			if (this.IsDisposed || !this.canResetHighlightAdjustment.Value)
+			if (this.IsDisposed)
 				return;
 			this.SetValue(HighlightAdjustmentProperty, 0);
 		}
@@ -3657,11 +3713,27 @@ namespace Carina.PixelViewer.ViewModels
 		public ICommand ResetHighlightAdjustmentCommand { get; }
 
 
+		// Reset saturation adjustment.
+		void ResetSaturationAdjustment()
+		{
+			this.VerifyAccess();
+			if (this.IsDisposed)
+				return;
+			this.SetValue(SaturationAdjustmentProperty, 0);
+		}
+
+
+		/// <summary>
+		/// Command to reset <see cref="SaturationAdjustment"/>.
+		/// </summary>
+		public ICommand ResetSaturationAdjustmentCommand { get; }
+
+
 		// Reset shadow adjustment.
 		void ResetShadowAdjustment()
 		{
 			this.VerifyAccess();
-			if (this.IsDisposed || !this.canResetShadowAdjustment.Value)
+			if (this.IsDisposed)
 				return;
 			this.SetValue(ShadowAdjustmentProperty, 0);
 		}
@@ -3677,7 +3749,7 @@ namespace Carina.PixelViewer.ViewModels
 		void ResetVibranceAdjustment()
 		{
 			this.VerifyAccess();
-			if (this.IsDisposed || !this.canResetVibranceAdjustment.Value)
+			if (this.IsDisposed)
 				return;
 			this.SetValue(VibranceAdjustmentProperty, 0);
 		}
@@ -4023,6 +4095,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.rowStrides[2];
 			set => this.ChangeRowStride(2, value);
+		}
+
+
+		/// <summary>
+		/// Get or set saturation adjustment. Range is [-1.0, 1.0].
+		/// </summary>
+		public double SaturationAdjustment
+		{
+			get => this.GetValue(SaturationAdjustmentProperty);
+			set => this.SetValue(SaturationAdjustmentProperty, value);
 		}
 
 

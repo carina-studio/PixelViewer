@@ -20,6 +20,10 @@ namespace Carina.PixelViewer
         /// </summary>
         public static readonly SettingKey<double> MaxProcessorRatioOfParallImageProcessing = new(nameof(MaxProcessorRatioOfParallImageProcessing), 0.5);
         /// <summary>
+        /// Sensitivity of saturation adjustment.
+        /// </summary>
+        public static readonly SettingKey<double> SaturationAdjustmentSensitivity = new(nameof(SaturationAdjustmentSensitivity), 1);
+        /// <summary>
         /// Special ratio of vibrance adjustment for red-major pixel.
         /// </summary>
         public static readonly SettingKey<double> VibranceAdjustmentRedMajorPixelRatio = new(nameof(VibranceAdjustmentRedMajorPixelRatio), 0.5);

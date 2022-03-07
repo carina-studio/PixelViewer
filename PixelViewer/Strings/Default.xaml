@@ -169,6 +169,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Saturation">Saturation</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">Vibrance</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">Color space</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management has been disabled, click to open options…</sys:String>
