@@ -37,8 +37,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 			// render
 			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
-			var partialMeanLut = (double*)null;
-			var partialMean = stackalloc double[] { 0, 0, 0 };
+			var accuColor = stackalloc ulong[] { 0L, 0L, 0L };
+			var accuPixelCount = stackalloc int[] { 0, 0, 0 };
 			try
 			{
 				var colorTransformationTables = stackalloc ushort*[3] { 
@@ -46,11 +46,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					baseColorTransformationTable + 65536,
 					baseColorTransformationTable + 131072,
 				};
-				partialMeanLut = (double*)NativeMemory.Alloc(65535 * sizeof(double));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[2], ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
-				BuildColorTransformationTableUnsafe(partialMeanLut, 1.0 / (width * height));
 				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 				{
 					// render to 16-bit R/G/B
@@ -68,7 +66,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							{
 								var colorComponent = colorComponentSelector(x, y);
 								var color = extractFunc(pixelPtr[0], pixelPtr[1]);
-								partialMean[colorComponent] += partialMeanLut[color];
+								accuColor[colorComponent] += color;
+								++accuPixelCount[colorComponent];
 								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 								bitmapPixelPtr[3] = 65535;
 							}
@@ -82,16 +81,15 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			}
 			finally
 			{
-				NativeMemory.Free(partialMeanLut);
 				NativeMemory.Free(baseColorTransformationTable);
 			}
 
 			// complete
 			return new ImageRenderingResult()
 			{
-				MeanOfBlue = partialMean[BlueColorComponent],
-				MeanOfGreen = partialMean[GreenColorComponent],
-				MeanOfRed = partialMean[RedColorComponent],
+				MeanOfBlue = accuColor[BlueColorComponent] / (double)accuPixelCount[BlueColorComponent],
+				MeanOfGreen = accuColor[GreenColorComponent] / (double)accuPixelCount[GreenColorComponent],
+				MeanOfRed = accuColor[RedColorComponent] / (double)accuPixelCount[RedColorComponent],
 			};
 		}
     }

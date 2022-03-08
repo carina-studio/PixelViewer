@@ -191,6 +191,7 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">在圖片上移動游標以檢視像素資訊。</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">自動調整</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectRgbGain">自動調整</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">開啟檔案所使用的組態</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案總管中顯示檔案</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>

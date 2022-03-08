@@ -783,6 +783,10 @@
 								<Separator Classes="Dialog_Separator"/>
 								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlueColorGain}"/>
 								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appImageRenderers:ImageRenderingOptions.MaxRgbGain}" Minimum="{x:Static appImageRenderers:ImageRenderingOptions.MinRgbGain}" Increment="0.1" Value="{Binding BlueColorGain, Mode=TwoWay}"/>
+								<Separator Classes="Dialog_Separator"/>
+								<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{DynamicResource String/SessionControl.SelectRgbGain}"/>
+								<Separator Classes="Dialog_Separator_Small"/>
+								<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ResetRgbGainCommand}" Content="{DynamicResource String/Common.Reset}"/>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding IsRgbGainSupported}"/>

@@ -333,6 +333,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasRenderingErrorProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderingError));
 		/// <summary>
+		/// Property of <see cref="HasRgbGain"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasRgbGainProperty = ObservableProperty.Register<Session, bool>(nameof(HasRgbGain));
+		/// <summary>
 		/// Property of <see cref="HasSaturationAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasSaturationAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasSaturationAdjustment));
@@ -695,6 +699,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canSaveFilteredImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canSelectColorAdjustment = new MutableObservableBoolean();
+		readonly MutableObservableBoolean canSelectRgbGain = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomTo = new MutableObservableBoolean();
@@ -761,6 +766,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 			this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
 			this.ResetHighlightAdjustmentCommand = new Command(this.ResetHighlightAdjustment, this.canResetHighlightAdjustment);
+			this.ResetRgbGainCommand = new Command(this.ResetRgbGain, this.GetValueAsObservable(HasRgbGainProperty));
 			this.ResetSaturationAdjustmentCommand = new Command(this.ResetSaturationAdjustment, this.canResetSaturationAdjustment);
 			this.ResetShadowAdjustmentCommand = new Command(this.ResetShadowAdjustment, this.canResetShadowAdjustment);
 			this.ResetVibranceAdjustmentCommand = new Command(this.ResetVibranceAdjustment, this.canResetVibranceAdjustment);
@@ -771,6 +777,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SaveProfileCommand = new Command(() => this.SaveProfile(), this.canSaveOrDeleteProfile);
 			this.SaveRenderedImageCommand = new Command<ImageSavingParams>(parameters => _ = this.SaveRenderedImage(parameters), this.canSaveRenderedImage);
 			this.SelectColorAdjustmentCommand = new Command(this.SelectColorAdjustment, this.canSelectColorAdjustment);
+			this.SelectRgbGainCommand = new Command(this.SelectRgbGain, this.canSelectRgbGain);
 			this.ZoomInCommand = new Command(this.ZoomIn, this.canZoomIn);
 			this.ZoomOutCommand = new Command(this.ZoomOut, this.canZoomOut);
 			this.ZoomToCommand = new Command<double>(scale => 
@@ -1050,6 +1057,8 @@ namespace Carina.PixelViewer.ViewModels
 							this.SetValue(HistogramsProperty, null);
 							this.SetValue(QuarterSizeRenderedImageProperty, null);
 							this.SetValue(RenderedImageProperty, null);
+							this.canSelectColorAdjustment.Update(false);
+							this.canSelectRgbGain.Update(false);
 							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 						}
@@ -1337,6 +1346,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HistogramsProperty, null);
 				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
+				this.canSelectColorAdjustment.Update(false);
+				this.canSelectRgbGain.Update(false);
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 			}
 			return true;
@@ -1382,6 +1393,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
 				this.canSaveRenderedImage.Update(false);
+				this.canSelectColorAdjustment.Update(false);
+				this.canSelectRgbGain.Update(false);
 				this.SetValue(SourceDataSizeProperty, 0);
 				this.UpdateCanSaveDeleteProfile();
 			}
@@ -2136,6 +2149,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether RGB gain is not 1.0 or not.
+		/// </summary>
+		public bool HasRgbGain { get => this.GetValue(HasRgbGainProperty); }
+
+
+		/// <summary>
 		/// Check whether <see cref="SaturationAdjustment"/> is non-zero or not.
 		/// </summary>
 		public bool HasSaturationAdjustment { get => this.GetValue(HasSaturationAdjustmentProperty); }
@@ -2619,6 +2638,9 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (this.IsRgbGainSupported)
 					this.renderImageAction.Reschedule(RenderImageDelay);
+				this.SetValue(HasRgbGainProperty, Math.Abs(this.BlueColorGain - 1) > 0.001
+					|| Math.Abs(this.GreenColorGain - 1) > 0.001
+					|| Math.Abs(this.RedColorGain - 1) > 0.001);
 			}
 			else if (property == BrightnessAdjustmentProperty)
 			{
@@ -2835,7 +2857,6 @@ namespace Carina.PixelViewer.ViewModels
 				if (newValue == null)
 					this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.SetValue(HasRenderedImageProperty, newValue != null);
-				this.canSelectColorAdjustment.Update(newValue != null && this.renderedImageFrame?.Histograms != null);
 				if (oldValue == null || newValue == null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
 					this.fitRenderedImageToViewportScale = double.NaN;
 				this.updateImageDisplaySizeAction.Execute();
@@ -3470,6 +3491,9 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
+				this.canSelectColorAdjustment.Update(renderedImageFrame.Histograms != null);
+				this.canSelectRgbGain.Update(renderedImageFrame.RenderingResult.Let(it =>
+					double.IsFinite(it.MeanOfBlue) && double.IsFinite(it.MeanOfGreen) && double.IsFinite(it.MeanOfRed)));
 
 				// filter image or report now
 				if (this.IsFilteringRenderedImageNeeded)
@@ -3503,6 +3527,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.canMoveToNextFrame.Update(false);
 				this.canMoveToPreviousFrame.Update(false);
+				this.canSelectColorAdjustment.Update(false);
+				this.canSelectRgbGain.Update(false);
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 			}
 			this.SetValue(IsConvertingColorSpaceProperty, false);
@@ -3714,6 +3740,24 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to reset <see cref="HighlightAdjustment"/>.
 		/// </summary>
 		public ICommand ResetHighlightAdjustmentCommand { get; }
+
+
+		// Reset RGB gain.
+		void ResetRgbGain()
+		{
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			this.SetValue(BlueColorGainProperty, 1.0);
+			this.SetValue(GreenColorGainProperty, 1.0);
+			this.SetValue(RedColorGainProperty, 1.0);
+			this.renderImageAction.Reschedule();
+		}
+
+
+		/// <summary>
+		/// Command to reset RGB gain.
+		/// </summary>
+		public ICommand ResetRgbGainCommand { get; }
 
 
 		// Reset saturation adjustment.
@@ -4368,10 +4412,8 @@ namespace Carina.PixelViewer.ViewModels
 			// check state
 			this.VerifyAccess();
 			this.VerifyDisposed();
-			if (!this.canSelectColorAdjustment.Value)
-				return;
 			
-			// get histigram
+			// get histogram
 			var histograms = this.renderedImageFrame?.Histograms;
 			if (histograms == null)
 				return;
@@ -4464,6 +4506,101 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to apply auto color adjustment.
 		/// </summary>
 		public ICommand SelectColorAdjustmentCommand { get; }
+
+
+		// Perform auto RGB gain selection.
+		void SelectRgbGain()
+		{
+			// check state
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			
+			// get rendering result
+			var renderingResult = (this.renderedImageFrame?.RenderingResult).GetValueOrDefault();
+			if (double.IsNaN(renderingResult.MeanOfBlue)
+				|| double.IsNaN(renderingResult.MeanOfGreen)
+				|| double.IsNaN(renderingResult.MeanOfRed))
+			{
+				return;
+			}
+			
+			// calculate ratio of RGB
+			var rRatio = 0.0;
+			var gRatio = 0.0;
+			var bRatio = 0.0;
+			var mean = 0.0;
+			var refR = renderingResult.MeanOfRed;
+			var refG = renderingResult.MeanOfGreen;
+			var refB = renderingResult.MeanOfBlue;
+			if (refR > refG)
+			{
+				if (refR > refB)
+				{
+					if (refG > refB) // R > G > B
+					{
+						rRatio = refG / refR;
+						gRatio = 1.0;
+						bRatio = refG / refB;
+						mean = refG;
+					}
+					else // R > B >= G
+					{
+						rRatio = refB / refR;
+						gRatio = refB / refG;
+						bRatio = 1.0;
+						mean = refB;
+					}
+				}
+				else // B >= R > G
+				{
+					rRatio = 1.0;
+					gRatio = refR / refG;
+					bRatio = refR / refB;
+					mean = refR;
+				}
+			}
+			else if (refG > refB)
+			{
+				if (refR > refB) // G > R > B
+				{
+					rRatio = 1.0;
+					gRatio = refR / refG;
+					bRatio = refR / refB;
+					mean = refR;
+				}
+				else // G > B >= R
+				{
+					rRatio = refB / refR;
+					gRatio = refB / refG;
+					bRatio = 1.0;
+					mean = refB;
+				}
+			}
+			else // B >= G >= R
+			{
+				rRatio = refG / refR;
+				gRatio = 1.0;
+				bRatio = refG / refB;
+				mean = refG;
+			}
+			if (!double.IsFinite(rRatio) || !double.IsFinite(gRatio) || !double.IsFinite(bRatio))
+				return;
+			if (rRatio == 0 || gRatio == 0 || bRatio == 0)
+				return;
+			
+			// apply RGB gain
+			this.SetValue(RedColorGainProperty, rRatio);
+			this.SetValue(GreenColorGainProperty, gRatio);
+			this.SetValue(BlueColorGainProperty, bRatio);
+			if (this.renderImageAction.IsScheduled)
+				this.renderImageAction.Reschedule();
+		}
+
+
+		/// <summary>
+		/// Command to apply auto RGB gain selection.
+		/// </summary>
+		public ICommand SelectRgbGainCommand { get; }
 
 
 		// Select default image renderer according to settings.

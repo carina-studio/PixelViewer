@@ -8,6 +8,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "新增自動 R/G/B 增益調整。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "支援在開啟影像檔案後重設影像濾鏡參數。",
 		"Type": "NewFeature"
 	},

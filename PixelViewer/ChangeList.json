@@ -8,6 +8,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Add auto R/G/B gain selection.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Support resetting image filter parameters after opening image file.",
 		"Type": "NewFeature"
 	},

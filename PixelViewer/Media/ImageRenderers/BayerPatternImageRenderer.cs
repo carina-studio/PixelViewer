@@ -127,34 +127,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
-		/// <summary>
-		/// Build floating point color transformation table for single color of BGRA64.
-		/// </summary>
-		/// <param name="table">Pointer to table, the length should be 65536.</param>
-		/// <param name="gain">Gain for color.</param>
-		protected static unsafe void BuildColorTransformationTableUnsafe(double* table, double gain)
-		{
-			table += 65535;
-			if (Math.Abs(gain - 1) <= 0.0001)
-			{
-				for (var i = 65535; i >= 0; --i, --table)
-					*table = i;
-			}
-			else
-			{
-				for (var i = 65535; i >= 0; --i, --table)
-				{
-					var c = i * gain;
-					*table = c > 65535
-						? 65535
-						: c < 0
-							? 0
-							: c;
-				}
-			}
-		}
-
-
 		// Demosaicing by 3x3 sub block.
 		unsafe void Demosaic3x3(IBitmapBuffer bitmapBuffer, Func<int, int, int> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 		{
