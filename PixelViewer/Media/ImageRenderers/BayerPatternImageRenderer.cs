@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -509,7 +510,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <inheritdoc/>
-		protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+		protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// get parameters
 			var width = bitmapBuffer.Width;
@@ -552,13 +553,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			});
 
 			// render
-			this.OnRender(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken);
+			var result = this.OnRender(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken);
 			if (cancellationToken.IsCancellationRequested)
-				return;
+				throw new TaskCanceledException();
 
 			// demosaicing
 			if (!renderingOptions.Demosaicing)
-				return;
+				return result;
 			var stopwatch = new Stopwatch().Also(it => it.Start());
 			try
 			{
@@ -578,6 +579,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			{
 				stopwatch.Stop();
 			}
+
+			// complete
+			return result;
 		}
 
 
@@ -591,7 +595,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="renderingOptions">Rendering options.</param>
 		/// <param name="planeOptions">Plane options.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		protected abstract void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int,int,int> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
+		/// <returns>Result of rendering.</returns>
+		protected abstract ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int,int,int> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
 
 
         /// <inheritdoc/>

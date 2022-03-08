@@ -100,11 +100,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="renderingOptions">Rendering options.</param>
 		/// <param name="planeOptions">List of <see cref="ImagePlaneOptions"/> for rendering.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		protected abstract void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
+		/// <returns>Result of rendering.</returns>
+		protected abstract ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
 
 
-		// Render.
-		public async Task Render(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+		/// <inheritdoc/>
+		public async Task<ImageRenderingResult> Render(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// check parameter
 			if (bitmapBuffer.Format != this.RenderedFormat)
@@ -125,14 +126,15 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// render
 			try
             {
-				await RenderingTaskFactory.StartNew(() =>
+				return await RenderingTaskFactory.StartNew(() =>
 				{
 					if (renderingOptions.DataOffset > 0)
 						stream.Seek(renderingOptions.DataOffset, SeekOrigin.Begin);
 					var stopWatch = App.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
 					stopWatch?.Start();
-					this.OnRender(sharedSource, stream, sharedBitmapBuffer, renderingOptions, planeOptions, cancellationToken);
+					var result = this.OnRender(sharedSource, stream, sharedBitmapBuffer, renderingOptions, planeOptions, cancellationToken);
 					stopWatch?.Let(it => this.Logger.LogTrace($"Rendering time: {it.ElapsedMilliseconds} ms"));
+					return result;
 				});
 			}
 			finally

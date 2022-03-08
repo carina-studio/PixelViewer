@@ -19,7 +19,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Render.
-		protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+		protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// get parameters
 			var width = bitmapBuffer.Width;
@@ -27,7 +27,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var pixelStride = planeOptions[0].PixelStride;
 			var rowStride = planeOptions[0].RowStride;
 			if (width <= 0 || height <= 0 || pixelStride <= 0 || (pixelStride * width) > rowStride)
-				return;
+				throw new ArgumentException("Invalid dimensions, pixel-stride or row-stride.");
 
 			// select byte ordering
 			Func<byte, byte, int> pixelConversionFunc = renderingOptions.ByteOrdering switch
@@ -63,6 +63,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					}
 				}
 			});
+
+			// complete
+			return new ImageRenderingResult();
 		}
 	}
 }

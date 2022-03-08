@@ -56,7 +56,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="renderingOptions">Rendering options.</param>
 		/// <param name="planeOptions">Rendering options for each plane.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
-		Task Render(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
+		Task<ImageRenderingResult> Render(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
 
 
 		/// <summary>
@@ -282,5 +282,36 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// YUV to RGB converter.
 		/// </summary>
 		public YuvToBgraConverter? YuvToBgraConverter { get; set; }
+	}
+
+
+	/// <summary>
+	/// Result of image rendering.
+	/// </summary>
+	struct ImageRenderingResult
+	{
+		/// <summary>
+		/// Initialize fields of <see cref="ImageRenderingResult"/> structure.
+		/// </summary>
+		public ImageRenderingResult()
+		{ }
+
+
+		/// <summary>
+		/// Mean of blue color.
+		/// </summary>
+		public double MeanOfBlue { get; set; } = double.NaN;
+
+
+		/// <summary>
+		/// Mean of green color.
+		/// </summary>
+		public double MeanOfGreen { get; set; } = double.NaN;
+
+
+		/// <summary>
+		/// Mean of red color.
+		/// </summary>
+		public double MeanOfRed { get; set; } = double.NaN;
 	}
 }

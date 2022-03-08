@@ -56,7 +56,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Render.
-		protected override unsafe void OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+		protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// get state
 			var width = (bitmapBuffer.Width & 0x7ffffffe);
@@ -155,6 +155,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					}
 				}
 			});
+
+			// complete
+			return new ImageRenderingResult();
 		}
 
 
