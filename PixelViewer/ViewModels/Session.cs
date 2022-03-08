@@ -3366,6 +3366,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.Logger.LogError(ex, $"Unable to update frame count and index of '{this.SourceFileName}'");
 				this.SetValue(HasRenderingErrorProperty, true);
+				this.ClearRenderedImage();
 				return;
 			}
 
