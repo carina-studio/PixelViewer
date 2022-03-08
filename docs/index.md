@@ -6,45 +6,24 @@ PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform imag
 
 Operating System                      | Download | Version | Screenshot
 :------------------------------------:|:--------:|:-------:|:----------:
-Windows 8/10/11                       |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-win-arm64.zip)|1.106.0.222 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows.png)
-Windows 7<br/>*(.NET Runtime needed)* |[x86](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-win-x86-fx-dependent.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-win-x64-fx-dependent.zip)|1.106.0.222 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7_Thumb.png" alt="Main window (Windows 7)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7.png)
-macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-osx-arm64.zip)|1.106.0.222 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
-Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/1.106.0.222/PixelViewer-1.106.0.222-linux-arm64.zip)|1.106.0.222 (Preview)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora_Thumb.png" alt="Main window (Fedora)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora.png)
+Windows 8/10/11                       |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-win-arm64.zip)|2.0.0.308 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows.png)
+Windows 7<br/>*(.NET Runtime needed)* |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-win-x86-fx-dependent.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-win-x64-fx-dependent.zip)|2.0.0.308 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7_Thumb.png" alt="Main window (Windows 7)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7.png)
+macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-osx-arm64.zip)|2.0.0.308 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
+Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.0.308/PixelViewer-2.0.0.308-linux-arm64.zip)|2.0.0.308 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora_Thumb.png" alt="Main window (Fedora)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora.png)
 
 - [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)
 
-## 📣 What's Change in 1.106.0.222
-- Add ```Display-P3``` color space and set as default screen color space on ```macOS```.
-- Add information bar to show ```ARGB```/```L*a*b*```/```XYZ``` colors of selected pixel.
-- Limited support of parsing DNG file.
-- Support saving image with orientation.
-- Support 4x4 Bayer Patterns.
-- Support RGB gain for ```Bayer Pattern``` formats.
-- Support ```BGR_161616```/```RGB_161616``` formats.
-- Allow specifying transformation function of brightness/contrast adjustment.
-- Add highlight/shadow adjustment on image.
-- Support selecting image format automatically according to file name of image.
-- Support specifying default byte ordering.
-- Support arranging tabs by dragging (not supported yet on ```Linux```).
-- Support opening tab in new window.
-- Support drag and drop multiple files to open.
-- Support layouting windows in horizontal, vertical or tile mode.
-- Support using system theme mode on ```macOS```.
-- Support hiding rendering parameters panel to get more space for viewing image.
-- Support auto update on ```macOS```.
-- Improve tab scrolling UX.
-- Improve toolbar scrolling UX.
-- Calculate memory usage of rendered images with more accuracy.
-- Reduce size of update packages for auto updating.
+## 📣 What's Change in 2.0 RC
+- Add saturation/vibrance adjustment.
+- Add auto color adjustment.
+- Add auto R/G/B gain selection.
+- Support resetting image filter parameters after opening image file.
+- Support specifying default color space of image.
+- Support using ```Ctrl/Cmd +/-``` to zoom image when ```Fit to viewport``` is ON.
+- Update algorithm of highlight/shadow adjustment.
+- Keep latest selected compression quality of JPEG.
 - Other UX improvement.
-- Use system menu bar on ```macOS```.
-- Enable ```Color Space Management``` by default on ```macOS```.
-- Use ```Command``` key instead of ```Ctrl``` key on ```macOS```.
-- Use single process to manage all windows.
 - Update dependent libraries.
-- Correct parameters of ```DCI-P3``` color space.
-- Correct algorithm of demosaicing.
-- Fix issue of unable to launch on ```ARM64``` PC.
 - Other bug fixing.
 
 ## ⭐ Supported formats
