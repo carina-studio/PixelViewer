@@ -37,16 +37,20 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 			// render
 			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
+			var partialMeanLut = (double*)null;
+			var partialMean = stackalloc double[] { 0, 0, 0 };
 			try
 			{
-				ushort** colorTransformationTables = stackalloc ushort*[3] { 
+				var colorTransformationTables = stackalloc ushort*[3] { 
 					baseColorTransformationTable,
 					baseColorTransformationTable + 65536,
 					baseColorTransformationTable + 131072,
 				};
+				partialMeanLut = (double*)NativeMemory.Alloc(65535 * sizeof(double));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[2], ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+				BuildColorTransformationTableUnsafe(partialMeanLut, 1.0 / (width * height));
 				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 				{
 					// render to 16-bit R/G/B
@@ -63,7 +67,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							for (var x = 0; x < width; ++x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 							{
 								var colorComponent = colorComponentSelector(x, y);
-								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][extractFunc(pixelPtr[0], pixelPtr[1])];
+								var color = extractFunc(pixelPtr[0], pixelPtr[1]);
+								partialMean[colorComponent] += partialMeanLut[color];
+								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 								bitmapPixelPtr[3] = 65535;
 							}
 							if (cancellationToken.IsCancellationRequested)
@@ -76,11 +82,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			}
 			finally
 			{
+				NativeMemory.Free(partialMeanLut);
 				NativeMemory.Free(baseColorTransformationTable);
 			}
 
 			// complete
-			return new ImageRenderingResult();
+			return new ImageRenderingResult()
+			{
+				MeanOfBlue = partialMean[BlueColorComponent],
+				MeanOfGreen = partialMean[GreenColorComponent],
+				MeanOfRed = partialMean[RedColorComponent],
+			};
 		}
     }
 }

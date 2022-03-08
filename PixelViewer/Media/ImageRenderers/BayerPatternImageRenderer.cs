@@ -14,10 +14,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     /// </summary>
     abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
     {
-        // Constants.
-        const int BlueColorComponent = 0;
-        const int GreenColorComponent = 1;
-        const int RedColorComponent = 2;
+        /// <summary>
+        /// Index of blue color.
+        /// </summary>
+        protected const int BlueColorComponent = 0;
+		/// <summary>
+		/// Index of green color.
+		/// </summary>
+        protected const int GreenColorComponent = 1;
+		/// <summary>
+		/// Index of red color.
+		/// </summary>
+        protected const int RedColorComponent = 2;
 
 
         // Static fields.
@@ -106,8 +114,44 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain)
 		{
 			table += 65535;
-			for (var i = 65535; i >= 0; --i, --table)
-				*table = ImageProcessing.ClipToUInt16(i * gain);
+			if (Math.Abs(gain - 1) <= 0.0001)
+			{
+				for (var i = 65535; i >= 0; --i, --table)
+					*table = (ushort)i;
+			}
+			else
+			{
+				for (var i = 65535; i >= 0; --i, --table)
+					*table = ImageProcessing.ClipToUInt16(i * gain);
+			}
+		}
+
+
+		/// <summary>
+		/// Build floating point color transformation table for single color of BGRA64.
+		/// </summary>
+		/// <param name="table">Pointer to table, the length should be 65536.</param>
+		/// <param name="gain">Gain for color.</param>
+		protected static unsafe void BuildColorTransformationTableUnsafe(double* table, double gain)
+		{
+			table += 65535;
+			if (Math.Abs(gain - 1) <= 0.0001)
+			{
+				for (var i = 65535; i >= 0; --i, --table)
+					*table = i;
+			}
+			else
+			{
+				for (var i = 65535; i >= 0; --i, --table)
+				{
+					var c = i * gain;
+					*table = c > 65535
+						? 65535
+						: c < 0
+							? 0
+							: c;
+				}
+			}
 		}
 
 

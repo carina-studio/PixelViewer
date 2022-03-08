@@ -64,6 +64,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 			// render
 			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
+			var partialMeanLut = (double*)null;
+			var partialMean = stackalloc double[] { 0, 0, 0 };
 			try
 			{
 				ushort** colorTransformationTables = stackalloc ushort*[3] {
@@ -71,9 +73,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					baseColorTransformationTable + 65536,
 					baseColorTransformationTable + 131072,
 				};
+				partialMeanLut = (double*)NativeMemory.Alloc(65535 * sizeof(double));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[2], ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+				BuildColorTransformationTableUnsafe(partialMeanLut, 1.0 / (width * height));
 				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 				{
 					// render to 16-bit R/G/B
@@ -92,7 +96,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								// 1st pixel
 								var bytes2 = packedPixelsPtr[2];
 								var colorComponent = colorComponentSelector(x, y);
-								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][bitsCombinationFunc(packedPixelsPtr[0], bytes2)];
+								var color = bitsCombinationFunc(packedPixelsPtr[0], bytes2);
+								partialMean[colorComponent] += partialMeanLut[color];
+								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
 								++x;
@@ -100,7 +106,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 								// 2nd pixel
 								colorComponent = colorComponentSelector(x, y);
-								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][bitsCombinationFunc(packedPixelsPtr[1], bytes2)];
+								color = bitsCombinationFunc(packedPixelsPtr[1], bytes2);
+								partialMean[colorComponent] += partialMeanLut[color];
+								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
 								++x;
@@ -115,11 +123,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			}
 			finally
             {
+				NativeMemory.Free(partialMeanLut);
 				NativeMemory.Free(baseColorTransformationTable);
             }
 
 			// complete
-			return new ImageRenderingResult();
+			return new ImageRenderingResult()
+			{
+				MeanOfBlue = partialMean[BlueColorComponent],
+				MeanOfGreen = partialMean[GreenColorComponent],
+				MeanOfRed = partialMean[RedColorComponent],
+			};
 		}
 	}
 }

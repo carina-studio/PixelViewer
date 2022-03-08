@@ -111,11 +111,14 @@ namespace Carina.PixelViewer.ViewModels
 					this.session.SynchronizationContext.Post(this.memoryUsageToken.Dispose);
 			}
 
+			// Frame number.
+			public readonly long FrameNumber;
+
 			// Histograms.
 			public BitmapHistograms? Histograms { get; set; }
 
-			// Frame number.
-			public readonly long FrameNumber;
+			// Rendering result.
+			public ImageRenderingResult RenderingResult { get; set; }
 
 			// Transfer resource ownership.
 			public ImageFrame? Transfer(Session session)
@@ -3402,7 +3405,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				// render
 				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
-				await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				renderedImageFrame.RenderingResult = await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 
 				// convert color space
 				if (colorSpaceConvertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
