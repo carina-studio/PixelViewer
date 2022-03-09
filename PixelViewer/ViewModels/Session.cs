@@ -1415,6 +1415,14 @@ namespace Carina.PixelViewer.ViewModels
 				this.ResetValue(InsufficientMemoryForRenderedImageProperty);
 			}
 
+			// release cached image frames
+			if (this.cachedFilteredImageFrames.IsNotEmpty())
+			{
+				foreach (var frame in this.cachedFilteredImageFrames)
+					frame.Dispose();
+				this.cachedFilteredImageFrames.Clear();
+			}
+
 			// release memory usage tokens
 			this.avaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			this.avaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
