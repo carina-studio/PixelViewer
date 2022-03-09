@@ -1843,9 +1843,9 @@ namespace Carina.PixelViewer.ViewModels
 			if (!failedToApply && isColorLutFilterNeeded)
 			{
 				// prepare LUT
-				var rLut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
-				var gLut = rLut.ToArray();
-				var bLut = rLut.ToArray();
+				var rLut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
+				var gLut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
+				var bLut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
 				try
 				{
 					stopwatch?.Restart();
@@ -1879,7 +1879,7 @@ namespace Carina.PixelViewer.ViewModels
 					RedLookupTable = rLut,
 					GreenLookupTable = gLut,
 					BlueLookupTable = bLut,
-					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
+					AlphaLookupTable = ColorLut.ObtainReadOnlyIdentity(renderedImageFrame.BitmapBuffer.Format)
 				};
 				stopwatch?.Restart();
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
@@ -1896,6 +1896,9 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				else
 					failedToApply = true;
+				ColorLut.Recycle(rLut);
+				ColorLut.Recycle(gLut);
+				ColorLut.Recycle(bLut);
 			}
 
 			// apply saturation filter
@@ -1927,7 +1930,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (!failedToApply && isLuminanceLutFilterNeeded)
 			{
 				// prepare LUT
-				var lut = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format);
+				var lut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
 				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
 				try
 				{
@@ -1957,7 +1960,7 @@ namespace Carina.PixelViewer.ViewModels
 					RedLookupTable = lut,
 					GreenLookupTable = lut,
 					BlueLookupTable = lut,
-					AlphaLookupTable = ColorLut.BuildIdentity(renderedImageFrame.BitmapBuffer.Format)
+					AlphaLookupTable = ColorLut.ObtainReadOnlyIdentity(renderedImageFrame.BitmapBuffer.Format)
 				};
 				stopwatch?.Restart();
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
@@ -1974,6 +1977,7 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				else
 					failedToApply = true;
+				ColorLut.Recycle(lut);
 			}
 
 			// apply grayscale filter

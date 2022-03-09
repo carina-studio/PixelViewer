@@ -1,4 +1,5 @@
 ﻿using CarinaStudio;
+using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,29 @@ namespace Carina.PixelViewer.Media.ImageFilters
     /// </summary>
     static class ColorLut
     {
+        /// <summary>
+        /// Read-only identity LUT for 16-bit color.
+        /// </summary>
+        public static IList<double> Identity16 = new double[65536].Also(it =>
+            ResetToIdentity(it)).AsReadOnly();
+        
+
+        /// <summary>
+        /// Read-only identity LUT for 8-bit color.
+        /// </summary>
+        public static IList<double> Identity8 = new double[256].Also(it =>
+            ResetToIdentity(it)).AsReadOnly();
+        
+
+        // Constants.
+        const int LutCacheSize = 8;
+
+
+        // Fields.
+        static readonly Stack<double[]> LutPool16 = new Stack<double[]>(LutCacheSize);
+        static readonly Stack<double[]> LutPool8 = new Stack<double[]>(LutCacheSize);
+
+
         /// <summary>
         /// Apply arctangent transformation.
         /// </summary>
@@ -111,22 +135,6 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 default:
                     throw new ArgumentException();
             }
-        }
-
-
-        /// <summary>
-        /// Build LUT with identity transformation.
-        /// </summary>
-        /// <param name="targetFormat">Target bitmap format.</param>
-        /// <returns>LUT.</returns>
-        public static IList<double> BuildIdentity(BitmapFormat targetFormat)
-        {
-            return (targetFormat switch
-            {
-                BitmapFormat.Bgra32 => new double[256],
-                BitmapFormat.Bgra64 => new double[65536],
-                _ => throw new ArgumentException($"Unsupported format: {targetFormat}"),
-            }).Also(it => ResetToIdentity(it));
         }
 
 
@@ -270,6 +278,100 @@ namespace Carina.PixelViewer.Media.ImageFilters
         {
             for (var n = lut.Count - 1; n >= 0; --n)
                 lut[n] *= factor;
+        }
+
+
+        /// <summary>
+        /// Obtain an LUT.
+        /// </summary>
+        /// <param name="template">Template LUT.</param>
+        /// <returns>LUT.</returns>
+        public static IList<double> Obtain(IList<double> template)
+        {
+            var lut = template.Count switch
+            {
+                256 => LutPool8.Lock(pool =>
+                {
+                    if (!pool.TryPop(out var lut))
+                        lut = new double[256];
+                    return lut;
+                }),
+                65536 => LutPool16.Lock(pool =>
+                {
+                    if (!pool.TryPop(out var lut))
+                        lut = new double[65536];
+                    return lut;
+                }),
+                _ => new double[template.Count],
+            };
+            template.CopyTo(lut, 0);
+            return lut;
+        }
+
+
+        /// <summary>
+        /// Obtain an identity LUT for given format.
+        /// </summary>
+        /// <param name="format">Format.</param>
+        /// <returns>Identity LUT.</returns>
+        public static IList<double> ObtainIdentity(BitmapFormat format) => format switch
+        {
+            BitmapFormat.Bgra32 => LutPool8.Lock(pool =>
+            {
+                if (!pool.TryPop(out var lut))
+                    lut = new double[256];
+                ResetToIdentity(lut);
+                return lut;
+            }),
+            BitmapFormat.Bgra64 => LutPool16.Lock(pool =>
+            {
+                if (!pool.TryPop(out var lut))
+                    lut = new double[65536];
+                ResetToIdentity(lut);
+                return lut;
+            }),
+            _ => throw new NotSupportedException($"Unsupported format: {format}."),
+        };
+
+
+         /// <summary>
+        /// Obtain an read-only identity LUT for given format.
+        /// </summary>
+        /// <param name="format">Format.</param>
+        /// <returns>Identity LUT.</returns>
+        public static IList<double> ObtainReadOnlyIdentity(BitmapFormat format) => format switch
+        {
+            BitmapFormat.Bgra32 => Identity8,
+            BitmapFormat.Bgra64 => Identity16,
+            _ => throw new NotSupportedException($"Unsupported format: {format}."),
+        };
+
+
+        /// <summary>
+        /// Recycle given LUT.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        public static void Recycle(IList<double> lut)
+        {
+            if (lut is not double[] arrayLut)
+                return;
+            switch (lut.Count)
+            {
+                case 256:
+                    lock (LutPool8)
+                    {
+                        if (LutPool8.Count < LutCacheSize)
+                            LutPool8.Push(arrayLut);
+                    }
+                    break;
+                case 65536:
+                    lock (LutPool16)
+                    {
+                        if (LutPool16.Count < LutCacheSize)
+                            LutPool16.Push(arrayLut);
+                    }
+                    break;
+            }
         }
 
 

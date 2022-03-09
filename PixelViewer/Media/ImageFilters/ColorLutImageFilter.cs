@@ -48,6 +48,15 @@ namespace Carina.PixelViewer.Media.ImageFilters
         }
 
 
+        // Constants.
+        const int LutPoolSize = 4;
+
+
+        // Static fields.
+        static readonly Stack<IntPtr> LutPool16 = new Stack<IntPtr>(LutPoolSize);
+        static readonly Stack<IntPtr> LutPool8 = new Stack<IntPtr>(LutPoolSize);
+
+
         // Build final lookup table for 8-bit color transformation.
         unsafe byte* BuildFinalLookupTable(IList<double> source, byte* lut)
         {
@@ -72,6 +81,24 @@ namespace Carina.PixelViewer.Media.ImageFilters
         }
 
 
+        // Obtain ARGB LUT for 16-bit color.
+        unsafe ushort* ObtainArgbLookupTable16() => (ushort*)LutPool16.Lock(pool =>
+        {
+            if (pool.TryPop(out var lut))
+                return lut;
+            return (IntPtr)NativeMemory.Alloc(65536 * sizeof(ushort) * 4);
+        });
+
+
+        // Obtain ARGB LUT for 8-bit color.
+        unsafe byte* ObtainArgbLookupTable8() => (byte*)LutPool8.Lock(pool =>
+        {
+            if (pool.TryPop(out var lut))
+                return lut;
+            return (IntPtr)NativeMemory.Alloc(256 * sizeof(byte) * 4);
+        });
+
+
         /// <inheritdoc/>
         protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
         {
@@ -90,7 +117,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                     {
                         case BitmapFormat.Bgra32:
                             {
-                                var luts = (byte*)Marshal.AllocHGlobal(256 * 4);
+                                var luts = ObtainArgbLookupTable8();
                                 var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 try
@@ -121,13 +148,13 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                 }
                                 finally
                                 {
-                                    Marshal.FreeHGlobal((IntPtr)luts);
+                                    RecycleArgbLookupTable8(luts);
                                 }
                             }
                             break;
                         case BitmapFormat.Bgra64:
                             {
-                                var luts = (ushort*)Marshal.AllocHGlobal(65536 * sizeof(ushort) * 4);
+                                var luts = ObtainArgbLookupTable16();
                                 var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 try
@@ -158,13 +185,39 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                 }
                                 finally
                                 {
-                                    Marshal.FreeHGlobal((IntPtr)luts);
+                                    RecycleArgbLookupTable16(luts);
                                 }
                             }
                             break;
                     }
                 });
             });
+        }
+
+
+        // Recycle ARGB LUT for 16-bit color.
+        unsafe void RecycleArgbLookupTable16(ushort* lut)
+        {
+            lock (LutPool16)
+            {
+                if (LutPool16.Count < LutPoolSize)
+                    LutPool16.Push((IntPtr)lut);
+                else
+                    NativeMemory.Free(lut);
+            }
+        }
+
+
+        // Recycle ARGB LUT for 8-bit color.
+        unsafe void RecycleArgbLookupTable8(byte* lut)
+        {
+            lock (LutPool8)
+            {
+                if (LutPool8.Count < LutPoolSize)
+                    LutPool8.Push((IntPtr)lut);
+                else
+                    NativeMemory.Free(lut);
+            }
         }
     }
 }
