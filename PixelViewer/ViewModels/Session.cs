@@ -687,6 +687,7 @@ namespace Carina.PixelViewer.ViewModels
 		IDisposable? cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
 		WriteableBitmap? cachedAvaRenderedImage;
 		IDisposable? cachedAvaRenderedImageMemoryUsageToken;
+		readonly List<ImageFrame> cachedFilteredImageFrames = new List<ImageFrame>(2);
 		readonly MutableObservableBoolean canApplyProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
@@ -1329,6 +1330,9 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(HistogramsProperty, null);
 				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
+				foreach (var cachedFrame in this.cachedFilteredImageFrames)
+					cachedFrame.Dispose();
+				this.cachedFilteredImageFrames.Clear();
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			}
 			return true;
@@ -1733,8 +1737,40 @@ namespace Carina.PixelViewer.ViewModels
 				++filterCount;
 			}
 
+			// release cached frames which is not suitable
+			var width = renderedImageFrame.BitmapBuffer.Width;
+			var height = renderedImageFrame.BitmapBuffer.Height;
+			var format = renderedImageFrame.BitmapBuffer.Format;
+			for (var i = this.cachedFilteredImageFrames.Count - 1; i >= 0; --i)
+			{
+				var cachedFrame = this.cachedFilteredImageFrames[i];
+				if (cachedFrame.BitmapBuffer.Width != width 
+					|| cachedFrame.BitmapBuffer.Height != height
+					|| cachedFrame.BitmapBuffer.Format != format)
+                {
+					if (this.Application.IsDebugMode)
+						this.Logger.LogTrace($"Released cached filtered image frame, size: {cachedFrame.BitmapBuffer.Width}x{cachedFrame.BitmapBuffer.Height}");
+					this.cachedFilteredImageFrames.RemoveAt(i);
+					cachedFrame.Dispose();
+                }
+			}
+
 			// allocate frames
-			var filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
+			var filteredImageFrame1 = (ImageFrame?)null;
+			var cachedFrameCount = this.cachedFilteredImageFrames.Count;
+			if (cachedFrameCount > 0)
+			{
+				if (this.Application.IsDebugMode)
+					this.Logger.LogTrace("Use cached filtered image frame 1");
+				filteredImageFrame1 = this.cachedFilteredImageFrames[cachedFrameCount - 1];
+				this.cachedFilteredImageFrames.RemoveAt(cachedFrameCount - 1);
+			}
+			else
+            {
+				if (this.Application.IsDebugMode)
+					this.Logger.LogWarning($"Allocate filtered image frame 1, size: {width}x{height}");
+				filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
+			}
 			if (filteredImageFrame1 == null)
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
@@ -1751,15 +1787,30 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				else if (this.hasPendingImageFiltering)
 				{
-					this.Logger.LogWarning("Start next filtering");
+					this.Logger.LogWarning("Filtering image has been cancelled, start next filtering");
 					this.filterImageAction.Schedule();
 				}
+				else
+					this.Logger.LogWarning("Filtering image has been cancelled");
 				return;
 			}
 			var filteredImageFrame2 = (ImageFrame?)null;
 			if (filterCount > 1)
 			{
-				filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
+				cachedFrameCount = this.cachedFilteredImageFrames.Count;
+				if (cachedFrameCount > 0)
+				{
+					if (this.Application.IsDebugMode)
+						this.Logger.LogTrace("Use cached filtered image frame 2");
+					filteredImageFrame2 = this.cachedFilteredImageFrames[cachedFrameCount - 1];
+					this.cachedFilteredImageFrames.RemoveAt(cachedFrameCount - 1);
+				}
+				else
+				{
+					if (this.Application.IsDebugMode)
+						this.Logger.LogWarning($"Allocate filtered image frame 2, size: {width}x{height}");
+					filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
+				}
 				if (filteredImageFrame2 == null)
 				{
 					if (!cancellationTokenSource.IsCancellationRequested)
@@ -1771,9 +1822,11 @@ namespace Carina.PixelViewer.ViewModels
 					}
 					else if (this.hasPendingImageFiltering)
 					{
-						this.Logger.LogWarning("Start next filtering");
+						this.Logger.LogWarning("Filtering image has been cancelled, start next filtering");
 						this.filterImageAction.Schedule();
 					}
+					else
+						this.Logger.LogWarning("Filtering image has been cancelled");
 					filteredImageFrame1.Dispose();
 					return;
 				}
@@ -1946,8 +1999,9 @@ namespace Carina.PixelViewer.ViewModels
 			// check filtering result
 			if (failedToApply)
 			{
-				filteredImageFrame1.Dispose();
-				filteredImageFrame2?.Dispose();
+				this.cachedFilteredImageFrames.Add(filteredImageFrame1);
+				if (filteredImageFrame2 != null)
+					this.cachedFilteredImageFrames.Add(filteredImageFrame2);
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageFilteringCancellationTokenSource = null;
@@ -1981,8 +2035,9 @@ namespace Carina.PixelViewer.ViewModels
 			// cancellation check
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
-				filteredImageFrame1.Dispose();
-				filteredImageFrame2?.Dispose();
+				this.cachedFilteredImageFrames.Add(filteredImageFrame1);
+				if (filteredImageFrame2 != null)
+					this.cachedFilteredImageFrames.Add(filteredImageFrame2);
 				if (this.hasPendingImageFiltering)
 				{
 					this.Logger.LogDebug("Start next filtering");
@@ -1999,16 +2054,19 @@ namespace Carina.PixelViewer.ViewModels
 
 			// complete
 			this.imageFilteringCancellationTokenSource = null;
-			this.filteredImageFrame?.Dispose();
+			if (this.filteredImageFrame != null)
+				this.cachedFilteredImageFrames.Add(this.filteredImageFrame);
 			if (sourceImageFrame == filteredImageFrame1)
 			{
 				this.filteredImageFrame = filteredImageFrame1;
-				filteredImageFrame2?.Dispose();
+				if (filteredImageFrame2 != null)
+					this.cachedFilteredImageFrames.Add(filteredImageFrame2);
 			}
 			else
 			{
 				this.filteredImageFrame = filteredImageFrame2;
-				filteredImageFrame1.Dispose();
+				if (filteredImageFrame1 != null)
+					this.cachedFilteredImageFrames.Add(filteredImageFrame1);
 			}
 			try
 			{
@@ -3680,7 +3738,7 @@ namespace Carina.PixelViewer.ViewModels
 					else
 					{
 						if (this.Application.IsDebugMode)
-							this.Logger.LogTrace($"Create Avalonia bitmap, size: {width}x{height}");
+							this.Logger.LogWarning($"Allocate Avalonia bitmap, size: {width}x{height}");
 						bitmap = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
 					}
 					await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap);
@@ -3723,7 +3781,7 @@ namespace Carina.PixelViewer.ViewModels
 							else
 							{
 								if (this.Application.IsDebugMode)
-									this.Logger.LogTrace($"Create quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}");
+									this.Logger.LogWarning($"Allocate quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}");
 								quarterSizeBitmap = new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
 							}
 							await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap);
