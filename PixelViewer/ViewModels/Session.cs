@@ -681,8 +681,12 @@ namespace Carina.PixelViewer.ViewModels
 
 		// Fields.
 		readonly List<ActivationToken> activationTokens = new List<ActivationToken>();
-		IDisposable? avaloniaQuarterSizeRenderedImageMemoryUsageToken;
-		IDisposable? avaloniaRenderedImageMemoryUsageToken;
+		IDisposable? avaQuarterSizeRenderedImageMemoryUsageToken;
+		IDisposable? avaRenderedImageMemoryUsageToken;
+		WriteableBitmap? cachedAvaQuarterSizeRenderedImage;
+		IDisposable? cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
+		WriteableBitmap? cachedAvaRenderedImage;
+		IDisposable? cachedAvaRenderedImageMemoryUsageToken;
 		readonly MutableObservableBoolean canApplyProfile = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
@@ -1408,8 +1412,14 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// release memory usage tokens
-			this.avaloniaQuarterSizeRenderedImageMemoryUsageToken = this.avaloniaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-			this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+			this.avaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+			this.avaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+
+			// clear cached Avalonia bitmaps
+			this.cachedAvaQuarterSizeRenderedImage = null;
+			this.cachedAvaRenderedImage = null;
+			this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+			this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 
 			// update zooming state
 			this.canZoomTo.Update(false);
@@ -1674,6 +1684,10 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.hasPendingImageFiltering = false;
 
+			// log
+			if (this.Application.IsDebugMode)
+				this.Logger.LogTrace("Start filtering image");
+
 			// prepare
 			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
 			this.imageFilteringCancellationTokenSource = cancellationTokenSource;
@@ -1802,6 +1816,8 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (!cancellationTokenSource.IsCancellationRequested)
 						this.Logger.LogError(ex, "Failed to prepare color LUT to filter image");
+					else if (this.Application.IsDebugMode)
+						this.Logger.LogWarning("Filtering cancelled when preparing color LUT");
 				}
 
 				// apply filter
@@ -1878,6 +1894,8 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (!cancellationTokenSource.IsCancellationRequested)
 						this.Logger.LogError(ex, "Failed to prepare luminance LUT to filter image");
+					else if (this.Application.IsDebugMode)
+						this.Logger.LogWarning("Filtering cancelled when preparing luminance LUT");
 				}
 
 				// apply filter
@@ -1939,9 +1957,11 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				else if (this.hasPendingImageFiltering)
 				{
-					this.Logger.LogDebug("Start next filtering");
+					this.Logger.LogDebug("Filtering has been cancelled, start next filtering");
 					this.filterImageAction.Schedule();
 				}
+				else if (this.Application.IsDebugMode)
+					this.Logger.LogWarning("Filtering has been cancelled");
 				return;
 			}
 
@@ -1954,6 +1974,8 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
 					this.Logger.LogError(ex, "Failed to generate histograms for filtered image");
+				else if (this.Application.IsDebugMode)
+					this.Logger.LogWarning("Filtering cancelled when generating histograms");
 			}
 
 			// cancellation check
@@ -1966,8 +1988,14 @@ namespace Carina.PixelViewer.ViewModels
 					this.Logger.LogDebug("Start next filtering");
 					this.filterImageAction.Schedule();
 				}
+				else if (this.Application.IsDebugMode)
+					this.Logger.LogWarning("Filtering cancelled");
 				return;
 			}
+
+			// log
+			if (this.Application.IsDebugMode)
+				this.Logger.LogTrace("Complete filtering image");
 
 			// complete
 			this.imageFilteringCancellationTokenSource = null;
@@ -2844,18 +2872,22 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (property == QuarterSizeRenderedImageProperty)
 			{
-				if (oldValue != null)
-					this.SynchronizationContext.Post(() => (oldValue as IDisposable)?.Dispose());
 				if (newValue == null)
-					this.avaloniaQuarterSizeRenderedImageMemoryUsageToken = this.avaloniaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				{
+					this.cachedAvaQuarterSizeRenderedImage = null;
+					this.avaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+					this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				}
 				this.SetValue(HasQuarterSizeRenderedImageProperty, newValue != null);
 			}
 			else if (property == RenderedImageProperty)
 			{
-				if (oldValue != null)
-					this.SynchronizationContext.Post(() => (oldValue as IDisposable)?.Dispose());
 				if (newValue == null)
-					this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				{
+					this.cachedAvaRenderedImage = null;
+					this.avaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+					this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				}
 				this.SetValue(HasRenderedImageProperty, newValue != null);
 				if (oldValue == null || newValue == null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
 					this.fitRenderedImageToViewportScale = double.NaN;
@@ -3580,70 +3612,158 @@ namespace Carina.PixelViewer.ViewModels
 			var imageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
 			if (imageFrame != null)
 			{
+				// released cached image if it is not suitable
+				var width = imageFrame.BitmapBuffer.Width;
+				var height = imageFrame.BitmapBuffer.Height;
+				if (this.cachedAvaRenderedImage != null)
+                {
+					if (this.cachedAvaRenderedImage.PixelSize.Width != width
+						|| this.cachedAvaRenderedImage.PixelSize.Height != height)
+                    {
+						if (this.Application.IsDebugMode)
+							this.Logger.LogTrace($"Release cached Avalonia bitmap, size: {this.cachedAvaRenderedImage.PixelSize.Width}x{this.cachedAvaRenderedImage.PixelSize.Height}");
+						this.cachedAvaRenderedImage = null;
+						this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+                    }
+                }
+
 				// request memory usage
-				var dataSize = (imageFrame.BitmapBuffer.Width * imageFrame.BitmapBuffer.Height * 4);
-				var memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
-				while (memoryUsageToken == null)
+				var memoryUsageToken = (IDisposable?)null;
+				if (this.cachedAvaRenderedImage != null)
 				{
-					if (this.RenderedImage != null)
+					if (this.Application.IsDebugMode)
+						this.Logger.LogTrace($"Use cached Avalonia bitmap, size: {this.cachedAvaRenderedImage.PixelSize.Width}x{this.cachedAvaRenderedImage.PixelSize.Height}");
+					memoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.AsNonNull();
+					this.cachedAvaRenderedImageMemoryUsageToken = null;
+				}
+				else
+				{
+					var dataSize = (width * height * 4);
+					memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
+					while (memoryUsageToken == null)
 					{
-						this.SetValue(QuarterSizeRenderedImageProperty, null);
-						this.SetValue(RenderedImageProperty, null);
-						memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
-						continue;
-					}
-					this.Logger.LogWarning("Unable to request memory usage for Avalonia Bitmap, try hibernating another session");
-					if (await HibernateAnotherSessionAsync())
-						memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
-					else
-					{
-						this.Logger.LogError("Unable to request memory usage for Avalonia Bitmap");
-						this.SetValue(HasRenderingErrorProperty, false);
-						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-						this.SetValue(HistogramsProperty, null);
-						this.SetValue(QuarterSizeRenderedImageProperty, null);
-						this.SetValue(RenderedImageProperty, null);
-						return;
+						if (this.RenderedImage != null)
+						{
+							this.SetValue(QuarterSizeRenderedImageProperty, null);
+							this.SetValue(RenderedImageProperty, null);
+							memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
+							continue;
+						}
+						this.Logger.LogWarning("Unable to request memory usage for Avalonia Bitmap, try hibernating another session");
+						if (await HibernateAnotherSessionAsync())
+							memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
+						else
+						{
+							this.Logger.LogError("Unable to request memory usage for Avalonia Bitmap");
+							this.SetValue(HasRenderingErrorProperty, false);
+							this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+							this.SetValue(HistogramsProperty, null);
+							this.SetValue(QuarterSizeRenderedImageProperty, null);
+							this.SetValue(RenderedImageProperty, null);
+							return;
+						}
 					}
 				}
 				var quarterSizeMemoryUsageToken = (IDisposable?)null;
 
 				// convert to Avalonia bitmap
-				var bitmap = (IBitmap?)null;
-				var quarterSizeBitmap = (IBitmap?)null;
+				var bitmap = (WriteableBitmap?)null;
+				var quarterSizeBitmap = (WriteableBitmap?)null;
 				try
 				{
-					bitmap = await imageFrame.BitmapBuffer.CreateAvaloniaBitmapAsync(cancellationToken: cancellationTokenSource.Token);
-					if (!cancellationTokenSource.IsCancellationRequested 
-						&& (imageFrame.BitmapBuffer.Width > 2048 || imageFrame.BitmapBuffer.Height > 2048))
+					// create full-size Avalonia bitmap
+					if (this.cachedAvaRenderedImage != null)
 					{
-						quarterSizeMemoryUsageToken = this.RequestRenderedImageMemoryUsage((imageFrame.BitmapBuffer.Width >> 1) * (imageFrame.BitmapBuffer.Height >> 1) * 4);
-						if (quarterSizeMemoryUsageToken != null)
-							quarterSizeBitmap = await imageFrame.BitmapBuffer.CreateQuarterSizeAvaloniaBitmapAsync(cancellationTokenSource.Token);
+						bitmap = this.cachedAvaRenderedImage;
+						this.cachedAvaRenderedImage = null;
+					}
+					else
+					{
+						if (this.Application.IsDebugMode)
+							this.Logger.LogTrace($"Create Avalonia bitmap, size: {width}x{height}");
+						bitmap = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
+					}
+					await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap);
+
+					// create quarter-size Avalonia bitmap
+					var halfWidth = width >> 1;
+					var halfHeight = height >> 1;
+					if (!cancellationTokenSource.IsCancellationRequested && (halfWidth > 1024 || halfHeight > 1024))
+					{
+						// released cached image if it is not suitable
+						if (this.cachedAvaQuarterSizeRenderedImage != null)
+						{
+							if (this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width != halfWidth
+								|| this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height != halfHeight)
+							{
+								if (this.Application.IsDebugMode)
+									this.Logger.LogTrace($"Release cached quarter-size Avalonia bitmap, size: {this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width}x{this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height}");
+								this.cachedAvaQuarterSizeRenderedImage = null;
+								this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+							}
+						}
+
+						// request memory usage
+						if (this.cachedAvaQuarterSizeRenderedImage != null)
+                        {
+							quarterSizeMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
+							this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = null;
+                        }
 						else
-							this.Logger.LogWarning("Unable to request memory usage for quarter-size Avalonia Bitmap");
+							quarterSizeMemoryUsageToken = this.RequestRenderedImageMemoryUsage(halfWidth * halfHeight * 4);
+
+						// create bitmap
+						if (quarterSizeMemoryUsageToken != null)
+						{
+							if (this.cachedAvaQuarterSizeRenderedImage != null)
+							{
+								quarterSizeBitmap = this.cachedAvaQuarterSizeRenderedImage;
+								this.cachedAvaQuarterSizeRenderedImage = null;
+							}
+							else
+							{
+								if (this.Application.IsDebugMode)
+									this.Logger.LogTrace($"Create quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}");
+								quarterSizeBitmap = new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
+							}
+							await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap);
+						}
+						else
+							this.Logger.LogWarning("Unable to request memory usage for quarter-size Avalonia bitmap");
 					}
 				}
 				catch (Exception ex)
 				{
+					this.cachedAvaQuarterSizeRenderedImage = null;
+					this.cachedAvaRenderedImage = null;
 					quarterSizeMemoryUsageToken?.Dispose();
 					if (bitmap == null)
 						memoryUsageToken?.Dispose();
 					if (ex is TaskCanceledException)
 					{
+						if (this.Application.IsDebugMode)
+							this.Logger.LogWarning("Reporting rendered image has been cancelled");
 						memoryUsageToken?.Dispose();
 						throw;
 					}
 					this.Logger.LogError(ex, "Failed to convert to Avalonia bitmap");
 				}
 				if (cancellationTokenSource.IsCancellationRequested)
+				{
+					if (this.Application.IsDebugMode)
+						this.Logger.LogWarning("Reporting rendered image has been cancelled");
 					throw new TaskCanceledException();
+				}
 
 				// update state
-				this.avaloniaQuarterSizeRenderedImageMemoryUsageToken = this.avaloniaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-				this.avaloniaQuarterSizeRenderedImageMemoryUsageToken = quarterSizeMemoryUsageToken;
-				this.avaloniaRenderedImageMemoryUsageToken = this.avaloniaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-				this.avaloniaRenderedImageMemoryUsageToken = memoryUsageToken;
+				this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				this.cachedAvaRenderedImage = this.GetValue(RenderedImageProperty) as WriteableBitmap;
+				this.cachedAvaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken;
+				this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				this.cachedAvaQuarterSizeRenderedImage = this.GetValue(QuarterSizeRenderedImageProperty) as WriteableBitmap;
+				this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken;
+				this.avaQuarterSizeRenderedImageMemoryUsageToken = quarterSizeMemoryUsageToken;
+				this.avaRenderedImageMemoryUsageToken = memoryUsageToken;
 				this.canSaveFilteredImage.Update(!this.IsSavingFilteredImage && this.filteredImageFrame != null);
 				this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 				this.SetValue(HasRenderingErrorProperty, false);
