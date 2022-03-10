@@ -4689,27 +4689,28 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			
 			// apply color adjustment
+			double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
 			this.SetValue(RedColorAdjustmentProperty, rRatio < 0.5
 				? -1
 				: rRatio > 2
 					? 1
 					: rRatio >= 1
-						? rRatio - 1
-						: 1 - 1 / rRatio);
+						? Quantize(rRatio - 1)
+						: Quantize(1 - 1 / rRatio));
 			this.SetValue(GreenColorAdjustmentProperty, gRatio < 0.5
 				? -1
 				: gRatio > 2
 					? 1
 					: gRatio >= 1
-						? gRatio - 1
-						: 1 - 1 / gRatio);
+						? Quantize(gRatio - 1)
+						: Quantize(1 - 1 / gRatio));
 			this.SetValue(BlueColorAdjustmentProperty, bRatio < 0.5
 				? -1
 				: bRatio > 2
 					? 1
 					: bRatio >= 1
-						? bRatio - 1
-						: 1 - 1 / bRatio);
+						? Quantize(bRatio - 1)
+						: Quantize(1 - 1 / bRatio));
 			if (this.filterImageAction.IsScheduled)
 				this.filterImageAction.Reschedule();
 		}
@@ -4808,9 +4809,10 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			
 			// apply RGB gain
-			this.SetValue(RedColorGainProperty, rRatio);
-			this.SetValue(GreenColorGainProperty, gRatio);
-			this.SetValue(BlueColorGainProperty, bRatio);
+			double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
+			this.SetValue(RedColorGainProperty, Quantize(rRatio));
+			this.SetValue(GreenColorGainProperty, Quantize(gRatio));
+			this.SetValue(BlueColorGainProperty, Quantize(bRatio));
 			if (this.renderImageAction.IsScheduled)
 				this.renderImageAction.Reschedule();
 		}
