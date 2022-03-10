@@ -14,7 +14,7 @@ namespace Carina.PixelViewer
         /// <summary>
         /// Sensitivity of highlight/shadow adjustment.
         /// </summary>
-        public static readonly SettingKey<double> HighlightShadowAdjustmentSensitivity = new(nameof(HighlightShadowAdjustmentSensitivity), 30);
+        public static readonly SettingKey<double> HighlightShadowAdjustmentSensitivity = new(nameof(HighlightShadowAdjustmentSensitivity), 5);
         /// <summary>
         /// Maximum ratio of processor for parallel image processing.
         /// </summary>

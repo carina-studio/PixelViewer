@@ -220,7 +220,11 @@ namespace Carina.PixelViewer.Media.ImageFilters
                         continue;
                     normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
                     if (Math.Abs(normColor) < colorThreshold)
-                        normColor = (normColor >= 0) ? colorThreshold : -colorThreshold;
+                    {
+                        if (normColor < 0)
+                            continue;
+                        normColor = colorThreshold;
+                    }
                     lut[n] = (startNormColor + Math.Pow(normColor, gamma) * colorRatio) * maxColor;
                 }
             }
@@ -261,11 +265,66 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 intensity = 1;
             else if (Math.Abs(intensity) < 0.001)
                 return Task.CompletedTask;
-            var sensitivity = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity)
-                ?? ConfigurationKeys.HighlightShadowAdjustmentSensitivity.DefaultValue;
-            var range = (int)(lut.Count * Math.Abs(intensity)) >> 1;
-            ArctanTransform(lut, lut.Count - range, lut.Count, intensity * sensitivity);
+            var sensitivity = (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity);
+            if (intensity >= 0)
+                InverseGammaTransform(lut, lut.Count >> 1, lut.Count, 1 + intensity * sensitivity);
+            else
+                InverseGammaTransform(lut, lut.Count >> 1, lut.Count, 1 / (1 - intensity * sensitivity));
             return Task.CompletedTask;
+        }
+
+
+        /// <summary>
+        /// Apply inverse gamma transformation on specific range of LUT.
+        /// </summary>
+        /// <param name="lut">LUT.</param>
+        /// <param name="start">Inclusive start of range of LUT.</param>
+        /// <param name="end">Exclusive end of range of LUT.</param>
+        /// <param name="gamma">Gamma.</param>
+        public static void InverseGammaTransform(IList<double> lut, int start, int end, double gamma)
+        {
+            // check parameter
+            if (end <= start)
+                return;
+            if (Math.Abs(gamma - 1) < 0.001)
+                return;
+
+            // apply
+            var maxColor = lut.Count - 1.0;
+            var startNormColor = start / maxColor;
+            var endNormColor = (end - 1) / maxColor;
+            var colorRatio = (end - start - 1) / maxColor;
+            var colorThreshold = (1 / maxColor);
+            if (gamma >= 1)
+            {
+                for (var n = lut.Count - 1; n >= 0; --n)
+                {
+                    var normColor = lut[n] / maxColor;
+                    if (normColor < startNormColor || normColor > endNormColor)
+                        continue;
+                    normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
+                    if (Math.Abs(normColor) < colorThreshold)
+                        normColor = (normColor >= 0) ? colorThreshold : -colorThreshold;
+                    lut[n] = (startNormColor + (1 - Math.Pow(1 - normColor, gamma)) * colorRatio) * maxColor;
+                }
+            }
+            else
+            {
+                for (var n = lut.Count - 1; n >= 0; --n)
+                {
+                    var normColor = lut[n] / maxColor;
+                    if (normColor < startNormColor || normColor > endNormColor)
+                        continue;
+                    normColor = (normColor - startNormColor) / colorRatio; // expand to [0.0, 1.0]
+                    if (Math.Abs(normColor - 1) < colorThreshold)
+                    {
+                        if (normColor > 1)
+                            continue;
+                        normColor = 1 - colorThreshold;
+                    }
+                    lut[n] = (startNormColor + (1 - Math.Pow(1 - normColor, gamma)) * colorRatio) * maxColor;
+                }
+            }
         }
 
 
@@ -530,10 +589,11 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 intensity = 1;
             else if (Math.Abs(intensity) < 0.001)
                 return Task.CompletedTask;
-            var sensitivity = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity)
-                ?? ConfigurationKeys.HighlightShadowAdjustmentSensitivity.DefaultValue;
-            var range = (int)(lut.Count * Math.Abs(intensity)) >> 1;
-            ArctanTransform(lut, 0, range, intensity * sensitivity);
+            var sensitivity = (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity);
+            if (intensity >= 0)
+                GammaTransform(lut, 0, lut.Count >> 1, 1 / (1 + intensity * sensitivity));
+            else
+                GammaTransform(lut, 0, lut.Count >> 1, 1 - intensity * sensitivity);
             return Task.CompletedTask;
         }
 
