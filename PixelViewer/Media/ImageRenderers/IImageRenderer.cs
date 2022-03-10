@@ -313,5 +313,23 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Mean of red color.
 		/// </summary>
 		public double MeanOfRed { get; set; } = double.NaN;
+
+
+		/// <summary>
+		/// Weighted mean of blue color.
+		/// </summary>
+		public double WeightedMeanOfBlue { get; set; } = double.NaN;
+
+
+		/// <summary>
+		/// Weighted mean of green color.
+		/// </summary>
+		public double WeightedMeanOfGreen { get; set; } = double.NaN;
+
+
+		/// <summary>
+		/// Weighted mean of red color.
+		/// </summary>
+		public double WeightedMeanOfRed { get; set; } = double.NaN;
 	}
 }

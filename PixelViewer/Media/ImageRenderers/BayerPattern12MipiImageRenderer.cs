@@ -66,6 +66,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
 			var accuColor = stackalloc ulong[] { 0L, 0L, 0L };
 			var accuPixelCount = stackalloc int[] { 0, 0, 0 };
+			var wAccuColor = stackalloc ulong[] { 0L, 0L, 0L };
+			var wAccuPixelCount = stackalloc int[] { 0, 0, 0 };
+			var wLeft = width / 3;
+			var wRight = width - wLeft;
+			var wTop = height / 3;
+			var wBottom = height - wTop;
 			try
 			{
 				ushort** colorTransformationTables = stackalloc ushort*[3] {
@@ -89,6 +95,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							imageStream.Read(row, 0, rowStride);
 							var packedPixelsPtr = rowPtr;
 							var bitmapPixelPtr = (ushort*)bitmapRowPtr;
+							var isVerticalWeightedArea = (y >= wTop && y <= wBottom);
 							for (var x = 0; x < width; packedPixelsPtr += 3)
 							{
 								// 1st pixel
@@ -97,6 +104,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								var color = bitsCombinationFunc(packedPixelsPtr[0], bytes2);
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
+								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
+								{
+									wAccuColor[colorComponent] += color;
+									++wAccuPixelCount[colorComponent];
+								}
 								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
@@ -108,6 +120,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								color = bitsCombinationFunc(packedPixelsPtr[1], bytes2);
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
+								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
+								{
+									wAccuColor[colorComponent] += color;
+									++wAccuPixelCount[colorComponent];
+								}
 								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
@@ -132,6 +149,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				MeanOfBlue = accuColor[BlueColorComponent] / (double)accuPixelCount[BlueColorComponent],
 				MeanOfGreen = accuColor[GreenColorComponent] / (double)accuPixelCount[GreenColorComponent],
 				MeanOfRed = accuColor[RedColorComponent] / (double)accuPixelCount[RedColorComponent],
+				WeightedMeanOfBlue = wAccuColor[BlueColorComponent] / (double)wAccuPixelCount[BlueColorComponent],
+				WeightedMeanOfGreen = wAccuColor[GreenColorComponent] / (double)wAccuPixelCount[GreenColorComponent],
+				WeightedMeanOfRed = wAccuColor[RedColorComponent] / (double)wAccuPixelCount[RedColorComponent],
 			};
 		}
 	}

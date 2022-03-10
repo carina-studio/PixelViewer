@@ -3616,7 +3616,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
 				this.canSelectColorAdjustment.Update(renderedImageFrame.Histograms != null);
 				this.canSelectRgbGain.Update(renderedImageFrame.RenderingResult.Let(it =>
-					double.IsFinite(it.MeanOfBlue) && double.IsFinite(it.MeanOfGreen) && double.IsFinite(it.MeanOfRed)));
+					(double.IsFinite(it.MeanOfBlue) && double.IsFinite(it.MeanOfGreen) && double.IsFinite(it.MeanOfRed))
+					|| (double.IsFinite(it.WeightedMeanOfBlue) && double.IsFinite(it.WeightedMeanOfGreen) && double.IsFinite(it.WeightedMeanOfRed))));
 
 				// filter image or report now
 				if (this.IsFilteringRenderedImageNeeded)
@@ -4741,9 +4742,15 @@ namespace Carina.PixelViewer.ViewModels
 			var gRatio = 0.0;
 			var bRatio = 0.0;
 			var mean = 0.0;
-			var refR = renderingResult.MeanOfRed;
-			var refG = renderingResult.MeanOfGreen;
-			var refB = renderingResult.MeanOfBlue;
+			var refR = renderingResult.WeightedMeanOfRed;
+			var refG = renderingResult.WeightedMeanOfGreen;
+			var refB = renderingResult.WeightedMeanOfBlue;
+			if (double.IsNaN(refR) || double.IsNaN(refG) || double.IsNaN(refB))
+			{
+				refR = renderingResult.MeanOfRed;
+				refG = renderingResult.MeanOfGreen;
+				refB = renderingResult.MeanOfBlue;
+			}
 			if (refR > refG)
 			{
 				if (refR > refB)
