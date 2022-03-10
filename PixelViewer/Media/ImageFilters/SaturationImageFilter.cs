@@ -123,11 +123,10 @@ namespace Carina.PixelViewer.Media.ImageFilters
         protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
         {
             this.VerifyFormats(source, result);
-            var saturation = Math.Max(-1, parameters.Saturation * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity));
-            var redMajorPixelRatio = (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentRedMajorPixelRatio);
+            var qSaturation = (int)(Math.Max(-1, parameters.Saturation * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity)) * 4096 + 0.5);
             var vibrance = parameters.Vibrance * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity);
-            var hasVibrance = Math.Abs(vibrance) >= 0.001;
-            if (Math.Abs(saturation) >= 0.001 || hasVibrance)
+            var qVibrance = (int)(vibrance * 4096 + 0.5);
+            if (qSaturation != 0 || qVibrance != 0)
             {
                 (source.Memory, result.Memory).Pin((srcBaseAddress, destBaseAddress) =>
                 {
@@ -160,20 +159,20 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                             continue;
                                         }
                                         var avg = (r + g + g + b) >> 2;
-                                        var shiftRatio = saturation;
-                                        if (hasVibrance)
+                                        var shiftRatio = qSaturation;
+                                        if (qVibrance != 0)
                                         {
                                             var satRatio = normTable[minMaxDiff];
-                                            var vibrationShiftRatio = (1 - satRatio) * vibrance;
+                                            var vibrationShiftRatio = (int)((1 - satRatio) * qVibrance + 0.5);
                                             if (max == r)
-                                                vibrationShiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                                vibrationShiftRatio = vibrationShiftRatio * (minMaxDiff + Math.Abs(g - b)) / (minMaxDiff << 1);
                                             shiftRatio += vibrationShiftRatio;
-                                            if (shiftRatio < -1)
-                                                shiftRatio = -1;
+                                            if (shiftRatio < -4096)
+                                                shiftRatio = -4096;
                                         }
-                                        r = ImageProcessing.ClipToByte(r + (r - avg) * shiftRatio);
-                                        g = ImageProcessing.ClipToByte(g + (g - avg) * shiftRatio);
-                                        b = ImageProcessing.ClipToByte(b + (b - avg) * shiftRatio);
+                                        r = ImageProcessing.ClipToByte(r + (((r - avg) * shiftRatio) >> 12));
+                                        g = ImageProcessing.ClipToByte(g + (((g - avg) * shiftRatio) >> 12));
+                                        b = ImageProcessing.ClipToByte(b + (((b - avg) * shiftRatio) >> 12));
                                         *destPixelPtr = packFunc(b, g, r, a);
                                     }
                                 });
@@ -203,20 +202,20 @@ namespace Carina.PixelViewer.Media.ImageFilters
                                             continue;
                                         }
                                         var avg = (r + g + g + b) >> 2;
-                                        var shiftRatio = saturation;
-                                        if (hasVibrance)
+                                        var shiftRatio = qSaturation;
+                                        if (qVibrance != 0)
                                         {
                                             var satRatio = normTable[minMaxDiff];
-                                            var vibrationShiftRatio = (1 - satRatio) * vibrance;
+                                            var vibrationShiftRatio = (int)((1 - satRatio) * qVibrance + 0.5);
                                             if (max == r)
-                                                vibrationShiftRatio *= (1 + Math.Abs(g - b) / (double)minMaxDiff) * redMajorPixelRatio;
+                                                vibrationShiftRatio = vibrationShiftRatio * (minMaxDiff + Math.Abs(g - b)) / (minMaxDiff << 1);
                                             shiftRatio += vibrationShiftRatio;
-                                            if (shiftRatio < -1)
-                                                shiftRatio = -1;
+                                            if (shiftRatio < -4096)
+                                                shiftRatio = -4096;
                                         }
-                                        r = ImageProcessing.ClipToUInt16(r + (r - avg) * shiftRatio);
-                                        g = ImageProcessing.ClipToUInt16(g + (g - avg) * shiftRatio);
-                                        b = ImageProcessing.ClipToUInt16(b + (b - avg) * shiftRatio);
+                                        r = ImageProcessing.ClipToUInt16(r + (((r - avg) * shiftRatio) >> 12));
+                                        g = ImageProcessing.ClipToUInt16(g + (((g - avg) * shiftRatio) >> 12));
+                                        b = ImageProcessing.ClipToUInt16(b + (((b - avg) * shiftRatio) >> 12));
                                         *destPixelPtr = packFunc(b, g, r, a);
                                     }
                                 });
