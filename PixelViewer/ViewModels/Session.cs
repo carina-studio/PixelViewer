@@ -3771,7 +3771,7 @@ namespace Carina.PixelViewer.ViewModels
 					{
 						if (this.Application.IsDebugMode)
 							this.Logger.LogWarning($"Allocate Avalonia bitmap, size: {width}x{height}");
-						bitmap = new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
+						bitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul));
 					}
 					await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap);
 
@@ -3814,7 +3814,7 @@ namespace Carina.PixelViewer.ViewModels
 							{
 								if (this.Application.IsDebugMode)
 									this.Logger.LogWarning($"Allocate quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}");
-								quarterSizeBitmap = new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul);
+								quarterSizeBitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul));
 							}
 							await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap);
 						}
