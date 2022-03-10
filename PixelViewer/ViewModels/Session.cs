@@ -669,6 +669,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Constants.
+		const int ReleaseCachedImagesDelay = 3000;
 		const int RenderImageDelay = 500;
 
 
@@ -725,6 +726,7 @@ namespace Carina.PixelViewer.ViewModels
 		bool isImagePlaneOptionsResetNeeded = true;
 		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 		readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>(CompareProfiles);
+		readonly ScheduledAction releasedCachedImagesAction;
 		ImageFrame? renderedImageFrame;
 		readonly ScheduledAction renderImageAction;
 		readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
@@ -798,6 +800,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.renderedImageFrame != null)
 					this.FilterImage(this.renderedImageFrame);
 			});
+			this.releasedCachedImagesAction = new ScheduledAction(() => this.ReleaseCachedImages());
 			this.renderImageAction = new ScheduledAction(this.RenderImage);
 			this.updateFilterSupportingAction = new ScheduledAction(() =>
 			{
@@ -1415,23 +1418,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.ResetValue(InsufficientMemoryForRenderedImageProperty);
 			}
 
-			// release cached image frames
-			if (this.cachedFilteredImageFrames.IsNotEmpty())
-			{
-				foreach (var frame in this.cachedFilteredImageFrames)
-					frame.Dispose();
-				this.cachedFilteredImageFrames.Clear();
-			}
+			// release cached images
+			this.ReleaseCachedImages();
 
 			// release memory usage tokens
 			this.avaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			this.avaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-
-			// clear cached Avalonia bitmaps
-			this.cachedAvaQuarterSizeRenderedImage = null;
-			this.cachedAvaRenderedImage = null;
-			this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-			this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 
 			// update zooming state
 			this.canZoomTo.Update(false);
@@ -3299,6 +3291,34 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Release all cached images.
+		bool ReleaseCachedImages()
+		{
+			var released = false;
+			if (this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken != null)
+			{
+				released = true;
+				this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				this.cachedAvaQuarterSizeRenderedImage = null;
+			}
+			if (this.cachedAvaRenderedImageMemoryUsageToken != null)
+			{
+				released = true;
+				this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
+				this.cachedAvaRenderedImage = null;
+			}
+			if (this.cachedFilteredImageFrames.IsNotEmpty())
+			{
+				released = true;
+				foreach (var frame in this.cachedFilteredImageFrames)
+					frame.Dispose();
+				this.cachedFilteredImageFrames.Clear();
+			}
+			this.releasedCachedImagesAction.Cancel();
+			return released;
+		}
+
+
 		// Release token for rendered image memory usage.
 		void ReleaseRenderedImageMemoryUsage(RenderedImageMemoryUsageToken token)
 		{
@@ -3850,6 +3870,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(QuarterSizeRenderedImageProperty, null);
 				this.SetValue(RenderedImageProperty, null);
 			}
+			this.releasedCachedImagesAction.Reschedule(ReleaseCachedImagesDelay);
 		}
 
 
