@@ -10,7 +10,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will significantly impacts the performance of image rendering.</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will affects the performance of image rendering.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">Default byte ordering</sys:String>

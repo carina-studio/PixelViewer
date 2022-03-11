@@ -10,7 +10,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會明顯延長影像繪製時間。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會影響繪製影像的效能。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">對比調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">預設位元組順序</sys:String>

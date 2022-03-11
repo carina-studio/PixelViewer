@@ -54,7 +54,7 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Enable color space management on image rendering.
 		/// </summary>
-		public static readonly SettingKey<bool> EnableColorSpaceManagement = new SettingKey<bool>(nameof(EnableColorSpaceManagement), CarinaStudio.Platform.IsMacOS);
+		public static readonly SettingKey<bool> EnableColorSpaceManagement = new SettingKey<bool>(nameof(EnableColorSpaceManagement), true);
 		/// <summary>
 		/// Evaluate image dimensions after changing image renderer.
 		/// </summary>
