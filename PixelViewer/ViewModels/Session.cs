@@ -3557,28 +3557,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(IsConvertingColorSpaceProperty, true);
 					await renderedImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
 					var tempImageFrame = renderedImageFrame;
-					var colorConverter = new Media.ColorSpace.Converter(renderedImageFrame.BitmapBuffer.ColorSpace, colorSpaceConvertedImageFrame.BitmapBuffer.ColorSpace);
-					var colorQuantizationFactor = renderedImageFrame.BitmapBuffer.Format.GetColorCount() - 1.0;
-					var renderingResult = renderedImageFrame.RenderingResult;
-					if (double.IsFinite(renderingResult.MeanOfBlue)
-						&& double.IsFinite(renderingResult.MeanOfGreen)
-						&& double.IsFinite(renderingResult.MeanOfRed))
-					{
-						var (r, g, b) = colorConverter.Convert(renderingResult.MeanOfRed / colorQuantizationFactor, renderingResult.MeanOfGreen / colorQuantizationFactor, renderingResult.MeanOfBlue / colorQuantizationFactor);
-						renderingResult.MeanOfBlue = b * colorQuantizationFactor;
-						renderingResult.MeanOfGreen = g * colorQuantizationFactor;
-						renderingResult.MeanOfRed = r * colorQuantizationFactor;
-					}
-					if (double.IsFinite(renderingResult.WeightedMeanOfBlue)
-						&& double.IsFinite(renderingResult.WeightedMeanOfGreen)
-						&& double.IsFinite(renderingResult.WeightedMeanOfRed))
-					{
-						var (r, g, b) = colorConverter.Convert(renderingResult.WeightedMeanOfRed / colorQuantizationFactor, renderingResult.WeightedMeanOfGreen / colorQuantizationFactor, renderingResult.WeightedMeanOfBlue / colorQuantizationFactor);
-						renderingResult.WeightedMeanOfBlue = b * colorQuantizationFactor;
-						renderingResult.WeightedMeanOfGreen = g * colorQuantizationFactor;
-						renderingResult.WeightedMeanOfRed = r * colorQuantizationFactor;
-					}
-					colorSpaceConvertedImageFrame.RenderingResult = renderingResult;
+					colorSpaceConvertedImageFrame.RenderingResult = renderedImageFrame.RenderingResult;
 					renderedImageFrame = colorSpaceConvertedImageFrame;
 					colorSpaceConvertedImageFrame = null;
 					tempImageFrame.Dispose();
