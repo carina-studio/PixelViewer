@@ -170,4 +170,70 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="v">Selected V.</param>
 		protected abstract void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v);
 	}
+
+
+	/// <summary>
+    /// <see cref="IImageRenderer"/> which supports rendering image with 10-bit YUV444p based format.
+    /// </summary>
+    class P410ImageRenderer : BaseYuv444p16ImageRenderer
+    {
+        public P410ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P410", true, new ImagePlaneDescriptor[] {
+            new ImagePlaneDescriptor(2),
+            new ImagePlaneDescriptor(2),
+            new ImagePlaneDescriptor(2),
+        }, new string[]{ "P410" }), 10)
+        { }
+
+
+        // Select UV component.
+        protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
+        {
+            u = uv1;
+            v = uv2;
+        }
+    }
+
+
+	/// <summary>
+    /// <see cref="IImageRenderer"/> which supports rendering image with 12-bit YUV444p based format.
+    /// </summary>
+    class P412ImageRenderer : BaseYuv444p16ImageRenderer
+    {
+        public P412ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P412", true, new ImagePlaneDescriptor[] {
+            new ImagePlaneDescriptor(2),
+            new ImagePlaneDescriptor(2),
+            new ImagePlaneDescriptor(2),
+        }, new string[]{ "P412" }), 12)
+        { }
+
+
+        // Select UV component.
+        protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
+        {
+            u = uv1;
+            v = uv2;
+        }
+    }
+
+
+	/// <summary>
+    /// <see cref="IImageRenderer"/> which supports rendering image with 16-bit YUV444p based format.
+    /// </summary>
+    class P416ImageRenderer : BaseYuv444p16ImageRenderer
+    {
+        public P416ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P416", true, new ImagePlaneDescriptor[] {
+            new ImagePlaneDescriptor(2),
+            new ImagePlaneDescriptor(2),
+            new ImagePlaneDescriptor(2),
+        }, new string[]{ "P416" }), 16)
+        { }
+
+
+        // Select UV component.
+        protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
+        {
+            u = uv1;
+            v = uv2;
+        }
+    }
 }

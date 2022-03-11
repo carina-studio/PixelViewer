@@ -80,10 +80,13 @@
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer 排列 (12 位元，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer 排列 (16 位元)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P010">P010 (10 位元 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P012">P012 (12 位元 YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P016">P016 (16 位元 YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P210">P210 (10 位元 YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P212">P212 (12 位元 YUV422p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P216">P216 (16 位元 YUV422p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P410">P410 (10 位元 YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P412">P412 (12 位元 YUV444p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P416">P416 (16 位元 YUV444p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10 位元 YUV420sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16 位元 YUV420sp)</sys:String>
