@@ -46,6 +46,19 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Get number of colors supported by given <see cref="BitmapFormat"/>.
+		/// </summary>
+		/// <param name="format"><see cref="BitmapFormat"/>.</param>
+		/// <returns>Number of colors.</returns>
+		public static int GetColorCount(this BitmapFormat format) => format switch
+		{
+			BitmapFormat.Bgra32 => 256,
+			BitmapFormat.Bgra64 => 65536,
+			_ => throw new ArgumentException($"Unknown format: {format}"),
+		};
+
+
+		/// <summary>
 		/// Convert <see cref="BitmapFormat"/> to <see cref="Avalonia.Platform.PixelFormat"/>.
 		/// </summary>
 		/// <param name="format"><see cref="BitmapFormat"/>.</param>
