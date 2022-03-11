@@ -42,7 +42,7 @@ namespace Carina.PixelViewer.Media.ImageEncoders
         /// <summary>
         /// Color space.
         /// </summary>
-        public BitmapColorSpace? ColorSpace { get; set; }
+        public ColorSpace? ColorSpace { get; set; }
 
 
         /// <summary>

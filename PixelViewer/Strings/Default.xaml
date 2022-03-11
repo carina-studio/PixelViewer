@@ -33,8 +33,8 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Color space of screen</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memory usage on status bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB color of selected pixel</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* color of selected pixel</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">Show XYZ color of selected pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* D50 color of selected pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">Show XYZ D50 color of selected pixel</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 
 	<!-- AspectRatio -->
@@ -57,14 +57,6 @@
 	<sys:String x:Key="String/BayerPattern.RGGB_2x2">RGGB (2x2)</sys:String>
 	<sys:String x:Key="String/BayerPattern.RGGB_4x4">RGGB (4x4)</sys:String>
 
-	<!-- BitmapColorSpace -->
-	<sys:String x:Key="String/BitmapColorSpace.Adobe-RGB">Adobe RGB</sys:String>
-	<sys:String x:Key="String/BitmapColorSpace.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
-	<sys:String x:Key="String/BitmapColorSpace.BT.601">ITU-R BT.601 (SDTV)</sys:String>
-	<sys:String x:Key="String/BitmapColorSpace.DCI-P3">DCI-P3</sys:String>
-	<sys:String x:Key="String/BitmapColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
-	<sys:String x:Key="String/BitmapColorSpace.sRGB">sRGB</sys:String>
-
 	<!-- BrightnessTransformationFunction -->
 	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangent-based transformation</sys:String>
 	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma transformation</sys:String>
@@ -73,6 +65,15 @@
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">Big-Endian</sys:String>
 	<sys:String x:Key="String/ByteOrdering.LittleEndian">Little-Endian</sys:String>
+
+	<!-- ColorSpace -->
+	<sys:String x:Key="String/ColorSpace.Adobe-RGB-1998">Adobe RGB (1998)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">ITU-R BT.601 525-line (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">ITU-R BT.601 625-line (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
+	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
+	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>

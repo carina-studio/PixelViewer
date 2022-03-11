@@ -33,8 +33,8 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">螢幕色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">顯示選取像素的 ARGB 色彩</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">顯示選取像素的 L*a*b* 色彩</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">顯示選取像素的 XYZ 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">顯示選取像素的 L*a*b* D50 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">顯示選取像素的 XYZ D50 色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 
 	<!-- AspectRatio -->
@@ -48,6 +48,10 @@
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">大端序 (Big-Endian)</sys:String>
 	<sys:String x:Key="String/ByteOrdering.LittleEndian">小端序 (Little-Endian)</sys:String>
+
+	<!-- ColorSpace -->
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">ITU-R BT.601 525行 (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">ITU-R BT.601 625行 (SDTV)</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>

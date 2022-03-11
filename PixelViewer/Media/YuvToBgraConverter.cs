@@ -21,7 +21,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_2020 = new YuvToBgraConverter("BT.2020", BitmapColorSpace.BT_2020,
+        public static readonly YuvToBgraConverter BT_2020 = new YuvToBgraConverter("BT.2020", ColorSpace.BT_2020,
             -16, -128, -128,
             1.1632,
             0, 1.6794,
@@ -30,7 +30,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.601.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601", BitmapColorSpace.BT_601,
+        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601", ColorSpace.BT_601_625Line,
             0, -128, -128,
             1,
             0, 1.402,
@@ -39,7 +39,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.656.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656", BitmapColorSpace.BT_601,
+        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656", ColorSpace.BT_601_625Line,
             -16, -128, -128,
             1.164,
             0, 1.596,
@@ -48,7 +48,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.709.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_709 = new YuvToBgraConverter("BT.709", BitmapColorSpace.Srgb,
+        public static readonly YuvToBgraConverter BT_709 = new YuvToBgraConverter("BT.709", ColorSpace.Srgb,
             0, -128, -128,
             1,
             0, 1.5748,
@@ -86,7 +86,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        YuvToBgraConverter(string name, BitmapColorSpace colorSpace,
+        YuvToBgraConverter(string name, ColorSpace colorSpace,
             int yShift, int uShift, int vShift,
             double yFactor,
             double uFactorForR, double vFactorForR,
@@ -135,7 +135,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Color space of RGB converted by this converter.
         /// </summary>
-        public BitmapColorSpace ColorSpace { get; }
+        public ColorSpace ColorSpace { get; }
 
 
         /// <summary>

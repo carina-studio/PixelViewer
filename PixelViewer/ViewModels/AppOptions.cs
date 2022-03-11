@@ -68,11 +68,11 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Default color space for image rendering.
 		/// </summary>
-		public BitmapColorSpace DefaultColorSpace
+		public ColorSpace DefaultColorSpace
 		{
 			get 
 			{
-				BitmapColorSpace.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
+				ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
 			set => this.Settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, value.Name);

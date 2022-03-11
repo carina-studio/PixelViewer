@@ -161,10 +161,10 @@
 
 				<!-- Default color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
-				<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:BitmapColorSpace.All}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
+				<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.BuiltInColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding Converter={x:Static appConverters:BitmapColorSpaceToStringConverter.Default}}"/>
+							<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>

@@ -40,7 +40,7 @@ namespace Carina.PixelViewer.Media.Profiles
         BayerPattern bayerPattern;
         double blueColorGain = 1.0;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
-        BitmapColorSpace colorSpace = BitmapColorSpace.Default;
+        ColorSpace colorSpace = Media.ColorSpace.Default;
         long dataOffset;
         bool demosaicing = true;
         IList<int> effectiveBits = emptyEffectiveBits;
@@ -75,7 +75,7 @@ namespace Carina.PixelViewer.Media.Profiles
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
-            BitmapColorSpace.TryGetByName(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
+            Media.ColorSpace.TryGetBuiltInColorSpace(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
             this.Type = type;
             if (type == ImageRenderingProfileType.Default)
             {
@@ -152,7 +152,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Color space of rendered image.
-        public BitmapColorSpace ColorSpace
+        public ColorSpace ColorSpace
         {
             get => this.colorSpace;
             set
@@ -505,7 +505,13 @@ namespace Carina.PixelViewer.Media.Profiles
                 if (rootElement.TryGetProperty(nameof(ColorSpace), out jsonProperty)
                        && jsonProperty.ValueKind == JsonValueKind.String)
                 {
-                    if (!BitmapColorSpace.TryGetByName(jsonProperty.GetString(), out profile.colorSpace))
+                    var name = jsonProperty.GetString().AsNonNull().Let(it => it switch
+                    {
+                        "Adobe-RGB" => "Adobe-RGB-1998".Also(_ => profile.IsUpgradedWhenLoading = true),
+                        "BT.601" => "BT.601-625-line".Also(_ => profile.IsUpgradedWhenLoading = true),
+                        _ => it,
+                    });
+                    if (!Media.ColorSpace.TryGetBuiltInColorSpace(name, out profile.colorSpace))
                         profile.IsUpgradedWhenLoading = true;
                 }
 

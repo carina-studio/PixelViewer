@@ -77,7 +77,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.session = session;
 			}
 
-			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, BitmapColorSpace colorSpace, int width, int height)
+			public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, ColorSpace colorSpace, int width, int height)
 			{
 				var renderedImageDataSize = ((long)width * height * format.GetByteSize()); // no need to reserve for Avalonia bitmap
 				var memoryUsageToken = session.RequestRenderedImageMemoryUsage(renderedImageDataSize);
@@ -239,7 +239,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="ColorSpace"/>.
 		/// </summary>
-		public static readonly ObservableProperty<BitmapColorSpace> ColorSpaceProperty = ObservableProperty.Register<Session, BitmapColorSpace>(nameof(ColorSpace), BitmapColorSpace.Default);
+		public static readonly ObservableProperty<ColorSpace> ColorSpaceProperty = ObservableProperty.Register<Session, ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
 		/// <summary>
 		/// Property of <see cref="ContrastAdjustment"/>.
 		/// </summary>
@@ -941,7 +941,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// setup color space management
 			this.SetValue(IsColorSpaceManagementEnabledProperty, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
-			if (BitmapColorSpace.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
+			if (Media.ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
 				this.SetValue(ColorSpaceProperty, colorSpace);
 
 			// setup title
@@ -1041,7 +1041,7 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Try allocating image frame for rendered image.
-		async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, BitmapColorSpace colorSpace, int width, int height)
+		async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, ColorSpace colorSpace, int width, int height)
 		{
 			var extraWaitingPerformed = false;
 			while (true)
@@ -1470,7 +1470,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get or set color space of rendered image.
 		/// </summary>
-		public BitmapColorSpace ColorSpace 
+		public ColorSpace ColorSpace 
 		{
 			get => this.GetValue(ColorSpaceProperty);
 			set => this.SetValue(ColorSpaceProperty, value);
@@ -3497,9 +3497,9 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(IsRenderingImageProperty, true);
 
             // check color space
-            var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : BitmapColorSpace.Srgb;
-			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace).ToBitmapColorSpace();
-			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && screenColorSpace != renderedColorSpace;
+            var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
+			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace).ToColorSpace();
+			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && !screenColorSpace.Equals(renderedColorSpace);
 
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
@@ -4069,7 +4069,7 @@ namespace Carina.PixelViewer.ViewModels
 			var framePaddingSize = 0L;
 			var byteOrdering = ByteOrdering.BigEndian;
 			var yuvToBgraConverter = this.YuvToBgraConverter;
-			var colorSpace = BitmapColorSpace.Srgb;
+			var colorSpace = ColorSpace.Default;
 			var demosaicing = true;
 			var width = 1;
 			var height = 1;
@@ -4088,7 +4088,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (savedState.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty))
 				YuvToBgraConverter.TryGetByName(jsonProperty.GetString(), out yuvToBgraConverter);
 			if (savedState.TryGetProperty(nameof(ColorSpace), out jsonProperty))
-				BitmapColorSpace.TryGetByName(jsonProperty.GetString(), out colorSpace);
+				Media.ColorSpace.TryGetBuiltInColorSpace(jsonProperty.GetString().AsNonNull(), out colorSpace);
 			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
 				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
@@ -4925,17 +4925,17 @@ namespace Carina.PixelViewer.ViewModels
 				});
 
 				// convert to Lab color
-				var labL = 0.0;
-				var labA = 0.0;
-				var labB = 0.0;
 				var colorSpace = this.ColorSpace;
-				colorSpace.ConvertToLabColorSpace(argbR, argbG, argbB, &labL, &labA, &labB);
+				var (labL, labA, labB) = colorSpace.ToLab(argbR, argbG, argbB);
+				labL *= 100;
+				labA *= 128;
+				labB *= 128;
 
 				// convert to XYZ color
-				var xyzX = 0.0;
-				var xyzY = 0.0;
-				var xyzZ = 0.0;
-				colorSpace.ConvertToXyzColorSpace(argbR, argbG, argbB, &xyzX, &xyzY, &xyzZ);
+				var (xyzX, xyzY, xyzZ) = colorSpace.ToXyz(argbR, argbG, argbB);
+				xyzX *= 100;
+				xyzY *= 100;
+				xyzZ *= 100;
 
 				// update state
 				this.SetValue(SelectedRenderedImagePixelColorProperty, color);

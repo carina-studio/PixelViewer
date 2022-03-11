@@ -24,7 +24,7 @@ namespace Carina.PixelViewer.Media
 		/// <summary>
 		/// Color space of bitmap.
 		/// </summary>
-		BitmapColorSpace ColorSpace { get; }
+		ColorSpace ColorSpace { get; }
 
 
 		/// <summary>
@@ -164,6 +164,13 @@ namespace Carina.PixelViewer.Media
 				throw new ArgumentException("Cannot convert to bitmap with different formats.");
 			if (bitmapBuffer.Width != resultBitmapBuffer.Width || bitmapBuffer.Height != resultBitmapBuffer.Height)
 				throw new ArgumentException("Cannot convert to bitmap with different dimensions.");
+			
+			// check color space
+			if (bitmapBuffer.ColorSpace.Equals(resultBitmapBuffer.ColorSpace))
+			{
+				await Task.Run(() => CopyTo(bitmapBuffer, resultBitmapBuffer));
+				return;
+			}
 
 			// convert
 			using var sharedBitmapBuffer = bitmapBuffer.Share();
@@ -175,17 +182,7 @@ namespace Carina.PixelViewer.Media
 					// select color space converter
 					var srcColorSpace = sharedBitmapBuffer.ColorSpace;
 					var targetColorSpace = resultBitmapBuffer.ColorSpace;
-					var convertFunc = Global.Run(() =>
-					{
-						if (targetColorSpace == BitmapColorSpace.DCI_P3)
-							return (ColorSpaceConversion)srcColorSpace.ConvertToDciP3ColorSpace;
-						else if (targetColorSpace == BitmapColorSpace.Display_P3)
-							return (ColorSpaceConversion)srcColorSpace.ConvertToDisplayP3ColorSpace;
-						else if (targetColorSpace == BitmapColorSpace.Srgb)
-							return srcColorSpace.ConvertToSrgbColorSpace;
-						else
-							throw new NotSupportedException($"Unsupported target color space: {resultBitmapBuffer.ColorSpace}");
-					});
+					var converter = new ColorSpace.Converter(srcColorSpace, targetColorSpace);
 
 					// copy directly
 					if (srcColorSpace == resultBitmapBuffer.ColorSpace)
@@ -222,7 +219,7 @@ namespace Carina.PixelViewer.Media
 											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
 											{
 												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												convertFunc(&r, &g, &b);
+												(r, g, b) = converter.Convert(r, g, b);
 												*destPixelPtr = packFunc(b, g, r, a);
 											}
 											if (cancellationToken.IsCancellationRequested)
@@ -245,7 +242,7 @@ namespace Carina.PixelViewer.Media
 											for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
 											{
 												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
-												convertFunc(&r, &g, &b);
+												(r, g, b) = converter.Convert(r, g, b);
 												*destPixelPtr = packFunc(b, g, r, a);
 											}
 											if (cancellationToken.IsCancellationRequested)

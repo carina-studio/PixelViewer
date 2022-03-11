@@ -576,10 +576,10 @@
 							<!-- CIELAB Color -->
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
 								<Panel>
-									<TextBlock Text="L*a*b*(000.000, 000.000, 000.000)" Opacity="0"/>
+									<TextBlock Text="L*a*b*(000.00, 000.00, 000.00)" Opacity="0"/>
 									<TextBlock>
 										<TextBlock.Text>
-											<MultiBinding StringFormat="{}L*a*b*({0:F3}, {1:F3}, {2:F3})">
+											<MultiBinding StringFormat="{}L*a*b*({0:F2}, {1:F2}, {2:F2})">
 												<Binding Path="SelectedRenderedImagePixelLabColor.Item1"/>
 												<Binding Path="SelectedRenderedImagePixelLabColor.Item2"/>
 												<Binding Path="SelectedRenderedImagePixelLabColor.Item3"/>
@@ -592,10 +592,10 @@
 
 							<!-- XYZ Color -->
 							<Panel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelXyzColor}">
-								<TextBlock Text="XYZ(0.000, 0.000, 0.000)" Opacity="0"/>
+								<TextBlock Text="XYZ(000.00, 000.00, 000.00)" Opacity="0"/>
 								<TextBlock>
 									<TextBlock.Text>
-										<MultiBinding StringFormat="{}XYZ({0:F3}, {1:F3}, {2:F3})">
+										<MultiBinding StringFormat="{}XYZ({0:F2}, {1:F2}, {2:F2})">
 											<Binding Path="SelectedRenderedImagePixelXyzColor.Item1"/>
 											<Binding Path="SelectedRenderedImagePixelXyzColor.Item2"/>
 											<Binding Path="SelectedRenderedImagePixelXyzColor.Item3"/>
@@ -699,10 +699,10 @@
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
 						<Panel>
 							<asControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
-							<ComboBox Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:BitmapColorSpace.All}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
+							<ComboBox Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:ColorSpace.BuiltInColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
-										<TextBlock Text="{Binding Converter={x:Static appConverters:BitmapColorSpaceToStringConverter.Default}}"/>
+										<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
 									</DataTemplate>
 								</ComboBox.ItemTemplate>
 							</ComboBox>

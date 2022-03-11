@@ -319,6 +319,18 @@ namespace Carina.PixelViewer
 				});
 			}
 
+			// upgrade default color space
+			if (oldVersion <= 4)
+			{
+				var name = settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName).Let(it => it switch
+				{
+					"Adobe-RGB" => "Adobe-RGB-1998",
+					"BT.601" => "BT.601-625-line",
+					_ => it,
+				});
+				settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, name);
+			}
+
 			// upgrade theme mode
 			if (oldVersion <= 1)
 			{
@@ -371,7 +383,7 @@ namespace Carina.PixelViewer
 
 
 		// Version of settings.
-		protected override int SettingsVersion => 4;
+		protected override int SettingsVersion => 5;
 
 
 		/// <inheritdoc/>
