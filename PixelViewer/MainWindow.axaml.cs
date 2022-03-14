@@ -617,6 +617,10 @@ namespace Carina.PixelViewer
 		// Called when tab item dragged.
 		void OnTabItemDragged(object? sender, TabItemDraggedEventArgs e)
 		{
+			// prevent dragging tab on Linux because drag-and-drop is not supported properly
+			if (CarinaStudio.Platform.IsLinux)
+				return;
+
 			// get session
 			var session = (e.Item as TabItem)?.DataContext as Session;
 			if (session == null)
