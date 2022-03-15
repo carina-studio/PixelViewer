@@ -288,7 +288,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
             for (var i = lut.Count - 1; i >= 0; --i)
             {
                 var color = lut[i] / maxColor;
-                if (color <= 0.5)
+                if (color <= 0.5 || color > 1)
                     continue;
                 lut[i] = interpFunc(color) * maxColor;
             }
@@ -616,7 +616,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
             for (var i = lut.Count - 1; i >= 0; --i)
             {
                 var color = lut[i] / maxColor;
-                if (color >= 0.5)
+                if (color >= 0.5 || color < 0)
                     continue;
                 lut[i] = interpFunc(color) * maxColor;
             }
