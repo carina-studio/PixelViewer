@@ -244,6 +244,24 @@ namespace Carina.PixelViewer.Media.ImageFilters
         }
 
 
+        // Generate Lagrange interpolation function by 4 points.
+        static Func<double, double> GenerateLagrangeInterpolation((double, double) p0, (double, double) p1, (double, double) p2, (double, double) p3)
+        {
+            var d0 = p0.Item2 / ((p0.Item1 - p1.Item1) * (p0.Item1 - p2.Item1) * (p0.Item1 - p3.Item1));
+            var d1 = p1.Item2 / ((p1.Item1 - p0.Item1) * (p1.Item1 - p2.Item1) * (p1.Item1 - p3.Item1));
+            var d2 = p2.Item2 / ((p2.Item1 - p0.Item1) * (p2.Item1 - p1.Item1) * (p2.Item1 - p3.Item1));
+            var d3 = p3.Item2 / ((p3.Item1 - p0.Item1) * (p3.Item1 - p1.Item1) * (p3.Item1 - p2.Item1));
+            return (x) =>
+            {
+                var n0 = (x - p1.Item1) * (x - p2.Item1) * (x - p3.Item1);
+                var n1 = (x - p0.Item1) * (x - p2.Item1) * (x - p3.Item1);
+                var n2 = (x - p0.Item1) * (x - p1.Item1) * (x - p3.Item1);
+                var n3 = (x - p0.Item1) * (x - p1.Item1) * (x - p2.Item1);
+                return (n0 * d0) + (n1 * d1) + (n2 * d2) + (n3 * d3);
+            };
+        }
+
+
         /// <summary>
         /// Apply highlight transformation.
         /// </summary>
@@ -265,11 +283,15 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 intensity = 1;
             else if (Math.Abs(intensity) < 0.001)
                 return Task.CompletedTask;
-            var sensitivity = (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity);
-            if (intensity >= 0)
-                InverseGammaTransform(lut, lut.Count >> 1, lut.Count, 1 + intensity * sensitivity);
-            else
-                InverseGammaTransform(lut, lut.Count >> 1, lut.Count, 1 / (1 - intensity * sensitivity));
+            var interpFunc = GenerateLagrangeInterpolation((0.4, 0.4), (0.5, 0.5), (0.75, 0.75 + (0.2 * intensity)), (1, 1));
+            var maxColor = lut.Count - 1;
+            for (var i = lut.Count - 1; i >= 0; --i)
+            {
+                var color = lut[i] / maxColor;
+                if (color <= 0.5)
+                    continue;
+                lut[i] = interpFunc(color) * maxColor;
+            }
             return Task.CompletedTask;
         }
 
@@ -589,11 +611,15 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 intensity = 1;
             else if (Math.Abs(intensity) < 0.001)
                 return Task.CompletedTask;
-            var sensitivity = (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.HighlightShadowAdjustmentSensitivity);
-            if (intensity >= 0)
-                GammaTransform(lut, 0, lut.Count >> 1, 1 / (1 + intensity * sensitivity));
-            else
-                GammaTransform(lut, 0, lut.Count >> 1, 1 - intensity * sensitivity);
+            var interpFunc = GenerateLagrangeInterpolation((0, 0), (0.25, 0.25 + (0.2 * intensity)), (0.5, 0.5), (0.6, 0.6));
+            var maxColor = lut.Count - 1;
+            for (var i = lut.Count - 1; i >= 0; --i)
+            {
+                var color = lut[i] / maxColor;
+                if (color >= 0.5)
+                    continue;
+                lut[i] = interpFunc(color) * maxColor;
+            }
             return Task.CompletedTask;
         }
 
