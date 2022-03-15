@@ -3617,8 +3617,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
 				this.canSelectColorAdjustment.Update(renderedImageFrame.Histograms != null);
 				this.canSelectRgbGain.Update(renderedImageFrame.RenderingResult.Let(it =>
-					(double.IsFinite(it.MeanOfBlue) && double.IsFinite(it.MeanOfGreen) && double.IsFinite(it.MeanOfRed))
-					|| (double.IsFinite(it.WeightedMeanOfBlue) && double.IsFinite(it.WeightedMeanOfGreen) && double.IsFinite(it.WeightedMeanOfRed))));
+					it.HasMeanOfRgb || it.HasWeightedMeanOfRgb));
 
 				// filter image or report now
 				if (this.IsFilteringRenderedImageNeeded)
