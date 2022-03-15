@@ -106,6 +106,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
 								{
+									wAccuColor[colorComponent] += (ushort)(color << 1);
+									wAccuPixelCount[colorComponent] += 2;
+								}
+								else
+								{
 									wAccuColor[colorComponent] += color;
 									++wAccuPixelCount[colorComponent];
 								}
@@ -121,6 +126,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
+								{
+									wAccuColor[colorComponent] += (ushort)(color << 1);
+									wAccuPixelCount[colorComponent] += 2;
+								}
+								else
 								{
 									wAccuColor[colorComponent] += color;
 									++wAccuPixelCount[colorComponent];
@@ -138,6 +148,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
 								{
+									wAccuColor[colorComponent] += (ushort)(color << 1);
+									wAccuPixelCount[colorComponent] += 2;
+								}
+								else
+								{
 									wAccuColor[colorComponent] += color;
 									++wAccuPixelCount[colorComponent];
 								}
@@ -153,6 +168,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
+								{
+									wAccuColor[colorComponent] += (ushort)(color << 1);
+									wAccuPixelCount[colorComponent] += 2;
+								}
+								else
 								{
 									wAccuColor[colorComponent] += color;
 									++wAccuPixelCount[colorComponent];
