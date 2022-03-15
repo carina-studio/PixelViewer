@@ -86,6 +86,7 @@
 	<!-- ContrastTransformationFunction -->
 	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">Dual arctangent-based transformation</sys:String>
 	<sys:String x:Key="String/ContrastTransformationFunction.Linear">Linear transformation</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange interpolation</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All files</sys:String>

@@ -166,6 +166,19 @@ namespace Carina.PixelViewer.Media.ImageFilters
 						ArctanTransform(lut, lut.Count / 2, lut.Count, intensityR);
                     }
                     break;
+                case ContrastTransformationFunction.Lagrange:
+                    {
+                        var interpFunc = GenerateLagrangeInterpolation((0, 0), (0.25, 0.25 - (0.2 * intensity)), (0.5, 0.5), (1, 1));
+                        var maxColor = lut.Count - 1;
+                        for (var i = lut.Count - 1; i >= 0; --i)
+                        {
+                            var color = lut[i] / maxColor;
+                            if (color < 0 || color > 1)
+                                continue;
+                            lut[i] = interpFunc(color) * maxColor;
+                        }
+                    }
+                    break;
                 case ContrastTransformationFunction.Linear:
                     {
                         var middleColor = (lut.Count - 1) / 2.0;
@@ -670,5 +683,9 @@ namespace Carina.PixelViewer.Media.ImageFilters
         /// Arctangen transformation.
         /// </summary>
         Arctan,
+        /// <summary>
+        /// Lagrange interpolation.
+        /// </summary>
+        Lagrange,
     }
 }

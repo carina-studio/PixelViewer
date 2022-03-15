@@ -64,6 +64,7 @@
 	<!-- ContrastTransformationFunction -->
 	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">雙反正切 (Arctangent) 轉換</sys:String>
 	<sys:String x:Key="String/ContrastTransformationFunction.Linear">線性轉換</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange 插值法</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
