@@ -298,6 +298,60 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
+		/// Check whether maximum of RGB is valid or not.
+		/// </summary>
+		public bool HasMaxOfRgb 
+		{
+			get => this.MaxOfBlue > 0 || this.MaxOfGreen > 0 || this.MaxOfRed > 0;
+		}
+
+
+		/// <summary>
+		/// Check whether mean of RGB is valid or not.
+		/// </summary>
+		public bool HasMeanOfRgb 
+		{
+			get => double.IsFinite(this.MeanOfBlue) && double.IsFinite(this.MeanOfGreen) && double.IsFinite(this.MeanOfRed);
+		}
+
+
+		/// <summary>
+		/// Check whether minimum of RGB is valid or not.
+		/// </summary>
+		public bool HasMinOfRgb 
+		{
+			get => this.MinOfBlue > 0 || this.MinOfGreen > 0 || this.MinOfRed > 0;
+		}
+
+
+		/// <summary>
+		/// Check whether weighted mean of RGB is valid or not.
+		/// </summary>
+		public bool HasWeightedMeanOfRgb 
+		{
+			get => double.IsFinite(this.WeightedMeanOfBlue) && double.IsFinite(this.WeightedMeanOfGreen) && double.IsFinite(this.WeightedMeanOfRed);
+		}
+
+
+		/// <summary>
+		/// Maximum color of blue.
+		/// </summary>
+		public int MaxOfBlue { get; set; } = 0;
+
+
+		/// <summary>
+		/// Maximum color of green.
+		/// </summary>
+		public int MaxOfGreen { get; set; } = 0;
+
+
+		/// <summary>
+		/// Maximum color of red.
+		/// </summary>
+		public int MaxOfRed { get; set; } = 0;
+
+
+		/// <summary>
 		/// Mean of blue color.
 		/// </summary>
 		public double MeanOfBlue { get; set; } = double.NaN;
@@ -313,6 +367,24 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Mean of red color.
 		/// </summary>
 		public double MeanOfRed { get; set; } = double.NaN;
+
+
+		/// <summary>
+		/// Minimum color of blue.
+		/// </summary>
+		public int MinOfBlue { get; set; } = 0;
+
+
+		/// <summary>
+		/// Minimum color of green.
+		/// </summary>
+		public int MinOfGreen { get; set; } = 0;
+
+
+		/// <summary>
+		/// Minimum color of red.
+		/// </summary>
+		public int MinOfRed { get; set; } = 0;
 
 
 		/// <summary>
