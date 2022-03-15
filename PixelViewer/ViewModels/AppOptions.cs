@@ -159,6 +159,16 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Whether luminance should be taken into account for RGB gain selection.
+		/// </summary>
+		public bool IncludeLuminanceIntoRgbGainSelection
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.IncludeLuminanceIntoRgbGainSelection);
+			set => this.Settings.SetValue<bool>(SettingKeys.IncludeLuminanceIntoRgbGainSelection, value);
+		}
+
+
+		/// <summary>
 		/// Maximum memory usage for rendering images.
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
@@ -197,6 +207,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
 			else if (key == SettingKeys.EvaluateImageRendererByFileName)
 				this.OnPropertyChanged(nameof(this.EvaluateImageRendererByFileName));
+			else if (key == SettingKeys.IncludeLuminanceIntoRgbGainSelection)
+				this.OnPropertyChanged(nameof(this.IncludeLuminanceIntoRgbGainSelection));
 			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 			else if (key == SettingKeys.ResetFilterParamsAfterOpeningSourceFile)

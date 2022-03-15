@@ -4807,6 +4807,20 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			if (rRatio == 0 || gRatio == 0 || bRatio == 0)
 				return;
+
+			// scale according to luminance
+			if (this.Settings.GetValueOrDefault(SettingKeys.IncludeLuminanceIntoRgbGainSelection) 
+				&& this.renderedImageFrame != null)
+			{
+				unsafe
+				{
+					var refLuminance = ImageProcessing.SelectRgbToLuminanceConversion()(renderingResult.MeanOfRed, renderingResult.MeanOfGreen, renderingResult.MeanOfBlue);
+					var lScale = (this.renderedImageFrame.BitmapBuffer.Format.GetColorCount() >> 1) / refLuminance;
+					rRatio *= lScale;
+					gRatio *= lScale;
+					bRatio *= lScale;
+				}
+			}
 			
 			// apply RGB gain
 			double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
