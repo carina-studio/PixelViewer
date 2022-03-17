@@ -55,7 +55,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[2], ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
-				bitmapBuffer.Memory.Pin(async (bitmapBaseAddress) =>
+				bitmapBuffer.Memory.Pin(bitmapBaseAddress =>
 				{
 					// render to 16-bit R/G/B
 					var bitmapRowPtr = (byte*)bitmapBaseAddress;
