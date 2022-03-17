@@ -32,6 +32,7 @@ namespace Carina.PixelViewer
 
 
 		// Static fields.
+		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new SettingKey<string>("ScreenColorSpace", "");
 		static readonly SettingKey<string> LegacyYuvConversionModeKey = new SettingKey<string>("YuvConversionMode", "");
 		static readonly Uri PreviewPackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
 		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
@@ -331,6 +332,26 @@ namespace Carina.PixelViewer
 				settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, name);
 			}
 
+			// upgrade screen color space
+			if (oldVersion <= 5)
+			{
+				settings.GetValueOrDefault(LegacyScreenColorSpaceKey).Let(it =>
+				{
+					switch (it)
+					{
+						case "DCI_P3":
+							settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.DCI_P3.Name);
+							break;
+						case "Display_P3":
+							settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Display_P3.Name);
+							break;
+						case "Srgb":
+							settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Srgb.Name);
+							break;
+					}
+				});
+			}
+
 			// upgrade theme mode
 			if (oldVersion <= 1)
 			{
@@ -383,7 +404,7 @@ namespace Carina.PixelViewer
 
 
 		// Version of settings.
-		protected override int SettingsVersion => 5;
+		protected override int SettingsVersion => 6;
 
 
 		/// <inheritdoc/>

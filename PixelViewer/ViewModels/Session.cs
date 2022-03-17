@@ -3027,7 +3027,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (key == SettingKeys.EnableColorSpaceManagement)
 				this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
-			else if (key == SettingKeys.ScreenColorSpace)
+			else if (key == SettingKeys.ScreenColorSpaceName)
 			{
 				if (this.IsColorSpaceManagementEnabled && this.IsActivated)
 					this.renderImageAction.Reschedule();
@@ -3498,7 +3498,11 @@ namespace Carina.PixelViewer.ViewModels
 
             // check color space
             var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
-			var screenColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace).ToColorSpace();
+			var screenColorSpace = Global.Run(() =>
+			{
+				Media.ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
+				return colorSpace;
+			});
 			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && !screenColorSpace.Equals(renderedColorSpace);
 
 			// create rendered image

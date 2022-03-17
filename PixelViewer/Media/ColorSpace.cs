@@ -81,11 +81,11 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Adobe RGB (1998).
         /// </summary>
-        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb));
+        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), true);
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020));
+        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), true);
         /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
@@ -103,7 +103,7 @@ namespace Carina.PixelViewer.Media
                 0.3935f, 0.3653f, 0.1917f,
                 0.2124f, 0.7011f, 0.0866f,
                 0.0187f, 0.1119f, 0.9584f
-            )));
+            )), true);
         /// <summary>
         /// ITU-R BT.601 625-line.
         /// </summary>
@@ -121,12 +121,12 @@ namespace Carina.PixelViewer.Media
                 0.4306f, 0.3415f, 0.1784f,
                 0.2220f, 0.7067f, 0.0713f,
                 0.0202f, 0.1296f, 0.9393f
-            )));
+            )), true);
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
 #pragma warning disable CS0618
-        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3));
+        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), true);
 #pragma warning restore CS0618
         /// <summary>
         /// Default color space.
@@ -135,11 +135,11 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Display-P3 (P3-D65).
         /// </summary>
-        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3));
+        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), true);
         /// <summary>
         /// sRGB.
         /// </summary>
-        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", SKColorSpace.CreateSrgb());
+        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", SKColorSpace.CreateSrgb(), true);
 
 
         // Static fields.
@@ -176,12 +176,13 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, SKColorSpace colorSpace)
+        ColorSpace(string name, SKColorSpace colorSpace, bool isBuiltIn)
         {
             this.skiaColorSpace = colorSpace;
             this.hasTransferFunc = colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncFromRgb);
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
+            this.IsBuiltIn = isBuiltIn;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
             this.matrixFromXyz = Quantize(this.skiaColorSpaceXyz.Invert());
@@ -252,6 +253,12 @@ namespace Carina.PixelViewer.Media
         /// <inheritdoc/>
         public override int GetHashCode() => 
             (int)this.matrixToXyz[0];
+        
+
+        /// <summary>
+        /// Check whether the color space is buil-in or not.
+        /// </summary>
+        public bool IsBuiltIn { get; }
         
 
         /// <summary>

@@ -100,9 +100,9 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<bool> SaveRenderedImageWithOrientation = new SettingKey<bool>(nameof(SaveRenderedImageWithOrientation), true);
 		/// <summary>
-		/// Color space of screen.
+		/// Name of color space of screen.
 		/// </summary>
-		public static readonly SettingKey<ScreenColorSpace> ScreenColorSpace = new SettingKey<ScreenColorSpace>(nameof(ScreenColorSpace), CarinaStudio.Platform.IsMacOS ? Media.ScreenColorSpace.Display_P3 : Media.ScreenColorSpace.Srgb);
+		public static readonly SettingKey<string> ScreenColorSpaceName = new SettingKey<string>(nameof(ScreenColorSpaceName), CarinaStudio.Platform.IsMacOS ? ColorSpace.Display_P3.Name : ColorSpace.Srgb.Name);
 		/// <summary>
 		/// Show process info on UI or not.
 		/// </summary>

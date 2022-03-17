@@ -217,7 +217,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.ResetImagePlaneOptionsAfterChangingImageDimensions));
 			else if (key == SettingKeys.SaveRenderedImageWithOrientation)
 				this.OnPropertyChanged(nameof(this.SaveRenderedImageWithOrientation));
-			else if (key == SettingKeys.ScreenColorSpace)
+			else if (key == SettingKeys.ScreenColorSpaceName)
 				this.OnPropertyChanged(nameof(this.ScreenColorSpace));
 			else if (key == SettingKeys.ShowProcessInfo)
 				this.OnPropertyChanged(nameof(this.ShowProcessInfo));
@@ -265,10 +265,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Color space of screen.
 		/// </summary>
-		public ScreenColorSpace ScreenColorSpace
+		public Media.ColorSpace ScreenColorSpace
 		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpace);
-			set => this.Settings.SetValue<ScreenColorSpace>(SettingKeys.ScreenColorSpace, value);
+			get 
+			{
+				ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
+				return colorSpace;
+			}
+			set => this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);
 		}
 
 
