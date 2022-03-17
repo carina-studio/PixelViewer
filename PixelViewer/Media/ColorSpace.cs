@@ -1,9 +1,15 @@
+using System.IO;
 using System.Linq;
+using CarinaStudio;
 using CarinaStudio.Collections;
 using SkiaSharp;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media
 {
@@ -81,15 +87,15 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Adobe RGB (1998).
         /// </summary>
-        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), true);
+        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), true);
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), true);
+        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), true);
         /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
-        public static readonly ColorSpace BT_601_525Line = new ColorSpace("BT.601-525-line", SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
+        public static readonly ColorSpace BT_601_525Line = new ColorSpace("BT.601-525-line", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
             {
                 G = 1 / 0.45f,
                 A = 1 / 1.099f,
@@ -107,7 +113,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.601 625-line.
         /// </summary>
-        public static readonly ColorSpace BT_601_625Line = new ColorSpace("BT.601-625-line", SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
+        public static readonly ColorSpace BT_601_625Line = new ColorSpace("BT.601-625-line", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
             {
                 G = 1 / 0.45f,
                 A = 1 / 1.099f,
@@ -126,7 +132,7 @@ namespace Carina.PixelViewer.Media
         /// DCI-P3 (D63).
         /// </summary>
 #pragma warning disable CS0618
-        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), true);
+        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), true);
 #pragma warning restore CS0618
         /// <summary>
         /// Default color space.
@@ -135,15 +141,15 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Display-P3 (P3-D65).
         /// </summary>
-        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), true);
+        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), true);
         /// <summary>
         /// sRGB.
         /// </summary>
-        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", SKColorSpace.CreateSrgb(), true);
+        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", null, SKColorSpace.CreateSrgb(), true);
 
 
         // Static fields.
-        static readonly Dictionary<string, ColorSpace> builtInColorSpaces = new Dictionary<string, ColorSpace>()
+        static readonly Dictionary<string, ColorSpace> builtInColorSpaces = new()
         {
             { AdobeRGB_1998.Name, AdobeRGB_1998 },
             { BT_2020.Name, BT_2020 },
@@ -153,6 +159,7 @@ namespace Carina.PixelViewer.Media
             { Display_P3.Name, Display_P3 },
             { Srgb.Name, Srgb },
         };
+        static readonly Random random = new();
 
 
         // Fields.
@@ -176,12 +183,13 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, SKColorSpace colorSpace, bool isBuiltIn)
+        ColorSpace(string name, string? iccName, SKColorSpace colorSpace, bool isBuiltIn)
         {
             this.skiaColorSpace = colorSpace;
             this.hasTransferFunc = colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncFromRgb);
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
+            this.IccName = iccName;
             this.IsBuiltIn = isBuiltIn;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
@@ -250,15 +258,151 @@ namespace Carina.PixelViewer.Media
         }
 
 
+        // Generate random name for color space.
+        static string GenerateRandomName() => new char[8].Let(it =>
+        {
+            for (var i = it.Length - 1; i >= 0; --i)
+            {
+                var n = random.Next(36);
+                if (n <= 9)
+                    it[i] = (char)('0' + n);
+                else
+                    it[i] = (char)('a' + (n - 10));
+            }
+            return $"{new string(it)}-{(uint)DateTime.Now.ToBinary()}";
+        });
+
+
         /// <inheritdoc/>
         public override int GetHashCode() => 
             (int)this.matrixToXyz[0];
         
 
         /// <summary>
+        /// Get name defined in ICC profile.
+        /// </summary>
+        public string? IccName { get; }
+        
+
+        /// <summary>
         /// Check whether the color space is buil-in or not.
         /// </summary>
         public bool IsBuiltIn { get; }
+
+
+        // Load color space from ICC profile.
+        static ColorSpace LoadFromIccProfile(string? fileName, Stream stream)
+        {
+            // read header
+            var header = new byte[128];
+            if (stream.Read(header, 0, 128) < 128)
+                throw new ArgumentException("Invalid ICC profile header.");
+            var profileSize = BinaryPrimitives.ReadUInt32BigEndian(header.AsSpan());
+            if (profileSize >= 1L << 20)
+                throw new ArgumentException($"Size of ICC profile is too large: {profileSize}.");
+            
+            // read profile to memory
+            var profile = new byte[profileSize];
+            Array.Copy(header, 0, profile, 0, 128);
+            if (stream.Read(profile, 128, profile.Length - 128) < profile.Length - 128)
+                throw new ArgumentException("Invalid ICC profile.");
+            
+            // parse profile
+            var skiaColorSpace = SKColorSpace.CreateIcc(profile);
+            if (skiaColorSpace == null)
+                throw new ArgumentException("Unsupported ICC profile.");
+            
+            // get name defined in profile
+            var iccName = (string?)null;
+            var offset = 132;
+            for (var i = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(128)); i > 0; --i, offset += 12)
+            {
+                if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset)) == 0x64657363u) // description
+                {
+                    // move to data block
+                    var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 4));
+                    var dataSize = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 8));
+                    if (dataOffset < 0 || dataOffset + dataSize > profileSize)
+                        continue;
+                    
+                    // read name
+                    switch (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset)))
+                    {
+                        case 0x64657363u: // 'desc'
+                            {
+                                var strLength = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
+                                if (strLength > 1)
+                                    iccName = Encoding.ASCII.GetString(profile, dataOffset + 12, strLength - 1);
+                            }
+                            break;
+                        case 0x6d6c7563u: // 'mluc'
+                            {
+                                var langCount = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
+                                var enUsName = (string?)null;
+                                var enName = (string?)null;
+                                dataOffset += 16;
+                                for (var langIndex = langCount; langIndex > 0; --langIndex)
+                                {
+                                    var lang = Encoding.ASCII.GetString(profile, dataOffset, 4);
+                                    var strLength = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 4)) >> 1;
+                                    if (strLength <= 0)
+                                        break;
+                                    if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8)) != 0x1cu)
+                                        break;
+                                    var str = new char[strLength].Let(it =>
+                                    {
+                                        var charDataOffset = dataOffset + 12;
+                                        for (var cIndex = 0; cIndex < strLength; ++cIndex, charDataOffset += 2)
+                                            it[cIndex] = (char)BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan(charDataOffset));
+                                        return new string(it);
+                                    });
+                                    if (lang == "enUS")
+                                        enUsName = str;
+                                    else if (lang.StartsWith("en"))
+                                        enName = str;
+                                    else if (iccName == null)
+                                        iccName = str;
+                                }
+                                if (iccName == null)
+                                {
+                                    if (enUsName != null)
+                                        iccName = enUsName;
+                                    else if (enName != null)
+                                        iccName = enName;
+                                }
+                            }
+                            break;
+                    }
+                    if (iccName != null)
+                        break;
+                }
+            }
+            if (iccName == null && fileName != null)
+                iccName = Path.GetFileName(fileName);
+
+            // create color space
+            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, false);
+        }
+
+
+        /// <summary>
+        /// Load ICC profile and create <see cref"ColorSpace"/>.
+        /// </summary>
+        /// <param name="fileName">File name of ICC profile.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of loading ICC profile.</returns>
+        public static Task<ColorSpace> LoadFromIccProfileAsync(string fileName, CancellationToken cancellationToken = default) => Task.Run(() =>
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            if (!CarinaStudio.IO.File.TryOpenRead(fileName, 5000, out var stream) || stream == null)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException();
+                throw new IOException($"Unable to open file '{fileName}'.");
+            }
+            return stream.Use(it => LoadFromIccProfile(fileName, it));
+        });
         
 
         /// <summary>
@@ -345,6 +489,10 @@ namespace Carina.PixelViewer.Media
         }
 
 
+        /// <inheritdoc/>
+        public override string ToString() => this.IccName ?? this.Name;
+
+
         /// <summary>
         /// Convert to XYZ D50 color space.
         /// </summary>
@@ -384,6 +532,32 @@ namespace Carina.PixelViewer.Media
             {
                 colorSpace = value;
                 return true;
+            }
+            colorSpace = Default;
+            return false;
+        }
+
+
+        /// <summary>
+        /// Try get built-in color space which is almost same as given color space.
+        /// </summary>
+        /// <param name="reference">Given color space.</param>
+        /// <param name="colorSpace">Found color space, or <see cref="Default"/> if specific color space cannot be found.</param>
+        /// <returns>True if specific color space can be found.</returns>
+        public static bool TryGetBuiltInColorSpace(ColorSpace reference, out ColorSpace colorSpace)
+        {
+            if (reference.IsBuiltIn)
+            {
+                colorSpace = reference;
+                return true;
+            }
+            foreach (var candidate in builtInColorSpaces.Values)
+            {
+                if (candidate.Equals(reference))
+                {
+                    colorSpace = candidate;
+                    return true;
+                }
             }
             colorSpace = Default;
             return false;
