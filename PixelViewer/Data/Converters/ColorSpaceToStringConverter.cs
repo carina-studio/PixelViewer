@@ -30,7 +30,11 @@ namespace Carina.PixelViewer.Data.Converters
             if (targetType != typeof(object) && targetType != typeof(string))
                 return null;
             if (value is ColorSpace colorSpace)
+            {
+                if (colorSpace.IccName != null)
+                    return colorSpace.IccName;
                 value = colorSpace.Name;
+            }
             if (value is not string name)
                 return null;
             if (app.TryGetResource<string>($"String/ColorSpace.{name}", out var res) == true)

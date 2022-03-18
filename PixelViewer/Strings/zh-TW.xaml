@@ -51,8 +51,10 @@
 	<sys:String x:Key="String/ByteOrdering.LittleEndian">小端序 (Little-Endian)</sys:String>
 
 	<!-- ColorSpace -->
-	<sys:String x:Key="String/ColorSpace.BT.601-525-line">ITU-R BT.601 525行 (SDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.601-625-line">ITU-R BT.601 625行 (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 525行 (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 625行 (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 搭配 PQ)</sys:String>
+	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 搭配 HLG)</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
@@ -211,6 +213,6 @@
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>
 
 	<!-- YuvToBgraConverter -->
-	<sys:String x:Key="String/YuvToBgraConverter.BT.656">ITU-R BT.656 (SDTV，NTSC 標準)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.656">BT.656 (SDTV，NTSC 標準)</sys:String>
 
 </ResourceDictionary>

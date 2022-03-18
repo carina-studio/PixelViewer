@@ -69,11 +69,13 @@
 
 	<!-- ColorSpace -->
 	<sys:String x:Key="String/ColorSpace.Adobe-RGB-1998">Adobe RGB (1998)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.601-525-line">ITU-R BT.601 525-line (SDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.601-625-line">ITU-R BT.601 625-line (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2020">BT.2020 (UHDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 525-line (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 625-line (SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
+	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 with PQ)</sys:String>
+	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 with HLG)</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 	
 	<!-- Common -->
@@ -249,9 +251,9 @@
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 
 	<!-- YuvToBgraConverter -->
-	<sys:String x:Key="String/YuvToBgraConverter.BT.2020">ITU-R BT.2020 (UHDTV)</sys:String>
-	<sys:String x:Key="String/YuvToBgraConverter.BT.601">ITU-R BT.601 (SDTV)</sys:String>
-	<sys:String x:Key="String/YuvToBgraConverter.BT.656">ITU-R BT.656 (SDTV, NTSC standard)</sys:String>
-	<sys:String x:Key="String/YuvToBgraConverter.BT.709">ITU-R BT.709 (HDTV)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.2020">BT.2020 (UHDTV)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.601">BT.601 (SDTV)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.656">BT.656 (SDTV, NTSC standard)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.709">BT.709 (HDTV)</sys:String>
 
 </ResourceDictionary>
