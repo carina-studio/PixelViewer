@@ -229,7 +229,8 @@ namespace Carina.PixelViewer
 		// Prepare shutting down.
         protected override async Task OnPrepareShuttingDownAsync()
         {
-			// wait for I/O of image rendering profiles
+			// wait for I/O completion
+			await Media.ColorSpace.WaitForIOTasksAsync();
 			await Media.Profiles.ImageRenderingProfiles.WaitForIOTasksAsync();
 
 			// call base
@@ -272,6 +273,10 @@ namespace Carina.PixelViewer
 
 			// initialize file format parsers
 			Media.FileFormatParsers.FileFormatParsers.Initialize(this);
+
+			// initialize color spaces
+			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingColorSpaces"));
+			await Media.ColorSpace.InitializeAsync(this);
 
 			// initialize image rendering profiles
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));

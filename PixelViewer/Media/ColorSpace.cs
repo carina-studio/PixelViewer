@@ -2,7 +2,9 @@ using System.IO;
 using System.Linq;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using System;
 using System.Buffers.Binary;
@@ -164,6 +166,8 @@ namespace Carina.PixelViewer.Media
 
 
         // Static fields.
+        static readonly SortedObservableList<ColorSpace> allColorSpaceList = new(Compare);
+        static IApplication? app;
         static readonly Dictionary<string, ColorSpace> builtInColorSpaces = new()
         {
             { AdobeRGB_1998.Name, AdobeRGB_1998 },
@@ -177,6 +181,9 @@ namespace Carina.PixelViewer.Media
             { LinearSrgb.Name, LinearSrgb },
             { Srgb.Name, Srgb },
         };
+        static readonly SortedObservableList<ColorSpace> customColorSpaceList = new(Compare);
+        static readonly Dictionary<string, ColorSpace> customColorSpaces = new();
+        static volatile ILogger? logger;
         static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
         static readonly Random random = new();
 
@@ -197,7 +204,11 @@ namespace Carina.PixelViewer.Media
         // Static initializer.
         static ColorSpace()
         {
-            BuiltInColorSpaces = builtInColorSpaces.Values.ToArray().AsReadOnly();
+            allColorSpaceList.AddAll(builtInColorSpaces.Values);
+            AllColorSpaces = allColorSpaceList.AsReadOnly();
+            BuiltInColorSpaces = builtInColorSpaces.Values.ToList().Also(it =>
+                it.Sort(Compare)).AsReadOnly();
+            CustomColorSpaces = customColorSpaceList.AsReadOnly();
             Default = Srgb;
         }
 
@@ -219,6 +230,37 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Add custom color space.
+        /// </summary>
+        /// <param name="colorSpace">Color space to add.</param>
+        /// <returns>True if color space has been added successfully.</returns>
+        public static bool AddCustomColorSpace(ColorSpace colorSpace)
+        {
+            if (colorSpace.IsBuiltIn)
+                return false;
+            var app = ColorSpace.app;
+            if (app == null)
+                return false;
+            if (customColorSpaces.TryAdd(colorSpace.Name, colorSpace))
+            {
+                colorSpace.PropertyChanged += OnCustomColorSpacePropertyChanged;
+                _ = colorSpace.SaveToFileAsync(Path.Combine(app.RootPrivateDirectoryPath, "ColorSpaces", $"{colorSpace.Name}.json"));
+                allColorSpaceList.Add(colorSpace);
+                customColorSpaceList.Add(colorSpace);
+                return true;
+            }
+            return false;
+        }
+
+
+        /// <summary>
+        /// Get all color spaces.
+        /// </summary>
+        /// <value></value>
+        public static IList<ColorSpace> AllColorSpaces { get; }
+
+
+        /// <summary>
         /// Get all built-in color spaces.
         /// </summary>
         public static IList<ColorSpace> BuiltInColorSpaces { get; }
@@ -234,6 +276,28 @@ namespace Carina.PixelViewer.Media
                 return 65536;
             return color;
         }
+
+
+        // Compare color spaces.
+        static int Compare(ColorSpace? lhs, ColorSpace? rhs)
+        {
+            if (lhs?.IsBuiltIn == true)
+            {
+                if (rhs?.IsBuiltIn == true)
+                    return string.Compare(lhs?.Name, rhs?.Name);
+                return -1;
+            }
+            if (rhs?.IsBuiltIn == true)
+                return 1;
+            return string.Compare(lhs?.Name, rhs?.Name);
+        }
+
+
+        /// <summary>
+        /// Get all custom color spaces.
+        /// </summary>
+        /// <value></value>
+        public static IList<ColorSpace> CustomColorSpaces { get; }
 
 
         /// <summary>
@@ -314,6 +378,67 @@ namespace Carina.PixelViewer.Media
         /// <inheritdoc/>
         public override int GetHashCode() => 
             (int)this.matrixToXyz[0];
+        
+
+        /// <summary>
+        /// Initialize color space.
+        /// </summary>
+        /// <param name="app">Application.</param>
+        /// <returns>Task of initialization.</returns>
+        public static async Task InitializeAsync(IApplication app)
+        {
+            // check state
+            if (ColorSpace.app != null)
+                throw new InvalidOperationException();
+            app.VerifyAccess();
+
+            // attach to application
+            ColorSpace.app = app;
+            logger = app.LoggerFactory.CreateLogger(nameof(ColorSpace));
+
+            logger.LogDebug("Initialize");
+
+            // find color space files
+            var directory = Path.Combine(app.RootPrivateDirectoryPath, "ColorSpaces");
+            var fileNames = await ioTaskFactory.StartNew(() =>
+            {
+                try
+                {
+                    if (Directory.Exists(directory))
+                        return Directory.GetFiles(directory, "*.json");
+                    return new string[0];
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"Failed to get color space files in '{directory}'");
+                    return new string[0];
+                }
+            });
+            logger.LogDebug($"Found {fileNames.Length} color space files");
+
+            // load color space files
+            foreach (var fileName in fileNames)
+            {
+                logger.LogTrace($"Load color space file '{fileNames}'");
+                var colorSpace = (ColorSpace?)null;
+                try
+                {
+                    colorSpace = await LoadFromFileAsync(fileName);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, $"Failed to load color space file '{fileNames}'");
+                    continue;
+                }
+                if (customColorSpaces.TryAdd(colorSpace.Name, colorSpace))
+                {
+                    colorSpace.PropertyChanged += OnCustomColorSpacePropertyChanged;
+                    allColorSpaceList.Add(colorSpace);
+                    customColorSpaceList.Add(colorSpace);
+                }
+            }
+            logger.LogDebug($"{customColorSpaces.Count} color space(s) loaded");
+        }
         
 
         /// <summary>
@@ -545,6 +670,19 @@ namespace Carina.PixelViewer.Media
         }
 
 
+        // Called when property of custom color space changed.
+        static void OnCustomColorSpacePropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (sender is not ColorSpace colorSpace || !customColorSpaces.ContainsKey(colorSpace.Name))
+                return;
+            var app = ColorSpace.app;
+            if (app == null)
+                return;
+            if (e.PropertyName == nameof(CustomName))
+                _ = colorSpace.SaveToFileAsync(Path.Combine(app.RootPrivateDirectoryPath, "ColorSpaces", $"{colorSpace.Name}.json"));
+        }
+
+
         /// <summary>
         /// Raised when property changed.
         /// </summary>
@@ -573,6 +711,32 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Remove custom color space.
+        /// </summary>
+        /// <param name="colorSpace">Color space to remove.</param>
+        /// <returns>True if color space has been removed successfully.</returns>
+        public static bool RemoveCustomColorSpace(ColorSpace colorSpace)
+        {
+            if (colorSpace.IsBuiltIn)
+                return false;
+            var app = ColorSpace.app;
+            if (app == null)
+                return false;
+            if (customColorSpaces.Remove(colorSpace.Name))
+            {
+                var fileName = Path.Combine(app.RootPrivateDirectoryPath, "ColorSpaces", $"{colorSpace.Name}.json");
+                colorSpace.PropertyChanged -= OnCustomColorSpacePropertyChanged;
+                _ = ioTaskFactory.StartNew(() =>
+                    Global.RunWithoutError(() => File.Delete(fileName)));
+                customColorSpaceList.Remove(colorSpace);
+                allColorSpaceList.Remove(colorSpace);
+                return true;
+            }
+            return false;
+        }
+
+
+        /// <summary>
         /// Save color space to file.
         /// </summary>
         /// <param name="fileName">File name.</param>
@@ -588,6 +752,7 @@ namespace Carina.PixelViewer.Media
                     throw new TaskCanceledException();
                 throw new IOException($"Unable to open file '{fileName}' to save color space.");
             }
+            logger?.LogTrace($"Save color space '{this.Name}' to '{fileName}'");
             using (stream)
             {
                 using var jsonWriter = new Utf8JsonWriter(stream, new JsonWriterOptions(){ Indented = true });
@@ -717,5 +882,12 @@ namespace Carina.PixelViewer.Media
             colorSpace = Default;
             return false;
         }
+
+
+        /// <summary>
+        /// Wait for IO tasks complete.
+        /// </summary>
+        /// <returns>Task of waiting.</returns>
+        public static Task WaitForIOTasksAsync() => ioTaskFactory.StartNew(() => logger?.LogDebug("All I/O tasks completed"));
     }
 }

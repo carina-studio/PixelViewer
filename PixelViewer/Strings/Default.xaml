@@ -4,6 +4,7 @@
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 	<!-- App -->
+	<sys:String x:Key="String/App.InitializingColorSpaces">Loading color spaces</sys:String>
 	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">Loading profiles</sys:String>
 	<sys:String x:Key="String/App.Shutdown">Exit</sys:String>
 
