@@ -76,6 +76,7 @@
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 with PQ)</sys:String>
 	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 with HLG)</sys:String>
+	<sys:String x:Key="String/ColorSpace.Linear-sRGB">Linear sRGB (sRGB w/o gamma transformation)</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 	
 	<!-- Common -->

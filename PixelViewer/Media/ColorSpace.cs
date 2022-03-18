@@ -151,6 +151,10 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         public static readonly ColorSpace Hlg10 = new ColorSpace("HLG10", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020), true);
         /// <summary>
+        /// Linear sRGB.
+        /// </summary>
+        public static readonly ColorSpace LinearSrgb = new ColorSpace("Linear-sRGB", null, SKColorSpace.CreateSrgbLinear(), true);
+        /// <summary>
         /// sRGB.
         /// </summary>
         public static readonly ColorSpace Srgb = new ColorSpace("sRGB", null, SKColorSpace.CreateSrgb(), true);
@@ -167,6 +171,7 @@ namespace Carina.PixelViewer.Media
             { Display_P3.Name, Display_P3 },
             { Dolby_Vision.Name, Dolby_Vision },
             { Hlg10.Name, Hlg10 },
+            { LinearSrgb.Name, LinearSrgb },
             { Srgb.Name, Srgb },
         };
         static readonly Random random = new();
