@@ -6,6 +6,7 @@ using SkiaSharp;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -16,7 +17,7 @@ namespace Carina.PixelViewer.Media
     /// <summary>
     /// RGB color space.
     /// </summary>
-    class ColorSpace : IEquatable<ColorSpace>
+    class ColorSpace : IEquatable<ColorSpace>, INotifyPropertyChanged
     {
         /// <summary>
         /// Convert RGB color between color spaces.
@@ -178,6 +179,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Fields.
+        string? customName;
         readonly bool hasTransferFunc;
         readonly long[] matrixFromXyz;
         readonly long[] matrixToXyz;
@@ -198,13 +200,13 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, string? iccName, SKColorSpace colorSpace, bool isBuiltIn)
+        ColorSpace(string name, string? customName, SKColorSpace colorSpace, bool isBuiltIn)
         {
+            this.customName = customName;
             this.skiaColorSpace = colorSpace;
             this.hasTransferFunc = colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncFromRgb);
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
-            this.IccName = iccName;
             this.IsBuiltIn = isBuiltIn;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
@@ -228,6 +230,24 @@ namespace Carina.PixelViewer.Media
             if (color > 65536)
                 return 65536;
             return color;
+        }
+
+
+        /// <summary>
+        /// Get ot set custom name of color space.
+        /// </summary>
+        public string? CustomName 
+        { 
+            get => this.customName;
+            set
+            {
+                if (this.IsBuiltIn)
+                    throw new InvalidOperationException();
+                if (this.customName == value)
+                    return;
+                this.customName = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CustomName)));
+            }
         }
 
 
@@ -291,12 +311,6 @@ namespace Carina.PixelViewer.Media
         /// <inheritdoc/>
         public override int GetHashCode() => 
             (int)this.matrixToXyz[0];
-        
-
-        /// <summary>
-        /// Get name defined in ICC profile.
-        /// </summary>
-        public string? IccName { get; }
         
 
         /// <summary>
@@ -460,6 +474,12 @@ namespace Carina.PixelViewer.Media
         }
 
 
+        /// <summary>
+        /// Raised when property changed.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+
         // Quantize color.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static long Quantize(double color)
@@ -505,7 +525,7 @@ namespace Carina.PixelViewer.Media
 
 
         /// <inheritdoc/>
-        public override string ToString() => this.IccName ?? this.Name;
+        public override string ToString() => this.CustomName ?? this.Name;
 
 
         /// <summary>
