@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using CarinaStudio;
 using CarinaStudio.Collections;
+using CarinaStudio.Threading.Tasks;
 using SkiaSharp;
 using System;
 using System.Buffers.Binary;
@@ -9,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -175,6 +177,7 @@ namespace Carina.PixelViewer.Media
             { LinearSrgb.Name, LinearSrgb },
             { Srgb.Name, Srgb },
         };
+        static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
         static readonly Random random = new();
 
 
@@ -319,6 +322,74 @@ namespace Carina.PixelViewer.Media
         public bool IsBuiltIn { get; }
 
 
+        /// <summary>
+        /// Load color space from file.
+        /// </summary>
+        /// <param name="fileName">File name.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of loading from file.</returns>
+        public static Task<ColorSpace> LoadFromFileAsync(string fileName, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            if (!CarinaStudio.IO.File.TryOpenRead(fileName, 5000, out var stream) || stream == null)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException();
+                throw new IOException($"Unable to open file '{fileName}' to load color space.");
+            }
+            return stream.Use(_ =>
+            {
+                // check root object
+                using var jsonDocument = JsonDocument.Parse(stream);
+                var rootObject = jsonDocument.RootElement;
+                if (rootObject.ValueKind != JsonValueKind.Object)
+                    throw new ArgumentException("Invalid color space file.");
+                
+                // get name and custom name
+                var name = (string?)null;
+                var customName = (string?)null;
+                if (rootObject.TryGetProperty(nameof(Name), out var jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
+                    name = jsonProperty.GetString();
+                if (rootObject.TryGetProperty(nameof(CustomName), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
+                    customName = jsonProperty.GetString();
+                if (string.IsNullOrWhiteSpace(name))
+                    throw new ArgumentException("No name of color space specified.");
+                
+                // get transfer function
+                var transferFunc = SKColorSpaceTransferFn.Empty;
+                if (rootObject.TryGetProperty("NumericalTransferFunction", out jsonProperty) 
+                    && jsonProperty.ValueKind == JsonValueKind.Array
+                    && jsonProperty.GetArrayLength() == 7)
+                {
+                    float[] values = new float[7];
+                    var index = 0;
+                    foreach (var jsonValue in jsonProperty.EnumerateArray())
+                        values[index++] = jsonValue.GetSingle();
+                    transferFunc = new SKColorSpaceTransferFn(values);
+                }
+
+                // get matrix to XYZ D50
+                var colorSpaceXyz = new SKColorSpaceXyz();
+                if (rootObject.TryGetProperty("MatrixToXyzD50", out jsonProperty) 
+                    && jsonProperty.ValueKind == JsonValueKind.Array
+                    && jsonProperty.GetArrayLength() == 9)
+                {
+                    float[] values = new float[9];
+                    var index = 0;
+                    foreach (var jsonValue in jsonProperty.EnumerateArray())
+                        values[index++] = jsonValue.GetSingle();
+                    colorSpaceXyz = new SKColorSpaceXyz(values);
+                }
+                else
+                    throw new ArgumentException("No matrix to XYZ D50 of color space specified.");
+                
+                // create color space
+                return new ColorSpace(name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), false);
+            });
+        });
+
+
         // Load color space from ICC profile.
         static ColorSpace LoadFromIccProfile(string? fileName, Stream stream)
         {
@@ -420,7 +491,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="fileName">File name of ICC profile.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of loading ICC profile.</returns>
-        public static Task<ColorSpace> LoadFromIccProfileAsync(string fileName, CancellationToken cancellationToken = default) => Task.Run(() =>
+        public static Task<ColorSpace> LoadFromIccProfileAsync(string fileName, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
         {
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -499,6 +570,55 @@ namespace Carina.PixelViewer.Media
             (long)(matrix[0, 1] * 65536 + 0.5), (long)(matrix[1, 1] * 65536 + 0.5), (long)(matrix[2, 1] * 65536 + 0.5),
             (long)(matrix[0, 2] * 65536 + 0.5), (long)(matrix[1, 2] * 65536 + 0.5), (long)(matrix[2, 2] * 65536 + 0.5),
         };
+
+
+        /// <summary>
+        /// Save color space to file.
+        /// </summary>
+        /// <param name="fileName">File name.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of saving to file.</returns>
+        public Task SaveToFileAsync(string fileName, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            if (!CarinaStudio.IO.File.TryOpenWrite(fileName, 5000, out var stream) || stream == null)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException();
+                throw new IOException($"Unable to open file '{fileName}' to save color space.");
+            }
+            using (stream)
+            {
+                using var jsonWriter = new Utf8JsonWriter(stream, new JsonWriterOptions(){ Indented = true });
+                jsonWriter.WriteStartObject();
+                jsonWriter.WriteString(nameof(Name), this.Name);
+                this.customName?.Let(it =>
+                    jsonWriter.WriteString(nameof(CustomName), it));
+                if (this.skiaColorSpace.GetNumericalTransferFunction(out var transferFunc))
+                {
+                    jsonWriter.WritePropertyName("NumericalTransferFunction");
+                    jsonWriter.WriteStartArray();
+                    jsonWriter.WriteNumberValue(transferFunc.G);
+                    jsonWriter.WriteNumberValue(transferFunc.A);
+                    jsonWriter.WriteNumberValue(transferFunc.B);
+                    jsonWriter.WriteNumberValue(transferFunc.C);
+                    jsonWriter.WriteNumberValue(transferFunc.D);
+                    jsonWriter.WriteNumberValue(transferFunc.E);
+                    jsonWriter.WriteNumberValue(transferFunc.F);
+                    jsonWriter.WriteEndArray();
+                }
+                this.skiaColorSpaceXyz.Let(it =>
+                {
+                    jsonWriter.WritePropertyName("MatrixToXyzD50");
+                    jsonWriter.WriteStartArray();
+                    foreach (var value in it.Values)
+                        jsonWriter.WriteNumberValue(value);
+                    jsonWriter.WriteEndArray();
+                });
+                jsonWriter.WriteEndObject();
+            }
+        });
 
 
         /// <summary>

@@ -31,8 +31,8 @@ namespace Carina.PixelViewer.Data.Converters
                 return null;
             if (value is ColorSpace colorSpace)
             {
-                if (colorSpace.IccName != null)
-                    return colorSpace.IccName;
+                if (colorSpace.CustomName != null)
+                    return colorSpace.CustomName;
                 value = colorSpace.Name;
             }
             if (value is not string name)
