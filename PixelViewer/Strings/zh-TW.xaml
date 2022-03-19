@@ -61,7 +61,7 @@
 	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 625行 (SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 搭配 PQ)</sys:String>
 	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 搭配 HLG)</sys:String>
-	<sys:String x:Key="String/ColorSpace.Linear-sRGB">線性 sRGB (無 Gamma 轉換之 sRGB)</sys:String>
+	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB (無 Gamma 轉換)</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
