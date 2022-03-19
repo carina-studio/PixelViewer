@@ -12,14 +12,18 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color space management improves the accuracy of color of rendered image, but it will affects the performance of image rendering.</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">The color space '{0}' is same as '{1}', do you still want to add it?</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">Custom color spaces</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">Default byte ordering</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">Default color space of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB conversion</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace">Edit custom color space</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace.CustomName">Name</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">Enable color space management</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
@@ -37,6 +41,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB color of selected pixel</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* D50 color of selected pixel</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">Show XYZ D50 color of selected pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">Unable to load color space from file.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 
 	<!-- AspectRatio -->
@@ -82,6 +87,7 @@
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
+	<sys:String x:Key="String/Common.Custom">Custom</sys:String>
 	<sys:String x:Key="String/Common.KnowMoreAbout">Know more about</sys:String>
 	<sys:String x:Key="String/Common.Options">Options</sys:String>
 	<sys:String x:Key="String/Common.Rename">Rename</sys:String>
@@ -96,6 +102,7 @@
 	<sys:String x:Key="String/FileType.All">All files</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows Bitmap</sys:String>
 	<sys:String x:Key="String/FileType.Dng">Digital Negative (DNG)</sys:String>
+	<sys:String x:Key="String/FileType.Icc">ICC color profile</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG image</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">Raw 32/64-bit BGRA pixels</sys:String>

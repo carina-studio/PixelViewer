@@ -941,7 +941,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// setup color space management
 			this.SetValue(IsColorSpaceManagementEnabledProperty, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
-			if (Media.ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
+			if (Media.ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
 				this.SetValue(ColorSpaceProperty, colorSpace);
 
 			// setup title
@@ -955,6 +955,9 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
 				this.SetValue(RenderingParametersPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
 			}
+
+			// add event handlers
+			Media.ColorSpace.RemovingCustomColorSpace += this.OnRemovingCustomColorSpace;
 		}
 
 
@@ -1609,6 +1612,10 @@ namespace Carina.PixelViewer.ViewModels
 
 			// detach from shared rendered images memory usage
 			this.sharedRenderedImagesMemoryUsageObserverToken.Dispose();
+
+			// remove event handlers
+			if (!disposing)
+				Media.ColorSpace.RemovingCustomColorSpace -= this.OnRemovingCustomColorSpace;
 
 			// call super
 			base.Dispose(disposing);
@@ -3002,6 +3009,18 @@ namespace Carina.PixelViewer.ViewModels
         }
 
 
+		// Called before removing custom color space.
+		void OnRemovingCustomColorSpace(object? sender, Media.ColorSpaceEventArgs e)
+		{
+			if (e.ColorSpace == this.GetValue(ColorSpaceProperty))
+			{
+				this.Logger.LogWarning($"Color space '{e.ColorSpace}' is being removed, switch back to default color space");
+				Media.ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
+				this.SetValue(ColorSpaceProperty, colorSpace);
+			}
+		}
+
+
 		// Raise PropertyChanged event for row stride.
 		void OnRowStrideChanged(int index) => this.OnPropertyChanged(index switch
 		{
@@ -3500,7 +3519,7 @@ namespace Carina.PixelViewer.ViewModels
             var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
 			var screenColorSpace = Global.Run(() =>
 			{
-				Media.ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
+				Media.ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
 				return colorSpace;
 			});
 			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && !screenColorSpace.Equals(renderedColorSpace);
@@ -4092,7 +4111,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (savedState.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty))
 				YuvToBgraConverter.TryGetByName(jsonProperty.GetString(), out yuvToBgraConverter);
 			if (savedState.TryGetProperty(nameof(ColorSpace), out jsonProperty))
-				Media.ColorSpace.TryGetBuiltInColorSpace(jsonProperty.GetString().AsNonNull(), out colorSpace);
+				Media.ColorSpace.TryGetColorSpace(jsonProperty.GetString().AsNonNull(), out colorSpace);
 			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
 				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))

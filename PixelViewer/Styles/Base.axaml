@@ -31,6 +31,11 @@
 		<!-- JpegImageEncodingOptionsDialog -->
 		<sys:Double x:Key="Double/JpegImageEncodingOptionsDialog.Width">300</sys:Double>
 
+		<!-- ListAction -->
+		<sys:Double x:Key="Double/ListAction.MinWidth">80</sys:Double>
+		<Thickness x:Key="Thickness/ListAction.Padding">10,5,10,5</Thickness>
+		<Thickness x:Key="Thickness/ListAction.Margin">5,5,0,0</Thickness>
+
 		<!-- MainWindow -->
 		<sys:Double x:Key="Double/MainWindow.MinHeight">100</sys:Double>
 		<sys:Double x:Key="Double/MainWindow.MinWidth">400</sys:Double>
@@ -39,6 +44,7 @@
 		<Thickness x:Key="Thickness/MainWindow.TabItem.ToolTip.Padding">5</Thickness>
 
 		<!-- SessionControl -->
+		<SolidColorBrush x:Key="Brush/SessionControl.CustomColorSpaceLabel.Background" Color="{DynamicResource Color/SessionControl.CustomColorSpaceLabel.Background}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Luminance" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance}"/>
@@ -49,6 +55,7 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Foreground" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Foreground}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
+		<Color x:Key="Color/SessionControl.CustomColorSpaceLabel.Background">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#000000</Color>
@@ -96,6 +103,16 @@
 		<Setter Property="LuminanceHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.LuminanceHistogram.Bakground}"/>
 		<Setter Property="Padding" Value="{DynamicResource Thickness/BitmapHistogramsView.Padding}"/>
 		<Setter Property="RedHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.RedHistogram.Bakground}"/>
+	</Style>
+
+	<!-- ListAction -->
+	<Style Selector="Button.ListAction">
+		<Setter Property="HorizontalAlignment" Value="Right"/>
+		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="Margin" Value="{DynamicResource Thickness/ListAction.Margin}"/>
+		<Setter Property="MinWidth" Value="{DynamicResource Double/ListAction.MinWidth}"/>
+		<Setter Property="Padding" Value="{DynamicResource Thickness/ListAction.Padding}"/>
+		<Setter Property="VerticalContentAlignment" Value="Center"/>
 	</Style>
 
 	<!-- SessionControl -->

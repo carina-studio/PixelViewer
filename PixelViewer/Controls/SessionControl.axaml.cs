@@ -88,6 +88,7 @@ namespace Carina.PixelViewer.Controls
 		readonly ToggleButton colorAdjustmentButton;
 		readonly Popup colorAdjustmentPopup;
 		readonly Border colorAdjustmentPopupBorder;
+		readonly ComboBox colorSpaceComboBox;
 		readonly ToggleButton evaluateImageDimensionsButton;
 		readonly ContextMenu evaluateImageDimensionsMenu;
 		readonly ToggleButton fileActionsButton;
@@ -208,6 +209,7 @@ namespace Carina.PixelViewer.Controls
 				it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 			});
 			this.colorAdjustmentPopupBorder = this.FindControl<Border>(nameof(colorAdjustmentPopupBorder)).AsNonNull();
+			this.colorSpaceComboBox = this.FindControl<ComboBox>(nameof(colorSpaceComboBox)).AsNonNull();
 			this.FindControl<Slider>("contrastAdjustmentSlider").AsNonNull().Also(it =>
 			{
 				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnContrastAdjustmentUI, RoutingStrategies.Tunnel);
@@ -623,6 +625,7 @@ namespace Carina.PixelViewer.Controls
 
 			// add event handlers
 			this.Application.StringsUpdated += this.OnApplicationStringsUpdated;
+			Media.ColorSpace.CustomNameChanged += this.OnColorSpaceCustomNameChanged;
 			this.AddHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged, Avalonia.Interactivity.RoutingStrategies.Tunnel);
 
 			// attach to settings
@@ -659,6 +662,16 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Called when custom name of color space changed.
+        void OnColorSpaceCustomNameChanged(object? sender, Media.ColorSpaceEventArgs e)
+        {
+            // [Workaround] Force refreshing content of ComboBox
+            var template = this.colorSpaceComboBox.ItemTemplate;
+            this.colorSpaceComboBox.ItemTemplate = null;
+            this.colorSpaceComboBox.ItemTemplate = template;
+        }
+
+
         // Called when detached from logical tree.
         protected override void OnDetachedFromLogicalTree(LogicalTreeAttachmentEventArgs e)
 		{
@@ -668,6 +681,7 @@ namespace Carina.PixelViewer.Controls
 
 			// remove event handlers
 			this.Application.StringsUpdated -= this.OnApplicationStringsUpdated;
+			Media.ColorSpace.CustomNameChanged -= this.OnColorSpaceCustomNameChanged;
 			this.RemoveHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged);
 
 			// detach from settings

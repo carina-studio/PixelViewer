@@ -12,14 +12,18 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會影響繪製影像的效能。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空間 '{0}' 與 '{1}' 相同，您是否還要將其加入？</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">對比調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">自訂色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">預設位元組順序</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">預設影像色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">預設 YUV 至 RGB 轉換</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace">編輯自訂色彩空間</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace.CustomName">名稱</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">啟用色彩空間管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
@@ -37,6 +41,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">顯示選取像素的 ARGB 色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">顯示選取像素的 L*a*b* D50 色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">顯示選取像素的 XYZ D50 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">無法從檔案載入色彩空間。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 
 	<!-- AspectRatio -->
@@ -60,6 +65,7 @@
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
+	<sys:String x:Key="String/Common.Custom">自訂</sys:String>
 	<sys:String x:Key="String/Common.KnowMoreAbout">了解更多</sys:String>
 	<sys:String x:Key="String/Common.Options">選項</sys:String>
 	<sys:String x:Key="String/Common.Rename">重新命名</sys:String>
@@ -74,6 +80,7 @@
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows 點陣圖</sys:String>
 	<sys:String x:Key="String/FileType.Dng">數位負片 (DNG)</sys:String>
+	<sys:String x:Key="String/FileType.Icc">ICC 色彩描述檔</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG 影像</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG 影像</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位元 BGRA 像素</sys:String>

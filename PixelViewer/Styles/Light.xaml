@@ -10,6 +10,7 @@
 	<Styles.Resources>
 
 		<!-- SessionControl -->
+		<Color x:Key="Color/SessionControl.CustomColorSpaceLabel.Background">#404040</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#57007f</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#007f0e</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#404040</Color>

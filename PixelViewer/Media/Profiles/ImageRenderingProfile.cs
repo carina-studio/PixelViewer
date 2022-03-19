@@ -75,7 +75,7 @@ namespace Carina.PixelViewer.Media.Profiles
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
-            Media.ColorSpace.TryGetBuiltInColorSpace(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
+            Media.ColorSpace.TryGetColorSpace(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
             this.Type = type;
             if (type == ImageRenderingProfileType.Default)
             {
@@ -511,7 +511,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         "BT.601" => "BT.601-625-line".Also(_ => profile.IsUpgradedWhenLoading = true),
                         _ => it,
                     });
-                    if (!Media.ColorSpace.TryGetBuiltInColorSpace(name, out profile.colorSpace))
+                    if (!Media.ColorSpace.TryGetColorSpace(name, out profile.colorSpace))
                         profile.IsUpgradedWhenLoading = true;
                 }
 

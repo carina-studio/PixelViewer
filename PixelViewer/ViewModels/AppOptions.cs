@@ -72,7 +72,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get 
 			{
-				ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
+				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
 			set => this.Settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, value.Name);
@@ -269,7 +269,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get 
 			{
-				ColorSpace.TryGetBuiltInColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
+				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
 			set => this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);

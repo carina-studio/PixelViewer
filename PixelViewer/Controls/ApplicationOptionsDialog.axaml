@@ -166,10 +166,15 @@
 
 				<!-- Default color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
-				<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.BuiltInColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
+				<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+							<Grid ColumnDefinitions="*,Auto">
+								<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+								<Border Background="{DynamicResource Brush/SessionControl.CustomColorSpaceLabel.Background}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding !IsBuiltIn}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+									<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+								</Border>
+							</Grid>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
@@ -178,13 +183,41 @@
 
 				<!-- Screen color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
-				<ComboBox Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.BuiltInColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
+				<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
-							<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+							<Grid ColumnDefinitions="*,Auto">
+								<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+								<Border Background="{DynamicResource Brush/SessionControl.CustomColorSpaceLabel.Background}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding !IsBuiltIn}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+									<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+								</Border>
+							</Grid>
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Custom color spaces -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
+				<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Height="150" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.CustomColorSpaces}">
+					<asControls:ListBox.ItemTemplate>
+						<DataTemplate>
+							<Grid ColumnDefinitions="*,Auto">
+								<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
+								<Border Classes="InPlaceAction_Reserved"/>
+								<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
+									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
+										<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
+									</Button>
+									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].EditCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
+										<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
+									</Button>
+								</StackPanel>
+							</Grid>
+						</DataTemplate>
+					</asControls:ListBox.ItemTemplate>
+				</asControls:ListBox>
+				<Button Classes="ListAction" Command="{Binding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add}"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Image filter -->

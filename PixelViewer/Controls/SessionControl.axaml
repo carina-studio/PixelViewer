@@ -699,10 +699,15 @@
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
 						<Panel>
 							<asControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
-							<ComboBox Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:ColorSpace.BuiltInColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
+							<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
-										<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+										<Grid ColumnDefinitions="*,Auto">
+											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+											<Border Background="{DynamicResource Brush/SessionControl.CustomColorSpaceLabel.Background}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding !IsBuiltIn}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+											</Border>
+										</Grid>
 									</DataTemplate>
 								</ComboBox.ItemTemplate>
 							</ComboBox>
