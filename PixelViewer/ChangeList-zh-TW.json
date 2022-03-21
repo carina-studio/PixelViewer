@@ -1,45 +1,49 @@
 ﻿[
 	{
-		"Description": "新增飽和度/自然飽和度調整。",
+		"Description": "支援 19 種新的影像格式。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "新增自動色彩比例調整。",
+		"Description": "支援在單一檔案中的多張影像畫面。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "新增自動 R/G/B 增益調整。",
+		"Description": "針對 Bayer 排列格式支援去馬賽克。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援在開啟影像檔案後重設影像濾鏡參數。",
+		"Description": "支援色彩空間管理。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援指定預設的影像色彩空間。",
+		"Description": "新增亮度/對比/亮部/暗部/飽和度/自然飽和度調整。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援在 \"調整至視窗大小\" 開啟時使用 Ctrl/Cmd +/- 縮放影像。",
-		"Type": "Improvement"
+		"Description": "新增色彩比例調整。",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "更新亮部/暗部調整的演算法。",
-		"Type": "Improvement"
+		"Description": "新增紅/綠/藍增益調整。",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "保留最近指定的 JPEG 壓縮品質。",
-		"Type": "Improvement"
+		"Description": "支援顯示紅/綠/藍以及亮度的色階分佈圖。",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "其他使用者體驗改善。",
+		"Description": "支援將影像儲存為 JPEG 或原始 BGRA 像素資料。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "使用者體驗改善。",
 		"Type": "Improvement"
 	},
 	{
 		"Description": "更新相依程式庫。"
 	},
 	{
-		"Description": "其他錯誤修正。",
+		"Description": "錯誤修正。",
 		"Type": "BugFixing"
 	}
 ]

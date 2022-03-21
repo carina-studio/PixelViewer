@@ -1,45 +1,49 @@
 ﻿[
 	{
-		"Description": "Add saturation/vibrance adjustment.",
+		"Description": "Support 19 new image formats.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Add auto color adjustment.",
+		"Description": "Support multiple image frames in single source file.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Add auto R/G/B gain selection.",
+		"Description": "Support demosaicing for Bayer Pattern format.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support resetting image filter parameters after opening image file.",
+		"Description": "Support color space management.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support specifying default color space of image.",
+		"Description": "Add brightness/contrast/highlight/shadow/saturation/vibrance adjustment.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support using Ctrl/Cmd +/- to zoom image when \"Fit to viewport\" is ON.",
-		"Type": "Improvement"
+		"Description": "Add color balance adjustment.",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "Update algorithm of highlight/shadow adjustment.",
-		"Type": "Improvement"
+		"Description": "Add R/G/B gain adjustment.",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "Keep latest selected compression quality of JPEG.",
-		"Type": "Improvement"
+		"Description": "Support showing R/G/B and luminance histograms.",
+		"Type": "NewFeature"
 	},
 	{
-		"Description": "Other UX improvement.",
+		"Description": "Support saving image as JPEG or raw BGRA pixels.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "UX improvement.",
 		"Type": "Improvement"
 	},
 	{
 		"Description": "Update dependent libraries."
 	},
 	{
-		"Description": "Other bug fixing.",
+		"Description": "Bug fixing.",
 		"Type": "BugFixing"
 	}
 ]
