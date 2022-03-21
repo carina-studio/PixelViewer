@@ -310,6 +310,7 @@
 									<Image.IsVisible>
 										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
 											<Binding Path="HasColorAdjustment"/>
+											<Binding Path="HasSaturationAdjustment"/>
 											<Binding Path="HasVibranceAdjustment"/>
 										</MultiBinding>
 									</Image.IsVisible>
