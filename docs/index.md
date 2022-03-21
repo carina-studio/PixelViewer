@@ -6,28 +6,26 @@ PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform imag
 
 Operating System                      | Download | Version | Screenshot
 :------------------------------------:|:--------:|:-------:|:----------:
-Windows 8/10/11                       |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-win-arm64.zip)|2.0.1.314 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows.png)
-Windows 7<br/>*(.NET Runtime needed)* |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-win-x86-fx-dependent.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-win-x64-fx-dependent.zip)|2.0.1.314 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7_Thumb.png" alt="Main window (Windows 7)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7.png)
-macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-osx-arm64.zip)|2.0.1.314 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
-Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.1.314/PixelViewer-2.0.1.314-linux-arm64.zip)|2.0.1.314 (RC)|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora_Thumb.png" alt="Main window (Fedora)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora.png)
+Windows 8/10/11                       |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-win-arm64.zip)|2.0.2.321|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows.png)
+Windows 7<br/>*(.NET Runtime needed)* |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-win-x86-fx-dependent.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-win-x64-fx-dependent.zip)|2.0.2.321|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7_Thumb.png" alt="Main window (Windows 7)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Windows7.png)
+macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-osx-arm64.zip)|2.0.2.321|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
+Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.2.321/PixelViewer-2.0.2.321-linux-arm64.zip)|2.0.2.321|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora_Thumb.png" alt="Main window (Fedora)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora.png)
 
 - [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)
 
-## 📣 What's Change in 2.0 RC
-- Add saturation/vibrance adjustment.
-- Add auto color adjustment.
-- Add auto R/G/B gain selection.
-- Add ```P012```, ```P212``` and ```P412``` format.
-- Support resetting image filter parameters after opening image file.
-- Support specifying default color space of image.
-- Support using ```Ctrl/Cmd +/-``` to zoom image when ```Fit to viewport``` is ON.
-- Update algorithm of highlight/shadow adjustment.
-- Keep latest selected compression quality of JPEG.
-- Re-implement color space management based-on Skia.
-- Improve memory management of rendering and filtering image.
-- Other UX improvement.
+## 📣 What's Change in 2.0
+- Support 19 new image formats.
+- Support multiple image frames in single source file.
+- Support demosaicing for Bayer Pattern format.
+- Support color space management.
+- Add brightness/contrast/highlight/shadow/saturation/vibrance adjustment.
+- Add color balance adjustment.
+- Add R/G/B gain adjustment.
+- Support showing R/G/B and luminance histograms.
+- Support saving image as JPEG or raw BGRA pixels.
+- UX improvement.
 - Update dependent libraries.
-- Other bug fixing.
+- Bug fixing.
 
 ## ⭐ Supported formats
 * Luminance
@@ -35,24 +33,24 @@ Linux                                 |[x64](https://github.com/carina-studio/Pi
   * L16
 * YUV
   * YUV444p
-  * P410 (v1.99+)
-  * P412 (v2.0.1+)
-  * P416 (v1.99+)
+  * P410
+  * P412
+  * P416
   * YUV422p
-  * P210 (v1.99+)
-  * P212 (v2.0.1+)
-  * P216 (v1.99+)
+  * P210
+  * P212
+  * P216
   * UYVY
   * YUVY
   * NV12
   * NV21
-  * Y010 (v1.99+)
-  * Y016 (v1.99+)
+  * Y010
+  * Y016
   * I420
   * YV12
-  * P010 (v1.99+)
-  * P012 (v2.0.1+)
-  * P016 (v1.99+)
+  * P010
+  * P012
+  * P016
 * RGB
   * BGR_888
   * RGB_565
@@ -61,44 +59,45 @@ Linux                                 |[x64](https://github.com/carina-studio/Pi
   * RGBX_8888
   * XBGR_8888
   * XRGB_8888
-  * BGR_161616 (v1.106+)
-  * RGB_161616 (v1.106+)
+  * BGR_161616
+  * RGB_161616
 * ARGB
   * ARGB_8888
   * ABGR_8888
   * BGRA_8888
   * RGBA_8888
-  * ARGB_16161616 (v1.105+)
-  * ABGR_16161616 (v1.105+)
-  * BGRA_16161616 (v1.105+)
-  * RGBA_16161616 (v1.105+)
+  * ARGB_16161616
+  * ABGR_16161616
+  * BGRA_16161616
+  * RGBA_16161616
 * Bayer Pattern
-  * 10-bit MIPI (v1.105+)
-  * 12-bit MIPI (v1.105+)
+  * 10-bit MIPI
+  * 12-bit MIPI
   * 16-bit
   
-## ⭐ Supported color spaces (v1.104+)
+## ⭐ Supported color spaces
 * sRGB
 * DCI-P3
-* Display-P3 (v1.106+)
+* Display-P3
 * Adobe RGB
-* ITU-R BT.601
+* ITU-R BT.601 525-lines
+* ITU-R BT.601 625-lines
 * ITU-R BT.2020
 
 ## ⭐ Supported functions
 * Rendering image from raw pixel file.
 * Evaluate image dimensions according to file name, file size and format.
 * Specify pixel-stride and row-stride for each plane.
-* Specify data offset to image in file. (v1.99+)
-* Specify color space of image and screen. (v1.104+)
+* Specify data offset to image in file.
+* Specify color space of image and screen.
 * Rotate and scale rendered image.
-* Navigate to specific image frame in file. (v1.99+)
-* Adjust brightness/contrast and color balance. (v1.104+)
-* Adjust highlight/shadow of image. (v1.106+)
-* Show histograms of R/G/B and luminance. (v1.102+)
-* Demosaicing for Bayer Pattern formats. (v1.103+)
+* Navigate to specific image frame in file.
+* Adjust brightness/contrast and color balance.
+* Adjust highlight/shadow of image.
+* Show histograms of R/G/B and luminance.
+* Demosaicing for Bayer Pattern formats.
 * Save rendered image as PNG file.
-* Save rendered image as JPEG/BGRA file. (v1.105+)
+* Save rendered image as JPEG/BGRA file.
 
 ## 📜 User Agreement
 - [English](user_agreement.md)
