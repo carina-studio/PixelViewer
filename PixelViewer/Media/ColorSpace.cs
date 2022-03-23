@@ -607,7 +607,10 @@ namespace Carina.PixelViewer.Media
                             break;
                     }
                     if (iccName != null)
+                    {
+                        iccName = iccName.Trim();
                         break;
+                    }
                 }
             }
             if (iccName == null && fileName != null)
