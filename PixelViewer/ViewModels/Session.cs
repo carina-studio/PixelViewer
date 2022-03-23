@@ -4057,12 +4057,11 @@ namespace Carina.PixelViewer.ViewModels
 			this.Logger.LogWarning("Start restoring state");
 
 			// load rendering parameters
-			if (!savedState.TryGetProperty(nameof(SourceFileName), out var jsonProperty) || jsonProperty.ValueKind != JsonValueKind.String)
-			{
-				this.Logger.LogDebug("No source file to restore");
-				return;
-			}
-			var fileName = jsonProperty.GetString().AsNonNull();
+			var fileName = (string?)null;
+			if (savedState.TryGetProperty(nameof(SourceFileName), out var jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
+				fileName = jsonProperty.GetString().AsNonNull();
+			else
+				this.Logger.LogDebug("Restoring state without source file");
 			var profile = Global.Run(() =>
 			{
 				if (savedState.TryGetProperty(nameof(Profile), out var jsonProperty))
@@ -4223,11 +4222,11 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(CustomTitleProperty, jsonProperty.GetString());
 
 			// open source file
-			await this.OpenSourceFile(fileName);
-			if (!this.IsSourceFileOpened)
+			if (fileName != null)
 			{
-				this.Logger.LogError($"Unable to restore source file '{fileName}'");
-				return;
+				await this.OpenSourceFile(fileName);
+				if (!this.IsSourceFileOpened)
+					this.Logger.LogError($"Unable to restore source file '{fileName}'");
 			}
 
 			// apply profile
@@ -4549,85 +4548,90 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public void SaveState(Utf8JsonWriter writer)
 		{
+			// start
 			writer.WriteStartObject();
-			if (!string.IsNullOrEmpty(this.SourceFileName))
+		
+			// file and profile
+			var fileName = this.SourceFileName;
+			if (!string.IsNullOrEmpty(fileName))
+				writer.WriteString(nameof(SourceFileName), fileName.AsNonNull());
+			else
+				this.Logger.LogDebug("Saving state without source file");
+
+			// rendering parameters
+			switch (this.Profile.Type)
 			{
-				// file and profile
-				writer.WriteString(nameof(SourceFileName), this.SourceFileName.AsNonNull());
-
-				// rendering parameters
-				switch (this.Profile.Type)
-				{
-					case ImageRenderingProfileType.Default:
-						writer.WriteNull(nameof(Profile));
-						break;
-					case ImageRenderingProfileType.UserDefined:
-						writer.WriteString(nameof(Profile), this.Profile.Name);
-						break;
-				}
-				writer.WriteString(nameof(ImageRenderer), this.ImageRenderer.Format.Name);
-				writer.WriteNumber(nameof(DataOffset), this.DataOffset);
-				writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
-				writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
-				writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
-				writer.WriteString(nameof(ColorSpace), this.ColorSpace.Name);
-				writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
-				writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
-				writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
-				writer.WritePropertyName("EffectiveBits");
-				writer.WriteStartArray();
-				foreach (var n in this.effectiveBits)
-					writer.WriteNumberValue(n);
-				writer.WriteEndArray();
-				writer.WritePropertyName("PixelStrides");
-				writer.WriteStartArray();
-				foreach (var n in this.pixelStrides)
-					writer.WriteNumberValue(n);
-				writer.WriteEndArray();
-				writer.WritePropertyName("RowStrides");
-				writer.WriteStartArray();
-				foreach (var n in this.rowStrides)
-					writer.WriteNumberValue(n);
-				writer.WriteEndArray();
-				if (this.IsRgbGainSupported)
-				{
-					writer.WriteNumber(nameof(RedColorGain), this.RedColorGain);
-					writer.WriteNumber(nameof(GreenColorGain), this.GreenColorGain);
-					writer.WriteNumber(nameof(BlueColorGain), this.BlueColorGain);
-				}
-
-				// filtering parameters
-				if (this.HasBrightnessAdjustment)
-					writer.WriteNumber(nameof(BrightnessAdjustment), this.BrightnessAdjustment);
-				if (this.HasColorAdjustment)
-				{
-					writer.WriteNumber(nameof(BlueColorAdjustment), this.BlueColorAdjustment);
-					writer.WriteNumber(nameof(GreenColorAdjustment), this.GreenColorAdjustment);
-					writer.WriteNumber(nameof(RedColorAdjustment), this.RedColorAdjustment);
-				}
-				if (this.HasContrastAdjustment)
-					writer.WriteNumber(nameof(ContrastAdjustment), this.ContrastAdjustment);
-				if (this.HasHighlightAdjustment)
-					writer.WriteNumber(nameof(HighlightAdjustment), this.HighlightAdjustment);
-				if (this.HasShadowAdjustment)
-					writer.WriteNumber(nameof(ShadowAdjustment), this.ShadowAdjustment);
-				if (this.HasVibranceAdjustment)
-					writer.WriteNumber(nameof(VibranceAdjustment), this.VibranceAdjustment);
-				writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
-
-				// displaying parameters
-				writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProperty));
-				writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
-				writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
-				writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
-				writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
-				writer.WriteNumber(nameof(RequestedImageDisplayScale), this.GetValue(RequestedImageDisplayScaleProperty));
-				writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
-
-				// other state
-				if (this.CustomTitle != null)
-					writer.WriteString(nameof(CustomTitle), this.CustomTitle ?? "");
+				case ImageRenderingProfileType.Default:
+					writer.WriteNull(nameof(Profile));
+					break;
+				case ImageRenderingProfileType.UserDefined:
+					writer.WriteString(nameof(Profile), this.Profile.Name);
+					break;
 			}
+			writer.WriteString(nameof(ImageRenderer), this.ImageRenderer.Format.Name);
+			writer.WriteNumber(nameof(DataOffset), this.DataOffset);
+			writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
+			writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
+			writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
+			writer.WriteString(nameof(ColorSpace), this.ColorSpace.Name);
+			writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
+			writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
+			writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
+			writer.WritePropertyName("EffectiveBits");
+			writer.WriteStartArray();
+			foreach (var n in this.effectiveBits)
+				writer.WriteNumberValue(n);
+			writer.WriteEndArray();
+			writer.WritePropertyName("PixelStrides");
+			writer.WriteStartArray();
+			foreach (var n in this.pixelStrides)
+				writer.WriteNumberValue(n);
+			writer.WriteEndArray();
+			writer.WritePropertyName("RowStrides");
+			writer.WriteStartArray();
+			foreach (var n in this.rowStrides)
+				writer.WriteNumberValue(n);
+			writer.WriteEndArray();
+			if (this.IsRgbGainSupported)
+			{
+				writer.WriteNumber(nameof(RedColorGain), this.RedColorGain);
+				writer.WriteNumber(nameof(GreenColorGain), this.GreenColorGain);
+				writer.WriteNumber(nameof(BlueColorGain), this.BlueColorGain);
+			}
+
+			// filtering parameters
+			if (this.HasBrightnessAdjustment)
+				writer.WriteNumber(nameof(BrightnessAdjustment), this.BrightnessAdjustment);
+			if (this.HasColorAdjustment)
+			{
+				writer.WriteNumber(nameof(BlueColorAdjustment), this.BlueColorAdjustment);
+				writer.WriteNumber(nameof(GreenColorAdjustment), this.GreenColorAdjustment);
+				writer.WriteNumber(nameof(RedColorAdjustment), this.RedColorAdjustment);
+			}
+			if (this.HasContrastAdjustment)
+				writer.WriteNumber(nameof(ContrastAdjustment), this.ContrastAdjustment);
+			if (this.HasHighlightAdjustment)
+				writer.WriteNumber(nameof(HighlightAdjustment), this.HighlightAdjustment);
+			if (this.HasShadowAdjustment)
+				writer.WriteNumber(nameof(ShadowAdjustment), this.ShadowAdjustment);
+			if (this.HasVibranceAdjustment)
+				writer.WriteNumber(nameof(VibranceAdjustment), this.VibranceAdjustment);
+			writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
+
+			// displaying parameters
+			writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProperty));
+			writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
+			writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
+			writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
+			writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
+			writer.WriteNumber(nameof(RequestedImageDisplayScale), this.GetValue(RequestedImageDisplayScaleProperty));
+			writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
+
+			// other state
+			if (this.CustomTitle != null)
+				writer.WriteString(nameof(CustomTitle), this.CustomTitle ?? "");
+			
+			// complete
 			writer.WriteEndObject();
 		}
 
