@@ -25,12 +25,7 @@
 			<ComboBox Name="profileComboBox" Classes="Dialog_ComboBox" Items="{Binding $parent[Window].Profiles}">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
-						<StackPanel Orientation="Horizontal">
-							<Border Height="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}" Margin="{DynamicResource Thickness/SessionControl.ImageRenderingProfile.Icon.Margin}" VerticalAlignment="Center" Width="{DynamicResource Double/SessionControl.ImageRenderingProfile.Icon.Size}">
-								<Image Classes="Icon" Source="{Binding Converter={x:Static appConverters:ImageRenderingProfileIconConverter.Default}}"/>
-							</Border>
-							<TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
-						</StackPanel>
+						<TextBlock Text="{Binding Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
 					</DataTemplate>
 				</ComboBox.ItemTemplate>
 			</ComboBox>

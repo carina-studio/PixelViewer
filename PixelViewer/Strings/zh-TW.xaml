@@ -198,6 +198,7 @@
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">處理程序的私有記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">組態</sys:String>
+	<sys:String x:Key="String/SessionControl.ProfileTypeLabel.FileFormat">檔案格式</sys:String>
 	<sys:String x:Key="String/SessionControl.RedColorGain">紅色增益</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">此分頁的影像繪製記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>

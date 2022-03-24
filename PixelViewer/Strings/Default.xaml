@@ -236,6 +236,7 @@
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">Process private memory usage</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
+	<sys:String x:Key="String/SessionControl.ProfileTypeLabel.FileFormat">File Format</sys:String>
 	<sys:String x:Key="String/SessionControl.RedColorGain">Red gain</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory usage of rendered images by this tab</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>

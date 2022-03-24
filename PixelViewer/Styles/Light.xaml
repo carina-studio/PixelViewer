@@ -18,6 +18,7 @@
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#00bfbf</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#7f000000</Color>
+		<Color x:Key="Color/SessionControl.ProfileTypeLabel.Background.FileFormat">#404040</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#aaaaaa</Color>
 		
 	</Styles.Resources>

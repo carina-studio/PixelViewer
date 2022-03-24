@@ -53,6 +53,7 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.YUV" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.YUV}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Foreground" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Foreground}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ProfileTypeLabel.Background.FileFormat" Color="{DynamicResource Color/SessionControl.ProfileTypeLabel.Background.FileFormat}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
 		<Color x:Key="Color/SessionControl.CustomColorSpaceLabel.Background">#000000</Color>
@@ -64,6 +65,7 @@
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Foreground">#ffffff</Color>
+		<Color x:Key="Color/SessionControl.ProfileTypeLabel.Background.FileFormat">#000000</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
 		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">4</CornerRadius>

@@ -337,6 +337,12 @@ namespace Carina.PixelViewer.Media.Profiles
         }
 
 
+        /// <summary>
+        /// Check whether type of profile is <see cref="ImageRenderingProfileType.FileFormat"/> or not.
+        /// </summary>
+        public bool IsFileFormat { get => this.Type == ImageRenderingProfileType.FileFormat; }
+
+
         // Check upgrading state.
         public bool IsUpgradedWhenLoading { get; private set; }
 
