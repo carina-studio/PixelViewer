@@ -266,7 +266,15 @@
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="brightnessAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="brightnessAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #brightnessAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="brightnessAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="brightnessAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #brightnessAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Contrast -->
@@ -275,7 +283,15 @@
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="contrastAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #contrastAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="contrastAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #contrastAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Highlight -->
@@ -284,7 +300,15 @@
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding HighlightAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="highlightAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="highlightAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #highlightAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="highlightAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="highlightAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #highlightAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Shadow -->
@@ -293,7 +317,15 @@
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ShadowAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="shadowAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="shadowAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #shadowAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="shadowAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="shadowAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #shadowAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 
 											</StackPanel>
 										</DockPanel>
@@ -333,40 +365,91 @@
 														<Setter Property="TickFrequency" Value="0.01"/>
 													</Style>
 												</StackPanel.Styles>
+
+												<!-- Red -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="redColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #redColorAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="redColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #redColorAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
+
+												<!-- Green -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="greenColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #greenColorAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="greenColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #greenColorAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
+
+												<!-- Blue -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="blueColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #blueColorAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="blueColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #blueColorAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
+
+												<!-- Saturation -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Saturation}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding SaturationAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="saturationAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #saturationAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="saturationAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #saturationAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
 												<Separator Classes="Dialog_Separator_Small"/>
+
+												<!-- Vibrance -->
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Vibrance}" VerticalAlignment="Center"/>
 													<Separator Classes="Dialog_Separator_Small"/>
 													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding VibranceAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
 												</StackPanel>
-												<Slider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
+												<Grid ColumnDefinitions="Auto,*,Auto">
+													<RepeatButton Name="vibranceAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #vibranceAdjustmentSlider}">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+													</RepeatButton>
+													<Slider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
+													<RepeatButton Name="vibranceAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValue}" CommandParameter="{Binding #vibranceAdjustmentSlider}" Grid.Column="2">
+														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+													</RepeatButton>
+												</Grid>
+
 											</StackPanel>
 										</DockPanel>
 									</Border>

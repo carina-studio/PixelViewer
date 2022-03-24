@@ -167,6 +167,8 @@
 	<sys:String x:Key="String/SessionControl.EffectiveBits">有效位元數</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">自動評估</sys:String>
 	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">套用濾鏡中…</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">遞減</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">遞增</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">調整至視窗大小 (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">畫面資料間格 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">灰階濾鏡</sys:String>

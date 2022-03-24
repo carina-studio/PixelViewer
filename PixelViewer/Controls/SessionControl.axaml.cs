@@ -44,6 +44,9 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Constants.
+		const int BrightnessAdjustmentGroup = 1;
+		const int ColorAdjustmentGroup = 2;
+		const int ContrastAdjustmentGroup = 3;
 		const int HidePanelsByImageViewerSizeDelay = 500;
 		const int StopUsingSmallRenderedImageDelay = 1000;
 
@@ -165,16 +168,40 @@ namespace Carina.PixelViewer.Controls
 			AvaloniaXamlLoader.Load(this);
 
 			// setup controls
-			this.FindControl<Slider>("blueColorAdjustmentSlider").AsNonNull().Also(it =>
+			void SetupFilterParamsSliderAndButtons(string name, int group)
 			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-			});
-			this.FindControl<Slider>("brightnessAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
-			});
+				var pointerPressedHandler = group switch
+				{
+					BrightnessAdjustmentGroup => (EventHandler<PointerPressedEventArgs>)this.OnPointerPressedOnBrightnessAdjustmentUI,
+					ColorAdjustmentGroup => this.OnPointerPressedOnColorAdjustmentUI,
+					ContrastAdjustmentGroup => this.OnPointerPressedOnContrastAdjustmentUI,
+					_ => throw new ArgumentException(),
+				};
+				var pointerReleasedHandler = group switch
+				{
+					BrightnessAdjustmentGroup => (EventHandler<PointerReleasedEventArgs>)this.OnPointerReleasedOnBrightnessAdjustmentUI,
+					ColorAdjustmentGroup => this.OnPointerReleasedOnColorAdjustmentUI,
+					ContrastAdjustmentGroup => this.OnPointerReleasedOnContrastAdjustmentUI,
+					_ => throw new ArgumentException(),
+				};
+				this.FindControl<Control>($"{name}DecreaseButton")?.Also(it =>
+				{
+					it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
+					it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
+				});
+				this.FindControl<Control>($"{name}IncreaseButton")?.Also(it =>
+				{
+					it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
+					it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
+				});
+				this.FindControl<Slider>($"{name}Slider")?.Also(it =>
+				{
+					it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
+					it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
+				});
+			}
+			SetupFilterParamsSliderAndButtons("blueColorAdjustment", ColorAdjustmentGroup);
+			SetupFilterParamsSliderAndButtons("brightnessAdjustment", BrightnessAdjustmentGroup);
 			this.brightnessAndContrastAdjustmentButton = this.FindControl<ToggleButton>(nameof(brightnessAndContrastAdjustmentButton)).AsNonNull();
 			this.brightnessAndContrastAdjustmentPopup = this.FindControl<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).AsNonNull().Also(it =>
 			{
@@ -210,11 +237,7 @@ namespace Carina.PixelViewer.Controls
 			});
 			this.colorAdjustmentPopupBorder = this.FindControl<Border>(nameof(colorAdjustmentPopupBorder)).AsNonNull();
 			this.colorSpaceComboBox = this.FindControl<ComboBox>(nameof(colorSpaceComboBox)).AsNonNull();
-			this.FindControl<Slider>("contrastAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnContrastAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnContrastAdjustmentUI, RoutingStrategies.Tunnel);
-			});
+			SetupFilterParamsSliderAndButtons("contrastAdjustment", ContrastAdjustmentGroup);
 			this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
 			this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 			{
@@ -227,16 +250,8 @@ namespace Carina.PixelViewer.Controls
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 			});
-			this.FindControl<Slider>("greenColorAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-			});
-			this.FindControl<Slider>("highlightAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
-			});
+			SetupFilterParamsSliderAndButtons("greenColorAdjustment", ColorAdjustmentGroup);
+			SetupFilterParamsSliderAndButtons("highlightAdjustment", BrightnessAdjustmentGroup);
 			this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
 			this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
 			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull().Also(it =>
@@ -299,16 +314,8 @@ namespace Carina.PixelViewer.Controls
 				it.MenuClosed += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
 				it.MenuOpened += (_, e) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 			});
-			this.FindControl<Slider>("redColorAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-			});
-			this.FindControl<Slider>("saturationAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-			});
+			SetupFilterParamsSliderAndButtons("redColorAdjustment", ColorAdjustmentGroup);
+			SetupFilterParamsSliderAndButtons("saturationAdjustment", ColorAdjustmentGroup);
 			this.renderingParamsPanelColumn = this.FindControl<Grid>("workingAreaGrid").AsNonNull().ColumnDefinitions.Last().Also(column =>
 			{
 				column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>((_) =>
@@ -317,19 +324,11 @@ namespace Carina.PixelViewer.Controls
 				}));
 			});
 			this.renderingParamsPanelScrollViewer = this.FindControl<ScrollViewer>(nameof(renderingParamsPanelScrollViewer)).AsNonNull();
-			this.FindControl<Slider>("shadowAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnBrightnessAdjustmentUI, RoutingStrategies.Tunnel);
-			});
+			SetupFilterParamsSliderAndButtons("shadowAdjustment", BrightnessAdjustmentGroup);
 #if DEBUG
 			this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
 #endif
-			this.FindControl<Slider>("vibranceAdjustmentSlider").AsNonNull().Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, this.OnPointerPressedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, this.OnPointerReleasedOnColorAdjustmentUI, RoutingStrategies.Tunnel);
-			});
+			SetupFilterParamsSliderAndButtons("vibranceAdjustment", ColorAdjustmentGroup);
 
 			// load resources
 			if (this.Application.TryGetResource<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels", out var doubleRes))
@@ -491,6 +490,14 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Decrease value of given slider.
+		void DecreaseSliderValue(Slider slider)
+		{
+			var value = Math.Max(slider.Minimum, slider.Value - slider.TickFrequency);
+			slider.Value = Math.Abs(value) <= 0.001 ? 0 : value;
+		}
+
+
 		/// <summary>
 		/// Drop data to this control.
 		/// </summary>
@@ -570,6 +577,14 @@ namespace Carina.PixelViewer.Controls
 
 		// Interpolation mode for rendered image.
 		BitmapInterpolationMode EffectiveRenderedImageInterpolationMode { get => this.GetValue<BitmapInterpolationMode>(EffectiveRenderedImageInterpolationModeProperty); }
+
+
+		// Increase value of given slider.
+		void IncreaseSliderValue(Slider slider)
+		{
+			var value = Math.Min(slider.Maximum, slider.Value + slider.TickFrequency);
+			slider.Value = Math.Abs(value) <= 0.001 ? 0 : value;
+		}
 
 
 		// Check whether image viewer is scrollable in current state or not.

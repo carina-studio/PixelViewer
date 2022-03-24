@@ -205,6 +205,8 @@
 	<sys:String x:Key="String/SessionControl.EffectiveBits">Effective bits</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
 	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">Applying filters…</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">Decrease</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">Increase</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding between frames (bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">Grayscale filter</sys:String>
