@@ -117,6 +117,7 @@
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer Pattern (12-bit, MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer Pattern (16-bit)</sys:String>
 	<sys:String x:Key="String/ImageFormat.I420">I420 (YUV420)</sys:String>
+	<sys:String x:Key="String/ImageFormat.JPEG">JPEG/JFIF</sys:String>
 	<sys:String x:Key="String/ImageFormat.NV12">NV12 (YUV420sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.NV21">NV21 (YUV420sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P010">P010 (10-bit YUV420p)</sys:String>
@@ -137,6 +138,7 @@
 	<!-- ImageFormatCategory -->
 	<sys:String x:Key="String/ImageFormatCategory.ARGB">ARGB</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.Bayer">Bayer Pattern</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Compressed">Compressed</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.Luminance">Luminance</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.RGB">RGB</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.Unclassified">Unclassified</sys:String>

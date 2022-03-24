@@ -222,6 +222,10 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		Unclassified,
 		/// <summary>
+		/// Compressed.
+		/// </summary>
+		Compressed,
+		/// <summary>
 		/// Luminance.
 		/// </summary>
 		Luminance,

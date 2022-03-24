@@ -24,17 +24,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
-		// Create default image plane options.
+		/// <inheritdoc/>
 		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new ImagePlaneOptions[]{
 			new ImagePlaneOptions(this.bytesPerPixel, width * this.bytesPerPixel)
 		};
 
 
-		// Evaluate pixel count.
+		/// <inheritdoc/>
 		public override int EvaluatePixelCount(IImageDataSource source) => (int)(source.Size / this.bytesPerPixel);
 
 
-		// Evaluate source data size.
+		/// <inheritdoc/>
 		public override long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions)
 		{
 			if (width <= 0 || height <= 0)
