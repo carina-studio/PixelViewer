@@ -343,6 +343,16 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Create <see cref="ColorSpace"/> instance from <see cref="SKColorSpace"/>.
+        /// </summary>
+        /// <param name="customName">Custom name.</param>
+        /// <param name="skColorSpace"><see cref="SKColorSpace"/>.</param>
+        /// <returns><see cref="ColorSpace"/>.</returns>
+        public static ColorSpace CreateFromSkiaColorSpace(string? customName, SKColorSpace skColorSpace) =>
+            new ColorSpace(GenerateRandomName(), customName, skColorSpace, false);
+
+
+        /// <summary>
         /// Convert from XYZ D50 color space.
         /// </summary>
         /// <param name="x">X.</param>
@@ -841,6 +851,13 @@ namespace Carina.PixelViewer.Media
             var labB = 200 * (Convert(y) - Convert(z / 0.825188)); // [-128, 128]
             return (labL / 100, labA / 128, labB / 128);
         }
+
+
+        /// <summary>
+        /// Convert to <see cref="SKColorSpace"/>.
+        /// </summary>
+        /// <returns><see cref="SKColorSpace"/>.</returns>
+        public SKColorSpace ToSkiaColorSpace() => this.skiaColorSpace;
 
 
         /// <inheritdoc/>

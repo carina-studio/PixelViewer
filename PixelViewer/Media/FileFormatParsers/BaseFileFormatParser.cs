@@ -55,7 +55,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 if (cancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException();
-                throw;
+                return null;
             }
 
             // parse
@@ -67,7 +67,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 if (cancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException();
-                throw;
+                return null;
             }
             finally
             {

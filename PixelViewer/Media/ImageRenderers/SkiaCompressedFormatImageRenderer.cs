@@ -28,27 +28,38 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         }
 
 
+        /// <summary>
+        /// Called to check file header.
+        /// </summary>
+        /// <param name="source">Source of image.</param>
+        /// <param name="imageStream">Stream to read image data.</param>
+        /// <returns>True if header of file is correct.</returns>
+        protected abstract bool OnCheckFileHeader(IImageDataSource source, Stream imageStream);
+
+
         /// <inheritdoc/>
         protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
         {
-            // check buffer size
+            // check file header first to prevent decoding image
             var position = imageStream.Position;
-            var imageInfo = new SKManagedStream(imageStream, false).Use(it =>
-                SKBitmap.DecodeBounds(it));
-            imageStream.Position = position;
-            if (imageInfo.IsEmpty)
+            if (!this.OnCheckFileHeader(source, imageStream))
                 throw new ArgumentException("Unsupported format.");
-            if (imageInfo.Width != bitmapBuffer.Width || imageInfo.Height != bitmapBuffer.Height)
-                throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {imageInfo.Width}x{imageInfo.Height} expected.");
-            
+            imageStream.Position = position;
+
             // create codec
+            // [Workaround] Read to memory first to prevent unrecoverable crash on some images
+            // Please refer to https://github.com/mono/SkiaSharp/issues/1551
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
-            using var codec = SKCodec.Create(imageStream, out var codecResult);
-            if (codecResult != SKCodecResult.Success || codec == null)
+            using var codec = SKData.Create(imageStream).Use(it => 
+                SKCodec.Create(it));
+            if (codec == null)
                 throw new ArgumentException("Unable to create codec.");
             if (codec.EncodedFormat != this.encodedFormat)
                 throw new ArgumentException($"Incorrect format: {codec.EncodedFormat}, {this.encodedFormat} expected.");
+            var imageInfo = codec.Info;
+            if (imageInfo.Width != bitmapBuffer.Width || imageInfo.Height != bitmapBuffer.Height)
+                throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {imageInfo.Width}x{imageInfo.Height} expected.");
             
             // decode
             if (cancellationToken.IsCancellationRequested)
@@ -120,5 +131,29 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
         /// <inheritdoc/>
         public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+    }
+
+
+    /// <summary>
+    /// <see cref="IImageRenderer"/> for JPEG format.
+    /// </summary>
+    class JpegImageRenderer : SkiaCompressedFormatImageRenderer
+    {
+        /// <summary>
+        /// Initialize new <see cref="JpegImageRenderer"/> instance.
+        /// </summary>
+        public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), new string[] { "JPEG" }), SkiaSharp.SKEncodedImageFormat.Jpeg)
+        { }
+
+
+        /// <inheritdoc/>
+        protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream)
+        {
+            var buffer = new byte[3];
+            return imageStream.Read(buffer, 0, 3) == 3
+                && buffer[0] == 0xff
+                && buffer[1] == 0xd8
+                && buffer[2] == 0xff;
+        }
     }
 }
