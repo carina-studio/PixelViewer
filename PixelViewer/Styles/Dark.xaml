@@ -16,7 +16,7 @@
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.RGB">#0085e5</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#007f7f</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#ffffff</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#7fffffff</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#606060</Color>
 		
 	</Styles.Resources>

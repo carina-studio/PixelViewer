@@ -66,7 +66,7 @@
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Foreground">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
-		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">2</CornerRadius>
+		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">4</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width">20</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
@@ -86,8 +86,8 @@
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Padding">3</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Border">1</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">3,0,0,0</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">2</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">5,0,0,0</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">5,2,5,2</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
