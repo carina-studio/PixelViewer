@@ -254,6 +254,11 @@
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="brightnessAndContrastAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
+										<Border.Transitions>
+											<Transitions>
+												<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/Animation.Fast}"/>
+											</Transitions>
+										</Border.Transitions>
 										<DockPanel>
 											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
 												<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}" HorizontalAlignment="Center"/>
@@ -350,6 +355,11 @@
 								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="colorAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
+										<Border.Transitions>
+											<Transitions>
+												<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/Animation.Fast}"/>
+											</Transitions>
+										</Border.Transitions>
 										<DockPanel>
 											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">

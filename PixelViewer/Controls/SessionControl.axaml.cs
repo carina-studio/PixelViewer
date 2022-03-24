@@ -48,6 +48,7 @@ namespace Carina.PixelViewer.Controls
 		const int ColorAdjustmentGroup = 2;
 		const int ContrastAdjustmentGroup = 3;
 		const int HidePanelsByImageViewerSizeDelay = 500;
+		const int ResetPointerPressedOnFilterParamsUIDelay = 1000;
 		const int StopUsingSmallRenderedImageDelay = 1000;
 
 
@@ -116,6 +117,9 @@ namespace Carina.PixelViewer.Controls
 		readonly HashSet<Avalonia.Input.Key> pressedKeys = new();
 		readonly ColumnDefinition renderingParamsPanelColumn;
 		readonly ScrollViewer renderingParamsPanelScrollViewer;
+		readonly ScheduledAction resetPointerPressedOnBrightnessAdjustmentUIAction;
+		readonly ScheduledAction resetPointerPressedOnColorAdjustmentUIAction;
+		readonly ScheduledAction resetPointerPressedOnContrastAdjustmentUIAction;
 		readonly ScheduledAction stopUsingSmallRenderedImageAction;
 		Vector? targetImageViewportCenter;
 		readonly ScheduledAction updateEffectiveRenderedImageAction;
@@ -206,7 +210,12 @@ namespace Carina.PixelViewer.Controls
 			this.brightnessAndContrastAdjustmentPopup = this.FindControl<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).AsNonNull().Also(it =>
 			{
 				it.PlacementTarget = this.brightnessAndContrastAdjustmentButton;
-				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = false);
+				it.Closed += (_, e) => 
+				{
+					this.resetPointerPressedOnBrightnessAdjustmentUIAction?.ExecuteIfScheduled();
+					this.resetPointerPressedOnContrastAdjustmentUIAction?.ExecuteIfScheduled();
+					this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = false);
+				};
 				it.Opened += (_, e) => this.SynchronizationContext.Post(() => 
 				{
 					this.brightnessAndContrastAdjustmentButton.IsChecked = true;
@@ -223,7 +232,11 @@ namespace Carina.PixelViewer.Controls
 			this.colorAdjustmentPopup = this.FindControl<Popup>(nameof(colorAdjustmentPopup)).AsNonNull().Also(it =>
 			{
 				it.PlacementTarget = this.colorAdjustmentButton;
-				it.Closed += (_, e) => this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = false);
+				it.Closed += (_, e) => 
+				{
+					this.resetPointerPressedOnColorAdjustmentUIAction?.ExecuteIfScheduled();
+					this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = false);
+				};
 				it.Opened += (_, e) => this.SynchronizationContext.Post(() => 
 				{
 					this.colorAdjustmentButton.IsChecked = true;
@@ -359,6 +372,12 @@ namespace Carina.PixelViewer.Controls
 				else
 					this.keepHistogramsVisible = false;
 			});
+			this.resetPointerPressedOnBrightnessAdjustmentUIAction = new ScheduledAction(() =>
+				this.SetValue<bool>(IsPointerPressedOnBrightnessAdjustmentUIProperty, false));
+			this.resetPointerPressedOnColorAdjustmentUIAction = new ScheduledAction(() =>
+				this.SetValue<bool>(IsPointerPressedOnColorAdjustmentUIProperty, false));
+			this.resetPointerPressedOnContrastAdjustmentUIAction = new ScheduledAction(() =>
+				this.SetValue<bool>(IsPointerPressedOnContrastAdjustmentUIProperty, false));
 			this.stopUsingSmallRenderedImageAction = new ScheduledAction(() =>
 			{
 				if (this.useSmallRenderedImage)
@@ -1011,39 +1030,48 @@ namespace Carina.PixelViewer.Controls
 		void OnPointerPressedOnBrightnessAdjustmentUI(object? sender, PointerEventArgs e)
 		{
 			if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+			{
+				this.resetPointerPressedOnBrightnessAdjustmentUIAction.Cancel();
 				this.SetValue<bool>(IsPointerPressedOnBrightnessAdjustmentUIProperty, true);
+			}
 		}
-
-
-		// Called when pointer released on brightness adjustment UI.
-		void OnPointerReleasedOnBrightnessAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
-			this.SetValue<bool>(IsPointerPressedOnBrightnessAdjustmentUIProperty, false);
 		
 
 		// Called when pointer pressed on color adjustment UI.
 		void OnPointerPressedOnColorAdjustmentUI(object? sender, PointerEventArgs e)
 		{
 			if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+			{
+				this.resetPointerPressedOnColorAdjustmentUIAction.Cancel();
 				this.SetValue<bool>(IsPointerPressedOnColorAdjustmentUIProperty, true);
+			}
 		}
 
-
-		// Called when pointer released on color adjustment UI.
-		void OnPointerReleasedOnColorAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
-			this.SetValue<bool>(IsPointerPressedOnColorAdjustmentUIProperty, false);
-		
 
 		// Called when pointer pressed on contrast adjustment UI.
 		void OnPointerPressedOnContrastAdjustmentUI(object? sender, PointerEventArgs e)
 		{
 			if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
+			{
+				this.resetPointerPressedOnContrastAdjustmentUIAction.Cancel();
 				this.SetValue<bool>(IsPointerPressedOnContrastAdjustmentUIProperty, true);
+			}
 		}
 
 
+		// Called when pointer released on brightness adjustment UI.
+		void OnPointerReleasedOnBrightnessAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
+			this.resetPointerPressedOnBrightnessAdjustmentUIAction.Reschedule(ResetPointerPressedOnFilterParamsUIDelay);
+
+
+		// Called when pointer released on color adjustment UI.
+		void OnPointerReleasedOnColorAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
+			this.resetPointerPressedOnColorAdjustmentUIAction.Reschedule(ResetPointerPressedOnFilterParamsUIDelay);
+		
+
 		// Called when pointer released on contrast adjustment UI.
 		void OnPointerReleasedOnContrastAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
-			this.SetValue<bool>(IsPointerPressedOnContrastAdjustmentUIProperty, false);
+			this.resetPointerPressedOnContrastAdjustmentUIAction.Reschedule(ResetPointerPressedOnFilterParamsUIDelay);
 
 
 		// Called when changing mouse wheel.
