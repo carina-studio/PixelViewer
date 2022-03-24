@@ -147,13 +147,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         /// <inheritdoc/>
-        protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream)
-        {
-            var buffer = new byte[3];
-            return imageStream.Read(buffer, 0, 3) == 3
-                && buffer[0] == 0xff
-                && buffer[1] == 0xd8
-                && buffer[2] == 0xff;
-        }
+        protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
+            FileFormatParsers.JpegFileFormatParser.CheckFileHeader(imageStream);
     }
 }

@@ -38,7 +38,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         /// </summary>
         /// <param name="stream">Stream to read image data.</param>
         /// <returns>True if header of file is correct.</returns>
-        protected abstract bool CheckFileHeader(Stream stream);
+        protected abstract bool OnCheckFileHeader(Stream stream);
 
 
         /// <inheritdoc/>
@@ -49,7 +49,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 // check file header first to prevent decoding image
                 var position = stream.Position;
-                if (!this.CheckFileHeader(stream))
+                if (!this.OnCheckFileHeader(stream))
                     return null;
                 stream.Position = position;
 
@@ -93,8 +93,12 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         { }
 
 
-        // Check file header.
-        protected override bool CheckFileHeader(Stream stream)
+        /// <summary>
+        /// Check whether header of file represents JPEG/JFIF or not.
+        /// </summary>
+        /// <param name="stream">Stream to read image data.</param>
+        /// <returns>True if header represents JPEG/JFIF.</returns>
+        public static bool CheckFileHeader(Stream stream)
         {
             var buffer = new byte[3];
             return stream.Read(buffer, 0, 3) == 3
@@ -102,5 +106,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 && buffer[1] == 0xd8
                 && buffer[2] == 0xff;
         }
+
+
+        // Check file header.
+        protected override bool OnCheckFileHeader(Stream stream) =>
+            CheckFileHeader(stream);
     }
 }
