@@ -215,7 +215,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, string? customName, SKColorSpace colorSpace, bool isBuiltIn)
+        ColorSpace(string name, string? customName, SKColorSpace colorSpace, bool isBuiltIn, bool isEmbeddedInFile = false)
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
@@ -223,6 +223,7 @@ namespace Carina.PixelViewer.Media
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
             this.IsBuiltIn = isBuiltIn;
+            this.IsEmbeddedInFile = isEmbeddedInFile;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
             this.matrixFromXyz = Quantize(this.skiaColorSpaceXyz.Invert());
@@ -347,9 +348,10 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="customName">Custom name.</param>
         /// <param name="skColorSpace"><see cref="SKColorSpace"/>.</param>
+        /// <param name="isEmbeddedInFile">Whether color space is embedded in file or not.</param>
         /// <returns><see cref="ColorSpace"/>.</returns>
-        public static ColorSpace CreateFromSkiaColorSpace(string? customName, SKColorSpace skColorSpace) =>
-            new ColorSpace(GenerateRandomName(), customName, skColorSpace, false);
+        public static ColorSpace FromSkiaColorSpace(string? customName, SKColorSpace skColorSpace, bool isEmbeddedInFile) =>
+            new ColorSpace(GenerateRandomName(), customName, skColorSpace, false, isEmbeddedInFile);
 
 
         /// <summary>
@@ -466,6 +468,12 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Check whether color space is parsed from data embedded in file or not.
+        /// </summary>
+        public bool IsEmbeddedInFile { get; }
+
+
+        /// <summary>
         /// Load color space from file.
         /// </summary>
         /// <param name="fileName">File name.</param>
@@ -534,7 +542,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Load color space from ICC profile.
-        static ColorSpace LoadFromIccProfile(string? fileName, Stream stream)
+        static ColorSpace LoadFromIccProfile(string? fileName, Stream stream, bool isEmbeddedInFile)
         {
             // read header
             var header = new byte[128];
@@ -627,8 +635,23 @@ namespace Carina.PixelViewer.Media
                 iccName = Path.GetFileName(fileName);
 
             // create color space
-            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, false);
+            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, false, isEmbeddedInFile);
         }
+
+
+        /// <summary>
+        /// Load ICC profile and create <see cref"ColorSpace"/>.
+        /// </summary>
+        /// <param name="stream">Stream to read ICC profile.</param>
+        /// <param name="isEmbeddedInFile">Whether ICC profile is embedded in file or not.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of loading ICC profile.</returns>
+        public static Task<ColorSpace> LoadFromIccProfileAsync(Stream stream, bool isEmbeddedInFile, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            return LoadFromIccProfile((stream as FileStream)?.Name, stream, isEmbeddedInFile);
+        });
 
 
         /// <summary>
@@ -647,7 +670,7 @@ namespace Carina.PixelViewer.Media
                     throw new TaskCanceledException();
                 throw new IOException($"Unable to open file '{fileName}'.");
             }
-            return stream.Use(it => LoadFromIccProfile(fileName, it));
+            return stream.Use(it => LoadFromIccProfile(fileName, it, false));
         });
         
 

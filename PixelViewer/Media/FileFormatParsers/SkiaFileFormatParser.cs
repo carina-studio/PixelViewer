@@ -4,7 +4,6 @@ using CarinaStudio;
 using SkiaSharp;
 using System;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -41,14 +40,22 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         protected abstract bool OnCheckFileHeader(Stream stream);
 
 
+        /// <summary>
+        /// Called to seek stream to position of embedded ICC profile.
+        /// </summary>
+        /// <param name="stream">Stream to read image data.</param>
+        /// <returns>True if seeking successfully.</returns>
+        protected virtual bool OnSeekToIccProfile(Stream stream) => false;
+
+
         /// <inheritdoc/>
         protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
         {
             // decode image info
+            var position = stream.Position;
             using var codec = await Task.Run(() =>
             {
                 // check file header first to prevent decoding image
-                var position = stream.Position;
                 if (!this.OnCheckFileHeader(stream))
                     return null;
                 stream.Position = position;
@@ -63,13 +70,39 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             if (codec == null || codec.EncodedFormat != this.encodedFormat)
                 return null;
             
+            // load ICC profile
+            var colorSpaceFromIccProfile = (ColorSpace?)null;
+            var hasIccProfile = false;
+            await Task.Run(() => 
+            {
+                try
+                {
+                    stream.Position = position;
+                    hasIccProfile = this.OnSeekToIccProfile(stream);
+                }
+                catch
+                { }
+            });
+            if (hasIccProfile)
+            {
+                try
+                {
+                    colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, true, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    if (ex is TaskCanceledException)
+                        throw;
+                }
+            }
+            
             // create profile
             var profile = new ImageRenderingProfile(this.FileFormat, this.imageRenderer);
-            profile.ColorSpace = codec.Info.ColorSpace.Let(it =>
+            profile.ColorSpace = colorSpaceFromIccProfile ?? codec.Info.ColorSpace.Let(it =>
             {
                 if (it.IsSrgb)
                     return ColorSpace.Srgb;
-                var colorSpace = ColorSpace.CreateFromSkiaColorSpace("Embedded ICC profile", it);
+                var colorSpace = ColorSpace.FromSkiaColorSpace(null, it, true);
                 if (ColorSpace.TryGetColorSpace(colorSpace, out var existingColorSpace))
                     return existingColorSpace;
                 return colorSpace;
@@ -78,38 +111,5 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             profile.Height = codec.Info.Height;
             return profile;
         }
-    }
-
-
-    /// <summary>
-    /// <see cref="IFileFormatParser"/> to parse JPEG file.
-    /// </summary>
-    class JpegFileFormatParser : SkiaFileFormatParser
-    {
-        /// <summary>
-        /// Initialize new <see cref="JpegFileFormatParser"/> instance.
-        /// </summary>
-        public JpegFileFormatParser() : base(FileFormats.Jpeg, SKEncodedImageFormat.Jpeg, ImageRenderers.ImageRenderers.All.First(it => it is JpegImageRenderer))
-        { }
-
-
-        /// <summary>
-        /// Check whether header of file represents JPEG/JFIF or not.
-        /// </summary>
-        /// <param name="stream">Stream to read image data.</param>
-        /// <returns>True if header represents JPEG/JFIF.</returns>
-        public static bool CheckFileHeader(Stream stream)
-        {
-            var buffer = new byte[3];
-            return stream.Read(buffer, 0, 3) == 3
-                && buffer[0] == 0xff
-                && buffer[1] == 0xd8
-                && buffer[2] == 0xff;
-        }
-
-
-        // Check file header.
-        protected override bool OnCheckFileHeader(Stream stream) =>
-            CheckFileHeader(stream);
     }
 }
