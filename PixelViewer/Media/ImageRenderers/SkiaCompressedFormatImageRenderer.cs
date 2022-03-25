@@ -64,7 +64,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             // decode
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
-            imageInfo.ColorSpace = SKColorSpace.CreateSrgb();
             imageInfo.ColorType = bitmapBuffer.Format switch
             {
                 BitmapFormat.Bgra32 => SKColorType.Bgra8888,
