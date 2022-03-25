@@ -49,7 +49,7 @@ namespace Carina.PixelViewer.Media
                 {
                     var m1 = this.fromColorSpace.skiaColorSpace.ToColorSpaceXyz();
                     var m2 = this.toColorSpace.skiaColorSpace.ToColorSpaceXyz().Invert();
-                    this.matrix = Quantize(SKColorSpaceXyz.Concat(m1, m2));
+                    this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
                 }
                 else
                     this.matrix = new long[0];
