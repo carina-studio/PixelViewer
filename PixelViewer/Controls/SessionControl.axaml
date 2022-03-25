@@ -793,12 +793,21 @@
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
 						<Panel>
 							<asControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
-							<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
+							<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" IsVisible="{Binding IsColorSpaceManagementEnabled}" Items="{Binding ColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
 										<Grid ColumnDefinitions="*,Auto">
 											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
-											<Border Background="{DynamicResource Brush/SessionControl.CustomColorSpaceLabel.Background}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding !IsBuiltIn}" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsEmbeddedInFile}" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+												<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.EmbeddedInFile}"/>
+											</Border>
+											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+												<Border.IsVisible>
+													<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+														<Binding Path="!IsBuiltIn"/>
+														<Binding Path="!IsEmbeddedInFile"/>
+													</MultiBinding>
+												</Border.IsVisible>
 												<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
 											</Border>
 										</Grid>

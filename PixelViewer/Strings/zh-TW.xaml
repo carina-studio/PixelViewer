@@ -60,6 +60,7 @@
 	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 525行 (SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 625行 (SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 搭配 PQ)</sys:String>
+	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">內嵌色彩空間</sys:String>
 	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 搭配 HLG)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB (無 Gamma 轉換)</sys:String>
 	
@@ -153,6 +154,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">自然飽和度</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">色彩空間</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">已停用色彩空間管理，點一下以開啟選項…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.EmbeddedInFile">檔案內嵌</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">是否要儲存套用濾鏡後的影像？</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">轉換色彩空間中…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">複製檔案名稱</sys:String>

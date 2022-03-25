@@ -88,6 +88,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 try
                 {
                     colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, true, cancellationToken);
+                    if (ColorSpace.TryGetColorSpace(colorSpaceFromIccProfile, out var existingColorSpace))
+                        colorSpaceFromIccProfile = existingColorSpace;
                 }
                 catch (Exception ex)
                 {

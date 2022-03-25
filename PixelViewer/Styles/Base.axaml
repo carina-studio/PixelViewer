@@ -44,9 +44,11 @@
 		<Thickness x:Key="Thickness/MainWindow.TabItem.ToolTip.Padding">5</Thickness>
 
 		<!-- SessionControl -->
-		<SolidColorBrush x:Key="Brush/SessionControl.CustomColorSpaceLabel.Background" Color="{DynamicResource Color/SessionControl.CustomColorSpaceLabel.Background}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.Custom" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.Custom}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Compressed" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Luminance" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.RGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.RGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Unclassified" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified}"/>
@@ -56,9 +58,11 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.ProfileTypeLabel.Background.FileFormat" Color="{DynamicResource Color/SessionControl.ProfileTypeLabel.Background.FileFormat}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
-		<Color x:Key="Color/SessionControl.CustomColorSpaceLabel.Background">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.RGB">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>

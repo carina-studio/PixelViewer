@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Carina.PixelViewer.Media;
@@ -13,6 +14,7 @@ using CarinaStudio.Animation;
 using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
+using CarinaStudio.Data.Converters;
 using CarinaStudio.IO;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
@@ -23,6 +25,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -709,6 +712,22 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomTo = new MutableObservableBoolean();
+		readonly SortedObservableList<ColorSpace> colorSpaces = new((lhs, rhs) =>
+		{
+			if (lhs == null)
+				return rhs == null ? 0 : -1;
+			if (rhs == null)
+				return 1;
+			if (lhs.IsEmbeddedInFile)
+				return rhs.IsEmbeddedInFile ? string.Compare(lhs.Name, rhs.Name) : -1;
+			if (rhs.IsEmbeddedInFile)
+				return 1;
+			if (lhs.IsBuiltIn)
+				return rhs.IsBuiltIn ? string.Compare(lhs.Name, rhs.Name) : -1;
+			if (rhs.IsBuiltIn)
+				return 1;
+			return string.Compare(lhs.Name, rhs.Name);
+		});
 		readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
 		ImageRenderingProfile? fileFormatProfile;
 		readonly ScheduledAction filterImageAction;
@@ -935,6 +954,12 @@ namespace Carina.PixelViewer.ViewModels
 			// select default byte ordering
 			this.SetValue(ByteOrderingProperty, this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering));
 
+			// attach to color spaces
+			this.ColorSpaces = this.colorSpaces.AsReadOnly();
+			this.colorSpaces.AddAll(Media.ColorSpace.AllColorSpaces);
+			(Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
+				it.CollectionChanged += this.OnAllColorSpacesChanged);
+
 			// select default YUV to RGB converter
 			if (YuvToBgraConverter.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion), out var converter))
 				this.SetValue(YuvToBgraConverterProperty, converter);
@@ -1147,10 +1172,15 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(YuvToBgraConverterProperty, profile.YuvToBgraConverter);
 
 				// color space
+				this.colorSpaces.RemoveAll(it => it.IsEmbeddedInFile);
 				if (profile.Type != ImageRenderingProfileType.UserDefined && this.IsYuvToBgraConverterSupported)
 					this.SetValue(ColorSpaceProperty, this.YuvToBgraConverter.ColorSpace);
 				else
+				{
+					if (profile.ColorSpace.IsEmbeddedInFile)
+						this.colorSpaces.Add(profile.ColorSpace);
 					this.SetValue(ColorSpaceProperty, profile.ColorSpace);
+				}
 
 				// demosaicing
 				this.SetValue(DemosaicingProperty, profile.Demosaicing);
@@ -1480,6 +1510,12 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		/// <summary>
+		/// Get available color spaces.
+		/// </summary>
+		public IList<ColorSpace> ColorSpaces { get; }
+
+
 		// Compare profiles.
 		static int CompareProfiles(ImageRenderingProfile? x, ImageRenderingProfile? y)
 		{
@@ -1609,6 +1645,10 @@ namespace Carina.PixelViewer.ViewModels
 			((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged -= this.OnUserDefinedProfilesChanged;
 			foreach (var profile in this.profiles)
 				profile.PropertyChanged -= this.OnProfilePropertyChanged;
+			
+			// detach from color spaces
+			(Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
+				it.CollectionChanged -= this.OnAllColorSpacesChanged);
 
 			// detach from shared rendered images memory usage
 			this.sharedRenderedImagesMemoryUsageObserverToken.Dispose();
@@ -2664,6 +2704,21 @@ namespace Carina.PixelViewer.ViewModels
 		/// Command to move to previous frame and render.
 		/// </summary>
 		public ICommand MoveToPreviousFrameCommand { get; }
+
+
+		// Called when list of all color spaces changed.
+		void OnAllColorSpacesChanged(object? sender, NotifyCollectionChangedEventArgs e)
+		{
+			switch (e.Action)
+			{
+				case NotifyCollectionChangedAction.Add:
+					this.colorSpaces.AddAll(e.NewItems.AsNonNull().Cast<ColorSpace>());
+					break;
+				case NotifyCollectionChangedAction.Remove:
+					this.colorSpaces.RemoveAll(e.NewItems.AsNonNull().Cast<ColorSpace>());
+					break;
+			}
+		}
 
 
 		// Called when strings updated.

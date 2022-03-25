@@ -81,6 +81,7 @@
 	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 with PQ)</sys:String>
+	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">Embedded color space</sys:String>
 	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 with HLG)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB w/o gamma transformation</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
@@ -192,6 +193,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">Vibrance</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">Color space</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management has been disabled, click to open options…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.EmbeddedInFile">In File</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save image which has been filtered?</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">Converting color space…</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>

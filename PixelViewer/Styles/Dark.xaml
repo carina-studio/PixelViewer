@@ -10,8 +10,11 @@
 	<Styles.Resources>
 
 		<!-- SessionControl -->
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#007f7f</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#ae00ff</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#007f46</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed">#660000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.RGB">#0085e5</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>
