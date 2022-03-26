@@ -524,6 +524,14 @@ class CieChromaticityDiagram : Control, IStyleable
     {
         this.chromaticities.CollectionChanged += this.OnChromaticitiesChanged;
         this.chromaticityGamuts.CollectionChanged += this.OnChromaticityGamutsChanged;
+        this.GetObservable(AxisBrushProperty).Subscribe(_ => this.axisPen = null);
+        this.GetObservable(BoundsProperty).Subscribe(_ => 
+        {
+            this.diagramGeometry = null;
+            this.diagramOverlayBrush = null;
+        });
+        this.GetObservable(DiagramBorderBrushProperty).Subscribe(_ => this.diagramBrush = null);
+        this.GetObservable(GridBrushProperty).Subscribe(_ => this.gridPen = null);
     }
 
 
