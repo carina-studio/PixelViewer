@@ -115,6 +115,13 @@
 		<Setter Property="RedHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.RedHistogram.Bakground}"/>
 	</Style>
 
+	<!-- CieChromaticityDiagram -->
+	<Style Selector="appControls|CieChromaticityDiagram">
+		<Setter Property="AxisBrush" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+		<Setter Property="DiagramBorderBrush" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
+		<Setter Property="GridBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+	</Style>
+
 	<!-- ListAction -->
 	<Style Selector="Button.ListAction">
 		<Setter Property="HorizontalAlignment" Value="Right"/>
