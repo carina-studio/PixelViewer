@@ -93,11 +93,11 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Adobe RGB (1998).
         /// </summary>
-        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), true);
+        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), D65, true);
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), true);
+        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), D65, true);
         /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
@@ -115,7 +115,7 @@ namespace Carina.PixelViewer.Media
                 0.3935f, 0.3653f, 0.1917f,
                 0.2124f, 0.7011f, 0.0866f,
                 0.0187f, 0.1119f, 0.9584f
-            )), true);
+            )), D65, true);
         /// <summary>
         /// ITU-R BT.601 625-line.
         /// </summary>
@@ -133,12 +133,20 @@ namespace Carina.PixelViewer.Media
                 0.4306f, 0.3415f, 0.1784f,
                 0.2220f, 0.7067f, 0.0713f,
                 0.0202f, 0.1296f, 0.9393f
-            )), true);
+            )), D65, true);
+        /// <summary>
+        /// CIE standard illuminant D50.
+        /// </summary>
+        public static (double, double, double) D50 = (0.9642, 1.0000, 0.8251);
+        /// <summary>
+        /// CIE standard illuminant D65.
+        /// </summary>
+        public static (double, double, double) D65 = (0.9504, 1.0000, 1.0888);
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
 #pragma warning disable CS0618
-        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), true);
+        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), (0.894587, 1, 0.954416), true);
 #pragma warning restore CS0618
         /// <summary>
         /// Default color space.
@@ -147,23 +155,23 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Display-P3 (P3-D65).
         /// </summary>
-        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), true);
+        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), D65, true);
         /// <summary>
         /// Dolby vision.
         /// </summary>
-        public static readonly ColorSpace Dolby_Vision = new ColorSpace("Dolby-Vision", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020), true);
+        public static readonly ColorSpace Dolby_Vision = new ColorSpace("Dolby-Vision", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020), D65, true);
         /// <summary>
         /// HLG10.
         /// </summary>
-        public static readonly ColorSpace Hlg10 = new ColorSpace("HLG10", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020), true);
+        public static readonly ColorSpace Hlg10 = new ColorSpace("HLG10", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020), D65, true);
         /// <summary>
         /// Linear sRGB.
         /// </summary>
-        public static readonly ColorSpace LinearSrgb = new ColorSpace("Linear-sRGB", null, SKColorSpace.CreateSrgbLinear(), true);
+        public static readonly ColorSpace LinearSrgb = new ColorSpace("Linear-sRGB", null, SKColorSpace.CreateSrgbLinear(), D65, true);
         /// <summary>
         /// sRGB.
         /// </summary>
-        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", null, SKColorSpace.CreateSrgb(), true);
+        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", null, SKColorSpace.CreateSrgb(), D65, true);
 
 
         // Static fields.
@@ -215,7 +223,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, string? customName, SKColorSpace colorSpace, bool isBuiltIn, bool isEmbeddedInFile = false)
+        ColorSpace(string name, string? customName, SKColorSpace colorSpace, (double, double, double) whitePoint, bool isBuiltIn, bool isEmbeddedInFile = false)
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
@@ -228,6 +236,7 @@ namespace Carina.PixelViewer.Media
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
             this.matrixFromXyz = Quantize(this.skiaColorSpaceXyz.Invert());
             this.Name = name;
+            this.WhitePoint = whitePoint;
         }
 
 
@@ -348,10 +357,11 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="customName">Custom name.</param>
         /// <param name="skColorSpace"><see cref="SKColorSpace"/>.</param>
+        /// <param name="whitePoint">XYZ of white point.</param>
         /// <param name="isEmbeddedInFile">Whether color space is embedded in file or not.</param>
         /// <returns><see cref="ColorSpace"/>.</returns>
-        public static ColorSpace FromSkiaColorSpace(string? customName, SKColorSpace skColorSpace, bool isEmbeddedInFile) =>
-            new ColorSpace(GenerateRandomName(), customName, skColorSpace, false, isEmbeddedInFile);
+        public static ColorSpace FromSkiaColorSpace(string? customName, SKColorSpace skColorSpace, (double, double, double) whitePoint, bool isEmbeddedInFile) =>
+            new ColorSpace(GenerateRandomName(), customName, skColorSpace, whitePoint, false, isEmbeddedInFile);
 
 
         /// <summary>
@@ -507,6 +517,19 @@ namespace Carina.PixelViewer.Media
                 if (string.IsNullOrWhiteSpace(name))
                     throw new ArgumentException("No name of color space specified.");
                 
+                // get white point
+                var whitePoint = D65;
+                if (rootObject.TryGetProperty(nameof(WhitePoint), out jsonProperty) 
+                    && jsonProperty.ValueKind == JsonValueKind.Array
+                    && jsonProperty.GetArrayLength() == 3)
+                {
+                    double[] values = new double[3];
+                    var index = 0;
+                    foreach (var jsonValue in jsonProperty.EnumerateArray())
+                        values[index++] = jsonValue.GetDouble();
+                    whitePoint = (values[0], values[1], values[2]);
+                }
+                
                 // get transfer function
                 var transferFunc = SKColorSpaceTransferFn.Empty;
                 if (rootObject.TryGetProperty("NumericalTransferFunction", out jsonProperty) 
@@ -536,7 +559,7 @@ namespace Carina.PixelViewer.Media
                     throw new ArgumentException("No matrix to XYZ D50 of color space specified.");
                 
                 // create color space
-                return new ColorSpace(name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), false);
+                return new ColorSpace(name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), whitePoint, false);
             });
         });
 
@@ -563,79 +586,123 @@ namespace Carina.PixelViewer.Media
             if (skiaColorSpace == null)
                 throw new ArgumentException("Unsupported ICC profile.");
             
-            // get name defined in profile
+            // prepare data reading functions
+            double ReadSFixed16Number(ReadOnlySpan<byte> buffer)
+            {
+                var value = BinaryPrimitives.ReadUInt32BigEndian(buffer);
+                if (value == 0)
+                    return 0;
+                var integer = (short)(value >> 16);
+                var fractional = (value & 0xffff) / 65536.0;
+                return integer + fractional;
+            }
+            
+            // get white point and name defined in profile
             var iccName = (string?)null;
+            var whitePoint = ((double, double, double)?)null;
             var offset = 132;
             for (var i = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(128)); i > 0; --i, offset += 12)
             {
-                if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset)) == 0x64657363u) // description
+                var tag = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset));
+                switch (tag)
                 {
-                    // move to data block
-                    var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 4));
-                    var dataSize = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 8));
-                    if (dataOffset < 0 || dataOffset + dataSize > profileSize)
-                        continue;
-                    
-                    // read name
-                    switch (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset)))
-                    {
-                        case 0x64657363u: // 'desc'
+                    case 0x64657363u: // 'desc' description
+                        {
+                            // skip reading name
+                            if (iccName != null)
+                                continue;
+                            
+                            // move to data block
+                            var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 4));
+                            var dataSize = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 8));
+                            if (dataOffset < 0 || dataOffset + dataSize > profileSize)
+                                continue;
+                            
+                            // read name
+                            switch (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset)))
                             {
-                                var strLength = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
-                                if (strLength > 1)
-                                    iccName = Encoding.ASCII.GetString(profile, dataOffset + 12, strLength - 1);
-                            }
-                            break;
-                        case 0x6d6c7563u: // 'mluc'
-                            {
-                                var langCount = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
-                                var enUsName = (string?)null;
-                                var enName = (string?)null;
-                                dataOffset += 16;
-                                for (var langIndex = langCount; langIndex > 0; --langIndex)
-                                {
-                                    var lang = Encoding.ASCII.GetString(profile, dataOffset, 4);
-                                    var strLength = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 4)) >> 1;
-                                    if (strLength <= 0)
-                                        break;
-                                    if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8)) != 0x1cu)
-                                        break;
-                                    var str = new char[strLength].Let(it =>
+                                case 0x64657363u: // 'desc'
                                     {
-                                        var charDataOffset = dataOffset + 12;
-                                        for (var cIndex = 0; cIndex < strLength; ++cIndex, charDataOffset += 2)
-                                            it[cIndex] = (char)BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan(charDataOffset));
-                                        return new string(it);
-                                    });
-                                    if (lang == "enUS")
-                                        enUsName = str;
-                                    else if (lang.StartsWith("en"))
-                                        enName = str;
-                                    else if (iccName == null)
-                                        iccName = str;
-                                }
-                                if (iccName == null)
-                                {
-                                    if (enUsName != null)
-                                        iccName = enUsName;
-                                    else if (enName != null)
-                                        iccName = enName;
-                                }
+                                        var strLength = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
+                                        if (strLength > 1)
+                                            iccName = Encoding.ASCII.GetString(profile, dataOffset + 12, strLength - 1);
+                                    }
+                                    break;
+                                case 0x6d6c7563u: // 'mluc'
+                                    {
+                                        var langCount = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
+                                        var enUsName = (string?)null;
+                                        var enName = (string?)null;
+                                        dataOffset += 16;
+                                        for (var langIndex = langCount; langIndex > 0; --langIndex)
+                                        {
+                                            var lang = Encoding.ASCII.GetString(profile, dataOffset, 4);
+                                            var strLength = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 4)) >> 1;
+                                            if (strLength <= 0)
+                                                break;
+                                            if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8)) != 0x1cu)
+                                                break;
+                                            var str = new char[strLength].Let(it =>
+                                            {
+                                                var charDataOffset = dataOffset + 12;
+                                                for (var cIndex = 0; cIndex < strLength; ++cIndex, charDataOffset += 2)
+                                                    it[cIndex] = (char)BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan(charDataOffset));
+                                                return new string(it);
+                                            });
+                                            if (lang == "enUS")
+                                                enUsName = str;
+                                            else if (lang.StartsWith("en"))
+                                                enName = str;
+                                            else if (iccName == null)
+                                                iccName = str;
+                                        }
+                                        if (iccName == null)
+                                        {
+                                            if (enUsName != null)
+                                                iccName = enUsName;
+                                            else if (enName != null)
+                                                iccName = enName;
+                                        }
+                                    }
+                                    break;
                             }
-                            break;
-                    }
-                    if (iccName != null)
-                    {
-                        iccName = iccName.Trim();
+                            if (iccName != null)
+                                iccName = iccName.Trim();
+                        }
                         break;
-                    }
+                    
+                    case 0x77747074: // 'wtpt' white point
+                        {
+                            // move to data block
+                            var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 4));
+                            var dataSize = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 8));
+                            if (dataOffset < 0 || dataOffset + dataSize > profileSize)
+                                continue;
+                            
+                            // read XYZ
+                            if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset)) == 0x58595a20) // 'XYZ '
+                            {
+                                var wpX = ReadSFixed16Number(profile.AsSpan(dataOffset + 8));
+                                var wpY = ReadSFixed16Number(profile.AsSpan(dataOffset + 12));
+                                var wpZ = ReadSFixed16Number(profile.AsSpan(dataOffset + 16));
+                                whitePoint = (wpX, wpY, wpZ);
+                            }
+                        }
+                        break;
                 }
             }
             if (iccName == null && fileName != null)
                 iccName = Path.GetFileName(fileName);
+            
+            // check whit point
+            if (!whitePoint.HasValue)
+            {
+                logger?.LogWarning("No white point defined in ICC profile, use D65 as default");
+                whitePoint = D65;
+            }
 
             // create color space
-            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, false, isEmbeddedInFile);
+            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, whitePoint.Value, false, isEmbeddedInFile);
         }
 
 
@@ -827,6 +894,15 @@ namespace Carina.PixelViewer.Media
                 jsonWriter.WriteString(nameof(Name), this.Name);
                 this.customName?.Let(it =>
                     jsonWriter.WriteString(nameof(CustomName), it));
+                this.WhitePoint.Let(wp =>
+                {
+                    jsonWriter.WritePropertyName(nameof(WhitePoint));
+                    jsonWriter.WriteStartArray();
+                    jsonWriter.WriteNumberValue(wp.Item1);
+                    jsonWriter.WriteNumberValue(wp.Item2);
+                    jsonWriter.WriteNumberValue(wp.Item3);
+                    jsonWriter.WriteEndArray();
+                });
                 if (this.skiaColorSpace.GetNumericalTransferFunction(out var transferFunc))
                 {
                     jsonWriter.WritePropertyName("NumericalTransferFunction");
@@ -885,6 +961,21 @@ namespace Carina.PixelViewer.Media
 
         /// <inheritdoc/>
         public override string ToString() => this.CustomName ?? this.Name;
+
+
+        /// <summary>
+        /// Convert to CIE xy chromaticity.
+        /// </summary>
+        /// <param name="r">Normalized R.</param>
+        /// <param name="g">Normalized G.</param>
+        /// <param name="b">Normalized B.</param>
+        /// <returns>xy chromaticity.</returns>
+        public (double, double) ToXyChromaticity(double r, double g, double b)
+        {
+            var (x, y, z) = this.ToXyz(r, g, b);
+            var xyz = (x + y + z);
+            return (x / xyz, y / xyz);
+        }
 
 
         /// <summary>
@@ -964,10 +1055,22 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Get URI to document of color space.
+        /// </summary>
+        public Uri? Uri { get; }
+
+
+        /// <summary>
         /// Wait for IO tasks complete.
         /// </summary>
         /// <returns>Task of waiting.</returns>
         public static Task WaitForIOTasksAsync() => ioTaskFactory.StartNew(() => logger?.LogDebug("All I/O tasks completed"));
+
+
+        /// <summary>
+        /// Get XYZ of white point.
+        /// </summary>
+        public (double, double, double) WhitePoint { get; }
     }
 
 

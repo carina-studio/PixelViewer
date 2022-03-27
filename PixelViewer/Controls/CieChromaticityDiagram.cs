@@ -804,22 +804,15 @@ class CieChromaticityDiagram : Control, IStyleable
             var borderPen = chromaticityGamut.BorderPen;
             if (borderPen != null)
             {
-                var (rX, rY, rZ) = chromaticityGamut.ColorSpace.ToXyz(1, 0, 0);
-                var (gX, gY, gZ) = chromaticityGamut.ColorSpace.ToXyz(0, 1, 0);
-                var (bX, bY, bZ) = chromaticityGamut.ColorSpace.ToXyz(0, 0, 1);
-                //var (wpX, wpY, wpZ) = chromaticityGamut.ColorSpace.ToXyz(1, 1, 1);
-                var rXYZ = (rX + rY + rZ);
-                var gXYZ = (gX + gY + gZ);
-                var bXYZ = (bX + bY + bZ);
-                //var wpXYZ = (wpX + wpY + wpZ);
-                var rPoint = this.XYToControlCoordinate(width, height, rX / rXYZ, rY / rXYZ);
-                var gPoint = this.XYToControlCoordinate(width, height, gX / gXYZ, gY / gXYZ);
-                var bPoint = this.XYToControlCoordinate(width, height, bX / bXYZ, bY / bXYZ);
-                //var wpPoint = this.XYToControlCoordinate(width, height, wpX / wpXYZ, wpY / wpXYZ);
+                var (rX, rY) = chromaticityGamut.ColorSpace.ToXyChromaticity(1, 0, 0);
+                var (gX, gY) = chromaticityGamut.ColorSpace.ToXyChromaticity(0, 1, 0);
+                var (bX, bY) = chromaticityGamut.ColorSpace.ToXyChromaticity(0, 0, 1);
+                var rPoint = this.XYToControlCoordinate(width, height, rX, rY);
+                var gPoint = this.XYToControlCoordinate(width, height, gX, gY);
+                var bPoint = this.XYToControlCoordinate(width, height, bX, bY);
                 context.DrawLine(borderPen, rPoint, gPoint);
                 context.DrawLine(borderPen, gPoint, bPoint);
                 context.DrawLine(borderPen, bPoint, rPoint);
-                //context.DrawRectangle(null, borderPen, new Rect(wpPoint.X - 2, wpPoint.Y - 2, 4, 4));
             }
         }
 
@@ -829,7 +822,7 @@ class CieChromaticityDiagram : Control, IStyleable
             var borderPen = chromaticity.BorderPen;
             var x = chromaticity.X;
             var y = chromaticity.Y;
-            if (borderPen != null && x >= 0 && x <= MaxCoordinateX && y >= 0 && y <= MaxCoordinateY)
+            if (borderPen != null && x >= MinCoordinateX && x <= MaxCoordinateX && y >= MinCoordinateY && y <= MaxCoordinateY)
             {
                 var point = this.XYToControlCoordinate(width, height, x, y);
                 context.DrawRectangle(null, borderPen, new Rect(point.X - 2, point.Y - 2, 4, 4));

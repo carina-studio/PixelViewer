@@ -85,13 +85,15 @@
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 
 	<!-- ColorSpaceInfoDialog -->
-	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">Blue primary (X, Y, Z)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">Blue</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy chromaticity diagram</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">Green primary (X, Y, Z)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">Green</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">Name</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">Red primary (X, Y, Z)</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space (show in dashed line)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">Primaries and white point</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">Red</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space (show as dashed line)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">Color space information</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">White point</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>

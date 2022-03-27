@@ -22,7 +22,7 @@
 		</Border>
 
 		<!-- Content -->
-		<Grid Classes="Dialog_ContentPanel" ColumnDefinitions="3*,Auto,2*">
+		<Grid Classes="Dialog_ContentPanel" ColumnDefinitions="*,Auto,*">
 			
 			<!-- xy chromaticity diagram -->
 			<StackPanel>
@@ -58,9 +58,12 @@
 				<!-- Name -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
 				<TextBox Name="nameTextBox" Classes="Dialog_TextBox" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
-				<Separator Classes="Dialog_Separator"/>
+				<Separator Classes="Dialog_Separator_Large"/>
 
-				<!-- RGB primaries -->
+				<!-- White point and primaries -->
+				<Border Classes="Dialog_TextBlock_Header1">
+					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Primaries}"/>
+				</Border>
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
 				<TextBox Name="redPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
 				<Separator Classes="Dialog_Separator"/>
@@ -69,6 +72,9 @@
 				<Separator Classes="Dialog_Separator"/>
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
 				<TextBox Name="bluePrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+				<Separator Classes="Dialog_Separator"/>
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
+				<TextBox Name="whitePointTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
 
 			</StackPanel>
 

@@ -32,10 +32,13 @@ partial class ColorSpaceInfoDialog : InputDialog
     readonly TextBox bluePrimaryTextBox;
     readonly CieChromaticityDiagram chromaticityDiagram;
     readonly CieChromaticityGamut colorSpaceChromaticityGamut = new();
+    readonly CieChromaticity colorSpaceWhitePointChromaticity = new();
     readonly TextBox greenPrimaryTextBox;
     readonly TextBox redPrimaryTextBox;
     readonly CieChromaticityGamut refColorSpaceChromaticityGamut = new();
+    readonly CieChromaticity refColorSpaceWhitePointChromaticity = new();
     readonly TextBox nameTextBox;
+    readonly TextBox whitePointTextBox;
 
 
     // Constructor.
@@ -48,15 +51,27 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             this.colorSpaceChromaticityGamut.BorderPen = new Pen()
             {
-                Brush = Brushes.White,
-                LineJoin = PenLineJoin.Bevel,
+                Brush = Brushes.Black,
+                Thickness = 1,
+            };
+            this.colorSpaceWhitePointChromaticity.BorderPen = new Pen()
+            {
+                Brush = Brushes.Black,
                 Thickness = 2,
             };
             this.refColorSpaceChromaticityGamut.BorderPen = new Pen()
             {
                 Brush = Brushes.White,
                 DashStyle = DashStyle.Dash,
+                Thickness = 1,
             };
+            this.refColorSpaceWhitePointChromaticity.BorderPen = new Pen()
+            {
+                Brush = Brushes.White,
+                Thickness = 2,
+            };
+            it.Chromaticities.Add(this.refColorSpaceWhitePointChromaticity);
+            it.Chromaticities.Add(this.colorSpaceWhitePointChromaticity);
             it.ChromaticityGamuts.Add(this.refColorSpaceChromaticityGamut);
             it.ChromaticityGamuts.Add(this.colorSpaceChromaticityGamut);
         });
@@ -66,12 +81,18 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             it.GetObservable(TextBox.TextProperty).Subscribe(_ => this.InvalidateInput());
         });
+        this.whitePointTextBox = this.FindControl<TextBox>(nameof(whitePointTextBox)).AsNonNull();
 
         // attach to property
         this.GetObservable(ReferenceColorSpaceProperty).Subscribe(colorSpace =>
         {
             if (colorSpace != null)
+            {
+                var wpXYZ = (colorSpace.WhitePoint.Item1 + colorSpace.WhitePoint.Item2 + colorSpace.WhitePoint.Item3);
+                this.refColorSpaceWhitePointChromaticity.X = colorSpace.WhitePoint.Item1 / wpXYZ;
+                this.refColorSpaceWhitePointChromaticity.Y = colorSpace.WhitePoint.Item2 / wpXYZ;
                 this.refColorSpaceChromaticityGamut.ColorSpace = colorSpace;
+            }
         });
     }
 
@@ -130,7 +151,10 @@ partial class ColorSpaceInfoDialog : InputDialog
     {
         // show color space info
         var colorSpace = this.ColorSpace;
+        var wpXYZ = (colorSpace.WhitePoint.Item1 + colorSpace.WhitePoint.Item2 + colorSpace.WhitePoint.Item3);
         this.nameTextBox.Text = Data.Converters.ColorSpaceToStringConverter.Default.Convert<string>(colorSpace);
+        this.colorSpaceWhitePointChromaticity.X = colorSpace.WhitePoint.Item1 / wpXYZ;
+        this.colorSpaceWhitePointChromaticity.Y = colorSpace.WhitePoint.Item2 / wpXYZ;
         this.colorSpaceChromaticityGamut.ColorSpace = colorSpace;
         var (rX, rY, rZ) = colorSpace.ToXyz(1, 0, 0);
         var (gX, gY, gZ) = colorSpace.ToXyz(0, 1, 0);
@@ -138,6 +162,7 @@ partial class ColorSpaceInfoDialog : InputDialog
         this.redPrimaryTextBox.Text = $"{rX:F4}, {rY:F4}, {rZ:F4}";
         this.greenPrimaryTextBox.Text = $"{gX:F4}, {gY:F4}, {gZ:F4}";
         this.bluePrimaryTextBox.Text = $"{bX:F4}, {bY:F4}, {bZ:F4}";
+        this.whitePointTextBox.Text = $"{colorSpace.WhitePoint.Item1:F4}, {colorSpace.WhitePoint.Item2:F4}, {colorSpace.WhitePoint.Item3:F4}";
 
         // attach to color spaces
         (Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>

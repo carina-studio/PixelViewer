@@ -22,7 +22,7 @@
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
 		<!-- ColorSpaceInfoDialog -->
-		<sys:Double x:Key="Double/ColorSpaceInfoDialog.Width">700</sys:Double>
+		<sys:Double x:Key="Double/ColorSpaceInfoDialog.Width">800</sys:Double>
 
 		<!-- FrameNumberSelectionDialog -->
 		<sys:Double x:Key="Double/FrameNumberSelectionDialog.Width">300</sys:Double>

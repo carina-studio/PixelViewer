@@ -104,7 +104,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 if (it.IsSrgb)
                     return ColorSpace.Srgb;
-                var colorSpace = ColorSpace.FromSkiaColorSpace(null, it, true);
+                var colorSpace = ColorSpace.FromSkiaColorSpace(null, it, ColorSpace.D65, true);
                 if (ColorSpace.TryGetColorSpace(colorSpace, out var existingColorSpace))
                     return existingColorSpace;
                 return colorSpace;
