@@ -162,6 +162,7 @@
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>
 				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/Color_management"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Default color space -->
@@ -178,7 +179,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/RGB_color_spaces"/>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Text="{DynamicResource String/Common.Details}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Screen color space -->
@@ -195,6 +196,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" Text="{DynamicResource String/Common.Details}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Custom color spaces -->
@@ -209,7 +211,7 @@
 									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
 										<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
 									</Button>
-									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].EditCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
+									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
 										<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
 									</Button>
 								</StackPanel>

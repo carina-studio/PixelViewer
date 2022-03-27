@@ -22,8 +22,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">預設 YUV 至 RGB 轉換</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace">編輯自訂色彩空間</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace.CustomName">名稱</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">啟用色彩管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
@@ -76,6 +74,7 @@
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
 	<sys:String x:Key="String/Common.Custom">自訂</sys:String>
+	<sys:String x:Key="String/Common.Details">詳細資訊…</sys:String>
 	<sys:String x:Key="String/Common.KnowMoreAbout">了解更多</sys:String>
 	<sys:String x:Key="String/Common.Options">選項</sys:String>
 	<sys:String x:Key="String/Common.Rename">重新命名</sys:String>

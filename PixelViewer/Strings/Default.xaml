@@ -22,8 +22,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB conversion</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace">Edit custom color space</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace.CustomName">Name</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">Enable color management</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
@@ -98,6 +96,7 @@
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
 	<sys:String x:Key="String/Common.Custom">Custom</sys:String>
+	<sys:String x:Key="String/Common.Details">Details…</sys:String>
 	<sys:String x:Key="String/Common.KnowMoreAbout">Know more about</sys:String>
 	<sys:String x:Key="String/Common.Options">Options</sys:String>
 	<sys:String x:Key="String/Common.Rename">Rename</sys:String>

@@ -98,8 +98,16 @@ namespace Carina.PixelViewer.Controls
                         return;
                 }
 
+                // show color space info
+                var finalColorSpace = await new ColorSpaceInfoDialog()
+                {
+                    ColorSpace = colorSpace,
+                }.ShowDialog<Media.ColorSpace>(this);
+                if (finalColorSpace == null)
+                    return;
+
                 // add color space
-                Media.ColorSpace.AddCustomColorSpace(colorSpace);
+                Media.ColorSpace.AddCustomColorSpace(finalColorSpace);
             }
             finally
             {
@@ -110,24 +118,6 @@ namespace Carina.PixelViewer.Controls
 
         // Command to add custom color space
         ICommand AddCustomColorSpaceCommand { get; }
-
-
-        // Edit custom color space.
-        async void EditCustomColorSpace(ListBoxItem listBoxItem)
-        {
-            if (listBoxItem.DataContext is not Media.ColorSpace colorSpace)
-                return;
-            var customName = await new TextInputDialog()
-            {
-                InitialText = colorSpace.CustomName,
-                Message = this.Application.GetString("ApplicationOptionsDialog.EditCustomColorSpace.CustomName"),
-                Title = this.Application.GetString("ApplicationOptionsDialog.EditCustomColorSpace"),
-            }.ShowDialog(this);
-            this.customColorSpaceListBox.SelectedItem = colorSpace;
-            if (string.IsNullOrWhiteSpace(customName))
-                return;
-            colorSpace.CustomName = customName;
-        }
 
 
         // Initial focused section.
@@ -185,7 +175,7 @@ namespace Carina.PixelViewer.Controls
                 && this.customColorSpaceListBox.TryFindListBoxItem(e.Item, out var listBoxItem)
                 && listBoxItem != null)
             {
-                this.EditCustomColorSpace(listBoxItem);
+                this.ShowColorSpaceInfo(listBoxItem);
             }
         }
 
@@ -227,6 +217,24 @@ namespace Carina.PixelViewer.Controls
                 return;
             Media.ColorSpace.RemoveCustomColorSpace(colorSpace);
         }
+
+
+        // Show color space info.
+		void ShowColorSpaceInfo(object item)
+		{
+			if (item is not Media.ColorSpace colorSpace)
+            {
+                if (item is Control control)
+                    colorSpace = (Media.ColorSpace)control.DataContext.AsNonNull();
+                else
+                    return;
+            }
+			_ = new ColorSpaceInfoDialog()
+			{
+				ColorSpace = colorSpace,
+				IsReadOnly = colorSpace.IsBuiltIn || colorSpace.IsEmbeddedInFile,
+			}.ShowDialog(this);
+		}
     }
 
 

@@ -1566,6 +1566,20 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		// Show color space info.
+		void ShowColorSpaceInfo()
+		{
+			if (this.DataContext is not Session session || this.attachedWindow == null)
+				return;
+			var colorSpace = session.ColorSpace;
+			_ = new ColorSpaceInfoDialog()
+			{
+				ColorSpace = colorSpace,
+				IsReadOnly = colorSpace.IsBuiltIn || colorSpace.IsEmbeddedInFile,
+			}.ShowDialog(this.attachedWindow);
+		}
+
+
 		// Show color space management settings in application options.
 		void ShowColorSpaceManagementOptions() => 
 			this.FindAncestorOfType<MainWindow>()?.ShowAppOptions(ApplicationOptionsDialogSection.ColorSpaceManagement);

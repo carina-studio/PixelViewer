@@ -24,7 +24,7 @@ partial class ColorSpaceInfoDialog : InputDialog
     // Static fields.
     static readonly AvaloniaProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
     static readonly AvaloniaProperty<bool> IsReadOnlyProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, bool>(nameof(IsReadOnly), false);
-    static readonly AvaloniaProperty<Media.ColorSpace> ReferenceColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace>("ReferenceColorSpace", Media.ColorSpace.Default);
+    static readonly AvaloniaProperty<Media.ColorSpace?> ReferenceColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace?>("ReferenceColorSpace", null);
     static readonly AvaloniaProperty<IList<Media.ColorSpace>> ReferenceColorSpacesProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, IList<Media.ColorSpace>>("ReferenceColorSpaces", new Media.ColorSpace[0]);
 
 
@@ -70,7 +70,8 @@ partial class ColorSpaceInfoDialog : InputDialog
         // attach to property
         this.GetObservable(ReferenceColorSpaceProperty).Subscribe(colorSpace =>
         {
-            this.refColorSpaceChromaticityGamut.ColorSpace = colorSpace;
+            if (colorSpace != null)
+                this.refColorSpaceChromaticityGamut.ColorSpace = colorSpace;
         });
     }
 
@@ -142,8 +143,7 @@ partial class ColorSpaceInfoDialog : InputDialog
         (Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
             it.CollectionChanged += this.OnAllColorSpacesChanged);
         this.SetValue<IList<Media.ColorSpace>>(ReferenceColorSpacesProperty, Media.ColorSpace.AllColorSpaces.Where(it => !it.Equals(colorSpace)).ToArray());
-        if (this.GetValue<Media.ColorSpace>(ReferenceColorSpaceProperty).Equals(colorSpace))
-            this.SetValue<Media.ColorSpace>(ReferenceColorSpaceProperty, colorSpace.Equals(Media.ColorSpace.Srgb) ? Media.ColorSpace.Display_P3 : Media.ColorSpace.Srgb);
+        this.SetValue<Media.ColorSpace?>(ReferenceColorSpaceProperty, colorSpace.Equals(Media.ColorSpace.Srgb) ? Media.ColorSpace.Display_P3 : Media.ColorSpace.Srgb);
 
         // call base
         base.OnOpened(e);
