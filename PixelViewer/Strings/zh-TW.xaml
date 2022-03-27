@@ -11,7 +11,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩空間管理可提供更準確的色彩輸出，但將會影響繪製影像的效能。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更準確的色彩輸出，但將會影響繪製影像的效能。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空間 '{0}' 與 '{1}' 相同，您是否還要將其加入？</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">對比調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
@@ -24,7 +24,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">預設 YUV 至 RGB 轉換</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace">編輯自訂色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EditCustomColorSpace.CustomName">名稱</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">啟用色彩空間管理</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">啟用色彩管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">優先嘗試從檔案名稱判斷影像格式</sys:String>
@@ -162,7 +162,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Saturation">飽和度</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">自然飽和度</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">色彩空間</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">已停用色彩空間管理，點一下以開啟選項…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">已停用色彩管理，點一下以開啟選項…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.EmbeddedInFile">檔案內嵌</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">是否要儲存套用濾鏡後的影像？</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">轉換色彩空間中…</sys:String>
