@@ -63,6 +63,15 @@
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">內嵌色彩空間</sys:String>
 	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 搭配 HLG)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB (無 Gamma 轉換)</sys:String>
+
+	<!-- ColorSpaceInfoDialog -->
+	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">藍主色 (X, Y, Z)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy 色度表</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">綠主色 (X, Y, Z)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">名稱</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">紅主色 (X, Y, Z)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">參考色彩空間 (虛線顯示)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">色彩空間資訊</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>

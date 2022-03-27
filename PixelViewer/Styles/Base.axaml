@@ -21,6 +21,9 @@
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">1</Thickness>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
+		<!-- ColorSpaceInfoDialog -->
+		<sys:Double x:Key="Double/ColorSpaceInfoDialog.Width">700</sys:Double>
+
 		<!-- FrameNumberSelectionDialog -->
 		<sys:Double x:Key="Double/FrameNumberSelectionDialog.Width">300</sys:Double>
 		<Thickness x:Key="Thickness/FrameNumberSelectionDialog.FrameCount.Margin">10,0,0,0</Thickness>

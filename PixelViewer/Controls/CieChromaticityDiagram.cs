@@ -35,8 +35,10 @@ class CieChromaticityDiagram : Control, IStyleable
 
 
     // Constants.
-    const double MaxCoordinateX = 0.8;
+    const double MaxCoordinateX = 0.9;
     const double MaxCoordinateY = 0.9;
+    const double MinCoordinateX = -0.1;
+    const double MinCoordinateY = -0.1;
 
 
     // Static fields.
@@ -527,10 +529,11 @@ class CieChromaticityDiagram : Control, IStyleable
         this.GetObservable(AxisBrushProperty).Subscribe(_ => this.axisPen = null);
         this.GetObservable(BoundsProperty).Subscribe(_ => 
         {
+            this.diagramBrush = null;
             this.diagramGeometry = null;
             this.diagramOverlayBrush = null;
         });
-        this.GetObservable(DiagramBorderBrushProperty).Subscribe(_ => this.diagramBrush = null);
+        this.GetObservable(DiagramBorderBrushProperty).Subscribe(_ => this.diagramPen = null);
         this.GetObservable(GridBrushProperty).Subscribe(_ => this.gridPen = null);
     }
 
@@ -787,8 +790,9 @@ class CieChromaticityDiagram : Control, IStyleable
         }
 
         // draw axises
-        context.DrawLine(this.axisPen, new Point(0, 0), new Point(0, height));
-        context.DrawLine(this.axisPen, new Point(0, height), new Point(width, height));
+        var originPoint = this.XYToControlCoordinate(width, height, 0, 0);
+        context.DrawLine(this.axisPen, new Point(originPoint.X, 0), new Point(originPoint.X, height));
+        context.DrawLine(this.axisPen, new Point(0, originPoint.Y), new Point(width, originPoint.Y));
 
         // draw diagram
         context.DrawGeometry(this.diagramBrush, this.diagramPen, this.diagramGeometry);
@@ -835,14 +839,20 @@ class CieChromaticityDiagram : Control, IStyleable
         // draw grid
         if (this.gridPen != null)
         {
-            for (var y = MaxCoordinateY - 0.1; y > -0.05; y -= 0.1)
+            var xLength = (MaxCoordinateX - MinCoordinateX);
+            var yLength = (MaxCoordinateY - MinCoordinateY);
+            for (var y = MaxCoordinateY; y > MinCoordinateY - 0.05; y -= 0.1)
             {
-                var lineY = y / MaxCoordinateY * height;
+                if (Math.Abs(y) < 0.05)
+                    continue;
+                var lineY = (1 - (y - MinCoordinateY) / yLength) * height;
                 context.DrawLine(this.gridPen, new Point(0, lineY), new Point(width, lineY));
             }
-            for (var x = MaxCoordinateX; Math.Abs(x) > 0.05; x -= 0.1)
+            for (var x = MaxCoordinateX; x > MinCoordinateX - 0.05; x -= 0.1)
             {
-                var lineX = x / MaxCoordinateX * width;
+                if (Math.Abs(x) < 0.05)
+                    continue;
+                var lineX = (x - MinCoordinateX) / xLength * width;
                 context.DrawLine(this.gridPen, new Point(lineX, 0), new Point(lineX, height));
             }
         }
@@ -850,8 +860,14 @@ class CieChromaticityDiagram : Control, IStyleable
 
 
     // Convert XY coordinate to control coordinate.
-    Point XYToControlCoordinate(double width, double height, double x, double y) =>
-        new Point(x / MaxCoordinateX * width, (1 - y / MaxCoordinateY) * height);
+    Point XYToControlCoordinate(double width, double height, double x, double y)
+    {
+        var xLength = (MaxCoordinateX - MinCoordinateX);
+        var yLength = (MaxCoordinateY - MinCoordinateY);
+        x -= MinCoordinateX;
+        y -= MinCoordinateY;
+        return new Point(x / xLength * width, (1 - y / yLength) * height);
+    }
 
 
     // Interface implementations.

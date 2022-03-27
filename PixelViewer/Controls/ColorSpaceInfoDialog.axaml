@@ -1,0 +1,79 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:appControls="using:Carina.PixelViewer.Controls"
+		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
+		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.Controls.ColorSpaceInfoDialog"
+		Classes="Dialog"
+        Title="{DynamicResource String/ColorSpaceInfoDialog.Title}"
+		Width="{DynamicResource Double/ColorSpaceInfoDialog.Width}">
+
+	<DockPanel>
+
+		<!-- Control buttons -->
+		<Border Classes="Dialog_ControlButtonsPanel">
+			<StackPanel Classes="Dialog_ControlButtonsPanel">
+				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
+				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].Close}" Content="{DynamicResource String/Common.Cancel}" IsVisible="{Binding !$parent[Window].IsReadOnly}"/>
+			</StackPanel>
+		</Border>
+
+		<!-- Content -->
+		<Grid Classes="Dialog_ContentPanel" ColumnDefinitions="3*,Auto,2*">
+			
+			<!-- xy chromaticity diagram -->
+			<StackPanel>
+
+				<!-- Diagram -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
+				<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}">
+					<appControls:CieChromaticityDiagram Name="chromaticityDiagram"/>
+				</Border>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Reference color space -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace}"/>
+				<ComboBox Classes="Dialog_ComboBox" Items="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
+					<ComboBox.ItemTemplate>
+						<DataTemplate>
+							<Grid ColumnDefinitions="*,Auto">
+								<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+								<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding !IsBuiltIn}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+									<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+								</Border>
+							</Grid>
+						</DataTemplate>
+					</ComboBox.ItemTemplate>
+				</ComboBox>
+
+			</StackPanel>
+			<Separator Classes="Dialog_Separator" Grid.Column="1"/>
+
+			<!-- color space info -->
+			<StackPanel Grid.Column="2">
+
+				<!-- Name -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
+				<TextBox Name="nameTextBox" Classes="Dialog_TextBox" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- RGB primaries -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
+				<TextBox Name="redPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+				<Separator Classes="Dialog_Separator"/>
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
+				<TextBox Name="greenPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+				<Separator Classes="Dialog_Separator"/>
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
+				<TextBox Name="bluePrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+
+			</StackPanel>
+
+		</Grid>
+		
+	</DockPanel>
+	
+</Window>
