@@ -66,11 +66,6 @@ partial class ColorSpaceInfoDialog : InputDialog
                 DashStyle = DashStyle.Dash,
                 Thickness = 1,
             };
-            this.refColorSpaceWhitePointChromaticity.BorderPen = new Pen()
-            {
-                Brush = Brushes.White,
-                Thickness = 2,
-            };
             it.Chromaticities.Add(this.refColorSpaceWhitePointChromaticity);
             it.Chromaticities.Add(this.colorSpaceWhitePointChromaticity);
             it.ChromaticityGamuts.Add(this.refColorSpaceChromaticityGamut);
@@ -90,9 +85,22 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             if (colorSpace != null)
             {
-                var wpXYZ = (colorSpace.WhitePoint.Item1 + colorSpace.WhitePoint.Item2 + colorSpace.WhitePoint.Item3);
-                this.refColorSpaceWhitePointChromaticity.X = colorSpace.WhitePoint.Item1 / wpXYZ;
-                this.refColorSpaceWhitePointChromaticity.Y = colorSpace.WhitePoint.Item2 / wpXYZ;
+                if (colorSpace.WhitePoint.HasValue)
+                {
+                    if (this.refColorSpaceWhitePointChromaticity.BorderPen == null)
+                    {
+                        this.refColorSpaceWhitePointChromaticity.BorderPen = new Pen()
+                        {
+                            Brush = Brushes.White,
+                            Thickness = 2,
+                        };
+                    }
+                    var (wpX, wpY) = Media.ColorSpace.XyzToXyChromaticity(colorSpace.WhitePoint.Value);
+                    this.refColorSpaceWhitePointChromaticity.X = wpX;
+                    this.refColorSpaceWhitePointChromaticity.Y = wpY;
+                }
+                else
+                    this.refColorSpaceWhitePointChromaticity.BorderPen = null;
                 this.refColorSpaceChromaticityGamut.ColorSpace = colorSpace;
             }
         });
@@ -153,10 +161,9 @@ partial class ColorSpaceInfoDialog : InputDialog
     {
         // show color space info
         var colorSpace = this.ColorSpace;
-        var wpXYZ = (colorSpace.WhitePoint.Item1 + colorSpace.WhitePoint.Item2 + colorSpace.WhitePoint.Item3);
+        var wp = colorSpace.WhitePoint;
         this.nameTextBox.Text = Data.Converters.ColorSpaceToStringConverter.Default.Convert<string>(colorSpace);
-        this.colorSpaceWhitePointChromaticity.X = colorSpace.WhitePoint.Item1 / wpXYZ;
-        this.colorSpaceWhitePointChromaticity.Y = colorSpace.WhitePoint.Item2 / wpXYZ;
+        
         this.colorSpaceChromaticityGamut.ColorSpace = colorSpace;
         var (rX, rY, rZ) = colorSpace.RgbToXyz(1, 0, 0);
         var (gX, gY, gZ) = colorSpace.RgbToXyz(0, 1, 0);
@@ -164,16 +171,33 @@ partial class ColorSpaceInfoDialog : InputDialog
         this.redPrimaryTextBox.Text = $"{rX:F4}, {rY:F4}, {rZ:F4}";
         this.greenPrimaryTextBox.Text = $"{gX:F4}, {gY:F4}, {gZ:F4}";
         this.bluePrimaryTextBox.Text = $"{bX:F4}, {bY:F4}, {bZ:F4}";
-        this.whitePointTextBox.Text = $"{colorSpace.WhitePoint.Item1:F4}, {colorSpace.WhitePoint.Item2:F4}, {colorSpace.WhitePoint.Item3:F4}";
-        this.whitePointDescriptionTextBlock.Text = Global.Run(() =>
+        if (wp.HasValue)
         {
-            var cct = Media.ColorSpace.XyChromaticityToCct(Media.ColorSpace.XyzToXyChromaticity(colorSpace.WhitePoint));
-            if (colorSpace.IsD65WhitePoint)
-                return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT", "D65", cct);
-            if (colorSpace.IsD50WhitePoint)
-                return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT", "D50", cct);
-            return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.CCT", cct);
-        });
+            var wpXYZ = wp.Value;
+            var (wpX, wpY) = Media.ColorSpace.XyzToXyChromaticity(wpXYZ);
+            this.colorSpaceWhitePointChromaticity.X = wpX;
+            this.colorSpaceWhitePointChromaticity.Y = wpY;
+            this.whitePointTextBox.Text = $"{wpXYZ.Item1:F4}, {wpXYZ.Item2:F4}, {wpXYZ.Item3:F4}";
+            this.whitePointDescriptionTextBlock.Text = Global.Run(() =>
+            {
+                var cct = Media.ColorSpace.XyChromaticityToCct(wpX, wpY);
+                var prefix = "";
+                var description = this.Application.GetString("ColorSpaceInfoDialog.WhitePoint.Description");
+                if (colorSpace.IsD65WhitePoint)
+                    prefix = this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT", "D65", cct);
+                else if (colorSpace.IsD50WhitePoint)
+                    prefix = this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT", "D50", cct);
+                else
+                    prefix = this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT", cct);
+                return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.WithPrefix", prefix, description);
+            });
+        }
+        else
+        {
+            this.colorSpaceWhitePointChromaticity.BorderPen = null;
+            this.whitePointTextBox.Bind(TextBox.TextProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Undefined"));
+            this.whitePointDescriptionTextBlock.Bind(TextBlock.TextProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description"));
+        }
 
         // attach to color spaces
         (Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>

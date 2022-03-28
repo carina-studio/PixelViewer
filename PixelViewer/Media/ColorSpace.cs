@@ -90,14 +90,14 @@ namespace Carina.PixelViewer.Media
         }
 
 
-         /// <summary>
+        /// <summary>
         /// CIE standard illuminant D50.
         /// </summary>
-        public static (double, double, double) D50 = (0.9642, 1.0000, 0.8251);
+        public static (double, double, double) D50 = (0.9642, 1.0000, 0.8249);
         /// <summary>
         /// CIE standard illuminant D65.
         /// </summary>
-        public static (double, double, double) D65 = (0.9504, 1.0000, 1.0888);
+        public static (double, double, double) D65 = (0.9504, 1.0000, 1.0889);
 
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, string? customName, SKColorSpace colorSpace, (double, double, double) whitePoint, bool isBuiltIn, bool isEmbeddedInFile = false)
+        ColorSpace(string name, string? customName, SKColorSpace colorSpace, (double, double, double)? whitePoint, bool isBuiltIn, bool isEmbeddedInFile = false)
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
@@ -233,8 +233,11 @@ namespace Carina.PixelViewer.Media
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
             this.IsBuiltIn = isBuiltIn;
-            this.IsD65WhitePoint = AreEquivalentWhitePoints(whitePoint, D65);
-            this.IsD50WhitePoint = !this.IsD65WhitePoint && AreEquivalentWhitePoints(whitePoint, D50);
+            if (whitePoint.HasValue)
+            {
+                this.IsD65WhitePoint = AreEquivalentWhitePoints(whitePoint.Value, D65);
+                this.IsD50WhitePoint = !this.IsD65WhitePoint && AreEquivalentWhitePoints(whitePoint.Value, D50);
+            }
             this.IsEmbeddedInFile = isEmbeddedInFile;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
@@ -270,9 +273,9 @@ namespace Carina.PixelViewer.Media
 
         // Check whether two white points are equivalent or not.
         static bool AreEquivalentWhitePoints((double, double, double) x, (double, double, double) y) =>
-            Math.Abs(x.Item1 - y.Item1) <= 0.00001
-            && Math.Abs(x.Item2 - y.Item2) <= 0.00001
-            && Math.Abs(x.Item3 - y.Item3) <= 0.00001;
+            Math.Abs(x.Item1 - y.Item1) <= 0.0001
+            && Math.Abs(x.Item2 - y.Item2) <= 0.0001
+            && Math.Abs(x.Item3 - y.Item3) <= 0.0001;
 
 
         /// <summary>
@@ -371,7 +374,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="whitePoint">XYZ of white point.</param>
         /// <param name="isEmbeddedInFile">Whether color space is embedded in file or not.</param>
         /// <returns><see cref="ColorSpace"/>.</returns>
-        public static ColorSpace FromSkiaColorSpace(string? customName, SKColorSpace skColorSpace, (double, double, double) whitePoint, bool isEmbeddedInFile) =>
+        public static ColorSpace FromSkiaColorSpace(string? customName, SKColorSpace skColorSpace, (double, double, double)? whitePoint, bool isEmbeddedInFile) =>
             new ColorSpace(GenerateRandomName(), customName, skColorSpace, whitePoint, false, isEmbeddedInFile);
 
 
@@ -515,7 +518,7 @@ namespace Carina.PixelViewer.Media
                     throw new ArgumentException("No name of color space specified.");
                 
                 // get white point
-                var whitePoint = D65;
+                var whitePoint = ((double, double, double)?)null;
                 if (rootObject.TryGetProperty(nameof(WhitePoint), out jsonProperty) 
                     && jsonProperty.ValueKind == JsonValueKind.Array
                     && jsonProperty.GetArrayLength() == 3)
@@ -669,6 +672,7 @@ namespace Carina.PixelViewer.Media
                         break;
                     
                     case 0x77747074: // 'wtpt' white point
+                        /*
                         {
                             // move to data block
                             var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(offset + 4));
@@ -685,6 +689,7 @@ namespace Carina.PixelViewer.Media
                                 whitePoint = (wpX, wpY, wpZ);
                             }
                         }
+                        */
                         break;
                 }
             }
@@ -692,14 +697,16 @@ namespace Carina.PixelViewer.Media
                 iccName = Path.GetFileName(fileName);
             
             // check whit point
+            /*
             if (!whitePoint.HasValue)
             {
                 logger?.LogWarning("No white point defined in ICC profile, use D65 as default");
                 whitePoint = D65;
             }
+            */
 
             // create color space
-            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, whitePoint.Value, false, isEmbeddedInFile);
+            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, whitePoint, false, isEmbeddedInFile);
         }
 
 
@@ -940,7 +947,7 @@ namespace Carina.PixelViewer.Media
                 jsonWriter.WriteString(nameof(Name), this.Name);
                 this.customName?.Let(it =>
                     jsonWriter.WriteString(nameof(CustomName), it));
-                this.WhitePoint.Let(wp =>
+                this.WhitePoint?.Let(wp =>
                 {
                     jsonWriter.WritePropertyName(nameof(WhitePoint));
                     jsonWriter.WriteStartArray();
@@ -1051,7 +1058,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Get XYZ of white point.
         /// </summary>
-        public (double, double, double) WhitePoint { get; }
+        public (double, double, double)? WhitePoint { get; }
 
 
         /// <summary>
@@ -1071,9 +1078,9 @@ namespace Carina.PixelViewer.Media
         /// <returns>Correlated Color Temperature.</returns>
         public static double XyChromaticityToCct(double x, double y)
         {
-            var n = (x - 0.3320) / (0.1858 - y);
+            var n = (x - 0.3320) / (y - 0.1858);
             var n2 = n * n;
-            return 437 * n2 * n + 3601 * n2 + 6861 * n + 5517;
+            return Math.Floor(-449 * n2 * n + 3525 * n2 - 6823.3 * n + 5520.33);
         }
 
 

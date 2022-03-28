@@ -72,8 +72,11 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">參考色彩空間 (虛線顯示)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">色彩空間資訊</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">白點</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.CCT">CCT {0:F0}K</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT">CIE 標準光源 {0}，CCT {1:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description">僅提供參考。內部色彩轉換皆使用 CIE 標準光源 D50 為白點。</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT">CCT {0:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT">CIE 標準光源 {0}，CCT {1:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.WithPrefix">{0}。{1}</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Undefined">未定義</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>

@@ -94,8 +94,11 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space (show as dashed line)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">Color space information</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">White point</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.CCT">CCT {0:F0}K</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT">CIE standard illuminant {0}, CCT {1:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description">This is for reference only. CIE standard illuminant D50 is always used for internal color conversion.</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT">CCT {0:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT">CIE standard illuminant {0}, CCT {1:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.WithPrefix">{0}. {1}</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Undefined">Undefined</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
