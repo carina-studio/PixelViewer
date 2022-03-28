@@ -88,7 +88,10 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">Blue</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy chromaticity diagram</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">Green</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">R/G/B are linear in this color space, they can be converted to XYZ color space by linear conversion directly.</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">Name</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.NonLinearColorSpace">R/G/B are non-linear in this color space. A non-linear transformation (OETF) must be applied before converting to XYZ color space.</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Other">Other information</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">Primaries and white point</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">Red</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space (show as dashed line)</sys:String>

@@ -22,6 +22,7 @@
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
 		<!-- ColorSpaceInfoDialog -->
+		<sys:Double x:Key="Double/ColorSpaceInfoDialog.Content.MaxHeight">550</sys:Double>
 		<sys:Double x:Key="Double/ColorSpaceInfoDialog.Width">800</sys:Double>
 
 		<!-- FrameNumberSelectionDialog -->

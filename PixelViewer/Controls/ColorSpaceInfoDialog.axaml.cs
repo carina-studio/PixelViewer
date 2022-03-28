@@ -34,6 +34,7 @@ partial class ColorSpaceInfoDialog : InputDialog
     readonly CieChromaticityGamut colorSpaceChromaticityGamut = new();
     readonly CieChromaticity colorSpaceWhitePointChromaticity = new();
     readonly TextBox greenPrimaryTextBox;
+    readonly TextBlock linearizationDescriptionTextBlock;
     readonly TextBox redPrimaryTextBox;
     readonly CieChromaticityGamut refColorSpaceChromaticityGamut = new();
     readonly CieChromaticity refColorSpaceWhitePointChromaticity = new();
@@ -72,6 +73,7 @@ partial class ColorSpaceInfoDialog : InputDialog
             it.ChromaticityGamuts.Add(this.colorSpaceChromaticityGamut);
         });
         this.greenPrimaryTextBox = this.FindControl<TextBox>(nameof(greenPrimaryTextBox)).AsNonNull();
+        this.linearizationDescriptionTextBlock = this.FindControl<TextBlock>(nameof(linearizationDescriptionTextBlock));
         this.redPrimaryTextBox = this.FindControl<TextBox>(nameof(redPrimaryTextBox)).AsNonNull();
         this.nameTextBox = this.FindControl<TextBox>(nameof(nameTextBox)).AsNonNull().Also(it =>
         {
@@ -198,6 +200,10 @@ partial class ColorSpaceInfoDialog : InputDialog
             this.whitePointTextBox.Bind(TextBox.TextProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Undefined"));
             this.whitePointDescriptionTextBlock.Bind(TextBlock.TextProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description"));
         }
+        if (colorSpace.IsLinear)
+            this.linearizationDescriptionTextBlock.Bind(TextBlock.TextProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.LinearColorSpace"));
+        else
+            this.linearizationDescriptionTextBlock.Bind(TextBlock.TextProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.NonLinearColorSpace"));
 
         // attach to color spaces
         (Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>

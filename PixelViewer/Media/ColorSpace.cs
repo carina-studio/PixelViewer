@@ -103,15 +103,29 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Adobe RGB (1998).
         /// </summary>
-        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace("Adobe-RGB-1998", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), D65, true);
+        public static readonly ColorSpace AdobeRGB_1998 = new ColorSpace(
+            "Adobe-RGB-1998", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"),
+            true);
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly ColorSpace BT_2020 = new ColorSpace("BT.2020", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), D65, true);
+        public static readonly ColorSpace BT_2020 = new ColorSpace(
+            "BT.2020", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Rec._2020"),
+            true);
         /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
-        public static readonly ColorSpace BT_601_525Line = new ColorSpace("BT.601-525-line", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
+        public static readonly ColorSpace BT_601_525Line = new ColorSpace(
+            "BT.601-525-line", 
+            null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
             {
                 G = 1 / 0.45f,
                 A = 1 / 1.099f,
@@ -125,11 +139,17 @@ namespace Carina.PixelViewer.Media
                 0.3935f, 0.3653f, 0.1917f,
                 0.2124f, 0.7011f, 0.0866f,
                 0.0187f, 0.1119f, 0.9584f
-            )), D65, true);
+            )), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"),
+            true);
         /// <summary>
         /// ITU-R BT.601 625-line.
         /// </summary>
-        public static readonly ColorSpace BT_601_625Line = new ColorSpace("BT.601-625-line", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
+        public static readonly ColorSpace BT_601_625Line = new ColorSpace(
+            "BT.601-625-line", 
+            null, 
+            SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
             {
                 G = 1 / 0.45f,
                 A = 1 / 1.099f,
@@ -143,12 +163,21 @@ namespace Carina.PixelViewer.Media
                 0.4306f, 0.3415f, 0.1784f,
                 0.2220f, 0.7067f, 0.0713f,
                 0.0202f, 0.1296f, 0.9393f
-            )), D65, true);
+            )), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"),
+            true);
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
 #pragma warning disable CS0618
-        public static readonly ColorSpace DCI_P3 = new ColorSpace("DCI-P3", null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), (0.894587, 1, 0.954416), true);
+        public static readonly ColorSpace DCI_P3 = new ColorSpace(
+            "DCI-P3", 
+            null, 
+            SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), 
+            (0.894587, 1, 0.954416), 
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"),
+            true);
 #pragma warning restore CS0618
         /// <summary>
         /// Default color space.
@@ -157,23 +186,53 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Display-P3 (P3-D65).
         /// </summary>
-        public static readonly ColorSpace Display_P3 = new ColorSpace("Display-P3", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), D65, true);
+        public static readonly ColorSpace Display_P3 = new ColorSpace(
+            "Display-P3", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"),
+            true);
         /// <summary>
         /// Dolby vision.
         /// </summary>
-        public static readonly ColorSpace Dolby_Vision = new ColorSpace("Dolby-Vision", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020), D65, true);
+        public static readonly ColorSpace Dolby_Vision = new ColorSpace(
+            "Dolby-Vision", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Dolby_Vision"),
+            true);
         /// <summary>
         /// HLG10.
         /// </summary>
-        public static readonly ColorSpace Hlg10 = new ColorSpace("HLG10", null, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020), D65, true);
+        public static readonly ColorSpace Hlg10 = new ColorSpace(
+            "HLG10", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Hybrid_log%E2%80%93gamma"),
+            true);
         /// <summary>
         /// Linear sRGB.
         /// </summary>
-        public static readonly ColorSpace LinearSrgb = new ColorSpace("Linear-sRGB", null, SKColorSpace.CreateSrgbLinear(), D65, true);
+        public static readonly ColorSpace LinearSrgb = new ColorSpace(
+            "Linear-sRGB", 
+            null, 
+            SKColorSpace.CreateSrgbLinear(), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/SRGB"),
+            true);
         /// <summary>
         /// sRGB.
         /// </summary>
-        public static readonly ColorSpace Srgb = new ColorSpace("sRGB", null, SKColorSpace.CreateSrgb(), D65, true);
+        public static readonly ColorSpace Srgb = new ColorSpace(
+            "sRGB", 
+            null, 
+            SKColorSpace.CreateSrgb(),
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/SRGB"),
+            true);
 
 
         // Static fields.
@@ -225,7 +284,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(string name, string? customName, SKColorSpace colorSpace, (double, double, double)? whitePoint, bool isBuiltIn, bool isEmbeddedInFile = false)
+        ColorSpace(string name, string? customName, SKColorSpace colorSpace, (double, double, double)? whitePoint, Uri? uri, bool isBuiltIn, bool isEmbeddedInFile = false)
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
@@ -239,10 +298,12 @@ namespace Carina.PixelViewer.Media
                 this.IsD50WhitePoint = !this.IsD65WhitePoint && AreEquivalentWhitePoints(whitePoint.Value, D50);
             }
             this.IsEmbeddedInFile = isEmbeddedInFile;
+            this.IsLinear = skiaColorSpace.GammaIsLinear;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
             this.matrixFromXyz = Quantize(this.skiaColorSpaceXyz.Invert());
             this.Name = name;
+            this.Uri = uri;
             this.WhitePoint = whitePoint;
         }
 
@@ -375,7 +436,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="isEmbeddedInFile">Whether color space is embedded in file or not.</param>
         /// <returns><see cref="ColorSpace"/>.</returns>
         public static ColorSpace FromSkiaColorSpace(string? customName, SKColorSpace skColorSpace, (double, double, double)? whitePoint, bool isEmbeddedInFile) =>
-            new ColorSpace(GenerateRandomName(), customName, skColorSpace, whitePoint, false, isEmbeddedInFile);
+            new ColorSpace(GenerateRandomName(), customName, skColorSpace, whitePoint, null, false, isEmbeddedInFile);
 
 
         // Generate random name for color space.
@@ -484,6 +545,12 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Check whether RGB in the color space is linear RGB or not.
+        /// </summary>
+        public bool IsLinear { get; }
+
+
+        /// <summary>
         /// Load color space from file.
         /// </summary>
         /// <param name="fileName">File name.</param>
@@ -559,7 +626,7 @@ namespace Carina.PixelViewer.Media
                     throw new ArgumentException("No matrix to XYZ D50 of color space specified.");
                 
                 // create color space
-                return new ColorSpace(name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), whitePoint, false);
+                return new ColorSpace(name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), whitePoint, null, false);
             });
         });
 
@@ -587,6 +654,7 @@ namespace Carina.PixelViewer.Media
                 throw new ArgumentException("Unsupported ICC profile.");
             
             // prepare data reading functions
+            /*
             double ReadSFixed16Number(ReadOnlySpan<byte> buffer)
             {
                 var value = BinaryPrimitives.ReadUInt32BigEndian(buffer);
@@ -596,6 +664,7 @@ namespace Carina.PixelViewer.Media
                 var fractional = (value & 0xffff) / 65536.0;
                 return integer + fractional;
             }
+            */
             
             // get white point and name defined in profile
             var iccName = (string?)null;
@@ -706,7 +775,7 @@ namespace Carina.PixelViewer.Media
             */
 
             // create color space
-            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, whitePoint, false, isEmbeddedInFile);
+            return new ColorSpace(GenerateRandomName(), iccName, skiaColorSpace, whitePoint, null, false, isEmbeddedInFile);
         }
 
 

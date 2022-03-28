@@ -5,6 +5,7 @@
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ColorSpaceInfoDialog"
 		Classes="Dialog"
@@ -22,10 +23,10 @@
 		</Border>
 
 		<!-- Content -->
-		<Grid Classes="Dialog_ContentPanel" ColumnDefinitions="*,Auto,*">
+		<Grid ColumnDefinitions="*,*">
 			
 			<!-- xy chromaticity diagram -->
-			<StackPanel>
+			<StackPanel Classes="Dialog_ContentPanel">
 
 				<!-- Diagram -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
@@ -50,34 +51,44 @@
 				</ComboBox>
 
 			</StackPanel>
-			<Separator Classes="Dialog_Separator" Grid.Column="1"/>
 
 			<!-- color space info -->
-			<StackPanel Grid.Column="2">
+			<ScrollViewer Grid.Column="1" MaxHeight="{StaticResource Double/ColorSpaceInfoDialog.Content.MaxHeight}">
+				<StackPanel Classes="Dialog_ContentPanel">
 
-				<!-- Name -->
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
-				<TextBox Name="nameTextBox" Classes="Dialog_TextBox" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
-				<Separator Classes="Dialog_Separator_Large"/>
+					<!-- Name -->
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
+					<TextBox Name="nameTextBox" Classes="Dialog_TextBox" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
+					<Separator Classes="Dialog_Separator_Large"/>
 
-				<!-- White point and primaries -->
-				<Border Classes="Dialog_TextBlock_Header1">
-					<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Primaries}"/>
-				</Border>
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
-				<TextBox Name="redPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-				<Separator Classes="Dialog_Separator"/>
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
-				<TextBox Name="greenPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-				<Separator Classes="Dialog_Separator"/>
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
-				<TextBox Name="bluePrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-				<Separator Classes="Dialog_Separator"/>
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
-				<TextBox Name="whitePointTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-				<TextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>
+					<!-- White point and primaries -->
+					<Border Classes="Dialog_TextBlock_Header1">
+						<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Primaries}"/>
+					</Border>
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
+					<TextBox Name="redPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+					<Separator Classes="Dialog_Separator"/>
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
+					<TextBox Name="greenPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+					<Separator Classes="Dialog_Separator"/>
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
+					<TextBox Name="bluePrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+					<Separator Classes="Dialog_Separator"/>
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
+					<TextBox Name="whitePointTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+					<TextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>
+					<Separator Classes="Dialog_Separator_Large"/>
 
-			</StackPanel>
+					<!-- Other information -->
+					<Border Classes="Dialog_TextBlock_Header1">
+						<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Other}"/>
+					</Border>
+					<TextBlock Name="linearizationDescriptionTextBlock" Classes="Dialog_TextBlock" TextWrapping="Wrap"/>
+					<Separator Classes="Dialog_Separator" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
+					<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock" HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static asConverters:ValueToBooleanConverters.NonNullToTrue}}" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
+
+				</StackPanel>
+			</ScrollViewer>
 
 		</Grid>
 		
