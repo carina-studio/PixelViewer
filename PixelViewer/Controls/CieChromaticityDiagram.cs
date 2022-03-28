@@ -804,9 +804,9 @@ class CieChromaticityDiagram : Control, IStyleable
             var borderPen = chromaticityGamut.BorderPen;
             if (borderPen != null)
             {
-                var (rX, rY) = chromaticityGamut.ColorSpace.ToXyChromaticity(1, 0, 0);
-                var (gX, gY) = chromaticityGamut.ColorSpace.ToXyChromaticity(0, 1, 0);
-                var (bX, bY) = chromaticityGamut.ColorSpace.ToXyChromaticity(0, 0, 1);
+                var (rX, rY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(1, 0, 0);
+                var (gX, gY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0, 1, 0);
+                var (bX, bY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0, 0, 1);
                 var rPoint = this.XYToControlCoordinate(width, height, rX, rY);
                 var gPoint = this.XYToControlCoordinate(width, height, gX, gY);
                 var bPoint = this.XYToControlCoordinate(width, height, bX, bY);

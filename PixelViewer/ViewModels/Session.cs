@@ -5024,13 +5024,13 @@ namespace Carina.PixelViewer.ViewModels
 
 				// convert to Lab color
 				var colorSpace = this.ColorSpace;
-				var (labL, labA, labB) = colorSpace.ToLab(argbR, argbG, argbB);
+				var (labL, labA, labB) = colorSpace.RgbToLab(argbR, argbG, argbB);
 				labL *= 100;
 				labA *= 128;
 				labB *= 128;
 
 				// convert to XYZ color
-				var (xyzX, xyzY, xyzZ) = colorSpace.ToXyz(argbR, argbG, argbB);
+				var (xyzX, xyzY, xyzZ) = colorSpace.RgbToXyz(argbR, argbG, argbB);
 				xyzX *= 100;
 				xyzY *= 100;
 				xyzZ *= 100;

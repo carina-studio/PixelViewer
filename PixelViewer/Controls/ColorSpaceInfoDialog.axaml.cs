@@ -156,9 +156,9 @@ partial class ColorSpaceInfoDialog : InputDialog
         this.colorSpaceWhitePointChromaticity.X = colorSpace.WhitePoint.Item1 / wpXYZ;
         this.colorSpaceWhitePointChromaticity.Y = colorSpace.WhitePoint.Item2 / wpXYZ;
         this.colorSpaceChromaticityGamut.ColorSpace = colorSpace;
-        var (rX, rY, rZ) = colorSpace.ToXyz(1, 0, 0);
-        var (gX, gY, gZ) = colorSpace.ToXyz(0, 1, 0);
-        var (bX, bY, bZ) = colorSpace.ToXyz(0, 0, 1);
+        var (rX, rY, rZ) = colorSpace.RgbToXyz(1, 0, 0);
+        var (gX, gY, gZ) = colorSpace.RgbToXyz(0, 1, 0);
+        var (bX, bY, bZ) = colorSpace.RgbToXyz(0, 0, 1);
         this.redPrimaryTextBox.Text = $"{rX:F4}, {rY:F4}, {rZ:F4}";
         this.greenPrimaryTextBox.Text = $"{gX:F4}, {gY:F4}, {gZ:F4}";
         this.bluePrimaryTextBox.Text = $"{bX:F4}, {bY:F4}, {bZ:F4}";

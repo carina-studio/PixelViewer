@@ -364,32 +364,6 @@ namespace Carina.PixelViewer.Media
             new ColorSpace(GenerateRandomName(), customName, skColorSpace, whitePoint, false, isEmbeddedInFile);
 
 
-        /// <summary>
-        /// Convert from XYZ D50 color space.
-        /// </summary>
-        /// <param name="x">X.</param>
-        /// <param name="y">Y.</param>
-        /// <param name="z">Z.</param>
-        /// <returns>Normalized RGB color.</returns>
-        public (double, double, double) FromXyz(double x, double y, double z)
-        {
-            var m = this.matrixFromXyz;
-            var qX = (long)(x * 65536 + 0.5);
-            var qY = (long)(y * 65536 + 0.5);
-            var qZ = (long)(z * 65536 + 0.5);
-            var qR = Clip((m[0] * qX + m[1] * qY + m[2] * qZ) >> 16);
-            var qG = Clip((m[3] * qX + m[4] * qY + m[5] * qZ) >> 16);
-            var qB = Clip((m[6] * qX + m[7] * qY + m[8] * qZ) >> 16);
-            if (this.hasTransferFunc)
-            {
-                qR = this.NumericalTransferToRgb(qR);
-                qG = this.NumericalTransferToRgb(qG);
-                qB = this.NumericalTransferToRgb(qB);
-            }
-            return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
-        }
-
-
         // Generate random name for color space.
         static string GenerateRandomName() => new char[8].Let(it =>
         {
@@ -868,6 +842,55 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Convert to L*a*b* D50 color space.
+        /// </summary>
+        /// <param name="r">Normalized R.</param>
+        /// <param name="g">Normalized G.</param>
+        /// <param name="b">Normalized B.</param>
+        /// <returns>L*a*b* color.</returns>
+        public (double, double, double) RgbToLab(double r, double g, double b) =>
+            XyzToLab(this.RgbToXyz(r, g, b));
+
+
+        /// <summary>
+        /// Convert to CIE xy chromaticity.
+        /// </summary>
+        /// <param name="r">Normalized R.</param>
+        /// <param name="g">Normalized G.</param>
+        /// <param name="b">Normalized B.</param>
+        /// <returns>xy chromaticity.</returns>
+        public (double, double) RgbToXyChromaticity(double r, double g, double b) =>
+            XyzToXyChromaticity(this.RgbToXyz(r, g, b));
+
+
+        /// <summary>
+        /// Convert from RGB to XYZ D50 color space.
+        /// </summary>
+        /// <param name="r">Normalized R.</param>
+        /// <param name="g">Normalized G.</param>
+        /// <param name="b">Normalized B.</param>
+        /// <returns>XYZ color.</returns>
+        public (double, double, double) RgbToXyz(double r, double g, double b)
+        {
+            var qR = Quantize(r);
+            var qG = Quantize(g);
+            var qB = Quantize(b);
+            if (this.hasTransferFunc)
+            {
+                qR = this.NumericalTransferFromRgb(qR);
+                qG = this.NumericalTransferFromRgb(qG);
+                qB = this.NumericalTransferFromRgb(qB);
+            }
+            var m = this.matrixToXyz;
+            return (
+                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
+                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
+                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
+            );
+        }
+
+
+        /// <summary>
         /// Save color space to file.
         /// </summary>
         /// <param name="fileName">File name.</param>
@@ -930,29 +953,6 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
-        /// Convert to L*a*b* D50 color space.
-        /// </summary>
-        /// <param name="r">Normalized R.</param>
-        /// <param name="g">Normalized G.</param>
-        /// <param name="b">Normalized B.</param>
-        /// <returns>L*a*b* color.</returns>
-        public (double, double, double) ToLab(double r, double g, double b)
-        {
-            var (x, y, z) = this.ToXyz(r, g, b);
-            double Convert(double t) // https://en.wikipedia.org/wiki/CIELAB_color_space
-            {
-                if (t > 0.008856451679036)
-                    return Math.Pow(t, 0.3333);
-                return (t / 0.128418549346017) + 0.137931034482759;
-            }
-            var labL = 116 * Convert(y) - 16; // [0, 100]
-            var labA = 500 * (Convert(x / 0.964212) - Convert(y)); // [-128, 128]
-            var labB = 200 * (Convert(y) - Convert(z / 0.825188)); // [-128, 128]
-            return (labL / 100, labA / 128, labB / 128);
-        }
-
-
-        /// <summary>
         /// Convert to <see cref="SKColorSpace"/>.
         /// </summary>
         /// <returns><see cref="SKColorSpace"/>.</returns>
@@ -961,48 +961,6 @@ namespace Carina.PixelViewer.Media
 
         /// <inheritdoc/>
         public override string ToString() => this.CustomName ?? this.Name;
-
-
-        /// <summary>
-        /// Convert to CIE xy chromaticity.
-        /// </summary>
-        /// <param name="r">Normalized R.</param>
-        /// <param name="g">Normalized G.</param>
-        /// <param name="b">Normalized B.</param>
-        /// <returns>xy chromaticity.</returns>
-        public (double, double) ToXyChromaticity(double r, double g, double b)
-        {
-            var (x, y, z) = this.ToXyz(r, g, b);
-            var xyz = (x + y + z);
-            return (x / xyz, y / xyz);
-        }
-
-
-        /// <summary>
-        /// Convert to XYZ D50 color space.
-        /// </summary>
-        /// <param name="r">Normalized R.</param>
-        /// <param name="g">Normalized G.</param>
-        /// <param name="b">Normalized B.</param>
-        /// <returns>XYZ color.</returns>
-        public (double, double, double) ToXyz(double r, double g, double b)
-        {
-            var qR = Quantize(r);
-            var qG = Quantize(g);
-            var qB = Quantize(b);
-            if (this.hasTransferFunc)
-            {
-                qR = this.NumericalTransferFromRgb(qR);
-                qG = this.NumericalTransferFromRgb(qG);
-                qB = this.NumericalTransferFromRgb(qB);
-            }
-            var m = this.matrixToXyz;
-            return (
-                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
-                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
-                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
-            );
-        }
 
 
         /// <summary>
@@ -1071,6 +1029,86 @@ namespace Carina.PixelViewer.Media
         /// Get XYZ of white point.
         /// </summary>
         public (double, double, double) WhitePoint { get; }
+
+
+        /// <summary>
+        /// Convert from XYZ D50 color space to L*a*b* D50 color space.
+        /// </summary>
+        /// <param name="xyz">XYZ color.</param>
+        /// <returns>L*a*b* color.</returns>
+        public static (double, double, double) XyzToLab((double, double, double) xyz) =>
+            XyzToLab(xyz.Item1, xyz.Item2, xyz.Item3);
+
+
+        /// <summary>
+        /// Convert from XYZ D50 color space to L*a*b* D50 color space.
+        /// </summary>
+        /// <param name="x">X.</param>
+        /// <param name="y">Y.</param>
+        /// <param name="z">Z.</param>
+        /// <returns>L*a*b* color.</returns>
+        public static (double, double, double) XyzToLab(double x, double y, double z)
+        {
+            double Convert(double t) // https://en.wikipedia.org/wiki/CIELAB_color_space
+            {
+                if (t > 0.008856451679036)
+                    return Math.Pow(t, 0.3333);
+                return (t / 0.128418549346017) + 0.137931034482759;
+            }
+            var labL = 116 * Convert(y) - 16; // [0, 100]
+            var labA = 500 * (Convert(x / 0.964212) - Convert(y)); // [-128, 128]
+            var labB = 200 * (Convert(y) - Convert(z / 0.825188)); // [-128, 128]
+            return (labL / 100, labA / 128, labB / 128);
+        }
+
+
+        /// <summary>
+        /// Convert from XYZ D50 color space to RGB.
+        /// </summary>
+        /// <param name="x">X.</param>
+        /// <param name="y">Y.</param>
+        /// <param name="z">Z.</param>
+        /// <returns>Normalized RGB color.</returns>
+        public (double, double, double) XyzToRgb(double x, double y, double z)
+        {
+            var m = this.matrixFromXyz;
+            var qX = (long)(x * 65536 + 0.5);
+            var qY = (long)(y * 65536 + 0.5);
+            var qZ = (long)(z * 65536 + 0.5);
+            var qR = Clip((m[0] * qX + m[1] * qY + m[2] * qZ) >> 16);
+            var qG = Clip((m[3] * qX + m[4] * qY + m[5] * qZ) >> 16);
+            var qB = Clip((m[6] * qX + m[7] * qY + m[8] * qZ) >> 16);
+            if (this.hasTransferFunc)
+            {
+                qR = this.NumericalTransferToRgb(qR);
+                qG = this.NumericalTransferToRgb(qG);
+                qB = this.NumericalTransferToRgb(qB);
+            }
+            return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
+        }
+
+
+        /// <summary>
+        /// Convert from CIE XYZ to CIE xy chromaticity.
+        /// </summary>
+        /// <param name="xyz">XYZ color.</param>
+        /// <returns>xy chromaticity.</returns>
+        public static (double, double) XyzToXyChromaticity((double, double, double) xyz) =>
+            XyzToXyChromaticity(xyz.Item1, xyz.Item2, xyz.Item3);
+
+
+        /// <summary>
+        /// Convert from CIE XYZ to CIE xy chromaticity.
+        /// </summary>
+        /// <param name="x">X.</param>
+        /// <param name="y">Y.</param>
+        /// <param name="z">Z.</param>
+        /// <returns>xy chromaticity.</returns>
+        public static (double, double) XyzToXyChromaticity(double x, double y, double z)
+        {
+            var xyz = (x + y + z);
+            return (x / xyz, y / xyz);
+        }
     }
 
 
