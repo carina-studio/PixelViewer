@@ -94,6 +94,8 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space (show as dashed line)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">Color space information</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">White point</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.CCT">CCT {0:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT">CIE standard illuminant {0}, CCT {1:F0}K</sys:String>
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>

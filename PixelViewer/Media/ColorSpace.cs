@@ -90,6 +90,16 @@ namespace Carina.PixelViewer.Media
         }
 
 
+         /// <summary>
+        /// CIE standard illuminant D50.
+        /// </summary>
+        public static (double, double, double) D50 = (0.9642, 1.0000, 0.8251);
+        /// <summary>
+        /// CIE standard illuminant D65.
+        /// </summary>
+        public static (double, double, double) D65 = (0.9504, 1.0000, 1.0888);
+
+
         /// <summary>
         /// Adobe RGB (1998).
         /// </summary>
@@ -134,14 +144,6 @@ namespace Carina.PixelViewer.Media
                 0.2220f, 0.7067f, 0.0713f,
                 0.0202f, 0.1296f, 0.9393f
             )), D65, true);
-        /// <summary>
-        /// CIE standard illuminant D50.
-        /// </summary>
-        public static (double, double, double) D50 = (0.9642, 1.0000, 0.8251);
-        /// <summary>
-        /// CIE standard illuminant D65.
-        /// </summary>
-        public static (double, double, double) D65 = (0.9504, 1.0000, 1.0888);
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
@@ -231,6 +233,8 @@ namespace Carina.PixelViewer.Media
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
             this.IsBuiltIn = isBuiltIn;
+            this.IsD65WhitePoint = AreEquivalentWhitePoints(whitePoint, D65);
+            this.IsD50WhitePoint = !this.IsD65WhitePoint && AreEquivalentWhitePoints(whitePoint, D50);
             this.IsEmbeddedInFile = isEmbeddedInFile;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
@@ -262,6 +266,13 @@ namespace Carina.PixelViewer.Media
             }
             return false;
         }
+
+
+        // Check whether two white points are equivalent or not.
+        static bool AreEquivalentWhitePoints((double, double, double) x, (double, double, double) y) =>
+            Math.Abs(x.Item1 - y.Item1) <= 0.00001
+            && Math.Abs(x.Item2 - y.Item2) <= 0.00001
+            && Math.Abs(x.Item3 - y.Item3) <= 0.00001;
 
 
         /// <summary>
@@ -449,6 +460,18 @@ namespace Carina.PixelViewer.Media
         /// Check whether the color space is buil-in or not.
         /// </summary>
         public bool IsBuiltIn { get; }
+
+
+        /// <summary>
+        /// Check whether the white point is D50 or not.
+        /// </summary>
+        public bool IsD50WhitePoint { get; }
+
+
+        /// <summary>
+        /// Check whether the white point is D65 or not.
+        /// </summary>
+        public bool IsD65WhitePoint { get; }
 
 
         /// <summary>
@@ -1029,6 +1052,29 @@ namespace Carina.PixelViewer.Media
         /// Get XYZ of white point.
         /// </summary>
         public (double, double, double) WhitePoint { get; }
+
+
+        /// <summary>
+        /// Convert from CIE xy chromaticity to Correlated Color Temperature.
+        /// </summary>
+        /// <param name="xy">xy chromaticity.</param>
+        /// <returns>Correlated Color Temperature.</returns>
+        public static double XyChromaticityToCct((double, double) xy) =>
+            XyChromaticityToCct(xy.Item1, xy.Item2);
+
+
+        /// <summary>
+        /// Convert from CIE xy chromaticity to Correlated Color Temperature.
+        /// </summary>
+        /// <param name="x">x.</param>
+        /// <param name="y">y.</param>
+        /// <returns>Correlated Color Temperature.</returns>
+        public static double XyChromaticityToCct(double x, double y)
+        {
+            var n = (x - 0.3320) / (0.1858 - y);
+            var n2 = n * n;
+            return 437 * n2 * n + 3601 * n2 + 6861 * n + 5517;
+        }
 
 
         /// <summary>

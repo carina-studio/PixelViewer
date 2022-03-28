@@ -38,6 +38,7 @@ partial class ColorSpaceInfoDialog : InputDialog
     readonly CieChromaticityGamut refColorSpaceChromaticityGamut = new();
     readonly CieChromaticity refColorSpaceWhitePointChromaticity = new();
     readonly TextBox nameTextBox;
+    readonly TextBlock whitePointDescriptionTextBlock;
     readonly TextBox whitePointTextBox;
 
 
@@ -81,6 +82,7 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             it.GetObservable(TextBox.TextProperty).Subscribe(_ => this.InvalidateInput());
         });
+        this.whitePointDescriptionTextBlock = this.FindControl<TextBlock>(nameof(whitePointDescriptionTextBlock)).AsNonNull();
         this.whitePointTextBox = this.FindControl<TextBox>(nameof(whitePointTextBox)).AsNonNull();
 
         // attach to property
@@ -163,6 +165,15 @@ partial class ColorSpaceInfoDialog : InputDialog
         this.greenPrimaryTextBox.Text = $"{gX:F4}, {gY:F4}, {gZ:F4}";
         this.bluePrimaryTextBox.Text = $"{bX:F4}, {bY:F4}, {bZ:F4}";
         this.whitePointTextBox.Text = $"{colorSpace.WhitePoint.Item1:F4}, {colorSpace.WhitePoint.Item2:F4}, {colorSpace.WhitePoint.Item3:F4}";
+        this.whitePointDescriptionTextBlock.Text = Global.Run(() =>
+        {
+            var cct = Media.ColorSpace.XyChromaticityToCct(Media.ColorSpace.XyzToXyChromaticity(colorSpace.WhitePoint));
+            if (colorSpace.IsD65WhitePoint)
+                return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT", "D65", cct);
+            if (colorSpace.IsD50WhitePoint)
+                return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.StandardIlluminantWithCCT", "D50", cct);
+            return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.CCT", cct);
+        });
 
         // attach to color spaces
         (Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>

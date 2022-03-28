@@ -75,6 +75,7 @@
 				<Separator Classes="Dialog_Separator"/>
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
 				<TextBox Name="whitePointTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
+				<TextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>
 
 			</StackPanel>
 

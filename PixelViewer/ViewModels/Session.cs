@@ -2715,7 +2715,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.colorSpaces.AddAll(e.NewItems.AsNonNull().Cast<ColorSpace>());
 					break;
 				case NotifyCollectionChangedAction.Remove:
-					this.colorSpaces.RemoveAll(e.NewItems.AsNonNull().Cast<ColorSpace>());
+					this.colorSpaces.RemoveAll(e.OldItems.AsNonNull().Cast<ColorSpace>());
 					break;
 			}
 		}
