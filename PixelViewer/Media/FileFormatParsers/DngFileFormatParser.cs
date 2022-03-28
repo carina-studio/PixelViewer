@@ -40,6 +40,12 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         {
             // get image info
             var byteOrdering = ByteOrdering.LittleEndian;
+            var hasJpegThumb = false;
+            var jpegThumbWidth = 0;
+            var jpegThumbHeight = 0;
+            var jpegThumbOffset = 0u;
+            var jpegThumbDataSize = 0u;
+            var compression = 0u;
             var imageWidth = 0;
             var imageHeight = 0;
             var orientation = 0;
@@ -51,7 +57,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             var cfaLayout = 0;
             var cfaPattern = (byte[]?)null;
             var imageDataOffset = 0L;
-            await Task.Run(() =>
+            var colorSpace = (Media.ColorSpace?)null;
+            await Task.Run(async () =>
             {
                 // create reader
                 var entryReader = (IfdEntryReader?)null;
@@ -72,6 +79,11 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 var stripByteCounts = (uint[]?)null;
                 var ushortData = (ushort[]?)null;
                 var uintData = (uint[]?)null;
+                var thumbWidth = 0;
+                var thumbHeight = 0;
+                var isJpegThumb = false;
+                var thumbStripOffsets = (uint[]?)null;
+                var thumbStripByteCounts = (uint[]?)null;
                 while (entryReader.Read())
                 {
                     switch (entryReader.CurrentIfdName)
@@ -85,12 +97,22 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                         isFullSizeImage = (uintData[0] == 0);
                                     break;
                                 case 0x0100: // ImageWidth
-                                    if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null)
-                                        imageWidth = (int)uintData[0];
+                                    if (entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                    {
+                                        if (isFullSizeImage)
+                                            imageWidth = (int)uintData[0];
+                                        else
+                                            thumbWidth = (int)uintData[0];
+                                    }
                                     break;
                                 case 0x0101: // ImageLength
-                                    if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null)
-                                        imageHeight = (int)uintData[0];
+                                    if (entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                    {
+                                        if (isFullSizeImage)
+                                            imageHeight = (int)uintData[0];
+                                        else
+                                            thumbHeight = (int)uintData[0];
+                                    }
                                     break;
                                 case 0x0102: // BitsPerSample
                                     if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
@@ -101,9 +123,17 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                             ++pixelStride;
                                     }
                                     break;
-                                case 0x0103: // Compression, should be 1 (Uncompressed data)
-                                    if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null && ushortData[0] != 1)
-                                        return;
+                                case 0x0103: // Compression, should be 1 (Uncompressed data) for full-size image
+                                    if (entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                    {
+                                        if (isFullSizeImage)
+                                        {
+                                            isJpegThumb = false;
+                                            compression = ushortData[0];
+                                        }
+                                        else
+                                            isJpegThumb = ushortData[0] == 7;
+                                    }
                                     break;
                                 case 0x0106: // PhotometricInterpretation
                                     if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
@@ -112,10 +142,15 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 case 0x0111: // StripOffsets
                                     if (isFullSizeImage)
                                         entryReader.TryGetEntryData(out stripOffsets);
+                                    else if (isJpegThumb)
+                                        entryReader.TryGetEntryData(out thumbStripOffsets);
                                     break;
                                 case 0x0112: // Orientation
-                                    if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
-                                        orientation = ushortData[0];
+                                    if (entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                    {
+                                        if (isFullSizeImage)
+                                            orientation = ushortData[0];
+                                    }
                                     break;
                                 case 0x0116: // RowsPerStrip:
                                     if (isFullSizeImage)
@@ -124,14 +159,28 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 case 0x0117: // StripByteCounts
                                     if (isFullSizeImage)
                                         entryReader.TryGetEntryData(out stripByteCounts);
+                                    else if (isJpegThumb && entryReader.TryGetEntryData(out thumbStripByteCounts))
+                                    {
+                                        // select this JPEG thumbnail if it is the largest one
+                                        if (thumbWidth > jpegThumbWidth && thumbHeight > jpegThumbHeight
+                                            && thumbStripOffsets != null && thumbStripOffsets.Length == 1
+                                            && thumbStripByteCounts != null && thumbStripByteCounts.Length == 1)
+                                        {
+                                            hasJpegThumb = true;
+                                            jpegThumbWidth = thumbWidth;
+                                            jpegThumbHeight = thumbHeight;
+                                            jpegThumbOffset = thumbStripOffsets[0];
+                                            jpegThumbDataSize = thumbStripByteCounts[0];
+                                        }
+                                    }
                                     break;
                                 case 0x0142: // TileWidth, should be same as image width
                                     if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null && uintData[0] != (uint)imageWidth)
-                                        return;
+                                        compression = 0;
                                     break;
                                 case 0x0143: // TileLength, should be same as image height
                                     if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null && uintData[0] != (uint)imageHeight)
-                                        return;
+                                        compression = 0;
                                     break;
                                 case 0x0144: // TileOffsets, only single tile is supported
                                     if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null)
@@ -139,8 +188,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                         if (uintData.Length == 1)
                                             imageDataOffset = (entryReader.InitialStreamPosition + uintData[0]);
                                         else
-                                            return;
+                                            compression = 0;
                                     }
+                                    break;
+                                case 0x0145: // TileByteCounts
                                     break;
                                 case 0x014a: // SubIFDs
                                     if (!isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null)
@@ -244,6 +295,30 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 // calculate effective bits
                 if (effectiveBits <= 0)
                     effectiveBits = (pixelStride << 3);
+                
+                // get color space
+                var useJpepImage = false;
+                switch (compression)
+                {
+                    case 1: // uncompressed raw
+                        break;
+                    case 7: // JPEG
+                        if (imageDataOffset > 0)
+                        {
+                            stream.Position = imageDataOffset;
+                            useJpepImage = true;
+                        }
+                        break;
+                    default:
+                        if (hasJpegThumb && jpegThumbOffset > 0)
+                        {
+                            stream.Position = jpegThumbOffset;
+                            useJpepImage = true;
+                        }
+                        break;
+                }
+                if (useJpepImage && JpegFileFormatParser.SeekToIccProfile(stream))
+                    colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(stream, true, cancellationToken);
             });
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -251,10 +326,52 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             // check image data and size
             if (imageWidth <= 0 || imageHeight <= 0)
                 return null;
-            if (imageDataOffset <= 0)
+            if (compression != 0 && imageDataOffset <= 0)
                 return null;
-            if (effectiveBits <= 0 || pixelStride <= 0 || rowStride <= 0)
+            if (compression == 1 // uncompressed raw
+                && (effectiveBits <= 0 || pixelStride <= 0 || rowStride <= 0))
+            {
                 return null;
+            }
+
+            // treat as compressed format
+            var imageRenderer = (Media.ImageRenderers.IImageRenderer?)null;
+            switch (compression)
+            {
+                case 1: // uncompressed raw
+                    break;
+                case 7: // JPEG
+                    imageRenderer = Media.ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is Media.ImageRenderers.JpegImageRenderer);
+                    if (imageRenderer != null)
+                    {
+                        return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>
+                        {
+                            if (colorSpace != null)
+                                profile.ColorSpace = colorSpace;
+                            profile.DataOffset = imageDataOffset;
+                            profile.Height = imageHeight;
+                            profile.Width = imageWidth;
+                        });
+                    }
+                    return null;
+                default:
+                    if (hasJpegThumb && jpegThumbOffset > 0 && jpegThumbWidth > 0 && jpegThumbHeight > 0)
+                    {
+                        imageRenderer = Media.ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is Media.ImageRenderers.JpegImageRenderer);
+                        if (imageRenderer != null)
+                        {
+                            return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>
+                            {
+                                if (colorSpace != null)
+                                    profile.ColorSpace = colorSpace;
+                                profile.DataOffset = jpegThumbOffset;
+                                profile.Height = jpegThumbHeight;
+                                profile.Width = jpegThumbWidth;
+                            });
+                        }
+                    }
+                    return null;
+            }
 
             // check CFA
             var bayerPattern = BayerPattern.RGGB_2x2;
@@ -275,7 +392,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             }
 
             // select renderer
-            var imageRenderer = pixelStride switch
+            imageRenderer = pixelStride switch
             { 
                 2 => ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.BayerPattern16ImageRenderer),
                 _ => null,
@@ -288,6 +405,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 profile.BayerPattern = bayerPattern;
                 profile.ByteOrdering = byteOrdering;
+                if (colorSpace != null)
+                    profile.ColorSpace = colorSpace;
                 profile.DataOffset = imageDataOffset;
                 profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);
                 profile.Height = imageHeight;

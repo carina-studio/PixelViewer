@@ -51,8 +51,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             // Please refer to https://github.com/mono/SkiaSharp/issues/1551
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
-            using var codec = SKData.Create(imageStream).Use(it => 
-                SKCodec.Create(it));
+            using var codec = SKData.Create(imageStream)?.Use(it => 
+                SKCodec.Create(it)) ?? new SKManagedStream(imageStream, false).Use(stream =>
+                    SKCodec.Create(stream));
             if (codec == null)
                 throw new ArgumentException("Unable to create codec.");
             if (codec.EncodedFormat != this.encodedFormat)

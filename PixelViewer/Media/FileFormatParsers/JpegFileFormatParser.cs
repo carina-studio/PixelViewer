@@ -41,7 +41,16 @@ class JpegFileFormatParser : SkiaFileFormatParser
 
 
     /// <inheritdoc/>
-    protected override bool OnSeekToIccProfile(Stream stream)
+    protected override bool OnSeekToIccProfile(Stream stream) =>
+        SeekToIccProfile(stream);
+
+
+    /// <summary>
+    /// Seek to embedded ICC profile.
+    /// </summary>
+    /// <param name="stream">Stream to read JPEG image.</param>
+    /// <returns>True if seeking successfully.</returns>
+    public static bool SeekToIccProfile(Stream stream)
     {
         // skip file header
         var segmentHeaderBuffer = new byte[4];
