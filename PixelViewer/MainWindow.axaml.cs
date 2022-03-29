@@ -114,7 +114,7 @@ namespace Carina.PixelViewer
 			this.GetObservable(IsActiveProperty).Subscribe(isActive =>
 			{
 				if (isActive)
-					Media.ColorSpace.InvalidateSystemColorSpace();
+					Media.ColorSpace.InvalidateSystemScreenColorSpace();
 			});
 		}
 

@@ -41,6 +41,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">顯示選取像素的 XYZ D50 色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">無法從檔案載入色彩空間。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">使用系統定義的螢幕色彩空間</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>

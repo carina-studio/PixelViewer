@@ -169,6 +169,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+        /// Check whether system defined screen color space is supported or not. 
+        /// </summary>
+        public bool IsSystemScreenColorSpaceSupported { get => Media.ColorSpace.IsSystemScreenColorSpaceSupported; }
+
+
+		/// <summary>
 		/// Maximum memory usage for rendering images.
 		/// </summary>
 		public long MaxRenderedImagesMemoryUsageMB
@@ -229,6 +235,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.ShowSelectedRenderedImagePixelXyzColor));
 			else if (key == SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
+			else if (key == SettingKeys.UseSystemScreenColorSpace)
+				this.OnPropertyChanged(nameof(this.UseSystemScreenColorSpace));
 		}
 
 
@@ -272,7 +280,11 @@ namespace Carina.PixelViewer.ViewModels
 				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
-			set => this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);
+			set
+			{
+				if (value != null)
+					this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);
+			}
 		}
 
 
@@ -323,6 +335,16 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile);
 			set => this.Settings.SetValue<bool>(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
+		}
+
+
+		/// <summary>
+		/// Use screen color space defined by system.
+		/// </summary>
+		public bool UseSystemScreenColorSpace
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace);
+			set => this.Settings.SetValue<bool>(SettingKeys.UseSystemScreenColorSpace, IsSystemScreenColorSpaceSupported && value);
 		}
 	}
 }

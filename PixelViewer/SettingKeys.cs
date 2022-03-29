@@ -123,5 +123,9 @@ namespace Carina.PixelViewer
 		/// Change to default image renderer after opening file.
 		/// </summary>
 		public static readonly SettingKey<bool> UseDefaultImageRendererAfterOpeningSourceFile = new SettingKey<bool>(nameof(UseDefaultImageRendererAfterOpeningSourceFile), false);
+		/// <summary>
+		/// Use screen color space defined by system.
+		/// </summary>
+		public static readonly SettingKey<bool> UseSystemScreenColorSpace = new (nameof(UseSystemScreenColorSpace), true);
 	}
 }

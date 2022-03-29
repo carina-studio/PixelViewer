@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:aConverters="using:Avalonia.Data.Converters"
 		xmlns:as="using:CarinaStudio.AppSuite"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
@@ -182,12 +183,18 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Text="{DynamicResource String/Common.Details}"/>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Screen color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
-				<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
+				<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_ComboBox" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
+					<ComboBox.IsEnabled>
+						<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+							<Binding Path="EnableColorSpaceManagement"/>
+							<Binding Path="!UseSystemScreenColorSpace"/>
+						</MultiBinding>
+					</ComboBox.IsEnabled>
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
 							<Grid ColumnDefinitions="*,Auto">
@@ -202,12 +209,19 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" Text="{DynamicResource String/Common.Details}"/>
+				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
 				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Use system screen color space -->
+				<StackPanel IsVisible="{Binding IsSystemScreenColorSpaceSupported}">
+					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace}"/>
+					<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseSystemScreenColorSpace, Mode=TwoWay}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+					<Separator Classes="Dialog_Separator"/>
+				</StackPanel>
 
 				<!-- Custom color spaces -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
-				<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Height="150" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.CustomColorSpaces}">
+				<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Height="150" Items="{x:Static appMedia:ColorSpace.CustomColorSpaces}">
 					<asControls:ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid ColumnDefinitions="*,Auto">

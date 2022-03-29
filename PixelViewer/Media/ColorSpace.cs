@@ -469,13 +469,13 @@ namespace Carina.PixelViewer.Media
         
 
         /// <summary>
-        /// Get color space defined by system.
+        /// Get screen color space defined by system.
         /// </summary>
         /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Task of getting color space.</returns>
-        public static async Task<ColorSpace> GetSystemColorSpaceAsync(CancellationToken cancellationToken = default)
+        /// <returns>Task of getting screen color space.</returns>
+        public static async Task<ColorSpace> GetSystemScreenColorSpaceAsync(CancellationToken cancellationToken = default)
         {
-            if (!CarinaStudio.Platform.IsMacOS)
+            if (!IsSystemScreenColorSpaceSupported)
                 throw new NotSupportedException();
             var systemColorSpace = await Task.Run(() =>
             {
@@ -536,6 +536,7 @@ namespace Carina.PixelViewer.Media
             // attach to application
             ColorSpace.app = app;
             logger = app.LoggerFactory.CreateLogger(nameof(ColorSpace));
+            app.Settings.SettingChanged += OnSettingChanged;
 
             logger.LogDebug("Initialize");
 
@@ -560,7 +561,7 @@ namespace Carina.PixelViewer.Media
             // load color space files
             foreach (var fileName in fileNames)
             {
-                logger.LogTrace($"Load color space file '{fileNames}'");
+                logger.LogTrace($"Load color space file '{fileName}'");
                 var colorSpace = (ColorSpace?)null;
                 try
                 {
@@ -568,7 +569,7 @@ namespace Carina.PixelViewer.Media
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"Failed to load color space file '{fileNames}'");
+                    logger.LogError(ex, $"Failed to load color space file '{fileName}'");
                     continue;
                 }
                 if (customColorSpaces.TryAdd(colorSpace.Name, colorSpace))
@@ -581,46 +582,69 @@ namespace Carina.PixelViewer.Media
             logger.LogDebug($"{customColorSpaces.Count} color space(s) loaded");
 
             // setup system color space
-            InvalidateSystemColorSpace();
+            await InvalidateSystemScreenColorSpaceAsync();
         }
 
 
         /// <summary>
-        /// Invalidate and refresh system color space.
+        /// Invalidate and refresh system screen color space.
         /// </summary>
-        public static async void InvalidateSystemColorSpace()
+        public static void InvalidateSystemScreenColorSpace() =>
+            _ = InvalidateSystemScreenColorSpaceAsync();
+
+
+        // Invalidate and refresh system screen color space.
+        static async Task InvalidateSystemScreenColorSpaceAsync()
         {
+            // check state
+            if (!IsSystemScreenColorSpaceSupported)
+                return;
+            
             // get system color space
             var colorSpace = (ColorSpace?)null;
             try
             {
-                colorSpace = await GetSystemColorSpaceAsync();
+                colorSpace = await GetSystemScreenColorSpaceAsync();
             }
             catch (Exception ex)
             {
-                if (app?.IsDebugMode == true)
-                    logger?.LogDebug(ex, "Unable to get system color space");
+                logger?.LogError(ex, "Unable to get system screen color space");
             }
-            if (systemColorSpace?.Equals(colorSpace) ?? colorSpace == null)
+
+            // skip if it is same as current system screen color space
+            var prevColorSpace = systemColorSpace;
+            if (prevColorSpace?.Equals(colorSpace) ?? colorSpace == null)
                 return;
             
-            logger.LogDebug($"System color space is '{colorSpace}'");
+            logger.LogDebug($"System screen color space is '{colorSpace}'");
 
-            // reset settings
-            if (app != null && systemColorSpace?.IsSystemDefined == true)
-            {
-                if (app.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName) == systemColorSpace.Name)
-                    app.Settings.ResetValue(SettingKeys.DefaultColorSpaceName);
-                if (app.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName) == systemColorSpace.Name)
-                    app.Settings.ResetValue(SettingKeys.ScreenColorSpaceName);
-            }
-
-            // update state
-            if (systemColorSpace?.IsSystemDefined == true)
-                allColorSpaceList.Remove(systemColorSpace);
+            // add color space to list
             systemColorSpace = colorSpace;
             if (colorSpace?.IsSystemDefined == true)
                 allColorSpaceList.Add(colorSpace);
+
+            // reset settings
+            if (app != null)
+            {
+                if (app.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace))
+                {
+                    if (colorSpace != null)
+                        app.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, colorSpace.Name);
+                    else
+                        app.Settings.ResetValue(SettingKeys.ScreenColorSpaceName);
+                }
+                if (prevColorSpace?.IsSystemDefined == true)
+                {
+                    if (app.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName) == prevColorSpace.Name)
+                        app.Settings.ResetValue(SettingKeys.DefaultColorSpaceName);
+                    if (app.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName) == prevColorSpace.Name)
+                        app.Settings.ResetValue(SettingKeys.ScreenColorSpaceName);
+                }
+            }
+
+            // remove previous color space from list
+            if (prevColorSpace?.IsSystemDefined == true)
+                allColorSpaceList.Remove(prevColorSpace);
         }
         
 
@@ -658,6 +682,12 @@ namespace Carina.PixelViewer.Media
         /// Check whether the source of color space is <see cref="ColorSpaceSource.UserDefined"/> or not.
         /// </summary>
         public bool IsUserDefined { get => this.Source == ColorSpaceSource.UserDefined; }
+
+
+        /// <summary>
+        /// Check whether system defined screen color space is supported or not. 
+        /// </summary>
+        public static bool IsSystemScreenColorSpaceSupported { get; } = CarinaStudio.Platform.IsMacOS;
 
 
         /// <summary>
@@ -984,6 +1014,19 @@ namespace Carina.PixelViewer.Media
                 return;
             if (e.PropertyName == nameof(CustomName))
                 _ = colorSpace.SaveToFileAsync(Path.Combine(app.RootPrivateDirectoryPath, "ColorSpaces", $"{colorSpace.Name}.json"));
+        }
+
+
+        // Called when application setting changed.
+        static void OnSettingChanged(object? sender, SettingChangedEventArgs e)
+        {
+            if (e.Key == SettingKeys.UseSystemScreenColorSpace && (bool)e.Value)
+            {
+                if (systemColorSpace != null)
+                    app?.Settings?.SetValue<string>(SettingKeys.ScreenColorSpaceName, systemColorSpace.Name);
+                else
+                    app?.Settings?.ResetValue(SettingKeys.ScreenColorSpaceName);
+            }
         }
 
 
