@@ -834,8 +834,8 @@
 							<TextBlock Grid.Column="1" Text=" × " VerticalAlignment="Center"/>
 							<asControls:IntegerTextBox Classes="Dialog_TextBox" Grid.Column="2" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
 						</Grid>
-						<Separator Classes="Dialog_Separator_Small"/>
-						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}"/>
+						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
+						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}" IsVisible="{Binding !IsCompressedImageFormat}"/>
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Plane options #1 -->

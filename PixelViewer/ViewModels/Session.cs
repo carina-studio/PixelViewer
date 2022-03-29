@@ -444,6 +444,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsColorSpaceManagementEnabledProperty = ObservableProperty.Register<Session, bool>(nameof(IsColorSpaceManagementEnabled));
 		/// <summary>
+		/// Property of <see cref="IsCompressedImageFormat"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> IsCompressedImageFormatProperty = ObservableProperty.Register<Session, bool>(nameof(IsCompressedImageFormat));
+		/// <summary>
 		/// Property of <see cref="IsContrastAdjustmentSupported"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> IsContrastAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsContrastAdjustmentSupported));
@@ -2521,6 +2525,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether image format supported by current <see cref="ImageRenderer"/> is a compressed format or not.
+		/// </summary>
+		public bool IsCompressedImageFormat { get => this.GetValue(IsCompressedImageFormatProperty); }
+
+
+		/// <summary>
 		/// Check whether contrast adjustment is supported or not.
 		/// </summary>
 		public bool IsContrastAdjustmentSupported { get => this.GetValue(IsContrastAdjustmentSupportedProperty); }
@@ -2867,11 +2877,14 @@ namespace Carina.PixelViewer.ViewModels
 					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 						this.isImageDimensionsEvaluationNeeded = true;
 					var imageRenderer = (IImageRenderer)newValue.AsNonNull();
+					var imageFormatCategory = imageRenderer.Format.Category;
+					var isBayerPatternFormat = imageFormatCategory == ImageFormatCategory.Bayer;
 					this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
-					this.SetValue(IsBayerPatternSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
-					this.SetValue(IsDemosaicingSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
-					this.SetValue(IsRgbGainSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.Bayer);
-					this.SetValue(IsYuvToBgraConverterSupportedProperty, imageRenderer.Format.Category == ImageFormatCategory.YUV);
+					this.SetValue(IsBayerPatternSupportedProperty, isBayerPatternFormat);
+					this.SetValue(IsCompressedImageFormatProperty, imageFormatCategory == ImageFormatCategory.Compressed);
+					this.SetValue(IsDemosaicingSupportedProperty, isBayerPatternFormat);
+					this.SetValue(IsRgbGainSupportedProperty, isBayerPatternFormat);
+					this.SetValue(IsYuvToBgraConverterSupportedProperty, imageFormatCategory == ImageFormatCategory.YUV);
 					this.isImagePlaneOptionsResetNeeded = true;
 					this.updateFilterSupportingAction.Reschedule();
 					this.renderImageAction.Reschedule();
@@ -3469,11 +3482,22 @@ namespace Carina.PixelViewer.ViewModels
 
 			// sync format information
 			var planeDescriptors = imageRenderer.Format.PlaneDescriptors;
-			if (this.ImagePlaneCount != planeDescriptors.Count)
+			if (imageRenderer.Format.Category != ImageFormatCategory.Compressed)
 			{
-				this.SetValue(ImagePlaneCountProperty, planeDescriptors.Count);
-				this.SetValue(HasImagePlane2Property, planeDescriptors.Count >= 2);
-				this.SetValue(HasImagePlane3Property, planeDescriptors.Count >= 3);
+				this.SetValue(HasImagePlane1Property, true);
+				if (this.ImagePlaneCount != planeDescriptors.Count)
+				{
+					this.SetValue(ImagePlaneCountProperty, planeDescriptors.Count);
+					this.SetValue(HasImagePlane2Property, planeDescriptors.Count >= 2);
+					this.SetValue(HasImagePlane3Property, planeDescriptors.Count >= 3);
+				}
+			}
+			else
+			{
+				this.SetValue(ImagePlaneCountProperty, 0);
+				this.SetValue(HasImagePlane1Property, false);
+				this.SetValue(HasImagePlane2Property, false);
+				this.SetValue(HasImagePlane3Property, false);
 			}
 			for (var i = planeDescriptors.Count - 1; i >= 0; --i)
 			{
