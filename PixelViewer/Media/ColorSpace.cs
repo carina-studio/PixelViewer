@@ -1,5 +1,6 @@
 using System.IO;
 using System.Linq;
+using Carina.PixelViewer.Native;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
@@ -237,7 +238,7 @@ namespace Carina.PixelViewer.Media
 
         // Static fields.
         static readonly SortedObservableList<ColorSpace> allColorSpaceList = new(Compare);
-        static IApplication? app;
+        static CarinaStudio.AppSuite.IAppSuiteApplication? app;
         static readonly Dictionary<string, ColorSpace> builtInColorSpaces = new()
         {
             { AdobeRGB_1998.Name, AdobeRGB_1998 },
@@ -256,6 +257,7 @@ namespace Carina.PixelViewer.Media
         static volatile ILogger? logger;
         static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
         static readonly Random random = new();
+        static ColorSpace? systemColorSpace;
 
 
         // Fields.
@@ -366,13 +368,17 @@ namespace Carina.PixelViewer.Media
         // Compare color spaces.
         static int Compare(ColorSpace? lhs, ColorSpace? rhs)
         {
-            if (lhs?.IsBuiltIn == true)
-            {
-                if (rhs?.IsBuiltIn == true)
-                    return string.Compare(lhs?.Name, rhs?.Name);
+            if (lhs == null)
+                return rhs == null ? 0 : 1;
+            if (rhs == null)
                 return -1;
-            }
-            if (rhs?.IsBuiltIn == true)
+            if (lhs.IsBuiltIn)
+                return rhs.IsBuiltIn ? string.Compare(lhs.Name, rhs.Name) : -1;
+            if (rhs.IsBuiltIn)
+                return 1;
+            if (lhs.IsSystemDefined)
+                return rhs.IsSystemDefined ? string.Compare(lhs.Name, rhs.Name) : -1;
+            if (rhs.IsSystemDefined)
                 return 1;
             return string.Compare(lhs?.Name, rhs?.Name);
         }
@@ -463,11 +469,64 @@ namespace Carina.PixelViewer.Media
         
 
         /// <summary>
+        /// Get color space defined by system.
+        /// </summary>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of getting color space.</returns>
+        public static async Task<ColorSpace> GetSystemColorSpaceAsync(CancellationToken cancellationToken = default)
+        {
+            if (!CarinaStudio.Platform.IsMacOS)
+                throw new NotSupportedException();
+            var systemColorSpace = await Task.Run(() =>
+            {
+                if (CarinaStudio.Platform.IsMacOS)
+                {
+                    var colorSpaceRef = IntPtr.Zero;
+                    var iccDataRef = IntPtr.Zero;
+                    try
+                    {
+                        colorSpaceRef = MacOS.CGDisplayCopyColorSpace(MacOS.CGMainDisplayID());
+                        if (colorSpaceRef == IntPtr.Zero)
+                            throw new Exception("No color space defined for main display.");
+                        var colorModel = MacOS.CGColorSpaceGetModel(colorSpaceRef);
+                        if (colorModel != MacOS.CGColorSpaceModel.RGB)
+                            throw new NotSupportedException($"Unsupported color model: {colorModel}.");
+                        iccDataRef = MacOS.CGColorSpaceCopyICCData(colorSpaceRef);
+                        if (iccDataRef == IntPtr.Zero)
+                            throw new Exception("Unable to get ICC profile from color space.");
+                        var iccDataCount = MacOS.CFDataGetLength(iccDataRef);
+                        if (iccDataCount == 0)
+                            throw new Exception("Empty ICC profile from color space.");
+                        var iccData = new byte[(int)iccDataCount];
+                        System.Runtime.InteropServices.Marshal.Copy(MacOS.CFDataGetBytePtr(iccDataRef), iccData, 0, iccData.Length);
+                        return new MemoryStream(iccData).Use(it =>
+                            LoadFromIccProfile(null, it, ColorSpaceSource.SystemDefined));
+                    }
+                    finally
+                    {
+                        if (iccDataRef != IntPtr.Zero)
+                            MacOS.CFRelease(iccDataRef);
+                        if (colorSpaceRef != IntPtr.Zero)
+                            MacOS.CFRelease(colorSpaceRef);
+                    }
+                }
+                throw new NotSupportedException();
+            });
+            foreach (var builtInColorSpace in builtInColorSpaces.Values)
+            {
+                if (builtInColorSpace.Equals(systemColorSpace))
+                    return builtInColorSpace;
+            }
+            return systemColorSpace;
+        }
+        
+
+        /// <summary>
         /// Initialize color space.
         /// </summary>
         /// <param name="app">Application.</param>
         /// <returns>Task of initialization.</returns>
-        public static async Task InitializeAsync(IApplication app)
+        public static async Task InitializeAsync(CarinaStudio.AppSuite.IAppSuiteApplication app)
         {
             // check state
             if (ColorSpace.app != null)
@@ -520,6 +579,48 @@ namespace Carina.PixelViewer.Media
                 }
             }
             logger.LogDebug($"{customColorSpaces.Count} color space(s) loaded");
+
+            // setup system color space
+            InvalidateSystemColorSpace();
+        }
+
+
+        /// <summary>
+        /// Invalidate and refresh system color space.
+        /// </summary>
+        public static async void InvalidateSystemColorSpace()
+        {
+            // get system color space
+            var colorSpace = (ColorSpace?)null;
+            try
+            {
+                colorSpace = await GetSystemColorSpaceAsync();
+            }
+            catch (Exception ex)
+            {
+                if (app?.IsDebugMode == true)
+                    logger?.LogDebug(ex, "Unable to get system color space");
+            }
+            if (systemColorSpace?.Equals(colorSpace) ?? colorSpace == null)
+                return;
+            
+            logger.LogDebug($"System color space is '{colorSpace}'");
+
+            // reset settings
+            if (app != null && systemColorSpace?.IsSystemDefined == true)
+            {
+                if (app.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName) == systemColorSpace.Name)
+                    app.Settings.ResetValue(SettingKeys.DefaultColorSpaceName);
+                if (app.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName) == systemColorSpace.Name)
+                    app.Settings.ResetValue(SettingKeys.ScreenColorSpaceName);
+            }
+
+            // update state
+            if (systemColorSpace?.IsSystemDefined == true)
+                allColorSpaceList.Remove(systemColorSpace);
+            systemColorSpace = colorSpace;
+            if (colorSpace?.IsSystemDefined == true)
+                allColorSpaceList.Add(colorSpace);
         }
         
 
@@ -1105,6 +1206,11 @@ namespace Carina.PixelViewer.Media
                 colorSpace = value;
                 return true;
             }
+            if (systemColorSpace?.Name == name)
+            {
+                colorSpace = systemColorSpace;
+                return true;
+            }
             colorSpace = Default;
             return false;
         }
@@ -1130,6 +1236,11 @@ namespace Carina.PixelViewer.Media
                     colorSpace = candidate;
                     return true;
                 }
+            }
+            if (systemColorSpace?.Equals(reference) == true)
+            {
+                colorSpace = systemColorSpace;
+                return true;
             }
             colorSpace = Default;
             return false;

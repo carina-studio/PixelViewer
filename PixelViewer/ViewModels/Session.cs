@@ -726,13 +726,13 @@ namespace Carina.PixelViewer.ViewModels
 				return rhs.IsEmbedded ? string.Compare(lhs.Name, rhs.Name) : -1;
 			if (rhs.IsEmbedded)
 				return 1;
-			if (lhs.IsSystemDefined)
-				return rhs.IsSystemDefined ? string.Compare(lhs.Name, rhs.Name) : -1;
-			if (rhs.IsSystemDefined)
-				return 1;
 			if (lhs.IsBuiltIn)
 				return rhs.IsBuiltIn ? string.Compare(lhs.Name, rhs.Name) : -1;
 			if (rhs.IsBuiltIn)
+				return 1;
+			if (lhs.IsSystemDefined)
+				return rhs.IsSystemDefined ? string.Compare(lhs.Name, rhs.Name) : -1;
+			if (rhs.IsSystemDefined)
 				return 1;
 			return string.Compare(lhs.Name, rhs.Name);
 		});

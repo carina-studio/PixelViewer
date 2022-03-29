@@ -334,6 +334,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 return null;
             }
 
+            // use existing color space if possible
+            if (colorSpace != null && Media.ColorSpace.TryGetColorSpace(colorSpace, out var existingColorSpace))
+                colorSpace = existingColorSpace;
+
             // treat as compressed format
             var imageRenderer = (Media.ImageRenderers.IImageRenderer?)null;
             switch (compression)

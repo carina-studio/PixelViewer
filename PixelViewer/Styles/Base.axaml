@@ -50,6 +50,7 @@
 		<!-- SessionControl -->
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.Custom" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.Custom}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.SystemDefined}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Compressed" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed}"/>
@@ -64,6 +65,7 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Inactive" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Inactive}"/>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#000000</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.SystemDefined">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed">#000000</Color>

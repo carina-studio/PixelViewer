@@ -109,6 +109,13 @@ namespace Carina.PixelViewer
 					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
 #endif
 			});
+
+			// trigger system color space update
+			this.GetObservable(IsActiveProperty).Subscribe(isActive =>
+			{
+				if (isActive)
+					Media.ColorSpace.InvalidateSystemColorSpace();
+			});
 		}
 
 
