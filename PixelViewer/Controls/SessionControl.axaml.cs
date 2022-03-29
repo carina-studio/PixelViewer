@@ -1575,7 +1575,7 @@ namespace Carina.PixelViewer.Controls
 			_ = new ColorSpaceInfoDialog()
 			{
 				ColorSpace = colorSpace,
-				IsReadOnly = colorSpace.IsBuiltIn || colorSpace.IsEmbeddedInFile,
+				IsReadOnly = !colorSpace.IsUserDefined,
 			}.ShowDialog(this.attachedWindow);
 		}
 

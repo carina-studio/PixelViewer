@@ -722,9 +722,13 @@ namespace Carina.PixelViewer.ViewModels
 				return rhs == null ? 0 : -1;
 			if (rhs == null)
 				return 1;
-			if (lhs.IsEmbeddedInFile)
-				return rhs.IsEmbeddedInFile ? string.Compare(lhs.Name, rhs.Name) : -1;
-			if (rhs.IsEmbeddedInFile)
+			if (lhs.IsEmbedded)
+				return rhs.IsEmbedded ? string.Compare(lhs.Name, rhs.Name) : -1;
+			if (rhs.IsEmbedded)
+				return 1;
+			if (lhs.IsSystemDefined)
+				return rhs.IsSystemDefined ? string.Compare(lhs.Name, rhs.Name) : -1;
+			if (rhs.IsSystemDefined)
 				return 1;
 			if (lhs.IsBuiltIn)
 				return rhs.IsBuiltIn ? string.Compare(lhs.Name, rhs.Name) : -1;
@@ -1176,12 +1180,12 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(YuvToBgraConverterProperty, profile.YuvToBgraConverter);
 
 				// color space
-				this.colorSpaces.RemoveAll(it => it.IsEmbeddedInFile);
+				this.colorSpaces.RemoveAll(it => it.IsEmbedded);
 				if (profile.Type != ImageRenderingProfileType.UserDefined && this.IsYuvToBgraConverterSupported)
 					this.SetValue(ColorSpaceProperty, this.YuvToBgraConverter.ColorSpace);
 				else
 				{
-					if (profile.ColorSpace.IsEmbeddedInFile)
+					if (profile.ColorSpace.IsEmbedded)
 						this.colorSpaces.Add(profile.ColorSpace);
 					this.SetValue(ColorSpaceProperty, profile.ColorSpace);
 				}

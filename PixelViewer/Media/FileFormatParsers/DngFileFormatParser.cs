@@ -318,7 +318,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         break;
                 }
                 if (useJpepImage && JpegFileFormatParser.SeekToIccProfile(stream))
-                    colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(stream, true, cancellationToken);
+                    colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(stream, Media.ColorSpaceSource.Embedded, cancellationToken);
             });
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();

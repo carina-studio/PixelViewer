@@ -33,8 +33,10 @@ namespace Carina.PixelViewer.Data.Converters
             {
                 if (colorSpace.CustomName != null)
                     return colorSpace.CustomName;
-                if (colorSpace.IsEmbeddedInFile)
+                if (colorSpace.IsEmbedded)
                     return app.GetString("ColorSpace.EmbeddedInFile");
+                if (colorSpace.IsSystemDefined)
+                    return app.GetString("ColorSpace.SystemDefined");
                 value = colorSpace.Name;
             }
             if (value is not string name)

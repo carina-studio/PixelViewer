@@ -83,6 +83,7 @@
 	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 with HLG)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB w/o gamma transformation</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
+	<sys:String x:Key="String/ColorSpace.SystemDefined">System defined color space</sys:String>
 
 	<!-- ColorSpaceInfoDialog -->
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">Blue</sys:String>
