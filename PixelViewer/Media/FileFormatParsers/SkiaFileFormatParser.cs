@@ -41,6 +41,14 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
 
 
         /// <summary>
+        /// Called to read ICC profile into memory.
+        /// </summary>
+        /// <param name="stream">Stream which is positioned at start of ICC profile.</param>
+        /// <returns>Read ICC profile, or Null if it is unsupported.</returns>
+        protected virtual byte[]? OnReadIccProfileToMemory(Stream stream) => null;
+
+
+        /// <summary>
         /// Called to seek stream to position of embedded ICC profile.
         /// </summary>
         /// <param name="stream">Stream to read image data.</param>
@@ -85,15 +93,32 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             });
             if (hasIccProfile)
             {
+                // read ICC profile into memory
+                var iccProfileData = (byte[]?)null;
                 try
                 {
-                    colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
+                    iccProfileData = await Task.Run(() => this.OnReadIccProfileToMemory(stream));
                 }
-                catch (Exception ex)
+                catch
+                { }
+                if (cancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException();
+                
+                // load ICC profile
+                try
                 {
-                    if (ex is TaskCanceledException)
-                        throw;
+                    if (iccProfileData == null)
+                        colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
+                    else
+                    {
+                        using var iccProfileStream = new MemoryStream(iccProfileData);
+                        colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccProfileStream, ColorSpaceSource.Embedded, cancellationToken);
+                    }
                 }
+                catch
+                { }
+                if (cancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException();
             }
             
             // create profile

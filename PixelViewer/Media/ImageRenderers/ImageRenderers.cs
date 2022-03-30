@@ -68,6 +68,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			new BayerPattern16ImageRenderer(),
 
 			new JpegImageRenderer(),
+			new PngImageRenderer(),
 		}).AsReadOnly();
 
 

@@ -33,6 +33,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             }
             new DngFileFormatParser().Let(it => parsers[it.FileFormat] = it);
             new JpegFileFormatParser().Let(it => parsers[it.FileFormat] = it);
+            new PngFileFormatParser().Let(it => parsers[it.FileFormat] = it);
             new Yuv4Mpeg2FileFormatParser().Let(it => parsers[it.FileFormat] = it);
         }
 

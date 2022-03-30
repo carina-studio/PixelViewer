@@ -150,4 +150,22 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
             FileFormatParsers.JpegFileFormatParser.CheckFileHeader(imageStream);
     }
+
+
+    /// <summary>
+    /// <see cref="IImageRenderer"/> for PNG format.
+    /// </summary>
+    class PngImageRenderer : SkiaCompressedFormatImageRenderer
+    {
+        /// <summary>
+        /// Initialize new <see cref="PngImageRenderer"/> instance.
+        /// </summary>
+        public PngImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "PNG", new ImagePlaneDescriptor(0), new string[] { "PNG" }), SkiaSharp.SKEncodedImageFormat.Png)
+        { }
+
+
+        /// <inheritdoc/>
+        protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
+            FileFormatParsers.PngFileFormatParser.CheckFileHeader(imageStream);
+    }
 }
