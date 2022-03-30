@@ -352,6 +352,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasShadowAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasShadowAdjustment));
 		/// <summary>
+		/// Property of <see cref="HasSourceDataSize"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> HasSourceDataSizeProperty = ObservableProperty.Register<Session, bool>(nameof(HasSourceDataSize));
+		/// <summary>
 		/// Property of <see cref="HasVibranceAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<bool> HasVibranceAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasVibranceAdjustment));
@@ -2321,6 +2325,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether <see cref="SourceDataSize"/> is non-zero or not.
+		/// </summary>
+		public bool HasSourceDataSize { get => this.GetValue(HasSourceDataSizeProperty); }
+
+
+		/// <summary>
 		/// Check whether <see cref="VibranceAdjustment"/> is non-zero or not.
 		/// </summary>
 		public bool HasVibranceAdjustment { get => this.GetValue(HasVibranceAdjustmentProperty); }
@@ -3076,6 +3086,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.updateIsFilteringImageNeededAction.Schedule();
 				this.filterImageAction.Schedule(RenderImageDelay);
 			}
+			else if (property == SourceDataSizeProperty)
+				this.SetValue(HasSourceDataSizeProperty, (long)newValue.AsNonNull() > 0);
 			else if (property == VibranceAdjustmentProperty)
 			{
 				this.SetValue(HasVibranceAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);

@@ -968,7 +968,13 @@
 					</StackPanel>
 
 					<!-- Source data size -->
-					<StackPanel Background="{x:Static Brushes.Transparent}" IsVisible="{Binding HasRenderedImage}" Orientation="Horizontal" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
+					<StackPanel Background="{x:Static Brushes.Transparent}" Orientation="Horizontal" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.SourceDataSize}">
+						<StackPanel.IsVisible>
+							<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+								<Binding Path="HasRenderedImage"/>
+								<Binding Path="HasSourceDataSize"/>
+							</MultiBinding>
+						</StackPanel.IsVisible>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
@@ -976,8 +982,21 @@
 						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={}{0:N0} }"/>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/Common.Bytes}"/>
+						<Separator Classes="StatusBar_Separator"/>
 					</StackPanel>
-					<Separator Classes="StatusBar_Separator" IsVisible="{Binding HasRenderedImage}"/>
+
+					<!-- Screen color space -->
+					<Button Classes="StatusBar_Button" Command="{Binding $parent[UserControl].ShowScreenColorSpaceInfo}" IsVisible="{Binding IsColorSpaceManagementEnabled}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.ScreenColorSpace}">
+						<StackPanel Orientation="Horizontal">
+							<!--Image Classes="StatusBar_Icon">
+								<DrawingImage>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
+								</DrawingImage>
+							</Image-->
+							<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Owner.EffectiveScreenColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+						</StackPanel>
+					</Button>
+					<Separator Classes="StatusBar_Separator" IsVisible="{Binding IsColorSpaceManagementEnabled}"/>
 
 				</StackPanel>
 

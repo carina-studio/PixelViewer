@@ -237,6 +237,7 @@
 	<sys:String x:Key="String/SessionControl.SaveImage">儲存影像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">儲存組態</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
+	<sys:String x:Key="String/SessionControl.ScreenColorSpace">螢幕色彩空間</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">在圖片上移動游標以檢視像素資訊。</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">自動調整</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectRgbGain">自動調整</sys:String>

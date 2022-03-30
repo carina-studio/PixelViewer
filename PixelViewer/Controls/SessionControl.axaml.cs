@@ -1613,6 +1613,24 @@ namespace Carina.PixelViewer.Controls
 		bool ShowProcessInfo { get => this.GetValue<bool>(ShowProcessInfoProperty); }
 
 
+		// Show screen color space info.
+		void ShowScreenColorSpaceInfo()
+		{
+			if (this.DataContext is not Session session 
+				|| session.Owner is not Workspace workspace
+				|| this.attachedWindow == null)
+			{
+				return;
+			}
+			var colorSpace = workspace.EffectiveScreenColorSpace;
+			_ = new ColorSpaceInfoDialog()
+			{
+				ColorSpace = colorSpace,
+				IsReadOnly = !colorSpace.IsUserDefined,
+			}.ShowDialog(this.attachedWindow);
+		}
+
+
 		// Show file in file explorer.
 		void ShowSourceFileInFileExplorer()
         {
