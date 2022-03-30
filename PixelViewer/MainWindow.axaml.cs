@@ -109,13 +109,6 @@ namespace Carina.PixelViewer
 					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
 #endif
 			});
-
-			// trigger system color space update
-			this.GetObservable(IsActiveProperty).Subscribe(isActive =>
-			{
-				if (isActive)
-					Media.ColorSpace.InvalidateSystemScreenColorSpace();
-			});
 		}
 
 
@@ -305,6 +298,7 @@ namespace Carina.PixelViewer
 			}
 
 			// attach to workspace
+			workspace.Window = this;
 			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged += this.OnSessionsChanged);
 			this.SetValue<bool>(HasMultipleSessionsProperty, workspace.Sessions.Count > 1);
 
@@ -344,6 +338,7 @@ namespace Carina.PixelViewer
 			}
 
 			// detach from workspace
+			workspace.Window = null;
 			this.SetValue<bool>(HasMultipleSessionsProperty, false);
 			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
 

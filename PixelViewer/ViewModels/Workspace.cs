@@ -1,8 +1,13 @@
-﻿using Carina.PixelViewer.Media.Profiles;
+﻿using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Platform;
+using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
+using CarinaStudio.Configuration;
 using CarinaStudio.Threading;
 using CarinaStudio.ViewModels;
 using CarinaStudio.Windows.Input;
@@ -23,11 +28,29 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="ActivatedSession"/>.
 		/// </summary>
 		public static readonly ObservableProperty<Session?> ActivatedSessionProperty = ObservableProperty.Register<Workspace, Session?>(nameof(ActivatedSession));
+		/// <summary>
+		/// Property of <see cref="EffectiveScreenColorSpace"/>.
+		/// </summary>
+		public static readonly ObservableProperty<ColorSpace> EffectiveScreenColorSpaceProperty = ObservableProperty.Register<Workspace, ColorSpace>(nameof(EffectiveScreenColorSpace), ColorSpace.Default);
+		/// <summary>
+		/// Property of <see cref="Window"/>.
+		/// </summary>
+		public static readonly ObservableProperty<Window?> WindowProperty = ObservableProperty.Register<Workspace, Window?>(nameof(Window), null);
+
+
+		// Constants.
+		const int UpdateEffectiveScreenColorSpaceInterval = 1000;
 
 
 		// Fields.
+		Screen? currentScreen;
 		IDisposable? sessionActivationToken;
 		readonly ObservableList<Session> sessions = new ObservableList<Session>();
+		readonly ScheduledAction updateEffectiveScreenColorSpaceAction;
+		readonly Observer<Rect> windowBoundsObserver;
+		IDisposable? windowBoundsObserverToken;
+		readonly Observer<bool> windowIsActiveObserver;
+		IDisposable? windowIsActiveObserverToken;
 
 
 		/// <summary>
@@ -38,6 +61,56 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			// setup properties
 			this.Sessions = this.sessions.AsReadOnly();
+
+			// setup actions
+			this.updateEffectiveScreenColorSpaceAction = new(async () =>
+			{
+				// check state
+				if (this.IsDisposed)
+					return;
+				var window = this.GetValue(WindowProperty);
+				if (window == null || !window.IsActive)
+					return;
+				var screen = window.Screens.ScreenFromVisual(window);
+				if (screen == null || screen.Bounds == this.currentScreen?.Bounds)
+					return;
+				
+				// get screen color space
+				currentScreen = screen;
+				var screenColorSpace = ColorSpace.Default;
+				if (!ColorSpace.IsSystemScreenColorSpaceSupported || !this.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace))
+					ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out screenColorSpace);
+				else
+				{
+					try
+					{
+						screenColorSpace = await ColorSpace.GetSystemScreenColorSpaceAsync(window.Bounds);
+					}
+					catch (Exception ex)
+					{
+						this.Logger.LogError(ex, "Unable to get system screen color space, fall-back to color space in settings");
+						ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out screenColorSpace);
+					}
+				}
+				this.Logger.LogDebug($"Screen color space is '{screenColorSpace}'");
+
+				// update state
+				if (!this.IsDisposed)
+					this.SetValue(EffectiveScreenColorSpaceProperty, screenColorSpace);
+			});
+			this.windowBoundsObserver = new(_ => 
+				this.updateEffectiveScreenColorSpaceAction.Schedule(UpdateEffectiveScreenColorSpaceInterval));
+			this.windowIsActiveObserver = new(isActive => 
+			{
+				if (isActive)
+				{
+					this.currentScreen = null;
+					this.updateEffectiveScreenColorSpaceAction.Reschedule();
+				}
+			});
+			
+			// attach to settings
+			this.Settings.SettingChanged += this.OnSettingChanged;
 
 			// restore state
 			savedState?.Let(savedState =>
@@ -238,9 +311,18 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.sessions.Clear();
 
+			// detach from settings
+			this.Settings.SettingChanged -= this.OnSettingChanged;
+
 			// call base
 			base.Dispose(disposing);
 		}
+
+
+		/// <summary>
+		/// Get effective screen color space.
+		/// </summary>
+		public ColorSpace EffectiveScreenColorSpace { get => this.GetValue(EffectiveScreenColorSpaceProperty); }
 
 
 		/// <summary>
@@ -287,6 +369,20 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				this.InvalidateTitle();
 			}
+			else if (property == WindowProperty)
+			{
+				this.windowBoundsObserverToken = this.windowBoundsObserverToken.DisposeAndReturnNull();
+				this.windowIsActiveObserverToken = this.windowIsActiveObserverToken.DisposeAndReturnNull();
+				(oldValue as Window)?.Let(it =>
+					it.PositionChanged -= this.OnWindowPositionChanged);
+				(newValue as Window)?.Let(it =>
+				{
+					this.windowBoundsObserverToken = it.GetObservable(Window.BoundsProperty).Subscribe(this.windowBoundsObserver);
+					this.windowIsActiveObserverToken = it.GetObservable(Window.IsActiveProperty).Subscribe(this.windowIsActiveObserver);
+					it.PositionChanged += this.OnWindowPositionChanged;
+				});
+				this.updateEffectiveScreenColorSpaceAction.Reschedule();
+			}
         }
 
 
@@ -305,11 +401,32 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Called when application setting changed.
+		void OnSettingChanged(object? sender, SettingChangedEventArgs e)
+		{
+			if (e.Key == SettingKeys.ScreenColorSpaceName)
+			{
+				if (!ColorSpace.IsSystemScreenColorSpaceSupported || !this.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace))
+					this.updateEffectiveScreenColorSpaceAction.Reschedule();
+			}
+			else if (e.Key == SettingKeys.UseSystemScreenColorSpace)
+			{
+				if ((bool)e.Value && ColorSpace.IsSystemScreenColorSpaceSupported)
+					this.updateEffectiveScreenColorSpaceAction.Reschedule();
+			}
+		}
+
+
 		// Update title.
         protected override string? OnUpdateTitle() => this.ActivatedSession?.Let(it =>
 		{
 			return $"PixelViewer - {it.Title}";
 		}) ?? "PixelViewer";
+
+
+		// Called when window position changed.
+		void OnWindowPositionChanged(object? sender, EventArgs e) =>
+			this.updateEffectiveScreenColorSpaceAction.Schedule(UpdateEffectiveScreenColorSpaceInterval);
 
 
 		/// <inheritdoc/>
@@ -340,5 +457,15 @@ namespace Carina.PixelViewer.ViewModels
         /// Get all <see cref="Session"/>s.
         /// </summary>
         public IList<Session> Sessions { get; }
+
+
+		/// <summary>
+		/// Get or set window which contains the workspace.
+		/// </summary>
+		public Window? Window
+		{
+			get => this.GetValue(WindowProperty);
+			set => this.SetValue(WindowProperty, value);
+		}
 	}
 }

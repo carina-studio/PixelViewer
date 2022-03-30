@@ -387,13 +387,6 @@ namespace Carina.PixelViewer
 					});
 				});
 			}
-
-			// use screen color space defined by system
-			if (oldVersion <= 6)
-			{
-				if (settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName) != SettingKeys.ScreenColorSpaceName.DefaultValue)
-					settings.SetValue<bool>(SettingKeys.UseSystemScreenColorSpace, false);
-			}
 		}
 #pragma warning restore CS0612
 

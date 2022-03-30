@@ -737,6 +737,8 @@ namespace Carina.PixelViewer.ViewModels
 			return string.Compare(lhs.Name, rhs.Name);
 		});
 		readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
+		readonly Observer<Media.ColorSpace> effectiveScreenColorSpaceObserver;
+		IDisposable? effectiveScreenColorSpaceObserverToken;
 		ImageRenderingProfile? fileFormatProfile;
 		readonly ScheduledAction filterImageAction;
 		ImageFrame? filteredImageFrame;
@@ -822,6 +824,7 @@ namespace Carina.PixelViewer.ViewModels
 			}, this.canZoomTo);
 
 			// setup operations
+			this.effectiveScreenColorSpaceObserver = new(_ => this.OnScreenColorSpaceChanged());
 			this.filterImageAction = new ScheduledAction(() =>
 			{
 				if (this.renderedImageFrame != null)
@@ -2760,6 +2763,16 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Called when owner changed.
+		protected override void OnOwnerChanged(ViewModel? prevOwner, ViewModel? newOwner)
+		{
+			base.OnOwnerChanged(prevOwner, newOwner);
+			this.effectiveScreenColorSpaceObserverToken = this.effectiveScreenColorSpaceObserverToken.DisposeAndReturnNull();
+			this.effectiveScreenColorSpaceObserverToken = (newOwner as Workspace)?.GetValueAsObservable(Workspace.EffectiveScreenColorSpaceProperty)?.Subscribe(this.effectiveScreenColorSpaceObserver);
+			this.OnScreenColorSpaceChanged();
+		}
+
+
 		// Raise PropertyChanged event for pixel stride.
 		void OnPixelStrideChanged(int index) => this.OnPropertyChanged(index switch
 		{
@@ -3103,6 +3116,29 @@ namespace Carina.PixelViewer.ViewModels
 		});
 
 
+		// Called when screen color space changed.
+		void OnScreenColorSpaceChanged()
+		{
+			var prevScreenColorSpace = this.colorSpaces.FirstOrDefault(it => it.IsSystemDefined);
+			if (prevScreenColorSpace != null)
+			{
+				if (this.GetValue(ColorSpaceProperty) == prevScreenColorSpace)
+				{
+					Media.ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
+					this.SetValue(ColorSpaceProperty, colorSpace);
+				}
+				this.colorSpaces.Remove(prevScreenColorSpace);
+			}
+			(this.Owner as Workspace)?.EffectiveScreenColorSpace?.Let(screenColorSpace =>
+			{
+				if (screenColorSpace.IsSystemDefined)
+					this.colorSpaces.Add(screenColorSpace);
+			});
+			if (this.IsColorSpaceManagementEnabled)
+				this.renderImageAction.Reschedule();
+		}
+
+
 		// Setting changed.
         protected override void OnSettingChanged(SettingChangedEventArgs e)
         {
@@ -3118,11 +3154,6 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (key == SettingKeys.EnableColorSpaceManagement)
 				this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
-			else if (key == SettingKeys.ScreenColorSpaceName)
-			{
-				if (this.IsColorSpaceManagementEnabled && this.IsActivated)
-					this.renderImageAction.Reschedule();
-			}
         }
 
 
@@ -3602,7 +3633,7 @@ namespace Carina.PixelViewer.ViewModels
 
             // check color space
             var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
-			var screenColorSpace = Global.Run(() =>
+			var screenColorSpace = (this.Owner as Workspace)?.EffectiveScreenColorSpace ?? Global.Run(() =>
 			{
 				Media.ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
 				return colorSpace;

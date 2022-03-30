@@ -188,13 +188,7 @@
 
 				<!-- Screen color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
-				<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_ComboBox" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
-					<ComboBox.IsEnabled>
-						<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
-							<Binding Path="EnableColorSpaceManagement"/>
-							<Binding Path="!UseSystemScreenColorSpace"/>
-						</MultiBinding>
-					</ComboBox.IsEnabled>
+				<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_ComboBox" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
 					<ComboBox.ItemTemplate>
 						<DataTemplate>
 							<Grid ColumnDefinitions="*,Auto">
@@ -216,6 +210,7 @@
 				<StackPanel IsVisible="{Binding IsSystemScreenColorSpaceSupported}">
 					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace}"/>
 					<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseSystemScreenColorSpace, Mode=TwoWay}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+					<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description}"/>
 					<Separator Classes="Dialog_Separator"/>
 				</StackPanel>
 
