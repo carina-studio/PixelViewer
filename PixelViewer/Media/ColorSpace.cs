@@ -192,7 +192,11 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "Display-P3", 
             null, 
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, SKColorSpaceXyz.DisplayP3), 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, new SKColorSpaceXyz(
+                0.51512146f, 0.29197693f, 0.15710449f,
+                0.24119568f, 0.6922455f, 0.0665741f,
+                -0.0010528564f, 0.041885376f, 0.7840729f
+            )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         /// <summary>
