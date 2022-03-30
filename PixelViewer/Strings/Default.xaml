@@ -214,7 +214,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">Vibrance</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">Color space</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management has been disabled, click to open options…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace.EmbeddedInFile">In File</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">In File</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.SystemDefined">System</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save image which has been filtered?</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">Converting color space…</sys:String>

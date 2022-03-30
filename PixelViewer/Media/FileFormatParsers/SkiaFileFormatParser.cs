@@ -88,8 +88,6 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 try
                 {
                     colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
-                    if (ColorSpace.TryGetColorSpace(colorSpaceFromIccProfile, out var existingColorSpace))
-                        colorSpaceFromIccProfile = existingColorSpace;
                 }
                 catch (Exception ex)
                 {
@@ -104,10 +102,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 if (it.IsSrgb)
                     return ColorSpace.Srgb;
-                var colorSpace = ColorSpace.FromSkiaColorSpace(ColorSpaceSource.Embedded, null, it, null);
-                if (ColorSpace.TryGetColorSpace(colorSpace, out var existingColorSpace))
-                    return existingColorSpace;
-                return colorSpace;
+                return ColorSpace.FromSkiaColorSpace(ColorSpaceSource.Embedded, null, it, null);
             });
             profile.Width = codec.Info.Width;
             profile.Height = codec.Info.Height;

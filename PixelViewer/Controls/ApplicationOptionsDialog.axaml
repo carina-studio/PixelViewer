@@ -216,7 +216,7 @@
 
 				<!-- Custom color spaces -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
-				<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Height="150" Items="{x:Static appMedia:ColorSpace.CustomColorSpaces}">
+				<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Height="150" Items="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
 					<asControls:ListBox.ItemTemplate>
 						<DataTemplate>
 							<Grid ColumnDefinitions="*,Auto">

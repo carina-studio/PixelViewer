@@ -107,7 +107,7 @@ namespace Carina.PixelViewer.Controls
                     return;
 
                 // add color space
-                Media.ColorSpace.AddCustomColorSpace(finalColorSpace);
+                Media.ColorSpace.AddUserDefinedColorSpace(finalColorSpace);
             }
             finally
             {
@@ -215,7 +215,7 @@ namespace Carina.PixelViewer.Controls
         {
             if (listBoxItem.DataContext is not Media.ColorSpace colorSpace)
                 return;
-            Media.ColorSpace.RemoveCustomColorSpace(colorSpace);
+            Media.ColorSpace.RemoveUserDefinedColorSpace(colorSpace);
         }
 
 

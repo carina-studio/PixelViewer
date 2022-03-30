@@ -175,7 +175,7 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">自然飽和度</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">色彩空間</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">已停用色彩管理，點一下以開啟選項…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace.EmbeddedInFile">檔案內嵌</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">檔案內嵌</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.SystemDefined">系統定義</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">是否要儲存套用濾鏡後的影像？</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">轉換色彩空間中…</sys:String>

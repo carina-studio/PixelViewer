@@ -997,7 +997,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// add event handlers
-			Media.ColorSpace.RemovingCustomColorSpace += this.OnRemovingCustomColorSpace;
+			Media.ColorSpace.RemovingUserDefinedColorSpace += this.OnRemovingUserDefinedColorSpace;
 		}
 
 
@@ -1188,14 +1188,21 @@ namespace Carina.PixelViewer.ViewModels
 
 				// color space
 				this.colorSpaces.RemoveAll(it => it.IsEmbedded);
+				var colorSpace = Media.ColorSpace.Default;
 				if (profile.Type != ImageRenderingProfileType.UserDefined && this.IsYuvToBgraConverterSupported)
-					this.SetValue(ColorSpaceProperty, this.YuvToBgraConverter.ColorSpace);
+					colorSpace = this.YuvToBgraConverter.ColorSpace;
 				else
 				{
-					if (profile.ColorSpace.IsEmbedded)
-						this.colorSpaces.Add(profile.ColorSpace);
-					this.SetValue(ColorSpaceProperty, profile.ColorSpace);
+					colorSpace = profile.ColorSpace;
+					if (colorSpace.IsEmbedded)
+					{
+						if (Media.ColorSpace.TryGetBuiltInColorSpace(colorSpace, out var builtInColorSpace))
+							colorSpace = builtInColorSpace;
+						else
+							this.colorSpaces.Add(colorSpace);
+					}
 				}
+				this.SetValue(ColorSpaceProperty, colorSpace);
 
 				// demosaicing
 				this.SetValue(DemosaicingProperty, profile.Demosaicing);
@@ -1670,7 +1677,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// remove event handlers
 			if (!disposing)
-				Media.ColorSpace.RemovingCustomColorSpace -= this.OnRemovingCustomColorSpace;
+				Media.ColorSpace.RemovingUserDefinedColorSpace -= this.OnRemovingUserDefinedColorSpace;
 
 			// call super
 			base.Dispose(disposing);
@@ -3106,8 +3113,8 @@ namespace Carina.PixelViewer.ViewModels
         }
 
 
-		// Called before removing custom color space.
-		void OnRemovingCustomColorSpace(object? sender, Media.ColorSpaceEventArgs e)
+		// Called before removing user-defined color space.
+		void OnRemovingUserDefinedColorSpace(object? sender, Media.ColorSpaceEventArgs e)
 		{
 			if (e.ColorSpace == this.GetValue(ColorSpaceProperty))
 			{
