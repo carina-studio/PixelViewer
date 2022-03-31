@@ -988,11 +988,11 @@
 					<!-- Screen color space -->
 					<Button Classes="StatusBar_Button" Command="{Binding $parent[UserControl].ShowScreenColorSpaceInfo}" IsVisible="{Binding IsColorSpaceManagementEnabled}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.ScreenColorSpace}">
 						<StackPanel Orientation="Horizontal">
-							<!--Image Classes="StatusBar_Icon">
+							<Image Classes="StatusBar_Icon">
 								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Screen}"/>
 								</DrawingImage>
-							</Image-->
+							</Image>
 							<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Owner.EffectiveScreenColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
 						</StackPanel>
 					</Button>
