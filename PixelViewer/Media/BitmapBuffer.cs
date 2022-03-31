@@ -13,7 +13,7 @@ namespace Carina.PixelViewer.Media
 		{
 			// Fields.
 			public readonly byte[] Array;
-			public readonly ColorSpace ColorSpace;
+			public ColorSpace ColorSpace;
 			public readonly BitmapFormat Format;
 			public readonly int Height;
 			public readonly int RowBytes;
@@ -62,6 +62,14 @@ namespace Carina.PixelViewer.Media
 		{
 			this.memory = new Memory<byte>(holder.Array);
 		}
+
+
+		/// <summary>
+		/// Change the color space of bitmap.
+		/// </summary>
+		/// <param name="colorSpace">New color space.</param>
+		public void UpdateColorSpace(ColorSpace colorSpace) =>
+			this.GetResourceHolder<HolderImpl>().ColorSpace = colorSpace;
 
 
 		// Implementations.

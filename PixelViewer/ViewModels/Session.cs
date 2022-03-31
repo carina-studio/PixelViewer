@@ -63,7 +63,7 @@ namespace Carina.PixelViewer.ViewModels
 			readonly Session session;
 
 			// Constructor
-			ImageFrame(Session session, IDisposable memoryUsageToken, IBitmapBuffer bitmapBuffer, long dataSize, long frameNumber)
+			ImageFrame(Session session, IDisposable memoryUsageToken, BitmapBuffer bitmapBuffer, long dataSize, long frameNumber)
 			{
 				this.BitmapBuffer = bitmapBuffer;
 				this.dataSize = dataSize;
@@ -102,7 +102,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// Bitmap buffer.
-			public readonly IBitmapBuffer BitmapBuffer;
+			public readonly BitmapBuffer BitmapBuffer;
 
 			// Dispose.
 			protected override void Dispose(bool disposing)
@@ -119,6 +119,12 @@ namespace Carina.PixelViewer.ViewModels
 
 			// Histograms.
 			public BitmapHistograms? Histograms { get; set; }
+
+			// Plane options.
+			public IList<ImagePlaneOptions>? PlaneOptions { get; set; }
+
+			// Rendering options.
+			public ImageRenderingOptions RenderingOptions { get; set; }
 
 			// Rendering result.
 			public ImageRenderingResult RenderingResult { get; set; } = new ImageRenderingResult();
@@ -720,6 +726,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
 		readonly MutableObservableBoolean canZoomTo = new MutableObservableBoolean();
+		ImageFrame? colorSpaceConvertedImageFrame;
 		readonly SortedObservableList<ColorSpace> colorSpaces = new((lhs, rhs) =>
 		{
 			if (lhs == null)
@@ -831,7 +838,9 @@ namespace Carina.PixelViewer.ViewModels
 			this.effectiveScreenColorSpaceObserver = new(_ => this.OnScreenColorSpaceChanged());
 			this.filterImageAction = new ScheduledAction(() =>
 			{
-				if (this.renderedImageFrame != null)
+				if (this.colorSpaceConvertedImageFrame != null)
+					this.FilterImage(this.colorSpaceConvertedImageFrame);
+				else if (this.renderedImageFrame != null)
 					this.FilterImage(this.renderedImageFrame);
 			});
 			this.releasedCachedImagesAction = new ScheduledAction(() => this.ReleaseCachedImages());
@@ -1112,6 +1121,7 @@ namespace Carina.PixelViewer.ViewModels
 							this.canSelectRgbGain.Update(false);
 							this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 							this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+							this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 						}
 						else if (!(await this.HibernateAnotherSessionAsync()))
 						{
@@ -1415,6 +1425,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.canSelectColorAdjustment.Update(false);
 				this.canSelectRgbGain.Update(false);
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+				this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 			}
 			return true;
 		}
@@ -1466,6 +1477,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+			this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 			if (!disposing)
 			{
 				this.ResetValue(ImageDisplayRotationProperty);
@@ -2000,7 +2012,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				// prepare LUT
 				var lut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
-				var histograms = (this.renderedImageFrame?.Histograms).AsNonNull();
+				var histograms = renderedImageFrame.Histograms.AsNonNull();
 				try
 				{
 					stopwatch?.Restart();
@@ -3645,6 +3657,7 @@ namespace Carina.PixelViewer.ViewModels
 				this.ClearRenderedImage();
 				return;
 			}
+			renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
 
 			// update state
 			this.canSaveRenderedImage.Update(false);
@@ -3659,15 +3672,31 @@ namespace Carina.PixelViewer.ViewModels
 			});
 			var isColorSpaceConversionNeeded = this.IsColorSpaceManagementEnabled && !screenColorSpace.Equals(renderedColorSpace);
 
+			// check whether rendering is needed or not
+			var isRenderingNeeded = this.renderedImageFrame?.Let(it =>
+			{
+				if (it.RenderingOptions != renderingOptions)
+					return true;
+				var planeOptions = it.PlaneOptions;
+				if (planeOptions == null || planeOptions.Count != planeOptionsList.Count)
+					return true;
+				for (var i = planeOptionsList.Count - 1; i >= 0; --i)
+                {
+					if (planeOptions[i] != planeOptionsList[i])
+						return true;
+                }
+				return false;
+			}) ?? true;
+
 			// create rendered image
 			var cancellationTokenSource = new CancellationTokenSource();
 			this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 			var renderedFormat = imageRenderer.RenderedFormat;
-			var renderedImageFrame = await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
+			var renderedImageFrame = isRenderingNeeded ? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight) : null;
 			var colorSpaceConvertedImageFrame = isColorSpaceConversionNeeded
 				? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, screenColorSpace, this.ImageWidth, this.ImageHeight)
 				: null;
-			if (renderedImageFrame == null 
+			if ((isRenderingNeeded && renderedImageFrame == null)
 				|| (isColorSpaceConversionNeeded && colorSpaceConvertedImageFrame == null))
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
@@ -3706,19 +3735,25 @@ namespace Carina.PixelViewer.ViewModels
 			try
 			{
 				// render
-				renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
-				renderedImageFrame.RenderingResult = await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				if (isRenderingNeeded && renderedImageFrame != null)
+				{
+					renderedImageFrame.RenderingResult = await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+					renderedImageFrame.RenderingOptions = renderingOptions;
+					renderedImageFrame.PlaneOptions = planeOptionsList;
+				}
+				else
+				{
+					this.Logger.LogTrace("No need to render image again with same options");
+					this.renderedImageFrame.AsNonNull().BitmapBuffer.UpdateColorSpace(renderedColorSpace);
+				}
 
 				// convert color space
 				if (colorSpaceConvertedImageFrame != null && !cancellationTokenSource.IsCancellationRequested)
 				{
 					this.SetValue(IsConvertingColorSpaceProperty, true);
-					await renderedImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
-					var tempImageFrame = renderedImageFrame;
-					colorSpaceConvertedImageFrame.RenderingResult = renderedImageFrame.RenderingResult;
-					renderedImageFrame = colorSpaceConvertedImageFrame;
-					colorSpaceConvertedImageFrame = null;
-					tempImageFrame.Dispose();
+					var sourceImageFrame = renderedImageFrame ?? this.renderedImageFrame.AsNonNull();
+					await sourceImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+					colorSpaceConvertedImageFrame.RenderingResult = sourceImageFrame.RenderingResult;
 				}
 			}
 			catch (Exception ex)
@@ -3731,7 +3766,10 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				try
 				{
-					renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+					if (colorSpaceConvertedImageFrame != null)
+						colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+					else if (renderedImageFrame != null)
+						renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
 				}
 				catch (Exception ex)
 				{
@@ -3744,7 +3782,11 @@ namespace Carina.PixelViewer.ViewModels
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
 				this.Logger.LogWarning($"Image rendering for '{sourceFileName}' has been cancelled");
-				this.SynchronizationContext.Post(renderedImageFrame.Dispose);
+				this.SynchronizationContext.Post(() =>
+                {
+					colorSpaceConvertedImageFrame?.Dispose();
+					renderedImageFrame?.Dispose();
+                });
 				if (this.hasPendingImageRendering)
 				{
 					if (this.IsActivated)
@@ -3767,21 +3809,26 @@ namespace Carina.PixelViewer.ViewModels
 				this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
 
 				// update state
-				this.renderedImageFrame?.Dispose();
-				this.renderedImageFrame = renderedImageFrame;
+				this.colorSpaceConvertedImageFrame?.Dispose();
+				this.colorSpaceConvertedImageFrame = colorSpaceConvertedImageFrame;
+				if (renderedImageFrame != null)
+				{
+					this.renderedImageFrame?.Dispose();
+					this.renderedImageFrame = renderedImageFrame;
+				}
 				this.SetValue(HasRenderingErrorProperty, false);
 				this.SetValue(SourceDataSizeProperty, frameDataSize);
 				this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 				this.canMoveToPreviousFrame.Update(frameNumber > 1);
-				this.canSelectColorAdjustment.Update(renderedImageFrame.Histograms != null);
-				this.canSelectRgbGain.Update(renderedImageFrame.RenderingResult.Let(it =>
-					it.HasMeanOfRgb || it.HasWeightedMeanOfRgb));
+				this.canSelectColorAdjustment.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.Histograms != null);
+				this.canSelectRgbGain.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.RenderingResult.Let(it =>
+					it.HasMeanOfRgb || it.HasWeightedMeanOfRgb) ?? false);
 
 				// filter image or report now
 				if (this.IsFilteringRenderedImageNeeded)
 				{
 					this.Logger.LogDebug("Continue filtering image after rendering");
-					this.FilterImage(renderedImageFrame.AsNonNull());
+					this.FilterImage(colorSpaceConvertedImageFrame ?? this.renderedImageFrame.AsNonNull());
 				}
 				else
 				{
@@ -3804,7 +3851,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.ClearFilteredImage();
 
 				// update state
-				renderedImageFrame.Dispose();
+				colorSpaceConvertedImageFrame?.Dispose();
+				renderedImageFrame?.Dispose();
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.canMoveToNextFrame.Update(false);
@@ -3858,7 +3906,9 @@ namespace Carina.PixelViewer.ViewModels
 		// Report rendered image according to current state.
 		async Task ReportRenderedImageAsync(CancellationTokenSource cancellationTokenSource)
 		{
-			var imageFrame = this.IsFilteringRenderedImageNeeded ? this.filteredImageFrame : this.renderedImageFrame;
+			var imageFrame = this.IsFilteringRenderedImageNeeded 
+				? this.filteredImageFrame 
+				: (this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame);
 			if (imageFrame != null)
 			{
 				// released cached image if it is not suitable
@@ -4655,7 +4705,8 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(IsSavingRenderedImageProperty, true);
 			try
 			{
-				await encoder.AsNonNull().EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
+				var imageFrame = this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame.AsNonNull();
+				await encoder.AsNonNull().EncodeAsync(imageFrame.BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 				return true;
 			}
 			catch (Exception ex)
@@ -4789,7 +4840,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.VerifyDisposed();
 			
 			// get histogram
-			var histograms = this.renderedImageFrame?.Histograms;
+			var histograms = (this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame)?.Histograms;
 			if (histograms == null)
 				return;
 			
@@ -5048,7 +5099,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (this.IsDisposed)
 				return;
-			var renderedImageBuffer = (this.filteredImageFrame ?? this.renderedImageFrame)?.BitmapBuffer;
+			var renderedImageBuffer = (this.filteredImageFrame ?? this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame)?.BitmapBuffer;
 			if (renderedImageBuffer == null 
 				|| x < 0 || x >= renderedImageBuffer.Width
 				|| y < 0 || y >= renderedImageBuffer.Height)

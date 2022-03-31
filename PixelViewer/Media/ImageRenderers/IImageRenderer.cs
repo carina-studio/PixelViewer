@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using CarinaStudio;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,7 +70,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// <summary>
 	/// Options of single plane for rendering image.
 	/// </summary>
-	struct ImagePlaneOptions
+	struct ImagePlaneOptions : IEquatable<ImagePlaneOptions>
 	{
 		/// <summary>
 		/// Initialize fields in <see cref="ImagePlaneOptions"/> structure.
@@ -94,10 +95,41 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		}
 
 
+		/// <inheritdoc/>
+		public bool Equals(ImagePlaneOptions options) =>
+			this.EffectiveBits == options.EffectiveBits
+			&& this.PixelStride == options.PixelStride
+			&& this.RowStride == options.RowStride;
+
+
+		/// <inheritdoc/>
+		public override bool Equals([NotNullWhen(true)] object? obj) =>
+			obj is ImagePlaneOptions options && this.Equals(options);
+
+
+        /// <summary>
+        /// Effective bits to render color in each pixel.
+        /// </summary>
+        public int EffectiveBits { get; set; }
+
+
+		/// <inheritdoc/>
+		public override int GetHashCode() =>
+			this.RowStride;
+
+
+        /// <summary>
+        /// Equality operator.
+        /// </summary>
+        public static bool operator ==(ImagePlaneOptions left, ImagePlaneOptions right) =>
+			left.Equals(right);
+
+
 		/// <summary>
-		/// Effective bits to render color in each pixel.
+		/// Inequality operator.
 		/// </summary>
-		public int EffectiveBits { get; set; }
+		public static bool operator !=(ImagePlaneOptions left, ImagePlaneOptions right) =>
+			!left.Equals(right);
 
 
 		/// <summary>
@@ -205,7 +237,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// <summary>
 	/// Options for rendering image.
 	/// </summary>
-	struct ImageRenderingOptions
+	struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	{
 		/// <summary>
 		/// Maximum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
@@ -249,6 +281,28 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		public bool Demosaicing { get; set; }
 
 
+		/// <inheritdoc/>
+		public bool Equals(ImageRenderingOptions options) =>
+			this.BayerPattern == options.BayerPattern
+			&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001
+			&& this.ByteOrdering == options.ByteOrdering
+			&& this.DataOffset == options.DataOffset
+			&& this.Demosaicing == options.Demosaicing
+			&& Math.Abs(this.GreenGain - options.GreenGain) <= 0.001
+			&& Math.Abs(this.RedGain - options.RedGain) <= 0.001
+			&& this.YuvToBgraConverter == options.YuvToBgraConverter;
+
+
+		/// <inheritdoc/>
+		public override bool Equals([NotNullWhen(true)] object? obj) =>
+			obj is ImageRenderingOptions options && this.Equals(options);
+
+
+		/// <inheritdoc/>
+		public override int GetHashCode() =>
+			(((int)this.ByteOrdering & 0xf) << 28) | (((this.YuvToBgraConverter?.GetHashCode() ?? 0) & 0xfff) << 16) | (int)(this.DataOffset & 0xffff);
+
+
 		/// <summary>
 		/// Get valid gain of RGB color.
 		/// </summary>
@@ -270,6 +324,20 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Gain of green color when renderering.
 		/// </summary>
 		public double GreenGain { get; set; }
+
+
+		/// <summary>
+		/// Equality operator.
+		/// </summary>
+		public static bool operator ==(ImageRenderingOptions x, ImageRenderingOptions y) =>
+			x.Equals(y);
+
+
+		/// <summary>
+		/// Inequality operator.
+		/// </summary>
+		public static bool operator !=(ImageRenderingOptions x, ImageRenderingOptions y) =>
+			!x.Equals(y);
 
 
 		/// <summary>
