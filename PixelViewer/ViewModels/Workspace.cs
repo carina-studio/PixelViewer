@@ -76,7 +76,7 @@ namespace Carina.PixelViewer.ViewModels
 					return;
 				
 				// get screen color space
-				currentScreen = screen;
+				this.currentScreen = screen;
 				var screenColorSpace = ColorSpace.Default;
 				if (!ColorSpace.IsSystemScreenColorSpaceSupported || !this.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace))
 					ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out screenColorSpace);
@@ -84,7 +84,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					try
 					{
-						screenColorSpace = await ColorSpace.GetSystemScreenColorSpaceAsync(window.Bounds);
+						screenColorSpace = await ColorSpace.GetSystemScreenColorSpaceAsync(window);
 					}
 					catch (Exception ex)
 					{

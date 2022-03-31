@@ -14,6 +14,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -417,6 +418,7 @@ namespace Carina.PixelViewer.Media
         public bool Equals(ColorSpace? colorSpace) =>
             colorSpace is not null 
             && this.Source == colorSpace.Source
+            && (this.Source != ColorSpaceSource.SystemDefined || this.customName == colorSpace.customName)
             && this.numericalTransferFuncFromRgb.Equals(colorSpace.numericalTransferFuncFromRgb)
             && this.skiaColorSpaceXyz.Equals(colorSpace.skiaColorSpaceXyz);
 
@@ -472,16 +474,16 @@ namespace Carina.PixelViewer.Media
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of getting screen color space.</returns>
         public static Task<ColorSpace> GetSystemScreenColorSpaceAsync(CancellationToken cancellationToken = default) =>
-            GetSystemScreenColorSpaceAsync(default, cancellationToken);
-        
+            GetSystemScreenColorSpaceAsync(null, cancellationToken);
+
 
         /// <summary>
         /// Get screen color space defined by system.
         /// </summary>
-        /// <param name="windowBounds">Bounds of window to get screen.</param>
+        /// <param name="window">Window to get screen.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of getting screen color space.</returns>
-        public static async Task<ColorSpace> GetSystemScreenColorSpaceAsync(Rect windowBounds, CancellationToken cancellationToken = default)
+        public static async Task<ColorSpace> GetSystemScreenColorSpaceAsync(Avalonia.Controls.Window? window, CancellationToken cancellationToken = default)
         {
             // check state
             if (!IsSystemScreenColorSpaceSupported)
@@ -490,7 +492,87 @@ namespace Carina.PixelViewer.Media
             // get screen color space
             var systemColorSpace = await Task.Run(() =>
             {
-                if (CarinaStudio.Platform.IsMacOS)
+                if (CarinaStudio.Platform.IsWindows)
+                {
+                    // use new API to get color profile
+                    if (CarinaStudio.Platform.IsWindows10OrAbove)
+                    {
+                        try
+                        {
+                            // find monitor
+                            var monitorInfo = new Win32.MONITORINFOEX() { cbSize = (uint)Marshal.SizeOf<Win32.MONITORINFOEX>() };
+                            var windowBounds = (window?.Bounds).GetValueOrDefault();
+                            var windowRect = new Win32.RECT()
+                            {
+                                left = (int)(windowBounds.Left + 0.5),
+                                top = (int)(windowBounds.Top + 0.5),
+                                right = (int)(windowBounds.Right + 0.5),
+                                bottom = (int)(windowBounds.Bottom + 0.5),
+                            };
+                            var hMonitor = Win32.MonitorFromRect(ref windowRect, Win32.MONITOR.DEFAULTTONEAREST);
+                            if (hMonitor == IntPtr.Zero)
+                                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get monitor which contains window.");
+                            if (!Win32.GetMonitorInfo(hMonitor, ref monitorInfo))
+                                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get info of monitor which contains window.");
+
+                            // get device info
+                            var displayDevice = new Win32.DISPLAY_DEVICE() { cb = (uint)Marshal.SizeOf<Win32.DISPLAY_DEVICE>() };
+                            if (!Win32.EnumDisplayDevices(monitorInfo.szDevice, 0, ref displayDevice, Win32.EDD.GET_DEVICE_INTERFACE_NAME))
+                                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get display device which contains window.");
+
+                            // check color profile scope
+                            var colorProfileScope = Win32.WCS_PROFILE_MANAGEMENT_SCOPE.SYSTEM_WIDE;
+                            if (Win32.WcsGetUsePerUserProfiles(displayDevice.DeviceKey, Win32.CLASS.MONITOR, out var usePerUserProfiles) && usePerUserProfiles)
+                                colorProfileScope = Win32.WCS_PROFILE_MANAGEMENT_SCOPE.CURRENT_USER;
+
+                            // get color profile name
+                            if (!Win32.WcsGetDefaultColorProfileSize(colorProfileScope, displayDevice.DeviceKey, Win32.COLORPROFILETYPE.ICC, Win32.COLORPROFILESUBTYPE.RGB_WORKING_SPACE, 0, out var colorProfileNameSize))
+                                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get size of name of color profile.");
+                            var colorProfileName = new StringBuilder((int)colorProfileNameSize);
+                            if (!Win32.WcsGetDefaultColorProfile(colorProfileScope, displayDevice.DeviceKey, Win32.COLORPROFILETYPE.ICC, Win32.COLORPROFILESUBTYPE.RGB_WORKING_SPACE, 0, colorProfileNameSize, colorProfileName))
+                                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get name of color profile.");
+
+                            // get color directory
+                            var colorDirPathSize = 512u << 1;
+                            var colorDirPath = new StringBuilder((int)colorDirPathSize >> 1);
+                            if (!Win32.GetColorDirectory(null, colorDirPath, ref colorDirPathSize))
+                                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get color directory.");
+
+                            // load color profile
+                            using var stream = new FileStream(Path.Combine(colorDirPath.ToString(), colorProfileName.ToString()), FileMode.Open, FileAccess.Read);
+                            return LoadFromIccProfile(colorProfileName.ToString(), stream, ColorSpaceSource.SystemDefined);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger?.LogError(ex, "Unable to get system color space on Windows 10+.");
+                        }
+                    }
+
+                    // get DC
+                    var hWnd = (window?.PlatformImpl?.Handle?.Handle).GetValueOrDefault();
+                    var hdc = Win32.GetWindowDC(hWnd);
+                    if (hdc == IntPtr.Zero)
+                        throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get DC of window or desktop.");
+
+                    // load ICC profile
+                    try
+                    {
+                        // get ICC profile name
+                        var fileNameBufferSize = 512u;
+                        var fileNameBuffer = new StringBuilder((int)fileNameBufferSize);
+                        if (!Win32.GetICMProfile(hdc, ref fileNameBufferSize, fileNameBuffer))
+                            throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to path of ICC profile of window or desktop.");
+
+                        // load ICC profile
+                        using var stream = new FileStream(fileNameBuffer.ToString(), FileMode.Open, FileAccess.Read);
+                        return LoadFromIccProfile(fileNameBuffer.ToString(), stream, ColorSpaceSource.SystemDefined);
+                    }
+                    finally
+                    {
+                        Win32.ReleaseDC(hWnd, hdc);
+                    }
+                }
+                else if (CarinaStudio.Platform.IsMacOS)
                 {
                     var colorSpaceRef = IntPtr.Zero;
                     var iccDataRef = IntPtr.Zero;
@@ -498,7 +580,8 @@ namespace Carina.PixelViewer.Media
                     {
                         // get display ID
                         var displayIdArray = new uint[1];
-                        if (windowBounds.IsEmpty)
+                        var windowBounds = (window?.Bounds).GetValueOrDefault();
+                        if (window == null)
                             displayIdArray[0] = MacOS.CGMainDisplayID();
                         else if (MacOS.CGGetDisplaysWithRect(new MacOS.CGRect() 
                             { 
@@ -525,7 +608,7 @@ namespace Carina.PixelViewer.Media
                         if (iccDataCount == 0)
                             throw new Exception("Empty ICC profile from color space.");
                         var iccData = new byte[(int)iccDataCount];
-                        System.Runtime.InteropServices.Marshal.Copy(MacOS.CFDataGetBytePtr(iccDataRef), iccData, 0, iccData.Length);
+                        Marshal.Copy(MacOS.CFDataGetBytePtr(iccDataRef), iccData, 0, iccData.Length);
                         return new MemoryStream(iccData).Use(it =>
                             LoadFromIccProfile(null, it, ColorSpaceSource.SystemDefined));
                     }
@@ -652,7 +735,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Check whether system defined screen color space is supported or not. 
         /// </summary>
-        public static bool IsSystemScreenColorSpaceSupported { get; } = CarinaStudio.Platform.IsMacOS;
+        public static bool IsSystemScreenColorSpaceSupported { get; } = CarinaStudio.Platform.IsWindows || CarinaStudio.Platform.IsMacOS;
 
 
         /// <summary>
@@ -878,7 +961,7 @@ namespace Carina.PixelViewer.Media
                 }
             }
             if (iccName == null && fileName != null)
-                iccName = Path.GetFileName(fileName);
+                iccName = Path.GetFileNameWithoutExtension(fileName);
             
             // check whit point
             /*
