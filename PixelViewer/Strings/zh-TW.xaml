@@ -57,11 +57,11 @@
 	<sys:String x:Key="String/ByteOrdering.LittleEndian">小端序 (Little-Endian)</sys:String>
 
 	<!-- ColorSpace -->
-	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 525行 (SDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 625行 (SDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 搭配 PQ)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2100-HLG">BT.2100 (HLG 轉換，HDR-TV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2100-PQ">BT.2100 (PQ 轉換，HDR-TV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 (525 行，SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625 行，SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">內嵌色彩空間</sys:String>
-	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 搭配 HLG)</sys:String>
 	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB (無 Gamma 轉換)</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">系統定義色彩空間</sys:String>
 

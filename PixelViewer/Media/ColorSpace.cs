@@ -124,6 +124,26 @@ namespace Carina.PixelViewer.Media
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
         /// <summary>
+        /// ITU-R BT.2100 with HLG transfer.
+        /// </summary>
+        public static readonly ColorSpace BT_2100_HLG = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "BT.2100-HLG",
+            null,
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020),
+            D65,
+            new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
+        /// <summary>
+        /// ITU-R BT.2100 with PQ transfer.
+        /// </summary>
+        public static readonly ColorSpace BT_2100_PQ = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "BT.2100-PQ",
+            null,
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020),
+            D65,
+            new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
+        /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
         public static readonly ColorSpace BT_601_525Line = new ColorSpace(
@@ -201,26 +221,6 @@ namespace Carina.PixelViewer.Media
             D65, 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         /// <summary>
-        /// Dolby vision.
-        /// </summary>
-        public static readonly ColorSpace Dolby_Vision = new ColorSpace(
-            ColorSpaceSource.BuiltIn,
-            "Dolby-Vision", 
-            null, 
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020), 
-            D65, 
-            new Uri("https://en.wikipedia.org/wiki/Dolby_Vision"));
-        /// <summary>
-        /// HLG10.
-        /// </summary>
-        public static readonly ColorSpace Hlg10 = new ColorSpace(
-            ColorSpaceSource.BuiltIn,
-            "HLG10", 
-            null, 
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020), 
-            D65, 
-            new Uri("https://en.wikipedia.org/wiki/Hybrid_log%E2%80%93gamma"));
-        /// <summary>
         /// Linear sRGB.
         /// </summary>
         public static readonly ColorSpace LinearSrgb = new ColorSpace(
@@ -249,12 +249,12 @@ namespace Carina.PixelViewer.Media
         {
             { AdobeRGB_1998.Name, AdobeRGB_1998 },
             { BT_2020.Name, BT_2020 },
+            { BT_2100_HLG.Name, BT_2100_HLG },
+            { BT_2100_PQ.Name, BT_2100_PQ },
             { BT_601_525Line.Name, BT_601_525Line },
             { BT_601_625Line.Name, BT_601_625Line },
             { DCI_P3.Name, DCI_P3 },
             { Display_P3.Name, Display_P3 },
-            { Dolby_Vision.Name, Dolby_Vision },
-            { Hlg10.Name, Hlg10 },
             { LinearSrgb.Name, LinearSrgb },
             { Srgb.Name, Srgb },
         };

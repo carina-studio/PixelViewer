@@ -76,14 +76,14 @@
 	<!-- ColorSpace -->
 	<sys:String x:Key="String/ColorSpace.Adobe-RGB-1998">Adobe RGB (1998)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.2020">BT.2020 (UHDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 525-line (SDTV)</sys:String>
-	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 625-line (SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2100-HLG">BT.2100 (HLG transfer, HDR-TV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2100-PQ">BT.2100 (PQ transfer, HDR-TV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 (525-line, SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625-line, SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
-	<sys:String x:Key="String/ColorSpace.Dolby-Vision">Dolby Vision/HDR10+ (BT.2020 with PQ)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">Embedded color space</sys:String>
-	<sys:String x:Key="String/ColorSpace.HLG10">HLG10 (BT.2020 with HLG)</sys:String>
-	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB w/o gamma transformation</sys:String>
+	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB w/o gamma transfer</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">System defined color space</sys:String>
 
