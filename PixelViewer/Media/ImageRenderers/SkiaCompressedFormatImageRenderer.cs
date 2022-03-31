@@ -82,7 +82,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
             {
                 var srcBaseAddr = bitmap.GetAddress(0, 0);
                 var srcRowStride = bitmap.RowBytes;
-                var destRowStride = bitmap.RowBytes;
+                var destRowStride = bitmapBuffer.RowBytes;
                 switch (bitmapBuffer.Format)
                 {
                     case BitmapFormat.Bgra32:
@@ -103,7 +103,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
                             var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                             var packFunc = ImageProcessing.SelectBgra64Packing();
                             var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + srcRowStride * y);
-                            var destPixelPtr = (ulong*)((byte*)destBaseAddr + srcRowStride * y);
+                            var destPixelPtr = (ulong*)((byte*)destBaseAddr + destRowStride * y);
                             var r = (ushort)0;
                             var g = (ushort)0;
                             var b = (ushort)0;
@@ -142,7 +142,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         /// <summary>
         /// Initialize new <see cref="JpegImageRenderer"/> instance.
         /// </summary>
-        public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), new string[] { "JPEG" }), SkiaSharp.SKEncodedImageFormat.Jpeg)
+        public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), new string[] { "JPEG" }), SKEncodedImageFormat.Jpeg)
         { }
 
 
@@ -160,7 +160,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         /// <summary>
         /// Initialize new <see cref="PngImageRenderer"/> instance.
         /// </summary>
-        public PngImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "PNG", new ImagePlaneDescriptor(0), new string[] { "PNG" }), SkiaSharp.SKEncodedImageFormat.Png)
+        public PngImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "PNG", new ImagePlaneDescriptor(0), new string[] { "PNG" }), SKEncodedImageFormat.Png)
         { }
 
 

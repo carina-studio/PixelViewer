@@ -19,6 +19,7 @@ namespace Carina.PixelViewer.Media
         static readonly ISet<FileFormat> emptyFormats = new HashSet<FileFormat>().AsReadOnly();
         static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new Dictionary<string, ISet<FileFormat>>(PathEqualityComparer.Default);
         static readonly Dictionary<string, FileFormat> formatsById = new Dictionary<string, FileFormat>();
+        static volatile FileFormat? heif;
         static volatile FileFormat? jpeg;
         static volatile FileFormat? png;
         static volatile FileFormat? rawBgra;
@@ -44,6 +45,12 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// High Efficiency Image File Format (HEIF).
+        /// </summary>
+        public static FileFormat Heif { get => heif ?? throw new InvalidOperationException("File format is not ready yet."); }
+
+
+        /// <summary>
         /// Initialize.
         /// </summary>
         /// <param name="app">Application.</param>
@@ -57,6 +64,7 @@ namespace Carina.PixelViewer.Media
             }
             bmp = Register(new FileFormat(app, "Bmp", new string[] { ".bmp" }));
             dng = Register(new FileFormat(app, "Dng", new string[] { ".dng" }));
+            heif = Register(new FileFormat(app, "Heif", new string[] { ".heif", ".heic" }));
             jpeg = Register(new FileFormat(app, "Jpeg", new string[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
             png = Register(new FileFormat(app, "Png", new string[] { ".png" }));
             rawBgra = Register(new FileFormat(app, "RawBgra", new string[] { ".bgra" }));

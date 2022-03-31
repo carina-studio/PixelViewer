@@ -102,9 +102,10 @@
 	<sys:String x:Key="String/FileType.All">所有檔案</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows 點陣圖</sys:String>
 	<sys:String x:Key="String/FileType.Dng">數位負片 (DNG)</sys:String>
+	<sys:String x:Key="String/FileType.Heif">高效率圖檔格式 (HEIF)</sys:String>
 	<sys:String x:Key="String/FileType.Icc">ICC 色彩描述檔</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG 影像</sys:String>
-	<sys:String x:Key="String/FileType.Png">PNG 影像</sys:String>
+	<sys:String x:Key="String/FileType.Png">可攜式網路影像 (PNG)</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位元 BGRA 像素</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
