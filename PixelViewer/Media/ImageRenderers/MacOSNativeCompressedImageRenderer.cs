@@ -326,23 +326,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
         try
         {
             // load data into memory
-            imageDataRef = MacOS.CFDataCreateMutable(MacOS.CFAllocatorGetDefault(), dataSize);
-            if (imageDataRef == IntPtr.Zero)
-                throw new Exception($"Unable to allocate buffer with size {dataSize}.");
-            var buffer = new byte[4096];
-            fixed (byte* bufferPtr = buffer)
-            {
-                var readCount = imageStream.Read(buffer, 0, buffer.Length);
-                while (readCount > 0)
-                {
-                    MacOS.CFDataAppendBytes(imageDataRef, new IntPtr(bufferPtr), readCount);
-                    readCount = imageStream.Read(buffer, 0, buffer.Length);
-                }
-            }
-            if ((long)MacOS.CFDataGetLength(imageDataRef) != dataSize)
-                throw new Exception($"Inconsistent data size.");
-            if (cancellationToken.IsCancellationRequested)
-                throw new TaskCanceledException();
+            imageDataRef = MacOS.CFDataCreateMutable(imageStream, dataSize, cancellationToken);
             
             // create image source
             imageSourceRef = MacOS.CGImageSourceCreateWithData(imageDataRef, IntPtr.Zero);
@@ -354,24 +338,20 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
             imagePropertiesRef = MacOS.CGImageSourceCopyPropertiesAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);
             if (imagePropertiesRef == IntPtr.Zero)
                 throw new Exception($"Unable to get properties of image.");
-            var imageWidthRef = MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth);
-            var imageHeightRef = MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight);
-            if (imageWidthRef == IntPtr.Zero || imageHeightRef == IntPtr.Zero)
+            if (!MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth, out int width)
+                || !MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight, out int height))
+            {
                 throw new Exception($"Unable to get dimensions of image.");
-            MacOS.CFNumberGetValue(imageWidthRef, MacOS.CFNumberType.SInt32Type, out int width);
-            MacOS.CFNumberGetValue(imageHeightRef, MacOS.CFNumberType.SInt32Type, out int height);
+            }
             if (width != bitmapBuffer.Width || height != bitmapBuffer.Height)
                 throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {width}x{height} expected.");
             
             // check image format
-            var colorModelRef = MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyColorModel);
-            var colorDepthRef = MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyDepth);
-            if (colorModelRef == IntPtr.Zero || colorDepthRef == IntPtr.Zero)
-                throw new Exception($"Unable to get pixel format of image.");
-            var colorModel = MacOS.CFStringGetCharacters(colorModelRef);
-            if (colorModel != "RGB")
+            if (!MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyColorModel, out string? colorModel)
+                || colorModel != "RGB")
+            {
                 throw new Exception($"Only RGB color model is supported.");
-            MacOS.CFNumberGetValue(colorDepthRef, MacOS.CFNumberType.SInt32Type, out int colorDepth);
+            }
 
             // load image
             imageRef = MacOS.CGImageSourceCreateImageAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);

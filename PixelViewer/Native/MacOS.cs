@@ -1,6 +1,9 @@
 using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Native
 {
@@ -197,6 +200,41 @@ namespace Carina.PixelViewer.Native
 		public static extern IntPtr CFDataCreate(IntPtr allocator, [MarshalAs(UnmanagedType.LPArray)] byte[] data, long length);
 
 
+        public static unsafe IntPtr CFDataCreateMutable(Stream source, long length, CancellationToken cancellationToken = default)
+        {
+            if (length < 0)
+                throw new ArgumentOutOfRangeException();
+            var dataRef = CFDataCreateMutable(CFAllocatorGetDefault(), Math.Max(1, length));
+            if (dataRef == IntPtr.Zero)
+                throw new Exception($"Unable to allocate buffer with {length} bytes.");
+            try
+            {
+                var buffer = new byte[4096];
+                fixed (byte* bufferPtr = buffer)
+                {
+                    var readCount = source.Read(buffer, 0, (int)Math.Min(buffer.Length, length));
+                    while (readCount > 0)
+                    {
+                        CFDataAppendBytes(dataRef, new IntPtr(bufferPtr), readCount);
+                        if (cancellationToken.IsCancellationRequested)
+                            throw new TaskCanceledException();
+                        length -= readCount;
+                        if (length > 0)
+                            readCount = source.Read(buffer, 0, (int)Math.Min(buffer.Length, length));
+                        else
+                            break;
+                    }
+                }
+                return dataRef;
+            }
+            catch
+            {
+                CFRelease(dataRef);
+                throw;
+            }
+        }
+
+
         [DllImport(CoreFoundationLib)]
 		public static extern IntPtr CFDataCreateMutable(IntPtr allocator, long capacity);
 
@@ -215,6 +253,71 @@ namespace Carina.PixelViewer.Native
 
         [DllImport(CoreFoundationLib)]
 		public static extern bool CFDictionaryContainsKey(IntPtr theDict, IntPtr key);
+
+
+        public static bool CFDictionaryGetValue(IntPtr theDict, IntPtr key, out int value)
+        {
+            var valueRef = CFDictionaryGetValue(theDict, key);
+            if (valueRef == IntPtr.Zero)
+            {
+                value = default;
+                return false;
+            }
+            CFNumberGetValue(valueRef, CFNumberType.SInt32Type, out value);
+            return true;
+        }
+
+
+        public static bool CFDictionaryGetValue(IntPtr theDict, IntPtr key, out uint value)
+        {
+            var valueRef = CFDictionaryGetValue(theDict, key);
+            if (valueRef == IntPtr.Zero)
+            {
+                value = default;
+                return false;
+            }
+            CFNumberGetValue(valueRef, CFNumberType.IntType, out value);
+            return true;
+        }
+
+
+        public static bool CFDictionaryGetValue(IntPtr theDict, IntPtr key, out float value)
+        {
+            var valueRef = CFDictionaryGetValue(theDict, key);
+            if (valueRef == IntPtr.Zero)
+            {
+                value = default;
+                return false;
+            }
+            CFNumberGetValue(valueRef, CFNumberType.Float32Type, out value);
+            return true;
+        }
+
+
+        public static bool CFDictionaryGetValue(IntPtr theDict, IntPtr key, out double value)
+        {
+            var valueRef = CFDictionaryGetValue(theDict, key);
+            if (valueRef == IntPtr.Zero)
+            {
+                value = default;
+                return false;
+            }
+            CFNumberGetValue(valueRef, CFNumberType.Float64Type, out value);
+            return true;
+        }
+
+
+        public static bool CFDictionaryGetValue(IntPtr theDict, IntPtr key, out string? value)
+        {
+            var valueRef = CFDictionaryGetValue(theDict, key);
+            if (valueRef == IntPtr.Zero)
+            {
+                value = default;
+                return false;
+            }
+            value = CFStringGetCharacters(valueRef);
+            return true;
+        }
 
 
         [DllImport(CoreFoundationLib)]

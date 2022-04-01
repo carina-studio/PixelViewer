@@ -58,26 +58,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
         try
         {
             // load data into memory
-            imageDataRef = MacOS.CFDataCreateMutable(MacOS.CFAllocatorGetDefault(), dataSize);
-            if (imageDataRef == IntPtr.Zero)
-                throw new Exception($"Unable to allocate buffer with size {dataSize}.");
-            var buffer = new byte[4096];
-            unsafe
-            {
-                fixed (byte* bufferPtr = buffer)
-                {
-                    var readCount = stream.Read(buffer, 0, buffer.Length);
-                    while (readCount > 0)
-                    {
-                        MacOS.CFDataAppendBytes(imageDataRef, new IntPtr(bufferPtr), readCount);
-                        readCount = stream.Read(buffer, 0, buffer.Length);
-                    }
-                }
-                }
-            if ((long)MacOS.CFDataGetLength(imageDataRef) != dataSize)
-                throw new Exception($"Inconsistent data size.");
-            if (cancellationToken.IsCancellationRequested)
-                throw new TaskCanceledException();
+            imageDataRef = MacOS.CFDataCreateMutable(stream, dataSize, cancellationToken);
             
             // create image source
             imageSourceRef = MacOS.CGImageSourceCreateWithData(imageDataRef, IntPtr.Zero);
