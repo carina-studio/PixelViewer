@@ -27,18 +27,14 @@ class HeifFileFormatParser : MagickFileFormatParser
     {
         var buffer = new byte[24];
         return stream.Read(buffer, 0, 24) == 24
-            && buffer[0] == 0x0
-            && buffer[1] == 0x0
-            && buffer[2] == 0x0
-            && buffer[3] == 0x18
             && buffer[4] == 'f'
             && buffer[5] == 't'
             && buffer[6] == 'y'
             && buffer[7] == 'p'
-            && buffer[20] == 'h'
-            && buffer[21] == 'e'
-            && buffer[22] == 'i'
-            && buffer[23] == 'c';
+            && buffer[8] == 'h'
+            && buffer[9] == 'e'
+            && buffer[10] == 'i'
+            && buffer[11] == 'c';
     }
 
 

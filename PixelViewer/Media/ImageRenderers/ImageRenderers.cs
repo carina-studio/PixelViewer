@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CarinaStudio;
+using System;
 using System.Collections.Generic;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
@@ -11,65 +12,71 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Get all available <see cref="IImageRenderer"/>s.
 		/// </summary>
-		public static IList<IImageRenderer> All { get; } = new List<IImageRenderer>(new IImageRenderer[]
+		public static IList<IImageRenderer> All { get; } = new List<IImageRenderer>().Also(it =>
 		{
-			new L8ImageRenderer(),
-			new L16ImageRenderer(),
-			new NV12ImageRenderer(),
-			new NV21ImageRenderer(),
-			new Y010ImageRenderer(),
-			new Y016ImageRenderer(),
-			new I420ImageRenderer(),
-			new P010ImageRenderer(),
-			new P012ImageRenderer(),
-			new P016ImageRenderer(),
-			new YV12ImageRenderer(),
-			new Yuv422pImageRenderer(),
-			new P210ImageRenderer(),
-			new P212ImageRenderer(),
-			new P216ImageRenderer(),
-			new UyvyImageRenderer(),
-			new YuvyImageRenderer(),
-			new Yuv444pImageRenderer(),
-			new P410ImageRenderer(),
-			new P412ImageRenderer(),
-			new P416ImageRenderer(),
-			new AndroidYuv420ImageRenderer(),
+			it.AddRange(new IImageRenderer[] {
+				new L8ImageRenderer(),
+				new L16ImageRenderer(),
+				new NV12ImageRenderer(),
+				new NV21ImageRenderer(),
+				new Y010ImageRenderer(),
+				new Y016ImageRenderer(),
+				new I420ImageRenderer(),
+				new P010ImageRenderer(),
+				new P012ImageRenderer(),
+				new P016ImageRenderer(),
+				new YV12ImageRenderer(),
+				new Yuv422pImageRenderer(),
+				new P210ImageRenderer(),
+				new P212ImageRenderer(),
+				new P216ImageRenderer(),
+				new UyvyImageRenderer(),
+				new YuvyImageRenderer(),
+				new Yuv444pImageRenderer(),
+				new P410ImageRenderer(),
+				new P412ImageRenderer(),
+				new P416ImageRenderer(),
+				new AndroidYuv420ImageRenderer(),
 
-			new Rgb565ImageRenderer(),
-			new Bgr888ImageRenderer(),
-			new Rgb888ImageRenderer(),
-			new Bgrx8888ImageRenderer(),
-			new Rgbx8888ImageRenderer(),
-			new Xbgr8888ImageRenderer(),
-			new Xrgb8888ImageRenderer(),
-			new Bgr161616ImageRenderer(),
-			new Rgb161616ImageRenderer(),
+				new Rgb565ImageRenderer(),
+				new Bgr888ImageRenderer(),
+				new Rgb888ImageRenderer(),
+				new Bgrx8888ImageRenderer(),
+				new Rgbx8888ImageRenderer(),
+				new Xbgr8888ImageRenderer(),
+				new Xrgb8888ImageRenderer(),
+				new Bgr161616ImageRenderer(),
+				new Rgb161616ImageRenderer(),
 
-			new Abgr8888ImageRenderer(),
-			new Argb8888ImageRenderer(),
-			new Bgra8888ImageRenderer(),
-			new Rgba8888ImageRenderer(),
-			new Abgr2101010ImageRenderer(),
-			new Argb2101010ImageRenderer(),
-			new Bgra1010102ImageRenderer(),
-			new Rgba1010102ImageRenderer(),
-			new Abgr16161616ImageRenderer(),
-			new Argb16161616ImageRenderer(),
-			new Bgra16161616ImageRenderer(),
-			new Rgba16161616ImageRenderer(),
-			new AbgrF16ImageRenderer(),
-			new ArgbF16ImageRenderer(),
-			new BgraF16ImageRenderer(),
-			new RgbaF16ImageRenderer(),
+				new Abgr8888ImageRenderer(),
+				new Argb8888ImageRenderer(),
+				new Bgra8888ImageRenderer(),
+				new Rgba8888ImageRenderer(),
+				new Abgr2101010ImageRenderer(),
+				new Argb2101010ImageRenderer(),
+				new Bgra1010102ImageRenderer(),
+				new Rgba1010102ImageRenderer(),
+				new Abgr16161616ImageRenderer(),
+				new Argb16161616ImageRenderer(),
+				new Bgra16161616ImageRenderer(),
+				new Rgba16161616ImageRenderer(),
+				new AbgrF16ImageRenderer(),
+				new ArgbF16ImageRenderer(),
+				new BgraF16ImageRenderer(),
+				new RgbaF16ImageRenderer(),
 
-			new BayerPattern10MipiImageRenderer(),
-			new BayerPattern12MipiImageRenderer(),
-			new BayerPattern16ImageRenderer(),
+				new BayerPattern10MipiImageRenderer(),
+				new BayerPattern12MipiImageRenderer(),
+				new BayerPattern16ImageRenderer(),
+			});
+			it.Add(CarinaStudio.Platform.IsMacOS 
+				? new MacOSHeifImageRenderer() 
+				: new HeifImageRenderer());
+			it.AddRange(new IImageRenderer[] {
+				new JpegImageRenderer(),
+				new PngImageRenderer(),
+			});
 
-			new HeifImageRenderer(),
-			new JpegImageRenderer(),
-			new PngImageRenderer(),
 		}).AsReadOnly();
 
 

@@ -195,5 +195,5 @@ class HeifImageRenderer : MagickCompressedImageRenderer
 
     /// <inheritdoc/>
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
-        true;
+        Media.FileFormatParsers.HeifFileFormatParser.CheckFileHeader(imageStream);
 }

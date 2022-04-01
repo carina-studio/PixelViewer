@@ -114,7 +114,7 @@ namespace Carina.PixelViewer.Media
         // Select formats by file name.
         public static bool TryGetFormatsByFileName(string fileName, out ISet<FileFormat> formats)
         {
-            if (formatsByExtensions.TryGetValue(Path.GetExtension(fileName), out var result))
+            if (formatsByExtensions.TryGetValue(Path.GetExtension(fileName).ToLower(), out var result))
             {
                 formats = result.AsReadOnly();
                 return true;

@@ -32,7 +32,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 logger = app.LoggerFactory.CreateLogger(nameof(FileFormatParsers));
             }
             new DngFileFormatParser().Let(it => parsers[it.FileFormat] = it);
-            new HeifFileFormatParser().Let(it => parsers[it.FileFormat] = it);
+            if (CarinaStudio.Platform.IsMacOS)
+                new MacOSHeifFileFormatParser().Let(it => parsers[it.FileFormat] = it);
+            else
+                new HeifFileFormatParser().Let(it => parsers[it.FileFormat] = it);
             new JpegFileFormatParser().Let(it => parsers[it.FileFormat] = it);
             new PngFileFormatParser().Let(it => parsers[it.FileFormat] = it);
             new Yuv4Mpeg2FileFormatParser().Let(it => parsers[it.FileFormat] = it);
