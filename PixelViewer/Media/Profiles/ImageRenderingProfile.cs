@@ -629,6 +629,12 @@ namespace Carina.PixelViewer.Media.Profiles
         }
 
 
+        /// <summary>
+        /// Orientation to display image. The property is used for displaying only.
+        /// </summary>
+        public int Orientation { get; set; }
+
+
         // Pixel strides for each plane.
         public IList<int> PixelStrides
         {

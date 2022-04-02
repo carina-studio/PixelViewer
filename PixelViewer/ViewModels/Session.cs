@@ -1237,6 +1237,28 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(BlueColorGainProperty, profile.BlueColorGain);
 				}
 
+				// rotation
+				if (profile.IsFileFormat)
+				{
+					var rotation = profile.Orientation;
+					if (rotation < 0)
+						rotation += 360;
+					else if (rotation > 360)
+						rotation -= 360;
+					rotation = (int)(rotation / 90.0 + 0.5) * 90;
+					this.SetValue(ImageDisplayRotationProperty, rotation);
+					if (this.GetValue(FitImageToViewportProperty) 
+						&& double.IsFinite(this.fitRenderedImageToViewportScale))
+					{
+						var scale = (rotation % 180) == 0
+							? this.fitRenderedImageToViewportScale
+							: this.fitRenderedImageToViewportScaleSwapped;
+						this.ZoomTo(scale, false);
+					}
+					else
+						this.updateImageDisplaySizeAction.Schedule();
+				}
+
 				// update state
 				if (this.renderImageAction.IsScheduled)
 				{
