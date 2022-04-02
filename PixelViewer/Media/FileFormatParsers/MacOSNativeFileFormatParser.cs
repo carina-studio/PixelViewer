@@ -1,6 +1,7 @@
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Native;
+using CarinaStudio;
 using System;
 using System.IO;
 using System.Threading;
@@ -36,80 +37,105 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
     protected abstract bool OnCheckFileHeader(Stream stream);
 
 
+    /// <summary>
+    /// Called to seek stream to position of embedded ICC profile.
+    /// </summary>
+    /// <param name="stream">Stream to read image data.</param>
+    /// <returns>True if seeking successfully.</returns>
+    protected virtual bool OnSeekToIccProfile(Stream stream) => false;
+
+
     /// <inheritdoc/>
     protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
     {
         // check file header first to prevent decoding image
         var position = stream.Position;
-        if (!this.OnCheckFileHeader(stream))
+        var checkingResult = await Task.Run(() => 
+        {
+            try
+            {
+                return this.OnCheckFileHeader(stream);
+            }
+            finally
+            {
+                stream.Position = position;
+            }
+        });
+        if (!checkingResult)
             return null;
-        stream.Position = position;
 
         // check data size
         var dataSize = Math.Max(0, stream.Length - position);
         if (dataSize > 256L << 20) // 256 MB
             return null;
         
-        // load image
-        var imageDataRef = IntPtr.Zero;
-        var imageSourceRef = IntPtr.Zero;
-        var imageRef = IntPtr.Zero;
-        var iccProfileDataRef = IntPtr.Zero;
-        try
+        // load ICC profile
+        var colorSpace = await Task.Run(async () =>
         {
-            // load data into memory
-            imageDataRef = MacOS.CFDataCreateMutable(stream, dataSize, cancellationToken);
-            
-            // create image source
-            imageSourceRef = MacOS.CGImageSourceCreateWithData(imageDataRef, IntPtr.Zero);
-            if (imageSourceRef == IntPtr.Zero || MacOS.CGImageSourceGetStatus(imageSourceRef) != MacOS.CGImageSourceStatus.Complete)
-                return null;
-            var primaryImageIndex = MacOS.CGImageSourceGetPrimaryImageIndex(imageSourceRef);
-            
-            // load image
-            imageRef = MacOS.CGImageSourceCreateImageAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);
-            if (imageRef == IntPtr.Zero)
-                throw new Exception($"Unable to load image.");
-            
-            // load ICC profile
-            var colorSpaceFromIccProfile = (ColorSpace?)null;
-            var colorSpaceRef = MacOS.CGImageGetColorSpace(imageRef);
-            if (colorSpaceRef != IntPtr.Zero)
+            try
             {
-                iccProfileDataRef = MacOS.CGColorSpaceCopyICCData(colorSpaceRef);
-                if (iccProfileDataRef != IntPtr.Zero)
-                {
-                    var size = (int)MacOS.CFDataGetLength(iccProfileDataRef);
-                    var iccData = new byte[size];
-                    System.Runtime.InteropServices.Marshal.Copy(MacOS.CFDataGetBytePtr(iccProfileDataRef), iccData, 0, size);
-                    try
-                    {
-                        using var iccDataStream = new MemoryStream(iccData);
-                        colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccDataStream, ColorSpaceSource.Embedded, cancellationToken);
-                    }
-                    catch
-                    { }
-                }
+                if (!this.OnSeekToIccProfile(stream))
+                    return null;
+                return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
             }
-
-            // create profile
-            var profile = new ImageRenderingProfile(this.FileFormat, this.imageRenderer);
-            if (colorSpaceFromIccProfile != null)
-                profile.ColorSpace = colorSpaceFromIccProfile;
-            profile.Width = (int)MacOS.CGImageGetWidth(imageRef);
-            profile.Height = (int)MacOS.CGImageGetHeight(imageRef);
-            return profile;
-        }
-        finally
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                stream.Position = position;
+            }
+        });
+        if (cancellationToken.IsCancellationRequested)
+            throw new TaskCanceledException();
+        
+        // parse image
+        var width = 0;
+        var height = 0;
+        await Task.Run(() =>
         {
-            if (iccProfileDataRef != IntPtr.Zero)
-                MacOS.CFRelease(iccProfileDataRef);
-            if (imageRef != IntPtr.Zero)
-                MacOS.CFRelease(imageRef);
-            if (imageSourceRef != IntPtr.Zero)
-                MacOS.CFRelease(imageSourceRef);
-            if (imageDataRef != IntPtr.Zero)
-                MacOS.CFRelease(imageDataRef);
-        }
+            var imageDataRef = IntPtr.Zero;
+            var imageSourceRef = IntPtr.Zero;
+            var imagePropertiesRef = IntPtr.Zero;
+            try
+            {
+                // load data into memory
+                imageDataRef = MacOS.CFDataCreateMutable(stream, dataSize, cancellationToken);
+                
+                // create image source
+                imageSourceRef = MacOS.CGImageSourceCreateWithData(imageDataRef, IntPtr.Zero);
+                if (imageSourceRef == IntPtr.Zero || MacOS.CGImageSourceGetStatus(imageSourceRef) != MacOS.CGImageSourceStatus.Complete)
+                    return;
+                var primaryImageIndex = MacOS.CGImageSourceGetPrimaryImageIndex(imageSourceRef);
+                
+                // get dimensions
+                imagePropertiesRef = MacOS.CGImageSourceCopyPropertiesAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);
+                if (imagePropertiesRef == IntPtr.Zero)
+                    return;
+                MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth, out width);
+                MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight, out height);
+            }
+            finally
+            {
+                if (imagePropertiesRef != IntPtr.Zero)
+                    MacOS.CFRelease(imagePropertiesRef);
+                if (imageSourceRef != IntPtr.Zero)
+                    MacOS.CFRelease(imageSourceRef);
+                if (imageDataRef != IntPtr.Zero)
+                    MacOS.CFRelease(imageDataRef);
+            }
+        });
+
+        // create profile
+        if (width <= 0 || height <= 0)
+            return null;
+        return new ImageRenderingProfile(this.FileFormat, this.imageRenderer).Also(it =>
+        {
+            if (colorSpace != null)
+                it.ColorSpace = colorSpace;
+            it.Height = height;
+            it.Width = width;
+        });
     }
 }

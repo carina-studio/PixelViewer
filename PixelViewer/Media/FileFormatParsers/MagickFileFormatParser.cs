@@ -41,14 +41,6 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
 
 
     /// <summary>
-    /// Called to read ICC profile into memory.
-    /// </summary>
-    /// <param name="stream">Stream which is positioned at start of ICC profile.</param>
-    /// <returns>Read ICC profile, or Null if it is unsupported.</returns>
-    protected virtual byte[]? OnReadIccProfileToMemory(Stream stream) => null;
-
-
-    /// <summary>
     /// Called to seek stream to position of embedded ICC profile.
     /// </summary>
     /// <param name="stream">Stream to read image data.</param>
@@ -84,52 +76,30 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             return null;
 
         // load ICC profile
-        var colorSpaceFromIccProfile = (ColorSpace?)null;
-        var hasIccProfile = false;
-        await Task.Run(() =>
+        var colorSpace = await Task.Run(async () =>
         {
             try
+            {
+                if (!this.OnSeekToIccProfile(stream))
+                    return null;
+                return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
+            }
+            catch
+            {
+                return null;
+            }
+            finally
             {
                 stream.Position = position;
-                hasIccProfile = this.OnSeekToIccProfile(stream);
             }
-            catch
-            { }
         });
-        if (hasIccProfile)
-        {
-            // read ICC profile into memory
-            var iccProfileData = (byte[]?)null;
-            try
-            {
-                iccProfileData = await Task.Run(() => this.OnReadIccProfileToMemory(stream));
-            }
-            catch
-            { }
-            if (cancellationToken.IsCancellationRequested)
-                throw new TaskCanceledException();
-
-            // load ICC profile
-            try
-            {
-                if (iccProfileData == null)
-                    colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
-                else
-                {
-                    using var iccProfileStream = new MemoryStream(iccProfileData);
-                    colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccProfileStream, ColorSpaceSource.Embedded, cancellationToken);
-                }
-            }
-            catch
-            { }
-            if (cancellationToken.IsCancellationRequested)
-                throw new TaskCanceledException();
-        }
+        if (cancellationToken.IsCancellationRequested)
+            throw new TaskCanceledException();
 
         // create profile
         var profile = new ImageRenderingProfile(this.FileFormat, this.imageRenderer);
-        if (colorSpaceFromIccProfile != null)
-            profile.ColorSpace = colorSpaceFromIccProfile;
+        if (colorSpace != null)
+            profile.ColorSpace = colorSpace;
         profile.Width = imageInfo.Width;
         profile.Height = imageInfo.Height;
         return profile;

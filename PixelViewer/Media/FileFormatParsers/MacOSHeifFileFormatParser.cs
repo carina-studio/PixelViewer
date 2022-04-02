@@ -20,4 +20,9 @@ class MacOSHeifFileFormatParser : MacOSNativeFileFormatParser
     /// <inheritdoc/>
     protected override bool OnCheckFileHeader(Stream stream) =>
         HeifFileFormatParser.CheckFileHeader(stream);
+
+
+    /// <inheritdoc/>
+    protected override bool OnSeekToIccProfile(Stream stream) =>
+        HeifFileFormatParser.SeekToIccProfile(stream);
 }
