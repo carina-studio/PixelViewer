@@ -41,6 +41,17 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
 
 
         /// <summary>
+        /// Called to parse extra information.
+        /// </summary>
+        /// <param name="stream">Stream to read image data.</param>
+        /// <param name="profile">Profile.</param>
+        /// <param name="cancellationToken">Cancellation token.</param>
+        /// <returns>Task of parsing.</returns>
+        protected virtual Task OnParseExtraInformationAsync(Stream stream, ImageRenderingProfile profile, CancellationToken cancellationToken) =>
+            Task.CompletedTask;
+
+
+        /// <summary>
         /// Called to read ICC profile into memory.
         /// </summary>
         /// <param name="stream">Stream which is positioned at start of ICC profile.</param>
@@ -94,13 +105,21 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             if (hasIccProfile)
             {
                 // read ICC profile into memory
-                var iccProfileData = (byte[]?)null;
-                try
+                var iccProfileData = await Task.Run(() =>
                 {
-                    iccProfileData = await Task.Run(() => this.OnReadIccProfileToMemory(stream));
-                }
-                catch
-                { }
+                    try
+                    {
+                        return this.OnReadIccProfileToMemory(stream);
+                    }
+                    catch 
+                    {
+                        return null;
+                    }
+                    finally
+                    {
+                        stream.Position = position;
+                    }
+                });
                 if (cancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException();
                 
@@ -108,7 +127,19 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 try
                 {
                     if (iccProfileData == null)
-                        colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
+                    {
+                        colorSpaceFromIccProfile = await Task.Run(async () =>
+                        {
+                            try
+                            {
+                                return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
+                            }
+                            finally
+                            {
+                                stream.Position = position;
+                            }
+                        });
+                    }
                     else
                     {
                         using var iccProfileStream = new MemoryStream(iccProfileData);
@@ -131,6 +162,11 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             });
             profile.Width = codec.Info.Width;
             profile.Height = codec.Info.Height;
+
+            // parse extra info
+            await this.OnParseExtraInformationAsync(stream, profile, cancellationToken);
+
+            // complete
             return profile;
         }
     }

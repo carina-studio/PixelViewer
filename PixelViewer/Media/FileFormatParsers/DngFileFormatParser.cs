@@ -45,6 +45,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             var jpegThumbHeight = 0;
             var jpegThumbOffset = 0u;
             var jpegThumbDataSize = 0u;
+            var jpegOrientation = 0;
             var compression = 0u;
             var imageWidth = 0;
             var imageHeight = 0;
@@ -82,6 +83,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 var thumbWidth = 0;
                 var thumbHeight = 0;
                 var isJpegThumb = false;
+                var thumbOrientation = 0;
                 var thumbStripOffsets = (uint[]?)null;
                 var thumbStripByteCounts = (uint[]?)null;
                 while (entryReader.Read())
@@ -150,6 +152,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                     {
                                         if (isFullSizeImage)
                                             orientation = ushortData[0];
+                                        else
+                                            thumbOrientation = ushortData[0];
                                     }
                                     break;
                                 case 0x0116: // RowsPerStrip:
@@ -171,6 +175,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                             jpegThumbHeight = thumbHeight;
                                             jpegThumbOffset = thumbStripOffsets[0];
                                             jpegThumbDataSize = thumbStripByteCounts[0];
+                                            jpegOrientation = thumbOrientation;
                                         }
                                     }
                                     break;
@@ -351,6 +356,13 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                             profile.DataOffset = imageDataOffset;
                             profile.Height = imageHeight;
                             profile.Width = imageWidth;
+                            profile.Orientation = jpegOrientation switch
+                            {
+                                3 or 4 => 180,
+                                5 or 8 => 270,
+                                6 or 7 => 90,
+                                _ => 0,
+                            };
                         });
                     }
                     return null;
@@ -367,6 +379,13 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 profile.DataOffset = jpegThumbOffset;
                                 profile.Height = jpegThumbHeight;
                                 profile.Width = jpegThumbWidth;
+                                profile.Orientation = jpegOrientation switch
+                                {
+                                    3 or 4 => 180,
+                                    5 or 8 => 270,
+                                    6 or 7 => 90,
+                                    _ => 0,
+                                };
                             });
                         }
                     }
@@ -410,6 +429,13 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 profile.DataOffset = imageDataOffset;
                 profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);
                 profile.Height = imageHeight;
+                profile.Orientation = orientation switch
+                {
+                    3 or 4 => 180,
+                    5 or 8 => 270,
+                    6 or 7 => 90,
+                    _ => 0,
+                };
                 profile.PixelStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = pixelStride);
                 profile.RowStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = rowStride);
                 profile.Width = imageWidth;
