@@ -51,9 +51,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			{
 				var effectiveBitsShiftCount = (16 - effectiveBits);
 				var effectiveBitsMask = (0xffff >> effectiveBitsShiftCount);
+				var paddingBitsMask = (0xffff >> effectiveBits);
 				return byteOrdering == ByteOrdering.LittleEndian
-					? (b1, b2) => (ushort)((((b2 << 8) | b1) & effectiveBitsMask) << effectiveBitsShiftCount)
-					: (b1, b2) => (ushort)((((b1 << 8) | b2) & effectiveBitsMask) << effectiveBitsShiftCount);
+					? (b1, b2) =>
+					{
+						var value = (b2 << 8) | b1;
+						return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+					}
+					: (b1, b2) =>
+					{
+						var value = (b1 << 8) | b2;
+						return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+					};
 			}
 		}
 
