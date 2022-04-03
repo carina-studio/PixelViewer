@@ -1,6 +1,7 @@
 using CarinaStudio;
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Carina.PixelViewer.Media;
@@ -14,7 +15,7 @@ class IsoBaseMediaFileReader
     readonly byte[] buffer = new byte[1024];
     byte[]? currentBoxData;
     long currentBoxDataPosition;
-    uint currentBoxDataSize;
+    long currentBoxDataSize;
     uint currentBoxType;
     readonly long endStreamPosition;
     bool eof;
@@ -53,22 +54,36 @@ class IsoBaseMediaFileReader
             throw new InvalidOperationException();
         if (this.currentBoxData != null)
             return new ReadOnlySpan<byte>(this.currentBoxData);
-        var data = new byte[this.currentBoxDataSize];
-        var remaining = this.currentBoxDataSize;
-        while (remaining > 0)
+        if (this.currentBoxDataSize < 0) // expand to end of stream
         {
-            var readCount = this.stream.Read(this.buffer, 0, (int)(Math.Min((uint)this.buffer.Length, remaining)));
-            if (readCount == 0)
+            var data = new List<byte>();
+            var readCount = this.stream.Read(this.buffer, 0, this.buffer.Length);
+            while (readCount > 0)
             {
-                this.eof = true;
-                throw new EndOfStreamException();
+                data.AddRange(this.buffer);
+                readCount = this.stream.Read(this.buffer, 0, this.buffer.Length);
             }
-            Array.Copy(this.buffer, 0L, data, data.LongLength - remaining, readCount);
-            if (readCount >= remaining)
-                break;
-            remaining -= (uint)readCount;
+            this.currentBoxData = data.ToArray();
         }
-        this.currentBoxData = data;
+        else
+        {
+            var data = new byte[this.currentBoxDataSize];
+            var remaining = this.currentBoxDataSize;
+            while (remaining > 0)
+            {
+                var readCount = this.stream.Read(this.buffer, 0, (int)(Math.Min(this.buffer.Length, remaining)));
+                if (readCount == 0)
+                {
+                    this.eof = true;
+                    throw new EndOfStreamException();
+                }
+                Array.Copy(this.buffer, 0L, data, data.LongLength - remaining, readCount);
+                if (readCount >= remaining)
+                    break;
+                remaining -= readCount;
+            }
+            this.currentBoxData = data;
+        }
         return new ReadOnlySpan<byte>(this.currentBoxData);
     }
 
@@ -126,7 +141,7 @@ class IsoBaseMediaFileReader
                 var remaining = this.currentBoxDataSize;
                 while (remaining > 0)
                 {
-                    var readCount = this.stream.Read(this.buffer, 0, (int)(Math.Min((uint)this.buffer.Length, remaining)));
+                    var readCount = this.stream.Read(this.buffer, 0, (int)(Math.Min(this.buffer.Length, remaining)));
                     if (readCount == 0)
                     {
                         this.eof = true;
@@ -134,7 +149,7 @@ class IsoBaseMediaFileReader
                     }
                     if (readCount >= remaining)
                         break;
-                    remaining -= (uint)readCount;
+                    remaining -= readCount;
                 }
             }
             else
@@ -149,12 +164,32 @@ class IsoBaseMediaFileReader
         }
         this.currentBoxDataSize = BinaryPrimitives.ReadUInt32BigEndian(this.buffer.AsSpan());
         this.currentBoxType = BinaryPrimitives.ReadUInt32BigEndian(this.buffer.AsSpan(4));
-        if (this.currentBoxDataSize < 8)
+        if (this.currentBoxDataSize == 1) // expand to end of stream
         {
+            if (this.stream.CanSeek)
+            {
+                var endPosition = this.stream.Length;
+                if (this.endStreamPosition >= 0)
+                    endPosition = Math.Min(this.endStreamPosition, endPosition);
+                this.currentBoxDataSize = (endPosition - this.stream.Position);
+                if (this.currentBoxDataSize < 0)
+                {
+                    this.currentBoxType = 0;
+                    this.eof = true;
+                    return false;
+                }
+            }
+            else
+                this.currentBoxDataSize = -1;
+        }
+        else if (this.currentBoxDataSize < 8)
+        {
+            this.currentBoxType = 0;
             this.eof = true;
             return false;
         }
-        this.currentBoxDataSize -= 8;
+        else
+            this.currentBoxDataSize -= 8;
         if (this.stream.CanSeek)
             this.currentBoxDataPosition = this.stream.Position;
         

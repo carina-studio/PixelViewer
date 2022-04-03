@@ -356,13 +356,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                             profile.DataOffset = imageDataOffset;
                             profile.Height = imageHeight;
                             profile.Width = imageWidth;
-                            profile.Orientation = jpegOrientation switch
-                            {
-                                3 or 4 => 180,
-                                5 or 8 => 270,
-                                6 or 7 => 90,
-                                _ => 0,
-                            };
+                            profile.Orientation = Tiff.FromTiffOrientation(jpegOrientation);
                         });
                     }
                     return null;
@@ -379,13 +373,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 profile.DataOffset = jpegThumbOffset;
                                 profile.Height = jpegThumbHeight;
                                 profile.Width = jpegThumbWidth;
-                                profile.Orientation = jpegOrientation switch
-                                {
-                                    3 or 4 => 180,
-                                    5 or 8 => 270,
-                                    6 or 7 => 90,
-                                    _ => 0,
-                                };
+                                profile.Orientation = Tiff.FromTiffOrientation(jpegOrientation);
                             });
                         }
                     }
@@ -429,13 +417,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 profile.DataOffset = imageDataOffset;
                 profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);
                 profile.Height = imageHeight;
-                profile.Orientation = orientation switch
-                {
-                    3 or 4 => 180,
-                    5 or 8 => 270,
-                    6 or 7 => 90,
-                    _ => 0,
-                };
+                profile.Orientation = Tiff.FromTiffOrientation(orientation);
                 profile.PixelStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = pixelStride);
                 profile.RowStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = rowStride);
                 profile.Width = imageWidth;

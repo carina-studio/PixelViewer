@@ -121,15 +121,9 @@ class JpegFileFormatParser : SkiaFileFormatParser
         });
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
-        
+
         // setup profile
-        profile.Orientation = orientation switch
-        {
-            3 or 4 => 180,
-            5 or 8 => 270,
-            6 or 7 => 90,
-            _ => 0,
-        };
+        profile.Orientation = Tiff.FromTiffOrientation(orientation);
     }
 
 

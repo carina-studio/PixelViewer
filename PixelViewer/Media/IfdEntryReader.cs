@@ -211,6 +211,20 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Read each entry and perform action.
+        /// </summary>
+        /// <param name="entryAction">Action to perform for each entry. Returning True to continue reading next entry, False to abort reading.</param>
+        public void ReadEntries(Func<bool> entryAction)
+        {
+            while (this.Read())
+            {
+                if (!entryAction())
+                    break;
+            }
+        }
+
+
+        /// <summary>
         /// Try reading raw data of entry.
         /// </summary>
         /// <param name="data">Read data.</param>

@@ -80,6 +80,10 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             {
                 return null;
             }
+            finally
+            {
+                stream.Position = position;
+            }
         });
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
