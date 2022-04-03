@@ -41,6 +41,17 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
 
 
     /// <summary>
+    /// Called to parse extra information.
+    /// </summary>
+    /// <param name="stream">Stream to read image data.</param>
+    /// <param name="profile">Profile.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task of parsing.</returns>
+    protected virtual Task OnParseExtraInformationAsync(Stream stream, ImageRenderingProfile profile, CancellationToken cancellationToken) =>
+        Task.CompletedTask;
+
+
+    /// <summary>
     /// Called to seek stream to position of embedded ICC profile.
     /// </summary>
     /// <param name="stream">Stream to read image data.</param>
@@ -102,6 +113,11 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             profile.ColorSpace = colorSpace;
         profile.Width = imageInfo.Width;
         profile.Height = imageInfo.Height;
+
+        // parse extra info
+        await this.OnParseExtraInformationAsync(stream, profile, cancellationToken);
+
+        // complete
         return profile;
     }
 }
