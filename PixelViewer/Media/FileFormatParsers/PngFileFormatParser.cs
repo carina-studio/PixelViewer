@@ -50,7 +50,10 @@ class PngFileFormatParser : SkiaFileFormatParser
     /// <inheritdoc/>
     protected override byte[]? OnReadIccProfileToMemory(Stream stream)
     {
-        using var compressedStream = new InflaterInputStream(stream);
+        using var compressedStream = new InflaterInputStream(stream)
+        {
+            IsStreamOwner = false,
+        };
         var data = new List<byte>(256);
         var buffer = new byte[256];
         var count = compressedStream.Read(buffer, 0, buffer.Length);
