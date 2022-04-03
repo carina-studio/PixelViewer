@@ -120,6 +120,9 @@ namespace Carina.PixelViewer.ViewModels
 			// Histograms.
 			public BitmapHistograms? Histograms { get; set; }
 
+			// Image renderer to render this frame.
+			public IImageRenderer? ImageRenderer { get; set; }
+
 			// Plane options.
 			public IList<ImagePlaneOptions>? PlaneOptions { get; set; }
 
@@ -3697,6 +3700,8 @@ namespace Carina.PixelViewer.ViewModels
 			// check whether rendering is needed or not
 			var isRenderingNeeded = this.renderedImageFrame?.Let(it =>
 			{
+				if (it.ImageRenderer != imageRenderer)
+					return true;
 				if (it.RenderingOptions != renderingOptions)
 					return true;
 				var planeOptions = it.PlaneOptions;
@@ -3760,6 +3765,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (isRenderingNeeded && renderedImageFrame != null)
 				{
 					renderedImageFrame.RenderingResult = await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+					renderedImageFrame.ImageRenderer = imageRenderer;
 					renderedImageFrame.RenderingOptions = renderingOptions;
 					renderedImageFrame.PlaneOptions = planeOptionsList;
 				}
