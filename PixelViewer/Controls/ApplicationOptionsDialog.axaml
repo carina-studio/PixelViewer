@@ -154,11 +154,6 @@
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding ShowSelectedRenderedImagePixelXyzColor, Mode=TwoWay}"/>
 				<Separator Classes="Dialog_Separator"/>
 
-				<!-- Include luminance into RGB gain selection -->
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.IncludeLuminanceIntoRgbGainSelection}"/>
-				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding IncludeLuminanceIntoRgbGainSelection, Mode=TwoWay}"/>
-				<Separator Classes="Dialog_Separator"/>
-
 				<!-- Enable color space management -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>

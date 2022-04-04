@@ -29,7 +29,6 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">影像濾鏡</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.IncludeLuminanceIntoRgbGainSelection">自動調整色彩增益時將亮度列入考慮</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像繪製記憶體使用上限 (MB)</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">開啟檔案後重設濾鏡參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>

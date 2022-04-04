@@ -68,10 +68,6 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<bool> EvaluateImageRendererByFileName = new SettingKey<bool>(nameof(EvaluateImageRendererByFileName), true);
 		/// <summary>
-		/// Whether luminance should be taken into account for RGB gain selection.
-		/// </summary>
-		public static readonly SettingKey<bool> IncludeLuminanceIntoRgbGainSelection = new SettingKey<bool>(nameof(IncludeLuminanceIntoRgbGainSelection), true);
-		/// <summary>
 		/// Height of main window.
 		/// </summary>
 		public static readonly SettingKey<int> MainWindowHeight = new SettingKey<int>(nameof(MainWindowHeight), 0);
