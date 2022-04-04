@@ -113,6 +113,7 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"));
+
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
@@ -123,6 +124,7 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
+
         /// <summary>
         /// ITU-R BT.2100 with HLG transfer.
         /// </summary>
@@ -133,6 +135,7 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020),
             D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
+
         /// <summary>
         /// ITU-R BT.2100 with PQ transfer.
         /// </summary>
@@ -143,6 +146,7 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020),
             D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
+
         /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
@@ -166,6 +170,7 @@ namespace Carina.PixelViewer.Media
             )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
+
         /// <summary>
         /// ITU-R BT.601 625-line.
         /// </summary>
@@ -190,10 +195,11 @@ namespace Carina.PixelViewer.Media
             )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
+
+#pragma warning disable CS0618
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
-#pragma warning disable CS0618
         public static readonly ColorSpace DCI_P3 = new ColorSpace(
             ColorSpaceSource.BuiltIn,
             "DCI-P3", 
@@ -202,10 +208,12 @@ namespace Carina.PixelViewer.Media
             (0.894587, 1, 0.954416), 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
 #pragma warning restore CS0618
+
         /// <summary>
         /// Default color space.
         /// </summary>
         public static readonly ColorSpace Default;
+
         /// <summary>
         /// Display-P3 (P3-D65).
         /// </summary>
@@ -220,16 +228,7 @@ namespace Carina.PixelViewer.Media
             )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
-        /// <summary>
-        /// Linear sRGB.
-        /// </summary>
-        public static readonly ColorSpace LinearSrgb = new ColorSpace(
-            ColorSpaceSource.BuiltIn,
-            "Linear-sRGB", 
-            null, 
-            SKColorSpace.CreateSrgbLinear(), 
-            D65, 
-            new Uri("https://en.wikipedia.org/wiki/SRGB"));
+        
         /// <summary>
         /// sRGB.
         /// </summary>
@@ -255,7 +254,6 @@ namespace Carina.PixelViewer.Media
             { BT_601_625Line.Name, BT_601_625Line },
             { DCI_P3.Name, DCI_P3 },
             { Display_P3.Name, Display_P3 },
-            { LinearSrgb.Name, LinearSrgb },
             { Srgb.Name, Srgb },
         };
         static volatile ILogger? logger;

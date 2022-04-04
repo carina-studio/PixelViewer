@@ -82,7 +82,6 @@
 	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">Embedded color space</sys:String>
-	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB w/o gamma transfer</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">System defined color space</sys:String>
 

@@ -357,6 +357,15 @@ namespace Carina.PixelViewer
 				});
 			}
 
+			// fall back linear-sRGB to sRGB
+			if (oldVersion <= 7)
+			{
+				if (settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName) == "Linear-sRGB")
+					settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, Media.ColorSpace.Srgb.Name);
+				if (settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName) == "Linear-sRGB")
+					settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Srgb.Name);
+			}
+
 			// upgrade theme mode
 			if (oldVersion <= 1)
 			{
@@ -409,7 +418,7 @@ namespace Carina.PixelViewer
 
 
 		// Version of settings.
-		protected override int SettingsVersion => 7;
+		protected override int SettingsVersion => 8;
 
 
 		/// <inheritdoc/>

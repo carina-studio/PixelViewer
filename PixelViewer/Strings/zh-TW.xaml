@@ -61,7 +61,6 @@
 	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 (525 行，SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625 行，SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">內嵌色彩空間</sys:String>
-	<sys:String x:Key="String/ColorSpace.Linear-sRGB">sRGB (無 Gamma 轉換)</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">系統定義色彩空間</sys:String>
 
 	<!-- ColorSpaceInfoDialog -->
