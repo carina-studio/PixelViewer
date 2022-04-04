@@ -54,6 +54,7 @@ namespace Carina.PixelViewer.Controls
                     dialog.Filters.Add(new FileDialogFilter().Also(it =>
                     {
                         it.Extensions.Add("icc");
+                        it.Extensions.Add("icm");
                         it.Name = this.Application.GetString("FileType.Icc");
                     }));
                     dialog.Filters.Add(new FileDialogFilter().Also(it =>
@@ -66,13 +67,17 @@ namespace Carina.PixelViewer.Controls
                     return;
                 
                 // load color space
-                var colorSpace = (Media.ColorSpace?)null;
+                var linearColorSpace = (Media.ColorSpace?)null;
+                var nonLinearColorSpace = (Media.ColorSpace?)null;
                 try
                 {
-                    if (Path.GetExtension(fileNames[0])?.ToLower() == ".icc")
-                        colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(fileNames[0]);
-                    else
-                        colorSpace = await Media.ColorSpace.LoadFromFileAsync(fileNames[0]);
+                    var colorSpaces = Path.GetExtension(fileNames[0])?.ToLower() switch
+                    {
+                        ".icc" or ".icm" => await Media.ColorSpace.LoadFromIccProfileAsync(fileNames[0]),
+                        _ => (null, await Media.ColorSpace.LoadFromFileAsync(fileNames[0])),
+                    };
+                    linearColorSpace = colorSpaces.Item1;
+                    nonLinearColorSpace = colorSpaces.Item2;
                 }
                 catch (Exception ex)
                 {
@@ -84,15 +89,18 @@ namespace Carina.PixelViewer.Controls
                     }.ShowDialog(this);
                     return;
                 }
+                if (linearColorSpace == null && nonLinearColorSpace == null)
+                    return;
                 
                 // find same color space
-                if (Media.ColorSpace.TryGetColorSpace(colorSpace, out var existingColorSpace))
+                if ((linearColorSpace != null && Media.ColorSpace.TryGetColorSpace(linearColorSpace, out var existingColorSpace))
+                    || (nonLinearColorSpace != null && Media.ColorSpace.TryGetColorSpace(nonLinearColorSpace, out existingColorSpace)))
                 {
                     var result = await new MessageDialog()
                     {
                         Buttons = MessageDialogButtons.YesNo,
                         Icon = MessageDialogIcon.Question,
-                        Message = this.Application.GetFormattedString("ApplicationOptionsDialog.ConfirmAddingExistingColorSpace", colorSpace, existingColorSpace),
+                        Message = this.Application.GetFormattedString("ApplicationOptionsDialog.ConfirmAddingExistingColorSpace", linearColorSpace ?? nonLinearColorSpace, existingColorSpace),
                     }.ShowDialog(this);
                     if (result == MessageDialogResult.No)
                         return;
@@ -101,13 +109,16 @@ namespace Carina.PixelViewer.Controls
                 // show color space info
                 var finalColorSpace = await new ColorSpaceInfoDialog()
                 {
-                    ColorSpace = colorSpace,
+                    ColorSpace = nonLinearColorSpace ?? linearColorSpace.AsNonNull()
                 }.ShowDialog<Media.ColorSpace>(this);
                 if (finalColorSpace == null)
                     return;
 
                 // add color space
-                Media.ColorSpace.AddUserDefinedColorSpace(finalColorSpace);
+                if (linearColorSpace != null)
+                    Media.ColorSpace.AddUserDefinedColorSpace(linearColorSpace);
+                if (nonLinearColorSpace != null)
+                    Media.ColorSpace.AddUserDefinedColorSpace(nonLinearColorSpace);
             }
             finally
             {

@@ -70,17 +70,17 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             return null;
         
         // load ICC profile
-        var colorSpace = await Task.Run(async () =>
+        var colorSpaces = await Task.Run(async () =>
         {
             try
             {
                 if (!this.OnSeekToIccProfile(stream))
-                    return null;
+                    return ((Media.ColorSpace, Media.ColorSpace?)?)null;
                 return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
             }
             catch
             {
-                return null;
+                return ((Media.ColorSpace, Media.ColorSpace?)?)null;
             }
             finally
             {
@@ -117,15 +117,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
                 MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth, out width);
                 MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight, out height);
                 if (MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyOrientation, out int rawOrientation))
-                {
-                    orientation = rawOrientation switch
-                    {
-                        3 or 4 => 180,
-                        5 or 8 => 270,
-                        6 or 7 => 90,
-                        _ => 0,
-                    };
-                }
+                    orientation = Tiff.FromTiffOrientation(rawOrientation);
             }
             finally
             {
@@ -143,8 +135,8 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             return null;
         return new ImageRenderingProfile(this.FileFormat, this.imageRenderer).Also(it =>
         {
-            if (colorSpace != null)
-                it.ColorSpace = colorSpace;
+            if (colorSpaces.HasValue)
+                it.ColorSpace = colorSpaces.Value.Let(it => it.Item2 ?? it.Item1);
             it.Height = height;
             it.Orientation = orientation;
             it.Width = width;

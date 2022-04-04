@@ -90,7 +90,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 return null;
             
             // load ICC profile
-            var colorSpaceFromIccProfile = (ColorSpace?)null;
+            var colorSpacesFromIccProfile = ((ColorSpace, ColorSpace?)?)null;
             var hasIccProfile = false;
             await Task.Run(() => 
             {
@@ -128,7 +128,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 {
                     if (iccProfileData == null)
                     {
-                        colorSpaceFromIccProfile = await Task.Run(async () =>
+                        colorSpacesFromIccProfile = await Task.Run(async () =>
                         {
                             try
                             {
@@ -143,7 +143,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     else
                     {
                         using var iccProfileStream = new MemoryStream(iccProfileData);
-                        colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccProfileStream, ColorSpaceSource.Embedded, cancellationToken);
+                        colorSpacesFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccProfileStream, ColorSpaceSource.Embedded, cancellationToken);
                     }
                 }
                 catch
@@ -154,12 +154,14 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             
             // create profile
             var profile = new ImageRenderingProfile(this.FileFormat, this.imageRenderer);
-            profile.ColorSpace = colorSpaceFromIccProfile ?? codec.Info.ColorSpace.Let(it =>
-            {
-                if (it.IsSrgb)
-                    return ColorSpace.Srgb;
-                return ColorSpace.FromSkiaColorSpace(ColorSpaceSource.Embedded, null, it, null);
-            });
+            profile.ColorSpace = colorSpacesFromIccProfile.HasValue 
+                ? colorSpacesFromIccProfile.Value.Let(it => it.Item2 ?? it.Item1)
+                : codec.Info.ColorSpace.Let(it =>
+                {
+                    if (it.IsSrgb)
+                        return ColorSpace.Srgb;
+                    return ColorSpace.FromSkiaColorSpace(ColorSpaceSource.Embedded, null, it, null).Let(it => it.Item2 ?? it.Item1);
+                });
             profile.Width = codec.Info.Width;
             profile.Height = codec.Info.Height;
 
