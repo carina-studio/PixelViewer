@@ -1,6 +1,5 @@
 ﻿using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
-using CarinaStudio;
 using ImageMagick;
 using System;
 using System.Collections.Generic;
@@ -92,17 +91,17 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             return null;
 
         // load ICC profile
-        var colorSpaces = await Task.Run(async () =>
+        var colorSpace = await Task.Run(async () =>
         {
             try
             {
                 if (!this.OnSeekToIccProfile(stream))
-                    return ((Media.ColorSpace, Media.ColorSpace?)?)null;
+                    return null;
                 return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
             }
             catch
             {
-                return ((Media.ColorSpace, Media.ColorSpace?)?)null;
+                return null;
             }
             finally
             {
@@ -114,8 +113,8 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
 
         // create profile
         var profile = new ImageRenderingProfile(this.FileFormat, this.imageRenderer);
-        if (colorSpaces.HasValue)
-            profile.ColorSpace = colorSpaces.Value.Let(it => it.Item2 ?? it.Item1);
+        if (colorSpace != null)
+            profile.ColorSpace = colorSpace;
         profile.Width = imageInfo.Width;
         profile.Height = imageInfo.Height;
 

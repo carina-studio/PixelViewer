@@ -12,8 +12,6 @@
 		<!-- SessionControl -->
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#0085e5</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#007f7f</Color>
-		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Linear">#000000</Color>
-		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.NonLinear">#007f46</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.SystemDefined">#ae00ff</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#ae00ff</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#007f46</Color>

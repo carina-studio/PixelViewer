@@ -58,7 +58,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             var cfaLayout = 0;
             var cfaPattern = (byte[]?)null;
             var imageDataOffset = 0L;
-            var colorSpaces = new Tuple<Media.ColorSpace?, Media.ColorSpace?>(null, null);
+            var colorSpace = (Media.ColorSpace?)null;
             await Task.Run(async () =>
             {
                 // create reader
@@ -323,7 +323,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         break;
                 }
                 if (useJpepImage && JpegFileFormatParser.SeekToIccProfile(stream))
-                    colorSpaces = (await Media.ColorSpace.LoadFromIccProfileAsync(stream, Media.ColorSpaceSource.Embedded, cancellationToken)).Let(it => new Tuple<Media.ColorSpace?, Media.ColorSpace?>(it.Item1, it.Item2));
+                    colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(stream, Media.ColorSpaceSource.Embedded, cancellationToken);
             });
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -351,8 +351,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     {
                         return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>
                         {
-                            (colorSpaces.Item2 ?? colorSpaces.Item1)?.Let(it =>
-                                profile.ColorSpace = it);
+                            if (colorSpace != null)
+                                profile.ColorSpace = colorSpace;
                             profile.DataOffset = imageDataOffset;
                             profile.Height = imageHeight;
                             profile.Width = imageWidth;
@@ -368,8 +368,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         {
                             return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>
                             {
-                                (colorSpaces.Item2 ?? colorSpaces.Item1)?.Let(it =>
-                                    profile.ColorSpace = it);
+                                if (colorSpace != null)
+                                    profile.ColorSpace = colorSpace;
                                 profile.DataOffset = jpegThumbOffset;
                                 profile.Height = jpegThumbHeight;
                                 profile.Width = jpegThumbWidth;
@@ -412,10 +412,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             {
                 profile.BayerPattern = bayerPattern;
                 profile.ByteOrdering = byteOrdering;
-                profile.ColorSpace = (colorSpaces.Item2 ?? colorSpaces.Item1)?.Also(it =>
-                {
-                    profile.ColorSpace = it.LinearColorSpace ?? it;
-                }) ?? Media.ColorSpace.Srgb_Linear;
+                if (colorSpace != null)
+                    profile.ColorSpace = colorSpace;
                 profile.DataOffset = imageDataOffset;
                 profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);
                 profile.Height = imageHeight;

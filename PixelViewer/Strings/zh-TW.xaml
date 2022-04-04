@@ -56,11 +56,18 @@
 	<sys:String x:Key="String/ByteOrdering.LittleEndian">小端序 (Little-Endian)</sys:String>
 
 	<!-- ColorSpace -->
+	<sys:String x:Key="String/ColorSpace.Adobe-RGB-1998-Linear">Adobe RGB (1998) (線性)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2020-Linear">BT.2020 (UHDTV) (線性)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.2100-HLG">BT.2100 (HLG 轉換，HDR-TV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.2100-PQ">BT.2100 (PQ 轉換，HDR-TV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 (525 行，SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line-Linear">BT.601 (525 行，SDTV) (線性)</sys:String>
 	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625 行，SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line-Linear">BT.601 (625 行，SDTV) (線性)</sys:String>
+	<sys:String x:Key="String/ColorSpace.DCI-P3-Linear">DCI-P3 (線性)</sys:String>
+	<sys:String x:Key="String/ColorSpace.Display-P3-Linear">Display-P3 (P3-D65) (線性)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">內嵌色彩空間</sys:String>
+	<sys:String x:Key="String/ColorSpace.sRGB-Linear">sRGB (線性)</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">系統定義色彩空間</sys:String>
 
 	<!-- ColorSpaceInfoDialog -->
@@ -175,8 +182,6 @@
 	<sys:String x:Key="String/SessionControl.ColorSpace">色彩空間</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">已停用色彩管理，點一下以開啟選項…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">檔案內嵌</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace.Linear">線性</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace.NonLinear">非線性</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.SystemDefined">系統定義</sys:String>
 	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">是否要儲存套用濾鏡後的影像？</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">轉換色彩空間中…</sys:String>

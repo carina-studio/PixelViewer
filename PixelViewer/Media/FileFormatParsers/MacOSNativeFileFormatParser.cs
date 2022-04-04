@@ -70,17 +70,17 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             return null;
         
         // load ICC profile
-        var colorSpaces = await Task.Run(async () =>
+        var colorSpace = await Task.Run(async () =>
         {
             try
             {
                 if (!this.OnSeekToIccProfile(stream))
-                    return ((Media.ColorSpace, Media.ColorSpace?)?)null;
+                    return null;
                 return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
             }
             catch
             {
-                return ((Media.ColorSpace, Media.ColorSpace?)?)null;
+                return null;
             }
             finally
             {
@@ -117,7 +117,15 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
                 MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth, out width);
                 MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight, out height);
                 if (MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyOrientation, out int rawOrientation))
-                    orientation = Tiff.FromTiffOrientation(rawOrientation);
+                {
+                    orientation = rawOrientation switch
+                    {
+                        3 or 4 => 180,
+                        5 or 8 => 270,
+                        6 or 7 => 90,
+                        _ => 0,
+                    };
+                }
             }
             finally
             {
@@ -135,8 +143,8 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             return null;
         return new ImageRenderingProfile(this.FileFormat, this.imageRenderer).Also(it =>
         {
-            if (colorSpaces.HasValue)
-                it.ColorSpace = colorSpaces.Value.Let(it => it.Item2 ?? it.Item1);
+            if (colorSpace != null)
+                it.ColorSpace = colorSpace;
             it.Height = height;
             it.Orientation = orientation;
             it.Width = width;

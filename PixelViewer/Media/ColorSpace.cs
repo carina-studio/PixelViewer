@@ -112,8 +112,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"),
-            linearColorSpaceName: "Adobe-RGB-1998-Linear");
+            new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"));
         
         /// <summary>
         /// Linear Adobe RGB (1998).
@@ -124,8 +123,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.AdobeRgb), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"),
-            linearColorSpaceName: "Adobe-RGB-1998");
+            new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"));
         
         /// <summary>
         /// ITU-R BT.2020.
@@ -136,8 +134,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Rec._2020"),
-            linearColorSpaceName: "BT.2020-Linear");
+            new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
         
         /// <summary>
         /// Linear ITU-R BT.2020.
@@ -148,8 +145,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Rec2020), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Rec._2020"),
-            nonLinearColorSpaceName: "BT.2020");
+            new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
 
         /// <summary>
         /// ITU-R BT.2100 with HLG transfer.
@@ -160,8 +156,7 @@ namespace Carina.PixelViewer.Media
             null,
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020),
             D65,
-            new Uri("https://en.wikipedia.org/wiki/Rec._2100"),
-            linearColorSpaceName: "BT.2020-Linear");
+            new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
         
         /// <summary>
         /// ITU-R BT.2100 with PQ transfer.
@@ -172,8 +167,7 @@ namespace Carina.PixelViewer.Media
             null,
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020),
             D65,
-            new Uri("https://en.wikipedia.org/wiki/Rec._2100"),
-            linearColorSpaceName: "BT.2020-Linear");
+            new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
         
         /// <summary>
         /// ITU-R BT.601 525-line.
@@ -198,8 +192,7 @@ namespace Carina.PixelViewer.Media
                     0.0187f, 0.1119f, 0.9584f
                 )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Rec._601"),
-            linearColorSpaceName: "BT.601-525-line-Linear");
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"));
         
         /// <summary>
         /// Linear ITU-R BT.601 525-line.
@@ -215,8 +208,7 @@ namespace Carina.PixelViewer.Media
                     0.0187f, 0.1119f, 0.9584f
                 )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Rec._601"),
-            nonLinearColorSpaceName: "BT.601-525-line");
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"));
         
         /// <summary>
         /// ITU-R BT.601 625-line.
@@ -242,8 +234,7 @@ namespace Carina.PixelViewer.Media
                     0.0202f, 0.1296f, 0.9393f
                 )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Rec._601"),
-            linearColorSpaceName: "BT.601-625-line-Linear");
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"));
         
         /// <summary>
         /// Linear ITU-R BT.601 625-line.
@@ -260,8 +251,7 @@ namespace Carina.PixelViewer.Media
                     0.0202f, 0.1296f, 0.9393f
                 )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/Rec._601"),
-            nonLinearColorSpaceName: "BT.601-625-line");
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"));
 
 #pragma warning disable CS0618
         /// <summary>
@@ -273,8 +263,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), 
             (0.894587, 1, 0.954416), 
-            new Uri("https://en.wikipedia.org/wiki/DCI-P3"),
-            linearColorSpaceName: "DCI-P3-Linear");
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         
         /// <summary>
         /// Linear DCI-P3 (D63).
@@ -285,8 +274,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Dcip3), 
             (0.894587, 1, 0.954416), 
-            new Uri("https://en.wikipedia.org/wiki/DCI-P3"),
-            nonLinearColorSpaceName: "DCI-P3");
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
 #pragma warning restore CS0618
 
         /// <summary>
@@ -307,8 +295,7 @@ namespace Carina.PixelViewer.Media
                 -0.0010528564f, 0.041885376f, 0.7840729f
             )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/DCI-P3"),
-            linearColorSpaceName: "Display-P3-Linear");
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         
         /// <summary>
         /// Linear Display-P3 (P3-D65).
@@ -323,8 +310,7 @@ namespace Carina.PixelViewer.Media
                 -0.0010528564f, 0.041885376f, 0.7840729f
             )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/DCI-P3"),
-            nonLinearColorSpaceName: "Display-P3");
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
 
         /// <summary>
         /// sRGB.
@@ -335,8 +321,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateSrgb(),
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/SRGB"),
-            linearColorSpaceName: "sRGB-Linear");
+            new Uri("https://en.wikipedia.org/wiki/SRGB"));
         
         /// <summary>
         /// Linear sRGB.
@@ -347,8 +332,7 @@ namespace Carina.PixelViewer.Media
             null, 
             SKColorSpace.CreateSrgbLinear(), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/SRGB"),
-            nonLinearColorSpaceName: "sRGB");
+            new Uri("https://en.wikipedia.org/wiki/SRGB"));
 
 
         // Static fields.
@@ -383,10 +367,8 @@ namespace Carina.PixelViewer.Media
         // Fields.
         string? customName;
         readonly bool hasTransferFunc;
-        readonly string? linearColorSpaceName;
         readonly long[] matrixFromXyz;
         readonly long[] matrixToXyz;
-        readonly string? nonLinearColorSpaceName;
         readonly SKColorSpaceTransferFn numericalTransferFuncFromRgb;
         readonly SKColorSpaceTransferFn numericalTransferFuncToRgb;
         volatile long[]? numericalTransferTableFromRgb;
@@ -408,7 +390,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(ColorSpaceSource source, string name, string? customName, SKColorSpace colorSpace, (double, double, double)? whitePoint, Uri? uri, string? linearColorSpaceName = null, string? nonLinearColorSpaceName = null)
+        ColorSpace(ColorSpaceSource source, string name, string? customName, SKColorSpace colorSpace, (double, double, double)? whitePoint, Uri? uri)
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
@@ -421,12 +403,10 @@ namespace Carina.PixelViewer.Media
                 this.IsD50WhitePoint = !this.IsD65WhitePoint && AreEquivalentWhitePoints(whitePoint.Value, D50);
             }
             this.IsLinear = skiaColorSpace.GammaIsLinear;
-            this.linearColorSpaceName = linearColorSpaceName;
             this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
             this.matrixFromXyz = Quantize(this.skiaColorSpaceXyz.Invert());
             this.Name = name;
-            this.nonLinearColorSpaceName = nonLinearColorSpaceName;
             this.Source = source;
             this.Uri = uri;
             this.WhitePoint = whitePoint;
@@ -558,18 +538,12 @@ namespace Carina.PixelViewer.Media
         /// <param name="customName">Custom name.</param>
         /// <param name="skColorSpace"><see cref="SKColorSpace"/>.</param>
         /// <param name="whitePoint">XYZ of white point.</param>
-        /// <returns>Linear and non-linear <see cref="ColorSpace"/>.</returns>
-        public static (ColorSpace, ColorSpace?) FromSkiaColorSpace(ColorSpaceSource source, string? customName, SKColorSpace skColorSpace, (double, double, double)? whitePoint)
+        /// <returns><see cref="ColorSpace"/>.</returns>
+        public static ColorSpace FromSkiaColorSpace(ColorSpaceSource source, string? customName, SKColorSpace skColorSpace, (double, double, double)? whitePoint)
         {
             if (source == ColorSpaceSource.BuiltIn)
                 throw new ArgumentException();
-            var name = GenerateRandomName();
-            if (skColorSpace.GammaIsLinear)
-                return (new ColorSpace(source, name, customName, skColorSpace, whitePoint, null), null);
-            return (
-                new ColorSpace(source, $"{name}-Linear", customName, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, skColorSpace.ToColorSpaceXyz()), whitePoint, null, nonLinearColorSpaceName: name),
-                new ColorSpace(source, name, customName, skColorSpace, whitePoint, null, linearColorSpaceName: $"{name}-Linear")
-            );
+            return new ColorSpace(source, GenerateRandomName(), customName, skColorSpace, whitePoint, null);
         }
 
 
@@ -615,7 +589,7 @@ namespace Carina.PixelViewer.Media
                 throw new NotSupportedException();
             
             // get screen color space
-            var systemColorSpaces = await Task.Run(() =>
+            var systemColorSpace = await Task.Run(() =>
             {
                 if (CarinaStudio.Platform.IsWindows)
                 {
@@ -749,7 +723,6 @@ namespace Carina.PixelViewer.Media
             });
 
             // use built-in color space instead
-            var systemColorSpace = systemColorSpaces.Item2 ?? systemColorSpaces.Item1;
             foreach (var builtInColorSpace in builtInColorSpaces.Values)
             {
                 if (builtInColorSpace.Equals(systemColorSpace))
@@ -871,20 +844,6 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
-        /// Get corresponding linear color space if this is a non-linear color space.
-        /// </summary>
-        public ColorSpace? LinearColorSpace 
-        { 
-            get
-            {
-                if (this.linearColorSpaceName != null && TryGetColorSpace(this.linearColorSpaceName, out var colorSpace))
-                    return colorSpace;
-                return null;
-            }
-        }
-
-
-        /// <summary>
         /// Load color space from file.
         /// </summary>
         /// <param name="fileName">File name.</param>
@@ -959,28 +918,14 @@ namespace Carina.PixelViewer.Media
                 else
                     throw new ArgumentException("No matrix to XYZ D50 of color space specified.");
                 
-                // get corresponding color space name
-                var linearColorSpaceName = (string?)null;
-                var nonLinearColorSpaceName = (string?)null;
-                if (rootObject.TryGetProperty(nameof(LinearColorSpace), out jsonProperty)
-                    && jsonProperty.ValueKind == JsonValueKind.String)
-                {
-                    linearColorSpaceName = jsonProperty.GetString();
-                }
-                if (rootObject.TryGetProperty(nameof(NonLinearColorSpace), out jsonProperty)
-                    && jsonProperty.ValueKind == JsonValueKind.String)
-                {
-                    nonLinearColorSpaceName = jsonProperty.GetString();
-                }
-                
                 // create color space
-                return new ColorSpace(ColorSpaceSource.UserDefined, name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), whitePoint, null, linearColorSpaceName, nonLinearColorSpaceName);
+                return new ColorSpace(ColorSpaceSource.UserDefined, name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), whitePoint, null);
             });
         });
 
 
         // Load color space from ICC profile.
-        static (ColorSpace, ColorSpace?) LoadFromIccProfile(string? fileName, Stream stream, ColorSpaceSource source)
+        static ColorSpace LoadFromIccProfile(string? fileName, Stream stream, ColorSpaceSource source)
         {
             // check parameter
             if (source == ColorSpaceSource.BuiltIn)
@@ -1127,13 +1072,7 @@ namespace Carina.PixelViewer.Media
             */
 
             // create color space
-            var name = GenerateRandomName();
-            if (skiaColorSpace.GammaIsLinear)
-                return (new ColorSpace(source, name, iccName, skiaColorSpace, whitePoint, null), null);
-            return (
-                new ColorSpace(source, $"{name}-Linear", iccName, SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, skiaColorSpace.ToColorSpaceXyz()), whitePoint, null, nonLinearColorSpaceName: name),
-                new ColorSpace(source, name, iccName, skiaColorSpace, whitePoint, null, linearColorSpaceName: $"{name}-Linear")
-            );
+            return new ColorSpace(source, GenerateRandomName(), iccName, skiaColorSpace, whitePoint, null);
         }
 
 
@@ -1144,7 +1083,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="source">Source of color space.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of loading ICC profile.</returns>
-        public static Task<(ColorSpace, ColorSpace?)> LoadFromIccProfileAsync(Stream stream, ColorSpaceSource source, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
+        public static Task<ColorSpace> LoadFromIccProfileAsync(Stream stream, ColorSpaceSource source, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
         {
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -1158,7 +1097,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="fileName">File name of ICC profile.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of loading ICC profile.</returns>
-        public static Task<(ColorSpace, ColorSpace?)> LoadFromIccProfileAsync(string fileName, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
+        public static Task<ColorSpace> LoadFromIccProfileAsync(string fileName, CancellationToken cancellationToken = default) => ioTaskFactory.StartNew(() =>
         {
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -1176,20 +1115,6 @@ namespace Carina.PixelViewer.Media
         /// Get name of color space.
         /// </summary>
         public string Name { get; }
-
-
-        /// <summary>
-        /// Get corresponding non-linear color space if this is a linear color space.
-        /// </summary>
-        public ColorSpace? NonLinearColorSpace 
-        {
-            get
-            {
-                if (this.nonLinearColorSpaceName != null && TryGetColorSpace(this.nonLinearColorSpaceName, out var colorSpace))
-                    return colorSpace;
-                return null;
-            }
-        }
 
 
         // Numerical transfer from RGB.
@@ -1416,10 +1341,6 @@ namespace Carina.PixelViewer.Media
                         jsonWriter.WriteNumberValue(value);
                     jsonWriter.WriteEndArray();
                 });
-                if (this.linearColorSpaceName != null)
-                    jsonWriter.WriteString(nameof(LinearColorSpace), this.linearColorSpaceName);
-                if (this.nonLinearColorSpaceName != null)
-                    jsonWriter.WriteString(nameof(NonLinearColorSpace), this.nonLinearColorSpaceName);
                 jsonWriter.WriteEndObject();
             }
         });
