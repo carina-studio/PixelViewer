@@ -113,6 +113,18 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"));
+        
+        /// <summary>
+        /// Linear Adobe RGB (1998).
+        /// </summary>
+        public static readonly ColorSpace AdobeRGB_1998_Linear = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "Adobe-RGB-1998-Linear", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.AdobeRgb), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"));
+        
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
@@ -123,6 +135,18 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
+        
+        /// <summary>
+        /// Linear ITU-R BT.2020.
+        /// </summary>
+        public static readonly ColorSpace BT_2020_Linear = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "BT.2020-Linear", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Rec2020), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
+
         /// <summary>
         /// ITU-R BT.2100 with HLG transfer.
         /// </summary>
@@ -133,6 +157,7 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020),
             D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
+        
         /// <summary>
         /// ITU-R BT.2100 with PQ transfer.
         /// </summary>
@@ -143,29 +168,48 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020),
             D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
+        
         /// <summary>
         /// ITU-R BT.601 525-line.
         /// </summary>
         public static readonly ColorSpace BT_601_525Line = new ColorSpace(
             ColorSpaceSource.BuiltIn,
             "BT.601-525-line", 
-            null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
-            {
-                G = 1 / 0.45f,
-                A = 1 / 1.099f,
-                B = 0.099f / 1.099f,
-                C = 1 / 4.5f, 
-                D = 0.081f, 
-                E = 0.0f, 
-                F = 0.0f
-            },
-            new SKColorSpaceXyz(
-                0.3935f, 0.3653f, 0.1917f,
-                0.2124f, 0.7011f, 0.0866f,
-                0.0187f, 0.1119f, 0.9584f
-            )), 
+            null, SKColorSpace.CreateRgb(
+                new SKColorSpaceTransferFn()
+                {
+                    G = 1 / 0.45f,
+                    A = 1 / 1.099f,
+                    B = 0.099f / 1.099f,
+                    C = 1 / 4.5f, 
+                    D = 0.081f, 
+                    E = 0.0f, 
+                    F = 0.0f
+                },
+                new SKColorSpaceXyz(
+                    0.3935f, 0.3653f, 0.1917f,
+                    0.2124f, 0.7011f, 0.0866f,
+                    0.0187f, 0.1119f, 0.9584f
+                )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
+        
+        /// <summary>
+        /// Linear ITU-R BT.601 525-line.
+        /// </summary>
+        public static readonly ColorSpace BT_601_525Line_Linear = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "BT.601-525-line-Linear", 
+            null, SKColorSpace.CreateRgb(
+                SKColorSpaceTransferFn.Linear,
+                new SKColorSpaceXyz(
+                    0.3935f, 0.3653f, 0.1917f,
+                    0.2124f, 0.7011f, 0.0866f,
+                    0.0187f, 0.1119f, 0.9584f
+                )), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"));
+        
         /// <summary>
         /// ITU-R BT.601 625-line.
         /// </summary>
@@ -173,27 +217,46 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "BT.601-625-line", 
             null, 
-            SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
-            {
-                G = 1 / 0.45f,
-                A = 1 / 1.099f,
-                B = 0.099f / 1.099f,
-                C = 1 / 4.5f, 
-                D = 0.081f, 
-                E = 0.0f, 
-                F = 0.0f
-            },
-            new SKColorSpaceXyz(
-                0.4306f, 0.3415f, 0.1784f,
-                0.2220f, 0.7067f, 0.0713f,
-                0.0202f, 0.1296f, 0.9393f
-            )), 
+            SKColorSpace.CreateRgb(
+                new SKColorSpaceTransferFn()
+                {
+                    G = 1 / 0.45f,
+                    A = 1 / 1.099f,
+                    B = 0.099f / 1.099f,
+                    C = 1 / 4.5f, 
+                    D = 0.081f, 
+                    E = 0.0f, 
+                    F = 0.0f
+                },
+                new SKColorSpaceXyz(
+                    0.4306f, 0.3415f, 0.1784f,
+                    0.2220f, 0.7067f, 0.0713f,
+                    0.0202f, 0.1296f, 0.9393f
+                )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
+        
+        /// <summary>
+        /// Linear ITU-R BT.601 625-line.
+        /// </summary>
+        public static readonly ColorSpace BT_601_625Line_Linear = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "BT.601-625-line-Linear", 
+            null, 
+            SKColorSpace.CreateRgb(
+                SKColorSpaceTransferFn.Linear,
+                new SKColorSpaceXyz(
+                    0.4306f, 0.3415f, 0.1784f,
+                    0.2220f, 0.7067f, 0.0713f,
+                    0.0202f, 0.1296f, 0.9393f
+                )), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/Rec._601"));
+
+#pragma warning disable CS0618
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
-#pragma warning disable CS0618
         public static readonly ColorSpace DCI_P3 = new ColorSpace(
             ColorSpaceSource.BuiltIn,
             "DCI-P3", 
@@ -201,11 +264,24 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), 
             (0.894587, 1, 0.954416), 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
+        
+        /// <summary>
+        /// Linear DCI-P3 (D63).
+        /// </summary>
+        public static readonly ColorSpace DCI_P3_Linear = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "DCI-P3-Linear", 
+            null, 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, SKColorSpaceXyz.Dcip3), 
+            (0.894587, 1, 0.954416), 
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
 #pragma warning restore CS0618
+
         /// <summary>
         /// Default color space.
         /// </summary>
         public static readonly ColorSpace Default;
+
         /// <summary>
         /// Display-P3 (P3-D65).
         /// </summary>
@@ -220,16 +296,22 @@ namespace Carina.PixelViewer.Media
             )), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
+        
         /// <summary>
-        /// Linear sRGB.
+        /// Linear Display-P3 (P3-D65).
         /// </summary>
-        public static readonly ColorSpace LinearSrgb = new ColorSpace(
+        public static readonly ColorSpace Display_P3_Linear = new ColorSpace(
             ColorSpaceSource.BuiltIn,
-            "Linear-sRGB", 
+            "Display-P3-Linear", 
             null, 
-            SKColorSpace.CreateSrgbLinear(), 
+            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Linear, new SKColorSpaceXyz(
+                0.51512146f, 0.29197693f, 0.15710449f,
+                0.24119568f, 0.6922455f, 0.0665741f,
+                -0.0010528564f, 0.041885376f, 0.7840729f
+            )), 
             D65, 
-            new Uri("https://en.wikipedia.org/wiki/SRGB"));
+            new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
+
         /// <summary>
         /// sRGB.
         /// </summary>
@@ -240,6 +322,17 @@ namespace Carina.PixelViewer.Media
             SKColorSpace.CreateSrgb(),
             D65, 
             new Uri("https://en.wikipedia.org/wiki/SRGB"));
+        
+        /// <summary>
+        /// Linear sRGB.
+        /// </summary>
+        public static readonly ColorSpace Srgb_Linear = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "sRGB-Linear", 
+            null, 
+            SKColorSpace.CreateSrgbLinear(), 
+            D65, 
+            new Uri("https://en.wikipedia.org/wiki/SRGB"));
 
 
         // Static fields.
@@ -248,15 +341,21 @@ namespace Carina.PixelViewer.Media
         static readonly Dictionary<string, ColorSpace> builtInColorSpaces = new()
         {
             { AdobeRGB_1998.Name, AdobeRGB_1998 },
+            { AdobeRGB_1998_Linear.Name, AdobeRGB_1998_Linear },
             { BT_2020.Name, BT_2020 },
+            { BT_2020_Linear.Name, BT_2020_Linear },
             { BT_2100_HLG.Name, BT_2100_HLG },
             { BT_2100_PQ.Name, BT_2100_PQ },
             { BT_601_525Line.Name, BT_601_525Line },
+            { BT_601_525Line_Linear.Name, BT_601_525Line_Linear },
             { BT_601_625Line.Name, BT_601_625Line },
+            { BT_601_625Line_Linear.Name , BT_601_625Line_Linear },
             { DCI_P3.Name, DCI_P3 },
+            { DCI_P3_Linear.Name, DCI_P3_Linear },
             { Display_P3.Name, Display_P3 },
-            { LinearSrgb.Name, LinearSrgb },
+            { Display_P3_Linear.Name, Display_P3_Linear },
             { Srgb.Name, Srgb },
+            { Srgb_Linear.Name, Srgb_Linear },
         };
         static volatile ILogger? logger;
         static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
