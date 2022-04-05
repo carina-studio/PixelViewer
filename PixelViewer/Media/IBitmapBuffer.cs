@@ -208,13 +208,13 @@ namespace Carina.PixelViewer.Media
 							{
 								case BitmapFormat.Bgra32:
 									{
-										var unpackFunc = ImageProcessing.SelectBgrx32UnpackingAndNormalizing();
-										var packFunc = ImageProcessing.SelectBgrx32DenormalizingAndPacking();
+										var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
+										var packFunc = ImageProcessing.SelectBgra32Packing();
 										ImageProcessing.ParallelFor(0, sharedBitmapBuffer.Height, (y) =>
 										{
-											var b = 0.0;
-											var g = 0.0;
-											var r = 0.0;
+											var b = (byte)0;
+											var g = (byte)0;
+											var r = (byte)0;
 											var a = (byte)0;
 											var srcPixelPtr = (uint*)((byte*)srcBaseAddr + (y * srcRowStride));
 											var destPixelPtr = (uint*)((byte*)destBaseAddr + (y * destRowStride));
@@ -231,13 +231,13 @@ namespace Carina.PixelViewer.Media
 									break;
 								case BitmapFormat.Bgra64:
 									{
-										var unpackFunc = ImageProcessing.SelectBgrx64UnpackingAndNormalizing();
-										var packFunc = ImageProcessing.SelectBgrx64DenormalizingAndPacking();
+										var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+										var packFunc = ImageProcessing.SelectBgra64Packing();
 										ImageProcessing.ParallelFor(0, sharedBitmapBuffer.Height, (y) =>
 										{
-											var b = 0.0;
-											var g = 0.0;
-											var r = 0.0;
+											var b = (ushort)0;
+											var g = (ushort)0;
+											var r = (ushort)0;
 											var a = (ushort)0;
 											var srcPixelPtr = (ulong*)((byte*)srcBaseAddr + (y * srcRowStride));
 											var destPixelPtr = (ulong*)((byte*)destBaseAddr + (y * destRowStride));

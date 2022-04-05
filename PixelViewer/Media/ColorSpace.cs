@@ -65,6 +65,72 @@ namespace Carina.PixelViewer.Media
             }
 
             /// <summary>
+            /// Convert 8-bit RGB color.
+            /// </summary>
+            /// <param name="r">Normalized R.</param>
+            /// <param name="g">Normalized G.</param>
+            /// <param name="b">Normalized B.</param>
+            /// <returns>Converted normalized RGB color.</returns>
+            public unsafe (byte, byte, byte) Convert(byte r, byte g, byte b)
+            {
+                if (this.isIdentical)
+                    return (r, g, b);
+                var qR = mappingTableFrom8Bit[r];
+                var qG = mappingTableFrom8Bit[g];
+                var qB = mappingTableFrom8Bit[b];
+                if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
+                {
+                    qR = this.srcColorSpace.NumericalTransferToLinear(qR);
+                    qG = this.srcColorSpace.NumericalTransferToLinear(qG);
+                    qB = this.srcColorSpace.NumericalTransferToLinear(qB);
+                }
+                var m = this.matrix;
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> 16);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
+                if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
+                {
+                    qR = this.destColorSpace.NumericalTransferFromLinear(qR);
+                    qG = this.destColorSpace.NumericalTransferFromLinear(qG);
+                    qB = this.destColorSpace.NumericalTransferFromLinear(qB);
+                }
+                return (mappingTableTo8Bit[qR], mappingTableTo8Bit[qG], mappingTableTo8Bit[qB]);
+            }
+
+            /// <summary>
+            /// Convert 16-bit RGB color.
+            /// </summary>
+            /// <param name="r">Normalized R.</param>
+            /// <param name="g">Normalized G.</param>
+            /// <param name="b">Normalized B.</param>
+            /// <returns>Converted normalized RGB color.</returns>
+            public unsafe (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
+            {
+                if (this.isIdentical)
+                    return (r, g, b);
+                var qR = mappingTableFrom16Bit[r];
+                var qG = mappingTableFrom16Bit[g];
+                var qB = mappingTableFrom16Bit[b];
+                if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
+                {
+                    qR = this.srcColorSpace.NumericalTransferToLinear(qR);
+                    qG = this.srcColorSpace.NumericalTransferToLinear(qG);
+                    qB = this.srcColorSpace.NumericalTransferToLinear(qB);
+                }
+                var m = this.matrix;
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> 16);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
+                if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
+                {
+                    qR = this.destColorSpace.NumericalTransferFromLinear(qR);
+                    qG = this.destColorSpace.NumericalTransferFromLinear(qG);
+                    qB = this.destColorSpace.NumericalTransferFromLinear(qB);
+                }
+                return (mappingTableTo16Bit[qR], mappingTableTo16Bit[qG], mappingTableTo16Bit[qB]);
+            }
+
+            /// <summary>
             /// Convert RGB color.
             /// </summary>
             /// <param name="r">Normalized R.</param>
@@ -80,9 +146,9 @@ namespace Carina.PixelViewer.Media
                 var qB = Quantize(b);
                 if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
                 {
-                    qR = this.srcColorSpace.NumericalTransferFromRgb(qR);
-                    qG = this.srcColorSpace.NumericalTransferFromRgb(qG);
-                    qB = this.srcColorSpace.NumericalTransferFromRgb(qB);
+                    qR = this.srcColorSpace.NumericalTransferToLinear(qR);
+                    qG = this.srcColorSpace.NumericalTransferToLinear(qG);
+                    qB = this.srcColorSpace.NumericalTransferToLinear(qB);
                 }
                 var m = this.matrix;
                 qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
@@ -90,9 +156,9 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
                 if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
                 {
-                    qR = this.destColorSpace.NumericalTransferToRgb(qR);
-                    qG = this.destColorSpace.NumericalTransferToRgb(qG);
-                    qB = this.destColorSpace.NumericalTransferToRgb(qB);
+                    qR = this.destColorSpace.NumericalTransferFromLinear(qR);
+                    qG = this.destColorSpace.NumericalTransferFromLinear(qG);
+                    qB = this.destColorSpace.NumericalTransferFromLinear(qB);
                 }
                 return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
             }
@@ -264,6 +330,10 @@ namespace Carina.PixelViewer.Media
         };
         static volatile ILogger? logger;
         static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
+        static readonly unsafe long* mappingTableFrom16Bit = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        static readonly unsafe long* mappingTableFrom8Bit = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        static readonly unsafe ushort* mappingTableTo16Bit = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 65537);
+        static readonly unsafe byte* mappingTableTo8Bit = (byte*)NativeMemory.Alloc(sizeof(byte) * 65537);
         static readonly Random random = new();
         static readonly SortedObservableList<ColorSpace> userDefinedColorSpaceList = new(Compare);
         static readonly Dictionary<string, ColorSpace> userDefinedColorSpaces = new();
@@ -274,22 +344,31 @@ namespace Carina.PixelViewer.Media
         readonly bool hasTransferFunc;
         readonly long[] matrixFromXyz;
         readonly long[] matrixToXyz;
-        readonly SKColorSpaceTransferFn numericalTransferFuncFromRgb;
-        readonly SKColorSpaceTransferFn numericalTransferFuncToRgb;
-        volatile long[]? numericalTransferTableFromRgb;
-        volatile long[]? numericalTransferTableToRgb;
+        readonly SKColorSpaceTransferFn numericalTransferFuncFromLinear;
+        readonly SKColorSpaceTransferFn numericalTransferFuncToLinear;
+        volatile unsafe long* numericalTransferTableFromLinear;
+        volatile unsafe long* numericalTransferTableToLinear;
         readonly SKColorSpace skiaColorSpace;
         readonly SKColorSpaceXyz skiaColorSpaceXyz;
 
 
         // Static initializer.
-        static ColorSpace()
+        static unsafe ColorSpace()
         {
             allColorSpaceList.AddAll(builtInColorSpaces.Values);
             AllColorSpaces = allColorSpaceList.AsReadOnly();
             BuiltInColorSpaces = builtInColorSpaces.Values.ToList().Also(it =>
                 it.Sort(Compare)).AsReadOnly();
             Default = Srgb;
+            for (var input = 0; input < 256; ++input)
+                mappingTableFrom8Bit[input] = (long)(input / 255.0 * 65536 + 0.5);
+            for (var input = 0; input < 65536; ++input)
+                mappingTableFrom16Bit[input] = (long)(input / 65535.0 * 65536 + 0.5);
+            for (var input = 0; input <= 65536; ++input)
+            {
+                mappingTableTo8Bit[input] = (byte)(input / 65536.0 * 255 + 0.5);
+                mappingTableTo16Bit[input] = (ushort)(input / 65536.0 * 65535 + 0.5);
+            }
             UserDefinedColorSpaces = userDefinedColorSpaceList.AsReadOnly();
         }
 
@@ -299,9 +378,9 @@ namespace Carina.PixelViewer.Media
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
-            this.hasTransferFunc = !colorSpace.GammaIsLinear && colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncFromRgb);
+            this.hasTransferFunc = !colorSpace.GammaIsLinear && colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncToLinear);
             if (this.hasTransferFunc)
-                this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
+                this.numericalTransferFuncFromLinear = this.numericalTransferFuncToLinear.Invert();
             if (whitePoint.HasValue)
             {
                 this.IsD65WhitePoint = AreEquivalentWhitePoints(whitePoint.Value, D65);
@@ -315,6 +394,22 @@ namespace Carina.PixelViewer.Media
             this.Source = source;
             this.Uri = uri;
             this.WhitePoint = whitePoint;
+        }
+
+
+        // Finalizer.
+        unsafe ~ColorSpace()
+        {
+            if (this.numericalTransferTableFromLinear != null)
+            {
+                NativeMemory.Free(this.numericalTransferTableFromLinear);
+                this.numericalTransferTableFromLinear = null;
+            }
+            if (this.numericalTransferTableToLinear != null)
+            {
+                NativeMemory.Free(this.numericalTransferTableToLinear);
+                this.numericalTransferTableToLinear = null;
+            }
         }
 
 
@@ -423,7 +518,7 @@ namespace Carina.PixelViewer.Media
             colorSpace is not null 
             && this.Source == colorSpace.Source
             && (this.Source != ColorSpaceSource.SystemDefined || this.customName == colorSpace.customName)
-            && this.numericalTransferFuncFromRgb.Equals(colorSpace.numericalTransferFuncFromRgb)
+            && this.numericalTransferFuncToLinear.Equals(colorSpace.numericalTransferFuncToLinear)
             && this.skiaColorSpaceXyz.Equals(colorSpace.skiaColorSpaceXyz);
 
 
@@ -1022,35 +1117,49 @@ namespace Carina.PixelViewer.Media
         public string Name { get; }
 
 
-        // Numerical transfer from RGB.
+        // Numerical transfer to non-linear color.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        long NumericalTransferFromRgb(long color)
+        unsafe long NumericalTransferFromLinear(long color)
         {
-            var table = this.numericalTransferTableFromRgb;
+            var table = this.numericalTransferTableFromLinear;
             if (table == null)
             {
-                table = new long[65537];
-                var transferFunc = this.numericalTransferFuncFromRgb;
-                for (var i = 65536; i >= 0; --i)
-                    table[i] = (long)(transferFunc.Transform(i / 65536f) * 65536 + 0.5);
-                this.numericalTransferTableFromRgb = table;
+                lock (this)
+                {
+                    table = this.numericalTransferTableFromLinear;
+                    if (table == null)
+                    {
+                        table = (long*)NativeMemory.Alloc(sizeof(long) * 65537);
+                        var transferFunc = this.numericalTransferFuncFromLinear;
+                        for (var i = 65536; i >= 0; --i)
+                            table[i] = (long)(transferFunc.Transform(i / 65536f) * 65536 + 0.5);
+                        this.numericalTransferTableFromLinear = table;
+                    }
+                }
             }
             return table[color];
         }
 
 
-        // Numerical transfer to RGB.
+        // Numerical transfer to linear color. 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        long NumericalTransferToRgb(long color)
+        unsafe long NumericalTransferToLinear(long color)
         {
-            var table = this.numericalTransferTableToRgb;
+            var table = this.numericalTransferTableToLinear;
             if (table == null)
             {
-                table = new long[65537];
-                var transferFunc = this.numericalTransferFuncToRgb;
-                for (var i = 65536; i >= 0; --i)
-                    table[i] = (long)(transferFunc.Transform(i / 65536f) * 65536 + 0.5);
-                this.numericalTransferTableToRgb = table;
+                lock (this)
+                {
+                    table = this.numericalTransferTableToLinear;
+                    if (table == null)
+                    {
+                        table = (long*)NativeMemory.Alloc(sizeof(long) * 65537);
+                        var transferFunc = this.numericalTransferFuncToLinear;
+                        for (var i = 65536; i >= 0; --i)
+                            table[i] = (long)(transferFunc.Transform(i / 65536f) * 65536 + 0.5);
+                        this.numericalTransferTableToLinear = table;
+                    }
+                }
             }
             return table[color];
         }
@@ -1143,12 +1252,56 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Convert to L*a*b* D50 color space.
         /// </summary>
+        /// <param name="r">R.</param>
+        /// <param name="g">G.</param>
+        /// <param name="b">B.</param>
+        /// <returns>L*a*b* color.</returns>
+        public (double, double, double) RgbToLab(byte r, byte g, byte b) =>
+            XyzToLab(this.RgbToXyz(r, g, b));
+        
+
+        /// <summary>
+        /// Convert to L*a*b* D50 color space.
+        /// </summary>
+        /// <param name="r">R.</param>
+        /// <param name="g">G.</param>
+        /// <param name="b">B.</param>
+        /// <returns>L*a*b* color.</returns>
+        public (double, double, double) RgbToLab(ushort r, ushort g, ushort b) =>
+            XyzToLab(this.RgbToXyz(r, g, b));
+
+
+        /// <summary>
+        /// Convert to L*a*b* D50 color space.
+        /// </summary>
         /// <param name="r">Normalized R.</param>
         /// <param name="g">Normalized G.</param>
         /// <param name="b">Normalized B.</param>
         /// <returns>L*a*b* color.</returns>
         public (double, double, double) RgbToLab(double r, double g, double b) =>
             XyzToLab(this.RgbToXyz(r, g, b));
+        
+
+        /// <summary>
+        /// Convert to CIE xy chromaticity.
+        /// </summary>
+        /// <param name="r">R.</param>
+        /// <param name="g">G.</param>
+        /// <param name="b">B.</param>
+        /// <returns>xy chromaticity.</returns>
+        public (double, double) RgbToXyChromaticity(byte r, byte g, byte b) =>
+            XyzToXyChromaticity(this.RgbToXyz(r, g, b));
+        
+
+        /// <summary>
+        /// Convert to CIE xy chromaticity.
+        /// </summary>
+        /// <param name="r">R.</param>
+        /// <param name="g">G.</param>
+        /// <param name="b">B.</param>
+        /// <returns>xy chromaticity.</returns>
+        public (double, double) RgbToXyChromaticity(ushort r, ushort g, ushort b) =>
+            XyzToXyChromaticity(this.RgbToXyz(r, g, b));
 
 
         /// <summary>
@@ -1160,6 +1313,60 @@ namespace Carina.PixelViewer.Media
         /// <returns>xy chromaticity.</returns>
         public (double, double) RgbToXyChromaticity(double r, double g, double b) =>
             XyzToXyChromaticity(this.RgbToXyz(r, g, b));
+        
+
+        /// <summary>
+        /// Convert from 8-bit RGB to XYZ D50 color space.
+        /// </summary>
+        /// <param name="r">R.</param>
+        /// <param name="g">G.</param>
+        /// <param name="b">B.</param>
+        /// <returns>XYZ color.</returns>
+        public unsafe (double, double, double) RgbToXyz(byte r, byte g, byte b)
+        {
+            var qR = mappingTableFrom8Bit[r];
+            var qG = mappingTableFrom8Bit[g];
+            var qB = mappingTableFrom8Bit[b];
+            if (this.hasTransferFunc)
+            {
+                qR = this.NumericalTransferToLinear(qR);
+                qG = this.NumericalTransferToLinear(qG);
+                qB = this.NumericalTransferToLinear(qB);
+            }
+            var m = this.matrixToXyz;
+            return (
+                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
+                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
+                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
+            );
+        }
+
+
+        /// <summary>
+        /// Convert from 16-bit RGB to XYZ D50 color space.
+        /// </summary>
+        /// <param name="r">R.</param>
+        /// <param name="g">G.</param>
+        /// <param name="b">B.</param>
+        /// <returns>XYZ color.</returns>
+        public unsafe (double, double, double) RgbToXyz(ushort r, ushort g, ushort b)
+        {
+            var qR = mappingTableFrom16Bit[r];
+            var qG = mappingTableFrom16Bit[g];
+            var qB = mappingTableFrom16Bit[b];
+            if (this.hasTransferFunc)
+            {
+                qR = this.NumericalTransferToLinear(qR);
+                qG = this.NumericalTransferToLinear(qG);
+                qB = this.NumericalTransferToLinear(qB);
+            }
+            var m = this.matrixToXyz;
+            return (
+                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
+                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
+                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
+            );
+        }
 
 
         /// <summary>
@@ -1176,9 +1383,9 @@ namespace Carina.PixelViewer.Media
             var qB = Quantize(b);
             if (this.hasTransferFunc)
             {
-                qR = this.NumericalTransferFromRgb(qR);
-                qG = this.NumericalTransferFromRgb(qG);
-                qB = this.NumericalTransferFromRgb(qB);
+                qR = this.NumericalTransferToLinear(qR);
+                qG = this.NumericalTransferToLinear(qG);
+                qB = this.NumericalTransferToLinear(qB);
             }
             var m = this.matrixToXyz;
             return (
@@ -1290,7 +1497,7 @@ namespace Carina.PixelViewer.Media
             }
             foreach (var candidate in builtInColorSpaces.Values)
             {
-                if (candidate.numericalTransferFuncFromRgb.Equals(reference.numericalTransferFuncFromRgb)
+                if (candidate.numericalTransferFuncToLinear.Equals(reference.numericalTransferFuncToLinear)
                     && candidate.skiaColorSpaceXyz.Equals(reference.skiaColorSpaceXyz))
                 {
                     colorSpace = candidate;
@@ -1337,7 +1544,7 @@ namespace Carina.PixelViewer.Media
                 return true;
             foreach (var candidate in userDefinedColorSpaceList)
             {
-                if (candidate.numericalTransferFuncFromRgb.Equals(reference.numericalTransferFuncFromRgb)
+                if (candidate.numericalTransferFuncToLinear.Equals(reference.numericalTransferFuncToLinear)
                     && candidate.skiaColorSpaceXyz.Equals(reference.skiaColorSpaceXyz))
                 {
                     colorSpace = candidate;
@@ -1440,9 +1647,9 @@ namespace Carina.PixelViewer.Media
             var qB = Clip((m[6] * qX + m[7] * qY + m[8] * qZ) >> 16);
             if (this.hasTransferFunc)
             {
-                qR = this.NumericalTransferToRgb(qR);
-                qG = this.NumericalTransferToRgb(qG);
-                qB = this.NumericalTransferToRgb(qB);
+                qR = this.NumericalTransferFromLinear(qR);
+                qG = this.NumericalTransferFromLinear(qG);
+                qB = this.NumericalTransferFromLinear(qB);
             }
             return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
         }
