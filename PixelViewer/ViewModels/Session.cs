@@ -670,6 +670,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
 		/// <summary>
+		/// Property of <see cref="UseLinearColorSpace"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> UseLinearColorSpaceProperty = ObservableProperty.Register<Session, bool>(nameof(UseLinearColorSpace), false);
+		/// <summary>
 		/// Property of <see cref="VibranceAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> VibranceAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(VibranceAdjustment), 0, 
@@ -1216,6 +1220,7 @@ namespace Carina.PixelViewer.ViewModels
 					}
 				}
 				this.SetValue(ColorSpaceProperty, colorSpace);
+				this.SetValue(UseLinearColorSpaceProperty, profile.UseLinearColorSpace);
 
 				// demosaicing
 				this.SetValue(DemosaicingProperty, profile.Demosaicing);
@@ -2887,7 +2892,8 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.HasMultipleByteOrderings)
 					this.renderImageAction.Reschedule();
 			}
-			else if (property == ColorSpaceProperty)
+			else if (property == ColorSpaceProperty
+				|| property == UseLinearColorSpaceProperty)
 			{
 				if (this.IsColorSpaceManagementEnabled)
 					this.renderImageAction.Reschedule();
@@ -3780,7 +3786,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					this.SetValue(IsConvertingColorSpaceProperty, true);
 					var sourceImageFrame = renderedImageFrame ?? this.renderedImageFrame.AsNonNull();
-					await sourceImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+					await sourceImageFrame.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.AsNonNull().BitmapBuffer, this.UseLinearColorSpace, false, cancellationTokenSource.Token);
 					colorSpaceConvertedImageFrame.RenderingResult = sourceImageFrame.RenderingResult;
 				}
 			}
@@ -4305,6 +4311,7 @@ namespace Carina.PixelViewer.ViewModels
 			var byteOrdering = ByteOrdering.BigEndian;
 			var yuvToBgraConverter = this.YuvToBgraConverter;
 			var colorSpace = ColorSpace.Default;
+			var useLinearColorSpace = false;
 			var demosaicing = true;
 			var width = 1;
 			var height = 1;
@@ -4324,6 +4331,8 @@ namespace Carina.PixelViewer.ViewModels
 				YuvToBgraConverter.TryGetByName(jsonProperty.GetString(), out yuvToBgraConverter);
 			if (savedState.TryGetProperty(nameof(ColorSpace), out jsonProperty))
 				Media.ColorSpace.TryGetColorSpace(jsonProperty.GetString().AsNonNull(), out colorSpace);
+			if (savedState.TryGetProperty(nameof(UseLinearColorSpace), out jsonProperty))
+				useLinearColorSpace = jsonProperty.ValueKind == JsonValueKind.True;
 			if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
 				demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 			if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
@@ -4454,6 +4463,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(ByteOrderingProperty, byteOrdering);
 			this.SetValue(YuvToBgraConverterProperty, yuvToBgraConverter);
 			this.SetValue(ColorSpaceProperty, colorSpace);
+			this.SetValue(UseLinearColorSpaceProperty, useLinearColorSpace);
 			this.SetValue(DemosaicingProperty, demosaicing);
 			this.SetValue(ImageWidthProperty, width);
 			this.SetValue(ImageHeightProperty, height);
@@ -4788,6 +4798,8 @@ namespace Carina.PixelViewer.ViewModels
 			writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
 			writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
 			writer.WriteString(nameof(ColorSpace), this.ColorSpace.Name);
+			if (this.UseLinearColorSpace)
+				writer.WriteBoolean(nameof(UseLinearColorSpace), true);
 			writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
 			writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
 			writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
@@ -5297,6 +5309,17 @@ namespace Carina.PixelViewer.ViewModels
 				this.Title = title;
 				this.OnPropertyChanged(nameof(this.Title));
 			}
+		}
+
+
+		/// <summary>
+		/// Get or set whether <see cref="ColorSpace"/> should be treat as linear color space or not.
+		/// </summary>
+		/// <value></value>
+		public bool UseLinearColorSpace
+		{
+			get => this.GetValue(UseLinearColorSpaceProperty);
+			set => this.SetValue(UseLinearColorSpaceProperty, value);
 		}
 
 

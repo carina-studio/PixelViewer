@@ -245,6 +245,7 @@
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用者介面回應時間</sys:String>
+	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">視為線性色彩空間</sys:String>
 	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV 至 RGB 轉換</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (Ctrl-)</sys:String>

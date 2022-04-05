@@ -813,6 +813,11 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 								<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[UserControl].ShowColorSpaceInfo}" Text="{DynamicResource String/Common.Details}"/>
+								<StackPanel IsVisible="{Binding !ColorSpace.IsLinear}">
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.UseLinearColorSpace}"/>
+									<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseLinearColorSpace, Mode=TwoWay}"/>
+								</StackPanel>
 							</StackPanel>
 						</Panel>
 						<Separator Classes="Dialog_Separator"/>

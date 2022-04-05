@@ -54,6 +54,7 @@ namespace Carina.PixelViewer.Media.Profiles
         double redColorGain = 1.0;
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
+        bool useLinearColorSpace;
         int width = 1;
         YuvToBgraConverter yuvToBgraConverter = YuvToBgraConverter.Default;
 
@@ -520,6 +521,11 @@ namespace Carina.PixelViewer.Media.Profiles
                     if (!Media.ColorSpace.TryGetColorSpace(name, out profile.colorSpace))
                         profile.IsUpgradedWhenLoading = true;
                 }
+                if (rootElement.TryGetProperty(nameof(UseLinearColorSpace), out jsonProperty) 
+                    && jsonProperty.ValueKind == JsonValueKind.True)
+                {
+                    profile.useLinearColorSpace = true;
+                }
 
                 // get demosaicing
                 if (rootElement.TryGetProperty(nameof(Demosaicing), out jsonProperty))
@@ -760,6 +766,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 if (format.Category == ImageFormatCategory.YUV)
                     jsonWriter.WriteString(nameof(YuvToBgraConverter), this.yuvToBgraConverter.Name);
                 jsonWriter.WriteString(nameof(ColorSpace), this.colorSpace.Name);
+                if (this.useLinearColorSpace)
+                    jsonWriter.WriteBoolean(nameof(UseLinearColorSpace), true);
                 jsonWriter.WriteBoolean(nameof(Demosaicing), this.demosaicing);
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);
@@ -800,6 +808,23 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Type of profile.
         public ImageRenderingProfileType Type { get; }
+
+
+        // Use linear color space.
+        public bool UseLinearColorSpace
+        {
+            get => this.useLinearColorSpace;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.useLinearColorSpace == value)
+                    return;
+                this.useLinearColorSpace = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UseLinearColorSpace)));
+            }
+        }
 
 
         // Throw exception is profile is default.

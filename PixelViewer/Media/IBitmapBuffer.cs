@@ -153,9 +153,11 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="bitmapBuffer">Source <see cref="IBitmapBuffer"/>.</param>
 		/// <param name="resultBitmapBuffer"><see cref="IBitmapBuffer"/> to receive converted data.</param>
+		/// <param name="useLinearSourceColorSpace">Whether color space of <paramref name="bitmapBuffer"/> should be treat as linear color space or not.</param>
+		/// <param name="useLinearTargetColorSpace">Whether color space of <paramref name="resultBitmapBuffer"/> should be treat as linear color space or not.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Task of conversion.</returns>
-		public static async Task ConvertToColorSpaceAsync(this IBitmapBuffer bitmapBuffer, IBitmapBuffer resultBitmapBuffer, CancellationToken cancellationToken)
+		public static async Task ConvertToColorSpaceAsync(this IBitmapBuffer bitmapBuffer, IBitmapBuffer resultBitmapBuffer, bool useLinearSourceColorSpace, bool useLinearTargetColorSpace, CancellationToken cancellationToken)
 		{
 			// check parameters
 			if (resultBitmapBuffer == bitmapBuffer)
@@ -182,7 +184,7 @@ namespace Carina.PixelViewer.Media
 					// select color space converter
 					var srcColorSpace = sharedBitmapBuffer.ColorSpace;
 					var targetColorSpace = resultBitmapBuffer.ColorSpace;
-					var converter = new ColorSpace.Converter(srcColorSpace, targetColorSpace);
+					var converter = new ColorSpace.Converter(srcColorSpace, useLinearSourceColorSpace, targetColorSpace, useLinearTargetColorSpace);
 
 					// copy directly
 					if (srcColorSpace == resultBitmapBuffer.ColorSpace)

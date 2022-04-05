@@ -284,6 +284,7 @@
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">User interface response time</sys:String>
+	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">Treat as linear color space</sys:String>
 	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV to RGB conversion</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>

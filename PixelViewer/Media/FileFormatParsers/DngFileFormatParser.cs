@@ -414,6 +414,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 profile.ByteOrdering = byteOrdering;
                 if (colorSpace != null)
                     profile.ColorSpace = colorSpace;
+                profile.UseLinearColorSpace = true;
                 profile.DataOffset = imageDataOffset;
                 profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);
                 profile.Height = imageHeight;

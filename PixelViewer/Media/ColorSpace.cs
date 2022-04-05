@@ -33,29 +33,35 @@ namespace Carina.PixelViewer.Media
         public class Converter
         {
             // Fields.
-            readonly ColorSpace fromColorSpace;
+            readonly ColorSpace destColorSpace;
             readonly bool isIdentical;
             readonly long[] matrix;
-            readonly ColorSpace toColorSpace;
+            readonly bool skipDestNumericalTransfer;
+            readonly bool skipSrcNumericalTransfer;
+            readonly ColorSpace srcColorSpace;
 
             /// <summary>
             /// Initialize new <see cref="Converter"/> instance.
             /// </summary>
-            /// <param name="fromColorSpace">Source color space.</param>
-            /// <param name="toColorSpace">Target color space.</param>
-            public Converter(ColorSpace fromColorSpace, ColorSpace toColorSpace)
+            /// <param name="srcColorSpace">Source color space.</param>
+            /// <param name="skipSrcNumericalTransfer">Skip numerical transfer from source color space.</param>
+            /// <param name="destColorSpace">Target color space.</param>
+            /// <param name="skipDestNumericalTransfer">Skip numerical transfer to target color space.</param>
+            public Converter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer)
             {
-                this.fromColorSpace = fromColorSpace;
-                this.toColorSpace = toColorSpace;
-                this.isIdentical = fromColorSpace.Equals(toColorSpace);
+                this.srcColorSpace = srcColorSpace;
+                this.destColorSpace = destColorSpace;
+                this.isIdentical = srcColorSpace.Equals(destColorSpace);
                 if (!this.isIdentical)
                 {
-                    var m1 = this.fromColorSpace.skiaColorSpace.ToColorSpaceXyz();
-                    var m2 = this.toColorSpace.skiaColorSpace.ToColorSpaceXyz().Invert();
+                    var m1 = this.srcColorSpace.skiaColorSpace.ToColorSpaceXyz();
+                    var m2 = this.destColorSpace.skiaColorSpace.ToColorSpaceXyz().Invert();
                     this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
                 }
                 else
                     this.matrix = new long[0];
+                this.skipSrcNumericalTransfer = skipSrcNumericalTransfer;
+                this.skipDestNumericalTransfer = skipDestNumericalTransfer;
             }
 
             /// <summary>
@@ -72,21 +78,21 @@ namespace Carina.PixelViewer.Media
                 var qR = Quantize(r);
                 var qG = Quantize(g);
                 var qB = Quantize(b);
-                if (this.fromColorSpace.hasTransferFunc)
+                if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
                 {
-                    qR = this.fromColorSpace.NumericalTransferFromRgb(qR);
-                    qG = this.fromColorSpace.NumericalTransferFromRgb(qG);
-                    qB = this.fromColorSpace.NumericalTransferFromRgb(qB);
+                    qR = this.srcColorSpace.NumericalTransferFromRgb(qR);
+                    qG = this.srcColorSpace.NumericalTransferFromRgb(qG);
+                    qB = this.srcColorSpace.NumericalTransferFromRgb(qB);
                 }
                 var m = this.matrix;
                 qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
                 qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> 16);
                 qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
-                if (this.toColorSpace.hasTransferFunc)
+                if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
                 {
-                    qR = this.toColorSpace.NumericalTransferToRgb(qR);
-                    qG = this.toColorSpace.NumericalTransferToRgb(qG);
-                    qB = this.toColorSpace.NumericalTransferToRgb(qB);
+                    qR = this.destColorSpace.NumericalTransferToRgb(qR);
+                    qG = this.destColorSpace.NumericalTransferToRgb(qG);
+                    qB = this.destColorSpace.NumericalTransferToRgb(qB);
                 }
                 return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
             }
@@ -293,7 +299,7 @@ namespace Carina.PixelViewer.Media
         {
             this.customName = customName;
             this.skiaColorSpace = colorSpace;
-            this.hasTransferFunc = colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncFromRgb);
+            this.hasTransferFunc = !colorSpace.GammaIsLinear && colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncFromRgb);
             if (this.hasTransferFunc)
                 this.numericalTransferFuncToRgb = this.numericalTransferFuncFromRgb.Invert();
             if (whitePoint.HasValue)
