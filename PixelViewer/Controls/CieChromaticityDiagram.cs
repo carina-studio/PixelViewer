@@ -499,6 +499,7 @@ class CieChromaticityDiagram : Control, IStyleable
     readonly List<CieChromaticityGamut> attachedChromaticityGamuts = new();
     Pen? axisPen;
     readonly ObservableList<CieChromaticity> chromaticities = new();
+    readonly PolylineGeometry chromaticityGamutGeometry = new();
     readonly ObservableList<CieChromaticityGamut> chromaticityGamuts = new();
     StreamGeometry? diagramGeometry;
     IBrush? diagramBrush;
@@ -751,7 +752,7 @@ class CieChromaticityDiagram : Control, IStyleable
         {
             var brush = this.DiagramBorderBrush;
             if (brush != null)
-                this.diagramPen = new Pen(brush);
+                this.diagramPen = new Pen(brush, 2);
         }
         if (this.diagramBrush == null)
         {
@@ -804,15 +805,23 @@ class CieChromaticityDiagram : Control, IStyleable
             var borderPen = chromaticityGamut.BorderPen;
             if (borderPen != null)
             {
-                var (rX, rY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(1, 0, 0);
-                var (gX, gY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0, 1, 0);
-                var (bX, bY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0, 0, 1);
+                var (rX, rY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(1.0, 0.0, 0.0);
+                var (gX, gY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0.0, 1.0, 0.0);
+                var (bX, bY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0.0, 0.0, 1.0);
                 var rPoint = this.XYToControlCoordinate(width, height, rX, rY);
                 var gPoint = this.XYToControlCoordinate(width, height, gX, gY);
                 var bPoint = this.XYToControlCoordinate(width, height, bX, bY);
-                context.DrawLine(borderPen, rPoint, gPoint);
-                context.DrawLine(borderPen, gPoint, bPoint);
-                context.DrawLine(borderPen, bPoint, rPoint);
+                this.chromaticityGamutGeometry.Points = new Points().Also(it =>
+                {
+                    it.Add(rPoint);
+                    it.Add(gPoint);
+                    it.Add(bPoint);
+                    it.Add(rPoint);
+                });
+                context.DrawGeometry(null, borderPen, this.chromaticityGamutGeometry);
+                context.DrawEllipse(borderPen.Brush, null, rPoint, 3, 3);
+                context.DrawEllipse(borderPen.Brush, null, gPoint, 3, 3);
+                context.DrawEllipse(borderPen.Brush, null, bPoint, 3, 3);
             }
         }
 

@@ -53,18 +53,22 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             this.colorSpaceChromaticityGamut.BorderPen = new Pen()
             {
-                Brush = Brushes.Black,
+                Brush = Brushes.DarkRed,
+                LineCap = PenLineCap.Round,
+                LineJoin = PenLineJoin.Round,
                 Thickness = 1,
             };
             this.colorSpaceWhitePointChromaticity.BorderPen = new Pen()
             {
-                Brush = Brushes.Black,
+                Brush = Brushes.DarkRed,
                 Thickness = 2,
             };
             this.refColorSpaceChromaticityGamut.BorderPen = new Pen()
             {
                 Brush = Brushes.White,
                 DashStyle = DashStyle.Dash,
+                LineCap = PenLineCap.Round,
+                LineJoin = PenLineJoin.Round,
                 Thickness = 1,
             };
             it.Chromaticities.Add(this.refColorSpaceWhitePointChromaticity);
