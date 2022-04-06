@@ -3887,6 +3887,7 @@ namespace Carina.PixelViewer.ViewModels
 				// update state
 				colorSpaceConvertedImageFrame?.Dispose();
 				renderedImageFrame?.Dispose();
+				this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.canMoveToNextFrame.Update(false);
