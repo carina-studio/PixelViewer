@@ -1,8 +1,8 @@
-﻿using CarinaStudio;
-using CarinaStudio.Collections;
+﻿using CarinaStudio.Collections;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Carina.PixelViewer.Media
 {
@@ -27,6 +27,7 @@ namespace Carina.PixelViewer.Media
             0, 1.6794,
             -0.187, -0.6497,
             2.1421, 0);
+        
         /// <summary>
         /// ITU-R BT.601.
         /// </summary>
@@ -36,6 +37,7 @@ namespace Carina.PixelViewer.Media
             0, 1.402,
             -0.344, -0.714,
             1.772, 0);
+        
         /// <summary>
         /// ITU-R BT.656.
         /// </summary>
@@ -45,6 +47,7 @@ namespace Carina.PixelViewer.Media
             0, 1.596,
             -0.391, -0.813,
             2.018, 0);
+        
         /// <summary>
         /// ITU-R BT.709.
         /// </summary>
@@ -62,27 +65,26 @@ namespace Carina.PixelViewer.Media
         public static readonly YuvToBgraConverter Default = BT_709;
 
 
+        // Static fields.
+        static readonly delegate*<ushort, ushort, ushort, ushort, ulong> PackingFunction16 = ImageProcessing.SelectBgra64Packing();
+        static readonly delegate*<byte, byte, byte, byte, uint> PackingFunction8 = ImageProcessing.SelectBgra32Packing();
+
+
         // Fields.
-        readonly int uFactorForB16;
-        readonly int uFactorForB8;
-        readonly int uFactorForG16;
-        readonly int uFactorForG8;
-        readonly int uFactorForR16;
-        readonly int uFactorForR8;
-        readonly int uShift16;
-        readonly int uShift8;
-        readonly int vFactorForB16;
-        readonly int vFactorForB8;
-        readonly int vFactorForG16;
-        readonly int vFactorForG8;
-        readonly int vFactorForR16;
-        readonly int vFactorForR8;
-        readonly int vShift16;
-        readonly int vShift8;
-        readonly int yFactor16;
-        readonly int yFactor8;
-        readonly int yShift16;
-        readonly int yShift8;
+        readonly long* bCoeff16Table1 = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* bCoeff16Table2 = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* bCoeff8Table1 = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        readonly long* bCoeff8Table2 = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        readonly long* gCoeff16Table1 = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* gCoeff16Table2 = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* gCoeff8Table1 = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        readonly long* gCoeff8Table2 = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        readonly long* rCoeff16Table1 = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* rCoeff16Table2 = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* rCoeff8Table1 = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        readonly long* rCoeff8Table2 = (long*)NativeMemory.Alloc(sizeof(long) * 256);
+        readonly long* yCoeff16Table = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
+        readonly long* yCoeff8Table = (long*)NativeMemory.Alloc(sizeof(long) * 256);
 
 
         // Constructor.
@@ -101,28 +103,74 @@ namespace Carina.PixelViewer.Media
             Converters.Add(this);
 
             // calculate quantized factors for 8-bit integer
-            yShift8 = yShift;
-            uShift8 = uShift;
-            vShift8 = vShift;
-            yFactor8 = (int)(yFactor * 256 + 0.5);
-            uFactorForR8 = (int)(uFactorForR * 256 + 0.5);
-            vFactorForR8 = (int)(vFactorForR * 256 + 0.5);
-            uFactorForG8 = (int)(uFactorForG * 256 + 0.5);
-            vFactorForG8 = (int)(vFactorForG * 256 + 0.5);
-            uFactorForB8 = (int)(uFactorForB * 256 + 0.5);
-            vFactorForB8 = (int)(vFactorForB * 256 + 0.5);
+            var yShift8 = yShift;
+            var uShift8 = uShift;
+            var vShift8 = vShift;
+            var yFactor8 = (long)(yFactor * 256 + 0.5);
+            var uFactorForR8 = (long)(uFactorForR * 256 + 0.5);
+            var vFactorForR8 = (long)(vFactorForR * 256 + 0.5);
+            var uFactorForG8 = (long)(uFactorForG * 256 + 0.5);
+            var vFactorForG8 = (long)(vFactorForG * 256 + 0.5);
+            var uFactorForB8 = (long)(uFactorForB * 256 + 0.5);
+            var vFactorForB8 = (long)(vFactorForB * 256 + 0.5);
 
             // calculate quantized factors for 16-bit integer
-            yShift16 = yShift << 8;
-            uShift16 = uShift << 8;
-            vShift16 = vShift << 8;
-            yFactor16 = (int)(yFactor * 65536 + 0.5);
-            uFactorForR16 = (int)(uFactorForR * 65536 + 0.5);
-            vFactorForR16 = (int)(vFactorForR * 65536 + 0.5);
-            uFactorForG16 = (int)(uFactorForG * 65536 + 0.5);
-            vFactorForG16 = (int)(vFactorForG * 65536 + 0.5);
-            uFactorForB16 = (int)(uFactorForB * 65536 + 0.5);
-            vFactorForB16 = (int)(vFactorForB * 65536 + 0.5);
+            var yShift16 = yShift << 8;
+            var uShift16 = uShift << 8;
+            var vShift16 = vShift << 8;
+            var yFactor16 = (long)(yFactor * 65536 + 0.5);
+            var uFactorForR16 = (long)(uFactorForR * 65536 + 0.5);
+            var vFactorForR16 = (long)(vFactorForR * 65536 + 0.5);
+            var uFactorForG16 = (long)(uFactorForG * 65536 + 0.5);
+            var vFactorForG16 = (long)(vFactorForG * 65536 + 0.5);
+            var uFactorForB16 = (long)(uFactorForB * 65536 + 0.5);
+            var vFactorForB16 = (long)(vFactorForB * 65536 + 0.5);
+
+            // pre-calculate coefficient for 8-bit integer
+            unsafe
+            {
+                var rCoeffTable1 = this.rCoeff8Table1;
+                var rCoeffTable2 = this.rCoeff8Table2;
+                var gCoeffTable1 = this.gCoeff8Table1;
+                var gCoeffTable2 = this.gCoeff8Table2;
+                var bCoeffTable1 = this.bCoeff8Table1;
+                var bCoeffTable2 = this.bCoeff8Table2;
+                for (var n = 255L; n >= 0; --n)
+                {
+                    var u32 = (n + uShift8);
+                    var v32 = (n + uShift8);
+                    yCoeff8Table[n] = (n + yShift8) * yFactor8;
+                    rCoeffTable1[n] = uFactorForR8 * u32;
+                    rCoeffTable2[n] = vFactorForR8 * v32;
+                    gCoeffTable1[n] = uFactorForG8 * u32;
+                    gCoeffTable2[n] = vFactorForG8 * v32;
+                    bCoeffTable1[n] = uFactorForB8 * u32;
+                    bCoeffTable2[n] = vFactorForB8 * v32;
+                }
+            }
+
+            // pre-calculate coefficient for 16-bit integer
+            unsafe
+            {
+                var rCoeffTable1 = this.rCoeff16Table1;
+                var rCoeffTable2 = this.rCoeff16Table2;
+                var gCoeffTable1 = this.gCoeff16Table1;
+                var gCoeffTable2 = this.gCoeff16Table2;
+                var bCoeffTable1 = this.bCoeff16Table1;
+                var bCoeffTable2 = this.bCoeff16Table2;
+                for (var n = 65535L; n >= 0; --n)
+                {
+                    var u64 = (n + uShift16);
+                    var v64 = (n + uShift16);
+                    yCoeff16Table[n] = (n + yShift16) * yFactor16;
+                    rCoeffTable1[n] = uFactorForR16 * u64;
+                    rCoeffTable2[n] = vFactorForR16 * v64;
+                    gCoeffTable1[n] = uFactorForG16 * u64;
+                    gCoeffTable2[n] = vFactorForG16 * v64;
+                    bCoeffTable1[n] = uFactorForB16 * u64;
+                    bCoeffTable2[n] = vFactorForB16 * v64;
+                }
+            }
         }
 
 
@@ -150,23 +198,23 @@ namespace Carina.PixelViewer.Media
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ConvertFromYuv422ToBgra32(byte y1, byte y2, byte u, byte v, uint* bgra1, uint* bgra2)
         {
-            var pixel1 = (byte*)bgra1;
-            var pixel2 = (byte*)bgra2;
-            var y132 = (y1 + this.yShift8) * this.yFactor8;
-            var y232 = (y2 + this.yShift8) * this.yFactor8;
-            var u32 = (u + this.uShift8);
-            var v32 = (v + this.vShift8);
-            var rCoeff = this.uFactorForR8 * u32 + this.vFactorForR8 * v32;
-            var gCoeff = this.uFactorForG8 * u32 + this.vFactorForG8 * v32;
-            var bCoeff = this.uFactorForB8 * u32 + this.vFactorForB8 * v32;
-            pixel1[0] = ImageProcessing.ClipToByte((y132 + bCoeff) >> 8);
-            pixel1[1] = ImageProcessing.ClipToByte((y132 + gCoeff) >> 8);
-            pixel1[2] = ImageProcessing.ClipToByte((y132 + rCoeff) >> 8);
-            pixel1[3] = 255;
-            pixel2[0] = ImageProcessing.ClipToByte((y232 + bCoeff) >> 8);
-            pixel2[1] = ImageProcessing.ClipToByte((y232 + gCoeff) >> 8);
-            pixel2[2] = ImageProcessing.ClipToByte((y232 + rCoeff) >> 8);
-            pixel2[3] = 255;
+            var y132 = this.yCoeff8Table[y1];
+            var y232 = this.yCoeff8Table[y2];
+            var rCoeff = this.rCoeff8Table1[u] + this.rCoeff8Table2[v];
+            var gCoeff = this.gCoeff8Table1[u] + this.gCoeff8Table2[v];
+            var bCoeff = this.bCoeff8Table1[u] + this.bCoeff8Table2[v];
+            *bgra1 = PackingFunction8(
+                ImageProcessing.ClipToByte((y132 + bCoeff) >> 8),
+                ImageProcessing.ClipToByte((y132 + gCoeff) >> 8),
+                ImageProcessing.ClipToByte((y132 + rCoeff) >> 8),
+                255
+            );
+            *bgra2 = PackingFunction8(
+                ImageProcessing.ClipToByte((y232 + bCoeff) >> 8),
+                ImageProcessing.ClipToByte((y232 + gCoeff) >> 8),
+                ImageProcessing.ClipToByte((y232 + rCoeff) >> 8),
+                255
+            );
         }
 
 
@@ -182,23 +230,23 @@ namespace Carina.PixelViewer.Media
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ConvertFromYuv422ToBgra64(ushort y1, ushort y2, ushort u, ushort v, ulong* bgra1, ulong* bgra2)
         {
-            var pixel1 = (ushort*)bgra1;
-            var pixel2 = (ushort*)bgra2;
-            var y164 = ((long)y1 + this.yShift16) * this.yFactor16;
-            var y264 = ((long)y2 + this.yShift16) * this.yFactor16;
-            var u64 = ((long)u + this.uShift16);
-            var v64 = ((long)v + this.uShift16);
-            var rCoeff = this.uFactorForR16 * u64 + this.vFactorForR16 * v64;
-            var gCoeff = this.uFactorForG16 * u64 + this.vFactorForG16 * v64;
-            var bCoeff = this.uFactorForB16 * u64 + this.vFactorForB16 * v64;
-            pixel1[0] = ImageProcessing.ClipToUInt16((y164 + bCoeff) >> 16);
-            pixel1[1] = ImageProcessing.ClipToUInt16((y164 + gCoeff) >> 16);
-            pixel1[2] = ImageProcessing.ClipToUInt16((y164 + rCoeff) >> 16);
-            pixel1[3] = 65535;
-            pixel2[0] = ImageProcessing.ClipToUInt16((y264 + bCoeff) >> 16);
-            pixel2[1] = ImageProcessing.ClipToUInt16((y264 + gCoeff) >> 16);
-            pixel2[2] = ImageProcessing.ClipToUInt16((y264 + rCoeff) >> 16);
-            pixel2[3] = 65535;
+            var y164 = this.yCoeff16Table[y1];
+            var y264 = this.yCoeff16Table[y2];
+            var rCoeff = this.rCoeff16Table1[u] + this.rCoeff16Table2[v];
+            var gCoeff = this.gCoeff16Table1[u] + this.gCoeff16Table2[v];
+            var bCoeff = this.bCoeff16Table1[u] + this.bCoeff16Table2[v];
+            *bgra1 = PackingFunction16(
+                ImageProcessing.ClipToUInt16((y164 + bCoeff) >> 16),
+                ImageProcessing.ClipToUInt16((y164 + gCoeff) >> 16),
+                ImageProcessing.ClipToUInt16((y164 + rCoeff) >> 16),
+                65535
+            );
+            *bgra2 = PackingFunction16(
+                ImageProcessing.ClipToUInt16((y264 + bCoeff) >> 16),
+                ImageProcessing.ClipToUInt16((y264 + gCoeff) >> 16),
+                ImageProcessing.ClipToUInt16((y264 + rCoeff) >> 16),
+                65535
+            );
         }
 
 
@@ -212,17 +260,16 @@ namespace Carina.PixelViewer.Media
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ConvertFromYuv444ToBgra32(byte y, byte u, byte v, uint* bgra)
         {
-            var pixel = (byte*)bgra;
-            var y32 = (y + this.yShift8) * this.yFactor8;
-            var u32 = (u + this.uShift8);
-            var v32 = (v + this.vShift8);
-            var rCoeff = this.uFactorForR8 * u32 + this.vFactorForR8 * v32;
-            var gCoeff = this.uFactorForG8 * u32 + this.vFactorForG8 * v32;
-            var bCoeff = this.uFactorForB8 * u32 + this.vFactorForB8 * v32;
-            pixel[0] = ImageProcessing.ClipToByte((y32 + bCoeff) >> 8);
-            pixel[1] = ImageProcessing.ClipToByte((y32 + gCoeff) >> 8);
-            pixel[2] = ImageProcessing.ClipToByte((y32 + rCoeff) >> 8);
-            pixel[3] = 255;
+            var y32 = this.yCoeff8Table[y];
+            var rCoeff = this.rCoeff8Table1[u] + this.rCoeff8Table2[v];
+            var gCoeff = this.gCoeff8Table1[u] + this.gCoeff8Table2[v];
+            var bCoeff = this.bCoeff8Table1[u] + this.bCoeff8Table2[v];
+            *bgra = PackingFunction8(
+                ImageProcessing.ClipToByte((y32 + bCoeff) >> 8),
+                ImageProcessing.ClipToByte((y32 + gCoeff) >> 8),
+                ImageProcessing.ClipToByte((y32 + rCoeff) >> 8),
+                255
+            );
         }
 
 
@@ -236,17 +283,16 @@ namespace Carina.PixelViewer.Media
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void ConvertFromYuv444ToBgra64(ushort y, ushort u, ushort v, ulong* bgra)
         {
-            var pixel1 = (ushort*)bgra;
-            var y64 = ((long)y + this.yShift16) * this.yFactor16;
-            var u64 = ((long)u + this.uShift16);
-            var v64 = ((long)v + this.uShift16);
-            var rCoeff = this.uFactorForR16 * u64 + this.vFactorForR16 * v64;
-            var gCoeff = this.uFactorForG16 * u64 + this.vFactorForG16 * v64;
-            var bCoeff = this.uFactorForB16 * u64 + this.vFactorForB16 * v64;
-            pixel1[0] = ImageProcessing.ClipToUInt16((y64 + bCoeff) >> 16);
-            pixel1[1] = ImageProcessing.ClipToUInt16((y64 + gCoeff) >> 16);
-            pixel1[2] = ImageProcessing.ClipToUInt16((y64 + rCoeff) >> 16);
-            pixel1[3] = 65535;
+            var y64 = this.yCoeff16Table[y];
+            var rCoeff = this.rCoeff16Table1[u] + this.rCoeff16Table2[v];
+            var gCoeff = this.gCoeff16Table1[u] + this.gCoeff16Table2[v];
+            var bCoeff = this.bCoeff16Table1[u] + this.bCoeff16Table2[v];
+            *bgra = PackingFunction16(
+                ImageProcessing.ClipToUInt16((y64 + bCoeff) >> 16),
+                ImageProcessing.ClipToUInt16((y64 + gCoeff) >> 16),
+                ImageProcessing.ClipToUInt16((y64 + rCoeff) >> 16),
+                65535
+            );
         }
 
 

@@ -72,6 +72,22 @@ namespace Carina.PixelViewer.Media
 		/// <param name="value">Given number.</param>
 		/// <returns>Clipped number.</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static byte ClipToByte(long value)
+		{
+			if (value < 0)
+				return 0;
+			if (value > 255)
+				return 255;
+			return (byte)value;
+		}
+
+
+		/// <summary>
+		/// Clip given number to the range of <see cref="byte"/>.
+		/// </summary>
+		/// <param name="value">Given number.</param>
+		/// <returns>Clipped number.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static byte ClipToByte(int value)
 		{
 			if (value < 0)
