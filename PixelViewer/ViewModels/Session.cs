@@ -3708,6 +3708,8 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				if (it.ImageRenderer != imageRenderer)
 					return true;
+				if (it.BitmapBuffer.Width != this.ImageWidth || it.BitmapBuffer.Height != this.ImageHeight)
+					return true;
 				if (it.RenderingOptions != renderingOptions)
 					return true;
 				var planeOptions = it.PlaneOptions;
