@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -79,10 +80,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
-				// render Y
+				// read Y
 				var yRow = new byte[yRowStride];
 				var bitmapRowPtr = (byte*)bitmapBaseAddress;
 				var bitmapRowStride = bitmapBuffer.RowBytes;
+				var bitmapRowStride2 = bitmapRowStride << 1;
 				fixed (byte* yRowPtr = yRow)
 				{
 					for (var rowIndex = 0; rowIndex < height; ++rowIndex, bitmapRowPtr += bitmapRowStride)
@@ -97,18 +99,19 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						for (var columnIndex = 0; columnIndex < width; ++columnIndex, yPixelPtr += yPixelStride, bitmapPixelPtr += 4)
 							bitmapPixelPtr[0] = yPixelPtr[0];
 						if (cancellationToken.IsCancellationRequested)
+							return;
+						if (isLastRow)
 							break;
-						if (!isLastRow)
-							Array.Clear(yRow, 0, yRowStride);
+						Array.Clear(yRow, 0, yRowStride);
 					}
 				}
 
-				// render UV1
+				// read UV1
 				var uv1Row = new byte[uv1RowStride];
 				bitmapRowPtr = (byte*)bitmapBaseAddress;
 				fixed (byte* uv1RowPtr = uv1Row)
 				{
-					for (var rowIndex = 0; rowIndex < height; ++rowIndex, bitmapRowPtr += bitmapRowStride)
+					for (var rowIndex = 0; rowIndex < height; rowIndex += 2, bitmapRowPtr += bitmapRowStride2)
 					{
 						// read UV row
 						var isLastRow = (rowIndex == height - 2);
@@ -116,35 +119,26 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							imageStream.Read(uv1Row, 0, uv1PixelStride * (width / 2 - 1) + 1);
 						else
 							imageStream.Read(uv1Row, 0, uv1RowStride);
-
-						// render the M row
 						var uvPixelPtr = uv1RowPtr;
 						var bitmapPixelPtr = bitmapRowPtr;
 						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv1PixelStride, bitmapPixelPtr += 8)
 							bitmapPixelPtr[1] = uvPixelPtr[0];
-						++rowIndex;
-						bitmapRowPtr += bitmapRowStride;
-
-						// render the (M+1) row
-						uvPixelPtr = uv1RowPtr;
-						bitmapPixelPtr = bitmapRowPtr;
-						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv1PixelStride, bitmapPixelPtr += 8)
-							bitmapPixelPtr[1] = uvPixelPtr[0];
-
+						
 						// check state
 						if (cancellationToken.IsCancellationRequested)
+							return;
+						if (isLastRow)
 							break;
-						if (rowIndex < height - 1)
-							Array.Clear(uv1Row, 0, uv1RowStride);
+						Array.Clear(uv1Row, 0, uv1RowStride);
 					}
 				}
 
-				// render UV2
+				// read UV2
 				var uv2Row = new byte[uv2RowStride];
 				bitmapRowPtr = (byte*)bitmapBaseAddress;
 				fixed (byte* uv2RowPtr = uv2Row)
 				{
-					for (var rowIndex = 0; rowIndex < height; ++rowIndex, bitmapRowPtr += bitmapRowStride)
+					for (var rowIndex = 0; rowIndex < height; rowIndex += 2, bitmapRowPtr += bitmapRowStride2)
 					{
 						// read UV row
 						var isLastRow = (rowIndex == height - 2);
@@ -152,38 +146,34 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							imageStream.Read(uv2Row, 0, uv2PixelStride * (width / 2 - 1) + 1);
 						else
 							imageStream.Read(uv2Row, 0, uv2RowStride);
-
-						// render the M row
 						var uvPixelPtr = uv2RowPtr;
 						var bitmapPixelPtr = bitmapRowPtr;
 						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv2PixelStride, bitmapPixelPtr += 8)
-						{
-							var y1 = bitmapPixelPtr[0];
-							var y2 = bitmapPixelPtr[4];
-							this.SelectUV(bitmapPixelPtr[1], uvPixelPtr[0], out var u, out var v);
-							converter.ConvertFromYuv422ToBgra32(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
-						}
-						++rowIndex;
-						bitmapRowPtr += bitmapRowStride;
-
-						// render the (M+1) row
-						uvPixelPtr = uv2RowPtr;
-						bitmapPixelPtr = bitmapRowPtr;
-						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv2PixelStride, bitmapPixelPtr += 8)
-						{
-							var y1 = bitmapPixelPtr[0];
-							var y2 = bitmapPixelPtr[4];
-							this.SelectUV(bitmapPixelPtr[1], uvPixelPtr[0], out var u, out var v);
-							converter.ConvertFromYuv422ToBgra32(y1, y2, u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
-						}
+							bitmapPixelPtr[2] = uvPixelPtr[0];
 
 						// check state
 						if (cancellationToken.IsCancellationRequested)
+							return;
+						if (isLastRow)
 							break;
-						if (rowIndex < height - 1)
-							Array.Clear(uv2Row, 0, uv2RowStride);
+						Array.Clear(uv1Row, 0, uv1RowStride);
 					}
 				}
+
+				// convert to BGRA
+				ImageProcessing.ParallelFor(0, height >> 1, (y) =>
+				{
+					var bitmapPixelPtr = (byte*)bitmapBaseAddress + (y << 1) * bitmapRowStride;
+					var bottomBitmapPixelPtr = bitmapPixelPtr + bitmapRowStride;
+					for (var x = width; x > 0; x -= 2, bitmapPixelPtr += 8, bottomBitmapPixelPtr += 8)
+					{
+						this.SelectUV(bitmapPixelPtr[1], bitmapPixelPtr[2], out var u, out var v);
+						converter.ConvertFromYuv422ToBgra32(bitmapPixelPtr[0], bitmapPixelPtr[4], u, v, (uint*)bitmapPixelPtr, (uint*)(bitmapPixelPtr + 4));
+						converter.ConvertFromYuv422ToBgra32(bottomBitmapPixelPtr[0], bottomBitmapPixelPtr[4], u, v, (uint*)bottomBitmapPixelPtr, (uint*)(bottomBitmapPixelPtr + 4));
+					}
+					if (cancellationToken.IsCancellationRequested)
+						throw new TaskCanceledException();
+				});
 			});
 
 			// complete
