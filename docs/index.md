@@ -86,7 +86,6 @@ Linux                                 |[x64](https://github.com/carina-studio/Pi
   
 ## ⭐ Supported color spaces
 * sRGB
-* sRGB w/o gamma transfer (v2.5+)
 * DCI-P3
 * Display-P3
 * Adobe RGB
