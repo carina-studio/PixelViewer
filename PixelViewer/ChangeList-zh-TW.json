@@ -1,56 +1,19 @@
 ﻿[
 	{
-		"Description": "支援匯入 ICC 色彩描述檔以建立自訂色彩空間。",
+		"Description": "新增 \"視為線性色彩空間\" 選項以在色彩空間轉換時略過線性數值變換。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "支援顯示色彩空間資訊，包括 CIE 1931 xy 色度表。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援優先使用作業系統所定義之螢幕色彩空間 (限 Windows 及 macOS)。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "支援繪製 HEIF/JPEG/PNG 之壓縮像素資料。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增 \"線性 sRGB\"/\"BT.2100 (HLG)\"/\"BT.2100 (PQ)\" 內建色彩空間。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增 ABGR_2101010/ARGB_2101010/BGRA_1010102/RGBA_1010102 格式。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增 ABGR_F16/ARGB_F16/BGRA_F16/RGBA_F16 格式。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "當 DNG 檔案內的原始資料不被支援時，改為使用內嵌 JPEG 影像。",
+		"Description": "提升色彩空間轉換之效能。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "支援根據檔案中的中繼資料自動旋轉影像。",
-		"Type": "Improvement"
+		"Description": "移除線性 sRGB 色彩空間。",
+		"Type": "BehaviorChange"
 	},
 	{
-		"Description": "新增按鈕以精確調整濾鏡參數。",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "避免不必要之影像重新繪製。",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "更新 Display-P3 色彩空間參數‧。"
-	},
-	{
-		"Description": "更新將色彩擴展至 16 位元色彩之方式。"
-	},
-	{
-		"Description": "更新相依程式庫。"
+		"Description": "取消在自動色彩增益時將亮度列入考慮。",
+		"Type": "BehaviorChange"
 	},
 	{
 		"Description": "其他錯誤修正。",

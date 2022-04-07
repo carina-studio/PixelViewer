@@ -1,56 +1,19 @@
 ﻿[
 	{
-		"Description": "Support importing ICC profile to create custom color spaces.",
+		"Description": "Add \"Treat as linear color space\" option to enable color space conversion without numerical linear transfer.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Support showing information of color spaces including CIE 1931 xy chromaticity diagram.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support using screen color space defined by operating system first (Windows and macOS only).",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Support rendering compressed pixel data including HEIF/JPEG/PNG.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Add \"Linear sRGB\"/\"BT.2100 (HLG)\"/\"BT.2100 (PQ)\" built-in color spaces.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Add ABGR_2101010/ARGB_2101010/BGRA_1010102/RGBA_1010102 formats.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Add ABGR_F16/ARGB_F16/BGRA_F16/RGBA_F16 formats.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Fall back to use embedded JPEG image if format of raw data in DNG file is unsupported.",
+		"Description": "Improve performance of color space conversion.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Support rotating image automatically according to metadata in file.",
-		"Type": "Improvement"
+		"Description": "Remove linear sRGB color space.",
+		"Type": "BehaviorChange"
 	},
 	{
-		"Description": "Add buttons to adjust filtering parameters accurately.",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "Prevent unnecessary image re-rendering.",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "Update parameters of Display-P3 color space."
-	},
-	{
-		"Description": "Update way of expanding color to 16-bit color."
-	},
-	{
-		"Description": "Update dependent libraries."
+		"Description": "Cancel taking luminance into account for RGB gain selection.",
+		"Type": "BehaviorChange"
 	},
 	{
 		"Description": "Other bug fixing.",
