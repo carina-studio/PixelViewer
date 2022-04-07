@@ -2,6 +2,13 @@
 title: PixelViewer
 ---
 
+## 📣 What's Change in 2.6 Preview
+- Add ```Treat as linear color space``` option to enable color space conversion without numerical linear transfer.
+- Improve performance of color space conversion.
+- Remove ```Linear sRGB``` color space.
+- Cancel taking luminance into account for RGB gain selection.
+- Other bug fixing.
+
 ## 📣 What's Change in 2.5 Preview
 - Support importing ICC profile to create custom color spaces.
 - Support showing information of color spaces including CIE 1931 xy chromaticity diagram.
