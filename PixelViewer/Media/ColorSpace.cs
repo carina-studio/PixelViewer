@@ -85,9 +85,9 @@ namespace Carina.PixelViewer.Media
                     qB = this.srcColorSpace.NumericalTransferToLinear(qB);
                 }
                 var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> 16);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
                 if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
                 {
                     qR = this.destColorSpace.NumericalTransferFromLinear(qR);
@@ -118,9 +118,9 @@ namespace Carina.PixelViewer.Media
                     qB = this.srcColorSpace.NumericalTransferToLinear(qB);
                 }
                 var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> 16);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
                 if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
                 {
                     qR = this.destColorSpace.NumericalTransferFromLinear(qR);
@@ -151,16 +151,16 @@ namespace Carina.PixelViewer.Media
                     qB = this.srcColorSpace.NumericalTransferToLinear(qB);
                 }
                 var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> 16);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> 16);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> 16);
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
                 if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
                 {
                     qR = this.destColorSpace.NumericalTransferFromLinear(qR);
                     qG = this.destColorSpace.NumericalTransferFromLinear(qG);
                     qB = this.destColorSpace.NumericalTransferFromLinear(qB);
                 }
-                return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
+                return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
             }
         }
 
@@ -313,6 +313,12 @@ namespace Carina.PixelViewer.Media
             new Uri("https://en.wikipedia.org/wiki/SRGB"));
 
 
+        // Constants.
+        const int QuantizationBits = 20;
+        const int QuantizationSteps = 0x1 << QuantizationBits;
+        const double QuantizationSteps2 = (double)QuantizationSteps * QuantizationSteps;
+
+
         // Static fields.
         static readonly SortedObservableList<ColorSpace> allColorSpaceList = new(Compare);
         static CarinaStudio.AppSuite.IAppSuiteApplication? app;
@@ -332,8 +338,8 @@ namespace Carina.PixelViewer.Media
         static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
         static readonly unsafe long* mappingTableFrom16Bit = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
         static readonly unsafe long* mappingTableFrom8Bit = (long*)NativeMemory.Alloc(sizeof(long) * 256);
-        static readonly unsafe ushort* mappingTableTo16Bit = (ushort*)NativeMemory.Alloc(sizeof(ushort) * 65537);
-        static readonly unsafe byte* mappingTableTo8Bit = (byte*)NativeMemory.Alloc(sizeof(byte) * 65537);
+        static readonly unsafe ushort* mappingTableTo16Bit = (ushort*)NativeMemory.Alloc(sizeof(ushort) * (QuantizationSteps + 1));
+        static readonly unsafe byte* mappingTableTo8Bit = (byte*)NativeMemory.Alloc(sizeof(byte) * (QuantizationSteps + 1));
         static readonly Random random = new();
         static readonly SortedObservableList<ColorSpace> userDefinedColorSpaceList = new(Compare);
         static readonly Dictionary<string, ColorSpace> userDefinedColorSpaces = new();
@@ -361,13 +367,13 @@ namespace Carina.PixelViewer.Media
                 it.Sort(Compare)).AsReadOnly();
             Default = Srgb;
             for (var input = 0; input < 256; ++input)
-                mappingTableFrom8Bit[input] = (long)(input / 255.0 * 65536 + 0.5);
+                mappingTableFrom8Bit[input] = (long)(input / 255.0 * QuantizationSteps + 0.5);
             for (var input = 0; input < 65536; ++input)
-                mappingTableFrom16Bit[input] = (long)(input / 65535.0 * 65536 + 0.5);
-            for (var input = 0; input <= 65536; ++input)
+                mappingTableFrom16Bit[input] = (long)(input / 65535.0 * QuantizationSteps + 0.5);
+            for (var input = QuantizationSteps; input >= 0; --input)
             {
-                mappingTableTo8Bit[input] = (byte)(input / 65536.0 * 255 + 0.5);
-                mappingTableTo16Bit[input] = (ushort)(input / 65536.0 * 65535 + 0.5);
+                mappingTableTo8Bit[input] = (byte)((double)input / QuantizationSteps * 255 + 0.5);
+                mappingTableTo16Bit[input] = (ushort)((double)input / QuantizationSteps * 65535 + 0.5);
             }
             UserDefinedColorSpaces = userDefinedColorSpaceList.AsReadOnly();
         }
@@ -463,8 +469,8 @@ namespace Carina.PixelViewer.Media
         {
             if (color < 0)
                 return 0;
-            if (color > 65536)
-                return 65536;
+            if (color > QuantizationSteps)
+                return QuantizationSteps;
             return color;
         }
 
@@ -1129,10 +1135,10 @@ namespace Carina.PixelViewer.Media
                     table = this.numericalTransferTableFromLinear;
                     if (table == null)
                     {
-                        table = (long*)NativeMemory.Alloc(sizeof(long) * 65537);
+                        table = (long*)NativeMemory.Alloc(sizeof(long) * (QuantizationSteps + 1));
                         var transferFunc = this.numericalTransferFuncFromLinear;
-                        for (var i = 65536; i >= 0; --i)
-                            table[i] = (long)(transferFunc.Transform(i / 65536f) * 65536 + 0.5);
+                        for (var i = QuantizationSteps; i >= 0; --i)
+                            table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
                         this.numericalTransferTableFromLinear = table;
                     }
                 }
@@ -1153,10 +1159,10 @@ namespace Carina.PixelViewer.Media
                     table = this.numericalTransferTableToLinear;
                     if (table == null)
                     {
-                        table = (long*)NativeMemory.Alloc(sizeof(long) * 65537);
+                        table = (long*)NativeMemory.Alloc(sizeof(long) * (QuantizationSteps + 1));
                         var transferFunc = this.numericalTransferFuncToLinear;
-                        for (var i = 65536; i >= 0; --i)
-                            table[i] = (long)(transferFunc.Transform(i / 65536f) * 65536 + 0.5);
+                        for (var i = QuantizationSteps; i >= 0; --i)
+                            table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
                         this.numericalTransferTableToLinear = table;
                     }
                 }
@@ -1191,17 +1197,17 @@ namespace Carina.PixelViewer.Media
             if (color < 0)
                 return 0;
             if (color > 1)
-                return 65536;
-            return (long)(color * 65536 + 0.5);
+                return QuantizationSteps;
+            return (long)(color * QuantizationSteps + 0.5);
         }
 
 
         // Quantize matrix of XYZ color space.
         static long[] Quantize(SKColorSpaceXyz matrix) => new long[9]
         {
-            (long)(matrix[0, 0] * 65536 + 0.5), (long)(matrix[1, 0] * 65536 + 0.5), (long)(matrix[2, 0] * 65536 + 0.5),
-            (long)(matrix[0, 1] * 65536 + 0.5), (long)(matrix[1, 1] * 65536 + 0.5), (long)(matrix[2, 1] * 65536 + 0.5),
-            (long)(matrix[0, 2] * 65536 + 0.5), (long)(matrix[1, 2] * 65536 + 0.5), (long)(matrix[2, 2] * 65536 + 0.5),
+            (long)((double)matrix[0, 0] * QuantizationSteps + 0.5), (long)((double)matrix[1, 0] * QuantizationSteps + 0.5), (long)((double)matrix[2, 0] * QuantizationSteps + 0.5),
+            (long)((double)matrix[0, 1] * QuantizationSteps + 0.5), (long)((double)matrix[1, 1] * QuantizationSteps + 0.5), (long)((double)matrix[2, 1] * QuantizationSteps + 0.5),
+            (long)((double)matrix[0, 2] * QuantizationSteps + 0.5), (long)((double)matrix[1, 2] * QuantizationSteps + 0.5), (long)((double)matrix[2, 2] * QuantizationSteps + 0.5),
         };
 
 
@@ -1335,9 +1341,9 @@ namespace Carina.PixelViewer.Media
             }
             var m = this.matrixToXyz;
             return (
-                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
-                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
-                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
+                (m[0] * qR + m[1] * qG + m[2] * qB) / QuantizationSteps2,
+                (m[3] * qR + m[4] * qG + m[5] * qB) / QuantizationSteps2,
+                (m[6] * qR + m[7] * qG + m[8] * qB) / QuantizationSteps2
             );
         }
 
@@ -1362,9 +1368,9 @@ namespace Carina.PixelViewer.Media
             }
             var m = this.matrixToXyz;
             return (
-                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
-                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
-                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
+                (m[0] * qR + m[1] * qG + m[2] * qB) / QuantizationSteps2,
+                (m[3] * qR + m[4] * qG + m[5] * qB) / QuantizationSteps2,
+                (m[6] * qR + m[7] * qG + m[8] * qB) / QuantizationSteps2
             );
         }
 
@@ -1639,19 +1645,19 @@ namespace Carina.PixelViewer.Media
         public (double, double, double) XyzToRgb(double x, double y, double z)
         {
             var m = this.matrixFromXyz;
-            var qX = (long)(x * 65536 + 0.5);
-            var qY = (long)(y * 65536 + 0.5);
-            var qZ = (long)(z * 65536 + 0.5);
-            var qR = Clip((m[0] * qX + m[1] * qY + m[2] * qZ) >> 16);
-            var qG = Clip((m[3] * qX + m[4] * qY + m[5] * qZ) >> 16);
-            var qB = Clip((m[6] * qX + m[7] * qY + m[8] * qZ) >> 16);
+            var qX = (long)(x * QuantizationSteps + 0.5);
+            var qY = (long)(y * QuantizationSteps + 0.5);
+            var qZ = (long)(z * QuantizationSteps + 0.5);
+            var qR = Clip((m[0] * qX + m[1] * qY + m[2] * qZ) >> QuantizationBits);
+            var qG = Clip((m[3] * qX + m[4] * qY + m[5] * qZ) >> QuantizationBits);
+            var qB = Clip((m[6] * qX + m[7] * qY + m[8] * qZ) >> QuantizationBits);
             if (this.hasTransferFunc)
             {
                 qR = this.NumericalTransferFromLinear(qR);
                 qG = this.NumericalTransferFromLinear(qG);
                 qB = this.NumericalTransferFromLinear(qB);
             }
-            return (qR / 65536.0, qG / 65536.0, qB / 65536.0);
+            return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
         }
 
 
@@ -1674,7 +1680,10 @@ namespace Carina.PixelViewer.Media
         public static (double, double) XyzToXyChromaticity(double x, double y, double z)
         {
             var xyz = (x + y + z);
-            return (x / xyz, y / xyz);
+            if (Math.Abs(xyz) >= 0.00000001)
+                return (x / xyz, y / xyz);
+            xyz = D50.Item1 + D50.Item2 + D50.Item3;
+            return (D50.Item1 / xyz, D50.Item2 / xyz);
         }
     }
 
