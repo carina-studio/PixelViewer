@@ -290,7 +290,7 @@
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
 
 	<!-- YuvToBgraConverter -->
-	<sys:String x:Key="String/YuvToBgraConverter.BT.2020">BT.2020 (UHDTV)</sys:String>
+	<sys:String x:Key="String/YuvToBgraConverter.BT.2020">BT.2020/BT.2100 (UHDTV/HDR-TV)</sys:String>
 	<sys:String x:Key="String/YuvToBgraConverter.BT.601">BT.601 (SDTV)</sys:String>
 	<sys:String x:Key="String/YuvToBgraConverter.BT.656">BT.656 (SDTV, NTSC standard)</sys:String>
 	<sys:String x:Key="String/YuvToBgraConverter.BT.709">BT.709 (HDTV)</sys:String>
