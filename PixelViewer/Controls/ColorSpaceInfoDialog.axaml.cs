@@ -32,13 +32,27 @@ partial class ColorSpaceInfoDialog : InputDialog
     readonly TextBox bluePrimaryTextBox;
     readonly CieChromaticityDiagram chromaticityDiagram;
     readonly CieChromaticityGamut colorSpaceChromaticityGamut = new();
+    readonly Pen colorSpaceTransferFuncStroke = new Pen()
+    {
+        Brush = Brushes.DarkRed,
+        Thickness = 2,
+    };
     readonly CieChromaticity colorSpaceWhitePointChromaticity = new();
+    readonly ComboBox diagramTypeComboBox;
     readonly TextBox greenPrimaryTextBox;
     readonly TextBlock linearizationDescriptionTextBlock;
     readonly TextBox redPrimaryTextBox;
     readonly CieChromaticityGamut refColorSpaceChromaticityGamut = new();
+    readonly Pen refColorSpaceTransferFuncStroke = new Pen()
+    {
+        Brush = Brushes.White,
+        DashStyle = DashStyle.Dash,
+        Thickness = 2,
+    };
     readonly CieChromaticity refColorSpaceWhitePointChromaticity = new();
     readonly TextBox nameTextBox;
+    readonly NormalizedTransferFunctionsDiagram toLinearTransferFuncDiagram;
+    readonly NormalizedTransferFunctionsDiagram toNonLinearTransferFuncDiagram;
     readonly TextBlock whitePointDescriptionTextBlock;
     readonly TextBox whitePointTextBox;
 
@@ -76,12 +90,45 @@ partial class ColorSpaceInfoDialog : InputDialog
             it.ChromaticityGamuts.Add(this.refColorSpaceChromaticityGamut);
             it.ChromaticityGamuts.Add(this.colorSpaceChromaticityGamut);
         });
+        this.diagramTypeComboBox = this.FindControl<ComboBox>(nameof(diagramTypeComboBox)).AsNonNull().Also(it =>
+        {
+            it.GetObservable(ComboBox.SelectedIndexProperty).Subscribe(index =>
+            {
+                var diagramViews = new Control?[]{
+                    this.chromaticityDiagram,
+                    this.toLinearTransferFuncDiagram,
+                    this.toNonLinearTransferFuncDiagram,
+                };
+                for (var i = diagramViews.Length - 1; i >= 0; --i)
+                    diagramViews[i]?.Parent?.Let(it => it.IsVisible = (i == index));
+            });
+        });
         this.greenPrimaryTextBox = this.FindControl<TextBox>(nameof(greenPrimaryTextBox)).AsNonNull();
         this.linearizationDescriptionTextBlock = this.FindControl<TextBlock>(nameof(linearizationDescriptionTextBlock));
         this.redPrimaryTextBox = this.FindControl<TextBox>(nameof(redPrimaryTextBox)).AsNonNull();
         this.nameTextBox = this.FindControl<TextBox>(nameof(nameTextBox)).AsNonNull().Also(it =>
         {
             it.GetObservable(TextBox.TextProperty).Subscribe(_ => this.InvalidateInput());
+        });
+        this.toLinearTransferFuncDiagram = this.FindControl<NormalizedTransferFunctionsDiagram>(nameof(toLinearTransferFuncDiagram)).AsNonNull().Also(it =>
+        {
+            it.TransferFunctions.Add(new NormalizedTransferFunction(i => i)
+            {
+                Stroke = new Pen().Also(pen =>
+                {
+                    pen.Bind(Pen.BrushProperty, this.GetResourceObservable("SystemControlForegroundBaseMediumBrush"));
+                })
+            });
+        });
+        this.toNonLinearTransferFuncDiagram = this.FindControl<NormalizedTransferFunctionsDiagram>(nameof(toNonLinearTransferFuncDiagram)).AsNonNull().Also(it =>
+        {
+            it.TransferFunctions.Add(new NormalizedTransferFunction(i => i)
+            {
+                Stroke = new Pen().Also(pen =>
+                {
+                    pen.Bind(Pen.BrushProperty, this.GetResourceObservable("SystemControlForegroundBaseMediumBrush"));
+                })
+            });
         });
         this.whitePointDescriptionTextBlock = this.FindControl<TextBlock>(nameof(whitePointDescriptionTextBlock)).AsNonNull();
         this.whitePointTextBox = this.FindControl<TextBox>(nameof(whitePointTextBox)).AsNonNull();
@@ -91,6 +138,7 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             if (colorSpace != null)
             {
+                // xy chromaticity
                 if (colorSpace.WhitePoint.HasValue)
                 {
                     if (this.refColorSpaceWhitePointChromaticity.BorderPen == null)
@@ -108,6 +156,20 @@ partial class ColorSpaceInfoDialog : InputDialog
                 else
                     this.refColorSpaceWhitePointChromaticity.BorderPen = null;
                 this.refColorSpaceChromaticityGamut.ColorSpace = colorSpace;
+
+                // transfer functions
+                if (this.toLinearTransferFuncDiagram.TransferFunctions.Count > 2)
+                    this.toLinearTransferFuncDiagram.TransferFunctions.RemoveAt(1);
+                this.toLinearTransferFuncDiagram.TransferFunctions.Insert(1, new NormalizedTransferFunction(colorSpace.NumericalTransferToLinear)
+                {
+                    Stroke = this.refColorSpaceTransferFuncStroke
+                });
+                if (this.toNonLinearTransferFuncDiagram.TransferFunctions.Count > 2)
+                    this.toNonLinearTransferFuncDiagram.TransferFunctions.RemoveAt(1);
+                this.toNonLinearTransferFuncDiagram.TransferFunctions.Insert(1, new NormalizedTransferFunction(colorSpace.NumericalTransferFromLinear)
+                {
+                    Stroke = this.refColorSpaceTransferFuncStroke
+                });
             }
         });
     }
@@ -169,21 +231,28 @@ partial class ColorSpaceInfoDialog : InputDialog
         var colorSpace = this.ColorSpace;
         var wp = colorSpace.WhitePoint;
         this.nameTextBox.Text = Data.Converters.ColorSpaceToStringConverter.Default.Convert<string>(colorSpace);
-        
         this.colorSpaceChromaticityGamut.ColorSpace = colorSpace;
+        this.toLinearTransferFuncDiagram.TransferFunctions.Add(new NormalizedTransferFunction(colorSpace.NumericalTransferToLinear)
+        {
+            Stroke = this.colorSpaceTransferFuncStroke
+        });
+        this.toNonLinearTransferFuncDiagram.TransferFunctions.Add(new NormalizedTransferFunction(colorSpace.NumericalTransferFromLinear)
+        {
+            Stroke = this.colorSpaceTransferFuncStroke
+        });
         var (rX, rY, rZ) = colorSpace.RgbToXyz(1, 0, 0);
         var (gX, gY, gZ) = colorSpace.RgbToXyz(0, 1, 0);
         var (bX, bY, bZ) = colorSpace.RgbToXyz(0, 0, 1);
-        this.redPrimaryTextBox.Text = $"{rX:F4}, {rY:F4}, {rZ:F4}";
-        this.greenPrimaryTextBox.Text = $"{gX:F4}, {gY:F4}, {gZ:F4}";
-        this.bluePrimaryTextBox.Text = $"{bX:F4}, {bY:F4}, {bZ:F4}";
+        this.redPrimaryTextBox.Text = $"{rX:F5}, {rY:F5}, {rZ:F5}";
+        this.greenPrimaryTextBox.Text = $"{gX:F5}, {gY:F5}, {gZ:F5}";
+        this.bluePrimaryTextBox.Text = $"{bX:F5}, {bY:F5}, {bZ:F5}";
         if (wp.HasValue)
         {
             var wpXYZ = wp.Value;
             var (wpX, wpY) = Media.ColorSpace.XyzToXyChromaticity(wpXYZ);
             this.colorSpaceWhitePointChromaticity.X = wpX;
             this.colorSpaceWhitePointChromaticity.Y = wpY;
-            this.whitePointTextBox.Text = $"{wpXYZ.Item1:F4}, {wpXYZ.Item2:F4}, {wpXYZ.Item3:F4}";
+            this.whitePointTextBox.Text = $"{wpXYZ.Item1:F5}, {wpXYZ.Item2:F5}, {wpXYZ.Item3:F5}";
             this.whitePointDescriptionTextBlock.Text = Global.Run(() =>
             {
                 var cct = Media.ColorSpace.XyChromaticityToCct(wpX, wpY);

@@ -27,15 +27,8 @@
 		<!-- Content -->
 		<Grid ColumnDefinitions="*,*">
 			
-			<!-- xy chromaticity diagram -->
+			<!-- Diagrams -->
 			<StackPanel Classes="Dialog_ContentPanel">
-
-				<!-- Diagram -->
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
-				<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}">
-					<appControls:CieChromaticityDiagram Name="chromaticityDiagram"/>
-				</Border>
-				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Reference color space -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace}"/>
@@ -54,6 +47,36 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Diagram type -->
+				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Diagram}"/>
+				<ComboBox Name="diagramTypeComboBox" Classes="Dialog_ComboBox" SelectedIndex="0">
+					<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
+					<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram}"/>
+					<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram}"/>
+				</ComboBox>
+				<Separator Classes="Dialog_Separator"/>
+
+				<!-- Diagrams -->
+				<Panel>
+
+					<!-- xy chromaticity diagram -->
+					<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}" IsVisible="True">
+						<appControls:CieChromaticityDiagram Name="chromaticityDiagram"/>
+					</Border>
+
+					<!-- To linear transfer function diagram -->
+					<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}" IsVisible="False">
+						<appControls:NormalizedTransferFunctionsDiagram Name="toLinearTransferFuncDiagram" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+					</Border>
+
+					<!-- To non-linear transfer function diagram -->
+					<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}" IsVisible="False">
+						<appControls:NormalizedTransferFunctionsDiagram Name="toNonLinearTransferFuncDiagram"/>
+					</Border>
+
+				</Panel>
 
 			</StackPanel>
 

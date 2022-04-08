@@ -88,6 +88,7 @@
 	<!-- ColorSpaceInfoDialog -->
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">Blue</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy chromaticity diagram</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Diagram">Type of diagram</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">Green</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">R/G/B are linear in this color space, they can be converted between XYZ color space by linear combination directly.</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">Name</sys:String>
@@ -97,6 +98,8 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">Red</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space (show as dashed line)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">Color space information</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram">Non-linear to linear transfer function (EOTF)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram">Linear to non-linear transfer function (OETF)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">White point</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description">This is for reference only. CIE standard illuminant D50 is always used for internal color conversion.</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT">CCT {0:F0}K</sys:String>
