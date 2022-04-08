@@ -1123,6 +1123,23 @@ namespace Carina.PixelViewer.Media
         public string Name { get; }
 
 
+        /// <summary>
+        /// Transfer linear color to non-linear color.
+        /// </summary>
+        /// <param name="color">Normalized linear color.</param>
+        /// <returns>Transferred color.</returns>
+        public double NumericalTransferFromLinear(double color)
+        {
+            if (color < 0)
+                color = 0;
+            else if (color > 1)
+                color = 1;
+            if (this.IsLinear || !this.hasTransferFunc)
+                return color;
+            return this.numericalTransferFuncFromLinear.Transform((float)color);
+        }
+
+
         // Numerical transfer to non-linear color.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe long NumericalTransferFromLinear(long color)
@@ -1144,6 +1161,23 @@ namespace Carina.PixelViewer.Media
                 }
             }
             return table[color];
+        }
+
+
+        /// <summary>
+        /// Transfer non-linear color to linear color.
+        /// </summary>
+        /// <param name="color">Normalized non-linear color.</param>
+        /// <returns>Transferred color.</returns>
+        public double NumericalTransferToLinear(double color)
+        {
+            if (color < 0)
+                color = 0;
+            else if (color > 1)
+                color = 1;
+            if (this.IsLinear || !this.hasTransferFunc)
+                return color;
+            return this.numericalTransferFuncToLinear.Transform((float)color);
         }
 
 
