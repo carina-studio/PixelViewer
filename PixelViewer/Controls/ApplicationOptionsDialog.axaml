@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:abControls="using:CarinaStudio.Controls"
 		xmlns:aConverters="using:Avalonia.Data.Converters"
 		xmlns:as="using:CarinaStudio.AppSuite"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
@@ -110,7 +111,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Image dimensions evaluation -->
@@ -158,7 +159,7 @@
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
 				<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>
 				<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/Color_management"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/Color_management"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Default color space -->
@@ -178,7 +179,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Screen color space -->
@@ -198,7 +199,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<asControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Use system screen color space -->
@@ -291,13 +292,13 @@
 
 				<!-- Max rendered images memory usage -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
-				<asControls:IntegerTextBox Name="maxRenderedImageMemoryUsageTextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
+				<abControls:IntegerTextBox Name="maxRenderedImageMemoryUsageTextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
 
 				<!-- Log output target port -->
 				<StackPanel IsVisible="{Binding $parent[Window].Application.IsDebugMode}">
 					<Separator Classes="Dialog_Separator"/>
 					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.LogOutputTargetPort}"/>
-					<asControls:IntegerTextBox Classes="Dialog_NumericUpDown" IsNullValueAllowed="False" Maximum="65535" Minimum="1000" Value="{Binding LogOutputTargetPort, Mode=TwoWay}"/>
+					<abControls:IntegerTextBox Classes="Dialog_NumericUpDown" IsNullValueAllowed="False" Maximum="65535" Minimum="1000" Value="{Binding LogOutputTargetPort, Mode=TwoWay}"/>
 				</StackPanel>
 				
 			</StackPanel>

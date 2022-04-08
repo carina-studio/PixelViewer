@@ -239,7 +239,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="BlueColorGain"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> BlueColorGainProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorGain), 1.0, coerce: it => ImageRenderingOptions.GetValidRgbGain(it));
+		public static readonly ObservableProperty<double> BlueColorGainProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorGain), 1.0, coerce: (s, it) => ImageRenderingOptions.GetValidRgbGain(it));
 		/// <summary>
 		/// Property of <see cref="BrightnessAdjustment"/>.
 		/// </summary>
@@ -291,7 +291,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="GreenColorGain"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> GreenColorGainProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorGain), 1.0, coerce: it => ImageRenderingOptions.GetValidRgbGain(it));
+		public static readonly ObservableProperty<double> GreenColorGainProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorGain), 1.0, coerce: (s, it) => ImageRenderingOptions.GetValidRgbGain(it));
 		/// <summary>
 		/// Property of <see cref="HasBrightnessAdjustment"/>.
 		/// </summary>
@@ -391,7 +391,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="ImageHeight"/>.
 		/// </summary>
-		public static readonly ObservableProperty<int> ImageHeightProperty = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: it => Math.Max(1, it));
+		public static readonly ObservableProperty<int> ImageHeightProperty = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: (S, it) => Math.Max(1, it));
 		/// <summary>
 		/// Property of <see cref="ImagePlaneCount"/>.
 		/// </summary>
@@ -407,7 +407,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="ImageWidth"/>.
 		/// </summary>
-		public static readonly ObservableProperty<int> ImageWidthProperty = ObservableProperty.Register<Session, int>(nameof(ImageWidth), 1, coerce: it => Math.Max(1, it));
+		public static readonly ObservableProperty<int> ImageWidthProperty = ObservableProperty.Register<Session, int>(nameof(ImageWidth), 1, coerce: (s, it) => Math.Max(1, it));
 		/// <summary>
 		/// Property of <see cref="InsufficientMemoryForRenderedImage"/>.
 		/// </summary>
@@ -575,7 +575,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="RedColorGain"/>.
 		/// </summary>
-		public static readonly ObservableProperty<double> RedColorGainProperty = ObservableProperty.Register<Session, double>(nameof(RedColorGain), 1.0, coerce: it => ImageRenderingOptions.GetValidRgbGain(it));
+		public static readonly ObservableProperty<double> RedColorGainProperty = ObservableProperty.Register<Session, double>(nameof(RedColorGain), 1.0, coerce: (s, it) => ImageRenderingOptions.GetValidRgbGain(it));
 		/// <summary>
 		/// Property of <see cref="RenderedImage"/>.
 		/// </summary>
@@ -588,7 +588,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="RenderingParametersPanelSize"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, 
-			coerce: it =>
+			coerce: (s, it) =>
 			{
 				if (it >= MaxRenderingParametersPanelSize)
 					return MaxRenderingParametersPanelSize;
@@ -601,7 +601,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="RequestedImageDisplayScale"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> RequestedImageDisplayScaleProperty = ObservableProperty.Register<Session, double>(nameof(RequestedImageDisplayScale), 1.0,
-			coerce: it =>
+			coerce: (s, it) =>
 			{
 				if (it < MinRenderedImageScale)
 					return MinRenderedImageScale;
@@ -614,7 +614,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="SaturationAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> SaturationAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(SaturationAdjustment), 0, 
-			coerce: it => 
+			coerce: (s, it) => 
 			{
 				if (it < -1)
 					return -1;
@@ -627,7 +627,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="ScreenPixelDensity"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> ScreenPixelDensityProperty = ObservableProperty.Register<Session, double>(nameof(ScreenPixelDensity), 1, 
-			coerce: it => Math.Max(1, it),
+			coerce: (s, it) => Math.Max(1, it),
 			validate: double.IsFinite);
 		/// <summary>
 		/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
@@ -677,7 +677,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Property of <see cref="VibranceAdjustment"/>.
 		/// </summary>
 		public static readonly ObservableProperty<double> VibranceAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(VibranceAdjustment), 0, 
-			coerce: it => 
+			coerce: (s, it) => 
 			{
 				if (it < -1)
 					return -1;
@@ -4437,7 +4437,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (savedState.TryGetProperty(nameof(RenderingParametersPanelSize), out jsonProperty)
 				&& jsonProperty.TryGetDouble(out renderingParamsPanelSize))
 			{
-				renderingParamsPanelSize = RenderingParametersPanelSizeProperty.CoercionFunction?.Invoke(renderingParamsPanelSize) ?? renderingParamsPanelSize;
+				renderingParamsPanelSize = this.CoerceValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
 				if (RenderingParametersPanelSizeProperty.ValidationFunction?.Invoke(renderingParamsPanelSize) == false)
 					renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
 			}

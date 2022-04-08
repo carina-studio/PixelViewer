@@ -2,7 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using CarinaStudio;
-using CarinaStudio.AppSuite.Controls;
+using CarinaStudio.Controls;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using System;
@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Controls
     /// <summary>
     /// Dialog to select frame number.
     /// </summary>
-    partial class FrameNumberSelectionDialog : InputDialog
+    partial class FrameNumberSelectionDialog : CarinaStudio.AppSuite.Controls.InputDialog
     {
         // Static fields.
         static readonly AvaloniaProperty<long> FrameCountProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(FrameCount), 1);
@@ -60,6 +60,7 @@ namespace Carina.PixelViewer.Controls
         }
 
 
+        /// <inheritdoc/>
         protected override void OnEnterKeyClickedOnInputControl(IControl control)
         {
             base.OnEnterKeyClickedOnInputControl(control);
