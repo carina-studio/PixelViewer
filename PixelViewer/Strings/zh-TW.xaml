@@ -67,9 +67,9 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">藍色</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy 色度表</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">綠色</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">紅/綠/藍在此色彩空間中為線性值，意即可以直接線性轉換至 XYZ 色彩空間。</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">紅/綠/藍在此色彩空間中為線性值，意即可以直接使用線性變換與 XYZ 色彩空間互相轉換。</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">名稱</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.NonLinearColorSpace">紅/綠/藍在此色彩空間中為非線性值，必須先透過一組非線性轉換 (OETF)，才可以線性轉換至 XYZ 色彩空間。</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.NonLinearColorSpace">紅/綠/藍在此色彩空間中為非線性值，必須先透過一組數值轉換函數 (OETF/EOTF) 才可以與 XYZ 色彩空間互相轉換。</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Other">其他資訊</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">主色及白點</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">紅色</sys:String>
