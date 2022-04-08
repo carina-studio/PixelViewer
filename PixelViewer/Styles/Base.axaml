@@ -138,6 +138,12 @@
 		<Setter Property="VerticalContentAlignment" Value="Center"/>
 	</Style>
 
+	<!-- NormalizedTransferFunctionsDiagram -->
+	<Style Selector="appControls|NormalizedTransferFunctionsDiagram">
+		<Setter Property="AxisBrush" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}"/>
+		<Setter Property="GridBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+	</Style>
+
 	<!-- SessionControl -->
 	<Style Selector="Border.SessionControl_FilterParamsPopup">
 		<Setter Property="Background" Value="{DynamicResource ComboBoxDropDownBackground}"/>
