@@ -518,7 +518,7 @@
 
 			<!-- Histograms -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Dark}" BorderThickness="0,0,1,0" IsVisible="{Binding IsHistogramsVisible}" Width="{DynamicResource Double/SessionControl.HistogramsPanel.Width}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}" Width="{DynamicResource Double/SessionControl.HistogramsPanel.Width}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{DynamicResource Thickness/SessionControl.HistogramsPanel.Padding}">
 
@@ -611,7 +611,7 @@
 				</ScrollViewer>
 
 				<!-- Pixel information -->
-				<Border Classes="StatusBar" Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Light}" BorderThickness="0,1,0,0" Grid.Row="1" IsVisible="{Binding HasRenderedImage}">
+				<Border Classes="StatusBar" Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Row="1" IsVisible="{Binding HasRenderedImage}">
 					<Border.Styles>
 						<Style Selector="TextBlock">
 							<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
@@ -926,7 +926,7 @@
 			</Border>
 
 			<!-- Splitter -->
-			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/Control.Border.Light}" BorderThickness="1,0,0,0" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2" IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
+			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Classes="GridSplitter_Vertical" DragCompleted="OnOptionsPanelSplitterDragCompleted" DragStarted="OnOptionsPanelSplitterDragStarted" Grid.Column="2" IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
 			
 		</Grid>
 
