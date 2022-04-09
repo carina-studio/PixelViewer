@@ -53,15 +53,15 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             this.colorSpaceChromaticityGamut.BorderPen = new Pen()
             {
-                Brush = Brushes.DarkRed,
+                Brush = Brushes.Red,
                 LineCap = PenLineCap.Round,
                 LineJoin = PenLineJoin.Round,
                 Thickness = 1,
             };
             this.colorSpaceWhitePointChromaticity.BorderPen = new Pen()
             {
-                Brush = Brushes.DarkRed,
-                Thickness = 2,
+                Brush = Brushes.Red,
+                Thickness = 1,
             };
             this.refColorSpaceChromaticityGamut.BorderPen = new Pen()
             {
@@ -98,7 +98,7 @@ partial class ColorSpaceInfoDialog : InputDialog
                         this.refColorSpaceWhitePointChromaticity.BorderPen = new Pen()
                         {
                             Brush = Brushes.White,
-                            Thickness = 2,
+                            Thickness = 1,
                         };
                     }
                     var (wpX, wpY) = Media.ColorSpace.XyzToXyChromaticity(colorSpace.WhitePoint.Value);
