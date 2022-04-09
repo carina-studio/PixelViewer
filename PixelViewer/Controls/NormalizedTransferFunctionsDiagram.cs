@@ -8,8 +8,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Controls;
 
@@ -195,6 +193,10 @@ class NormalizedTransferFunctionsDiagram : Control, IStyleable
                 {
                     var x = (double)i / maxValue;
                     var y = transferFunc.TransferValue(x);
+                    if (y < 0)
+                        y = 0;
+                    else if (y > 1)
+                        y = 1;
                     geometry.Points.Add(new Point(x * width, (1 - y) * height));
                 }
                 this.attachedTransferFuncs[transferFunc] = geometry;
