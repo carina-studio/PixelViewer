@@ -54,8 +54,8 @@ namespace Carina.PixelViewer.Media
                 this.isIdentical = srcColorSpace.Equals(destColorSpace);
                 if (!this.isIdentical)
                 {
-                    var m1 = this.srcColorSpace.skiaColorSpace.ToColorSpaceXyz();
-                    var m2 = this.destColorSpace.skiaColorSpace.ToColorSpaceXyz().Invert();
+                    var m1 = this.srcColorSpace.skiaColorSpaceXyz;
+                    var m2 = this.destColorSpace.skiaColorSpaceXyz.Invert();
                     this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
                 }
                 else
@@ -182,7 +182,8 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "Adobe-RGB-1998", 
             null, 
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.TwoDotTwo, SKColorSpaceXyz.AdobeRgb), 
+            SKColorSpaceTransferFn.TwoDotTwo,
+            SKColorSpaceXyz.AdobeRgb,
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Adobe_RGB_color_space"));
 
@@ -193,7 +194,8 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "BT.2020", 
             null, 
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Rec2020, SKColorSpaceXyz.Rec2020), 
+            SKColorSpaceTransferFn.Rec2020,
+            SKColorSpaceXyz.Rec2020,
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._2020"));
 
@@ -204,7 +206,8 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "BT.2100-HLG",
             null,
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Hlg, SKColorSpaceXyz.Rec2020),
+            SKColorSpaceTransferFn.Hlg,
+            SKColorSpaceXyz.Rec2020,
             D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
 
@@ -215,7 +218,8 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "BT.2100-PQ",
             null,
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Pq, SKColorSpaceXyz.Rec2020),
+            SKColorSpaceTransferFn.Pq,
+            SKColorSpaceXyz.Rec2020,
             D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._2100"));
 
@@ -225,7 +229,8 @@ namespace Carina.PixelViewer.Media
         public static readonly ColorSpace BT_601_525Line = new ColorSpace(
             ColorSpaceSource.BuiltIn,
             "BT.601-525-line", 
-            null, SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
+            null, 
+            new SKColorSpaceTransferFn()
             {
                 G = 1 / 0.45f,
                 A = 1 / 1.099f,
@@ -239,7 +244,7 @@ namespace Carina.PixelViewer.Media
                 0.3935f, 0.3653f, 0.1917f,
                 0.2124f, 0.7011f, 0.0866f,
                 0.0187f, 0.1119f, 0.9584f
-            )), 
+            ), 
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
 
@@ -250,7 +255,7 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "BT.601-625-line", 
             null, 
-            SKColorSpace.CreateRgb(new SKColorSpaceTransferFn()
+            new SKColorSpaceTransferFn()
             {
                 G = 1 / 0.45f,
                 A = 1 / 1.099f,
@@ -264,7 +269,7 @@ namespace Carina.PixelViewer.Media
                 0.4306f, 0.3415f, 0.1784f,
                 0.2220f, 0.7067f, 0.0713f,
                 0.0202f, 0.1296f, 0.9393f
-            )), 
+            ),
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
 
@@ -276,7 +281,12 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "DCI-P3", 
             null, 
-            SKColorSpace.CreateRgb(new SKColorSpaceTransferFn() { G = 2.6f, A = 1.0f }, SKColorSpaceXyz.Dcip3), 
+            new SKColorSpaceTransferFn()
+            {
+                G = 2.6f,
+                A = 1f
+            },
+            SKColorSpaceXyz.Dcip3,
             (0.894587, 1, 0.954416), 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
 #pragma warning restore CS0618
@@ -293,11 +303,12 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "Display-P3", 
             null, 
-            SKColorSpace.CreateRgb(SKColorSpaceTransferFn.Srgb, new SKColorSpaceXyz(
+            SKColorSpaceTransferFn.Srgb,
+            new SKColorSpaceXyz(
                 0.51512146f, 0.29197693f, 0.15710449f,
                 0.24119568f, 0.6922455f, 0.0665741f,
                 -0.0010528564f, 0.041885376f, 0.7840729f
-            )), 
+            ),
             D65, 
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         
@@ -308,7 +319,8 @@ namespace Carina.PixelViewer.Media
             ColorSpaceSource.BuiltIn,
             "sRGB", 
             null, 
-            SKColorSpace.CreateSrgb(),
+            SKColorSpaceTransferFn.Srgb,
+            SKColorSpaceXyz.Srgb,
             D65, 
             new Uri("https://en.wikipedia.org/wiki/SRGB"));
 
@@ -354,7 +366,6 @@ namespace Carina.PixelViewer.Media
         readonly SKColorSpaceTransferFn numericalTransferFuncToLinear;
         volatile unsafe long* numericalTransferTableFromLinear;
         volatile unsafe long* numericalTransferTableToLinear;
-        readonly SKColorSpace skiaColorSpace;
         readonly SKColorSpaceXyz skiaColorSpaceXyz;
 
 
@@ -380,20 +391,22 @@ namespace Carina.PixelViewer.Media
 
 
         // Constructor.
-        ColorSpace(ColorSpaceSource source, string name, string? customName, SKColorSpace colorSpace, (double, double, double)? whitePoint, Uri? uri)
+        ColorSpace(ColorSpaceSource source, string name, string? customName, SKColorSpaceTransferFn transferFunc, SKColorSpaceXyz matrixToXyz, (double, double, double)? whitePoint, Uri? uri)
         {
             this.customName = customName;
-            this.skiaColorSpace = colorSpace;
-            this.hasTransferFunc = !colorSpace.GammaIsLinear && colorSpace.GetNumericalTransferFunction(out this.numericalTransferFuncToLinear);
+            this.hasTransferFunc = !IsLinearTransferFunc(transferFunc);
             if (this.hasTransferFunc)
-                this.numericalTransferFuncFromLinear = this.numericalTransferFuncToLinear.Invert();
+            {
+                this.numericalTransferFuncToLinear = transferFunc;
+                this.numericalTransferFuncFromLinear = transferFunc.Invert();
+            }
             if (whitePoint.HasValue)
             {
                 this.IsD65WhitePoint = AreEquivalentWhitePoints(whitePoint.Value, D65);
                 this.IsD50WhitePoint = !this.IsD65WhitePoint && AreEquivalentWhitePoints(whitePoint.Value, D50);
             }
-            this.IsLinear = skiaColorSpace.GammaIsLinear;
-            this.skiaColorSpaceXyz = colorSpace.ToColorSpaceXyz();
+            this.IsLinear = !this.hasTransferFunc;
+            this.skiaColorSpaceXyz = matrixToXyz;
             this.matrixToXyz = Quantize(this.skiaColorSpaceXyz);
             this.matrixFromXyz = Quantize(this.skiaColorSpaceXyz.Invert());
             this.Name = name;
@@ -549,7 +562,10 @@ namespace Carina.PixelViewer.Media
         {
             if (source == ColorSpaceSource.BuiltIn)
                 throw new ArgumentException();
-            return new ColorSpace(source, GenerateRandomName(), customName, skColorSpace, whitePoint, null);
+            var hasTransferFunc = skColorSpace.GetNumericalTransferFunction(out var transferFunc);
+            if (!hasTransferFunc)
+                transferFunc = SKColorSpaceTransferFn.Linear;
+            return new ColorSpace(source, GenerateRandomName(), customName, transferFunc, skColorSpace.ToColorSpaceXyz(), whitePoint, null);
         }
 
 
@@ -738,6 +754,18 @@ namespace Carina.PixelViewer.Media
             // complete
             return systemColorSpace;
         }
+
+
+        // [Workaroung] Apply HLG transfer.
+        // Please refer to third_party/skcms/skcms.cc in Skia source code.
+        static double HlgNumericalTransferToLinear(SKColorSpaceTransferFn fn, double value)
+        {
+            var sign = value >= 0 ? 1f : -1f;
+            var K = fn.F + 1;
+            return (K * sign * (value * fn.A <= 1
+                ? Math.Pow(value * fn.A, fn.B)
+                : Math.Pow(Math.E, (value - fn.E) * fn.C) + fn.D));
+        }
         
 
         /// <summary>
@@ -825,10 +853,21 @@ namespace Carina.PixelViewer.Media
         public bool IsEmbedded { get => this.Source == ColorSpaceSource.Embedded; }
 
 
+        // [Workaroung] Check whether given transfer function is HLG or not.
+        // Please refer to third_party/skcms/skcms.cc in Skia source code.
+        static bool IsHlgTransferFunc(SKColorSpaceTransferFn fn) =>
+            fn.G < 0 && Math.Abs((int)fn.G - SKColorSpaceTransferFn.Hlg.G) <= 0.0000001;
+
+
         /// <summary>
         /// Check whether RGB in the color space is linear RGB or not.
         /// </summary>
         public bool IsLinear { get; }
+
+
+        // Check whether given transfer function is linear or not.
+        static bool IsLinearTransferFunc(SKColorSpaceTransferFn fn) =>
+            Math.Abs(fn.G - 1) < 0.000001 && Math.Abs(fn.A - 1) < 0.000001 && fn.B == 0 && fn.C == 0 && fn.D == 0 && fn.E == 0 && fn.F == 0;
 
 
         /// <summary>
@@ -925,7 +964,7 @@ namespace Carina.PixelViewer.Media
                     throw new ArgumentException("No matrix to XYZ D50 of color space specified.");
                 
                 // create color space
-                return new ColorSpace(ColorSpaceSource.UserDefined, name, customName, SKColorSpace.CreateRgb(transferFunc, colorSpaceXyz), whitePoint, null);
+                return new ColorSpace(ColorSpaceSource.UserDefined, name, customName, transferFunc, colorSpaceXyz, whitePoint, null);
             });
         });
 
@@ -1078,7 +1117,10 @@ namespace Carina.PixelViewer.Media
             */
 
             // create color space
-            return new ColorSpace(source, GenerateRandomName(), iccName, skiaColorSpace, whitePoint, null);
+            var hasTransferFunc = skiaColorSpace.GetNumericalTransferFunction(out var transferFunc);
+            if (!hasTransferFunc)
+                transferFunc = SKColorSpaceTransferFn.Linear;
+            return new ColorSpace(source, GenerateRandomName(), iccName, transferFunc, skiaColorSpace.ToColorSpaceXyz(), whitePoint, null);
         }
 
 
@@ -1472,8 +1514,9 @@ namespace Carina.PixelViewer.Media
                     jsonWriter.WriteNumberValue(wp.Item3);
                     jsonWriter.WriteEndArray();
                 });
-                if (this.skiaColorSpace.GetNumericalTransferFunction(out var transferFunc))
+                if (this.hasTransferFunc)
                 {
+                    var transferFunc = this.numericalTransferFuncToLinear;
                     jsonWriter.WritePropertyName("NumericalTransferFunction");
                     jsonWriter.WriteStartArray();
                     jsonWriter.WriteNumberValue(transferFunc.G);
@@ -1515,7 +1558,8 @@ namespace Carina.PixelViewer.Media
         /// Convert to <see cref="SKColorSpace"/>.
         /// </summary>
         /// <returns><see cref="SKColorSpace"/>.</returns>
-        public SKColorSpace ToSkiaColorSpace() => this.skiaColorSpace;
+        public SKColorSpace ToSkiaColorSpace() => 
+            SKColorSpace.CreateRgb(this.numericalTransferFuncToLinear, this.skiaColorSpaceXyz);
 
 
         /// <inheritdoc/>
