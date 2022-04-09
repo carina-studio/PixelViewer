@@ -34,7 +34,7 @@ partial class ColorSpaceInfoDialog : InputDialog
     readonly CieChromaticityGamut colorSpaceChromaticityGamut = new();
     readonly Pen colorSpaceTransferFuncStroke = new Pen()
     {
-        Brush = Brushes.DarkRed,
+        Brush = Brushes.Red,
         Thickness = 2,
     };
     readonly CieChromaticity colorSpaceWhitePointChromaticity = new();
@@ -43,12 +43,7 @@ partial class ColorSpaceInfoDialog : InputDialog
     readonly TextBlock linearizationDescriptionTextBlock;
     readonly TextBox redPrimaryTextBox;
     readonly CieChromaticityGamut refColorSpaceChromaticityGamut = new();
-    readonly Pen refColorSpaceTransferFuncStroke = new Pen()
-    {
-        Brush = Brushes.White,
-        DashStyle = DashStyle.Dash,
-        Thickness = 2,
-    };
+    readonly Pen refColorSpaceTransferFuncStroke;
     readonly CieChromaticity refColorSpaceWhitePointChromaticity = new();
     readonly TextBox nameTextBox;
     readonly NormalizedTransferFunctionsDiagram toLinearTransferFuncDiagram;
@@ -60,6 +55,14 @@ partial class ColorSpaceInfoDialog : InputDialog
     // Constructor.
     public ColorSpaceInfoDialog()
     {
+        // prepare resources
+        this.refColorSpaceTransferFuncStroke = new Pen().Also(it =>
+        {
+            it.Bind(Pen.BrushProperty, this.GetResourceObservable("SystemControlForegroundBaseHighBrush"));
+            it.DashStyle = DashStyle.Dash;
+            it.Thickness = 2;
+        });
+
         // setup views
         AvaloniaXamlLoader.Load(this);
         this.bluePrimaryTextBox = this.FindControl<TextBox>(nameof(bluePrimaryTextBox)).AsNonNull();
