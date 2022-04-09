@@ -43,9 +43,11 @@ class CieChromaticityDiagram : Control, IStyleable
 
     // Static fields.
     static readonly (Color, double, double)[] ColorCoordinates = new (Color, double, double)[] {
-        (Color.FromArgb(0xff, 0xff, 0x4c, 0x4c), 0.72329, 0.27671), // 700 nm
-        (Color.FromArgb(0xff, 0x4c, 0x4c, 0xff), 0.15225, 0.02008), // 435.8 nm
-        (Color.FromArgb(0xff, 0x4c, 0xff, 0x4c), 0.28489, 0.71108), // 546.1 nm
+        (Color.FromArgb(0xff, 0xff, 0xff, 0x4c), 0.51808, 0.48181), // yellow, 580 nm
+        (Color.FromArgb(0xff, 0xff, 0x4c, 0x4c), 0.72329, 0.27671), // red, 700 nm
+        (Color.FromArgb(0xff, 0x4c, 0x4c, 0xff), 0.15225, 0.02008), // blue, 435.8 nm
+        (Color.FromArgb(0xff, 0x4c, 0xff, 0xff), 0.00418, 0.59194), // cyan, 500 nm
+        (Color.FromArgb(0xff, 0x4c, 0xff, 0x4c), 0.28489, 0.71108), // green, 546.1 nm
     };
     static readonly (int, double, double)[] XYCoordinates = new (int, double, double)[] {
         // With 2-degree observer (http://www.cvrl.org/)
@@ -506,6 +508,11 @@ class CieChromaticityDiagram : Control, IStyleable
     IBrush? diagramOverlayBrush;
     Pen? diagramPen;
     Pen? gridPen;
+    readonly Pen shadowPen = new Pen()
+    {
+        Brush = new SolidColorBrush(Color.FromArgb(64, 0, 0, 0)),
+        LineJoin = PenLineJoin.Round,
+    };
 
 
     // Static initializer.
@@ -811,6 +818,9 @@ class CieChromaticityDiagram : Control, IStyleable
                 var rPoint = this.XYToControlCoordinate(width, height, rX, rY);
                 var gPoint = this.XYToControlCoordinate(width, height, gX, gY);
                 var bPoint = this.XYToControlCoordinate(width, height, bX, bY);
+                context.DrawEllipse(this.shadowPen.Brush, null, rPoint, 4, 4);
+                context.DrawEllipse(this.shadowPen.Brush, null, gPoint, 4, 4);
+                context.DrawEllipse(this.shadowPen.Brush, null, bPoint, 4, 4);
                 this.chromaticityGamutGeometry.Points = new Points().Also(it =>
                 {
                     it.Add(rPoint);
@@ -818,6 +828,8 @@ class CieChromaticityDiagram : Control, IStyleable
                     it.Add(bPoint);
                     it.Add(rPoint);
                 });
+                this.shadowPen.Thickness = borderPen.Thickness + 2;
+                context.DrawGeometry(null, this.shadowPen, this.chromaticityGamutGeometry);
                 context.DrawGeometry(null, borderPen, this.chromaticityGamutGeometry);
                 context.DrawEllipse(borderPen.Brush, null, rPoint, 3, 3);
                 context.DrawEllipse(borderPen.Brush, null, gPoint, 3, 3);
@@ -834,6 +846,8 @@ class CieChromaticityDiagram : Control, IStyleable
             if (borderPen != null && x >= MinCoordinateX && x <= MaxCoordinateX && y >= MinCoordinateY && y <= MaxCoordinateY)
             {
                 var point = this.XYToControlCoordinate(width, height, x, y);
+                this.shadowPen.Thickness = borderPen.Thickness + 2;
+                context.DrawRectangle(null, this.shadowPen, new Rect(point.X - 2, point.Y - 2, 4, 4));
                 context.DrawRectangle(null, borderPen, new Rect(point.X - 2, point.Y - 2, 4, 4));
             }
         }
