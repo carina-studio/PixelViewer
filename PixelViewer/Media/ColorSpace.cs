@@ -756,15 +756,31 @@ namespace Carina.PixelViewer.Media
         }
 
 
-        // [Workaroung] Apply HLG transfer.
-        // Please refer to third_party/skcms/skcms.cc in Skia source code.
-        static double HlgNumericalTransferToLinear(SKColorSpaceTransferFn fn, double value)
+        // [Workaroung] Apply inverse-HLG transfer.
+        // Please refer to https://en.wikipedia.org/wiki/Hybrid_log%E2%80%93gamma
+        static double HlgNumericalTransferFromLinear(double value)
         {
-            var sign = value >= 0 ? 1f : -1f;
-            var K = fn.F + 1;
-            return (K * sign * (value * fn.A <= 1
-                ? Math.Pow(value * fn.A, fn.B)
-                : Math.Pow(Math.E, (value - fn.E) * fn.C) + fn.D));
+            if (value < 0)
+                value = 0;
+            else if (value > 1)
+                value = 1;
+            if (value <= 1.0 / 12)
+                return Math.Sqrt(3 * value);
+            return 0.17883277 * Math.Log(12 * value - 0.28466892) + 0.55991073;
+        }
+
+
+        // [Workaroung] Apply HLG transfer.
+        // Please refer to https://en.wikipedia.org/wiki/Hybrid_log%E2%80%93gamma
+        static double HlgNumericalTransferToLinear(double value)
+        {
+            if (value < 0)
+                value = 0;
+            else if (value > 1)
+                value = 1;
+            if (value <= 0.5)
+                return (value * value) / 3;
+            return (Math.Pow(Math.E, (value - 0.55991073) / 0.17883277) + 0.28466892) / 12;
         }
         
 
@@ -1179,8 +1195,16 @@ namespace Carina.PixelViewer.Media
                     {
                         table = (long*)NativeMemory.Alloc(sizeof(long) * (QuantizationSteps + 1));
                         var transferFunc = this.numericalTransferFuncFromLinear;
-                        for (var i = QuantizationSteps; i >= 0; --i)
-                            table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
+                        if (IsHlgTransferFunc(transferFunc))
+                        {
+                            for (var i = QuantizationSteps; i >= 0; --i)
+                                table[i] = (long)(HlgNumericalTransferFromLinear((double)i / QuantizationSteps) * QuantizationSteps + 0.5);
+                        }
+                        else
+                        {
+                            for (var i = QuantizationSteps; i >= 0; --i)
+                                table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
+                        }
                         this.numericalTransferTableFromLinear = table;
                     }
                 }
@@ -1203,8 +1227,16 @@ namespace Carina.PixelViewer.Media
                     {
                         table = (long*)NativeMemory.Alloc(sizeof(long) * (QuantizationSteps + 1));
                         var transferFunc = this.numericalTransferFuncToLinear;
-                        for (var i = QuantizationSteps; i >= 0; --i)
-                            table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
+                        if (IsHlgTransferFunc(transferFunc))
+                        {
+                            for (var i = QuantizationSteps; i >= 0; --i)
+                                table[i] = (long)(HlgNumericalTransferToLinear((double)i / QuantizationSteps) * QuantizationSteps + 0.5);
+                        }
+                        else
+                        {
+                            for (var i = QuantizationSteps; i >= 0; --i)
+                                table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
+                        }
                         this.numericalTransferTableToLinear = table;
                     }
                 }
