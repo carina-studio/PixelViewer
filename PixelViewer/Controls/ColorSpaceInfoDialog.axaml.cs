@@ -171,9 +171,9 @@ partial class ColorSpaceInfoDialog : InputDialog
         this.nameTextBox.Text = Data.Converters.ColorSpaceToStringConverter.Default.Convert<string>(colorSpace);
         
         this.colorSpaceChromaticityGamut.ColorSpace = colorSpace;
-        var (rX, rY, rZ) = colorSpace.RgbToXyz(1, 0, 0);
-        var (gX, gY, gZ) = colorSpace.RgbToXyz(0, 1, 0);
-        var (bX, bY, bZ) = colorSpace.RgbToXyz(0, 0, 1);
+        var (rX, rY, rZ) = colorSpace.RgbToXyz(1.0, 0.0, 0.0);
+        var (gX, gY, gZ) = colorSpace.RgbToXyz(0.0, 1.0, 0.0);
+        var (bX, bY, bZ) = colorSpace.RgbToXyz(0.0, 0.0, 1.0);
         this.redPrimaryTextBox.Text = $"{rX:F4}, {rY:F4}, {rZ:F4}";
         this.greenPrimaryTextBox.Text = $"{gX:F4}, {gY:F4}, {gZ:F4}";
         this.bluePrimaryTextBox.Text = $"{bX:F4}, {bY:F4}, {bZ:F4}";

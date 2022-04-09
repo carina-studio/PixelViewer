@@ -1469,9 +1469,9 @@ namespace Carina.PixelViewer.Media
             }
             var m = this.matrixToXyz;
             return (
-                (m[0] * qR + m[1] * qG + m[2] * qB) / 4294967296.0,
-                (m[3] * qR + m[4] * qG + m[5] * qB) / 4294967296.0,
-                (m[6] * qR + m[7] * qG + m[8] * qB) / 4294967296.0
+                (m[0] * qR + m[1] * qG + m[2] * qB) / QuantizationSteps2,
+                (m[3] * qR + m[4] * qG + m[5] * qB) / QuantizationSteps2,
+                (m[6] * qR + m[7] * qG + m[8] * qB) / QuantizationSteps2
             );
         }
 
