@@ -243,9 +243,9 @@ partial class ColorSpaceInfoDialog : InputDialog
         {
             Stroke = this.colorSpaceTransferFuncStroke
         });
-        var (rX, rY, rZ) = colorSpace.RgbToXyz(1, 0, 0);
-        var (gX, gY, gZ) = colorSpace.RgbToXyz(0, 1, 0);
-        var (bX, bY, bZ) = colorSpace.RgbToXyz(0, 0, 1);
+        var (rX, rY, rZ) = colorSpace.RgbToXyz(1.0, 0.0, 0.0);
+        var (gX, gY, gZ) = colorSpace.RgbToXyz(0.0, 1.0, 0.0);
+        var (bX, bY, bZ) = colorSpace.RgbToXyz(0.0, 0.0, 1.0);
         this.redPrimaryTextBox.Text = $"{rX:F5}, {rY:F5}, {rZ:F5}";
         this.greenPrimaryTextBox.Text = $"{gX:F5}, {gY:F5}, {gZ:F5}";
         this.bluePrimaryTextBox.Text = $"{bX:F5}, {bY:F5}, {bZ:F5}";
