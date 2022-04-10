@@ -2,7 +2,7 @@
 
 PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixels data from file and rendering it.
 
-## 📥 Download (Preview)
+## 📥 Download (RC)
 
 Operating System                      | Download | Version | Screenshot
 :------------------------------------:|:--------:|:-------:|:----------:
@@ -20,6 +20,7 @@ Windows 7<br/>*(.NET Runtime needed)* |[x86](https://github.com/carina-studio/Pi
 macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.3.325/PixelViewer-2.0.3.325-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.3.325/PixelViewer-2.0.3.325-osx-arm64.zip)|2.0.3.325|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_macOS.png)
 Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.3.325/PixelViewer-2.0.3.325-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.0.3.325/PixelViewer-2.0.3.325-linux-arm64.zip)|2.0.3.325|[<img src="https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora_Thumb.png" alt="Main window (Fedora)" width="150"/>](https://carina-studio.github.io/PixelViewer/Screenshot_MainWindow_Fedora.png)
 
+<br/>
 
 - [Change List](change_list.md)
 - [How to Install and Upgrade PixelViewer](installation_and_upgrade.md)

@@ -2,7 +2,7 @@
 title: PixelViewer
 ---
 
-## 📣 What's Change in 2.6 Preview
+## 📣 What's Change in 2.6 RC
 - Add ```Treat as linear color space``` option to enable color space conversion without numerical linear transfer.
 - Improve performance of color space conversion.
 - Remove ```Linear sRGB``` color space.
