@@ -483,8 +483,8 @@
 					<!-- Rendering params panel -->
 					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding IsRenderingParametersPanelVisible}" ToolTip.Tip="{DynamicResource String/SessionControl.RenderingParametersPanel}">
 						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.SidePanel}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.SidePanel.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Panel.Right}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Panel.Right.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 
