@@ -814,7 +814,7 @@
 										</DataTemplate>
 									</ComboBox.ItemTemplate>
 								</ComboBox>
-								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[UserControl].ShowColorSpaceInfo}" Text="{DynamicResource String/Common.Details}"/>
+								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[UserControl].ShowColorSpaceInfo}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
 								<StackPanel IsVisible="{Binding !ColorSpace.IsLinear}">
 									<Separator Classes="Dialog_Separator"/>
 									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.UseLinearColorSpace}"/>

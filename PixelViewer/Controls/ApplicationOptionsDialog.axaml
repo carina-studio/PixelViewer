@@ -179,7 +179,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Screen color space -->
@@ -199,7 +199,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details}"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Use system screen color space -->

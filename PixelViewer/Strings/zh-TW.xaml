@@ -87,12 +87,6 @@
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
-	<sys:String x:Key="String/Common.Custom">自訂</sys:String>
-	<sys:String x:Key="String/Common.Details">詳細資訊…</sys:String>
-	<sys:String x:Key="String/Common.KnowMoreAbout">了解更多</sys:String>
-	<sys:String x:Key="String/Common.Options">選項</sys:String>
-	<sys:String x:Key="String/Common.Rename">重新命名</sys:String>
-	<sys:String x:Key="String/Common.Reset">重設</sys:String>
 
 	<!-- ContrastTransformationFunction -->
 	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">雙反正切 (Arctangent) 轉換</sys:String>

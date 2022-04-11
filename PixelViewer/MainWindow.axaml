@@ -90,7 +90,7 @@
 									</StackPanel>
 								</StackPanel>
 								<StackPanel IsVisible="{Binding IsHibernated}" Orientation="Horizontal">
-									<Image Classes="ToolTipIcon" Source="{DynamicResource Image/Icon.Leaf}"/>
+									<Image Classes="ToolTipIcon" Source="{DynamicResource Image/Icon.Leaf.Colored}"/>
 									<TextBlock Classes="ToolTipText" Text="{DynamicResource String/MainWindow.Session.Hibernated}"/>
 								</StackPanel>
 							</StackPanel>

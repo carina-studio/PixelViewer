@@ -109,12 +109,6 @@
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
-	<sys:String x:Key="String/Common.Custom">Custom</sys:String>
-	<sys:String x:Key="String/Common.Details">Details…</sys:String>
-	<sys:String x:Key="String/Common.KnowMoreAbout">Know more about</sys:String>
-	<sys:String x:Key="String/Common.Options">Options</sys:String>
-	<sys:String x:Key="String/Common.Rename">Rename</sys:String>
-	<sys:String x:Key="String/Common.Reset">Reset</sys:String>
 
 	<!-- ContrastTransformationFunction -->
 	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">Dual arctangent-based transformation</sys:String>
