@@ -89,6 +89,13 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="../FFmpeg/5.0.1/$(RuntimeIdentifier)/*" Link="FFmpeg/%(Filename)%(Extension)">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<ExcludeFromSingleFile>True</ExcludeFromSingleFile>
+		</Content>
+	</ItemGroup>
 	
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
@@ -97,8 +104,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-	  <EmbeddedResource Include="ChangeList-zh-TW.json" />
-	  <EmbeddedResource Include="ChangeList.json" />
+		<EmbeddedResource Include="ChangeList-zh-TW.json" />
+		<EmbeddedResource Include="ChangeList.json" />
 	</ItemGroup>
 	
 </Project>
