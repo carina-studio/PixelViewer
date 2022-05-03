@@ -1255,9 +1255,14 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Called when test button clicked.
-		void OnTestButtonClick()
+		async void OnTestButtonClick()
 		{
-			this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
+			//this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
+			var fileNames = await new OpenFileDialog().ShowAsync(this.attachedWindow.AsNonNull());
+			if (fileNames == null || fileNames.IsEmpty())
+				return;
+			
+			using var dataSource = await Media.FFmpegVideoDataSource.TryCreateAsync(this.Application, fileNames[0]);
 		}
 
 

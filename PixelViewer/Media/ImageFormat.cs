@@ -34,6 +34,7 @@ namespace Carina.PixelViewer.Media
 				return result;
 			return string.Compare(x, y, true);
 		}));
+		static readonly Dictionary<string, ImageFormat> formatsByName = new();
 
 
 		/// <summary>
@@ -124,6 +125,7 @@ namespace Carina.PixelViewer.Media
 		{
 			if (planeDescriptors.IsEmpty())
 				throw new ArgumentException("Empty image plane descriptor.");
+			formatsByName.Add(name, this);
 			foreach (var keyword in keywords)
 				formatsByKeyword.Add(keyword, this);
 			this.Category = category;
@@ -169,7 +171,7 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
-		/// Try get <see cref="ImageFormat"/> by given file name.
+		/// Try getting <see cref="ImageFormat"/> by given file name.
 		/// </summary>
 		/// <param name="fileName">File name.</param>
 		/// <param name="format">Format found by file name.</param>
@@ -188,6 +190,16 @@ namespace Carina.PixelViewer.Media
 			format = null;
 			return false;
 		}
+
+
+		/// <summary>
+		/// Try getting <see cref="ImageFormat"/> by given name.
+		/// </summary>
+		/// <param name="name">Name of format.</param>
+		/// <param name="format">Format found by name.</param>
+		/// <returns>True if format found.</returns>
+		public static bool TryGetByName(string name, out ImageFormat? format) =>
+			formatsByName.TryGetValue(name, out format);
 
 
 		// Implementations.
