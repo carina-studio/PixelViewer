@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:abControls="using:CarinaStudio.Controls"
-		xmlns:abConverters="using:CarinaStudio.Data.Converters"
+		xmlns:aConverters="using:Avalonia.Data.Converters"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
@@ -112,8 +112,8 @@
 						<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Other}"/>
 					</Border>
 					<TextBlock Name="linearizationDescriptionTextBlock" Classes="Dialog_TextBlock" TextWrapping="Wrap"/>
-					<Separator Classes="Dialog_Separator" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static abConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
-					<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock" HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static abConverters:ValueToBooleanConverters.NonNullToTrue}}" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
+					<Separator Classes="Dialog_Separator" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+					<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock" HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
 
 				</StackPanel>
 			</ScrollViewer>

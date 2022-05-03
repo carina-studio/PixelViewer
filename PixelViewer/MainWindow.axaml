@@ -35,7 +35,7 @@
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
 							</MenuItem.Icon>
 						</MenuItem>
-						<MenuItem Command="{Binding $parent[Window].ResetSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static abConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
+						<MenuItem Command="{Binding $parent[Window].ResetSessionTitle}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
 						<Separator/>
 						<MenuItem Command="{Binding $parent[Window].MoveSessionToNewWorkspace}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $parent[Window].HasMultipleSessions}">
 							<MenuItem.Icon>
@@ -66,10 +66,10 @@
 								</Style>
 							</StackPanel.Styles>
 							<Panel>
-								<TextBlock FontWeight="Bold" IsVisible="{Binding SourceFileName, Converter={x:Static abConverters:ValueToBooleanConverters.NonEmptyStringToTrue}}" Text="{Binding SourceFileName}" TextWrapping="Wrap"/>
-								<TextBlock FontWeight="Bold" IsVisible="{Binding SourceFileName, Converter={x:Static abConverters:ValueToBooleanConverters.EmptyStringToTrue}}" Text="{DynamicResource String/Session.EmptyTitle}"/>
+								<TextBlock FontWeight="Bold" IsVisible="{Binding SourceFileName, Converter={x:Static aConverters:StringConverters.IsNotNullOrEmpty}}" Text="{Binding SourceFileName}" TextWrapping="Wrap"/>
+								<TextBlock FontWeight="Bold" IsVisible="{Binding SourceFileName, Converter={x:Static aConverters:StringConverters.IsNullOrEmpty}}" Text="{DynamicResource String/Session.EmptyTitle}"/>
 							</Panel>
-							<StackPanel IsVisible="{Binding SourceFileName, Converter={x:Static abConverters:ValueToBooleanConverters.NonEmptyStringToTrue}}">
+							<StackPanel IsVisible="{Binding SourceFileName, Converter={x:Static aConverters:StringConverters.IsNotNullOrEmpty}}">
 								<Separator Classes="Dialog_Separator_Small"/>
 								<StackPanel IsVisible="{Binding !IsHibernated}">
 									<StackPanel Orientation="Horizontal">
@@ -134,7 +134,7 @@
 						<NativeMenuItem Command="{Binding $self.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}"  Gesture="Cmd+T"/>
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding $self.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}"/>
-						<NativeMenuItem Command="{Binding $self.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static abConverters:ValueToBooleanConverters.NonNullToTrue}}"/>
+						<NativeMenuItem Command="{Binding $self.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding $self.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $self.HasMultipleSessions}"/>
 						<NativeMenuItemSeparator/>

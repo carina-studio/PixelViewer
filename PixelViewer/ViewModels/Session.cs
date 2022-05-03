@@ -1764,7 +1764,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 
 			// evaluate
-			this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((it) =>
+			this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((ref PixelSize it) =>
 			{
 				if (this.ImageWidth != it.Width || this.ImageHeight != it.Height)
 				{
@@ -3569,7 +3569,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.Logger.LogDebug($"Evaluate dimensions of image for '{sourceFileName}'");
 				this.isImageDimensionsEvaluationNeeded = false;
-				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((it) =>
+				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref PixelSize it) =>
 				{
 					this.SetValue(ImageWidthProperty, it.Width);
 					this.SetValue(ImageHeightProperty, it.Height);
@@ -5155,7 +5155,7 @@ namespace Carina.PixelViewer.ViewModels
 					var pixelPtr = (byte*)baseAddress + renderedImageBuffer.GetPixelOffset(x, y);
 					return renderedImageBuffer.Format switch
 					{
-						BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also(it =>
+						BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also((ref Color it) =>
 						{
 							argbA = it.A / 255.0;
 							argbR = it.R / 255.0;
