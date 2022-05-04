@@ -23,6 +23,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
     class HolderImpl : BaseResourceHolder
     {
         // Fields.
+        public readonly IApplication Application;
         public TimeSpan Duration;
         public readonly string FFmpegDirectory;
         public ByteOrdering? FrameByteOrdering;
@@ -31,16 +32,26 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         public readonly string FileName;
         public double FrameRate = double.NaN;
         public PixelSize FrameSize;
+        public readonly string Id;
         public readonly ILogger Logger;
 
 
         // Constructor.
         public HolderImpl(IApplication app, string fileName)
         {
+            this.Application = app;
             this.FFmpegDirectory = Path.Combine(app.RootPrivateDirectoryPath, "FFmpeg");
             this.FileName = fileName;
+            this.Id = new string(new char[8].Also(it =>
+            {
+                for (var i = it.Length - 1; i >= 0; --i)
+                {
+                    var n = Random.Next(36);
+                    it[i] = n <= 9 ? (char)('0' + n) : (char)('a' + (n - 10));
+                }
+            }));
             this.Logger = app.LoggerFactory.CreateLogger(nameof(FFmpegVideoDataSource));
-            this.Logger.LogDebug($"Create source of '{fileName}'");
+            this.Logger.LogDebug($"Create source of '{fileName}' ({this.Id})");
         }
 
         // Release.
@@ -69,15 +80,46 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
     }
 
 
+    // Constants.
+    const int SharedFrameCacheCapacity = 32;
+
+
     // Static fields.
     static readonly Regex DurationRegex = new("^[\\s]*Duration:[\\s]*(?<Duration>[\\d:\\.]+),");
+    static readonly Random Random = new();
+    static readonly LinkedList<FileImageDataSource> SharedFrameCache = new();
     static readonly Regex StreamHeaderRegex = new("^[\\s]*Stream #[\\d]+:[\\d]+[^:]*:[\\s]*(?<Type>[\\w]+):[\\s]*(?<Info>.*)");
+    static readonly Regex VideoFrameExtractedRegex = new("^\\s*video:\\d+");
     static readonly Regex VideoStreamHeaderInfoRegex = new("(?<Encoder>[\\w\\d]+)\\s*\\((?<EncodingProfile>[^\\)]*)\\)(\\s*\\([^\\)]*\\))?,\\s*(?<PixelFormat>[\\w\\d]+)\\([^,]*(,\\s*(?<ColorSpace>[^\\)]*))?\\),\\s*(?<FrameWidth>[\\d]+)x(?<FrameHeight>[\\d]+)(\\s\\[[^\\]]+\\])?(,[^,]*)?,\\s*(?<FrameRate>[\\d\\.]+)\\s+fps");
 
 
     // Fields.
+    readonly string id;
     readonly ILogger logger;
 	readonly List<StreamImpl> openedStreams = new();
+
+
+    // Static initializer.
+    static FFmpegVideoDataSource()
+    {
+        Task.Run(() =>
+        {
+            try
+            {
+                var directory = Path.Combine(App.Current.RootPrivateDirectoryPath, "FFmpeg");
+                if (Directory.Exists(directory))
+                {
+                    foreach (var frameFileName in Directory.GetFiles(directory))
+                    {
+                        if (Path.GetFileName(frameFileName)?.StartsWith("Frame_") == true)
+                            Global.RunWithoutError(() => System.IO.File.Delete(frameFileName));
+                    }
+                }
+            }
+            catch
+            { }
+        });
+    }
 
 
     // Constructor.
@@ -86,6 +128,9 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         // setup logger
         var holder = this.GetResourceHolder<HolderImpl>();
         this.logger = holder.Logger;
+
+        // get ID
+        this.id = holder.Id;
 
         // get video information
         using var process = this.LaunchFFmpeg($"-i \"{fileName}\"");
@@ -177,6 +222,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
     }
     FFmpegVideoDataSource(HolderImpl holder) : base(holder)
     { 
+        this.id = holder.Id;
         this.logger = holder.Logger;
     }
 
@@ -197,6 +243,23 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
             foreach (var stream in this.openedStreams.ToArray())
                 Global.RunWithoutErrorAsync(stream.Dispose);
             this.openedStreams.Clear();
+        }
+
+        // clear cached frame files
+        lock (SharedFrameCache)
+        {
+            var node = SharedFrameCache.First;
+            var fileNameKeyword = $"_{this.id}_";
+            while (node != null)
+            {
+                var nextNode = node.Next;
+                if (Path.GetFileName(node.Value.FileName)?.Contains(fileNameKeyword) == true)
+                {
+                    SharedFrameCache.Remove(node);
+                    Global.RunWithoutErrorAsync(node.Value.Dispose);
+                }
+                node = nextNode;
+            }
         }
 
         // call base
@@ -241,7 +304,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
 
 
     /// <inheritdoc/>
-    public Task<IImageDataSource> GetFrameAsync(TimeSpan position, CancellationToken cancellationToken)
+    public async Task<IImageDataSource> GetFrameAsync(TimeSpan position, CancellationToken cancellationToken = default)
     {
         // check state
         this.VerifyDisposed();
@@ -254,8 +317,106 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         else if (position > this.Duration)
             position = this.Duration;
         
+        // select output format
+        var holder = this.GetResourceHolder<HolderImpl>();
+        var frameFileExtension = holder.FrameFormat?.Let(it =>
+        {
+            if (it.Category == ImageFormatCategory.YUV)
+                return ".yuv";
+            throw new NotSupportedException($"Unsupported video frame format: {it.Name}.");
+        }) ?? throw new NotSupportedException($"Unknown video frame format.");
+
+        // use cached frame directly
+        var frameId = $"Frame_{holder.Id}_{position.TotalMilliseconds}{frameFileExtension}";
+        var frameFileName = Path.Combine(holder.FFmpegDirectory, frameId);
+        var cachedFrameFile = SharedFrameCache.Lock(it =>
+        {
+            this.logger.LogTrace($"Get frame at {position}, frame ID: {frameId}");
+            var node = it.First;
+            while (node != null)
+            {
+                if (PathEqualityComparer.Default.Equals(node.Value.FileName, frameFileName))
+                {
+                    if (node.Previous != null)
+                    {
+                        it.Remove(node);
+                        it.AddFirst(node);
+                    }
+                    this.logger.LogTrace($"Use cached frame, frame ID: {frameId}");
+                    return node.Value.Share();
+                }
+                node = node.Next;
+            }
+            return null;
+        });
+        if (cachedFrameFile != null)
+            return cachedFrameFile;
+        
         // extract video frame
-        throw new NotImplementedException();
+        var videoFileName = holder.FileName;
+        var ffmpegDirectory = holder.FFmpegDirectory;
+        var frameFile = await Task.Run(() =>
+        {
+            var ffmpegProcess = (Process?)null;
+            try
+            {
+                // extract frame
+                ffmpegProcess = this.LaunchFFmpeg($"-ss {(int)position.TotalHours:D2}:{position.ToString("mm\\:ss\\.fff")} -i \"{videoFileName}\" -vframes 1 -y \"{frameFileName}\"");
+                if (cancellationToken.IsCancellationRequested)
+                    throw new TaskCanceledException();
+                using var reader = ffmpegProcess.StandardError;
+                var completed = false;
+                var line = reader.ReadLine();
+                while (line != null)
+                {
+                    if (cancellationToken.IsCancellationRequested)
+                        throw new TaskCanceledException();
+                    if (VideoFrameExtractedRegex.IsMatch(line))
+                        completed = true;
+                    line = reader.ReadLine();
+                }
+                if (!completed)
+                    throw new Exception($"Failed to exteact frame from '{videoFileName}'.");
+
+                // complete
+                return new FileImageDataSource(holder.Application, frameFileName, true);
+            }
+            catch
+            {
+                Global.RunWithoutError(() => System.IO.File.Delete(frameFileName));
+                throw;
+            }
+            finally
+            {
+                Global.RunWithoutError(() => ffmpegProcess?.Kill());
+            }
+        });
+        if (this.IsDisposed)
+        {
+            Global.RunWithoutErrorAsync(() => System.IO.File.Delete(frameFileName));
+            throw new ObjectDisposedException(nameof(FFmpegVideoDataSource));
+        }
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Global.RunWithoutErrorAsync(() => System.IO.File.Delete(frameFileName));
+            throw new TaskCanceledException();
+        }
+
+        // add frame to cache
+        lock (SharedFrameCache)
+        {
+            while (SharedFrameCache.Count >= SharedFrameCacheCapacity)
+            {
+                var node = SharedFrameCache.Last;
+                SharedFrameCache.RemoveLast();
+                this.logger.LogTrace($"Drop frame from cache, frame ID: {Path.GetFileName(node?.Value?.FileName)}");
+                node?.Value?.Dispose();
+            }
+            SharedFrameCache.AddFirst(frameFile.Share());
+        }
+
+        // complete
+        return frameFile;
     }
 
 

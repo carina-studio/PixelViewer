@@ -22,27 +22,36 @@ namespace Carina.PixelViewer.Media
 			// Fields.
 			public readonly IApplication Application;
 			public readonly FileStream BaseStream;
+			public readonly bool DeleteWhenReleasing;
 			public readonly ILogger Logger;
 
 			// Constructor.
-			public HolderImpl(IApplication app, string fileName)
+			public HolderImpl(IApplication app, string fileName, bool deleteWhenReleasing)
 			{
 				this.Logger = app.LoggerFactory.CreateLogger(nameof(FileImageDataSource));
 				this.Logger.LogDebug($"Create source of '{fileName}'");
 				this.Application = app;
 				this.BaseStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+				this.DeleteWhenReleasing = deleteWhenReleasing;
 			}
 
 			// Release.
 			protected override void Release()
 			{
-				this.Logger.LogDebug($"Release source of '{this.BaseStream.Name}'");
-				try
+				var fileName = this.BaseStream.Name;
+				this.Logger.LogDebug($"Release source of '{fileName}'");
+				Global.RunWithoutError(this.BaseStream.Close);
+				if (this.DeleteWhenReleasing)
 				{
-					this.BaseStream.Close();
+					Global.RunWithoutErrorAsync(() =>
+					{
+						if (System.IO.File.Exists(fileName))
+						{
+							this.Logger.LogTrace($"Delete file '{fileName}' when releasing");
+							System.IO.File.Delete(fileName);
+						}
+					});
 				}
-				catch
-				{ }
 			}
 		}
 
@@ -77,8 +86,10 @@ namespace Carina.PixelViewer.Media
 		/// <summary>
 		/// Initialize new <see cref="FileImageDataSource"/> instance.
 		/// </summary>
+		/// <param name="app">Application.</param>
 		/// <param name="fileName">Name of file of image.</param>
-		public FileImageDataSource(IApplication app, string fileName) : base(new HolderImpl(app, fileName))
+		/// <param name="deleteAfterDisposing">True to delete file after disposing all instances.</param>
+		public FileImageDataSource(IApplication app, string fileName, bool deleteAfterDisposing = false) : base(new HolderImpl(app, fileName, deleteAfterDisposing))
 		{
 			var holder = this.GetResourceHolder<HolderImpl>();
 			this.FileName = holder.BaseStream.Name;
