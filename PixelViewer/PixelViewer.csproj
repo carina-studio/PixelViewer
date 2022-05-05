@@ -91,7 +91,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="../FFmpeg/5.0.1/$(RuntimeIdentifier)/*" Link="FFmpeg/%(Filename)%(Extension)">
+		<Content Include="../FFmpeg/5.0/$(RuntimeIdentifier)/*" Link="FFmpeg/%(Filename)%(Extension)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<ExcludeFromSingleFile>True</ExcludeFromSingleFile>
 		</Content>
