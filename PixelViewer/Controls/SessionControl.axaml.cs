@@ -1,3 +1,4 @@
+using ASControls = CarinaStudio.AppSuite.Controls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
@@ -13,7 +14,6 @@ using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
-using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Controls;
@@ -537,9 +537,9 @@ namespace Carina.PixelViewer.Controls
 			// check file count
 			if (fileNames.Length > 8)
 			{
-				await new MessageDialog()
+				await new ASControls.MessageDialog()
 				{
-					Icon = MessageDialogIcon.Warning,
+					Icon = ASControls.MessageDialogIcon.Warning,
 					Message = this.Application.GetString("SessionControl.MaxDragDropFileCountReached"),
 				}.ShowDialog(this.attachedWindow);
 				return false;
@@ -1428,7 +1428,7 @@ namespace Carina.PixelViewer.Controls
 			while (true)
 			{
 				// input name
-				name = await new TextInputDialog()
+				name = await new ASControls.TextInputDialog()
 				{
 					InitialText = name,
 					Message = this.Application.GetString("SessionControl.InputNameOfProfile"),
@@ -1441,9 +1441,9 @@ namespace Carina.PixelViewer.Controls
 					break;
 
 				// show message for duplicate name
-				await new MessageDialog()
+				await new ASControls.MessageDialog()
 				{
-					Icon = MessageDialogIcon.Warning,
+					Icon = ASControls.MessageDialogIcon.Warning,
 					Message = string.Format(this.Application.GetStringNonNull("SessionControl.DuplicateNameOfProfile"), name),
 				}.ShowDialog(this.attachedWindow);
 			}
@@ -1480,22 +1480,22 @@ namespace Carina.PixelViewer.Controls
 			var saveFilteredImage = false;
 			if (session.IsFilteringRenderedImageNeeded)
 			{
-				var result = await new MessageDialog()
+				var result = await new ASControls.MessageDialog()
 				{
-					Buttons = MessageDialogButtons.YesNoCancel,
-					Icon = MessageDialogIcon.Question,
+					Buttons = ASControls.MessageDialogButtons.YesNoCancel,
+					Icon = ASControls.MessageDialogIcon.Question,
 					Message = this.Application.GetString("SessionControl.ConfirmSavingFilteredImage")
 				}.ShowDialog(this.attachedWindow);
-				if (result == MessageDialogResult.Cancel)
+				if (result == ASControls.MessageDialogResult.Cancel)
 					return;
-				saveFilteredImage = (result == MessageDialogResult.Yes);
+				saveFilteredImage = (result == ASControls.MessageDialogResult.Yes);
 			}
 
 			// select file
 			var fileName = await new SaveFileDialog().Also((dialog) =>
 			{
 				var app = (App)this.Application;
-				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
+				dialog.Filters?.Add(new FileDialogFilter().Also((filter) =>
 				{
 					filter.Name = app.GetString("FileType.Jpeg");
 					filter.Extensions.Add("jpg");
@@ -1503,12 +1503,12 @@ namespace Carina.PixelViewer.Controls
 					filter.Extensions.Add("jpe");
 					filter.Extensions.Add("jfif");
 				}));
-				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
+				dialog.Filters?.Add(new FileDialogFilter().Also((filter) =>
 				{
 					filter.Name = app.GetString("FileType.Png");
 					filter.Extensions.Add("png");
 				}));
-				dialog.Filters.Add(new FileDialogFilter().Also((filter) =>
+				dialog.Filters?.Add(new FileDialogFilter().Also((filter) =>
 				{
 					filter.Name = app.GetString("FileType.RawBgra");
 					filter.Extensions.Add("bgra");

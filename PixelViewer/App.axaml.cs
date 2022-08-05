@@ -1,4 +1,4 @@
-using System.ComponentModel.Design;
+using ASControls = CarinaStudio.AppSuite.Controls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
@@ -51,6 +51,14 @@ namespace Carina.PixelViewer
 
         /// <inheritdoc/>
         public override int DefaultLogOutputTargetPort => 5570;
+
+
+		/// <inheritdoc/>
+        public override IEnumerable<ExternalDependency> ExternalDependencies => new ExternalDependency[0];
+
+
+		/// <inheritdoc/>
+        public override int ExternalDependenciesVersion => 1;
 
 
         // Initialize.
@@ -236,6 +244,13 @@ namespace Carina.PixelViewer
 			// call base
             await base.OnPrepareShuttingDownAsync();
         }
+
+
+		/// <inheritdoc/>
+		protected override ASControls.SplashWindowParams OnPrepareSplashWindow() => base.OnPrepareSplashWindow().Also((ref ASControls.SplashWindowParams it) =>
+		{
+			it.AccentColor = Avalonia.Media.Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
+		});
 
 
 		// Prepare starting.

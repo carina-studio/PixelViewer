@@ -51,12 +51,12 @@ namespace Carina.PixelViewer.Controls
                 // select file
                 var fileNames = await new OpenFileDialog().Also(dialog =>
                 {
-                    dialog.Filters.Add(new FileDialogFilter().Also(it =>
+                    dialog.Filters?.Add(new FileDialogFilter().Also(it =>
                     {
                         it.Extensions.Add("icc");
                         it.Name = this.Application.GetString("FileType.Icc");
                     }));
-                    dialog.Filters.Add(new FileDialogFilter().Also(it =>
+                    dialog.Filters?.Add(new FileDialogFilter().Also(it =>
                     {
                         it.Extensions.Add("json");
                         it.Name = this.Application.GetString("FileType.Json");
