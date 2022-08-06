@@ -28,7 +28,7 @@
 
 		<!-- Content -->
 		<ScrollViewer Name="contentScrollViewer" MaxHeight="{DynamicResource Double/ApplicationOptionsDialog.Content.MaxHeight}">
-			<StackPanel Classes="Dialog_ContentPanel">
+			<StackPanel Classes="Dialog_ContentPanel_WithHeader">
 
 				<!-- User interface -->
 				<Border Classes="Dialog_TextBlock_Header1">
@@ -212,25 +212,29 @@
 
 				<!-- Custom color spaces -->
 				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
-				<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Height="150" Items="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
-					<asControls:ListBox.ItemTemplate>
-						<DataTemplate>
-							<Grid ColumnDefinitions="*,Auto">
-								<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
-								<Border Classes="InPlaceAction_Reserved"/>
-								<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
-									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
-										<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
-									</Button>
-									<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
-										<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
-									</Button>
-								</StackPanel>
-							</Grid>
-						</DataTemplate>
-					</asControls:ListBox.ItemTemplate>
-				</asControls:ListBox>
-				<Button Classes="ListAction" Command="{Binding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add}"/>
+				<Grid ColumnDefinitions="*,Auto">
+					<asControls:ListBox Name="customColorSpaceListBox" DoubleClickOnItem="OnDoubleClickOnListBoxItem" Items="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
+						<asControls:ListBox.ItemTemplate>
+							<DataTemplate>
+								<Grid ColumnDefinitions="*,Auto">
+									<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
+									<Border Classes="InPlaceAction_Reserved"/>
+									<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
+										<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
+											<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
+										</Button>
+										<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
+											<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
+										</Button>
+									</StackPanel>
+								</Grid>
+							</DataTemplate>
+						</asControls:ListBox.ItemTemplate>
+					</asControls:ListBox>
+					<Button Classes="BrowseButton" Command="{Binding $parent[Window].AddCustomColorSpaceCommand}" Grid.Column="1" ToolTip.Tip="{DynamicResource String/Common.Add}" VerticalAlignment="Top">
+						<Image Classes="BrowseButtonIcon" Source="{StaticResource Image/Icon.Add}"/>
+					</Button>
+				</Grid>
 				<Separator Classes="Dialog_Separator_Large"/>
 
 				<!-- Image filter -->

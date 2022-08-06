@@ -82,7 +82,7 @@
 
 			<!-- color space info -->
 			<ScrollViewer Grid.Column="1" MaxHeight="{StaticResource Double/ColorSpaceInfoDialog.Content.MaxHeight}">
-				<StackPanel Classes="Dialog_ContentPanel">
+				<StackPanel Classes="Dialog_ContentPanel_WithHeader">
 
 					<!-- Name -->
 					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
