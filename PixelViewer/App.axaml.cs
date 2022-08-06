@@ -311,6 +311,16 @@ namespace Carina.PixelViewer
 		}
 
 
+		///<inheritdoc/>
+        protected override bool OnRestoreMainWindows()
+        {
+            if (base.OnRestoreMainWindows())
+				return true;
+			this.ShowMainWindow();
+			return false;
+        }
+
+
         ///<inheritdoc/>
         protected override bool OnSelectEnteringDebugMode()
         {
