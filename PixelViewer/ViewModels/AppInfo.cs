@@ -1,8 +1,4 @@
-﻿using Avalonia;
-using Avalonia.Media.Imaging;
-using Avalonia.Platform;
-using CarinaStudio;
-using CarinaStudio.AppSuite.ViewModels;
+﻿using CarinaStudio.AppSuite.ViewModels;
 using System;
 
 namespace Carina.PixelViewer.ViewModels
