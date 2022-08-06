@@ -307,11 +307,7 @@ namespace Carina.PixelViewer.Controls
 						this.hidePanelsByImageViewerSizeAction?.Schedule(HidePanelsByImageViewerSizeDelay);
 				}));
 			});
-			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull().Also(it =>
-			{
-				if (CarinaStudio.Platform.IsMacOS)
-					it.IsVisible = false;
-			});
+			this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 			{
 #if DEBUG

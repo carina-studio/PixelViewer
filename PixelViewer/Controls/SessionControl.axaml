@@ -43,18 +43,18 @@
 		<ContextMenu x:Key="fileActionsMenu" PlacementMode="Top">
 			<MenuItem Command="{Binding $parent[UserControl].CopyFileName}" Header="{DynamicResource String/SessionControl.CopyFileName}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Copy}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Copy.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[UserControl].CopyFilePath}" Header="{DynamicResource String/SessionControl.CopyFilePath}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Copy}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Copy.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
 			<MenuItem Command="{Binding $parent[UserControl].ShowSourceFileInFileExplorer}" Header="{DynamicResource String/SessionControl.ShowFileInExplorer}" IsEnabled="{x:Static c:Platform.IsOpeningFileManagerSupported}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.FileManager}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.FileManager.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 		</ContextMenu>
@@ -63,14 +63,14 @@
 		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Bottom">
 			<MenuItem Command="{Binding $parent[Window].ShowAppOptions}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Settings}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Settings.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[Window].CheckForAppUpdate}" Header="{DynamicResource String/SessionControl.CheckForApplicationUpdate}">
 				<MenuItem.Icon>
 					<Panel>
-						<Image Classes="MenuItem_Icon" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static aConverters:ObjectConverters.IsNull}}" Source="{DynamicResource Image/Icon.Update}"/>
-						<Image Classes="MenuItem_Icon" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Source="{DynamicResource Image/Icon.Update.Colored}"/>
+						<Image Classes="MenuItem_Icon" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static aConverters:ObjectConverters.IsNull}}" Source="{StaticResource Image/Icon.Update.Outline}"/>
+						<Image Classes="MenuItem_Icon" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Source="{StaticResource Image/Icon.Update.Outline.Colored}"/>
 					</Panel>
 				</MenuItem.Icon>
 			</MenuItem>
@@ -78,27 +78,31 @@
 			<Separator/>
 			<MenuItem Command="{Binding $parent[Window].CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" InputGesture="Ctrl+N">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.AddWindow}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.AddWindow}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
 			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Horizontal}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Horizontal}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Vertical}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Vertical}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Vertical}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Tile}">
 				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Layout.Tile}"/>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Tile}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
-			<MenuItem Command="{Binding $parent[Window].ShowAppInfo}" Header="{DynamicResource String/SessionControl.ApplicationInfo}"/>
+			<MenuItem Command="{Binding $parent[Window].ShowAppInfo}" Header="{DynamicResource String/SessionControl.ApplicationInfo}">
+				<MenuItem.Icon>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Information.Outline}"/>
+				</MenuItem.Icon>
+			</MenuItem>
 		</ContextMenu>
 		
 	</UserControl.Resources>
@@ -116,12 +120,12 @@
 
 						<!-- Open file -->
 						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.OpenFile}"/>
 						</Button>
 
 						<!-- Save image -->
 						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveImage}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Save}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.Save}"/>
 						</Button>
 
 						<!-- Separator -->
@@ -130,14 +134,14 @@
 						<!-- Fit to viewport -->
 						<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 							<Panel>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
 						</ToggleButton>
 
 						<!-- Zoom-out -->
 						<RepeatButton Name="zoomOutButton" Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomOut}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.ZoomOut}"/>
 						</RepeatButton>
 
 						<!-- Zoom -->
@@ -154,7 +158,7 @@
 
 						<!-- Zoom-in -->
 						<RepeatButton Name="zoomInButton" Classes="ToolBar_RepeatButton" Command="{Binding ZoomInCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomIn}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.ZoomIn}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.ZoomIn}"/>
 						</RepeatButton>
 
 						<!-- Separator -->
@@ -162,7 +166,7 @@
 
 						<!-- Rotate-left -->
 						<Button Name="rotateLeftButton" Classes="ToolBar_Button" Command="{Binding RotateLeftCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateLeft}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateLeft}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.RotateLeft}"/>
 						</Button>
 
 						<!-- Rotation -->
@@ -179,7 +183,7 @@
 
 						<!-- Rotate-right -->
 						<Button Name="rotateRightButton" Classes="ToolBar_Button" Command="{Binding RotateRightCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.RotateRight}">
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.RotateRight}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.RotateRight}"/>
 						</Button>
 
 						<!-- Separator -->
@@ -188,8 +192,8 @@
 						<!-- Histograms -->
 						<ToggleButton Name="histogramsButton" Classes="ToolBar_ToggleButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !$parent[UserControl].IsHistogramsDisabled}" ToolTip.Tip="{DynamicResource String/SessionControl.Histograms}">
 							<Panel>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
 						</ToggleButton>
 
@@ -201,12 +205,12 @@
 
 							<!-- First frame -->
 							<Button Classes="ToolBar_Button" Command="{Binding MoveToFirstFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToFirstFrame}">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastBackward}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FastBackward}"/>
 							</Button>
 
 							<!-- Previous frame -->
 							<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToPreviousFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToPreviousFrame}">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Backward}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 							</RepeatButton>
 
 							<!-- Frame -->
@@ -226,12 +230,12 @@
 
 							<!-- Next frame -->
 							<RepeatButton Classes="ToolBar_RepeatButton" Command="{Binding MoveToNextFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToNextFrame}">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Forward}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 							</RepeatButton>
 
 							<!-- Last frame -->
 							<Button Classes="ToolBar_Button" Command="{Binding MoveToLastFrameCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.MoveToLastFrame}">
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.FastForward}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FastForward}"/>
 							</Button>
 
 						</StackPanel>
@@ -242,8 +246,8 @@
 						<!-- Brightness and contrast adjustment -->
 						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment}">
 							<Panel>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}">
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}">
 									<Image.IsVisible>
 										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
 											<Binding Path="HasBrightnessAdjustment"/>
@@ -253,7 +257,7 @@
 										</MultiBinding>
 									</Image.IsVisible>
 								</Image>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="brightnessAndContrastAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
 										<Border.Transitions>
@@ -262,7 +266,7 @@
 											</Transitions>
 										</Border.Transitions>
 										<DockPanel>
-											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
+											<Border DockPanel.Dock="Bottom" Padding="{StaticResource Thickness/Dialog.ControlButtonsPanel.Padding}">
 												<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}" HorizontalAlignment="Center"/>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
@@ -344,8 +348,8 @@
 						<!-- Color adjustment -->
 						<ToggleButton Name="colorAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ColorAdjustment}">
 							<Panel>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Active}">
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Active}">
 									<Image.IsVisible>
 										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
 											<Binding Path="HasColorAdjustment"/>
@@ -354,7 +358,7 @@
 										</MultiBinding>
 									</Image.IsVisible>
 								</Image>
-								<Image Classes="Icon" Source="{DynamicResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="colorAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
 										<Border.Transitions>
@@ -363,7 +367,7 @@
 											</Transitions>
 										</Border.Transitions>
 										<DockPanel>
-											<Border DockPanel.Dock="Bottom" Padding="{DynamicResource Thickness/Dialog.ControlButtonsPanel.Padding}">
+											<Border DockPanel.Dock="Bottom" Padding="{StaticResource Thickness/Dialog.ControlButtonsPanel.Padding}">
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<Button Classes="Dialog_ControlButton" Command="{Binding SelectColorAdjustmentCommand}" Content="{DynamicResource String/SessionControl.SelectColorAdjustment}"/>
 													<Button Classes="Dialog_ControlButton" Command="{Binding $parent[UserControl].ResetColorAdjustmentCommand}" Content="{DynamicResource String/Common.Reset}"/>
@@ -477,24 +481,24 @@
 
 					<!-- Test -->
 					<Button Name="testButton" Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Lab}"/>
+						<Image Classes="Icon" Source="{StaticResource Image/Icon.Lab}"/>
 					</Button>
 
 					<!-- Rendering params panel -->
 					<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding IsRenderingParametersPanelVisible}" ToolTip.Tip="{DynamicResource String/SessionControl.RenderingParametersPanel}">
 						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Panel.Right}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Panel.Right.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.Panel.Right}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.Panel.Right.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 
 					<!-- Other actions -->
-					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
+					<ToggleButton Name="otherActionsButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].ShowOtherActions}" IsVisible="{x:Static c:Platform.IsNotMacOS}" ToolTip.Tip="{DynamicResource String/SessionControl.OtherActions}">
 						<Panel>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{DynamicResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							<Border Classes="ToolBar_NotificationIndicator" IsVisible="{Binding $parent[Window].Application.UpdateInfo, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}">
-								<Image Classes="ToolBar_NotificationIndicator" Source="{DynamicResource Image/Icon.Update.Colored}"/>
+								<Image Classes="ToolBar_NotificationIndicator" Source="{StaticResource Image/Icon.Update.Colored}"/>
 							</Border>
 						</Panel>
 					</ToggleButton>
@@ -503,7 +507,7 @@
 
 			</Grid>
 		</Border>
-		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{DynamicResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
+		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{StaticResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{StaticResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
 
 		<!-- Viewer -->
 		<Grid Name="workingAreaGrid" Grid.Row="1">
@@ -518,14 +522,14 @@
 
 			<!-- Histograms -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}" Width="{DynamicResource Double/SessionControl.HistogramsPanel.Width}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" IsVisible="{Binding IsHistogramsVisible}" Width="{StaticResource Double/SessionControl.HistogramsPanel.Width}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-					<StackPanel Margin="{DynamicResource Thickness/SessionControl.HistogramsPanel.Padding}">
+					<StackPanel Margin="{StaticResource Thickness/SessionControl.HistogramsPanel.Padding}">
 
 						<!-- Styles -->
 						<StackPanel.Styles>
 							<Style Selector="appControls|BitmapHistogramsView">
-								<Setter Property="Height" Value="{DynamicResource Double/SessionControl.Histogram.Height}"/>
+								<Setter Property="Height" Value="{StaticResource Double/SessionControl.Histogram.Height}"/>
 								<Setter Property="HorizontalAlignment" Value="Stretch"/>
 							</Style>
 						</StackPanel.Styles>
@@ -557,33 +561,33 @@
 			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}" DragDrop.AllowDrop="True" Grid.Column="1" RowDefinitions="*,Auto">
 
 				<!-- Hint -->
-				<Viewbox Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
+				<Viewbox Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
 					<Panel>
 
 						<!-- Drag-drop hint -->
 						<Border IsVisible="{Binding !IsOpeningSourceFile}">
 							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
 								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section1}"/>
-								<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
+								<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile}"/>
 								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.DragDropHint.Section2}"/>
 							</StackPanel>
 						</Border>
 
 						<!-- Opening file hint -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.OpenFile}"/>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
 						</StackPanel>
 
 						<!-- Insufficient memory hint -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.Warning}"/>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Warning}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
 						</StackPanel>
 
 						<!-- Rendering error -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{DynamicResource Image/Icon.Error}"/>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Error}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
 						</StackPanel>
 
@@ -592,7 +596,7 @@
 
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
-					<Panel Margin="{DynamicResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
+					<Panel Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
 						<Border Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
 							<Border.Background>
 								<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
@@ -615,7 +619,7 @@
 					<Border.Styles>
 						<Style Selector="TextBlock">
 							<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
-							<Setter Property="Margin" Value="{DynamicResource Thickness/StatusBar.Item.Margin}"/>
+							<Setter Property="Margin" Value="{StaticResource Thickness/StatusBar.Item.Margin}"/>
 							<Setter Property="VerticalAlignment" Value="Center"/>
 						</Style>
 					</Border.Styles>
@@ -626,7 +630,7 @@
 							
 							<!-- Position -->
 							<StackPanel Orientation="Horizontal">
-								<Image Classes="StatusBar_Icon" Source="{DynamicResource Image/Icon.Coordinates}"/>
+								<Image Classes="StatusBar_Icon" Source="{StaticResource Image/Icon.Coordinates}"/>
 								<Panel>
 									<TextBlock Text="(0000, 0000)" Opacity="0"/>
 									<TextBlock>
@@ -643,7 +647,7 @@
 
 							<!-- Color -->
 							<StackPanel Orientation="Horizontal">
-								<Border BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}" BorderThickness="1" Height="{DynamicResource Double/StatusBar.Icon.Size}" Width="{DynamicResource Double/StatusBar.Icon.Size}">
+								<Border BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}" BorderThickness="1" Height="{StaticResource Double/StatusBar.Icon.Size}" Width="{StaticResource Double/StatusBar.Icon.Size}">
 									<Border.Background>
 										<SolidColorBrush Color="{Binding SelectedRenderedImagePixelColor}"/>
 									</Border.Background>
@@ -708,7 +712,7 @@
 			<!-- Rendering parameters panel -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3" IsVisible="{Binding IsRenderingParametersPanelVisible}">
 				<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
-					<StackPanel IsEnabled="{Binding IsSourceFileOpened}" Margin="{DynamicResource Thickness/SessionControl.OptionsPanel.Padding}">
+					<StackPanel IsEnabled="{Binding IsSourceFileOpened}" Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
 
 						<!-- Styles -->
 						<StackPanel.Styles>
@@ -804,8 +808,8 @@
 												<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsEmbedded}" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
 													<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.Embedded}"/>
 												</Border>
-												<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-													<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
+												<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+													<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
 												</Border>
 												<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
 													<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
@@ -956,17 +960,17 @@
 					<!-- File actions -->
 					<StackPanel Orientation="Horizontal">
 						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}"/>
-						<ToggleButton Name="fileActionsButton" Classes="StatusBar_ToggleButton" Command="{Binding $parent[UserControl].ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{DynamicResource Double/SessionControl.StatusBar.FileActions.MaxWidth}">
+						<ToggleButton Name="fileActionsButton" Classes="StatusBar_ToggleButton" Command="{Binding $parent[UserControl].ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}">
 							<StackPanel Orientation="Horizontal">
 								<Image Classes="StatusBar_Icon">
 									<DrawingImage>
-										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.File}"/>
+										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.File.Outline}"/>
 									</DrawingImage>
 								</Image>
 								<TextBlock Text="{Binding SourceFileSizeString}"/>
 								<Image Classes="StatusBar_DropDownIcon">
 									<DrawingImage>
-										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.MoveUp}"/>
+										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.MoveUp}"/>
 									</DrawingImage>
 								</Image>
 							</StackPanel>
@@ -984,7 +988,7 @@
 						</StackPanel.IsVisible>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.BinaryData}"/>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.BinaryData}"/>
 							</DrawingImage>
 						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceDataSize, StringFormat={}{0:N0} }"/>
@@ -997,7 +1001,7 @@
 						<StackPanel Orientation="Horizontal">
 							<Image Classes="StatusBar_Icon">
 								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Screen}"/>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Screen}"/>
 								</DrawingImage>
 							</Image>
 							<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Owner.EffectiveScreenColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
@@ -1015,7 +1019,7 @@
 						<Separator Classes="StatusBar_Separator"/>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Save}"/>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Save.Outline}"/>
 							</DrawingImage>
 						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.SavingRenderedImage}"/>
@@ -1026,7 +1030,7 @@
 						<Separator Classes="StatusBar_Separator"/>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.ImageFilter}"/>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.ImageFilter}"/>
 							</DrawingImage>
 						</Image>
 						<TextBlock Classes="StatusBar_TextBlock" Text="{DynamicResource String/SessionControl.FilteringRenderedImage}"/>
@@ -1037,7 +1041,7 @@
 						<Separator Classes="StatusBar_Separator"/>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Waiting}"/>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Waiting.Outline}"/>
 							</DrawingImage>
 						</Image>
 						<Panel>
@@ -1054,7 +1058,7 @@
 							<Separator Classes="StatusBar_Separator"/>
 							<Image Classes="StatusBar_Icon">
 								<DrawingImage>
-									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Speed}"/>
+									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Speed.Outline}"/>
 								</DrawingImage>
 							</Image>
 							<Panel>
@@ -1067,7 +1071,7 @@
 						<Separator Classes="StatusBar_Separator"/>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Cpu}"/>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Cpu.Outline}"/>
 							</DrawingImage>
 						</Image>
 						<Panel>
@@ -1079,7 +1083,7 @@
 						<Separator Classes="StatusBar_Separator"/>
 						<Image Classes="StatusBar_Icon">
 							<DrawingImage>
-								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{DynamicResource Geometry/Icon.Memory}"/>
+								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Memory.Outline}"/>
 							</DrawingImage>
 						</Image>
 						<Panel>
