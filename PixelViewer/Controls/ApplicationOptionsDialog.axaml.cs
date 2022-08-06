@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Carina.PixelViewer.ViewModels;
@@ -80,7 +81,7 @@ namespace Carina.PixelViewer.Controls
                     await new MessageDialog()
                     {
                         Icon = MessageDialogIcon.Error,
-                        Message = this.Application.GetString("ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile"),
+                        Message = this.GetResourceObservable("String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile"),
                     }.ShowDialog(this);
                     return;
                 }
@@ -92,7 +93,12 @@ namespace Carina.PixelViewer.Controls
                     {
                         Buttons = MessageDialogButtons.YesNo,
                         Icon = MessageDialogIcon.Question,
-                        Message = this.Application.GetFormattedString("ApplicationOptionsDialog.ConfirmAddingExistingColorSpace", colorSpace, existingColorSpace),
+                        Message = new FormattedString().Also(it =>
+                        {
+                            it.Arg1 = colorSpace;
+                            it.Arg2 = existingColorSpace;
+                            it.Bind(FormattedString.FormatProperty, this.GetResourceObservable("String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace"));
+                        }),
                     }.ShowDialog(this);
                     if (result == MessageDialogResult.No)
                         return;

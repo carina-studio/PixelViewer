@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Controls
     partial class ImageRenderingProfileSelectionDialog : InputDialog
     {
         // Static fields.
-        static readonly AvaloniaProperty<string?> MessageProperty = AvaloniaProperty.Register<ImageRenderingProfileSelectionDialog, string?>(nameof(Message));
+        public static readonly AvaloniaProperty<string?> MessageProperty = AvaloniaProperty.Register<ImageRenderingProfileSelectionDialog, string?>(nameof(Message));
 
 
         // Fields.

@@ -256,19 +256,44 @@ partial class ColorSpaceInfoDialog : InputDialog
             this.colorSpaceWhitePointChromaticity.X = wpX;
             this.colorSpaceWhitePointChromaticity.Y = wpY;
             this.whitePointTextBox.Text = $"{wpXYZ.Item1:F5}, {wpXYZ.Item2:F5}, {wpXYZ.Item3:F5}";
-            this.whitePointDescriptionTextBlock.Text = Global.Run(() =>
+            this.whitePointDescriptionTextBlock.Bind(TextBlock.TextProperty, Global.Run(() =>
             {
                 var cct = Media.ColorSpace.XyChromaticityToCct(wpX, wpY);
-                var prefix = "";
-                var description = this.Application.GetString("ColorSpaceInfoDialog.WhitePoint.Description");
+                var prefix = (IObservable<string?>?)null;
+                var description = this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description");
                 if (colorSpace.IsD65WhitePoint)
-                    prefix = this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT", "D65", cct);
+                {
+                    prefix = new FormattedString().Also(it =>
+                    {
+                        it.Arg1 = "D65";
+                        it.Arg2 = cct;
+                        it.Bind(FormattedString.FormatProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT"));
+                    });
+                }
                 else if (colorSpace.IsD50WhitePoint)
-                    prefix = this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT", "D50", cct);
+                {
+                    prefix = new FormattedString().Also(it =>
+                    {
+                        it.Arg1 = "D50";
+                        it.Arg2 = cct;
+                        it.Bind(FormattedString.FormatProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT"));
+                    });
+                }
                 else
-                    prefix = this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT", cct);
-                return this.Application.GetFormattedString("ColorSpaceInfoDialog.WhitePoint.Description.WithPrefix", prefix, description);
-            });
+                {
+                    prefix = new FormattedString().Also(it =>
+                    {
+                        it.Arg1 = cct;
+                        it.Bind(FormattedString.FormatProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix"));
+                    });
+                }
+                return new FormattedString().Also(it =>
+                {
+                    it.Bind(FormattedString.Arg1Property, prefix);
+                    it.Bind(FormattedString.Arg2Property, description);
+                    it.Bind(FormattedString.FormatProperty, this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description.WithPrefix"));
+                });
+            }));
         }
         else
         {

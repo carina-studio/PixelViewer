@@ -540,7 +540,7 @@ namespace Carina.PixelViewer.Controls
 				await new ASControls.MessageDialog()
 				{
 					Icon = ASControls.MessageDialogIcon.Warning,
-					Message = this.Application.GetString("SessionControl.MaxDragDropFileCountReached"),
+					Message = this.GetResourceObservable("String/SessionControl.MaxDragDropFileCountReached"),
 				}.ShowDialog(this.attachedWindow);
 				return false;
 			}
@@ -549,10 +549,10 @@ namespace Carina.PixelViewer.Controls
 			if (fileNames.Length > 1)
 			{
 				// select profile
-				var profile = await new ImageRenderingProfileSelectionDialog()
+				var profile = await new ImageRenderingProfileSelectionDialog().Also(it =>
 				{
-					Message = this.Application.GetString("SessionControl.SelectProfileToOpenFiles"),
-				}.ShowDialog<ImageRenderingProfile?>(this.attachedWindow);
+					it.Bind(ImageRenderingProfileSelectionDialog.MessageProperty, this.GetResourceObservable("String/SessionControl.SelectProfileToOpenFiles"));
+				}).ShowDialog<ImageRenderingProfile?>(this.attachedWindow);
 				if (profile == null)
 					return false;
 
@@ -1431,7 +1431,7 @@ namespace Carina.PixelViewer.Controls
 				name = await new ASControls.TextInputDialog()
 				{
 					InitialText = name,
-					Message = this.Application.GetString("SessionControl.InputNameOfProfile"),
+					Message = this.GetResourceObservable("String/SessionControl.InputNameOfProfile"),
 				}.ShowDialog(this.attachedWindow);
 				if (string.IsNullOrWhiteSpace(name))
 					return;
@@ -1484,7 +1484,7 @@ namespace Carina.PixelViewer.Controls
 				{
 					Buttons = ASControls.MessageDialogButtons.YesNoCancel,
 					Icon = ASControls.MessageDialogIcon.Question,
-					Message = this.Application.GetString("SessionControl.ConfirmSavingFilteredImage")
+					Message = this.GetResourceObservable("String/SessionControl.ConfirmSavingFilteredImage")
 				}.ShowDialog(this.attachedWindow);
 				if (result == ASControls.MessageDialogResult.Cancel)
 					return;

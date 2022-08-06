@@ -691,7 +691,7 @@ namespace Carina.PixelViewer
 			var customTitle = await new TextInputDialog()
 			{
 				InitialText = session.CustomTitle,
-				Message = this.Application.GetString("MainWindow.SetCustomSessionTitle.Message"),
+				Message = this.GetResourceObservable("String/MainWindow.SetCustomSessionTitle.Message"),
 			}.ShowDialog(this);
 			if (string.IsNullOrWhiteSpace(customTitle))
 				return;
