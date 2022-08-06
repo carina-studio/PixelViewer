@@ -272,11 +272,7 @@
 											<StackPanel Classes="Dialog_ContentPanel">
 
 												<!-- Brightness -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" Format="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="brightnessAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #brightnessAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -289,11 +285,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Contrast -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ContrastAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding ContrastAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="contrastAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #contrastAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -306,11 +298,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Highlight -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding HighlightAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding HighlightAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="highlightAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #highlightAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -323,11 +311,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Shadow -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding ShadowAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding ShadowAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="shadowAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #shadowAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -383,11 +367,7 @@
 												</StackPanel.Styles>
 
 												<!-- Red -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="redColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #redColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -400,11 +380,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Green -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding GreenColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding GreenColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.ColorAdjustment.Label.Green}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="greenColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #greenColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -417,11 +393,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Blue -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding BlueColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding BlueColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.ColorAdjustment.Label.Blue}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="blueColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #blueColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -434,11 +406,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Saturation -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Saturation}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding SaturationAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding SaturationAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.ColorAdjustment.Label.Saturation}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="saturationAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #saturationAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -451,11 +419,7 @@
 												<Separator Classes="Dialog_Separator_Small"/>
 
 												<!-- Vibrance -->
-												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{DynamicResource String/SessionControl.ColorAdjustment.Label.Vibrance}" VerticalAlignment="Center"/>
-													<Separator Classes="Dialog_Separator_Small"/>
-													<TextBlock Classes="Dialog_TextBlock" HorizontalAlignment="Center" Text="{Binding VibranceAdjustment, StringFormat={}{0:+0.00;-0.00}}" VerticalAlignment="Center"/>
-												</StackPanel>
+												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding VibranceAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.ColorAdjustment.Label.Vibrance}" HorizontalAlignment="Center"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
 													<RepeatButton Name="vibranceAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValue}" CommandParameter="{Binding #vibranceAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
@@ -633,14 +597,7 @@
 								<Image Classes="StatusBar_Icon" Source="{StaticResource Image/Icon.Coordinates}"/>
 								<Panel>
 									<TextBlock Text="(0000, 0000)" Opacity="0"/>
-									<TextBlock>
-										<TextBlock.Text>
-											<MultiBinding StringFormat="{}({0}, {1})">
-												<Binding Path="SelectedRenderedImagePixelPositionX"/>
-												<Binding Path="SelectedRenderedImagePixelPositionY"/>
-											</MultiBinding>
-										</TextBlock.Text>
-									</TextBlock>
+									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelPositionX}" Arg2="{Binding SelectedRenderedImagePixelPositionY}" Format="({0}, {1})"/>
 								</Panel>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
@@ -659,16 +616,7 @@
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
 								<Panel>
 									<TextBlock Text="ARGB(000, 000, 000, 000)" Opacity="0"/>
-									<TextBlock>
-										<TextBlock.Text>
-											<MultiBinding StringFormat="{}ARGB({0}, {1}, {2}, {3})">
-												<Binding Path="SelectedRenderedImagePixelColor.A"/>
-												<Binding Path="SelectedRenderedImagePixelColor.R"/>
-												<Binding Path="SelectedRenderedImagePixelColor.G"/>
-												<Binding Path="SelectedRenderedImagePixelColor.B"/>
-											</MultiBinding>
-										</TextBlock.Text>
-									</TextBlock>
+									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelColor.A}" Arg2="{Binding SelectedRenderedImagePixelColor.R}" Arg3="{Binding SelectedRenderedImagePixelColor.G}" Arg4="{Binding SelectedRenderedImagePixelColor.B}" Format="ARGB({0}, {1}, {2}, {3})"/>
 								</Panel>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
@@ -677,15 +625,7 @@
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
 								<Panel>
 									<TextBlock Text="L*a*b*(000.00, 000.00, 000.00)" Opacity="0"/>
-									<TextBlock>
-										<TextBlock.Text>
-											<MultiBinding StringFormat="{}L*a*b*({0:F2}, {1:F2}, {2:F2})">
-												<Binding Path="SelectedRenderedImagePixelLabColor.Item1"/>
-												<Binding Path="SelectedRenderedImagePixelLabColor.Item2"/>
-												<Binding Path="SelectedRenderedImagePixelLabColor.Item3"/>
-											</MultiBinding>
-										</TextBlock.Text>
-									</TextBlock>
+									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelLabColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelLabColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelLabColor.Item3}" Format="L*a*b*({0:F2}, {1:F2}, {2:F2})"/>
 								</Panel>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
@@ -693,15 +633,7 @@
 							<!-- XYZ Color -->
 							<Panel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelXyzColor}">
 								<TextBlock Text="XYZ(000.00, 000.00, 000.00)" Opacity="0"/>
-								<TextBlock>
-									<TextBlock.Text>
-										<MultiBinding StringFormat="{}XYZ({0:F2}, {1:F2}, {2:F2})">
-											<Binding Path="SelectedRenderedImagePixelXyzColor.Item1"/>
-											<Binding Path="SelectedRenderedImagePixelXyzColor.Item2"/>
-											<Binding Path="SelectedRenderedImagePixelXyzColor.Item3"/>
-										</MultiBinding>
-									</TextBlock.Text>
-								</TextBlock>
+								<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelXyzColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelXyzColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelXyzColor.Item3}" Format="XYZ({0:F2}, {1:F2}, {2:F2})"/>
 							</Panel>
 						</WrapPanel>
 					</Panel>
