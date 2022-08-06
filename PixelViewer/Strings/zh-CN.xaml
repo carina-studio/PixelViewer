@@ -1,0 +1,257 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui" 
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+	<!-- App -->
+	<sys:String x:Key="String/App.InitializingColorSpaces">载入色彩空间</sys:String>
+	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">载入配置</sys:String>
+	<sys:String x:Key="String/App.Shutdown">结束</sys:String>
+	
+	<!-- ApplicationOptionsDialog -->
+	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度调整函数</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更准确的色彩输出，但将会影响绘制图像的效能。 </sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空间「{0}」与「{1}」相同，您是否还要将其加入？ </sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">对比调整函数</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的页面开启拖放的文件</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">自定义色彩空间</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">默认字结顺序</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">默认图像色彩空间</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">默认评估之长宽比例</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若选择&lt;不指定&gt;将尝试使用文件名称评估尺寸</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">默认格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">默认 YUV 至 RGB 转换</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">启用色彩管理</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">变更格式后评估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">开启文件后评估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">优先尝试从文件名称判断图像格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">图像尺寸评估</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">图像滤镜</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">图像格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">图像绘制内存使用上限 (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">开启文件后重置滤镜参数</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">变更图像宽度后重置图层参数</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">储存图像时套用当前的旋转方向</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">屏幕色彩空间</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在状态列上显示 CPU 及内存使用量</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">显示选取像素的 ARGB 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">显示选取像素的 L*a*b* D50 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">显示选取像素的 XYZ D50 色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">无法从文件载入色彩空间。 </sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">开启文件后重置至默认格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">优先使用系统定义的屏幕色彩空间</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">若无法取得系统定义的屏幕色彩空间，将改为使用「屏幕色彩空间」</sys:String>
+
+	<!-- AspectRatio -->
+	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
+
+	<!-- BrightnessTransformationFunction -->
+	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">反正切 (Arctangent) 转换</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma 转换</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">线性转换</sys:String>
+
+	<!-- ByteOrdering -->
+	<sys:String x:Key="String/ByteOrdering.BigEndian">大端序 (Big-Endian)</sys:String>
+	<sys:String x:Key="String/ByteOrdering.LittleEndian">小端序 (Little-Endian)</sys:String>
+
+	<!-- ColorSpace -->
+	<sys:String x:Key="String/ColorSpace.BT.2100-HLG">BT.2100 (HLG 转换，HDR-TV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.2100-PQ">BT.2100 (PQ 转换，HDR-TV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-525-line">BT.601 (525 行，SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625 行，SDTV)</sys:String>
+	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">内嵌色彩空间</sys:String>
+	<sys:String x:Key="String/ColorSpace.SystemDefined">系统定义色彩空间</sys:String>
+
+	<!-- ColorSpaceInfoDialog -->
+	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">蓝色</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy 色度表</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Diagram">图表类型</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">绿色</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">红/绿/蓝在此色彩空间中为线性值，意即可以直接使用线性变换与 XYZ 色彩空间互相转换。 </sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">名称</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.NonLinearColorSpace">红/绿/蓝在此色彩空间中为非线性值，必须先透过一组数值转换函数 (OETF/EOTF) 才可以与 XYZ 色彩空间互相转换。 </sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Other">其他信息</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">主色及白点</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">红色</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">参考色彩空间 (虚线显示)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">色彩空间资讯</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram">非线性-线性转换函数 (EOTF)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram">线性-非线性转换函数 (OETF)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">白点</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description">仅提供参考。内部色彩转换皆使用 CIE 标准光源 D50 为白点。 </sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT">CCT {0:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT">CIE 标准光源 {0}，CCT {1:F0}K</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.WithPrefix">{0}。 {1}</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Undefined">未定义</sys:String>
+	
+	<!-- Common -->
+	<sys:String x:Key="String/Common.Bytes">字节</sys:String>
+
+	<!-- ContrastTransformationFunction -->
+	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">双反正切 (Arctangent) 转换</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Linear">线性转换</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange 插值法</sys:String>
+
+	<!-- FileType -->
+	<sys:String x:Key="String/FileType.All">所有文件</sys:String>
+	<sys:String x:Key="String/FileType.Bmp">Windows 位图</sys:String>
+	<sys:String x:Key="String/FileType.Dng">数位负片 (DNG)</sys:String>
+	<sys:String x:Key="String/FileType.Heif">高效率图像文件格式 (HEIF)</sys:String>
+	<sys:String x:Key="String/FileType.Icc">ICC 色彩描述文件</sys:String>
+	<sys:String x:Key="String/FileType.Jpeg">JPEG 图像</sys:String>
+	<sys:String x:Key="String/FileType.Png">可携式网路图像 (PNG)</sys:String>
+	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位 BGRA 像素</sys:String>
+
+	<!-- FrameNumberSelectionDialog -->
+	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至画面</sys:String>
+
+	<!-- ImageFormat -->
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer 排列 (12 位，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer 排列 (16 位)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P010">P010 (10 位 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P012">P012 (12 位 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P016">P016 (16 位 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P210">P210 (10 位 YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P212">P212 (12 位 YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P216">P216 (16 位 YUV422p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P410">P410 (10 位 YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P412">P412 (12 位 YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.P416">P416 (16 位 YUV444p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10 位 YUV420sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16 位 YUV420sp)</sys:String>
+
+	<!-- ImageFormatCategory -->
+	<sys:String x:Key="String/ImageFormatCategory.Bayer">Bayer 排列</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Compressed">压缩</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Luminance">明度/灰阶</sys:String>
+	<sys:String x:Key="String/ImageFormatCategory.Unclassified">未分类</sys:String>
+
+	<!-- ImageRenderingProfile -->
+	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;无&gt;</sys:String>
+
+	<!-- ImageRenderingProfileSelectionDialog -->
+	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">选择配置</sys:String>
+
+	<!-- JpegImageEncodingOptionsDialog -->
+	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">压缩质量：</sys:String>
+	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG 选项</sys:String>
+
+	<!-- MainWindow -->
+	<sys:String x:Key="String/MainWindow.ResetSessionTitle">重置标题</sys:String>
+	<sys:String x:Key="String/MainWindow.Session.Hibernated">休眠中以节省资源</sys:String>
+	<sys:String x:Key="String/MainWindow.Session.RenderedImagesMemoryUsage">内存使用：</sys:String>
+	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">自定义标题…</sys:String>
+	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">自定义标题</sys:String>
+	<sys:String x:Key="String/MainWindow.Tabs">页面</sys:String>
+	<sys:String x:Key="String/MainWindow.Windows">窗口</sys:String>
+
+	<!-- Product -->
+	<sys:String x:Key="String/Product.PixelViewer-Pro">PixelViewer 专业版</sys:String>
+	<sys:String x:Key="String/Product.PixelViewer-Pro-Test">PixelViewer 专业版 (测试)</sys:String>
+
+	<!-- Session -->
+	<sys:String x:Key="String/Session.EmptyTitle">空白页面</sys:String>
+
+	<!-- SessionControl -->
+	<sys:String x:Key="String/SessionControl.ApplicationInfo">关于 PixelViewer…</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplicationOptions">应用程序选项…</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplyProfile">重置至配置参数</sys:String>
+	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer 排列方式</sys:String>
+	<sys:String x:Key="String/SessionControl.BlueColorGain">蓝色增益</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">亮度及对比</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">对比</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight">亮部</sys:String>
+	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">暗部</sys:String>
+	<sys:String x:Key="String/SessionControl.ByteOrdering">字节顺序</sys:String>
+	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">检查应用程序更新…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment">色彩：在亮度不变的原则下，调整红色/绿色/蓝色的相对比例。 </sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">蓝色</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">绿色</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">红色</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Saturation">饱和度</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">自然饱和度</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace">色彩空间</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">已停用色彩管理，点一下以开启选项…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">文件内嵌</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.SystemDefined">系统定义</sys:String>
+	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">是否要储存套用滤镜后的图像？ </sys:String>
+	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">转换色彩空间中…</sys:String>
+	<sys:String x:Key="String/SessionControl.CopyFileName">复制文件名称</sys:String>
+	<sys:String x:Key="String/SessionControl.CopyFilePath">复制完整文件路径</sys:String>
+	<sys:String x:Key="String/SessionControl.CpuUsage">CPU 使用率</sys:String>
+	<sys:String x:Key="String/SessionControl.DataOffset">起始资料位移 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;无&gt;</sys:String>
+	<sys:String x:Key="String/SessionControl.DeleteProfile">删除配置</sys:String>
+	<sys:String x:Key="String/SessionControl.Demosaicing">去马赛克</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">拖放文件到这里，或是点击</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以开启图像文件。 </sys:String>
+	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">配置「{0}」已经存在。 </sys:String>
+	<sys:String x:Key="String/SessionControl.EffectiveBits">有效位数</sys:String>
+	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">自动评估</sys:String>
+	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">套用滤镜中…</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">递减</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">递增</sys:String>
+	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">调整至窗口大小 (Ctrl+0)</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePaddingSize">画面资料间隔 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.GrayscaleFilter">灰阶滤镜</sys:String>
+	<sys:String x:Key="String/SessionControl.GreenColorGain">绿色增益</sys:String>
+	<sys:String x:Key="String/SessionControl.Histogram.Blue">蓝色</sys:String>
+	<sys:String x:Key="String/SessionControl.Histogram.Green">绿色</sys:String>
+	<sys:String x:Key="String/SessionControl.Histogram.Luminance">亮度</sys:String>
+	<sys:String x:Key="String/SessionControl.Histogram.Red">红色</sys:String>
+	<sys:String x:Key="String/SessionControl.Histograms">色阶分布图</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageDimensions">尺寸 (像素)</sys:String>
+	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">图层 #1</sys:String>
+	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">图层 #2</sys:String>
+	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">图层 #3</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageRenderer">格式</sys:String>
+	<sys:String x:Key="String/SessionControl.InputNameOfProfile">配置名称：</sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">内存不足。您可以尝试在应用程序选项中调高内存使用上限。 </sys:String>
+	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">最多支持拖放 8 个文件。 </sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一帧 (Home)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最后一帧 (End)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一帧 (Page Down)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一帧 (Page Up)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至帧…</sys:String>
+	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">没有图像文件开启</sys:String>
+	<sys:String x:Key="String/SessionControl.OpeningSourceFile">正在开启图像文件…</sys:String>
+	<sys:String x:Key="String/SessionControl.OpenSourceFile">开启图像文件 (Ctrl+O)</sys:String>
+	<sys:String x:Key="String/SessionControl.OtherActions">其他动作</sys:String>
+	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">程序的私有内存使用量</sys:String>
+	<sys:String x:Key="String/SessionControl.Profile">配置</sys:String>
+	<sys:String x:Key="String/SessionControl.ProfileTypeLabel.FileFormat">文件格式</sys:String>
+	<sys:String x:Key="String/SessionControl.RedColorGain">红色增益</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">此页面的图像绘制内存使用量</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingImage">绘制中…</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">绘制失败，通常是因为使用错误的绘制参数。 </sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">绘制参数面板</sys:String>
+	<sys:String x:Key="String/SessionControl.RgbGain">色彩预先校正</sys:String>
+	<sys:String x:Key="String/SessionControl.RotateLeft">逆时针旋转</sys:String>
+	<sys:String x:Key="String/SessionControl.RotateRight">顺时针旋转</sys:String>
+	<sys:String x:Key="String/SessionControl.RowStride">行步距 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">另存配置</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveImage">储存图像 (Ctrl+S)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveProfile">储存配置</sys:String>
+	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在储存绘制的图像…</sys:String>
+	<sys:String x:Key="String/SessionControl.ScreenColorSpace">屏幕色彩空间</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedPixel.None">在图片上移动鼠标以查看像素资讯。 </sys:String>
+	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">自动调整</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectRgbGain">自动调整</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">开启文件所使用的配置</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在文件总管中显示文件</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceDataSize">来源资料大小</sys:String>
+	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">图像绘制内存使用总量</sys:String>
+	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用介面回应时间</sys:String>
+	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">视为线性色彩空间</sys:String>
+	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV 至 RGB 转换</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomOut">缩小 (Ctrl-)</sys:String>
+
+	<!-- YuvToBgraConverter -->
+	<sys:String x:Key="String/YuvToBgraConverter.BT.656">BT.656 (SDTV，NTSC 标准)</sys:String>
+
+</ResourceDictionary>

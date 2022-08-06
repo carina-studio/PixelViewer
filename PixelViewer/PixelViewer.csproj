@@ -73,11 +73,14 @@
 		<AvaloniaResource Include="PixelViewer.ico" />
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
+		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
+		<AvaloniaResource Include="Strings/Default-OSX.xaml" />
+		<AvaloniaResource Include="Strings/zh-CN.xaml" />
+		<AvaloniaResource Include="Strings/zh-CN-Linux.xaml" />
+		<AvaloniaResource Include="Strings/zh-CN-OSX.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW-OSX.xaml" />
-		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
-		<AvaloniaResource Include="Strings/Default-OSX.xaml" />
 		<AvaloniaResource Include="Styles/Base.axaml" />
 		<AvaloniaResource Include="Styles/Dark.xaml" />
 		<AvaloniaResource Include="Styles/Icons.axaml" />

@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="https://github.com/avaloniaui" 
+					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+					xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+	<!-- SessionControl -->
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">点击</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以开启图像文件。</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在文件管理器中显示文件</sys:String>
+
+</ResourceDictionary>
