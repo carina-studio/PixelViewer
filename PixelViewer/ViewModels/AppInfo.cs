@@ -1,4 +1,5 @@
-﻿using CarinaStudio.AppSuite.ViewModels;
+using CarinaStudio;
+using CarinaStudio.AppSuite.ViewModels;
 using System;
 
 namespace Carina.PixelViewer.ViewModels
@@ -13,18 +14,23 @@ namespace Carina.PixelViewer.ViewModels
 
 
         // URI of privacy policy.
-        public override Uri? PrivacyPolicyUri => this.Application.CultureInfo.ToString() switch
+        public override Uri? PrivacyPolicyUri => this.Application.PrivacyPolicyVersion.Let(it =>
         {
-            "zh-TW" => new Uri("https://carina-studio.github.io/PixelViewer/privacy_policy_zh-TW.html"),
-            _ => new Uri("https://carina-studio.github.io/PixelViewer/privacy_policy.html"),
-        };
-
+            if (it != null)
+                return new Uri($"https://carinastudio.azurewebsites.net/Documents/PixelViewer/PrivacyPolicy?version={it.Major}.{it.Minor}");
+            return new Uri($"https://carinastudio.azurewebsites.net/Documents/PixelViewer/PrivacyPolicy");
+        });
 
         // URI of User Agreement.
-        public override Uri? UserAgreementUri => this.Application.CultureInfo.ToString() switch
+        public override Uri? UserAgreementUri => this.Application.UserAgreementVersion.Let(it =>
         {
-            "zh-TW" => new Uri("https://carina-studio.github.io/PixelViewer/user_agreement_zh-TW.html"),
-            _ => new Uri("https://carina-studio.github.io/PixelViewer/user_agreement.html"),
-        };
+            if (it != null)
+                return new Uri($"https://carinastudio.azurewebsites.net/Documents/PixelViewer/UserAgreement?version={it.Major}.{it.Minor}");
+            return new Uri($"https://carinastudio.azurewebsites.net/Documents/PixelViewer/UserAgreement");
+        });
+
+
+        /// <inheritdoc/>
+        public override Uri? WebsiteUri => new Uri("https://carinastudio.azurewebsites.net/PixelViewer/");
     }
 }
