@@ -89,17 +89,45 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="rowStride">Row stride in bytes.</param>
 		public ImagePlaneOptions(int effectiveBits, int pixelStride, int rowStride)
 		{
+			this.BlackLevel = null;
 			this.EffectiveBits = effectiveBits;
 			this.PixelStride = pixelStride;
 			this.RowStride = rowStride;
+			this.WhiteLevel = null;
 		}
+
+
+		/// <summary>
+		/// Initialize fields in <see cref="ImagePlaneOptions"/> structure.
+		/// </summary>
+		/// <param name="effectiveBits">Effective bits to render color in each pixel.</param>
+		/// <param name="blackLevel">Black level.</param>
+		/// <param name="whiteLevel">White level.</param>
+		/// <param name="pixelStride">Pixel stride in bytes.</param>
+		/// <param name="rowStride">Row stride in bytes.</param>
+		public ImagePlaneOptions(int effectiveBits, uint blackLevel, uint whiteLevel, int pixelStride, int rowStride)
+		{
+			this.BlackLevel = blackLevel;
+			this.EffectiveBits = effectiveBits;
+			this.PixelStride = pixelStride;
+			this.RowStride = rowStride;
+			this.WhiteLevel = whiteLevel;
+		}
+
+
+		/// <summary>
+		/// Black level.
+		/// </summary>
+		public uint? BlackLevel { get; set; }
 
 
 		/// <inheritdoc/>
 		public bool Equals(ImagePlaneOptions options) =>
-			this.EffectiveBits == options.EffectiveBits
+			this.BlackLevel == options.BlackLevel
+			&& this.EffectiveBits == options.EffectiveBits
 			&& this.PixelStride == options.PixelStride
-			&& this.RowStride == options.RowStride;
+			&& this.RowStride == options.RowStride
+			&& this.WhiteLevel == options.WhiteLevel;
 
 
 		/// <inheritdoc/>
@@ -142,6 +170,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Row stride in bytes.
 		/// </summary>
 		public int RowStride { get; set; }
+
+
+		/// <summary>
+		/// White level.
+		/// </summary>
+		public uint? WhiteLevel { get; set; }
 	}
 
 

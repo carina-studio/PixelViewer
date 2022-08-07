@@ -58,9 +58,39 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid row stride: {rowStride}.");
 
 			// prepare conversion
-			var bitsCombinationFunc = renderingOptions.ByteOrdering == ByteOrdering.BigEndian
-				? new Func<byte, byte, ushort>((b1, b2) => (ushort)(((b1 << 2) | (b2 & 0x3)) << 6))
-				: new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 | ((b2 & 0x3) << 8)) << 6));
+			var blackLevel = planeOptions[0].BlackLevel.GetValueOrDefault();
+			var whiteLevel = planeOptions[0].WhiteLevel ?? 1023;
+			if (blackLevel >= whiteLevel || whiteLevel > 1023)
+				throw new ArgumentException($"Invalid black/white level: {blackLevel}, {whiteLevel}.");
+			var bitsCombinationFunc = (blackLevel == 0 && whiteLevel == 1023)
+				? Global.Run(() =>
+				{
+					return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
+						? new Func<byte, byte, ushort>((b1, b2) => (ushort)(((b1 << 2) | (b2 & 0x3)) << 6))
+						: new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 | ((b2 & 0x3) << 8)) << 6));
+				})
+				: Global.Run(() =>
+				{
+					var correctedColors = new ushort[1024].Also(it =>
+					{
+						var scale = 1023.0 / (whiteLevel - blackLevel);
+						for (var i = whiteLevel; i > blackLevel; --i)
+							it[i] = (ushort)((i - blackLevel) * scale + 0.5);
+						for (var i = it.Length - 1; i > whiteLevel; --i)
+							it[i] = 1023;
+					});
+					return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
+						? new Func<byte, byte, ushort>((b1, b2) => 
+						{
+							var color = correctedColors[(b1 << 2) | (b2 & 0x3)];
+							return (ushort)(color << 6);
+						})
+						: new Func<byte, byte, ushort>((b1, b2) => 
+						{
+							var color = correctedColors[b1 | ((b2 & 0x3) << 8)];
+							return (ushort)(color << 6);
+						});
+				});
 
 			// render
 			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);

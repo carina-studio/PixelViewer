@@ -37,32 +37,91 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <param name="byteOrdering">Byte ordering.</param>
 		/// <param name="effectiveBits">Effective bits, range is [9, 16].</param>
 		/// <returns>Extraction function.</returns>
-		protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits)
+		protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits) =>
+			this.Create16BitColorExtraction(byteOrdering, effectiveBits, 0, (uint)(1 << effectiveBits) - 1);
+
+
+		/// <summary>
+		/// Create function to extract from [9, 16]-bit data to 16-bit data.
+		/// </summary>
+		/// <param name="byteOrdering">Byte ordering.</param>
+		/// <param name="effectiveBits">Effective bits, range is [9, 16].</param>
+		/// <param name="blackLevel">Black level.</param>
+		/// <param name="whiteLevel">White level.</param>
+		/// <returns>Extraction function.</returns>
+		protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits, uint blackLevel, uint whiteLevel)
 		{
 			if (effectiveBits < 9 || effectiveBits > 16)
 				throw new ArgumentOutOfRangeException(nameof(effectiveBits));
+			if (blackLevel < 0 || blackLevel >= whiteLevel)
+				throw new ArgumentOutOfRangeException(nameof(blackLevel));
+			if (whiteLevel > (1 << effectiveBits) - 1)
+				throw new ArgumentOutOfRangeException(nameof(whiteLevel));
 			if (effectiveBits == 16)
 			{
-				return byteOrdering == ByteOrdering.LittleEndian
-					? (b1, b2) => (ushort)((b2 << 8) | b1)
-					: (b1, b2) => (ushort)((b1 << 8) | b2);
+				if (blackLevel == 0 && whiteLevel == 65535)
+				{
+					return byteOrdering == ByteOrdering.LittleEndian
+						? (b1, b2) => (ushort)((b2 << 8) | b1)
+						: (b1, b2) => (ushort)((b1 << 8) | b2);
+				}
+				else
+				{
+					var correctedColors = new ushort[65536].Also(it =>
+					{
+						var scale = 65535.0 / (whiteLevel - blackLevel);
+						for (var i = whiteLevel; i > blackLevel; --i)
+							it[i] = (ushort)((i - blackLevel) * scale + 0.5);
+						for (var i = it.Length - 1; i > whiteLevel; --i)
+							it[i] = 65535;
+					});
+					return byteOrdering == ByteOrdering.LittleEndian
+						? (b1, b2) => correctedColors[(ushort)((b2 << 8) | b1)]
+						: (b1, b2) => correctedColors[(ushort)((b1 << 8) | b2)];
+				}
 			}
 			else
 			{
 				var effectiveBitsShiftCount = (16 - effectiveBits);
 				var effectiveBitsMask = (0xffff >> effectiveBitsShiftCount);
 				var paddingBitsMask = (0xffff >> effectiveBits);
-				return byteOrdering == ByteOrdering.LittleEndian
-					? (b1, b2) =>
+				if (blackLevel == 0 && whiteLevel == (1 << effectiveBits) - 1)
+				{
+					return byteOrdering == ByteOrdering.LittleEndian
+						? (b1, b2) =>
+						{
+							var value = (b2 << 8) | b1;
+							return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+						}
+						: (b1, b2) =>
+						{
+							var value = (b1 << 8) | b2;
+							return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+						};
+				}
+				else
+				{
+					var correctedColors = new ushort[1 << effectiveBits].Also(it =>
 					{
-						var value = (b2 << 8) | b1;
-						return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
-					}
-					: (b1, b2) =>
-					{
-						var value = (b1 << 8) | b2;
-						return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
-					};
+						var maxColor = (ushort)(it.Length - 1);
+						var scale = (double)maxColor / (whiteLevel - blackLevel);
+						for (var i = whiteLevel; i > blackLevel; --i)
+							it[i] = (ushort)((i - blackLevel) * scale + 0.5);
+						for (var i = it.Length - 1; i > whiteLevel; --i)
+							it[i] = maxColor;
+					});
+					return byteOrdering == ByteOrdering.LittleEndian
+						? (b1, b2) =>
+						{
+							var value = correctedColors[(b2 << 8) | b1];
+							return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+						}
+						: (b1, b2) =>
+						{
+							var value = correctedColors[(b1 << 8) | b2];
+							return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+						};
+				}
 			}
 		}
 

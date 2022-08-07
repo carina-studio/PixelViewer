@@ -33,7 +33,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
 
 			// prepare conversion
-			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits);
+			var blackLevel = planeOptions[0].BlackLevel.GetValueOrDefault();
+			var whiteLevel = planeOptions[0].WhiteLevel ?? (uint)(1 << effectiveBits) - 1;
+			if (blackLevel >= whiteLevel || whiteLevel >= (1 << effectiveBits))
+				throw new ArgumentException($"Invalid black/white level: {blackLevel}, {whiteLevel}.");
+			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits, blackLevel, whiteLevel);
 
 			// render
 			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
