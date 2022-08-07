@@ -92,13 +92,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="../FFmpeg/5.0/$(RuntimeIdentifier)/*" Link="FFmpeg/%(Filename)%(Extension)">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<ExcludeFromSingleFile>True</ExcludeFromSingleFile>
-		</Content>
-	</ItemGroup>
 	
 	<ItemGroup>
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
