@@ -50,6 +50,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             var imageWidth = 0;
             var imageHeight = 0;
             var orientation = 0;
+            var blackLevel = 0u;
+            var whiteLevel = 0u;
             var effectiveBits = 0;
             var pixelStride = 0;
             var rowStride = 0;
@@ -209,10 +211,26 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                     if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
                                         cfaLayout = ushortData[0];
                                     break;
+                                case 0xc61a: // BlackLevel
+                                    if (isFullSizeImage)
+                                    {
+                                        if (entryReader.CurrentEntryType == IfdEntryType.UInt16 
+                                            && entryReader.TryGetEntryData(out ushortData)
+                                            && ushortData != null)
+                                        {
+                                            blackLevel = ushortData[0];
+                                        }
+                                        else if (entryReader.CurrentEntryType == IfdEntryType.UInt32
+                                            && entryReader.TryGetEntryData(out uintData)
+                                            && uintData != null)
+                                        {
+                                            blackLevel = uintData[0];
+                                        }
+                                    }
+                                    break;
                                 case 0xc61d: // WhiteLevel
                                     if (isFullSizeImage)
                                     {
-                                        var whiteLevel = 0u;
                                         if (entryReader.CurrentEntryType == IfdEntryType.UInt16 
                                             && entryReader.TryGetEntryData(out ushortData)
                                             && ushortData != null)
@@ -417,6 +435,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 profile.UseLinearColorSpace = true;
                 profile.DataOffset = imageDataOffset;
                 profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);
+                profile.BlackLevels = new uint[ImageFormat.MaxPlaneCount].Also(it => it[0] = blackLevel);
+                profile.WhiteLevels = new uint[ImageFormat.MaxPlaneCount].Also(it => it[0] = whiteLevel);
                 profile.Height = imageHeight;
                 profile.Orientation = Tiff.FromTiffOrientation(orientation);
                 profile.PixelStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = pixelStride);

@@ -159,6 +159,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">应用程序选项…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重置至配置参数</sys:String>
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer 排列方式</sys:String>
+	<sys:String x:Key="String/SessionControl.BlackLevel">黑色值</sys:String>
 	<sys:String x:Key="String/SessionControl.BlueColorGain">蓝色增益</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">亮度及对比</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度：{0}</sys:String>
@@ -247,6 +248,7 @@
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">图像绘制内存使用总量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用介面回应时间</sys:String>
 	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">视为线性色彩空间</sys:String>
+	<sys:String x:Key="String/SessionControl.WhiteLevel">白色值</sys:String>
 	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV 至 RGB 转换</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">缩小 (Ctrl-)</sys:String>

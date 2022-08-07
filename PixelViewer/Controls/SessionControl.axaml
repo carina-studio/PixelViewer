@@ -789,6 +789,14 @@
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
+								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels1}">
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="0" Value="{Binding BlackLevel1, Mode=TwoWay}"/>
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="1" Value="{Binding WhiteLevel1, Mode=TwoWay}"/>
+								</StackPanel>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane1}"/>
@@ -804,6 +812,14 @@
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
+								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels2}">
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="0" Value="{Binding BlackLevel2, Mode=TwoWay}"/>
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="1" Value="{Binding WhiteLevel2, Mode=TwoWay}"/>
+								</StackPanel>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane2}"/>
@@ -819,6 +835,14 @@
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
 								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
+								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels3}">
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="0" Value="{Binding BlackLevel3, Mode=TwoWay}"/>
+									<Separator Classes="Dialog_Separator"/>
+									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="1" Value="{Binding WhiteLevel3, Mode=TwoWay}"/>
+								</StackPanel>
 							</StackPanel>
 						</Expander>
 						<Separator Classes="Dialog_Separator" IsVisible="{Binding HasImagePlane3}"/>

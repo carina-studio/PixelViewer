@@ -32,12 +32,14 @@ namespace Carina.PixelViewer.Media.Profiles
         static volatile IApplication? app;
         static volatile ImageRenderingProfile? defaultProfile;
         static volatile string? directoryPath;
+        static readonly IList<uint> emptyBlackLevels = new uint[4].AsReadOnly();
         static readonly IList<int> emptyEffectiveBits = new int[4].AsReadOnly();
         static volatile ILogger? logger;
 
 
         // Fields.
         BayerPattern bayerPattern;
+        IList<uint> blackLevels = emptyBlackLevels;
         double blueColorGain = 1.0;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         ColorSpace colorSpace = Media.ColorSpace.Default;
@@ -55,6 +57,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
         bool useLinearColorSpace;
+        IList<uint> whiteLevels = emptyBlackLevels;
         int width = 1;
         YuvToBgraConverter yuvToBgraConverter = YuvToBgraConverter.Default;
 
@@ -107,6 +110,25 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 this.bayerPattern = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BayerPattern)));
+            }
+        }
+
+
+        // Black level.
+        public IList<uint> BlackLevels
+        {
+            get => this.blackLevels;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.blackLevels.SequenceEqual(value))
+                    return;
+                if (value.Count != ImageFormat.MaxPlaneCount)
+                    throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
+                this.blackLevels = value.ToArray().AsReadOnly();
+                this.PropertyChanged?.Invoke(this, new(nameof(BlackLevels)));
             }
         }
 
@@ -553,6 +575,38 @@ namespace Carina.PixelViewer.Media.Profiles
                     profile.effectiveBits = array.AsReadOnly();
                 }
 
+                // get black levels
+                if (rootElement.TryGetProperty(nameof(BlackLevels), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+                {
+                    var array = new uint[ImageFormat.MaxPlaneCount];
+                    var index = 0;
+                    foreach (var jsonValue in jsonProperty.EnumerateArray())
+                    {
+                        if (jsonValue.TryGetUInt32(out var uintValue))
+                            array[index] = uintValue;
+                        ++index;
+                        if (index >= array.Length)
+                            break;
+                    }
+                    profile.blackLevels = array.AsReadOnly();
+                }
+
+                // get white levels
+                if (rootElement.TryGetProperty(nameof(WhiteLevels), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+                {
+                    var array = new uint[ImageFormat.MaxPlaneCount];
+                    var index = 0;
+                    foreach (var jsonValue in jsonProperty.EnumerateArray())
+                    {
+                        if (jsonValue.TryGetUInt32(out var uintValue))
+                            array[index] = uintValue;
+                        ++index;
+                        if (index >= array.Length)
+                            break;
+                    }
+                    profile.whiteLevels = array.AsReadOnly();
+                }
+
                 // get pixel strides
                 if (rootElement.TryGetProperty(nameof(PixelStrides), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
                 {
@@ -776,6 +830,16 @@ namespace Carina.PixelViewer.Media.Profiles
                 for (var i = 0; i < format.PlaneCount; ++i)
                     jsonWriter.WriteNumberValue(this.effectiveBits[i]);
                 jsonWriter.WriteEndArray();
+                jsonWriter.WritePropertyName(nameof(BlackLevels));
+                jsonWriter.WriteStartArray();
+                for (var i = 0; i < format.PlaneCount; ++i)
+                    jsonWriter.WriteNumberValue(this.blackLevels[i]);
+                jsonWriter.WriteEndArray();
+                jsonWriter.WritePropertyName(nameof(WhiteLevels));
+                jsonWriter.WriteStartArray();
+                for (var i = 0; i < format.PlaneCount; ++i)
+                    jsonWriter.WriteNumberValue(this.whiteLevels[i]);
+                jsonWriter.WriteEndArray();
                 jsonWriter.WritePropertyName(nameof(PixelStrides));
                 jsonWriter.WriteStartArray();
                 for (var i = 0; i < format.PlaneCount; ++i)
@@ -832,6 +896,25 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             if (this.Type == ImageRenderingProfileType.Default)
                 throw new InvalidOperationException("Cannot modify default profile.");
+        }
+
+
+        // White level.
+        public IList<uint> WhiteLevels
+        {
+            get => this.whiteLevels;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.whiteLevels.SequenceEqual(value))
+                    return;
+                if (value.Count != ImageFormat.MaxPlaneCount)
+                    throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
+                this.whiteLevels = value.ToArray().AsReadOnly();
+                this.PropertyChanged?.Invoke(this, new(nameof(WhiteLevels)));
+            }
         }
 
 

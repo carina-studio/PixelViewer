@@ -15,7 +15,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="BayerPattern10MipiImageRenderer"/> instance.
 		/// </summary>
-		public BayerPattern10MipiImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_10_MIPI", true, new ImagePlaneDescriptor(0, 10, 10), new string[]{ "RAW10" }))
+		public BayerPattern10MipiImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_10_MIPI", true, new ImagePlaneDescriptor(0, 10, 10, true), new string[]{ "RAW10" }))
 		{ }
 
 

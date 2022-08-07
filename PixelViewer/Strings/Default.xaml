@@ -194,6 +194,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer pattern</sys:String>
+	<sys:String x:Key="String/SessionControl.BlackLevel">Black level</sys:String>
 	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue gain</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness and Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness: {0}</sys:String>
@@ -282,6 +283,7 @@
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">User interface response time</sys:String>
 	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">Treat as linear color space</sys:String>
+	<sys:String x:Key="String/SessionControl.WhiteLevel">White level</sys:String>
 	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV to RGB conversion</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>

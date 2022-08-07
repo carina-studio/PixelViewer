@@ -1,5 +1,4 @@
 ﻿using Avalonia;
-using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Carina.PixelViewer.Media;
@@ -14,7 +13,6 @@ using CarinaStudio.Animation;
 using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
-using CarinaStudio.Data.Converters;
 using CarinaStudio.IO;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
@@ -25,7 +23,6 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -228,6 +225,18 @@ namespace Carina.PixelViewer.ViewModels
 		public const double MinRenderingParametersPanelSize = 200;
 
 
+		/// <summary>
+		/// Property of <see cref="AreAdjustableBlackWhiteLevels1"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels1Property = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels1));
+		/// <summary>
+		/// Property of <see cref="AreAdjustableBlackWhiteLevels2"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels2Property = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels2));
+		/// <summary>
+		/// Property of <see cref="AreAdjustableBlackWhiteLevels3"/>.
+		/// </summary>
+		public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels3Property = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels3));
 		/// <summary>
 		/// Property of <see cref="BayerPattern"/>.
 		/// </summary>
@@ -708,6 +717,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly List<ActivationToken> activationTokens = new List<ActivationToken>();
 		IDisposable? avaQuarterSizeRenderedImageMemoryUsageToken;
 		IDisposable? avaRenderedImageMemoryUsageToken;
+		readonly uint[] blackLevels = new uint[ImageFormat.MaxPlaneCount];
 		WriteableBitmap? cachedAvaQuarterSizeRenderedImage;
 		IDisposable? cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
 		WriteableBitmap? cachedAvaRenderedImage;
@@ -782,6 +792,7 @@ namespace Carina.PixelViewer.ViewModels
 		readonly ScheduledAction updateImageDisplaySizeAction;
 		readonly ScheduledAction updateIsFilteringImageNeededAction;
 		readonly ScheduledAction updateIsProcessingImageAction;
+		readonly uint[] whiteLevels = new uint[ImageFormat.MaxPlaneCount];
 
 
 		/// <summary>
@@ -1233,6 +1244,8 @@ namespace Carina.PixelViewer.ViewModels
 				for (var i = this.ImageRenderer.Format.PlaneCount - 1; i >= 0; --i)
 				{
 					this.ChangeEffectiveBits(i, profile.EffectiveBits[i]);
+					this.ChangeBlackLevel(i, profile.BlackLevels[i]);
+					this.ChangeWhiteLevel(i, profile.WhiteLevels[i]);
 					this.ChangePixelStride(i, profile.PixelStrides[i]);
 					this.ChangeRowStride(i, profile.RowStrides[i]);
 				}
@@ -1284,12 +1297,60 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
+		/// Check whether black/white levels for 1st image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
+		/// </summary>
+		public bool AreAdjustableBlackWhiteLevels1 { get => this.GetValue(AreAdjustableBlackWhiteLevels1Property); }
+
+
+		/// <summary>
+		/// Check whether black/white levels for 2nd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
+		/// </summary>
+		public bool AreAdjustableBlackWhiteLevels2 { get => this.GetValue(AreAdjustableBlackWhiteLevels2Property); }
+
+
+		/// <summary>
+		/// Check whether black/white levels for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
+		/// </summary>
+		public bool AreAdjustableBlackWhiteLevels3 { get => this.GetValue(AreAdjustableBlackWhiteLevels3Property); }
+
+
+		/// <summary>
 		/// Get or set <see cref="BayerPattern"/> for rendered image.
 		/// </summary>
 		public BayerPattern BayerPattern
 		{
 			get => this.GetValue(BayerPatternProperty);
 			set => this.SetValue(BayerPatternProperty, value);
+		}
+
+
+		/// <summary>
+		/// Get or set black level of 1st image plane.
+		/// </summary>
+		public uint BlackLevel1
+		{
+			get => this.blackLevels[0];
+			set => this.ChangeBlackLevel(0, value);
+		}
+
+
+		/// <summary>
+		/// Get or set black level of 2nd image plane.
+		/// </summary>
+		public uint BlackLevel2
+		{
+			get => this.blackLevels[1];
+			set => this.ChangeBlackLevel(1, value);
+		}
+
+
+		/// <summary>
+		/// Get or set black level of 3rd image plane.
+		/// </summary>
+		public uint BlackLevel3
+		{
+			get => this.blackLevels[2];
+			set => this.ChangeBlackLevel(2, value);
 		}
 
 
@@ -1377,6 +1438,19 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Change black level of given image plane.
+		void ChangeBlackLevel(int index, uint blackLevel)
+		{
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			if (this.blackLevels[index] == blackLevel)
+				return;
+			this.blackLevels[index] = blackLevel;
+			this.OnBlackLevelChanged(index);
+			this.renderImageAction.Reschedule(RenderImageDelay);
+		}
+
+
 		// Change effective bits of given image plane.
 		void ChangeEffectiveBits(int index, int effectiveBits)
 		{
@@ -1412,6 +1486,19 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			this.rowStrides[index] = rowStride;
 			this.OnRowStrideChanged(index);
+			this.renderImageAction.Reschedule(RenderImageDelay);
+		}
+
+
+		// Change white level of given image plane.
+		void ChangeWhiteLevel(int index, uint whiteLevel)
+		{
+			this.VerifyAccess();
+			this.VerifyDisposed();
+			if (this.whiteLevels[index] == whiteLevel)
+				return;
+			this.whiteLevels[index] = whiteLevel;
+			this.OnWhiteLevelChanged(index);
 			this.renderImageAction.Reschedule(RenderImageDelay);
 		}
 
@@ -2805,6 +2892,16 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Raise PropertyChanged event for black level.
+		void OnBlackLevelChanged(int index) => this.OnPropertyChanged(index switch
+		{
+			0 => nameof(this.BlackLevel1),
+			1 => nameof(this.BlackLevel2),
+			2 => nameof(this.BlackLevel3),
+			_ => throw new ArgumentOutOfRangeException(),
+		});
+
+
 		// Raise PropertyChanged event for effectie bits.
 		void OnEffectiveBitsChanged(int index) => this.OnPropertyChanged(index switch
 		{
@@ -3252,6 +3349,16 @@ namespace Carina.PixelViewer.ViewModels
 		}
 
 
+		// Raise PropertyChanged event for white level.
+		void OnWhiteLevelChanged(int index) => this.OnPropertyChanged(index switch
+		{
+			0 => nameof(this.WhiteLevel1),
+			1 => nameof(this.WhiteLevel2),
+			2 => nameof(this.WhiteLevel3),
+			_ => throw new ArgumentOutOfRangeException(),
+		});
+
+
         // Open given file as image data source.
         async Task OpenSourceFile(string? fileName)
 		{
@@ -3600,6 +3707,13 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				this.SetValue(i switch
 				{
+					0 => AreAdjustableBlackWhiteLevels1Property,
+					1 => AreAdjustableBlackWhiteLevels2Property,
+					2 => AreAdjustableBlackWhiteLevels3Property,
+					_ => throw new ArgumentException(),
+				}, planeDescriptors[i].AreAdjustableBlackWhiteLevels);
+				this.SetValue(i switch
+				{
 					0 => IsAdjustableEffectiveBits1Property,
 					1 => IsAdjustableEffectiveBits2Property,
 					2 => IsAdjustableEffectiveBits3Property,
@@ -3623,9 +3737,21 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					var planeOptions = planeOptionsList[i];
 					this.effectiveBits[i] = planeOptions.EffectiveBits;
+					if (planeOptions.BlackLevel.HasValue && planeOptions.WhiteLevel.HasValue)
+					{
+						this.blackLevels[i] = planeOptions.BlackLevel.GetValueOrDefault();
+						this.whiteLevels[i] = planeOptions.WhiteLevel.GetValueOrDefault();
+					}
+					else
+					{
+						this.blackLevels[i] = 0;
+						this.whiteLevels[i] = (uint)(1 << planeOptions.EffectiveBits) - 1;
+					}
 					this.pixelStrides[i] = planeOptions.PixelStride;
 					this.rowStrides[i] = planeOptions.RowStride;
 					this.OnEffectiveBitsChanged(i);
+					this.OnBlackLevelChanged(i);
+					this.OnWhiteLevelChanged(i);
 					this.OnPixelStrideChanged(i);
 					this.OnRowStrideChanged(i);
 				}
@@ -3637,6 +3763,11 @@ namespace Carina.PixelViewer.ViewModels
 					planeOptionsList[i] = planeOptionsList[i].Let((it) =>
 					{
 						it.EffectiveBits = this.effectiveBits[i];
+						if (planeDescriptors[i].AreAdjustableBlackWhiteLevels)
+						{
+							it.BlackLevel = this.blackLevels[i];
+							it.WhiteLevel = this.whiteLevels[i];
+						}
 						it.PixelStride = this.pixelStrides[i];
 						it.RowStride = this.rowStrides[i];
 						return it;
@@ -4319,6 +4450,8 @@ namespace Carina.PixelViewer.ViewModels
 			var width = 1;
 			var height = 1;
 			var effectiveBits = new int[this.effectiveBits.Length];
+			var blackLevels = new uint[this.blackLevels.Length];
+			var whiteLevels = new uint[this.whiteLevels.Length];
 			var pixelStrides = new int[this.pixelStrides.Length];
 			var rowStrides = new int[this.rowStrides.Length];
 			var rGain = 1.0;
@@ -4351,6 +4484,30 @@ namespace Carina.PixelViewer.ViewModels
 						effectiveBits[index] = intValue;
 					++index;
 					if (index >= this.effectiveBits.Length)
+						break;
+				}
+			}
+			if (savedState.TryGetProperty("BlackLevels", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+			{
+				var index = 0;
+				foreach (var jsonValue in jsonProperty.EnumerateArray())
+				{
+					if (jsonValue.TryGetUInt32(out var uintValue))
+						blackLevels[index] = uintValue;
+					++index;
+					if (index >= this.blackLevels.Length)
+						break;
+				}
+			}
+			if (savedState.TryGetProperty("WhiteLevels", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.Array)
+			{
+				var index = 0;
+				foreach (var jsonValue in jsonProperty.EnumerateArray())
+				{
+					if (jsonValue.TryGetUInt32(out var uintValue))
+						whiteLevels[index] = uintValue;
+					++index;
+					if (index >= this.blackLevels.Length)
 						break;
 				}
 			}
@@ -4472,6 +4629,10 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(ImageHeightProperty, height);
 			for (var i = effectiveBits.Length - 1; i >= 0; --i)
 				this.ChangeEffectiveBits(i, effectiveBits[i]);
+			for (var i = blackLevels.Length - 1; i >= 0; --i)
+				this.ChangeBlackLevel(i, blackLevels[i]);
+			for (var i = whiteLevels.Length - 1; i >= 0; --i)
+				this.ChangeWhiteLevel(i, whiteLevels[i]);
 			for (var i = pixelStrides.Length - 1; i >= 0; --i)
 				this.ChangePixelStride(i, pixelStrides[i]);
 			for (var i = rowStrides.Length - 1; i >= 0; --i)
@@ -4809,6 +4970,16 @@ namespace Carina.PixelViewer.ViewModels
 			writer.WritePropertyName("EffectiveBits");
 			writer.WriteStartArray();
 			foreach (var n in this.effectiveBits)
+				writer.WriteNumberValue(n);
+			writer.WriteEndArray();
+			writer.WritePropertyName("BlackLevels");
+			writer.WriteStartArray();
+			foreach (var n in this.blackLevels)
+				writer.WriteNumberValue(n);
+			writer.WriteEndArray();
+			writer.WritePropertyName("WhiteLevels");
+			writer.WriteStartArray();
+			foreach (var n in this.whiteLevels)
 				writer.WriteNumberValue(n);
 			writer.WriteEndArray();
 			writer.WritePropertyName("PixelStrides");
@@ -5333,6 +5504,36 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			get => this.GetValue(VibranceAdjustmentProperty);
 			set => this.SetValue(VibranceAdjustmentProperty, value);
+		}
+
+
+		/// <summary>
+		/// Get or set white level of 1st image plane.
+		/// </summary>
+		public uint WhiteLevel1
+		{
+			get => this.whiteLevels[0];
+			set => this.ChangeWhiteLevel(0, value);
+		}
+
+
+		/// <summary>
+		/// Get or set white level of 2nd image plane.
+		/// </summary>
+		public uint WhiteLevel2
+		{
+			get => this.whiteLevels[1];
+			set => this.ChangeWhiteLevel(1, value);
+		}
+
+
+		/// <summary>
+		/// Get or set white level of 3rd image plane.
+		/// </summary>
+		public uint WhiteLevel3
+		{
+			get => this.whiteLevels[2];
+			set => this.ChangeWhiteLevel(2, value);
 		}
 
 
