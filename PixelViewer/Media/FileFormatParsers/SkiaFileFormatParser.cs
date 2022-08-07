@@ -2,7 +2,6 @@ using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using CarinaStudio;
 using SkiaSharp;
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,21 +125,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 // load ICC profile
                 try
                 {
-                    if (iccProfileData == null)
-                    {
-                        colorSpaceFromIccProfile = await Task.Run(async () =>
-                        {
-                            try
-                            {
-                                return await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
-                            }
-                            finally
-                            {
-                                stream.Position = position;
-                            }
-                        });
-                    }
-                    else
+                    if (iccProfileData != null)
                     {
                         using var iccProfileStream = new MemoryStream(iccProfileData);
                         colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccProfileStream, ColorSpaceSource.Embedded, cancellationToken);
