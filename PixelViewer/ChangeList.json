@@ -1,22 +1,21 @@
 ﻿[
 	{
-		"Description": "Add \"Treat as linear color space\" option to enable color space conversion without numerical linear transfer.",
+		"Description": "Support specifying black and white level for Bayer Pattern format.",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "Improve performance of color space conversion.",
+		"Description": "Adding zh-CN language support.",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "Update styles of user interface.",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "Remove linear sRGB color space.",
-		"Type": "BehaviorChange"
+		"Description": "Update dependent libraries."
 	},
 	{
-		"Description": "Cancel taking luminance into account for RGB gain selection.",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "Other bug fixing.",
+		"Description": "Minor bug fixing.",
 		"Type": "BugFixing"
 	}
 ]

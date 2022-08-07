@@ -1,19 +1,18 @@
 ﻿[
 	{
-		"Description": "新增 \"視為線性色彩空間\" 選項以在色彩空間轉換時略過線性數值變換。",
+		"Description": "支援為 Bayer 排列格式指定黑色值 (Black Level) 與白色值 (White Level)。",
 		"Type": "NewFeature"
 	},
 	{
-		"Description": "提升色彩空間轉換之效能。",
+		"Description": "新增簡體中文語言支援。",
+		"Type": "NewFeature"
+	},
+	{
+		"Description": "更新使用者介面樣式。",
 		"Type": "Improvement"
 	},
 	{
-		"Description": "移除線性 sRGB 色彩空間。",
-		"Type": "BehaviorChange"
-	},
-	{
-		"Description": "取消在自動色彩增益時將亮度列入考慮。",
-		"Type": "BehaviorChange"
+		"Description": "更新相依程式庫。"
 	},
 	{
 		"Description": "其他錯誤修正。",
