@@ -4,6 +4,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "新增「重新整理」按钮以触发图像重新绘制。",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "新增简体中文语言支援。",
 		"Type": "NewFeature"
 	},

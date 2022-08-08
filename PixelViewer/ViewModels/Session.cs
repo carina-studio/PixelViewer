@@ -827,6 +827,11 @@ namespace Carina.PixelViewer.ViewModels
 					--this.FrameNumber;
 			}, this.canMoveToPreviousFrame);
 			this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSourceFile);
+			this.RenderImageCommand = new Command(() => 
+			{
+				this.ClearRenderedImage();
+				this.renderImageAction?.Reschedule();
+			}, this.GetValueAsObservable(IsSourceFileOpenedProperty));
 			this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
 			this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 			this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
@@ -4032,6 +4037,12 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(IsConvertingColorSpaceProperty, false);
 			this.SetValue(IsRenderingImageProperty, false);
 		}
+
+
+		/// <summary>
+		/// Command to request rendering image.
+		/// </summary>
+		public ICommand RenderImageCommand { get; }
 
 
 		/// <summary>

@@ -4,6 +4,10 @@
 		"Type": "NewFeature"
 	},
 	{
+		"Description": "Adding 'Refresh' button to trigger image re-rendering.",
+		"Type": "NewFeature"
+	},
+	{
 		"Description": "Adding zh-CN language support.",
 		"Type": "NewFeature"
 	},

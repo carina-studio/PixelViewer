@@ -128,6 +128,11 @@
 							<Image Classes="Icon" Source="{StaticResource Image/Icon.Save}"/>
 						</Button>
 
+						<!-- Refresh -->
+						<Button Classes="ToolBar_Button" Command="{Binding RenderImageCommand}" ToolTip.Tip="{DynamicResource String/Common.Refresh}">
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.Refresh}"/>
+						</Button>
+
 						<!-- Separator -->
 						<Separator Classes="ToolBar_Separator"/>
 
