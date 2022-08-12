@@ -48,11 +48,11 @@ class NormalizedTransferFunctionsDiagram : Control, IStyleable
     /// </summary>
     public NormalizedTransferFunctionsDiagram()
     {
-        this.GetObservable(BoundsProperty).Subscribe(_ =>
+        this.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
         {
             foreach (var transferFunc in this.attachedTransferFuncs.Keys.ToArray())
                 this.attachedTransferFuncs[transferFunc] = null;
-        });
+        }));
         this.transferFuncs.CollectionChanged += this.OnTransferFunctionsChanged;
     }
 

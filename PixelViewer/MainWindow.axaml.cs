@@ -64,7 +64,7 @@ namespace Carina.PixelViewer
 			// setup controls
 			this.baseBorder = this.FindControl<Border>(nameof(baseBorder)).AsNonNull().Also(it => 
 			{
-				it.GetObservable(BoundsProperty).Subscribe(_ =>
+				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
 				{
 					if (this.isPerformingContentRelayout)
 					{
@@ -72,7 +72,7 @@ namespace Carina.PixelViewer
 						this.isPerformingContentRelayout = false;
 						it.Padding = new Thickness();
 					}
-				});
+				}));
 			});
 
 			// setup main tab control
@@ -147,25 +147,6 @@ namespace Carina.PixelViewer
 			this.attachedActivatedSession = session;
 			session.PropertyChanged += this.OnActivatedSessionPropertyChanged;
 			this.updateTitleBarAction.Schedule();
-		}
-
-
-		/// <summary>
-		/// Check for application update.
-		/// </summary>
-		public async void CheckForAppUpdate()
-		{
-			this.VerifyAccess();
-			using var updater = new CarinaStudio.AppSuite.ViewModels.ApplicationUpdater();
-			var result = await new CarinaStudio.AppSuite.Controls.ApplicationUpdateDialog(updater)
-			{
-				CheckForUpdateWhenShowing = true
-			}.ShowDialog(this);
-			if (result == ApplicationUpdateDialogResult.ShutdownNeeded)
-			{
-				Logger.LogWarning("Shut down to continue updating");
-				this.Application.Shutdown();
-			}
 		}
 
 
@@ -733,16 +714,6 @@ namespace Carina.PixelViewer
 			// set title
 			session.CustomTitle = customTitle;
 		}
-
-
-		/// <summary>
-		/// Show application info.
-		/// </summary>
-		public async void ShowAppInfo()
-        {
-			using var appInfo = new AppInfo();
-			await new ApplicationInfoDialog(appInfo).ShowDialog(this);
-        }
 
 
 		/// <summary>

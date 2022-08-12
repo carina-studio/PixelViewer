@@ -269,17 +269,17 @@ namespace Carina.PixelViewer.Controls
 			this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
 			this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull().Also(it =>
 			{
-				it.GetObservable(BoundsProperty).Subscribe(_ =>
+				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
 				{
 					if (this.GetValue<bool>(IsPointerOverImageProperty) && this.latestPointerEventArgsOnImage != null)
 						this.SetValue<Point>(PointerPositionOnImageControlProperty, this.latestPointerEventArgsOnImage.GetCurrentPoint(it).Position);
-				});
+				}));
 			});
 			this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
 			this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull().Also(it =>
 			{
-				it.GetObservable(BoundsProperty).Subscribe(_ => this.ReportImageViewportSize());
-				it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(_ =>
+				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ => this.ReportImageViewportSize()));
+				it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(new Observer<Size>(_ =>
 				{
 					this.updateIsImageViewerScrollableAction?.Schedule();
 					if (this.targetImageViewportCenter.HasValue)
@@ -288,11 +288,11 @@ namespace Carina.PixelViewer.Controls
 						this.targetImageViewportCenter = null;
 						this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
 					}
-				});
-				it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(_ =>
+				}));
+				it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(new Observer<Size>(_ =>
 				{
 					this.updateIsImageViewerScrollableAction?.Schedule();
-				});
+				}));
 			});
 			this.imageViewerGrid = this.FindControl<Control>(nameof(imageViewerGrid)).AsNonNull().Also(it =>
 			{

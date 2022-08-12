@@ -31,7 +31,7 @@ namespace Carina.PixelViewer.Controls
             InitializeComponent();
             this.frameNumberTextBox = this.FindControl<IntegerTextBox>(nameof(frameNumberTextBox)).AsNonNull().Also(it =>
             {
-                it.GetObservable(IntegerTextBox.ValueProperty).Subscribe(_ => this.InvalidateInput());
+                it.GetObservable(IntegerTextBox.ValueProperty).Subscribe(new Observer<long?>(_ => this.InvalidateInput()));
             });
         }
 

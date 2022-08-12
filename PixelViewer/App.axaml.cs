@@ -174,13 +174,13 @@ namespace Carina.PixelViewer
 			switch ((sender as NativeMenuItem)?.CommandParameter as string)
 			{
 				case "AppInfo":
-					(this.LatestActiveMainWindow as MainWindow)?.ShowAppInfo();
+					(this.LatestActiveMainWindow as MainWindow)?.ShowApplicationInfoDialogAsync();
 					break;
 				case "AppOptions":
 					(this.LatestActiveMainWindow as MainWindow)?.ShowAppOptions();
 					break;
 				case "CheckForUpdate":
-					(this.LatestActiveMainWindow as MainWindow)?.CheckForAppUpdate();
+					(this.LatestActiveMainWindow as MainWindow)?.CheckForApplicationUpdateAsync();
 					break;
 				case "EditConfiguration":
 					(this.LatestActiveMainWindow as MainWindow)?.ShowConfigurationEditor();
