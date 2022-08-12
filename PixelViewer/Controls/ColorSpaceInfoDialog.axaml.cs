@@ -95,7 +95,7 @@ partial class ColorSpaceInfoDialog : InputDialog
         });
         this.diagramTypeComboBox = this.FindControl<ComboBox>(nameof(diagramTypeComboBox)).AsNonNull().Also(it =>
         {
-            it.GetObservable(ComboBox.SelectedIndexProperty).Subscribe(index =>
+            it.GetObservable(ComboBox.SelectedIndexProperty).Subscribe(new Observer<int>(index =>
             {
                 var diagramViews = new Control?[]{
                     this.chromaticityDiagram,
@@ -104,14 +104,14 @@ partial class ColorSpaceInfoDialog : InputDialog
                 };
                 for (var i = diagramViews.Length - 1; i >= 0; --i)
                     diagramViews[i]?.Parent?.Let(it => it.IsVisible = (i == index));
-            });
+            }));
         });
         this.greenPrimaryTextBox = this.FindControl<TextBox>(nameof(greenPrimaryTextBox)).AsNonNull();
         this.linearizationDescriptionTextBlock = this.FindControl<TextBlock>(nameof(linearizationDescriptionTextBlock));
         this.redPrimaryTextBox = this.FindControl<TextBox>(nameof(redPrimaryTextBox)).AsNonNull();
         this.nameTextBox = this.FindControl<TextBox>(nameof(nameTextBox)).AsNonNull().Also(it =>
         {
-            it.GetObservable(TextBox.TextProperty).Subscribe(_ => this.InvalidateInput());
+            it.GetObservable(TextBox.TextProperty).Subscribe(new Observer<string?>(_ => this.InvalidateInput()));
         });
         this.toLinearTransferFuncDiagram = this.FindControl<NormalizedTransferFunctionsDiagram>(nameof(toLinearTransferFuncDiagram)).AsNonNull().Also(it =>
         {
@@ -137,7 +137,7 @@ partial class ColorSpaceInfoDialog : InputDialog
         this.whitePointTextBox = this.FindControl<TextBox>(nameof(whitePointTextBox)).AsNonNull();
 
         // attach to property
-        this.GetObservable(ReferenceColorSpaceProperty).Subscribe(colorSpace =>
+        this.GetObservable(ReferenceColorSpaceProperty).Subscribe(new Observer<Media.ColorSpace?>(colorSpace =>
         {
             if (colorSpace != null)
             {
@@ -174,7 +174,7 @@ partial class ColorSpaceInfoDialog : InputDialog
                     Stroke = this.refColorSpaceTransferFuncStroke
                 });
             }
-        });
+        }));
     }
 
 
