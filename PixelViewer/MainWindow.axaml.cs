@@ -1,3 +1,5 @@
+//#define DEMO
+
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -38,7 +40,6 @@ namespace Carina.PixelViewer
 
 		// Constants.
 		const string DraggingSessionKey = "DraggingSettion";
-		const bool IsDemoMode = false;
 
 
 		// Fields.
@@ -523,32 +524,26 @@ namespace Carina.PixelViewer
 		protected override void OnOpened(EventArgs e)
 		{
 			base.OnOpened(e);
-			if (IsDemoMode)
+#if DEMO
+			this.SynchronizationContext.Post(() =>
 			{
-				this.SynchronizationContext.Post(() =>
+				this.WindowState = WindowState.Normal;
+				(this.Screens.ScreenFromWindow(this.PlatformImpl) ?? this.Screens.Primary)?.Let(screen =>
 				{
-					this.WindowState = WindowState.Normal;
-					(this.Screens.ScreenFromWindow(this.PlatformImpl) ?? this.Screens.Primary)?.Let(screen =>
-					{
-						var workingArea = screen.WorkingArea;
-						if (workingArea.Width >= 1300 && workingArea.Height >= 900)
-						{
-							this.Width = 1200;
-							this.Height = 800;
-						}
-						else if (workingArea.Width >= 1000 && workingArea.Height >= 700)
-						{
-							this.Width = 900;
-							this.Height = 600;
-						}
-						else
-						{
-							this.Width = 768;
-							this.Height = 512;
-						}
-					});
+					var workingArea = screen.WorkingArea;
+					var w = (workingArea.Width * 0.95) / 4;
+					var h = (workingArea.Height * 0.95) / 3;
+					var u = Math.Min(w, h);
+					var sysDecorSizes = this.GetSystemDecorationSizes();
+					if (Platform.IsNotMacOS)
+						u /= screen.PixelDensity;
+					this.Width = u * 4;
+					this.Height = this.ExtendClientAreaToDecorationsHint
+						? u * 3
+						: u * 3 - sysDecorSizes.Top - sysDecorSizes.Bottom;
 				});
-			}
+			});
+#endif
 		}
 
 
