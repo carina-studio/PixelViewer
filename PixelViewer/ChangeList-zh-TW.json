@@ -1,25 +1,3 @@
 ﻿[
-	{
-		"Description": "支援為 Bayer 排列格式指定黑色值 (Black Level) 與白色值 (White Level)。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增「重新整理」按鈕以觸發影像重新繪製。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "新增簡體中文語言支援。",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "更新使用者介面樣式。",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "更新相依程式庫。"
-	},
-	{
-		"Description": "其他錯誤修正。",
-		"Type": "BugFixing"
-	}
+	
 ]

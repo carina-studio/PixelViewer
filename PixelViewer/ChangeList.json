@@ -1,25 +1,3 @@
 ﻿[
-	{
-		"Description": "Support specifying black and white level for Bayer Pattern format.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Adding 'Refresh' button to trigger image re-rendering.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Adding zh-CN language support.",
-		"Type": "NewFeature"
-	},
-	{
-		"Description": "Update styles of user interface.",
-		"Type": "Improvement"
-	},
-	{
-		"Description": "Update dependent libraries."
-	},
-	{
-		"Description": "Minor bug fixing.",
-		"Type": "BugFixing"
-	}
+	
 ]
