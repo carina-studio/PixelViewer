@@ -153,7 +153,7 @@ namespace Carina.PixelViewer
 
 
 		// Load theme.
-        protected override IStyle? OnLoadTheme(ThemeMode themeMode)
+        protected override IStyle? OnLoadTheme(ThemeMode themeMode, bool useCompactUI)
         {
 			var uri = themeMode switch
 			{
