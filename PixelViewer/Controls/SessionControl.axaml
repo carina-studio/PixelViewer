@@ -923,12 +923,12 @@
 						<TextBlock Classes="StatusBar_TextBlock" IsVisible="{Binding !IsSourceFileOpened}" Text="{DynamicResource String/SessionControl.NoSourceFileOpened}"/>
 						<ToggleButton Name="fileActionsButton" Classes="StatusBar_ToggleButton" Command="{Binding $parent[UserControl].ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}">
 							<StackPanel Orientation="Horizontal">
-								<Image Classes="StatusBar_Icon">
+								<Image Classes="StatusBar_IconWithText">
 									<DrawingImage>
 										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.File.Outline}"/>
 									</DrawingImage>
 								</Image>
-								<TextBlock Text="{Binding SourceFileSizeString}"/>
+								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding SourceFileSizeString}"/>
 								<Image Classes="StatusBar_DropDownIcon">
 									<DrawingImage>
 										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.MoveUp}"/>
@@ -947,7 +947,7 @@
 								<Binding Path="HasSourceDataSize"/>
 							</MultiBinding>
 						</StackPanel.IsVisible>
-						<Image Classes="StatusBar_Icon">
+						<Image Classes="StatusBar_IconWithText">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.BinaryData}"/>
 							</DrawingImage>
@@ -960,7 +960,7 @@
 					<!-- Screen color space -->
 					<Button Classes="StatusBar_Button" Command="{Binding $parent[UserControl].ShowScreenColorSpaceInfo}" IsVisible="{Binding IsColorSpaceManagementEnabled}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.ScreenColorSpace}">
 						<StackPanel Orientation="Horizontal">
-							<Image Classes="StatusBar_Icon">
+							<Image Classes="StatusBar_IconWithText">
 								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Screen}"/>
 								</DrawingImage>
@@ -978,7 +978,7 @@
 					<!-- Saving image -->
 					<StackPanel IsVisible="{Binding IsSavingImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
-						<Image Classes="StatusBar_Icon">
+						<Image Classes="StatusBar_IconWithText">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Save.Outline}"/>
 							</DrawingImage>
@@ -989,7 +989,7 @@
 					<!-- Filtering image -->
 					<StackPanel IsVisible="{Binding IsFilteringRenderedImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
-						<Image Classes="StatusBar_Icon">
+						<Image Classes="StatusBar_IconWithText">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.ImageFilter}"/>
 							</DrawingImage>
@@ -1000,7 +1000,7 @@
 					<!-- Rendering image -->
 					<StackPanel IsVisible="{Binding IsRenderingImage}" Orientation="Horizontal">
 						<Separator Classes="StatusBar_Separator"/>
-						<Image Classes="StatusBar_Icon">
+						<Image Classes="StatusBar_IconWithText">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Waiting.Outline}"/>
 							</DrawingImage>
@@ -1017,7 +1017,7 @@
 						<!-- UI response duration -->
 						<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=IsDebugMode}" Orientation="Horizontal">
 							<Separator Classes="StatusBar_Separator"/>
-							<Image Classes="StatusBar_Icon">
+							<Image Classes="StatusBar_IconWithText">
 								<DrawingImage>
 									<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Speed.Outline}"/>
 								</DrawingImage>
@@ -1030,7 +1030,7 @@
 
 						<!-- CPU usage -->
 						<Separator Classes="StatusBar_Separator"/>
-						<Image Classes="StatusBar_Icon">
+						<Image Classes="StatusBar_IconWithText">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Cpu.Outline}"/>
 							</DrawingImage>
@@ -1042,7 +1042,7 @@
 
 						<!-- Memory usage -->
 						<Separator Classes="StatusBar_Separator"/>
-						<Image Classes="StatusBar_Icon">
+						<Image Classes="StatusBar_IconWithText">
 							<DrawingImage>
 								<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Memory.Outline}"/>
 							</DrawingImage>
