@@ -93,8 +93,14 @@ REM Build packages
         del /Q Packages\Packaging.txt
         exit
     )
-    if exist %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\ULogViewer.png (
-        del /Q %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\ULogViewer.png
+    if exist %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\PixelViewer.png (
+        del /Q %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\PixelViewer.png
+    )
+    if exist %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\PresentationFramework.dll (
+        del /Q %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\PresentationFramework.dll
+    )
+    if exist %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\System.Windows.Forms.dll (
+        del /Q %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\System.Windows.Forms.dll
     )
 
     REM Generate package
