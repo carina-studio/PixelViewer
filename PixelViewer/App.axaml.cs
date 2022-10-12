@@ -10,6 +10,7 @@ using CarinaStudio.AppSuite;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
+using CarinaStudio.Controls;
 using CarinaStudio.ViewModels;
 using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
@@ -19,6 +20,7 @@ using System.Linq;
 using System.Globalization;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CarinaStudio.AppSuite.ViewModels;
 
 namespace Carina.PixelViewer
 {
@@ -47,6 +49,16 @@ namespace Carina.PixelViewer
 
 		/// <inheritdoc/>
 		protected override bool AllowMultipleMainWindows => true;
+
+
+		/// <inheritdoc/>
+        public override ApplicationInfo CreateApplicationInfoViewModel() =>
+			new ViewModels.AppInfo();
+
+
+        /// <inheritdoc/>
+        public override ApplicationOptions CreateApplicationOptionsViewModel() =>
+			new ViewModels.AppOptions();
 
 
         /// <inheritdoc/>
@@ -174,13 +186,13 @@ namespace Carina.PixelViewer
 			switch ((sender as NativeMenuItem)?.CommandParameter as string)
 			{
 				case "AppInfo":
-					(this.LatestActiveMainWindow as MainWindow)?.ShowApplicationInfoDialogAsync();
+					this.ShowApplicationInfoDialog();
 					break;
 				case "AppOptions":
-					(this.LatestActiveMainWindow as MainWindow)?.ShowAppOptions();
+					this.ShowApplicationOptionsDialog();
 					break;
 				case "CheckForUpdate":
-					(this.LatestActiveMainWindow as MainWindow)?.CheckForApplicationUpdateAsync();
+					this.CheckForApplicationUpdate();
 					break;
 				case "EditConfiguration":
 					(this.LatestActiveMainWindow as MainWindow)?.ShowConfigurationEditor();
@@ -444,6 +456,33 @@ namespace Carina.PixelViewer
 
 		// Version of settings.
 		protected override int SettingsVersion => 8;
+
+
+		/// <inheritdoc/>
+		public override async Task ShowApplicationOptionsDialogAsync(Avalonia.Controls.Window? owner, string? sectionName)
+		{
+			owner?.ActivateAndBringToFront();
+			var dialog = new Controls.ApplicationOptionsDialog();
+			if (Enum.TryParse<Controls.ApplicationOptionsDialogSection>(sectionName, out var section))
+				dialog.InitialFocusedSection = section;
+			var result = await (owner != null
+				? dialog.ShowDialog<CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult>(owner)
+				: dialog.ShowDialog<CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult>());
+			switch (result)
+			{
+				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartApplicationNeeded:
+					this.Logger.LogWarning("Restart application");
+					if (this.IsDebugMode)
+						this.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}", this.IsRunningAsAdministrator);
+					else
+						this.Restart(App.RestoreMainWindowsArgument, this.IsRunningAsAdministrator);
+					break;
+				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
+					this.Logger.LogWarning("Restart main windows");
+					this.RestartMainWindows();
+					break;
+			}
+		}
 
 
 		/// <inheritdoc/>

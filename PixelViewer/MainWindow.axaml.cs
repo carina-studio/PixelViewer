@@ -8,7 +8,6 @@ using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
-using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Input;
@@ -300,10 +299,6 @@ namespace Carina.PixelViewer
 			// attach to activated session
 			workspace.ActivatedSession?.Let(it => this.AttachToActivatedSession(it));
 		}
-
-
-		/// <inheritdoc/>
-		protected override ApplicationInfo OnCreateApplicationInfo() => new AppInfo();
 
 
         // Detach from view-model.
@@ -708,36 +703,6 @@ namespace Carina.PixelViewer
 
 			// set title
 			session.CustomTitle = customTitle;
-		}
-
-
-		/// <summary>
-		/// Show application options.
-		/// </summary>
-		public void ShowAppOptions() => this.ShowAppOptions(ApplicationOptionsDialogSection.First);
-
-
-		/// <summary>
-		/// Show application options.
-		/// </summary>
-		/// <param name="initSection">Initial section to show.</param>
-		public async void ShowAppOptions(ApplicationOptionsDialogSection initSection)
-		{
-			this.VerifyAccess();
-			switch (await new ApplicationOptionsDialog() { InitialFocusedSection = initSection }.ShowDialog<ApplicationOptionsDialogResult>(this))
-			{
-				case ApplicationOptionsDialogResult.RestartApplicationNeeded:
-					Logger.LogWarning("Need to restart application");
-					if (this.Application.IsDebugMode)
-						this.Application.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}");
-					else
-						this.Application.Restart(App.RestoreMainWindowsArgument);
-					break;
-				case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
-					Logger.LogWarning("Need to restart main windows");
-					this.Application.RestartMainWindows();
-					break;
-			}
 		}
 
 
