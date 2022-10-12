@@ -3940,7 +3940,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (colorSpaceConvertedImageFrame != null)
 						colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
-					else if (renderedImageFrame != null)
+					if (renderedImageFrame != null)
 						renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
 				}
 				catch (Exception ex)
