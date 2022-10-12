@@ -74,7 +74,7 @@
 					</Panel>
 				</MenuItem.Icon>
 			</MenuItem>
-			<MenuItem Name="editConfigMenuItem" Command="{Binding $parent[Window].ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False"/>
+			<MenuItem Name="editConfigMenuItem" Command="{Binding $parent[UserControl].Application.ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False"/>
 			<Separator/>
 			<MenuItem Command="{Binding $parent[Window].CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" InputGesture="Ctrl+N">
 				<MenuItem.Icon>

@@ -195,7 +195,7 @@ namespace Carina.PixelViewer
 					this.CheckForApplicationUpdate();
 					break;
 				case "EditConfiguration":
-					(this.LatestActiveMainWindow as MainWindow)?.ShowConfigurationEditor();
+					this.ShowConfigurationEditor();
 					break;
 				case "Shutdown":
 					this.Shutdown();
@@ -279,6 +279,7 @@ namespace Carina.PixelViewer
 				this.Shutdown();
 				return;
 			}
+			this.UpdateSplashWindowProgress(0.1);
 
 			// remove debug menu items
 #if !DEBUG
@@ -300,14 +301,17 @@ namespace Carina.PixelViewer
 
 			// initialize file format parsers
 			Media.FileFormatParsers.FileFormatParsers.Initialize(this);
+			this.UpdateSplashWindowProgress(0.2);
 
 			// initialize color spaces
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingColorSpaces"));
 			await Media.ColorSpace.InitializeAsync(this);
+			this.UpdateSplashWindowProgress(0.6);
 
 			// initialize image rendering profiles
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
 			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
+			this.UpdateSplashWindowProgress(0.8);
 
 			// check max rendered image memory usage
 			this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB).Let(mb =>
@@ -318,6 +322,8 @@ namespace Carina.PixelViewer
 			});
 
 			// show main window
+			this.UpdateSplashWindowProgress(1);
+			await Task.Delay(300);
 			if (!this.IsRestoringMainWindowsRequested)
 				this.ShowMainWindow();
 		}
@@ -341,6 +347,15 @@ namespace Carina.PixelViewer
 #else
 			return base.OnSelectEnteringDebugMode();
 #endif
+        }
+
+
+		///<inheritdoc/>
+        protected override void OnTryExitingBackgroundMode()
+        {
+            base.OnTryExitingBackgroundMode();
+			if (this.MainWindows.IsEmpty())
+				this.ShowMainWindow();
         }
 
 
@@ -482,6 +497,22 @@ namespace Carina.PixelViewer
 					this.RestartMainWindows();
 					break;
 			}
+		}
+
+
+		/// <summary>
+		/// Show editor of application configuration.
+		/// </summary>
+		public void ShowConfigurationEditor()
+		{
+			var keys = new List<SettingKey>();
+			keys.AddRange(SettingKey.GetDefinedKeys<CarinaStudio.AppSuite.ConfigurationKeys>());
+			keys.AddRange(SettingKey.GetDefinedKeys<ConfigurationKeys>());
+			new SettingsEditorDialog()
+			{
+				SettingKeys = keys,
+				Settings = this.Configuration,
+			}.ShowDialog(this.LatestActiveMainWindow);
 		}
 
 

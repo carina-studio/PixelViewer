@@ -103,6 +103,7 @@
 		<EmbeddedResource Include="ChangeList.json" />
 		<EmbeddedResource Include="ChangeList-zh-CN.json" />
 		<EmbeddedResource Include="ChangeList-zh-TW.json" />
+		<AvaloniaResource Include="SplashWindowBackground.jpg" />
 	</ItemGroup>
 	
 </Project>

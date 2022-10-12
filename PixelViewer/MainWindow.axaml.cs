@@ -704,21 +704,5 @@ namespace Carina.PixelViewer
 			// set title
 			session.CustomTitle = customTitle;
 		}
-
-
-		/// <summary>
-		/// Show editor of application configuration.
-		/// </summary>
-		public void ShowConfigurationEditor()
-		{
-			var keys = new List<SettingKey>();
-			keys.AddRange(SettingKey.GetDefinedKeys<CarinaStudio.AppSuite.ConfigurationKeys>());
-			keys.AddRange(SettingKey.GetDefinedKeys<ConfigurationKeys>());
-			_ = new SettingsEditorDialog()
-			{
-				SettingKeys = keys,
-				Settings = this.Configuration,
-			}.ShowDialog(this);
-		}
 	}
 }
