@@ -2,6 +2,8 @@ using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.Native;
 using CarinaStudio;
+using CarinaStudio.MacOS.CoreFoundation;
+using CarinaStudio.MacOS.ImageIO;
 using System;
 using System.IO;
 using System.Threading;
@@ -96,45 +98,25 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
         var orientation = 0;
         await Task.Run(() =>
         {
-            var imageDataRef = IntPtr.Zero;
-            var imageSourceRef = IntPtr.Zero;
-            var imagePropertiesRef = IntPtr.Zero;
-            try
+            // create image source
+            using var imageSource = CGImageSource.FromStream(stream);
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            var primaryImageIndex = imageSource.PrimaryImageIndex;
+            
+            // get dimensions
+            using var imageProperties = CFObject.FromHandle(MacOS.CGImageSourceCopyPropertiesAtIndex(imageSource.Handle, (nuint)primaryImageIndex, IntPtr.Zero), true);
+            MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelWidth, out width);
+            MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelHeight, out height);
+            if (MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyOrientation, out int rawOrientation))
             {
-                // load data into memory
-                imageDataRef = MacOS.CFDataCreateMutable(stream, dataSize, cancellationToken);
-                
-                // create image source
-                imageSourceRef = MacOS.CGImageSourceCreateWithData(imageDataRef, IntPtr.Zero);
-                if (imageSourceRef == IntPtr.Zero || MacOS.CGImageSourceGetStatus(imageSourceRef) != MacOS.CGImageSourceStatus.Complete)
-                    return;
-                var primaryImageIndex = MacOS.CGImageSourceGetPrimaryImageIndex(imageSourceRef);
-                
-                // get dimensions
-                imagePropertiesRef = MacOS.CGImageSourceCopyPropertiesAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);
-                if (imagePropertiesRef == IntPtr.Zero)
-                    return;
-                MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth, out width);
-                MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight, out height);
-                if (MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyOrientation, out int rawOrientation))
+                orientation = rawOrientation switch
                 {
-                    orientation = rawOrientation switch
-                    {
-                        3 or 4 => 180,
-                        5 or 8 => 270,
-                        6 or 7 => 90,
-                        _ => 0,
-                    };
-                }
-            }
-            finally
-            {
-                if (imagePropertiesRef != IntPtr.Zero)
-                    MacOS.CFRelease(imagePropertiesRef);
-                if (imageSourceRef != IntPtr.Zero)
-                    MacOS.CFRelease(imageSourceRef);
-                if (imageDataRef != IntPtr.Zero)
-                    MacOS.CFRelease(imageDataRef);
+                    3 or 4 => 180,
+                    5 or 8 => 270,
+                    6 or 7 => 90,
+                    _ => 0,
+                };
             }
         });
 

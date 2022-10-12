@@ -1,5 +1,8 @@
 using Carina.PixelViewer.Native;
 using CarinaStudio;
+using CarinaStudio.MacOS.CoreFoundation;
+using CarinaStudio.MacOS.CoreGraphics;
+using CarinaStudio.MacOS.ImageIO;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -22,25 +25,16 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
 
 
     // Copy data from CGImage.
-    static unsafe void CopyPixelsFromCGImageToBgra32BitmapBuffer(IntPtr imageRef, IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
+    static unsafe void CopyPixelsFromCGImageToBgra32BitmapBuffer(CGImage image, IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
     {
-        var imagePixelsRef = IntPtr.Zero;
-        try
+        using var imagePixels = image.DataProvider.ToData();
+        var srcPixelStride = image.BitsPerPixel >> 3;
+        var srcRowStride = image.BytesPerRow;
+        var srcAlphaInfo = image.AlphaInfo;
+        var srcPixelFormat = image.PixelFormat;
+        var destRowStride = bitmapBuffer.RowBytes;
+        imagePixels.AsSpan().Pin(srcBaseAddr =>
         {
-            var srcDataProvider = MacOS.CGImageGetDataProvider(imageRef);
-            if (srcDataProvider == IntPtr.Zero)
-                throw new Exception($"Unable to get pixels of image.");
-            imagePixelsRef = MacOS.CGDataProviderCopyData(srcDataProvider);
-            if (imagePixelsRef == IntPtr.Zero)
-                throw new Exception($"Unable to get pixels of image.");
-            var srcBaseAddr = MacOS.CFDataGetBytePtr(imagePixelsRef);
-            if (srcBaseAddr == IntPtr.Zero)
-                throw new Exception($"Unable to get pixels of image.");
-            var srcPixelStride = (int)MacOS.CGImageGetBitsPerPixel(imageRef) >> 3;
-            var srcRowStride = (int)MacOS.CGImageGetBytesPerRow(imageRef);
-            var srcAlphaInfo = MacOS.CGImageGetAlphaInfo(imageRef);
-            var srcPixelFormat = MacOS.CGImageGetPixelFormatInfo(imageRef);
-            var destRowStride = bitmapBuffer.RowBytes;
             bitmapBuffer.Memory.Pin(destBaseAddr =>
             {
                 var packFunc = ImageProcessing.SelectBgra32Packing();
@@ -48,10 +42,10 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                 var destRowPtr = (byte*)destBaseAddr;
                 switch (srcPixelFormat)
                 {
-                    case MacOS.CGImagePixelFormatInfo.Packed:
+                    case CGImagePixelFormatInfo.Packed:
                         switch (srcAlphaInfo)
                         {
-                            case MacOS.CGImageAlphaInfo.AlphaFirst: // ARGB
+                            case CGImageAlphaInfo.AlphaFirst: // ARGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -62,7 +56,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaLast: // RGBA
+                            case CGImageAlphaInfo.AlphaLast: // RGBA
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -73,7 +67,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
+                            case CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -84,8 +78,8 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaNone: // RGB
-                            case MacOS.CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
+                            case CGImageAlphaInfo.AlphaNone: // RGB
+                            case CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -100,10 +94,10 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                 throw new NotSupportedException($"Unsupported source alpha type: {srcAlphaInfo}.");
                         }
                         break;
-                    case MacOS.CGImagePixelFormatInfo.RGB101010:
+                    case CGImagePixelFormatInfo.RGB101010:
                         switch (srcAlphaInfo)
                         {
-                            case MacOS.CGImageAlphaInfo.AlphaFirst: // ARGB
+                            case CGImageAlphaInfo.AlphaFirst: // ARGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -127,7 +121,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaLast: // RGBA
+                            case CGImageAlphaInfo.AlphaLast: // RGBA
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -151,7 +145,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
+                            case CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -168,8 +162,8 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaNone: // RGB
-                            case MacOS.CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
+                            case CGImageAlphaInfo.AlphaNone: // RGB
+                            case CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -194,35 +188,21 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                         throw new NotSupportedException($"Unsupported source pixel format: {srcPixelFormat}.");
                 }
             });
-        }
-        finally
-        {
-            if (imagePixelsRef != IntPtr.Zero)
-                MacOS.CFRelease(imagePixelsRef);
-        }
+        });
     }
 
 
     // Copy data from CGImage.
-    static unsafe void CopyPixelsFromCGImageToBgra64BitmapBuffer(IntPtr imageRef, IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
+    static unsafe void CopyPixelsFromCGImageToBgra64BitmapBuffer(CGImage image, IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
     {
-        var imagePixelsRef = IntPtr.Zero;
-        try
+        using var imagePixels = image.DataProvider.ToData();
+        var srcPixelStride = image.BitsPerPixel >> 3;
+        var srcRowStride = image.BytesPerRow;
+        var srcAlphaInfo = image.AlphaInfo;
+        var srcPixelFormat = image.PixelFormat;
+        var destRowStride = bitmapBuffer.RowBytes;
+        imagePixels.AsSpan().Pin(srcBaseAddr =>
         {
-            var srcDataProvider = MacOS.CGImageGetDataProvider(imageRef);
-            if (srcDataProvider == IntPtr.Zero)
-                throw new Exception($"Unable to get pixels of image.");
-            imagePixelsRef = MacOS.CGDataProviderCopyData(srcDataProvider);
-            if (imagePixelsRef == IntPtr.Zero)
-                throw new Exception($"Unable to get pixels of image.");
-            var srcBaseAddr = MacOS.CFDataGetBytePtr(imagePixelsRef);
-            if (srcBaseAddr == IntPtr.Zero)
-                throw new Exception($"Unable to get pixels of image.");
-            var srcPixelStride = (int)MacOS.CGImageGetBitsPerPixel(imageRef) >> 3;
-            var srcRowStride = (int)MacOS.CGImageGetBytesPerRow(imageRef);
-            var srcAlphaInfo = MacOS.CGImageGetAlphaInfo(imageRef);
-            var srcPixelFormat = MacOS.CGImageGetPixelFormatInfo(imageRef);
-            var destRowStride = bitmapBuffer.RowBytes;
             bitmapBuffer.Memory.Pin(destBaseAddr =>
             {
                 var packFunc = ImageProcessing.SelectBgra64Packing();
@@ -230,10 +210,10 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                 var destRowPtr = (byte*)destBaseAddr;
                 switch (srcPixelFormat)
                 {
-                    case MacOS.CGImagePixelFormatInfo.Packed:
+                    case CGImagePixelFormatInfo.Packed:
                         switch (srcAlphaInfo)
                         {
-                            case MacOS.CGImageAlphaInfo.AlphaFirst: // ARGB
+                            case CGImageAlphaInfo.AlphaFirst: // ARGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -244,7 +224,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaLast: // RGBA
+                            case CGImageAlphaInfo.AlphaLast: // RGBA
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -255,7 +235,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
+                            case CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -266,8 +246,8 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                                         throw new TaskCanceledException();
                                 }
                                 break;
-                            case MacOS.CGImageAlphaInfo.AlphaNone: // RGB
-                            case MacOS.CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
+                            case CGImageAlphaInfo.AlphaNone: // RGB
+                            case CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
                                     var srcPixelPtr = (byte*)srcRowPtr;
@@ -286,12 +266,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                         throw new NotSupportedException($"Unsupported source pixel format: {srcPixelFormat}.");
                 }
             });
-        }
-        finally
-        {
-            if (imagePixelsRef != IntPtr.Zero)
-                MacOS.CFRelease(imagePixelsRef);
-        }
+        });
     }
 
 
@@ -318,67 +293,42 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
         if (dataSize > 256L << 20) // 256 MB
             throw new NotSupportedException($"Data is too large to load into memory: {dataSize}");
 
-        // load image
-        var imageDataRef = IntPtr.Zero;
-        var imageSourceRef = IntPtr.Zero;
-        var imagePropertiesRef = IntPtr.Zero;
-        var imageRef = IntPtr.Zero;
-        try
+        // create image source
+        using var imageSource = CGImageSource.FromStream(imageStream);
+        if (cancellationToken.IsCancellationRequested)
+            throw new TaskCanceledException();
+        
+        // check image dimensions
+        using var imageProperties = CFObject.FromHandle(MacOS.CGImageSourceCopyPropertiesAtIndex(imageSource.Handle, (nuint)imageSource.PrimaryImageIndex, IntPtr.Zero), true);
+        if (!MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelWidth, out int width)
+            || !MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelHeight, out int height))
         {
-            // load data into memory
-            imageDataRef = MacOS.CFDataCreateMutable(imageStream, dataSize, cancellationToken);
-            
-            // create image source
-            imageSourceRef = MacOS.CGImageSourceCreateWithData(imageDataRef, IntPtr.Zero);
-            if (imageSourceRef == IntPtr.Zero || MacOS.CGImageSourceGetStatus(imageSourceRef) != MacOS.CGImageSourceStatus.Complete)
-                throw new Exception($"Unable to create image source.");
-            var primaryImageIndex = MacOS.CGImageSourceGetPrimaryImageIndex(imageSourceRef);
-            
-            // check image dimensions
-            imagePropertiesRef = MacOS.CGImageSourceCopyPropertiesAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);
-            if (imagePropertiesRef == IntPtr.Zero)
-                throw new Exception($"Unable to get properties of image.");
-            if (!MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelWidth, out int width)
-                || !MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyPixelHeight, out int height))
-            {
-                throw new Exception($"Unable to get dimensions of image.");
-            }
-            if (width != bitmapBuffer.Width || height != bitmapBuffer.Height)
-                throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {width}x{height} expected.");
-            
-            // check image format
-            if (!MacOS.CFDictionaryGetValue(imagePropertiesRef, MacOS.kCGImagePropertyColorModel, out string? colorModel)
-                || colorModel != "RGB")
-            {
-                throw new Exception($"Only RGB color model is supported.");
-            }
-
-            // load image
-            imageRef = MacOS.CGImageSourceCreateImageAtIndex(imageSourceRef, primaryImageIndex, IntPtr.Zero);
-            if (imageRef == IntPtr.Zero)
-                throw new Exception($"Unable to load image.");
-            
-            // copy pixels
-            switch (bitmapBuffer.Format)
-            {
-                case BitmapFormat.Bgra32:
-                    CopyPixelsFromCGImageToBgra32BitmapBuffer(imageRef, bitmapBuffer, cancellationToken);
-                    break;
-                case BitmapFormat.Bgra64:
-                    CopyPixelsFromCGImageToBgra64BitmapBuffer(imageRef, bitmapBuffer, cancellationToken);
-                    break;
-            }
+            throw new Exception($"Unable to get dimensions of image.");
         }
-        finally
+        if (width != bitmapBuffer.Width || height != bitmapBuffer.Height)
+            throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {width}x{height} expected.");
+        
+        // check image format
+        if (!MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyColorModel, out string? colorModel)
+            || colorModel != "RGB")
         {
-            if (imageRef != IntPtr.Zero)
-                MacOS.CFRelease(imageRef);
-            if (imagePropertiesRef != IntPtr.Zero)
-                MacOS.CFRelease(imagePropertiesRef);
-            if (imageSourceRef != IntPtr.Zero)
-                MacOS.CFRelease(imageSourceRef);
-            if (imageDataRef != IntPtr.Zero)
-                MacOS.CFRelease(imageDataRef);
+            throw new Exception($"Only RGB color model is supported.");
+        }
+
+        // load image
+        using var image = imageSource.CreateImage();
+        if (cancellationToken.IsCancellationRequested)
+            throw new TaskCanceledException();
+        
+        // copy pixels
+        switch (bitmapBuffer.Format)
+        {
+            case BitmapFormat.Bgra32:
+                CopyPixelsFromCGImageToBgra32BitmapBuffer(image, bitmapBuffer, cancellationToken);
+                break;
+            case BitmapFormat.Bgra64:
+                CopyPixelsFromCGImageToBgra64BitmapBuffer(image, bitmapBuffer, cancellationToken);
+                break;
         }
 
         // complete

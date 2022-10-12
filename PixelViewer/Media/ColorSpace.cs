@@ -1,8 +1,8 @@
-using Avalonia;
 using Carina.PixelViewer.Native;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
+using CarinaStudio.MacOS.CoreGraphics;
 using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -695,51 +695,29 @@ namespace Carina.PixelViewer.Media
                 }
                 else if (CarinaStudio.Platform.IsMacOS)
                 {
-                    var colorSpaceRef = IntPtr.Zero;
-                    var iccDataRef = IntPtr.Zero;
-                    try
+                    // get display ID
+                    var windowBounds = (window?.Bounds).GetValueOrDefault();
+                    var displayId = Display.GetDisplayFromRect(new()
                     {
-                        // get display ID
-                        var displayIdArray = new uint[1];
-                        var windowBounds = (window?.Bounds).GetValueOrDefault();
-                        if (window == null)
-                            displayIdArray[0] = MacOS.CGMainDisplayID();
-                        else if (MacOS.CGGetDisplaysWithRect(new MacOS.CGRect() 
-                            { 
-                                Origin = { X = windowBounds.Left, Y = windowBounds.Top },
-                                Size = { Width = windowBounds.Width, Height = windowBounds.Height },
-                            }, 
-                            1, displayIdArray, out var displayCount) != MacOS.CGError.Success || displayCount != 1)
-                        {
-                            logger?.LogError("Unable to get screen which contains given window, use default screen");
-                            displayIdArray[0] = MacOS.CGMainDisplayID();
-                        }
+                        Origin = { X = windowBounds.Left, Y = windowBounds.Top },
+                        Size = { Width = windowBounds.Width, Height = windowBounds.Height },
+                    });
+                    if (displayId == Display.Invalid)
+                        displayId = Display.GetMainDisplay();
 
-                        // get color space
-                        colorSpaceRef = MacOS.CGDisplayCopyColorSpace(displayIdArray[0]);
-                        if (colorSpaceRef == IntPtr.Zero)
-                            throw new Exception("No color space defined for main display.");
-                        var colorModel = MacOS.CGColorSpaceGetModel(colorSpaceRef);
-                        if (colorModel != MacOS.CGColorSpaceModel.RGB)
-                            throw new NotSupportedException($"Unsupported color model: {colorModel}.");
-                        iccDataRef = MacOS.CGColorSpaceCopyICCData(colorSpaceRef);
-                        if (iccDataRef == IntPtr.Zero)
-                            throw new Exception("Unable to get ICC profile from color space.");
-                        var iccDataCount = MacOS.CFDataGetLength(iccDataRef);
-                        if (iccDataCount == 0)
-                            throw new Exception("Empty ICC profile from color space.");
-                        var iccData = new byte[(int)iccDataCount];
-                        Marshal.Copy(MacOS.CFDataGetBytePtr(iccDataRef), iccData, 0, iccData.Length);
-                        return new MemoryStream(iccData).Use(it =>
-                            LoadFromIccProfile(null, it, ColorSpaceSource.SystemDefined));
-                    }
-                    finally
+                    // get color space
+                    using var colorSpace = CGColorSpace.FromDisplay(displayId);
+                    if (colorSpace.Model != CGColorSpaceModel.RGB)
+                        throw new NotSupportedException($"Unsupported color model: {colorSpace.Model}.");
+                    using var iccData = colorSpace.ToIccProfile();
+                    if (iccData.Length == 0)
+                        throw new Exception("Empty ICC profile from color space.");
+                    return new MemoryStream().Use(it =>
                     {
-                        if (iccDataRef != IntPtr.Zero)
-                            MacOS.CFRelease(iccDataRef);
-                        if (colorSpaceRef != IntPtr.Zero)
-                            MacOS.CFRelease(colorSpaceRef);
-                    }
+                        it.Write(iccData.AsSpan());
+                        it.Position = 0;
+                        return LoadFromIccProfile(null, it, ColorSpaceSource.SystemDefined);
+                    });
                 }
                 throw new NotSupportedException();
             });
