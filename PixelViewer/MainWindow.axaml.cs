@@ -13,12 +13,8 @@ using CarinaStudio.Configuration;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using Microsoft.Extensions.Logging;
-#if WINDOWS10_0_17763_0_OR_GREATER
-using Microsoft.WindowsAPICodePack.Taskbar;
-#endif
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -94,21 +90,21 @@ namespace Carina.PixelViewer
 			{
 				if (this.IsClosed)
 					return;
-#if WINDOWS10_0_17763_0_OR_GREATER
-				if (!TaskbarManager.IsPlatformSupported)
-					return;
-				if (this.attachedActivatedSession == null)
-					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
-				else if (this.attachedActivatedSession.InsufficientMemoryForRenderedImage)
-					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Error);
-				else if (this.attachedActivatedSession.IsRenderingImage
-					|| this.attachedActivatedSession.IsSavingRenderedImage)
+				var session = this.attachedActivatedSession;
+				if (session == null)
+					this.TaskbarIconProgressState = TaskbarIconProgressState.None;
+				else if (session.InsufficientMemoryForRenderedImage
+					|| session.HasRenderingError)
 				{
-					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.Indeterminate);
+					this.TaskbarIconProgressState = TaskbarIconProgressState.Error;
+				}
+				else if (session.IsRenderingImage
+					|| session.IsSavingRenderedImage)
+				{
+					this.TaskbarIconProgressState = TaskbarIconProgressState.Indeterminate;
 				}
 				else
-					TaskbarManager.Instance.SetProgressState(TaskbarProgressBarState.NoProgress);
-#endif
+					this.TaskbarIconProgressState = TaskbarIconProgressState.None;
 			});
 		}
 
@@ -257,6 +253,7 @@ namespace Carina.PixelViewer
 		{
 			switch(e.PropertyName)
             {
+				case nameof(Session.HasRenderingError):
 				case nameof(Session.InsufficientMemoryForRenderedImage):
 				case nameof(Session.IsRenderingImage):
 				case nameof(Session.IsSavingRenderedImage):
@@ -704,5 +701,11 @@ namespace Carina.PixelViewer
 			// set title
 			session.CustomTitle = customTitle;
 		}
+
+
+#if WINDOWS10_0_17763_0_OR_GREATER
+		/// <inheritdoc/>
+		protected override Type? TaskbarManagerType => typeof(Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager);
+#endif
 	}
 }
