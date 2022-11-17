@@ -1246,11 +1246,35 @@ namespace Carina.PixelViewer.ViewModels
 				this.SetValue(ImageHeightProperty, profile.Height);
 
 				// plane options
-				for (var i = this.ImageRenderer.Format.PlaneCount - 1; i >= 0; --i)
+				var imageFormat = this.ImageRenderer.Format;
+				var defaultPlaneOptions = Global.Run(() =>
 				{
+					try
+					{
+						return this.ImageRenderer.CreateDefaultPlaneOptions(profile.Width, profile.Height);
+					}
+					catch (Exception ex)
+					{
+						this.Logger.LogError(ex, "Unable to get default plane options with dimensions {w}x{h}", profile.Width, profile.Height);
+						return new ImagePlaneOptions[imageFormat.PlaneCount];
+					}
+				});
+				for (var i = imageFormat.PlaneCount - 1; i >= 0; --i)
+				{
+					var planeDescriptor = imageFormat.PlaneDescriptors[i];
 					this.ChangeEffectiveBits(i, profile.EffectiveBits[i]);
 					this.ChangeBlackLevel(i, profile.BlackLevels[i]);
-					this.ChangeWhiteLevel(i, profile.WhiteLevels[i]);
+					this.ChangeWhiteLevel(i, profile.WhiteLevels[i].Let(it =>
+					{
+						// [Workaround] Handle case of white levels not saved to profile
+						if (planeDescriptor.AreAdjustableBlackWhiteLevels && it == 0)
+						{
+							if (defaultPlaneOptions[i].WhiteLevel.HasValue)
+								return defaultPlaneOptions[i].WhiteLevel.GetValueOrDefault();
+							return (uint)(1 << planeDescriptor.MaxEffectiveBits) - 1;
+						}
+						return it;
+					}));
 					this.ChangePixelStride(i, profile.PixelStrides[i]);
 					this.ChangeRowStride(i, profile.RowStrides[i]);
 				}
@@ -5563,6 +5587,8 @@ namespace Carina.PixelViewer.ViewModels
 			profile.Width = this.ImageWidth;
 			profile.Height = this.ImageHeight;
 			profile.EffectiveBits = this.effectiveBits;
+			profile.BlackLevels = this.blackLevels;
+			profile.WhiteLevels = this.whiteLevels;
 			profile.PixelStrides = this.pixelStrides;
 			profile.RowStrides = this.rowStrides;
 			if (this.IsRgbGainSupported)
