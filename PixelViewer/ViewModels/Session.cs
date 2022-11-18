@@ -1486,8 +1486,6 @@ namespace Carina.PixelViewer.ViewModels
 			// check state
 			this.VerifyAccess();
 			this.VerifyDisposed();
-			if (effectiveBits < 1)
-				effectiveBits = 1;
 			if (this.effectiveBits[index] == effectiveBits)
 				return;
 			
@@ -1497,16 +1495,19 @@ namespace Carina.PixelViewer.ViewModels
 			this.renderImageAction.Reschedule(RenderImageDelay);
 
 			// update black/white levels
-			var imageFormat = this.GetValue(ImageRendererProperty)?.Format;
-			if (imageFormat != null)
+			if (effectiveBits > 0)
 			{
-				var planeDescriptor = imageFormat.PlaneDescriptors[index];
-				if (planeDescriptor.AreAdjustableBlackWhiteLevels)
+				var imageFormat = this.GetValue(ImageRendererProperty)?.Format;
+				if (imageFormat != null)
 				{
-					var maxWhiteLevel = (uint)(1 << effectiveBits) - 1;
-					this.ChangeWhiteLevel(index, maxWhiteLevel);
-					if (this.blackLevels[index] >= maxWhiteLevel)
-						this.ChangeBlackLevel(index, maxWhiteLevel - 1);
+					var planeDescriptor = imageFormat.PlaneDescriptors[index];
+					if (planeDescriptor.AreAdjustableBlackWhiteLevels)
+					{
+						var maxWhiteLevel = (uint)(1 << effectiveBits) - 1;
+						this.ChangeWhiteLevel(index, maxWhiteLevel);
+						if (this.blackLevels[index] >= maxWhiteLevel)
+							this.ChangeBlackLevel(index, maxWhiteLevel - 1);
+					}
 				}
 			}
 		}
