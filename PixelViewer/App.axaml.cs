@@ -518,5 +518,11 @@ namespace Carina.PixelViewer
 
 		/// <inheritdoc/>
 		public override Version? UserAgreementVersion => new Version(1, 3);
+
+
+#if WINDOWS_ONLY
+		/// <inheritdoc/>
+		protected override System.Reflection.Assembly WindowsSdkAssembly => typeof(global::Windows.UI.Color).Assembly;
+#endif
     }
 }
