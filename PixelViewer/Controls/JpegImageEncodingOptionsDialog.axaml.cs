@@ -24,7 +24,7 @@ namespace Carina.PixelViewer.Controls
         // Constructor.
         public JpegImageEncodingOptionsDialog()
         {
-            InitializeComponent();
+            AvaloniaXamlLoader.Load(this);
             this.qualityLevelSlider = this.FindControl<Slider>(nameof(qualityLevelSlider)).AsNonNull().Also(it =>
             {
                 it.Value = this.PersistentState.GetValueOrDefault(LatestQualityLevelKey);
@@ -42,9 +42,5 @@ namespace Carina.PixelViewer.Controls
                 QualityLevel = qualityLevel,
             });
         }
-
-
-        // Initialize.
-        private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
     }
 }

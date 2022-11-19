@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Controls
     partial class ImageRenderingProfileSelectionDialog : InputDialog
     {
         // Static fields.
-        public static readonly AvaloniaProperty<string?> MessageProperty = AvaloniaProperty.Register<ImageRenderingProfileSelectionDialog, string?>(nameof(Message));
+        public static readonly StyledProperty<string?> MessageProperty = AvaloniaProperty.Register<ImageRenderingProfileSelectionDialog, string?>(nameof(Message));
 
 
         // Fields.
@@ -24,18 +24,14 @@ namespace Carina.PixelViewer.Controls
         // Constructor.
         public ImageRenderingProfileSelectionDialog()
         {
-            InitializeComponent();
-            this.profileComboBox = this.FindControl<ComboBox>(nameof(profileComboBox)).AsNonNull();
+            AvaloniaXamlLoader.Load(this);
+            this.profileComboBox = this.Get<ComboBox>(nameof(profileComboBox));
         }
 
 
         // Generate result.
         protected override Task<object?> GenerateResultAsync(CancellationToken cancellationToken) =>
             Task.FromResult((object?)this.profileComboBox.SelectedItem.AsNonNull());
-
-
-        // Initialize.
-        private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
         // Initial selected profile.
@@ -58,8 +54,10 @@ namespace Carina.PixelViewer.Controls
         }
 
 
-        // List of available profiles.
-        IList<ImageRenderingProfile> Profiles { get; } = new List<ImageRenderingProfile>().Also(it =>
+        /// <summary>
+        /// List of available profiles.
+        /// </summary>
+        public IList<ImageRenderingProfile> Profiles { get; } = new List<ImageRenderingProfile>().Also(it =>
         {
             it.Add(ImageRenderingProfile.Default);
             it.AddRange(ImageRenderingProfiles.UserDefinedProfiles);

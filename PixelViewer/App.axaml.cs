@@ -215,7 +215,7 @@ namespace Carina.PixelViewer
 
 			// create new main window
 			if (filePath == null || this.MainWindows.IsEmpty())
-				this.ShowMainWindow();
+				this.ShowMainWindowAsync();
 
 			// open file
 			if (filePath != null)
@@ -325,16 +325,16 @@ namespace Carina.PixelViewer
 			this.UpdateSplashWindowProgress(1);
 			await Task.Delay(300);
 			if (!this.IsRestoringMainWindowsRequested)
-				this.ShowMainWindow();
+				await this.ShowMainWindowAsync();
 		}
 
 
 		///<inheritdoc/>
-        protected override bool OnRestoreMainWindows()
+        protected override async Task<bool> OnRestoreMainWindowsAsync()
         {
-            if (base.OnRestoreMainWindows())
+            if (await base.OnRestoreMainWindowsAsync())
 				return true;
-			this.ShowMainWindow();
+			await this.ShowMainWindowAsync();
 			return false;
         }
 
@@ -351,11 +351,13 @@ namespace Carina.PixelViewer
 
 
 		///<inheritdoc/>
-        protected override void OnTryExitingBackgroundMode()
+        protected override bool OnTryExitingBackgroundMode()
         {
-            base.OnTryExitingBackgroundMode();
+            if (base.OnTryExitingBackgroundMode())
+				return true;
 			if (this.MainWindows.IsEmpty())
-				this.ShowMainWindow();
+				_ = this.ShowMainWindowAsync();
+			return true;
         }
 
 
@@ -494,7 +496,7 @@ namespace Carina.PixelViewer
 					break;
 				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
 					this.Logger.LogWarning("Restart main windows");
-					this.RestartMainWindows();
+					await this.RestartMainWindowsAsync();
 					break;
 			}
 		}

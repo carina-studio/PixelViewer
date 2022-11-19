@@ -17,8 +17,8 @@ namespace Carina.PixelViewer.Controls
     partial class FrameNumberSelectionDialog : CarinaStudio.AppSuite.Controls.InputDialog
     {
         // Static fields.
-        static readonly AvaloniaProperty<long> FrameCountProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(FrameCount), 1);
-        static readonly AvaloniaProperty<long> InitialFrameNumberProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(InitialFrameNumber), 1);
+        static readonly StyledProperty<long> FrameCountProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(FrameCount), 1);
+        static readonly StyledProperty<long> InitialFrameNumberProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(InitialFrameNumber), 1);
 
 
         // Fields.
@@ -28,16 +28,12 @@ namespace Carina.PixelViewer.Controls
         // Constructor.
         public FrameNumberSelectionDialog()
         {
-            InitializeComponent();
-            this.frameNumberTextBox = this.FindControl<IntegerTextBox>(nameof(frameNumberTextBox)).AsNonNull().Also(it =>
+            AvaloniaXamlLoader.Load(this);
+            this.frameNumberTextBox = this.Get<IntegerTextBox>(nameof(frameNumberTextBox)).Also(it =>
             {
                 it.GetObservable(IntegerTextBox.ValueProperty).Subscribe(new Observer<long?>(_ => this.InvalidateInput()));
             });
         }
-
-
-        // Initialize.
-        private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
 
         // Number of frames.

@@ -19,11 +19,11 @@ class NormalizedTransferFunctionsDiagram : Control, IStyleable
     /// <summary>
     /// Property of <see cref="AxisBrush"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IBrush?> AxisBrushProperty = AvaloniaProperty.Register<NormalizedTransferFunctionsDiagram, IBrush?>(nameof(AxisBrush), null);
+    public static readonly StyledProperty<IBrush?> AxisBrushProperty = AvaloniaProperty.Register<NormalizedTransferFunctionsDiagram, IBrush?>(nameof(AxisBrush), null);
     /// <summary>
     /// Property of <see cref="GridBrush"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IBrush?> GridBrushProperty = AvaloniaProperty.Register<NormalizedTransferFunctionsDiagram, IBrush?>(nameof(GridBrush), null);
+    public static readonly StyledProperty<IBrush?> GridBrushProperty = AvaloniaProperty.Register<NormalizedTransferFunctionsDiagram, IBrush?>(nameof(GridBrush), null);
 
 
     // Fields.
@@ -203,7 +203,8 @@ class NormalizedTransferFunctionsDiagram : Control, IStyleable
             }
 
             // draw geometry
-            context.DrawGeometry(null, transferFunc.Stroke, geometry);
+            if (geometry != null)
+                context.DrawGeometry(null, transferFunc.Stroke, geometry);
         }
     }
 
@@ -227,7 +228,7 @@ class NormalizedTransferFunction : AvaloniaObject
     /// <summary>
     /// Property of <see cref="Stroke"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IPen?> StrokeProperty = AvaloniaProperty.Register<NormalizedTransferFunction, IPen?>(nameof(Stroke), null);
+    public static readonly StyledProperty<IPen?> StrokeProperty = AvaloniaProperty.Register<NormalizedTransferFunction, IPen?>(nameof(Stroke), null);
 
 
     // Fields.

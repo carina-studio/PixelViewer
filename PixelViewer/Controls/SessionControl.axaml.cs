@@ -8,7 +8,7 @@ using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
-using Avalonia.Visuals.Media.Imaging;
+using Avalonia.Media.Imaging;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
@@ -38,6 +38,16 @@ namespace Carina.PixelViewer.Controls
 	class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		/// <summary>
+		/// Maximum value of RGB gain.
+		/// </summary>
+		public static decimal MaxRgbGain = (decimal)Media.ImageRenderers.ImageRenderingOptions.MaxRgbGain;
+		/// <summary>
+		/// Minimum value of RGB gain.
+		/// </summary>
+		public static decimal MinRgbGain = (decimal)Media.ImageRenderers.ImageRenderingOptions.MinRgbGain;
+
+
+		/// <summary>
 		/// <see cref="IValueConverter"/> which maps boolean to <see cref="ScrollBarVisibility.Auto"/>(True) and <see cref="ScrollBarVisibility.Disabled"/>(False).
 		/// </summary>
 		public static readonly IValueConverter BooleanToScrollBarVisibilityConverter = new BooleanToValueConverter<ScrollBarVisibility>(ScrollBarVisibility.Auto, ScrollBarVisibility.Disabled);
@@ -53,20 +63,20 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Static fields.
-		static readonly AvaloniaProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
-		static readonly AvaloniaProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.Default);
-		static readonly AvaloniaProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
-		static readonly AvaloniaProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
-		static readonly AvaloniaProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
-		static readonly AvaloniaProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnColorAdjustmentUI");
-		static readonly AvaloniaProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnContrastAdjustmentUI");
-		static readonly AvaloniaProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
-		static readonly AvaloniaProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
-		static readonly AvaloniaProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
-		static readonly AvaloniaProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
-		static readonly AvaloniaProperty<bool> ShowSelectedRenderedImagePixelLabColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
-		static readonly AvaloniaProperty<bool> ShowSelectedRenderedImagePixelXyzColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelXyzColor));
-		static readonly AvaloniaProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
+		static readonly StyledProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
+		static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.Default);
+		static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
+		static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
+		static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
+		static readonly StyledProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnColorAdjustmentUI");
+		static readonly StyledProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnContrastAdjustmentUI");
+		static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
+		static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
+		static readonly StyledProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
+		static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
+		static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelLabColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
+		static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelXyzColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelXyzColor));
+		static readonly StyledProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
 
 		// Fields.
@@ -154,6 +164,8 @@ namespace Carina.PixelViewer.Controls
 				this.canSaveRenderedImage);
 
 			// create commands
+			this.DecreaseSliderValueCommand = new Command<Slider>(this.DecreaseSliderValue);
+			this.IncreaseSliderValueCommand = new Command<Slider>(this.IncreaseSliderValue);
 			this.OpenSourceFileCommand = new Command(this.OpenSourceFile, this.canOpenSourceFile);
 			this.ResetBrightnessAndContrastAdjustmentCommand = new Command(this.ResetBrightnessAndContrastAdjustment, this.canResetBrightnessAndContrastAdjustment);
 			this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAndVibranceAdjustment);
@@ -163,8 +175,7 @@ namespace Carina.PixelViewer.Controls
 			{
 				if (this.evaluateImageDimensionsMenu == null)
 					return;
-				if (this.evaluateImageDimensionsMenu.PlacementTarget == null)
-					this.evaluateImageDimensionsMenu.PlacementTarget = this.evaluateImageDimensionsButton;
+				this.evaluateImageDimensionsMenu.PlacementTarget ??= this.evaluateImageDimensionsButton;
 				this.evaluateImageDimensionsMenu.Open(this.evaluateImageDimensionsButton);
 			}, this.canShowEvaluateImageDimensionsMenu);
 
@@ -311,7 +322,7 @@ namespace Carina.PixelViewer.Controls
 			this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 			{
 #if DEBUG
-				foreach (var item in it.Items)
+				foreach (var item in it.Items!)
 				{
 					if (item is MenuItem menuItem && menuItem.Name == "editConfigMenuItem")
 					{
@@ -481,8 +492,10 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Copy file name.
-		void CopyFileName()
+		/// <summary>
+		/// Copy file name.
+		/// </summary>
+		public void CopyFileName()
 		{
 			if (this.DataContext is not Session session || !session.IsSourceFileOpened)
 				return;
@@ -493,8 +506,10 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Copy file path.
-		void CopyFilePath()
+		/// <summary>
+		/// Copy file path.
+		/// </summary>
+		public void CopyFilePath()
 		{
 			if (this.DataContext is not Session session || !session.IsSourceFileOpened)
 				return;
@@ -514,12 +529,20 @@ namespace Carina.PixelViewer.Controls
 
 
 		/// <summary>
+		/// Command to decrease value of given slider.
+		/// </summary>
+		public ICommand DecreaseSliderValueCommand { get; }
+
+
+		/// <summary>
 		/// Drop data to this control.
 		/// </summary>
 		/// <param name="data">Dropped data.</param>
 		/// <param name="keyModifiers">Key modifiers.</param>
 		/// <returns>True if data has been accepted.</returns>
+#pragma warning disable IDE0060
 		public async Task<bool> DropDataAsync(IDataObject data, KeyModifiers keyModifiers)
+#pragma warning restore IDE0060
 		{
 			// get file names
 			var fileNames = data.GetFileNames()?.ToArray();
@@ -602,12 +625,20 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
+		/// <summary>
+		/// Command to increase value of given slider.
+		/// </summary>
+		public ICommand IncreaseSliderValueCommand { get; }
+
+
 		// Check whether image viewer is scrollable in current state or not.
 		bool IsImageViewerScrollable { get => this.GetValue<bool>(IsImageViewerScrollableProperty); }
 
 
-		// Move to specific frame.
-		async void MoveToSpecificFrame()
+		/// <summary>
+		/// Move to specific frame.
+		/// </summary>
+		public async void MoveToSpecificFrame()
 		{
 			// check state
 			if (this.DataContext is not Session session)
@@ -903,7 +934,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Called when double tap on image.
-		void OnImageDoubleTapped(object? sender, RoutedEventArgs e)
+		void OnImageDoubleTapped(object? sender, TappedEventArgs e)
 		{
 			if (this.DataContext is not Session session)
 				return;
@@ -1099,15 +1130,15 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Called when property changed.
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
 		{
 			base.OnPropertyChanged(change);
 			var property = change.Property;
 			if (property == DataContextProperty)
 			{
-				if (change.OldValue.Value is Session oldSession)
+				if (change.OldValue is Session oldSession)
 					oldSession.PropertyChanged -= this.OnSessionPropertyChanged;
-				if (change.NewValue.Value is Session newSession)
+				if (change.NewValue is Session newSession)
 				{
 					// attach to session
 					newSession.PropertyChanged += this.OnSessionPropertyChanged;
@@ -1250,8 +1281,10 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Called when test button clicked.
-		async void OnTestButtonClick()
+		/// <summary>
+		/// Called when test button clicked.
+		/// </summary>
+		public async void OnTestButtonClick()
 		{
 			//this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
 			var fileNames = await new OpenFileDialog().ShowAsync(this.attachedWindow.AsNonNull());
@@ -1289,12 +1322,18 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Open brightness and contrast adjustment UI.
-		void OpenBrightnessAndContrastAdjustmentPopup() => this.brightnessAndContrastAdjustmentPopup.Open();
+		/// <summary>
+		/// Open brightness and contrast adjustment UI.
+		/// </summary>
+		public void OpenBrightnessAndContrastAdjustmentPopup() => 
+			this.brightnessAndContrastAdjustmentPopup.Open();
 
 
-		// Open color adjustment UI.
-		void OpenColorAdjustmentPopup() => this.colorAdjustmentPopup.Open();
+		/// <summary>
+		/// Open color adjustment UI.
+		/// </summary>
+		public void OpenColorAdjustmentPopup() => 
+			this.colorAdjustmentPopup.Open();
 
 
 		// Open source file.
@@ -1323,7 +1362,7 @@ namespace Carina.PixelViewer.Controls
 		void OpenSourceFile(string fileName)
 		{
 			// check state
-			if (!(this.DataContext is Session session))
+			if (this.DataContext is not Session session)
 			{
 				Logger.LogError("No session to open source file");
 				return;
@@ -1366,7 +1405,7 @@ namespace Carina.PixelViewer.Controls
 				return;
 			if (this.attachedWindow == null)
 				return;
-			session.ScreenPixelDensity = (this.attachedWindow.Screens.ScreenFromVisual(this.attachedWindow) ?? this.attachedWindow.Screens.Primary).PixelDensity;
+			session.ScreenPixelDensity = (this.attachedWindow.Screens.ScreenFromVisual(this.attachedWindow) ?? this.attachedWindow.Screens.Primary)?.Scaling ?? 1.0;
 		}
 
 
@@ -1384,7 +1423,7 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Command to reset brightness and contrast.
-		ICommand ResetBrightnessAndContrastAdjustmentCommand { get; }
+		public ICommand ResetBrightnessAndContrastAdjustmentCommand { get; }
 
 
 		// Reset color adjustment.
@@ -1399,14 +1438,14 @@ namespace Carina.PixelViewer.Controls
 
 
 		// Command to reset color adjustment.
-		ICommand ResetColorAdjustmentCommand { get; }
+		public ICommand ResetColorAdjustmentCommand { get; }
 
 
 		// Save as new profile.
 		async void SaveAsNewProfile()
 		{
 			// check state
-			if (!(this.DataContext is Session session))
+			if (this.DataContext is not Session session)
 			{
 				Logger.LogError("No session to save as new profile");
 				return;
@@ -1567,8 +1606,10 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Show color space info.
-		void ShowColorSpaceInfo()
+		/// <summary>
+		/// Show color space info.
+		/// </summary>
+		public void ShowColorSpaceInfo()
 		{
 			if (this.DataContext is not Session session || this.attachedWindow == null)
 				return;
@@ -1581,8 +1622,10 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Show color space management settings in application options.
-		void ShowColorSpaceManagementOptions()
+		/// <summary>
+		/// Show color space management settings in application options.
+		/// </summary>
+		public void ShowColorSpaceManagementOptions()
 		{
 			if (this.attachedWindow != null)
 				this.Application.ShowApplicationOptionsDialogAsync(this.attachedWindow, ApplicationOptionsDialogSection.ColorSpaceManagement.ToString());
@@ -1595,30 +1638,36 @@ namespace Carina.PixelViewer.Controls
 		public ICommand ShowEvaluateImageDimensionsMenuCommand { get; }
 
 
-		// Show file actions.
-		void ShowFileActions()
+		/// <summary>
+		/// Show file actions.
+		/// </summary>
+		public void ShowFileActions()
 		{
-			if (this.fileActionsMenu.PlacementTarget == null)
-				this.fileActionsMenu.PlacementTarget = this.fileActionsButton;
+			this.fileActionsMenu.PlacementTarget ??= this.fileActionsButton;
 			this.fileActionsMenu.Open(this.fileActionsButton);
 		}
 
 
-		// Show other actions.
-		void ShowOtherActions()
+		/// <summary>
+		/// Show other actions.
+		/// </summary>
+		public void ShowOtherActions()
 		{
-			if (this.otherActionsMenu.PlacementTarget == null)
-				this.otherActionsMenu.PlacementTarget = this.otherActionsButton;
+			this.otherActionsMenu.PlacementTarget ??= this.otherActionsButton;
 			this.otherActionsMenu.Open(this.otherActionsButton);
 		}
 
 
-		// Show process info on UI or not.
-		bool ShowProcessInfo { get => this.GetValue<bool>(ShowProcessInfoProperty); }
+		/// <summary>
+		/// Show process info on UI or not.
+		/// </summary>
+		public bool ShowProcessInfo { get => this.GetValue<bool>(ShowProcessInfoProperty); }
 
 
-		// Show screen color space info.
-		void ShowScreenColorSpaceInfo()
+		/// <summary>
+		/// Show screen color space info.
+		/// </summary>
+		public void ShowScreenColorSpaceInfo()
 		{
 			if (this.DataContext is not Session session 
 				|| session.Owner is not Workspace workspace
@@ -1635,8 +1684,10 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Show file in file explorer.
-		void ShowSourceFileInFileExplorer()
+		/// <summary>
+		/// Show file in file explorer.
+		/// </summary>
+		public void ShowSourceFileInFileExplorer()
         {
 			if (!CarinaStudio.Platform.IsOpeningFileManagerSupported)
 				return;
@@ -1665,7 +1716,9 @@ namespace Carina.PixelViewer.Controls
 		}
 
 
-		// Status bar state.
-		StatusBarState StatusBarState { get => this.GetValue<StatusBarState>(StatusBarStateProperty); }
+		/// <summary>
+		/// Status bar state.
+		/// </summary>
+		public StatusBarState StatusBarState { get => this.GetValue<StatusBarState>(StatusBarStateProperty); }
 	}
 }

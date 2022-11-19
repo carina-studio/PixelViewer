@@ -9,9 +9,9 @@ using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.Collections;
-using CarinaStudio.Configuration;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
+using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections;
@@ -19,6 +19,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading;
+using System.Windows.Input;
 
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
 
@@ -30,7 +31,7 @@ namespace Carina.PixelViewer
 	class MainWindow : MainWindow<Workspace>
 	{
 		// Statis fields.
-		static readonly AvaloniaProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
+		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
 
 
 		// Constants.
@@ -42,7 +43,7 @@ namespace Carina.PixelViewer
 		readonly Border baseBorder;
 		bool isPerformingContentRelayout;
 		readonly AsTabControl mainTabControl;
-		readonly ObservableList<TabItem> mainTabItems = new ObservableList<TabItem>();
+		readonly ObservableList<TabItem> mainTabItems = new();
 		readonly ScheduledAction relayoutContentAction;
 		readonly ScheduledAction updateTitleBarAction;
 
@@ -52,10 +53,16 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public MainWindow()
 		{
+			// create commands
+			this.CloseMainTabItemCommand = new Command<TabItem>(this.CloseMainTabItem);
+			this.MoveSessionToNewWorkspaceCommand = new Command<TabItem>(this.MoveSessionToNewWorkspace);
+			this.ResetSessionTitleCommand = new Command<TabItem>(this.ResetSessionTitle);
+			this.SetCustomSessionTitleCommand = new Command<TabItem>(this.SetCustomSessionTitle);
+
 			// initialize Avalonia resources
-			InitializeComponent();
+			AvaloniaXamlLoader.Load(this);
 			if (CarinaStudio.Platform.IsMacOS)
-				NativeMenu.SetMenu(this, this.Resources["nativeMenu"] as NativeMenu);
+				NativeMenu.SetMenu(this, (NativeMenu)this.Resources["nativeMenu"].AsNonNull());
 
 			// setup controls
 			this.baseBorder = this.FindControl<Border>(nameof(baseBorder)).AsNonNull().Also(it => 
@@ -72,11 +79,11 @@ namespace Carina.PixelViewer
 			});
 
 			// setup main tab control
-			this.mainTabControl = this.FindControl<AsTabControl>("tabControl").AsNonNull().Also((it) =>
+			this.mainTabControl = this.Get<AsTabControl>("tabControl").Also((it) =>
 			{
 				it.SelectionChanged += (s, e) => this.OnMainTabControlSelectionChanged();
 			});
-			this.mainTabItems.AddRange(((IList)this.mainTabControl.Items).Cast<TabItem>());
+			this.mainTabItems.AddRange(((IList)this.mainTabControl.Items!).Cast<TabItem>());
 			this.mainTabControl.Items = this.mainTabItems;
 
 			// create scheduled actions
@@ -146,8 +153,10 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Close current tab item.
-		void CloseCurrentMainTabItem() =>
+		/// <summary>
+		/// Close current tab item.
+		/// </summary>
+		public void CloseCurrentMainTabItem() =>
 			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.CloseMainTabItem(it));
 
 
@@ -163,16 +172,24 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Create tab item and its session.
-		void CreateMainTabItem() =>
+		/// <summary>
+		/// Create tab item and its session.
+		/// </summary>
+		public void CreateMainTabItem() =>
 			(this.DataContext as Workspace)?.Let(it => it.CreateAndAttachSession(it.Sessions.Count));
+		
+
+		/// <summary>
+		/// Command to close given tab item.
+		/// </summary>
+		public ICommand CloseMainTabItemCommand { get; }
 
 
 		/// <summary>
 		/// Create new main window.
 		/// </summary>
 		public void CreateMainWindow() =>
-			this.Application.ShowMainWindow();
+			this.Application.ShowMainWindowAsync();
 
 
 		// Detach from activated session.
@@ -186,7 +203,7 @@ namespace Carina.PixelViewer
 
 
 		// Detach tab item from session.
-		void DetachTabItemFromSession(TabItem tabItem)
+		static void DetachTabItemFromSession(TabItem tabItem)
 		{
 			(tabItem.Header as IControl)?.Let((it) => it.DataContext = null);
 			(tabItem.Content as IControl)?.Let((it) => it.DataContext = null);
@@ -206,34 +223,32 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Initialize Avalonia component.
-		private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-
-
-		// Move current session to new workspace.
-		void MoveCurrentSessionToNewWorkspace() =>
+		/// <summary>
+		/// Move current session to new workspace.
+		/// </summary>
+		public void MoveCurrentSessionToNewWorkspace() =>
 			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.MoveSessionToNewWorkspace(it));
 
 
 		// Move given session to new workspace.
-		void MoveSessionToNewWorkspace(TabItem tabItem)
+		async void MoveSessionToNewWorkspace(TabItem tabItem)
         {
 			// check state
 			if (tabItem.DataContext is not Session session)
 				return;
 
 			// create new window
-			if (!this.Application.ShowMainWindow(newWindow =>
+			if (!await this.Application.ShowMainWindowAsync(newWindow =>
             {
 				if (newWindow.DataContext is Workspace newWorkspace)
-					this.MoveSessionToNewWorkspace(session, newWorkspace);
+					MoveSessionToNewWorkspace(session, newWorkspace);
 			}))
 			{
 				this.Logger.LogError("Unable to create new main window for session to be moved");
 				return;
 			}
         }
-		void MoveSessionToNewWorkspace(Session session, Workspace newWorkspace)
+		static void MoveSessionToNewWorkspace(Session session, Workspace newWorkspace)
 		{
 			// find empty session
 			var emptySession = newWorkspace.Sessions.FirstOrDefault();
@@ -246,6 +261,12 @@ namespace Carina.PixelViewer
 			if (emptySession != null)
 				newWorkspace.DetachAndCloseSession(emptySession);
 		}
+
+
+		/// <summary>
+		/// Command to move given session to new workspace.
+		/// </summary>
+		public ICommand MoveSessionToNewWorkspaceCommand { get; }
 
 
 		// Called when property of activated session changed.
@@ -308,7 +329,7 @@ namespace Carina.PixelViewer
 			this.mainTabControl.SelectedIndex = 0;
 			for (var i = this.mainTabItems.Count - 1; i > 0; --i)
 			{
-				this.DetachTabItemFromSession(this.mainTabItems[i]);
+				DetachTabItemFromSession(this.mainTabItems[i]);
 				this.mainTabItems.RemoveAt(i);
 			}
 
@@ -353,8 +374,7 @@ namespace Carina.PixelViewer
 			}
 			
 			// handle session dragging
-			var session = e.Data.Get(DraggingSessionKey) as Session;
-			if (session != null && e.ItemIndex != this.mainTabItems.Count - 1)
+			if (e.Data.Get(DraggingSessionKey) is Session session && e.ItemIndex != this.mainTabItems.Count - 1)
 			{
 				// find source position
 				var workspace = (Workspace)session.Owner.AsNonNull();
@@ -540,9 +560,9 @@ namespace Carina.PixelViewer
 
 
 		// Called when property changed.
-		protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+		protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
 		{
-			base.OnPropertyChanged<T>(change);
+			base.OnPropertyChanged(change);
 			var property = change.Property;
 			if (property == HeightProperty 
 				|| property == WidthProperty
@@ -595,7 +615,7 @@ namespace Carina.PixelViewer
 								else
 									this.mainTabControl.SelectedIndex = -1;
 							}
-							this.DetachTabItemFromSession(this.mainTabItems[tabIndex]);
+							DetachTabItemFromSession(this.mainTabItems[tabIndex]);
 							this.mainTabItems.RemoveAt(tabIndex);
 						}
 						(this.DataContext as Workspace)?.Let((it) =>
@@ -626,8 +646,7 @@ namespace Carina.PixelViewer
 				return;
 
 			// get session
-			var session = (e.Item as TabItem)?.DataContext as Session;
-			if (session == null)
+			if((e.Item as TabItem)?.DataContext is not Session session)
 				return;
 			
 			// prepare dragging data
@@ -664,8 +683,10 @@ namespace Carina.PixelViewer
         }
 
 
-		// Reset title of current session.
-		void ResetCurrentSessionTitle() =>
+		/// <summary>
+		/// Reset title of current session.
+		/// </summary>
+		public void ResetCurrentSessionTitle() =>
 			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.ResetSessionTitle(it));
 
 
@@ -677,8 +698,16 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Set custom title of current session.
-		void SetCurrentCustomSessionTitle() =>
+		/// <summary>
+		/// Xommand to reset title of session.
+		/// </summary>
+		public ICommand ResetSessionTitleCommand { get; }
+
+
+		/// <summary>
+		/// Set custom title of current session.
+		/// </summary>
+		public void SetCurrentCustomSessionTitle() =>
 			(this.mainTabControl.SelectedItem as TabItem)?.Let(it => this.SetCustomSessionTitle(it));
 
 
@@ -701,6 +730,12 @@ namespace Carina.PixelViewer
 			// set title
 			session.CustomTitle = customTitle;
 		}
+
+
+		/// <summary>
+		/// Command to set custom title of session.
+		/// </summary>
+		public ICommand SetCustomSessionTitleCommand { get; }
 
 
 #if WINDOWS10_0_17763_0_OR_GREATER

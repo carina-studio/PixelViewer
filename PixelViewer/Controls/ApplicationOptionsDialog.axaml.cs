@@ -32,7 +32,9 @@ namespace Carina.PixelViewer.Controls
         public ApplicationOptionsDialog()
         {
             this.AddCustomColorSpaceCommand = new Command(this.AddCustomColorSpace, this.canAddCustomColorSpace);
-            InitializeComponent();
+            this.RemoveCustomColorSpaceCommand = new Command<ListBoxItem>(this.RemoveCustomColorSpace);
+            this.ShowColorSpaceInfoCommand = new Command<ListBoxItem>(this.ShowColorSpaceInfo);
+            AvaloniaXamlLoader.Load(this);
             this.customColorSpaceListBox = this.FindControl<Avalonia.Controls.ListBox>(nameof(customColorSpaceListBox)).AsNonNull();
             this.defaultColorSpaceComboBox = this.FindControl<ComboBox>(nameof(defaultColorSpaceComboBox)).AsNonNull();
             this.FindControl<IntegerTextBox>("maxRenderedImageMemoryUsageTextBox").AsNonNull().Let(it =>
@@ -77,7 +79,7 @@ namespace Carina.PixelViewer.Controls
                 }
                 catch (Exception ex)
                 {
-                    this.Logger.LogError(ex, $"Unable to load color space from '{fileNames[0]}'");
+                    this.Logger.LogError(ex, "Unable to load color space from '{fileName}'", fileNames[0]);
                     await new MessageDialog()
                     {
                         Icon = MessageDialogIcon.Error,
@@ -122,20 +124,18 @@ namespace Carina.PixelViewer.Controls
         }
 
 
-        // Command to add custom color space
-        ICommand AddCustomColorSpaceCommand { get; }
+        /// <summary>
+        /// Command to add custom color space.
+        /// </summary>
+        public ICommand AddCustomColorSpaceCommand { get; }
 
 
         // Initial focused section.
         public ApplicationOptionsDialogSection InitialFocusedSection { get; set; } = ApplicationOptionsDialogSection.First;
 
 
-        // Initialize.
-        private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
-
-
         // Whether drag-and-drop is supported or not.
-        bool IsDragAndDropSupported { get; } = !CarinaStudio.Platform.IsLinux;
+        public bool IsDragAndDropSupported { get; } = !CarinaStudio.Platform.IsLinux;
 
 
         // Called when strings updated.
@@ -225,6 +225,12 @@ namespace Carina.PixelViewer.Controls
         }
 
 
+        /// <summary>
+        /// Command to remove custom color space.
+        /// </summary>
+        public ICommand RemoveCustomColorSpaceCommand { get; }
+
+
         // Show color space info.
 		void ShowColorSpaceInfo(object item)
 		{
@@ -241,6 +247,12 @@ namespace Carina.PixelViewer.Controls
 				IsReadOnly = !colorSpace.IsUserDefined,
 			}.ShowDialog(this);
 		}
+
+
+        /// <summary>
+        /// Command to show color space info.
+        /// </summary>
+        public ICommand ShowColorSpaceInfoCommand { get; }
     }
 
 

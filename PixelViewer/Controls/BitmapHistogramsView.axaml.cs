@@ -22,46 +22,46 @@ namespace Carina.PixelViewer.Controls
         /// <summary>
         /// Property of <see cref="BlueHistogramBrush"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<IBrush?> BlueHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(BlueHistogramBrush));
+        public static readonly StyledProperty<IBrush?> BlueHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(BlueHistogramBrush));
         /// <summary>
         /// Property of <see cref="GreenHistogramBrush"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<IBrush?> GreenHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(GreenHistogramBrush));
+        public static readonly StyledProperty<IBrush?> GreenHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(GreenHistogramBrush));
         /// <summary>
         /// Property of <see cref="IsBlueHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsBlueHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsBlueHistogramVisible), false);
+        public static readonly StyledProperty<bool> IsBlueHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsBlueHistogramVisible), false);
         /// <summary>
         /// Property of <see cref="IsGreenHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsGreenHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsGreenHistogramVisible), false);
+        public static readonly StyledProperty<bool> IsGreenHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsGreenHistogramVisible), false);
         /// <summary>
         /// Property of <see cref="IsLuminanceHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsLuminanceHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsLuminanceHistogramVisible), false);
+        public static readonly StyledProperty<bool> IsLuminanceHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsLuminanceHistogramVisible), false);
         /// <summary>
         /// Property of <see cref="IsRedHistogramVisible"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<bool> IsRedHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsRedHistogramVisible), false);
+        public static readonly StyledProperty<bool> IsRedHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsRedHistogramVisible), false);
         /// <summary>
         /// Property of <see cref="LuminanceHistogramBrush"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<IBrush?> LuminanceHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(LuminanceHistogramBrush));
+        public static readonly StyledProperty<IBrush?> LuminanceHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(LuminanceHistogramBrush));
         /// <summary>
         /// Property of <see cref="RedHistogramBrush"/>.
         /// </summary>
-        public static readonly AvaloniaProperty<IBrush?> RedHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(RedHistogramBrush));
+        public static readonly StyledProperty<IBrush?> RedHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(RedHistogramBrush));
 
 
         // Static fields.
-        static readonly AvaloniaProperty<IImage?> BlueHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(BlueHistogramImage));
-        static readonly AvaloniaProperty<double> BlueHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(BlueHistogramScaleY), 0);
-        static readonly AvaloniaProperty<IImage?> GreenHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(GreenHistogramImage));
-        static readonly AvaloniaProperty<double> GreenHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(GreenHistogramScaleY), 0);
-        static readonly AvaloniaProperty<IImage?> LuminanceHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(LuminanceHistogramImage));
-        static readonly AvaloniaProperty<double> LuminanceHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(LuminanceHistogramScaleY), 0);
-        static readonly AvaloniaProperty<IImage?> RedHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(RedHistogramImage));
-        static readonly AvaloniaProperty<double> RedHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RedHistogramScaleY), 0);
+        static readonly StyledProperty<IImage?> BlueHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(BlueHistogramImage));
+        static readonly StyledProperty<double> BlueHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(BlueHistogramScaleY), 0);
+        static readonly StyledProperty<IImage?> GreenHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(GreenHistogramImage));
+        static readonly StyledProperty<double> GreenHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(GreenHistogramScaleY), 0);
+        static readonly StyledProperty<IImage?> LuminanceHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(LuminanceHistogramImage));
+        static readonly StyledProperty<double> LuminanceHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(LuminanceHistogramScaleY), 0);
+        static readonly StyledProperty<IImage?> RedHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(RedHistogramImage));
+        static readonly StyledProperty<double> RedHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RedHistogramScaleY), 0);
 
 
         // Fields.
@@ -271,7 +271,7 @@ namespace Carina.PixelViewer.Controls
 
 
         /// <inheritdoc/>
-        protected override void OnPropertyChanged<T>(AvaloniaPropertyChangedEventArgs<T> change)
+        protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
         {
             base.OnPropertyChanged(change);
             var property = change.Property;
@@ -284,8 +284,8 @@ namespace Carina.PixelViewer.Controls
             }
             else if (property == DataContextProperty)
             {
-                (change.OldValue.Value as BitmapHistograms)?.Let(it => this.DetachFromBitmapHistograms(it));
-                (change.NewValue.Value as BitmapHistograms)?.Let(it => this.AttachToBitmapHistograms(it));
+                (change.OldValue as BitmapHistograms)?.Let(it => this.DetachFromBitmapHistograms(it));
+                (change.NewValue as BitmapHistograms)?.Let(it => this.AttachToBitmapHistograms(it));
             }
             else if (property == IsBlueHistogramVisibleProperty
                 || property == IsGreenHistogramVisibleProperty

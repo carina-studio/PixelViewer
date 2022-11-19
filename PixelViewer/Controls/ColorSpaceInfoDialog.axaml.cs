@@ -22,17 +22,17 @@ namespace Carina.PixelViewer.Controls;
 partial class ColorSpaceInfoDialog : InputDialog
 {
     // Static fields.
-    static readonly AvaloniaProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
-    static readonly AvaloniaProperty<bool> IsReadOnlyProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, bool>(nameof(IsReadOnly), false);
-    static readonly AvaloniaProperty<Media.ColorSpace?> ReferenceColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace?>("ReferenceColorSpace", null);
-    static readonly AvaloniaProperty<IList<Media.ColorSpace>> ReferenceColorSpacesProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, IList<Media.ColorSpace>>("ReferenceColorSpaces", new Media.ColorSpace[0]);
+    static readonly StyledProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
+    static readonly StyledProperty<bool> IsReadOnlyProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, bool>(nameof(IsReadOnly), false);
+    static readonly StyledProperty<Media.ColorSpace?> ReferenceColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace?>("ReferenceColorSpace", null);
+    static readonly StyledProperty<IList<Media.ColorSpace>> ReferenceColorSpacesProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, IList<Media.ColorSpace>>("ReferenceColorSpaces", Array.Empty<Media.ColorSpace>());
 
 
     // Fields.
     readonly TextBox bluePrimaryTextBox;
     readonly CieChromaticityDiagram chromaticityDiagram;
     readonly CieChromaticityGamut colorSpaceChromaticityGamut = new();
-    readonly Pen colorSpaceTransferFuncStroke = new Pen()
+    readonly Pen colorSpaceTransferFuncStroke = new()
     {
         Brush = Brushes.Red,
         Thickness = 2,
@@ -107,7 +107,7 @@ partial class ColorSpaceInfoDialog : InputDialog
             }));
         });
         this.greenPrimaryTextBox = this.FindControl<TextBox>(nameof(greenPrimaryTextBox)).AsNonNull();
-        this.linearizationDescriptionTextBlock = this.FindControl<TextBlock>(nameof(linearizationDescriptionTextBlock));
+        this.linearizationDescriptionTextBlock = this.Get<TextBlock>(nameof(linearizationDescriptionTextBlock));
         this.redPrimaryTextBox = this.FindControl<TextBox>(nameof(redPrimaryTextBox)).AsNonNull();
         this.nameTextBox = this.FindControl<TextBox>(nameof(nameTextBox)).AsNonNull().Also(it =>
         {
@@ -144,14 +144,11 @@ partial class ColorSpaceInfoDialog : InputDialog
                 // xy chromaticity
                 if (colorSpace.WhitePoint.HasValue)
                 {
-                    if (this.refColorSpaceWhitePointChromaticity.BorderPen == null)
+                    this.refColorSpaceWhitePointChromaticity.BorderPen ??= new Pen()
                     {
-                        this.refColorSpaceWhitePointChromaticity.BorderPen = new Pen()
-                        {
-                            Brush = Brushes.White,
-                            Thickness = 1,
-                        };
-                    }
+                        Brush = Brushes.White,
+                        Thickness = 1,
+                    };
                     var (wpX, wpY) = Media.ColorSpace.XyzToXyChromaticity(colorSpace.WhitePoint.Value);
                     this.refColorSpaceWhitePointChromaticity.X = wpX;
                     this.refColorSpaceWhitePointChromaticity.Y = wpY;

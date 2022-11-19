@@ -179,7 +179,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Screen color space -->
@@ -199,7 +199,7 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
+				<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Use system screen color space -->
@@ -220,10 +220,10 @@
 									<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
 									<Border Classes="InPlaceAction_Reserved"/>
 									<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
-										<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpace}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
+										<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
 											<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
 										</Button>
-										<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].ShowColorSpaceInfo}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
+										<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
 											<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
 										</Button>
 									</StackPanel>

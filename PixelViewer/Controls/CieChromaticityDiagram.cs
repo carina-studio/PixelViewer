@@ -19,19 +19,19 @@ class CieChromaticityDiagram : Control, IStyleable
     /// <summary>
     /// Property of <see cref="AxisBrush"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IBrush?> AxisBrushProperty = AvaloniaProperty.Register<CieChromaticityDiagram, IBrush?>(nameof(AxisBrush), null);
+    public static readonly StyledProperty<IBrush?> AxisBrushProperty = AvaloniaProperty.Register<CieChromaticityDiagram, IBrush?>(nameof(AxisBrush), null);
     /// <summary>
     /// Property of <see cref="DiagramBorderBrush"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IBrush?> DiagramBorderBrushProperty = AvaloniaProperty.Register<CieChromaticityDiagram, IBrush?>(nameof(DiagramBorderBrush), null);
+    public static readonly StyledProperty<IBrush?> DiagramBorderBrushProperty = AvaloniaProperty.Register<CieChromaticityDiagram, IBrush?>(nameof(DiagramBorderBrush), null);
     /// <summary>
     /// Property of <see cref="GridBrush"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IBrush?> GridBrushProperty = AvaloniaProperty.Register<CieChromaticityDiagram, IBrush?>(nameof(GridBrush), null);
+    public static readonly StyledProperty<IBrush?> GridBrushProperty = AvaloniaProperty.Register<CieChromaticityDiagram, IBrush?>(nameof(GridBrush), null);
     /// <summary>
     /// Property of <see cref="FontSize"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<double> FontSizeProperty = AvaloniaProperty.Register<CieChromaticityDiagram, double>(nameof(FontSize), 10);
+    public static readonly StyledProperty<double> FontSizeProperty = AvaloniaProperty.Register<CieChromaticityDiagram, double>(nameof(FontSize), 10);
 
 
     // Constants.
@@ -508,7 +508,7 @@ class CieChromaticityDiagram : Control, IStyleable
     IBrush? diagramOverlayBrush;
     Pen? diagramPen;
     Pen? gridPen;
-    readonly Pen shadowPen = new Pen()
+    readonly Pen shadowPen = new()
     {
         Brush = new SolidColorBrush(Color.FromArgb(64, 0, 0, 0)),
         LineJoin = PenLineJoin.Round,
@@ -547,7 +547,7 @@ class CieChromaticityDiagram : Control, IStyleable
 
 
     // Calculate angle from point to point.
-    double AngleToControlCoordinate(Point src, Point dest)
+    static double AngleToControlCoordinate(Point src, Point dest)
     {
         if (Math.Abs(dest.X - src.X) < 0.001)
             return dest.Y <= src.Y ? 0 : 180;
@@ -742,9 +742,9 @@ class CieChromaticityDiagram : Control, IStyleable
             this.diagramGeometry = new StreamGeometry();
             using var geometryContext = this.diagramGeometry.Open();
             var coordCount = XYCoordinates.Length;
-            geometryContext.BeginFigure(this.XYToControlCoordinate(width, height, XYCoordinates[0].Item2, XYCoordinates[0].Item3), true);
+            geometryContext.BeginFigure(XYToControlCoordinate(width, height, XYCoordinates[0].Item2, XYCoordinates[0].Item3), true);
             for (var i = 1; i < coordCount; ++i)
-                geometryContext.LineTo(this.XYToControlCoordinate(width, height, XYCoordinates[i].Item2, XYCoordinates[i].Item3));
+                geometryContext.LineTo(XYToControlCoordinate(width, height, XYCoordinates[i].Item2, XYCoordinates[i].Item3));
             geometryContext.EndFigure(false);
         }
 
@@ -761,35 +761,29 @@ class CieChromaticityDiagram : Control, IStyleable
             if (brush != null)
                 this.diagramPen = new Pen(brush, 2);
         }
-        if (this.diagramBrush == null)
+        this.diagramBrush ??= new ConicGradientBrush().Also(it =>
         {
-            this.diagramBrush = new ConicGradientBrush().Also(it =>
+            var wp = XYToControlCoordinate(width, height, WhitePointXY.Item1, WhitePointXY.Item2);
+            var firstColorPoint = XYToControlCoordinate(width, height, ColorCoordinates[0].Item2, ColorCoordinates[0].Item3);
+            it.Angle = AngleToControlCoordinate(wp, firstColorPoint);
+            it.Center = new RelativePoint(wp, RelativeUnit.Absolute);
+            foreach (var coord in ColorCoordinates)
             {
-                var wp = this.XYToControlCoordinate(width, height, WhitePointXY.Item1, WhitePointXY.Item2);
-                var firstColorPoint = this.XYToControlCoordinate(width, height, ColorCoordinates[0].Item2, ColorCoordinates[0].Item3);
-                it.Angle = this.AngleToControlCoordinate(wp, firstColorPoint);
-                it.Center = new RelativePoint(wp, RelativeUnit.Absolute);
-                foreach (var coord in ColorCoordinates)
-                {
-                    var colorPoint = this.XYToControlCoordinate(width, height, coord.Item2, coord.Item3);
-                    var angle = this.AngleToControlCoordinate(wp, colorPoint);
-                    it.GradientStops.Add(new GradientStop(coord.Item1, (angle - it.Angle) / 360.0));
-                }
-                it.GradientStops.Add(new GradientStop(ColorCoordinates[0].Item1, 1.0));
-            });
-        }
-        if (this.diagramOverlayBrush == null)
+                var colorPoint = XYToControlCoordinate(width, height, coord.Item2, coord.Item3);
+                var angle = AngleToControlCoordinate(wp, colorPoint);
+                it.GradientStops.Add(new GradientStop(coord.Item1, (angle - it.Angle) / 360.0));
+            }
+            it.GradientStops.Add(new GradientStop(ColorCoordinates[0].Item1, 1.0));
+        });
+        this.diagramOverlayBrush ??= new RadialGradientBrush().Also(it =>
         {
-            this.diagramOverlayBrush = new RadialGradientBrush().Also(it =>
-            {
-                var wp = this.XYToControlCoordinate(width, height, WhitePointXY.Item1, WhitePointXY.Item2);
-                it.Center = new RelativePoint(wp, RelativeUnit.Absolute);
-                it.GradientOrigin = new RelativePoint(wp, RelativeUnit.Absolute);
-                it.GradientStops.Add(new GradientStop(Color.FromArgb(200, 255, 255, 255), 0.0));
-                it.GradientStops.Add(new GradientStop(Color.FromArgb(0, 255, 255, 255), 1));
-                it.Radius = 0.4;
-            });
-        }
+            var wp = XYToControlCoordinate(width, height, WhitePointXY.Item1, WhitePointXY.Item2);
+            it.Center = new RelativePoint(wp, RelativeUnit.Absolute);
+            it.GradientOrigin = new RelativePoint(wp, RelativeUnit.Absolute);
+            it.GradientStops.Add(new GradientStop(Color.FromArgb(200, 255, 255, 255), 0.0));
+            it.GradientStops.Add(new GradientStop(Color.FromArgb(0, 255, 255, 255), 1));
+            it.Radius = 0.4;
+        });
         if (this.gridPen == null)
         {
             var brush = this.GridBrush;
@@ -798,9 +792,9 @@ class CieChromaticityDiagram : Control, IStyleable
         }
 
         // draw axises
-        var originPoint = this.XYToControlCoordinate(width, height, 0, 0);
-        context.DrawLine(this.axisPen, new Point(originPoint.X, 0), new Point(originPoint.X, height));
-        context.DrawLine(this.axisPen, new Point(0, originPoint.Y), new Point(width, originPoint.Y));
+        var originPoint = XYToControlCoordinate(width, height, 0, 0);
+        context.DrawLine(this.axisPen!, new Point(originPoint.X, 0), new Point(originPoint.X, height));
+        context.DrawLine(this.axisPen!, new Point(0, originPoint.Y), new Point(width, originPoint.Y));
 
         // draw diagram
         context.DrawGeometry(this.diagramBrush, this.diagramPen, this.diagramGeometry);
@@ -815,9 +809,9 @@ class CieChromaticityDiagram : Control, IStyleable
                 var (rX, rY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(1.0, 0.0, 0.0);
                 var (gX, gY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0.0, 1.0, 0.0);
                 var (bX, bY) = chromaticityGamut.ColorSpace.RgbToXyChromaticity(0.0, 0.0, 1.0);
-                var rPoint = this.XYToControlCoordinate(width, height, rX, rY);
-                var gPoint = this.XYToControlCoordinate(width, height, gX, gY);
-                var bPoint = this.XYToControlCoordinate(width, height, bX, bY);
+                var rPoint = XYToControlCoordinate(width, height, rX, rY);
+                var gPoint = XYToControlCoordinate(width, height, gX, gY);
+                var bPoint = XYToControlCoordinate(width, height, bX, bY);
                 context.DrawEllipse(this.shadowPen.Brush, null, rPoint, 4, 4);
                 context.DrawEllipse(this.shadowPen.Brush, null, gPoint, 4, 4);
                 context.DrawEllipse(this.shadowPen.Brush, null, bPoint, 4, 4);
@@ -845,7 +839,7 @@ class CieChromaticityDiagram : Control, IStyleable
             var y = chromaticity.Y;
             if (borderPen != null && x >= MinCoordinateX && x <= MaxCoordinateX && y >= MinCoordinateY && y <= MaxCoordinateY)
             {
-                var point = this.XYToControlCoordinate(width, height, x, y);
+                var point = XYToControlCoordinate(width, height, x, y);
                 this.shadowPen.Thickness = borderPen.Thickness + 2;
                 context.DrawRectangle(null, this.shadowPen, new Rect(point.X - 2, point.Y - 2, 4, 4));
                 context.DrawRectangle(null, borderPen, new Rect(point.X - 2, point.Y - 2, 4, 4));
@@ -876,7 +870,7 @@ class CieChromaticityDiagram : Control, IStyleable
 
 
     // Convert XY coordinate to control coordinate.
-    Point XYToControlCoordinate(double width, double height, double x, double y)
+    static Point XYToControlCoordinate(double width, double height, double x, double y)
     {
         var xLength = (MaxCoordinateX - MinCoordinateX);
         var yLength = (MaxCoordinateY - MinCoordinateY);
@@ -899,15 +893,15 @@ class CieChromaticity : AvaloniaObject
     /// <summary>
     /// Property of <see cref="BorderPen"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IPen?> BorderPenProperty = AvaloniaProperty.Register<CieChromaticity, IPen?>(nameof(BorderPen), null);
+    public static readonly StyledProperty<IPen?> BorderPenProperty = AvaloniaProperty.Register<CieChromaticity, IPen?>(nameof(BorderPen), null);
     /// <summary>
     /// Property of <see cref="X"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<double> XProperty = AvaloniaProperty.Register<CieChromaticity, double>(nameof(X), 0);
+    public static readonly StyledProperty<double> XProperty = AvaloniaProperty.Register<CieChromaticity, double>(nameof(X), 0);
     /// <summary>
     /// Property of <see cref="Y"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<double> YProperty = AvaloniaProperty.Register<CieChromaticity, double>(nameof(Y), 0);
+    public static readonly StyledProperty<double> YProperty = AvaloniaProperty.Register<CieChromaticity, double>(nameof(Y), 0);
 
 
     /// <summary>
@@ -949,11 +943,11 @@ class CieChromaticityGamut : AvaloniaObject
     /// <summary>
     /// Property of <see cref="BorderPen"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<IPen?> BorderPenProperty = AvaloniaProperty.Register<CieChromaticityGamut, IPen?>(nameof(BorderPen), null);
+    public static readonly StyledProperty<IPen?> BorderPenProperty = AvaloniaProperty.Register<CieChromaticityGamut, IPen?>(nameof(BorderPen), null);
     /// <summary>
     /// Property of <see cref="ColorSpace"/>.
     /// </summary>
-    public static readonly AvaloniaProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<CieChromaticityGamut, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
+    public static readonly StyledProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<CieChromaticityGamut, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
 
 
     /// <summary>
