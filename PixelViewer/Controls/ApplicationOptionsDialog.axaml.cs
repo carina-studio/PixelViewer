@@ -256,6 +256,13 @@ namespace Carina.PixelViewer.Controls
 
 
         /// <summary>
+        /// Show external dependencies dialoh.
+        /// </summary>
+        public void ShowExternalDependenciesDialog() =>
+            _ = new ExternalDependenciesDialog().ShowDialog(this);
+
+
+        /// <summary>
         /// Command to show color space info.
         /// </summary>
         public ICommand ShowColorSpaceInfoCommand { get; }

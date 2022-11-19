@@ -34,10 +34,10 @@ namespace Carina.PixelViewer
 
 
 		// Static fields.
-		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new SettingKey<string>("ScreenColorSpace", "");
-		static readonly SettingKey<string> LegacyYuvConversionModeKey = new SettingKey<string>("YuvConversionMode", "");
-		static readonly Uri PreviewPackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
-		static readonly Uri StablePackageManifestUri = new Uri("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
+		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new("ScreenColorSpace", "");
+		static readonly SettingKey<string> LegacyYuvConversionModeKey = new("YuvConversionMode", "");
+		static readonly Uri PreviewPackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
+		static readonly Uri StablePackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
 
 
 		// Constructor.
@@ -66,7 +66,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-        public override IEnumerable<ExternalDependency> ExternalDependencies => new ExternalDependency[0];
+        public override IEnumerable<ExternalDependency> ExternalDependencies => Array.Empty<ExternalDependency>();
 
 
 		/// <inheritdoc/>
@@ -129,7 +129,7 @@ namespace Carina.PixelViewer
 			var resources = this.LoadStringResource(new Uri($"avares://PixelViewer/Strings/{cultureInfo}.xaml"));
 			if (resources == null)
 			{
-				this.Logger.LogWarning($"No string resources for {cultureInfo}");
+				this.Logger.LogWarning("No string resources for {cultureInfo}", cultureInfo);
 				return null;
 			}
 			if (CarinaStudio.Platform.IsLinux)
@@ -144,7 +144,7 @@ namespace Carina.PixelViewer
 					});
 				}
 				else
-					this.Logger.LogWarning($"No platform-specific string resources for {cultureInfo}");
+					this.Logger.LogWarning("No platform-specific string resources for {cultureInfo}", cultureInfo);
 			}
 			else if (CarinaStudio.Platform.IsMacOS)
 			{
@@ -158,7 +158,7 @@ namespace Carina.PixelViewer
 					});
 				}
 				else
-					this.Logger.LogWarning($"No platform-specific string resources for {cultureInfo}");
+					this.Logger.LogWarning("No platform-specific string resources for {cultureInfo}", cultureInfo);
 			}
 			return resources;
 		}
@@ -322,8 +322,6 @@ namespace Carina.PixelViewer
 			});
 
 			// show main window
-			this.UpdateSplashWindowProgress(1);
-			await Task.Delay(300);
 			if (!this.IsRestoringMainWindowsRequested)
 				await this.ShowMainWindowAsync();
 		}
@@ -464,7 +462,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version? PrivacyPolicyVersion => new Version(1, 2);
+		public override Version? PrivacyPolicyVersion => new(1, 2);
 
 
 		// Releasing type.
@@ -519,7 +517,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version? UserAgreementVersion => new Version(1, 3);
+		public override Version? UserAgreementVersion => new(1, 3);
 
 
 #if WINDOWS_ONLY

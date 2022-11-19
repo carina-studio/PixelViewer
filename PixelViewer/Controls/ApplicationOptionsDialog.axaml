@@ -44,7 +44,10 @@
 						</DataTemplate>
 					</ComboBox.ItemTemplate>
 				</ComboBox>
-				<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsRestartingMainWindowsNeeded}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
+				<Grid Classes="Dialog_IconText_Container_Description" ColumnDefinitions="Auto,*" IsVisible="{Binding IsRestartingMainWindowsNeeded}">
+					<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
+					<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
+				</Grid>
 				<Separator Classes="Dialog_Separator"/>
 
 				<!-- Enable blurry background -->
@@ -59,10 +62,20 @@
 				<!-- Custom screen scale factor -->
 				<StackPanel IsVisible="{Binding IsCustomScreenScaleFactorSupported}">
 					<Separator Classes="Dialog_Separator"/>
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.CustomScreenScaleFactor}"/>
-					<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="{}{0:F0}%" Increment="25" Maximum="300" Minimum="100" Value="{Binding CustomScreenScaleFactor, Converter={x:Static asConverters:RatioToPercentageConverter.Default}, Mode=TwoWay}"/>
-					<TextBlock Classes="Dialog_TextBlock_Description_Warning" IsVisible="{Binding IsCustomScreenScaleFactorAdjusted}" Text="{DynamicResource String/ApplicationOptions.WillRestartApplicationToTakeEffect}"/>
-					<Separator Classes="Dialog_Separator"/>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ApplicationOptions.CustomScreenScaleFactor}" VerticalAlignment="Center"/>
+						<Separator Classes="Dialog_Separator_Small"/>
+						<TextBlock Classes="Dialog_TextBlock" Text="{Binding CustomScreenScaleFactor, Converter={x:Static asConverters:RatioToPercentageConverter.Default}, StringFormat={}({0})}" VerticalAlignment="Center"/>
+					</StackPanel>
+					<Slider HorizontalAlignment="Stretch" Maximum="{Binding MaxCustomScreenScaleFactor, Mode=OneTime}" Minimum="1" TickPlacement="Outside" TickFrequency="{Binding CustomScreenScaleFactorGranularity, Mode=OneTime}" Value="{Binding CustomScreenScaleFactor, Mode=TwoWay}"/>
+					<Grid ColumnDefinitions="Auto,*" IsVisible="{Binding IsCustomScreenScaleFactorAdjusted}" Margin="{StaticResource Thickness/Dialog.TextBlock.Margin.Description}">
+						<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
+						<TextBlock Classes="Dialog_Icon_TextBlock" Foreground="{DynamicResource Brush/Dialog.TextBlock.Foreground.Warning}" Grid.Column="1" Text="{DynamicResource String/ApplicationOptions.WillRestartApplicationToTakeEffect}"/>
+					</Grid>
+					<StackPanel IsVisible="{Binding !IsXRandRInstalled}">
+						<TextBlock Classes="Dialog_TextBlock_Description_Warning" Text="{DynamicResource String/ApplicationOptions.CustomScreenScaleFactor.XRandRNotFound}"/>
+						<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[Window].ShowExternalDependenciesDialog}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
+					</StackPanel>
 				</StackPanel>
 				<Separator Classes="Dialog_Separator_Large"/>
 

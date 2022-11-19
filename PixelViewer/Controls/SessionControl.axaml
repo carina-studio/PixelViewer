@@ -104,6 +104,11 @@
 				</MenuItem.Icon>
 			</MenuItem>
 		</ContextMenu>
+
+		<!-- Slider -->
+		<sys:Double x:Key="SliderHorizontalHeight">25</sys:Double>
+		<GridLength x:Key="SliderPostContentMargin">0</GridLength>
+		<GridLength x:Key="SliderPreContentMargin">0</GridLength>
 		
 	</UserControl.Resources>
 

@@ -195,11 +195,6 @@
 		<Setter Property="Width" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 	</Style>
 	<Style Selector="Slider.SessionControl_FilterParamsSlider">
-		<Style.Resources>
-			<sys:Double x:Key="SliderHorizontalHeight">25</sys:Double>
-			<GridLength x:Key="SliderPostContentMargin">0</GridLength>
-			<GridLength x:Key="SliderPreContentMargin">0</GridLength>
-		</Style.Resources>
 		<Setter Property="Foreground" Value="{DynamicResource SliderTrackFill}"/>
 		<Setter Property="IsSnapToTickEnabled" Value="True"/>
 		<Setter Property="TickPlacement" Value="None"/>
