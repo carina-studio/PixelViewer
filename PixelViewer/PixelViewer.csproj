@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<AssemblyVersion>2.7.2.1118</AssemblyVersion>
-		<Version>2.7.2.1118</Version>
+		<AssemblyVersion>2.7.3.1119</AssemblyVersion>
+		<Version>2.7.3.1119</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
 		<Copyright>©2021 Carina Studio</Copyright>
