@@ -25,7 +25,7 @@ namespace Carina.PixelViewer.Media.Profiles
         // Initializer.
         static ImageRenderingProfiles()
         {
-            UserDefinedProfiles = userDefinedProfiles.AsReadOnly();
+            UserDefinedProfiles = ListExtensions.AsReadOnly(userDefinedProfiles);
         }
 
 

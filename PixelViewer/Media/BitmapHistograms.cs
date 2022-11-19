@@ -53,12 +53,12 @@ namespace Carina.PixelViewer.Media
             this.ColorCount = red.Count;
             if (this.ColorCount != green.Count || this.ColorCount != blue.Count || this.ColorCount != luminance.Count)
                 throw new ArgumentException();
-            this.Blue = blue.AsReadOnly();
+            this.Blue = ListExtensions.AsReadOnly(blue);
             this.EffectivePixelCount = effectivePixelCount;
-            this.Green = green.AsReadOnly();
-            this.Luminance = luminance.AsReadOnly();
+            this.Green = ListExtensions.AsReadOnly(green);
+            this.Luminance = ListExtensions.AsReadOnly(luminance);
             this.Maximum = Math.Max(Math.Max(red.Max(), green.Max()), Math.Max(blue.Max(), luminance.Max()));
-            this.Red = red.AsReadOnly();
+            this.Red = ListExtensions.AsReadOnly(red);
             Analyze(luminance, effectivePixelCount, out this.meanOfLuminance, out this.minOfLuminance, out this.shadowOfLuminance, out this.medianOfLuminance, out this.highlightOfLuminance, out this.maxOfLuminance);
             Analyze(red, effectivePixelCount, out this.meanOfRed, out this.minOfRed, out this.shadowOfRed, out this.medianOfRed, out this.highlightOfRed, out this.maxOfRed);
             Analyze(green, effectivePixelCount, out this.meanOfGreen, out this.minOfGreen, out this.shadowOfGreen, out this.medianOfGreen, out this.highlightOfGreen, out this.maxOfGreen);

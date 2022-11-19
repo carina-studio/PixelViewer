@@ -3,7 +3,7 @@
 set APP_NAME=PixelViewer
 set RID_LIST=linux-arm64 linux-x64
 set CONFIG=Release
-set FRAMEWORK=net6.0
+set FRAMEWORK=net7.0
 set ERRORLEVEL=0
 
 echo ********** Start building %APP_NAME% **********

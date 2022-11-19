@@ -373,7 +373,7 @@ namespace Carina.PixelViewer.Media
         static unsafe ColorSpace()
         {
             allColorSpaceList.AddAll(builtInColorSpaces.Values);
-            AllColorSpaces = allColorSpaceList.AsReadOnly();
+            AllColorSpaces = ListExtensions.AsReadOnly(allColorSpaceList);
             BuiltInColorSpaces = builtInColorSpaces.Values.ToList().Also(it =>
                 it.Sort(Compare)).AsReadOnly();
             Default = Srgb;
@@ -386,7 +386,7 @@ namespace Carina.PixelViewer.Media
                 mappingTableTo8Bit[input] = (byte)((double)input / QuantizationSteps * 255 + 0.5);
                 mappingTableTo16Bit[input] = (ushort)((double)input / QuantizationSteps * 65535 + 0.5);
             }
-            UserDefinedColorSpaces = userDefinedColorSpaceList.AsReadOnly();
+            UserDefinedColorSpaces = ListExtensions.AsReadOnly(userDefinedColorSpaceList);
         }
 
 

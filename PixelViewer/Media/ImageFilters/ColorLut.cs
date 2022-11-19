@@ -16,15 +16,15 @@ namespace Carina.PixelViewer.Media.ImageFilters
         /// <summary>
         /// Read-only identity LUT for 16-bit color.
         /// </summary>
-        public static IList<double> Identity16 = new double[65536].Also(it =>
-            ResetToIdentity(it)).AsReadOnly();
+        public static IList<double> Identity16 = ListExtensions.AsReadOnly(new double[65536].Also(it =>
+            ResetToIdentity(it)));
         
 
         /// <summary>
         /// Read-only identity LUT for 8-bit color.
         /// </summary>
-        public static IList<double> Identity8 = new double[256].Also(it =>
-            ResetToIdentity(it)).AsReadOnly();
+        public static IList<double> Identity8 = ListExtensions.AsReadOnly(new double[256].Also(it =>
+            ResetToIdentity(it)));
         
 
         // Constants.

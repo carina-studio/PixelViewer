@@ -34,7 +34,7 @@ for i in "${!RID_LIST[@]}"; do
     echo " "
 
     # clean
-    rm -r ./$APP_NAME/bin/$CONFIG/net6.0/$RID
+    rm -r ./$APP_NAME/bin/$CONFIG/net7.0/$RID
     dotnet restore $APP_NAME -r $RID
     if [ "$?" != "0" ]; then
         exit
@@ -51,7 +51,7 @@ for i in "${!RID_LIST[@]}"; do
     fi
 
     # zip package
-    ditto -c -k --sequesterRsrc "./$APP_NAME/bin/$CONFIG/net6.0/$RID/publish/" "./Packages/$VERSION/$APP_NAME-$VERSION-$RID.zip"
+    ditto -c -k --sequesterRsrc "./$APP_NAME/bin/$CONFIG/net7.0/$RID/publish/" "./Packages/$VERSION/$APP_NAME-$VERSION-$RID.zip"
     if [ "$?" != "0" ]; then
         exit
     fi

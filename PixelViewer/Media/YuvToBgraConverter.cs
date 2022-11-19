@@ -177,7 +177,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Get all available converters.
         /// </summary>
-        public static IList<YuvToBgraConverter> All { get; } = Converters.AsReadOnly();
+        public static IList<YuvToBgraConverter> All { get; } = ListExtensions.AsReadOnly(Converters);
 
 
         /// <summary>

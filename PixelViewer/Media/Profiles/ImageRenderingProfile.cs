@@ -32,8 +32,8 @@ namespace Carina.PixelViewer.Media.Profiles
         static volatile IApplication? app;
         static volatile ImageRenderingProfile? defaultProfile;
         static volatile string? directoryPath;
-        static readonly IList<uint> emptyBlackLevels = new uint[4].AsReadOnly();
-        static readonly IList<int> emptyEffectiveBits = new int[4].AsReadOnly();
+        static readonly IList<uint> emptyBlackLevels = ListExtensions.AsReadOnly(new uint[4]);
+        static readonly IList<int> emptyEffectiveBits = ListExtensions.AsReadOnly(new int[4]);
         static volatile ILogger? logger;
 
 
@@ -127,7 +127,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 if (value.Count != ImageFormat.MaxPlaneCount)
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
-                this.blackLevels = value.ToArray().AsReadOnly();
+                this.blackLevels = ListExtensions.AsReadOnly(value.ToArray());
                 this.PropertyChanged?.Invoke(this, new(nameof(BlackLevels)));
             }
         }
@@ -283,7 +283,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 if (value.Count != ImageFormat.MaxPlaneCount)
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
-                this.effectiveBits = value.ToArray().AsReadOnly();
+                this.effectiveBits = ListExtensions.AsReadOnly(value.ToArray());
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EffectiveBits)));
             }
         }
@@ -572,7 +572,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         if (index >= array.Length)
                             break;
                     }
-                    profile.effectiveBits = array.AsReadOnly();
+                    profile.effectiveBits = ListExtensions.AsReadOnly(array);
                 }
 
                 // get black levels
@@ -588,7 +588,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         if (index >= array.Length)
                             break;
                     }
-                    profile.blackLevels = array.AsReadOnly();
+                    profile.blackLevels = ListExtensions.AsReadOnly(array);
                 }
 
                 // get white levels
@@ -604,7 +604,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         if (index >= array.Length)
                             break;
                     }
-                    profile.whiteLevels = array.AsReadOnly();
+                    profile.whiteLevels = ListExtensions.AsReadOnly(array);
                 }
 
                 // get pixel strides
@@ -620,7 +620,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         if (index >= array.Length)
                             break;
                     }
-                    profile.pixelStrides = array.AsReadOnly();
+                    profile.pixelStrides = ListExtensions.AsReadOnly(array);
                 }
 
                 // get row strides
@@ -636,7 +636,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         if (index >= array.Length)
                             break;
                     }
-                    profile.rowStrides = array.AsReadOnly();
+                    profile.rowStrides = ListExtensions.AsReadOnly(array);
                 }
 
                 // get RGB gain
@@ -708,7 +708,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 if (value.Count != ImageFormat.MaxPlaneCount)
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
-                this.pixelStrides = value.ToArray().AsReadOnly();
+                this.pixelStrides = ListExtensions.AsReadOnly(value.ToArray());
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PixelStrides)));
             }
         }
@@ -762,7 +762,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 if (value.Count != ImageFormat.MaxPlaneCount)
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
-                this.rowStrides = value.ToArray().AsReadOnly();
+                this.rowStrides = ListExtensions.AsReadOnly(value.ToArray());
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RowStrides)));
             }
         }
@@ -912,7 +912,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 if (value.Count != ImageFormat.MaxPlaneCount)
                     throw new ArgumentException("Number of element must be same as ImageFormat.MaxPlaneCount.");
-                this.whiteLevels = value.ToArray().AsReadOnly();
+                this.whiteLevels = ListExtensions.AsReadOnly(value.ToArray());
                 this.PropertyChanged?.Invoke(this, new(nameof(WhiteLevels)));
             }
         }

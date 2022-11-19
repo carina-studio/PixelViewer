@@ -992,7 +992,7 @@ namespace Carina.PixelViewer.ViewModels
 				profile.PropertyChanged += this.OnProfilePropertyChanged;
 				this.profiles.Add(profile);
 			}
-			this.Profiles = this.profiles.AsReadOnly();
+			this.Profiles = ListExtensions.AsReadOnly(this.profiles);
 			((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged += this.OnUserDefinedProfilesChanged;
 
 			// select default image renderer
@@ -1002,7 +1002,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(ByteOrderingProperty, this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering));
 
 			// attach to color spaces
-			this.ColorSpaces = this.colorSpaces.AsReadOnly();
+			this.ColorSpaces = ListExtensions.AsReadOnly(this.colorSpaces);
 			this.colorSpaces.AddAll(Media.ColorSpace.AllColorSpaces);
 			(Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
 				it.CollectionChanged += this.OnAllColorSpacesChanged);

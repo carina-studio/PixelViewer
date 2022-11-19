@@ -17,12 +17,12 @@ namespace Carina.PixelViewer.Media.ImageEncoders
         // Static initializer.
         static ImageEncoders()
         {
-            All = new IImageEncoder[]
+            All = ListExtensions.AsReadOnly(new IImageEncoder[]
             {
                 new JpegImageEncoder(),
                 new PngImageEncoder(),
                 new RawBgraImageEncoder(),
-            }.AsReadOnly();
+            });
             foreach(var encoder in All)
             {
                 encodersByFormat[encoder.Format] = encoder;

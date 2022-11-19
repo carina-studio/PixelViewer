@@ -60,7 +60,7 @@ namespace Carina.PixelViewer.ViewModels
 		public Workspace(JsonElement? savedState)
 		{
 			// setup properties
-			this.Sessions = this.sessions.AsReadOnly();
+			this.Sessions = ListExtensions.AsReadOnly(this.sessions);
 
 			// setup actions
 			this.updateEffectiveScreenColorSpaceAction = new(async () =>
