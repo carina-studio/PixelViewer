@@ -75,11 +75,13 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="format"><see cref="BitmapFormat"/>.</param>
 		/// <returns><see cref="System.Drawing.Imaging.PixelFormat"/>.</returns>
+#pragma warning disable CA1416
 		public static System.Drawing.Imaging.PixelFormat ToSystemDrawingPixelFormat(this BitmapFormat format) => format switch
 		{
 			BitmapFormat.Bgra32 => System.Drawing.Imaging.PixelFormat.Format32bppArgb,
 			BitmapFormat.Bgra64 => System.Drawing.Imaging.PixelFormat.Format64bppArgb,
 			_ => throw new ArgumentException($"Unknown format: {format}"),
 		};
+#pragma warning restore CA1416
 	}
 }

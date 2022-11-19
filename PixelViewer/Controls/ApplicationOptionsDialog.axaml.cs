@@ -1,6 +1,6 @@
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using Avalonia.Platform.Storage;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
@@ -52,34 +52,40 @@ namespace Carina.PixelViewer.Controls
             try
             {
                 // select file
-                var fileNames = await new OpenFileDialog().Also(dialog =>
+                var fileName = (await this.StorageProvider.OpenFilePickerAsync(new()
                 {
-                    dialog.Filters?.Add(new FileDialogFilter().Also(it =>
+                    FileTypeFilter = new FilePickerFileType[]
                     {
-                        it.Extensions.Add("icc");
-                        it.Name = this.Application.GetString("FileType.Icc");
-                    }));
-                    dialog.Filters?.Add(new FileDialogFilter().Also(it =>
-                    {
-                        it.Extensions.Add("json");
-                        it.Name = this.Application.GetString("FileType.Json");
-                    }));
-                }).ShowAsync(this);
-                if (fileNames == null || fileNames.IsEmpty())
+                        new FilePickerFileType(this.Application.GetStringNonNull("FileType.Icc"))
+                        {
+                            Patterns = new string[] { "*.icc" }
+                        },
+                        new FilePickerFileType(this.Application.GetStringNonNull("FileType.Json"))
+                        {
+                            Patterns = new string[] { "*.json" }
+                        }
+                    }
+                }))?.Let(it =>
+                {
+                    if (it.Count == 1 && it[0].TryGetUri(out var uri))
+                        return uri.LocalPath;
+                    return null;
+                });
+                if (string.IsNullOrEmpty(fileName))
                     return;
                 
                 // load color space
                 var colorSpace = (Media.ColorSpace?)null;
                 try
                 {
-                    if (Path.GetExtension(fileNames[0])?.ToLower() == ".icc")
-                        colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(fileNames[0]);
+                    if (Path.GetExtension(fileName)?.ToLower() == ".icc")
+                        colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(fileName);
                     else
-                        colorSpace = await Media.ColorSpace.LoadFromFileAsync(fileNames[0]);
+                        colorSpace = await Media.ColorSpace.LoadFromFileAsync(fileName);
                 }
                 catch (Exception ex)
                 {
-                    this.Logger.LogError(ex, "Unable to load color space from '{fileName}'", fileNames[0]);
+                    this.Logger.LogError(ex, "Unable to load color space from '{fileName}'", fileName);
                     await new MessageDialog()
                     {
                         Icon = MessageDialogIcon.Error,

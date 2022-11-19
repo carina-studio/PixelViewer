@@ -52,7 +52,7 @@ namespace Carina.PixelViewer.Media
         {
             this.ColorCount = red.Count;
             if (this.ColorCount != green.Count || this.ColorCount != blue.Count || this.ColorCount != luminance.Count)
-                throw new ArgumentException();
+                throw new ArgumentException("Count of colors of R/G/B/L should be same.");
             this.Blue = ListExtensions.AsReadOnly(blue);
             this.EffectivePixelCount = effectivePixelCount;
             this.Green = ListExtensions.AsReadOnly(green);
@@ -197,7 +197,7 @@ namespace Carina.PixelViewer.Media
                         });
                     }
                     if (stopWatch != null)
-                        Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
+                        Logger?.LogTrace("Take {ms} ms to create histograms for {width}x{height} {format} bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
                     return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
                 });
             }
@@ -270,7 +270,7 @@ namespace Carina.PixelViewer.Media
                         });
                     }
                     if (stopWatch != null)
-                        Logger.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to create histograms for {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap");
+                        Logger?.LogTrace("Take {ms} ms to create histograms for {width}x{height} {format} bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
                     return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
                 });
             }

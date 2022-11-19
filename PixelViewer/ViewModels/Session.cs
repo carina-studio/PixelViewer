@@ -147,7 +147,7 @@ namespace Carina.PixelViewer.ViewModels
                 var memoryUsageToken = session.RequestRenderedImageMemoryUsage(this.dataSize);
 				if (memoryUsageToken == null)
 				{
-					this.session.Logger.LogError($"Failed to transfer image frame to {session}");
+					this.session.Logger.LogError("Failed to transfer image frame to {session}", session);
 					return null;
 				}
 
@@ -707,14 +707,14 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Static fields.
-		static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new SettingKey<bool>("Session.IsInitHistogramsPanelVisible", false);
-		static readonly SettingKey<int> LatestRenderingParamsPanelSize = new SettingKey<int>("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
-		static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new MutableObservableInt64();
+		static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
+		static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
+		static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new();
 		static readonly TimeSpan ZoomAnimationDuration = TimeSpan.FromMilliseconds(500);
 
 
 		// Fields.
-		readonly List<ActivationToken> activationTokens = new List<ActivationToken>();
+		readonly List<ActivationToken> activationTokens = new();
 		IDisposable? avaQuarterSizeRenderedImageMemoryUsageToken;
 		IDisposable? avaRenderedImageMemoryUsageToken;
 		readonly uint[] blackLevels = new uint[ImageFormat.MaxPlaneCount];
@@ -722,27 +722,27 @@ namespace Carina.PixelViewer.ViewModels
 		IDisposable? cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
 		WriteableBitmap? cachedAvaRenderedImage;
 		IDisposable? cachedAvaRenderedImageMemoryUsageToken;
-		readonly List<ImageFrame> cachedFilteredImageFrames = new List<ImageFrame>(2);
-		readonly MutableObservableBoolean canApplyProfile = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canMoveToNextFrame = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canMoveToPreviousFrame = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canOpenSourceFile = new MutableObservableBoolean(true);
-		readonly MutableObservableBoolean canResetBrightnessAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canResetColorAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canResetContrastAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canResetHighlightAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canResetSaturationAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canResetShadowAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canResetVibranceAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canSaveAsNewProfile = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canSaveOrDeleteProfile = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canSaveFilteredImage = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canSaveRenderedImage = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canSelectColorAdjustment = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canSelectRgbGain = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canZoomIn = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canZoomOut = new MutableObservableBoolean();
-		readonly MutableObservableBoolean canZoomTo = new MutableObservableBoolean();
+		readonly List<ImageFrame> cachedFilteredImageFrames = new(2);
+		readonly MutableObservableBoolean canApplyProfile = new();
+		readonly MutableObservableBoolean canMoveToNextFrame = new();
+		readonly MutableObservableBoolean canMoveToPreviousFrame = new();
+		readonly MutableObservableBoolean canOpenSourceFile = new(true);
+		readonly MutableObservableBoolean canResetBrightnessAdjustment = new();
+		readonly MutableObservableBoolean canResetColorAdjustment = new();
+		readonly MutableObservableBoolean canResetContrastAdjustment = new();
+		readonly MutableObservableBoolean canResetHighlightAdjustment = new();
+		readonly MutableObservableBoolean canResetSaturationAdjustment = new();
+		readonly MutableObservableBoolean canResetShadowAdjustment = new();
+		readonly MutableObservableBoolean canResetVibranceAdjustment = new();
+		readonly MutableObservableBoolean canSaveAsNewProfile = new();
+		readonly MutableObservableBoolean canSaveOrDeleteProfile = new();
+		readonly MutableObservableBoolean canSaveFilteredImage = new();
+		readonly MutableObservableBoolean canSaveRenderedImage = new();
+		readonly MutableObservableBoolean canSelectColorAdjustment = new();
+		readonly MutableObservableBoolean canSelectRgbGain = new();
+		readonly MutableObservableBoolean canZoomIn = new();
+		readonly MutableObservableBoolean canZoomOut = new();
+		readonly MutableObservableBoolean canZoomTo = new();
 		ImageFrame? colorSpaceConvertedImageFrame;
 		readonly SortedObservableList<ColorSpace> colorSpaces = new((lhs, rhs) =>
 		{
@@ -782,7 +782,7 @@ namespace Carina.PixelViewer.ViewModels
 		bool isImageDimensionsEvaluationNeeded = true;
 		bool isImagePlaneOptionsResetNeeded = true;
 		readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
-		readonly SortedObservableList<ImageRenderingProfile> profiles = new SortedObservableList<ImageRenderingProfile>(CompareProfiles);
+		readonly SortedObservableList<ImageRenderingProfile> profiles = new(CompareProfiles);
 		readonly ScheduledAction releasedCachedImagesAction;
 		ImageFrame? renderedImageFrame;
 		readonly ScheduledAction renderImageAction;
@@ -1183,7 +1183,7 @@ namespace Carina.PixelViewer.ViewModels
 			catch (Exception ex)
 			{
 				if (!cancellationToken.IsCancellationRequested)
-					this.Logger.LogError(ex, $"Error occurred while applying filter {filter}");
+					this.Logger.LogError(ex, "Error occurred while applying filter {filter}", filter);
 				return false;
 			}
 		}
@@ -1430,7 +1430,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.filterImageAction.Cancel();
 			if (this.imageFilteringCancellationTokenSource == null)
 				return false;
-			this.Logger.LogWarning($"Cancel filtering image for source '{this.SourceFileName}'");
+			this.Logger.LogWarning("Cancel filtering image for source '{sourceFileName}'", this.SourceFileName);
 			this.imageFilteringCancellationTokenSource.Cancel();
 			this.imageFilteringCancellationTokenSource = null;
 
@@ -1452,7 +1452,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.renderImageAction.Cancel();
 			if (this.imageRenderingCancellationTokenSource == null)
 				return false;
-			this.Logger.LogWarning($"Cancel rendering image for source '{this.SourceFileName}'");
+			this.Logger.LogWarning("Cancel rendering image for source '{sourceFileName}'", this.SourceFileName);
 			this.imageRenderingCancellationTokenSource.Cancel();
 			this.imageRenderingCancellationTokenSource = null;
 
@@ -1687,7 +1687,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				_ = Task.Run(() =>
 				{
-					this.Logger.LogDebug($"Dispose source for '{sourceFileName}'");
+					this.Logger.LogDebug("Dispose source for '{sourceFileName}'", sourceFileName);
 					imageDataSource?.Dispose();
 				});
 			}
@@ -1940,18 +1940,10 @@ namespace Carina.PixelViewer.ViewModels
 				this.Logger.LogTrace("Start filtering image");
 
 			// prepare
-			CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+			CancellationTokenSource cancellationTokenSource = new();
 			this.imageFilteringCancellationTokenSource = cancellationTokenSource;
 			this.canSaveFilteredImage.Update(false);
 			this.SetValue(IsFilteringRenderedImageProperty, true);
-
-			// setup swap function
-			void SwapImageFrames(ref ImageFrame? x, ref ImageFrame? y)
-			{
-				var t = x;
-				x = y;
-				y = t;
-			}
 
 			// check filters needed
 			var filterCount = 0;
@@ -1996,7 +1988,7 @@ namespace Carina.PixelViewer.ViewModels
 					|| cachedFrame.BitmapBuffer.Format != format)
                 {
 					if (this.Application.IsDebugMode)
-						this.Logger.LogTrace($"Released cached filtered image frame, size: {cachedFrame.BitmapBuffer.Width}x{cachedFrame.BitmapBuffer.Height}");
+						this.Logger.LogTrace("Released cached filtered image frame, size: {width}x{height}", cachedFrame.BitmapBuffer.Width, cachedFrame.BitmapBuffer.Height);
 					this.cachedFilteredImageFrames.RemoveAt(i);
 					cachedFrame.Dispose();
                 }
@@ -2015,7 +2007,7 @@ namespace Carina.PixelViewer.ViewModels
 			else
             {
 				if (this.Application.IsDebugMode)
-					this.Logger.LogWarning($"Allocate filtered image frame 1, size: {width}x{height}");
+					this.Logger.LogWarning("Allocate filtered image frame 1, size: {width}x{height}", width, height);
 				filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
 			}
 			if (filteredImageFrame1 == null)
@@ -2055,7 +2047,7 @@ namespace Carina.PixelViewer.ViewModels
 				else
 				{
 					if (this.Application.IsDebugMode)
-						this.Logger.LogWarning($"Allocate filtered image frame 2, size: {width}x{height}");
+						this.Logger.LogWarning("Allocate filtered image frame 2, size: {width}x{height}", width, height);
 					filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
 				}
 				if (filteredImageFrame2 == null)
@@ -2110,7 +2102,7 @@ namespace Carina.PixelViewer.ViewModels
 						ColorLut.Multiply(bLut, bFactor);
 					}
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to prepare color LUT");
+						this.Logger.LogTrace("Take {ms} ms to prepare color LUT", stopwatch.ElapsedMilliseconds);
 				}
 				catch (Exception ex)
 				{
@@ -2132,14 +2124,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply color LUT filter");
+						this.Logger.LogTrace("Take {ms} ms to apply color LUT filter", stopwatch.ElapsedMilliseconds);
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
 						resultImageFrame = filteredImageFrame2;
 					}
 					else
-						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+						(sourceImageFrame, resultImageFrame) = (resultImageFrame, sourceImageFrame);
 				}
 				else
 					failedToApply = true;
@@ -2160,14 +2152,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (await this.ApplyImageFilterAsync(new SaturationImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply saturation filter");
+						this.Logger.LogTrace("Take {ms} ms to apply saturation filter", stopwatch.ElapsedMilliseconds);
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
 						resultImageFrame = filteredImageFrame2;
 					}
 					else
-						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+						(sourceImageFrame, resultImageFrame) = (resultImageFrame, sourceImageFrame);
 				}
 				else
 					failedToApply = true;
@@ -2191,7 +2183,7 @@ namespace Carina.PixelViewer.ViewModels
 					if (this.canResetShadowAdjustment.Value)
 						await ColorLut.ShadowTransformAsync(lut, this.ShadowAdjustment, cancellationTokenSource.Token);
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to prepare luminance LUT");
+						this.Logger.LogTrace("Take {ms} ms to prepare luminance LUT", stopwatch.ElapsedMilliseconds);
 				}
 				catch (Exception ex)
 				{
@@ -2213,14 +2205,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 				{
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply luminance LUT filter");
+						this.Logger.LogTrace("Take {ms} ms to apply luminance LUT filter", stopwatch.ElapsedMilliseconds);
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
 						resultImageFrame = filteredImageFrame2;
 					}
 					else
-						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+						(sourceImageFrame, resultImageFrame) = (resultImageFrame, sourceImageFrame);
 				}
 				else
 					failedToApply = true;
@@ -2234,14 +2226,14 @@ namespace Carina.PixelViewer.ViewModels
 				if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), cancellationTokenSource.Token))
 				{
 					if (stopwatch != null)
-						this.Logger.LogTrace($"Take {stopwatch.ElapsedMilliseconds} ms to apply grayscale filter");
+						this.Logger.LogTrace("Take {ms} ms to apply grayscale filter", stopwatch.ElapsedMilliseconds);
 					if (sourceImageFrame == renderedImageFrame)
 					{
 						sourceImageFrame = resultImageFrame;
 						resultImageFrame = filteredImageFrame2;
 					}
 					else
-						SwapImageFrames(ref sourceImageFrame, ref resultImageFrame);
+						(sourceImageFrame, resultImageFrame) = (resultImageFrame, sourceImageFrame);
 				}
 				else
 					failedToApply = true;
@@ -2560,13 +2552,13 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			if (sessionToClearRenderedImage != null)
 			{
-				this.Logger.LogWarning($"Hibernate {sessionToClearRenderedImage}");
+				this.Logger.LogWarning("Hibernate {sessionToClearRenderedImage}", sessionToClearRenderedImage);
 				if (sessionToClearRenderedImage.Hibernate())
 				{
 					await Task.Delay(1000);
 					return true;
 				}
-				this.Logger.LogError($"Failed to hibernate {sessionToClearRenderedImage}");
+				this.Logger.LogError("Failed to hibernate {sessionToClearRenderedImage}", sessionToClearRenderedImage);
 				return false;
 			}
 			this.Logger.LogWarning("No deactivated session to hibernate");
@@ -2947,7 +2939,7 @@ namespace Carina.PixelViewer.ViewModels
 			0 => nameof(this.BlackLevel1),
 			1 => nameof(this.BlackLevel2),
 			2 => nameof(this.BlackLevel3),
-			_ => throw new ArgumentOutOfRangeException(),
+			_ => throw new ArgumentOutOfRangeException(nameof(index)),
 		});
 
 
@@ -2957,12 +2949,12 @@ namespace Carina.PixelViewer.ViewModels
 			0 => nameof(this.EffectiveBits1),
 			1 => nameof(this.EffectiveBits2),
 			2 => nameof(this.EffectiveBits3),
-			_ => throw new ArgumentOutOfRangeException(),
+			_ => throw new ArgumentOutOfRangeException(nameof(index)),
 		});
 
 
 		// Called when state of loading profiles has been changed.
-		void OnLoadingProfilesStateChanged(bool isLoading)
+		void OnLoadingProfilesStateChanged()
 		{
 			this.UpdateCanSaveDeleteProfile();
 		}
@@ -2984,7 +2976,7 @@ namespace Carina.PixelViewer.ViewModels
 			0 => nameof(this.PixelStride1),
 			1 => nameof(this.PixelStride2),
 			2 => nameof(this.PixelStride3),
-			_ => throw new ArgumentOutOfRangeException(),
+			_ => throw new ArgumentOutOfRangeException(nameof(index)),
 		});
 
 
@@ -3113,7 +3105,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.renderImageAction.Reschedule();
 				}
 				else
-					this.Logger.LogError($"{newValue} is not part of available image renderer list");
+					this.Logger.LogError("{newValue} is not part of available image renderer list", newValue);
 			}
 			else if (property == ImageViewportSizeProperty
 				|| property == ScreenPixelDensityProperty)
@@ -3307,7 +3299,7 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			if (e.ColorSpace == this.GetValue(ColorSpaceProperty))
 			{
-				this.Logger.LogWarning($"Color space '{e.ColorSpace}' is being removed, switch back to default color space");
+				this.Logger.LogWarning("Color space '{colorSpace}' is being removed, switch back to default color space", e.ColorSpace);
 				Media.ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
 				this.SetValue(ColorSpaceProperty, colorSpace);
 			}
@@ -3320,7 +3312,7 @@ namespace Carina.PixelViewer.ViewModels
 			0 => nameof(this.RowStride1),
 			1 => nameof(this.RowStride2),
 			2 => nameof(this.RowStride3),
-			_ => throw new ArgumentOutOfRangeException(),
+			_ => throw new ArgumentOutOfRangeException(nameof(index)),
 		});
 
 
@@ -3404,7 +3396,7 @@ namespace Carina.PixelViewer.ViewModels
 			0 => nameof(this.WhiteLevel1),
 			1 => nameof(this.WhiteLevel2),
 			2 => nameof(this.WhiteLevel3),
-			_ => throw new ArgumentOutOfRangeException(),
+			_ => throw new ArgumentOutOfRangeException(nameof(index)),
 		});
 
 
@@ -3416,7 +3408,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			if (!this.canOpenSourceFile.Value)
 			{
-				this.Logger.LogError($"Cannot open '{fileName}' in current state");
+				this.Logger.LogError("Cannot open '{fileName}' in current state", fileName);
 				return;
 			}
 
@@ -3443,18 +3435,18 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				try
 				{
-					this.Logger.LogDebug($"Create source for '{fileName}'");
+					this.Logger.LogDebug("Create source for '{fileName}'", fileName);
 					return new FileImageDataSource(this.Application, fileName);
 				}
 				catch (Exception ex)
 				{
-					this.Logger.LogError(ex, $"Unable to create source for '{fileName}'");
+					this.Logger.LogError(ex, "Unable to create source for '{fileName}'", fileName);
 					return null;
 				}
 			});
 			if (this.IsDisposed)
 			{
-				this.Logger.LogWarning($"Source for '{fileName}' created after disposing.");
+				this.Logger.LogWarning("Source for '{fileName}' created after disposing.", fileName);
 				if (imageDataSource != null)
 					_ = Task.Run(imageDataSource.Dispose);
 				return;
@@ -3525,7 +3517,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
 			{
-				this.Logger.LogWarning($"Use default image renderer after opening source '{fileName}'");
+				this.Logger.LogWarning("Use default image renderer after opening source '{fileName}'", fileName);
 				var defaultImageRenderer = this.SelectDefaultImageRenderer();
 				if (this.ImageRenderer != defaultImageRenderer)
 				{
@@ -3666,7 +3658,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (!this.IsDisposed)
 				this.SetValue(RenderedImagesMemoryUsageProperty, this.RenderedImagesMemoryUsage - token.DataSize);
 			SharedRenderedImagesMemoryUsage.Decrease(token.DataSize);
-			this.Logger.LogDebug($"Release {token.DataSize.ToFileSizeString()} for rendered image, total: {SharedRenderedImagesMemoryUsage.Value.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+			this.Logger.LogDebug("Release {dataSize} for rendered image, total: {totalUsage}, max: {maxUsage}", token.DataSize.ToFileSizeString(), SharedRenderedImagesMemoryUsage.Value.ToFileSizeString(), maxUsage.ToFileSizeString());
 		}
 
 
@@ -3723,7 +3715,7 @@ namespace Carina.PixelViewer.ViewModels
 			// evaluate dimensions
 			if (this.isImageDimensionsEvaluationNeeded)
 			{
-				this.Logger.LogDebug($"Evaluate dimensions of image for '{sourceFileName}'");
+				this.Logger.LogDebug("Evaluate dimensions of image for '{sourceFileName}'", sourceFileName);
 				this.isImageDimensionsEvaluationNeeded = false;
 				imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref PixelSize it) =>
 				{
@@ -3863,7 +3855,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			catch (Exception ex)
 			{
-				this.Logger.LogError(ex, $"Unable to update frame count and index of '{this.SourceFileName}'");
+				this.Logger.LogError(ex, "Unable to update frame count and index of '{sourceFileName}'", this.SourceFileName);
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.ClearRenderedImage();
 				return;
@@ -3945,7 +3937,7 @@ namespace Carina.PixelViewer.ViewModels
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 
 			// render
-			this.Logger.LogDebug($"Render image for '{sourceFileName}', dimensions: {this.ImageWidth}x{this.ImageHeight}");
+			this.Logger.LogDebug("Render image for '{sourceFileName}', dimensions: {width}x{height}", sourceFileName, this.ImageWidth, this.ImageHeight);
 			var exception = (Exception?)null;
 			try
 			{
@@ -3997,7 +3989,7 @@ namespace Carina.PixelViewer.ViewModels
 			// check whether rendering has been cancelled or not
 			if (cancellationTokenSource.IsCancellationRequested)
 			{
-				this.Logger.LogWarning($"Image rendering for '{sourceFileName}' has been cancelled");
+				this.Logger.LogWarning("Image rendering for '{sourceFileName}' has been cancelled", sourceFileName);
 				this.SynchronizationContext.Post(() =>
                 {
 					colorSpaceConvertedImageFrame?.Dispose();
@@ -4022,7 +4014,7 @@ namespace Carina.PixelViewer.ViewModels
 			// update state and continue filtering if needed
 			if (exception == null)
 			{
-				this.Logger.LogDebug($"Image for '{sourceFileName}' rendered");
+				this.Logger.LogDebug("Image for '{sourceFileName}' rendered", sourceFileName);
 
 				// update state
 				this.colorSpaceConvertedImageFrame?.Dispose();
@@ -4061,7 +4053,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			else
 			{
-				this.Logger.LogError(exception, $"Error occurred while rendering image for '{sourceFileName}'");
+				this.Logger.LogError(exception, "Error occurred while rendering image for '{sourceFileName}'", sourceFileName);
 
 				// clear filtered image
 				this.ClearFilteredImage();
@@ -4118,10 +4110,10 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				SharedRenderedImagesMemoryUsage.Update(totalMemoryUsage);
 				this.SetValue(RenderedImagesMemoryUsageProperty, this.RenderedImagesMemoryUsage + dataSize);
-				this.Logger.LogDebug($"Request {dataSize.ToFileSizeString()} for rendered image, total: {totalMemoryUsage.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+				this.Logger.LogDebug("Request {dataSize} for rendered image, total: {totalMemoryUsage}, max: {maxUsage}", dataSize.ToFileSizeString(), totalMemoryUsage.ToFileSizeString(), maxUsage.ToFileSizeString());
 				return new RenderedImageMemoryUsageToken(this, dataSize);
 			}
-			this.Logger.LogError($"Unable to request {dataSize.ToFileSizeString()} for rendered image, total: {SharedRenderedImagesMemoryUsage.Value.ToFileSizeString()}, max: {maxUsage.ToFileSizeString()}");
+			this.Logger.LogError("Unable to request {dataSize} for rendered image, total: {totalMemoryUsage}, max: {maxUsage}", dataSize.ToFileSizeString(), SharedRenderedImagesMemoryUsage.Value.ToFileSizeString(), maxUsage.ToFileSizeString());
 			return null;
 		}
 
@@ -4143,7 +4135,7 @@ namespace Carina.PixelViewer.ViewModels
 						|| this.cachedAvaRenderedImage.PixelSize.Height != height)
                     {
 						if (this.Application.IsDebugMode)
-							this.Logger.LogTrace($"Release cached Avalonia bitmap, size: {this.cachedAvaRenderedImage.PixelSize.Width}x{this.cachedAvaRenderedImage.PixelSize.Height}");
+							this.Logger.LogTrace("Release cached Avalonia bitmap, size: {w}x{h}", this.cachedAvaRenderedImage.PixelSize.Width, this.cachedAvaRenderedImage.PixelSize.Height);
 						this.cachedAvaRenderedImage = null;
 						this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
                     }
@@ -4154,7 +4146,7 @@ namespace Carina.PixelViewer.ViewModels
 				if (this.cachedAvaRenderedImage != null)
 				{
 					if (this.Application.IsDebugMode)
-						this.Logger.LogTrace($"Use cached Avalonia bitmap, size: {this.cachedAvaRenderedImage.PixelSize.Width}x{this.cachedAvaRenderedImage.PixelSize.Height}");
+						this.Logger.LogTrace("Use cached Avalonia bitmap, size: {w}x{h}", this.cachedAvaRenderedImage.PixelSize.Width, this.cachedAvaRenderedImage.PixelSize.Height);
 					memoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.AsNonNull();
 					this.cachedAvaRenderedImageMemoryUsageToken = null;
 				}
@@ -4202,7 +4194,7 @@ namespace Carina.PixelViewer.ViewModels
 					else
 					{
 						if (this.Application.IsDebugMode)
-							this.Logger.LogWarning($"Allocate Avalonia bitmap, size: {width}x{height}");
+							this.Logger.LogWarning("Allocate Avalonia bitmap, size: {width}x{height}", width, height);
 						bitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul));
 					}
 					await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap);
@@ -4219,7 +4211,7 @@ namespace Carina.PixelViewer.ViewModels
 								|| this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height != halfHeight)
 							{
 								if (this.Application.IsDebugMode)
-									this.Logger.LogTrace($"Release cached quarter-size Avalonia bitmap, size: {this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width}x{this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height}");
+									this.Logger.LogTrace("Release cached quarter-size Avalonia bitmap, size: {w}x{h}", this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width, this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height);
 								this.cachedAvaQuarterSizeRenderedImage = null;
 								this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 							}
@@ -4245,7 +4237,7 @@ namespace Carina.PixelViewer.ViewModels
 							else
 							{
 								if (this.Application.IsDebugMode)
-									this.Logger.LogWarning($"Allocate quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}");
+									this.Logger.LogWarning("Allocate quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}", halfWidth, halfHeight);
 								quarterSizeBitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul));
 							}
 							await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap);
@@ -4491,7 +4483,7 @@ namespace Carina.PixelViewer.ViewModels
 				{
 					if (ImageRenderers.TryFindByFormatName(jsonProperty.GetString().AsNonNull(), out var renderer))
 						return renderer;
-					this.Logger.LogWarning($"Cannot find image renderer of '{jsonProperty.GetString()}' to restore");
+					this.Logger.LogWarning("Cannot find image renderer of '{s}' to restore", jsonProperty.GetString());
 				}
 				return null;
 			});
@@ -4516,8 +4508,9 @@ namespace Carina.PixelViewer.ViewModels
 				jsonProperty.TryGetInt64(out dataOffset);
 			if (savedState.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
 				jsonProperty.TryGetInt64(out framePaddingSize);
-			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty))
-				Enum.TryParse(jsonProperty.GetString(), out byteOrdering);
+			if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
+				&& Enum.TryParse(jsonProperty.GetString(), out byteOrdering))
+			{ }
 			if (savedState.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty))
 				YuvToBgraConverter.TryGetByName(jsonProperty.GetString(), out yuvToBgraConverter);
 			if (savedState.TryGetProperty(nameof(ColorSpace), out jsonProperty))
@@ -4663,7 +4656,7 @@ namespace Carina.PixelViewer.ViewModels
 			{
 				await this.OpenSourceFile(fileName);
 				if (!this.IsSourceFileOpened)
-					this.Logger.LogError($"Unable to restore source file '{fileName}'");
+					this.Logger.LogError("Unable to restore source file '{fileName}'", fileName);
 			}
 
 			// apply profile
@@ -4850,7 +4843,7 @@ namespace Carina.PixelViewer.ViewModels
 			var profile = new ImageRenderingProfile(name, this.ImageRenderer).Also((it) => this.WriteParametersToProfile(it));
 			if (!ImageRenderingProfiles.AddUserDefinedProfile(profile))
 			{
-				this.Logger.LogError($"Unable to add profile '{name}'");
+				this.Logger.LogError("Unable to add profile '{name}'", name);
 				return;
 			}
 
@@ -4931,7 +4924,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			catch (Exception ex)
 			{
-				this.Logger.LogError(ex, $"Failed to save profile '{profile.Name}'");
+				this.Logger.LogError(ex, "Failed to save profile '{profileName}'", profile.Name);
 			}
 		}
 
@@ -5171,7 +5164,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			
 			// apply color adjustment
-			double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
+			static double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
 			this.SetValue(RedColorAdjustmentProperty, rRatio < 0.5
 				? -1
 				: rRatio > 2
@@ -5221,10 +5214,10 @@ namespace Carina.PixelViewer.ViewModels
 			}
 			
 			// calculate ratio of RGB
-			var rRatio = 0.0;
-			var gRatio = 0.0;
-			var bRatio = 0.0;
-			var mean = 0.0;
+			double rRatio;
+			double gRatio;
+			double bRatio;
+			//double mean;
 			var refR = renderingResult.WeightedMeanOfRed;
 			var refG = renderingResult.WeightedMeanOfGreen;
 			var refB = renderingResult.WeightedMeanOfBlue;
@@ -5243,14 +5236,14 @@ namespace Carina.PixelViewer.ViewModels
 						rRatio = refG / refR;
 						gRatio = 1.0;
 						bRatio = refG / refB;
-						mean = refG;
+						//mean = refG;
 					}
 					else // R > B >= G
 					{
 						rRatio = refB / refR;
 						gRatio = refB / refG;
 						bRatio = 1.0;
-						mean = refB;
+						//mean = refB;
 					}
 				}
 				else // B >= R > G
@@ -5258,7 +5251,7 @@ namespace Carina.PixelViewer.ViewModels
 					rRatio = 1.0;
 					gRatio = refR / refG;
 					bRatio = refR / refB;
-					mean = refR;
+					//mean = refR;
 				}
 			}
 			else if (refG > refB)
@@ -5268,14 +5261,14 @@ namespace Carina.PixelViewer.ViewModels
 					rRatio = 1.0;
 					gRatio = refR / refG;
 					bRatio = refR / refB;
-					mean = refR;
+					//mean = refR;
 				}
 				else // G > B >= R
 				{
 					rRatio = refB / refR;
 					gRatio = refB / refG;
 					bRatio = 1.0;
-					mean = refB;
+					//mean = refB;
 				}
 			}
 			else // B >= G >= R
@@ -5283,7 +5276,7 @@ namespace Carina.PixelViewer.ViewModels
 				rRatio = refG / refR;
 				gRatio = 1.0;
 				bRatio = refG / refB;
-				mean = refG;
+				//mean = refG;
 			}
 			if (!double.IsFinite(rRatio) || !double.IsFinite(gRatio) || !double.IsFinite(bRatio))
 				return;
@@ -5291,7 +5284,7 @@ namespace Carina.PixelViewer.ViewModels
 				return;
 			
 			// apply RGB gain
-			double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
+			static double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
 			this.SetValue(RedColorGainProperty, Quantize(rRatio));
 			this.SetValue(GreenColorGainProperty, Quantize(gRatio));
 			this.SetValue(BlueColorGainProperty, Quantize(bRatio));

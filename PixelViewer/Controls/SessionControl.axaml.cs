@@ -9,6 +9,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
@@ -1286,12 +1287,18 @@ namespace Carina.PixelViewer.Controls
 		/// </summary>
 		public async void OnTestButtonClick()
 		{
-			//this.Application.Restart(AppSuiteApplication.RestoreMainWindowsArgument);
-			var fileNames = await new OpenFileDialog().ShowAsync(this.attachedWindow.AsNonNull());
-			if (fileNames == null || fileNames.IsEmpty())
+			if (this.attachedWindow == null)
+				return;
+			var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new()))?.Let(it =>
+			{
+				if (it.Count == 1 && it[0].TryGetUri(out var uri))
+					return uri.LocalPath;
+				return null;
+			});
+			if (string.IsNullOrEmpty(fileName))
 				return;
 			
-			using var dataSource = await Media.FFmpegVideoDataSource.TryCreateAsync(this.Application, fileNames[0]);
+			using var dataSource = await Media.FFmpegVideoDataSource.TryCreateAsync(this.Application, fileName);
 		}
 
 
@@ -1347,10 +1354,10 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// select file
-			var fileName = (await new OpenFileDialog().ShowAsync(this.attachedWindow)).Let((it) =>
+			var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new()))?.Let(it =>
 			{
-				if (it != null && it.IsNotEmpty())
-					return it[0];
+				if (it.Count == 1 && it[0].TryGetUri(out var uri))
+					return uri.LocalPath;
 				return null;
 			});
 			if (fileName == null)
@@ -1527,29 +1534,29 @@ namespace Carina.PixelViewer.Controls
 			}
 
 			// select file
-			var fileName = await new SaveFileDialog().Also((dialog) =>
+			var app = (App)this.Application;
+			var fileName = (await this.attachedWindow.StorageProvider.SaveFilePickerAsync(new()
 			{
-				var app = (App)this.Application;
-				dialog.Filters?.Add(new FileDialogFilter().Also((filter) =>
+				FileTypeChoices = new FilePickerFileType[]
 				{
-					filter.Name = app.GetString("FileType.Jpeg");
-					filter.Extensions.Add("jpg");
-					filter.Extensions.Add("jpeg");
-					filter.Extensions.Add("jpe");
-					filter.Extensions.Add("jfif");
-				}));
-				dialog.Filters?.Add(new FileDialogFilter().Also((filter) =>
-				{
-					filter.Name = app.GetString("FileType.Png");
-					filter.Extensions.Add("png");
-				}));
-				dialog.Filters?.Add(new FileDialogFilter().Also((filter) =>
-				{
-					filter.Name = app.GetString("FileType.RawBgra");
-					filter.Extensions.Add("bgra");
-				}));
-				dialog.InitialFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg";
-			}).ShowAsync(this.attachedWindow);
+					new FilePickerFileType(app.GetStringNonNull("FileType.Jpeg"))
+					{
+						Patterns = new string[] { "*.jpg", "*.jpeg", "*.jpe", "*.jfif" },
+					},
+					new FilePickerFileType(app.GetStringNonNull("FileType.Png"))
+					{
+						Patterns = new string[] { "*.png" },
+					},
+					new FilePickerFileType(app.GetStringNonNull("FileType.RawBgra"))
+					{
+						Patterns = new string[] { "*.bgra" },
+					}
+				},
+				SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg"
+			}))?.Let(it =>
+			{
+				return it.TryGetUri(out var uri) ? uri.LocalPath : null;
+			});
 			if (fileName == null)
 				return;
 
