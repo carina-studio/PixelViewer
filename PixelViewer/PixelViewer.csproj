@@ -59,8 +59,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
 		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="2.2.13.1217-dev">
-			<IncludeAssets>compile;contentFiles;native;runtime</IncludeAssets>
+			<IncludeAssets>compile;contentFiles;runtime</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
@@ -84,6 +85,7 @@
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
 		<AvaloniaResource Include="Resources/UserAgreement.md" />
 		<AvaloniaResource Include="Resources/UserAgreement-zh-TW.md" />
+		<AvaloniaResource Include="SplashWindowBackground.jpg" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
 		<AvaloniaResource Include="Strings/Default-OSX.xaml" />
@@ -115,7 +117,6 @@
 		<EmbeddedResource Include="ChangeList.json" />
 		<EmbeddedResource Include="ChangeList-zh-CN.json" />
 		<EmbeddedResource Include="ChangeList-zh-TW.json" />
-		<AvaloniaResource Include="SplashWindowBackground.jpg" />
 	</ItemGroup>
 	
 </Project>
