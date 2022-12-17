@@ -82,6 +82,8 @@
 		<AvaloniaResource Include="Resources/PrivacyPolicy.md" />
 		<AvaloniaResource Include="Resources/PrivacyPolicy-zh-TW.md" />
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
+		<AvaloniaResource Include="Resources/UserAgreement.md" />
+		<AvaloniaResource Include="Resources/UserAgreement-zh-TW.md" />
 		<AvaloniaResource Include="Strings/Default.xaml" />
 		<AvaloniaResource Include="Strings/Default-Linux.xaml" />
 		<AvaloniaResource Include="Strings/Default-OSX.xaml" />

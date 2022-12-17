@@ -576,7 +576,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override DocumentSource? UserAgreement { get => null; }
+		public override DocumentSource? UserAgreement { get => new UserAgreementSource(this); }
 
 
 		/// <inheritdoc/>
