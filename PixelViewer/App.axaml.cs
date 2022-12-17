@@ -18,6 +18,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Globalization;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CarinaStudio.AppSuite.ViewModels;
@@ -29,6 +30,60 @@ namespace Carina.PixelViewer
 	/// </summary>
 	class App : AppSuiteApplication
 	{
+		// Source of document of Privacy Policy.
+		class PrivacyPolicySource : DocumentSource
+		{
+			public PrivacyPolicySource(App app) : base(app)
+			{ 
+				var cultureName = app.CultureInfo.Name;
+				if (cultureName.StartsWith("zh-")
+					&& cultureName.EndsWith("TW"))
+				{
+					this.Culture = ApplicationCulture.ZH_TW;
+				}
+				else
+					this.Culture = ApplicationCulture.EN_US;
+			}
+			public override IList<ApplicationCulture> SupportedCultures => new ApplicationCulture[]
+			{
+				ApplicationCulture.EN_US,
+				ApplicationCulture.ZH_TW,
+			};
+			public override Uri Uri => this.Culture switch
+			{
+				ApplicationCulture.ZH_TW => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/PrivacyPolicy-zh-TW.md"),
+				_ => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/PrivacyPolicy.md"),
+			};
+		}
+
+
+		// Source of document of User Agreement.
+		class UserAgreementSource : DocumentSource
+		{
+			public UserAgreementSource(App app) : base(app)
+			{ 
+				var cultureName = app.CultureInfo.Name;
+				if (cultureName.StartsWith("zh-")
+					&& cultureName.EndsWith("TW"))
+				{
+					this.Culture = ApplicationCulture.ZH_TW;
+				}
+				else
+					this.Culture = ApplicationCulture.EN_US;
+			}
+			public override IList<ApplicationCulture> SupportedCultures => new ApplicationCulture[]
+			{
+				ApplicationCulture.EN_US,
+				ApplicationCulture.ZH_TW,
+			};
+			public override Uri Uri => this.Culture switch
+			{
+				ApplicationCulture.ZH_TW => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/UserAgreement-zh-TW.md"),
+				_ => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/UserAgreement.md"),
+			};
+		}
+
+
 		// Constants.
 		const string FilePathKey = "FilePath";
 
@@ -462,6 +517,10 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
+		public override DocumentSource? PrivacyPolicy { get => null; }
+
+
+		/// <inheritdoc/>
 		public override Version? PrivacyPolicyVersion => new(1, 2);
 
 
@@ -494,7 +553,7 @@ namespace Carina.PixelViewer
 					break;
 				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
 					this.Logger.LogWarning("Restart main windows");
-					await this.RestartMainWindowsAsync();
+					await this.RestartRootWindowsAsync();
 					break;
 			}
 		}
@@ -514,6 +573,10 @@ namespace Carina.PixelViewer
 				Settings = this.Configuration,
 			}.ShowDialog(this.LatestActiveMainWindow);
 		}
+
+
+		/// <inheritdoc/>
+		public override DocumentSource? UserAgreement { get => null; }
 
 
 		/// <inheritdoc/>
