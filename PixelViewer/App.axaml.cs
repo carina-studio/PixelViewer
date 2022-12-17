@@ -517,7 +517,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override DocumentSource? PrivacyPolicy { get => null; }
+		public override DocumentSource? PrivacyPolicy { get => new PrivacyPolicySource(this); }
 
 
 		/// <inheritdoc/>
