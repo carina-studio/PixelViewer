@@ -479,6 +479,16 @@ namespace Carina.PixelViewer
 					targetWorkspace.AttachSession(targetIndex, session);
 					targetWorkspace.ActivatedSession = session;
 				}
+
+				// [Workaround] Sometimes the content of tab item will gone after moving tab item
+				(this.Content as Control)?.Let(it =>
+				{
+					var margin = it.Margin;
+					it.Margin = new(0, 0, 0, -1);
+					this.SynchronizationContext.Post(() => it.Margin = margin);
+				});
+
+				// complete
 				e.Handled = true;
 				return;
 			}
