@@ -35,14 +35,7 @@ namespace Carina.PixelViewer
 		{
 			public PrivacyPolicySource(App app) : base(app)
 			{ 
-				var cultureName = app.CultureInfo.Name;
-				if (cultureName.StartsWith("zh-")
-					&& cultureName.EndsWith("TW"))
-				{
-					this.Culture = ApplicationCulture.ZH_TW;
-				}
-				else
-					this.Culture = ApplicationCulture.EN_US;
+				this.SetToCurrentCulture();
 			}
 			public override IList<ApplicationCulture> SupportedCultures => new ApplicationCulture[]
 			{
@@ -62,14 +55,7 @@ namespace Carina.PixelViewer
 		{
 			public UserAgreementSource(App app) : base(app)
 			{ 
-				var cultureName = app.CultureInfo.Name;
-				if (cultureName.StartsWith("zh-")
-					&& cultureName.EndsWith("TW"))
-				{
-					this.Culture = ApplicationCulture.ZH_TW;
-				}
-				else
-					this.Culture = ApplicationCulture.EN_US;
+				this.SetToCurrentCulture();
 			}
 			public override IList<ApplicationCulture> SupportedCultures => new ApplicationCulture[]
 			{
@@ -508,12 +494,9 @@ namespace Carina.PixelViewer
 
 
 		// URI of package manifest.
-        public override Uri? PackageManifestUri
-        {
-			get => this.Settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.AcceptNonStableApplicationUpdate)
-				? PreviewPackageManifestUri
-				: StablePackageManifestUri;
-        }
+        public override IEnumerable<Uri> PackageManifestUris => this.Settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.AcceptNonStableApplicationUpdate)
+			? new[] { PreviewPackageManifestUri, StablePackageManifestUri }
+			: new[] {StablePackageManifestUri };
 
 
 		/// <inheritdoc/>
@@ -546,10 +529,7 @@ namespace Carina.PixelViewer
 			{
 				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartApplicationNeeded:
 					this.Logger.LogWarning("Restart application");
-					if (this.IsDebugMode)
-						this.Restart($"{App.DebugArgument} {App.RestoreMainWindowsArgument}", this.IsRunningAsAdministrator);
-					else
-						this.Restart(App.RestoreMainWindowsArgument, this.IsRunningAsAdministrator);
+					this.Restart();
 					break;
 				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
 					this.Logger.LogWarning("Restart main windows");
