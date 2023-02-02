@@ -77,6 +77,24 @@
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
 		<TrimmerRootAssembly Include="System.Management" />
 	</ItemGroup>
+
+	<!-- Trimming options -->
+	<ItemGroup>
+		<TrimmerRootAssembly Include="netstandard" />
+		<TrimmerRootAssembly Include="NLog" />
+		<TrimmerRootAssembly Include="System.Console" />
+		<TrimmerRootAssembly Include="System.Private.Xml" />
+		<TrimmerRootAssembly Include="System.Private.CoreLib" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
+		<TrimmerRootAssembly Include="Microsoft.Windows.SDK.NET" />
+		<TrimmerRootAssembly Include="System.Management" />
+	</ItemGroup>
+
+	<ItemGroup Condition="$(TargetFramework.Contains('linux'))">
+		<TrimmerRootAssembly Include="Tmds.DBus" />
+	</ItemGroup>
 	
 	<ItemGroup>
 		<AvaloniaResource Include="PixelViewer.ico" />
@@ -101,6 +119,7 @@
 		<AvaloniaResource Include="Styles/Light.xaml" />
 	</ItemGroup>
 	
+	<!-- Application Icon for Linux -->
 	<ItemGroup>
 		<None Update="PixelViewer.png">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
