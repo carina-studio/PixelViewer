@@ -1,5 +1,5 @@
 APP_NAME="PixelViewer"
-APP_BUNDLE_ID="com.carina-studio.ulogviewer"
+APP_BUNDLE_ID="com.carina-studio.pixelviewer"
 RID_LIST=("osx-x64" "osx.11.0-arm64")
 PUB_PLATFORM_LIST=("osx-x64" "osx-arm64")
 KEY_ID="" # App Store Connect API Key ID
