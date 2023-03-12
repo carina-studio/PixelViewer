@@ -50,10 +50,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var bitmapPixelPtr = bitmapRowPtr;
 						for (var x = width; x > 0; --x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 						{
-							var rgb = pixelConversionFunc(pixelPtr[0], pixelPtr[1]);
-							bitmapPixelPtr[0] = (byte)(rgb & 0x1f);
-							bitmapPixelPtr[1] = (byte)((rgb >> 5) & 0x3f);
-							bitmapPixelPtr[2] = (byte)((rgb >> 11) & 0x1f);
+							var rgb565 = pixelConversionFunc(pixelPtr[0], pixelPtr[1]);
+							var r = (rgb565 >> 11) & 0x1f;
+							var g = (rgb565 >> 5) & 0x3f;
+							var b = rgb565 & 0x1f;
+							bitmapPixelPtr[0] = (byte)((b << 3) | (b >> 2)); // extend from 5 bits to 8 bits
+							bitmapPixelPtr[1] = (byte)((g << 2) | (g >> 4)); // extend from 6 bits to 8 bits
+							bitmapPixelPtr[2] = (byte)((r << 3) | (r >> 2)); // extend from 5 bits to 8 bits
 							bitmapPixelPtr[3] = 255;
 						}
 						if (isLastRow || cancellationToken.IsCancellationRequested)
