@@ -37,7 +37,7 @@ namespace Carina.PixelViewer
 			{ 
 				this.SetToCurrentCulture();
 			}
-			public override IList<ApplicationCulture> SupportedCultures => new ApplicationCulture[]
+			public override IList<ApplicationCulture> SupportedCultures => new[]
 			{
 				ApplicationCulture.EN_US,
 				ApplicationCulture.ZH_TW,
@@ -57,7 +57,7 @@ namespace Carina.PixelViewer
 			{ 
 				this.SetToCurrentCulture();
 			}
-			public override IList<ApplicationCulture> SupportedCultures => new ApplicationCulture[]
+			public override IList<ApplicationCulture> SupportedCultures => new[]
 			{
 				ApplicationCulture.EN_US,
 				ApplicationCulture.ZH_TW,
@@ -94,12 +94,12 @@ namespace Carina.PixelViewer
 
 		/// <inheritdoc/>
         public override ApplicationInfo CreateApplicationInfoViewModel() =>
-			new ViewModels.AppInfo();
+			new AppInfo();
 
 
         /// <inheritdoc/>
         public override ApplicationOptions CreateApplicationOptionsViewModel() =>
-			new ViewModels.AppOptions();
+			new AppOptions();
 
 
         /// <inheritdoc/>
@@ -128,7 +128,7 @@ namespace Carina.PixelViewer
 
 
 		// Create main window.
-		protected override CarinaStudio.AppSuite.Controls.Window OnCreateMainWindow() => new MainWindow();
+		protected override CarinaStudio.AppSuite.Controls.MainWindow OnCreateMainWindow() => new MainWindow();
 
 
 		// Create view-model for main window.
@@ -141,7 +141,7 @@ namespace Carina.PixelViewer
 
 
 		// Load default strings.
-        protected override IResourceProvider? OnLoadDefaultStringResource()
+        protected override IResourceProvider OnLoadDefaultStringResource()
         {
 			var resources = this.LoadStringResource(new Uri("avares://PixelViewer/Strings/Default.xaml")).AsNonNull();
 			if (CarinaStudio.Platform.IsLinux)
@@ -206,7 +206,7 @@ namespace Carina.PixelViewer
 
 
 		// Load theme.
-        protected override IStyle? OnLoadTheme(ThemeMode themeMode, bool useCompactUI)
+        protected override IStyle OnLoadTheme(ThemeMode themeMode, bool useCompactUI)
         {
 			var uri = themeMode switch
 			{
@@ -269,7 +269,7 @@ namespace Carina.PixelViewer
 					this.MainWindows[0].ActivateAndBringToFront();
 				}
 				else
-					this.Logger.LogError("No main window or worksapce to handle new instance");
+					this.Logger.LogError("No main window or workspace to handle new instance");
 			}
 		}
 
@@ -300,7 +300,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		protected override ASControls.SplashWindowParams OnPrepareSplashWindow() => base.OnPrepareSplashWindow().Also((ref ASControls.SplashWindowParams it) =>
+		protected override SplashWindowParams OnPrepareSplashWindow() => base.OnPrepareSplashWindow().Also((ref SplashWindowParams it) =>
 		{
 			it.AccentColor = Avalonia.Media.Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
 		});
@@ -500,11 +500,11 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override DocumentSource? PrivacyPolicy { get => new PrivacyPolicySource(this); }
+		public override DocumentSource PrivacyPolicy => new PrivacyPolicySource(this);
 
 
 		/// <inheritdoc/>
-		public override Version? PrivacyPolicyVersion => new(1, 2);
+		public override Version PrivacyPolicyVersion => new(1, 2);
 
 
 		// Releasing type.
@@ -516,22 +516,22 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override async Task ShowApplicationOptionsDialogAsync(Avalonia.Controls.Window? owner, string? sectionName)
+		public override async Task ShowApplicationOptionsDialogAsync(Avalonia.Controls.Window? owner, string? sectionName = null)
 		{
 			owner?.ActivateAndBringToFront();
 			var dialog = new Controls.ApplicationOptionsDialog();
 			if (Enum.TryParse<Controls.ApplicationOptionsDialogSection>(sectionName, out var section))
 				dialog.InitialFocusedSection = section;
 			var result = await (owner != null
-				? dialog.ShowDialog<CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult>(owner)
-				: dialog.ShowDialog<CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult>());
+				? dialog.ShowDialog<ApplicationOptionsDialogResult>(owner)
+				: dialog.ShowDialog<ApplicationOptionsDialogResult>());
 			switch (result)
 			{
-				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartApplicationNeeded:
+				case ApplicationOptionsDialogResult.RestartApplicationNeeded:
 					this.Logger.LogWarning("Restart application");
 					this.Restart();
 					break;
-				case CarinaStudio.AppSuite.Controls.ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
+				case ApplicationOptionsDialogResult.RestartMainWindowsNeeded:
 					this.Logger.LogWarning("Restart main windows");
 					await this.RestartRootWindowsAsync();
 					break;
@@ -556,16 +556,10 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override DocumentSource? UserAgreement { get => new UserAgreementSource(this); }
+		public override DocumentSource UserAgreement => new UserAgreementSource(this);
 
 
 		/// <inheritdoc/>
-		public override Version? UserAgreementVersion => new(1, 3);
-
-
-#if WINDOWS_ONLY
-		/// <inheritdoc/>
-		protected override System.Reflection.Assembly WindowsSdkAssembly => typeof(global::Windows.UI.Color).Assembly;
-#endif
-    }
+		public override Version UserAgreementVersion => new(1, 3);
+	}
 }

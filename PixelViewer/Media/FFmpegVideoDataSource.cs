@@ -51,7 +51,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
                 }
             }));
             this.Logger = app.LoggerFactory.CreateLogger(nameof(FFmpegVideoDataSource));
-            this.Logger.LogDebug($"Create source of '{fileName}' ({this.Id})");
+            this.Logger.LogDebug("Create source of '{fileName}' ({id})",fileName, this.Id);
         }
 
         // Release.
@@ -107,17 +107,19 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
             try
             {
                 var directory = Path.Combine(App.Current.RootPrivateDirectoryPath, "FFmpeg");
-                if (Directory.Exists(directory))
+                if (System.IO.Directory.Exists(directory))
                 {
-                    foreach (var frameFileName in Directory.GetFiles(directory))
+                    foreach (var frameFileName in System.IO.Directory.GetFiles(directory))
                     {
-                        if (Path.GetFileName(frameFileName)?.StartsWith("Frame_") == true)
+                        if (Path.GetFileName(frameFileName).StartsWith("Frame_"))
                             Global.RunWithoutError(() => System.IO.File.Delete(frameFileName));
                     }
                 }
             }
+            // ReSharper disable EmptyGeneralCatchClause
             catch
             { }
+            // ReSharper restore EmptyGeneralCatchClause
         });
     }
 
@@ -239,7 +241,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         // close all opened streams
         if (disposing && this.openedStreams.IsNotEmpty())
         {
-            this.logger.LogWarning($"Close {this.openedStreams.Count} opened stream(s) of '{this.FileName}'");
+            this.logger.LogWarning("Close {count} opened stream(s) of '{fileName}'", this.openedStreams.Count, this.FileName);
             foreach (var stream in this.openedStreams.ToArray())
                 Global.RunWithoutErrorAsync(stream.Dispose);
             this.openedStreams.Clear();
@@ -253,7 +255,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
             while (node != null)
             {
                 var nextNode = node.Next;
-                if (Path.GetFileName(node.Value.FileName)?.Contains(fileNameKeyword) == true)
+                if (Path.GetFileName(node.Value.FileName).Contains(fileNameKeyword))
                 {
                     SharedFrameCache.Remove(node);
                     Global.RunWithoutErrorAsync(node.Value.Dispose);
@@ -274,33 +276,33 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
 
 
     /// <inheritdoc/>
-    public TimeSpan Duration { get => this.GetResourceHolder<HolderImpl>().Duration; }
+    public TimeSpan Duration => this.GetResourceHolder<HolderImpl>().Duration;
 
 
     /// <summary>
     /// Get file name of video.
     /// </summary>
-    public string FileName { get => this.GetResourceHolder<HolderImpl>().FileName; }
+    public string FileName => this.GetResourceHolder<HolderImpl>().FileName;
 
 
     /// <inheritdoc/>
-    public ByteOrdering? FrameByteOrdering { get => this.GetResourceHolder<HolderImpl>().FrameByteOrdering; }
+    public ByteOrdering? FrameByteOrdering => this.GetResourceHolder<HolderImpl>().FrameByteOrdering;
 
 
     /// <inheritdoc/>
-    public ColorSpace? FrameColorSpace { get => this.GetResourceHolder<HolderImpl>().FrameColorSpace; }
+    public ColorSpace FrameColorSpace => this.GetResourceHolder<HolderImpl>().FrameColorSpace;
 
 
     /// <inheritdoc/>
-    public ImageFormat? FrameFormat { get => this.GetResourceHolder<HolderImpl>().FrameFormat; }
+    public ImageFormat? FrameFormat => this.GetResourceHolder<HolderImpl>().FrameFormat;
 
 
     /// <inheritdoc/>
-    public double FrameRate { get => this.GetResourceHolder<HolderImpl>().FrameRate; }
+    public double FrameRate => this.GetResourceHolder<HolderImpl>().FrameRate;
 
 
     /// <inheritdoc/>
-    public PixelSize FrameSize { get => this.GetResourceHolder<HolderImpl>().FrameSize; }
+    public PixelSize FrameSize => this.GetResourceHolder<HolderImpl>().FrameSize;
 
 
     /// <inheritdoc/>
@@ -331,7 +333,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         var frameFileName = Path.Combine(holder.FFmpegDirectory, frameId);
         var cachedFrameFile = SharedFrameCache.Lock(it =>
         {
-            this.logger.LogTrace($"Get frame at {position}, frame ID: {frameId}");
+            this.logger.LogTrace("Get frame at {position}, frame ID: {frameId}", position, frameId);
             var node = it.First;
             while (node != null)
             {
@@ -342,7 +344,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
                         it.Remove(node);
                         it.AddFirst(node);
                     }
-                    this.logger.LogTrace($"Use cached frame, frame ID: {frameId}");
+                    this.logger.LogTrace("Use cached frame, frame ID: {frameId}", frameId);
                     return node.Value.Share();
                 }
                 node = node.Next;
@@ -390,7 +392,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
             {
                 Global.RunWithoutError(() => ffmpegProcess?.Kill());
             }
-        });
+        }, cancellationToken);
         if (this.IsDisposed)
         {
             Global.RunWithoutErrorAsync(() => System.IO.File.Delete(frameFileName));
@@ -409,8 +411,8 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
             {
                 var node = SharedFrameCache.Last;
                 SharedFrameCache.RemoveLast();
-                this.logger.LogTrace($"Drop frame from cache, frame ID: {Path.GetFileName(node?.Value?.FileName)}");
-                node?.Value?.Dispose();
+                this.logger.LogTrace("Drop frame from cache, frame ID: {fileName}", Path.GetFileName(node?.Value.FileName));
+                node?.Value.Dispose();
             }
             SharedFrameCache.AddFirst(frameFile.Share());
         }
@@ -457,7 +459,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
                 throw new TaskCanceledException();
 
             // open stream
-            var fileStream = (FileStream?)null;
+            FileStream? fileStream;
             try
             {
                 fileStream = new FileStream(this.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);

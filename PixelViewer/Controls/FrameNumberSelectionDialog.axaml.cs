@@ -14,7 +14,7 @@ namespace Carina.PixelViewer.Controls
     /// <summary>
     /// Dialog to select frame number.
     /// </summary>
-    partial class FrameNumberSelectionDialog : CarinaStudio.AppSuite.Controls.InputDialog
+    class FrameNumberSelectionDialog : CarinaStudio.AppSuite.Controls.InputDialog
     {
         // Static fields.
         static readonly StyledProperty<long> FrameCountProperty = AvaloniaProperty.Register<FrameNumberSelectionDialog, long>(nameof(FrameCount), 1);
@@ -39,8 +39,8 @@ namespace Carina.PixelViewer.Controls
         // Number of frames.
         public long FrameCount
         {
-            get => this.GetValue<long>(FrameCountProperty);
-            set => this.SetValue<long>(FrameCountProperty, value);
+            get => this.GetValue(FrameCountProperty);
+            set => this.SetValue(FrameCountProperty, value);
         }
 
 
@@ -51,13 +51,13 @@ namespace Carina.PixelViewer.Controls
         // Initial frame number.
         public long InitialFrameNumber
         {
-            get => this.GetValue<long>(InitialFrameNumberProperty);
-            set => this.SetValue<long>(InitialFrameNumberProperty, value);
+            get => this.GetValue(InitialFrameNumberProperty);
+            set => this.SetValue(InitialFrameNumberProperty, value);
         }
 
 
         /// <inheritdoc/>
-        protected override void OnEnterKeyClickedOnInputControl(IControl control)
+        protected override void OnEnterKeyClickedOnInputControl(Control control)
         {
             base.OnEnterKeyClickedOnInputControl(control);
             this.GenerateResultCommand.TryExecute();

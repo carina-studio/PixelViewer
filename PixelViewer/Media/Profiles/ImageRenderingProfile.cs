@@ -67,7 +67,7 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             this.name = name;
             this.renderer = renderer;
-            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
+            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
         }
         public ImageRenderingProfile(FileFormat format, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.FileFormat)
         {
@@ -75,16 +75,16 @@ namespace Carina.PixelViewer.Media.Profiles
             this.fileFormat.PropertyChanged += this.OnFileFormatPropertyChanged;
             this.name = format.Name;
             this.renderer = renderer;
-            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings?.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
+            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
-            Media.ColorSpace.TryGetColorSpace(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
+            ColorSpace.TryGetColorSpace(this.Application.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out this.colorSpace);
             this.Type = type;
             if (type == ImageRenderingProfileType.Default)
             {
                 this.name = this.Application.GetStringNonNull("ImageRenderingProfile.Default");
-                this.Application.StringsUpdated += (_, e) =>
+                this.Application.StringsUpdated += (_, _) =>
                 {
                     this.name = this.Application.GetStringNonNull("ImageRenderingProfile.Default");
                     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
@@ -94,7 +94,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Application.
-        public IApplication Application { get => app ?? throw new InvalidOperationException("Profile is not ready yet."); }
+        public IApplication Application => app ?? throw new InvalidOperationException("Profile is not ready yet.");
 
 
         // Pattern of Bayer Filter.
@@ -227,14 +227,14 @@ namespace Carina.PixelViewer.Media.Profiles
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogError(ex, $"Unable to delete file '{fileName}'");
+                    logger?.LogError(ex, "Unable to delete file '{fileName}'", fileName);
                 }
             });
         }
 
 
         // Default profile.
-        public static ImageRenderingProfile Default { get => defaultProfile ?? throw new InvalidOperationException("Default profile is not ready yet."); }
+        public static ImageRenderingProfile Default => defaultProfile ?? throw new InvalidOperationException("Default profile is not ready yet.");
 
 
         // Demosaicing
@@ -255,7 +255,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Path of directory to load/save profiles.
-        public static string DirectoryPath { get => directoryPath ?? throw new InvalidOperationException("Profile is not ready yet."); }
+        public static string DirectoryPath => directoryPath ?? throw new InvalidOperationException("Profile is not ready yet.");
 
 
         /// <inheritdoc/>
@@ -363,7 +363,7 @@ namespace Carina.PixelViewer.Media.Profiles
         /// <summary>
         /// Check whether type of profile is <see cref="ImageRenderingProfileType.FileFormat"/> or not.
         /// </summary>
-        public bool IsFileFormat { get => this.Type == ImageRenderingProfileType.FileFormat; }
+        public bool IsFileFormat => this.Type == ImageRenderingProfileType.FileFormat;
 
 
         // Check upgrading state.
@@ -502,7 +502,7 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonProperty.TryGetInt64(out profile.framePaddingSize);
 
                 // get byte ordering
-                if (profile.renderer?.Format?.HasMultipleByteOrderings == true
+                if (profile.renderer?.Format.HasMultipleByteOrderings == true
                     && rootElement.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
                     && jsonProperty.ValueKind == JsonValueKind.String)
                 {
@@ -510,7 +510,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 }
 
                 // get bayer pattern
-                if (profile.renderer?.Format?.Category == ImageFormatCategory.Bayer
+                if (profile.renderer?.Format.Category == ImageFormatCategory.Bayer
                     && rootElement.TryGetProperty(nameof(BayerPattern), out jsonProperty)
                     && jsonProperty.ValueKind == JsonValueKind.String)
                 {
@@ -518,7 +518,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 }
 
                 // YUV to RGB converter
-                if (profile.renderer?.Format?.Category == ImageFormatCategory.YUV)
+                if (profile.renderer?.Format.Category == ImageFormatCategory.YUV)
                 {
                     if (rootElement.TryGetProperty(nameof(YuvToBgraConverter), out jsonProperty)
                         && jsonProperty.ValueKind == JsonValueKind.String)
@@ -540,7 +540,7 @@ namespace Carina.PixelViewer.Media.Profiles
                         "BT.601" => "BT.601-625-line".Also(_ => profile.IsUpgradedWhenLoading = true),
                         _ => it,
                     });
-                    if (!Media.ColorSpace.TryGetColorSpace(name, out profile.colorSpace))
+                    if (!ColorSpace.TryGetColorSpace(name, out profile.colorSpace))
                         profile.IsUpgradedWhenLoading = true;
                 }
                 if (rootElement.TryGetProperty(nameof(UseLinearColorSpace), out jsonProperty) 
@@ -551,7 +551,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
                 // get demosaicing
                 if (rootElement.TryGetProperty(nameof(Demosaicing), out jsonProperty))
-                profile.demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
+                    profile.demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
 
                 // get dimensions
                 if (rootElement.TryGetProperty(nameof(Width), out jsonProperty) && jsonProperty.TryGetInt32(out var intValue))
@@ -657,7 +657,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Logger.
-        ILogger Logger { get => logger ?? throw new InvalidOperationException("Instance is not ready yet."); }
+        ILogger Logger => logger ?? throw new InvalidOperationException("Instance is not ready yet.");
 
 
         // Name of profile.
@@ -789,20 +789,20 @@ namespace Carina.PixelViewer.Media.Profiles
                 {
                     try
                     {
-                        this.Logger.LogTrace($"Delete previous file '{prevFileName}'");
+                        this.Logger.LogTrace("Delete previous file '{prevFileName}'", prevFileName);
                         System.IO.File.Delete(prevFileName);
                     }
                     catch (Exception ex)
                     {
-                        this.Logger.LogError(ex, $"Unable to delete previous file '{prevFileName}'");
+                        this.Logger.LogError(ex, "Unable to delete previous file '{prevFileName}'", prevFileName);
                     }
                 }
 
                 // create directory
-                Directory.CreateDirectory(DirectoryPath);
+                System.IO.Directory.CreateDirectory(DirectoryPath);
 
                 // save to file
-                this.Logger.LogTrace($"Save '{this.name}' to '{fileName}'");
+                this.Logger.LogTrace("Save '{name}' to '{fileName}'", this.name, fileName);
                 using var stream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite);
                 using var jsonWriter = new Utf8JsonWriter(stream, new JsonWriterOptions() { Indented = true });
                 var format = this.Renderer.Format;

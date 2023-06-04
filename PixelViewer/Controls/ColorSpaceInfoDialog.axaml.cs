@@ -19,7 +19,7 @@ namespace Carina.PixelViewer.Controls;
 /// <summary>
 /// Dialog to show information of color space.
 /// </summary>
-partial class ColorSpaceInfoDialog : InputDialog
+class ColorSpaceInfoDialog : InputDialog
 {
     // Static fields.
     static readonly StyledProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
@@ -178,8 +178,8 @@ partial class ColorSpaceInfoDialog : InputDialog
     // Color space to be shown.
     public Media.ColorSpace ColorSpace
     {
-        get => this.GetValue<Media.ColorSpace>(ColorSpaceProperty);
-        set => this.SetValue<Media.ColorSpace>(ColorSpaceProperty, value);
+        get => this.GetValue(ColorSpaceProperty);
+        set => this.SetValue(ColorSpaceProperty, value);
     }
 
 
@@ -196,14 +196,14 @@ partial class ColorSpaceInfoDialog : InputDialog
     // Show in read-only mode or not.
     public bool IsReadOnly
     {
-        get => this.GetValue<bool>(IsReadOnlyProperty);
-        set => this.SetValue<bool>(IsReadOnlyProperty, value);
+        get => this.GetValue(IsReadOnlyProperty);
+        set => this.SetValue(IsReadOnlyProperty, value);
     }
 
 
     // Called when list of all color space changed.
     void OnAllColorSpacesChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
-        this.SetValue<IList<Media.ColorSpace>>(ReferenceColorSpacesProperty, Media.ColorSpace.AllColorSpaces.Where(it => !it.Equals(this.ColorSpace)).ToArray());
+        this.SetValue(ReferenceColorSpacesProperty, Media.ColorSpace.AllColorSpaces.Where(it => !it.Equals(this.ColorSpace)).ToArray());
 
 
     // Called when closed.
@@ -216,7 +216,7 @@ partial class ColorSpaceInfoDialog : InputDialog
 
 
     // Key clicked on input control.
-    protected override void OnEnterKeyClickedOnInputControl(IControl control)
+    protected override void OnEnterKeyClickedOnInputControl(Control control)
     {
         base.OnEnterKeyClickedOnInputControl(control);
         if (!this.IsReadOnly)
@@ -256,7 +256,7 @@ partial class ColorSpaceInfoDialog : InputDialog
             this.whitePointDescriptionTextBlock.Bind(TextBlock.TextProperty, Global.Run(() =>
             {
                 var cct = Media.ColorSpace.XyChromaticityToCct(wpX, wpY);
-                var prefix = (IObservable<string?>?)null;
+                IObservable<string?>? prefix;
                 var description = this.GetResourceObservable("String/ColorSpaceInfoDialog.WhitePoint.Description");
                 if (colorSpace.IsD65WhitePoint)
                 {
@@ -306,8 +306,8 @@ partial class ColorSpaceInfoDialog : InputDialog
         // attach to color spaces
         (Media.ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
             it.CollectionChanged += this.OnAllColorSpacesChanged);
-        this.SetValue<IList<Media.ColorSpace>>(ReferenceColorSpacesProperty, Media.ColorSpace.AllColorSpaces.Where(it => !it.Equals(colorSpace)).ToArray());
-        this.SetValue<Media.ColorSpace?>(ReferenceColorSpaceProperty, colorSpace.Equals(Media.ColorSpace.Srgb) ? Media.ColorSpace.Display_P3 : Media.ColorSpace.Srgb);
+        this.SetValue(ReferenceColorSpacesProperty, Media.ColorSpace.AllColorSpaces.Where(it => !it.Equals(colorSpace)).ToArray());
+        this.SetValue(ReferenceColorSpaceProperty, colorSpace.Equals(Media.ColorSpace.Srgb) ? Media.ColorSpace.Display_P3 : Media.ColorSpace.Srgb);
 
         // call base
         base.OnOpened(e);
