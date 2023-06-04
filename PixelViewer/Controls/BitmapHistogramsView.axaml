@@ -21,7 +21,7 @@
 			</Panel.Styles>
 			
 			<!-- Red -->
-			<Image IsVisible="{Binding $parent[UserControl].IsREdHistogramVisible}" Source="{Binding $parent[UserControl].RedHistogramImage}">
+			<Image IsVisible="{Binding $parent[UserControl].IsRedHistogramVisible}" Source="{Binding $parent[UserControl].RedHistogramImage}">
 				<Image.RenderTransform>
 					<ScaleTransform ScaleY="{Binding $parent[UserControl].RedHistogramScaleY}"/>
 				</Image.RenderTransform>

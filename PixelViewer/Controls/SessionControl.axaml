@@ -13,7 +13,6 @@
              xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
              xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
              xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
-			 xmlns:appProfiles="using:Carina.PixelViewer.Media.Profiles"
 			 xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
 			 xmlns:ia="using:Avalonia.Xaml.Interactivity"
              xmlns:iaCore="using:Avalonia.Xaml.Interactions.Core"
@@ -257,7 +256,7 @@
 						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.BrightnessAndContrastAdjustment}">
 							<Panel>
 								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast.Active}" IsVisible="{Binding HasBrightnessAdjustment}">
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast.Active}">
 									<Image.IsVisible>
 										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
 											<Binding Path="HasBrightnessAdjustment"/>
@@ -1057,7 +1056,7 @@
 							<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding RenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.RenderedImagesMemoryUsage}"/>
 								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding TotalRenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.TotalRenderedImagesMemoryUsage}"/>
-								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
+								<TextBlock Classes="StatusBar_TextBlock" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{DynamicResource String/SessionControl.PrivateMemoryUsage}"/>
 							</StackPanel>
 						</Panel>
 
