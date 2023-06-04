@@ -1,17 +1,24 @@
-# PixelViewer [![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/releases/tag/2.7.4.312) ![](https://img.shields.io/github/downloads/carina-studio/PixelViewer/total) [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/commits/master) [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
+# PixelViewer 
+[![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/releases/tag/2.7.4.312) ![](https://img.shields.io/github/downloads/carina-studio/PixelViewer/total) [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/commits/master) [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
 
-PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixels data from file and rendering it.
+PixelViewer is a [.NET](https://dotnet.microsoft.com/) based cross-platform image viewer written by C# which supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixels data from file and rendering it. Please visit the [Website](https://carinastudio.azurewebsites.net/PixelViewer/) for more details.
+
+PixelViewer 是一個由 C# 撰寫並基於 [.NET](https://dotnet.microsoft.com/) 的跨平台影像檢視器，支援讀取及繪製原始 Luminance/YUV/RGB/ARGB/Bayer 像素資料。請參閱 [網站](https://carinastudio.azurewebsites.net/PixelViewer/) 以取得更多資訊。
+
+<img alt="PixelViewer" src="https://carinastudio.azurewebsites.net/PixelViewer/Banner.png"/>
 
 ## 📥 Download
 
-### Stable
-Operating System                      | Download | Version | Screenshot
-:------------------------------------:|:--------:|:-------:|:----------:
-Windows 8/10/11                       |[x86](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x86.zip) &#124; [x64](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-arm64.zip)|2.7.4.312|[<img src="https://carinastudio.azurewebsites.net/PixelViewer/Screenshots/MainWindow_Windows_Thumb.png" alt="Main window (Windows)" width="150"/>](https://carinastudio.azurewebsites.net/PixelViewer/Screenshots/MainWindow_Windows.png)
-macOS 11/12                           |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-osx-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-osx-arm64.zip)|2.7.4.312|[<img src="https://carinastudio.azurewebsites.net/PixelViewer/Screenshots/MainWindow_macOS_Thumb.png" alt="Main window (macOS)" width="150"/>](https://carinastudio.azurewebsites.net/PixelViewer/Screenshots/MainWindow_macOS.png)
-Linux                                 |[x64](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-linux-x64.zip) &#124; [arm64](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-linux-arm64.zip)|2.7.4.312|[<img src="https://carinastudio.azurewebsites.net/PixelViewer/Screenshots/MainWindow_Fedora_Thumb.png" alt="Main window (Fedora)" width="150"/>](https://carinastudio.azurewebsites.net/PixelViewer/Screenshots/MainWindow_Fedora.png)
+### 2.7.4.312
+[![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x64.zip)
+[![](https://img.shields.io/badge/Windows-arm64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-arm64.zip)
+[![](https://img.shields.io/badge/Windows-x86-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x86.zip)
 
-- [Installation and Upgrade Guide](https://carinastudio.azurewebsites.net/PixelViewer/InstallAndUpgrade)
+[![](https://img.shields.io/badge/macOS-arm64%20(M1/M2)-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-osx-arm64.zip)
+[![](https://img.shields.io/badge/macOS-x64-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-osx-x64.zip)
+
+[![](https://img.shields.io/badge/Linux-x64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-linux-x64.zip)
+[![](https://img.shields.io/badge/Linux-arm64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-linux-arm64.zip)
 
 ## ⭐ Supported formats
 * Luminance
