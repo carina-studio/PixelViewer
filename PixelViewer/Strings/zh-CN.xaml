@@ -11,6 +11,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度调整函数</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">{0} 的详细信息…</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更准确的色彩输出，但将会影响绘制图像的效能。 </sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空间「{0}」与「{1}」相同，您是否还要将其加入？ </sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">对比调整函数</sys:String>
