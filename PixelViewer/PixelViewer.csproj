@@ -112,9 +112,10 @@
 		<AvaloniaResource Include="Strings/zh-TW-Linux.xaml" />
 		<AvaloniaResource Include="Strings/zh-TW-OSX.xaml" />
 		<AvaloniaResource Include="Styles/Base.axaml" />
-		<AvaloniaResource Include="Styles/Dark.xaml" />
+		<AvaloniaResource Include="Styles/Base-Compact.axaml" />
+		<AvaloniaResource Include="Styles/Dark.axaml" />
 		<AvaloniaResource Include="Styles/Icons.axaml" />
-		<AvaloniaResource Include="Styles/Light.xaml" />
+		<AvaloniaResource Include="Styles/Light.axaml" />
 	</ItemGroup>
 	
 	<!-- Application Icon for Linux -->

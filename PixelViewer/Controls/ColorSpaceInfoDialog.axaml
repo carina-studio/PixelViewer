@@ -6,8 +6,7 @@
 		xmlns:aConverters="using:Avalonia.Data.Converters"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
-		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
-		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
+        xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ColorSpaceInfoDialog"
 		Classes="Dialog"
@@ -25,95 +24,149 @@
 		</Border>
 
 		<!-- Content -->
-		<Grid ColumnDefinitions="*,*">
+		<Grid ColumnDefinitions="3*,2*">
 			
 			<!-- Diagrams -->
-			<StackPanel Classes="Dialog_ContentPanel">
+			<Border Name="diagramBaseContainer" Classes="Dialog_ContentPanel_WithItemsGroups" VerticalAlignment="Top">
+				<Border Classes="Dialog_ItemsGroup_Container">
+					<StackPanel>
+						
+						<!-- Reference color space -->
+						<asControls:DialogItemGrid>
+							<StackPanel Classes="Dialog_Item_Text_Container">
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace}"/>
+								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace.Description}"/>
+							</StackPanel>
+							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" Items="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
+								<ComboBox.ItemTemplate>
+									<DataTemplate>
+										<Grid ColumnDefinitions="*,Auto">
+											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
+											</Border>
+											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+											</Border>
+										</Grid>
+									</DataTemplate>
+								</ComboBox.ItemTemplate>
+							</ComboBox>
+						</asControls:DialogItemGrid>
+						<Separator Classes="Dialog_Item_Separator"/>
 
-				<!-- Reference color space -->
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace}"/>
-				<ComboBox Classes="Dialog_ComboBox" Items="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
-					<ComboBox.ItemTemplate>
-						<DataTemplate>
-							<Grid ColumnDefinitions="*,Auto">
-								<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
-								<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-									<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
-								</Border>
-								<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-									<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
-								</Border>
-							</Grid>
-						</DataTemplate>
-					</ComboBox.ItemTemplate>
-				</ComboBox>
-				<Separator Classes="Dialog_Separator"/>
+						<!-- Diagrams -->
+						<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.Diagram}"/>
+							<ComboBox Name="diagramTypeComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" SelectedIndex="0">
+								<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
+								<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram}"/>
+								<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram}"/>
+							</ComboBox>
+						</asControls:DialogItemGrid>
+						<Separator Classes="Dialog_Separator_Small"/>
 
-				<!-- Diagram type -->
-				<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Diagram}"/>
-				<ComboBox Name="diagramTypeComboBox" Classes="Dialog_ComboBox" SelectedIndex="0">
-					<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
-					<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram}"/>
-					<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram}"/>
-				</ComboBox>
-				<Separator Classes="Dialog_Separator"/>
+						<!-- Diagrams -->
+						<Panel>
 
-				<!-- Diagrams -->
-				<Panel>
+							<!-- xy chromaticity diagram -->
+							<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="{StaticResource Thickness/Control.Border}" Height="{Binding $self.Bounds.Width}" Opacity="1">
+								<Border.Transitions>
+									<Transitions>
+										<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/Animation.Fast}"/>
+									</Transitions>
+								</Border.Transitions>
+								<appControls:CieChromaticityDiagram Name="chromaticityDiagram"/>
+							</Border>
 
-					<!-- xy chromaticity diagram -->
-					<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}" IsVisible="True">
-						<appControls:CieChromaticityDiagram Name="chromaticityDiagram"/>
-					</Border>
+							<!-- To linear transfer function diagram -->
+							<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="{StaticResource Thickness/Control.Border}" Height="{Binding $self.Bounds.Width}" Opacity="0">
+								<Border.Transitions>
+									<Transitions>
+										<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/Animation.Fast}"/>
+									</Transitions>
+								</Border.Transitions>
+								<appControls:NormalizedTransferFunctionsDiagram Name="toLinearTransferFuncDiagram" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+							</Border>
 
-					<!-- To linear transfer function diagram -->
-					<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}" IsVisible="False">
-						<appControls:NormalizedTransferFunctionsDiagram Name="toLinearTransferFuncDiagram" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
-					</Border>
+							<!-- To non-linear transfer function diagram -->
+							<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="{StaticResource Thickness/Control.Border}" Height="{Binding $self.Bounds.Width}" Opacity="0">
+								<Border.Transitions>
+									<Transitions>
+										<DoubleTransition Property="Opacity" Duration="{StaticResource TimeSpan/Animation.Fast}"/>
+									</Transitions>
+								</Border.Transitions>
+								<appControls:NormalizedTransferFunctionsDiagram Name="toNonLinearTransferFuncDiagram"/>
+							</Border>
 
-					<!-- To non-linear transfer function diagram -->
-					<Border BorderBrush="{DynamicResource Brush/Control.Border}" BorderThickness="1" Height="{Binding $self.Bounds.Width}" IsVisible="False">
-						<appControls:NormalizedTransferFunctionsDiagram Name="toNonLinearTransferFuncDiagram"/>
-					</Border>
+						</Panel>
+						
+					</StackPanel>
+				</Border>
 
-				</Panel>
-
-			</StackPanel>
+			</Border>
 
 			<!-- color space info -->
-			<ScrollViewer Grid.Column="1" MaxHeight="{StaticResource Double/ColorSpaceInfoDialog.Content.MaxHeight}">
-				<StackPanel Classes="Dialog_ContentPanel_WithHeader">
+			<ScrollViewer Grid.Column="1" MaxHeight="{Binding #diagramBaseContainer.Bounds.Height}" VerticalAlignment="Top">
+				<StackPanel Classes="Dialog_ContentPanel_WithItemsGroups" Margin="{StaticResource Thickness/ColorSpaceInfoDialog.RightContentPanel.Padding}">
 
 					<!-- Name -->
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
-					<TextBox Name="nameTextBox" Classes="Dialog_TextBox" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
+					<Border Classes="Dialog_ItemsGroup_Container">
+						<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
+							<TextBox Name="nameTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
+						</asControls:DialogItemGrid>
+					</Border>
 					<Separator Classes="Dialog_Separator_Large"/>
 
 					<!-- White point and primaries -->
-					<Border Classes="Dialog_TextBlock_Header1">
-						<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Primaries}"/>
+					<Border Classes="Dialog_ItemsGroup_Header">
+						<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ColorSpaceInfoDialog.Primaries}"/>
 					</Border>
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
-					<TextBox Name="redPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-					<Separator Classes="Dialog_Separator"/>
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
-					<TextBox Name="greenPrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-					<Separator Classes="Dialog_Separator"/>
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
-					<TextBox Name="bluePrimaryTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-					<Separator Classes="Dialog_Separator"/>
-					<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
-					<TextBox Name="whitePointTextBox" Classes="Dialog_TextBox" IsReadOnly="True"/>
-					<TextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>
+					<Border Classes="Dialog_ItemsGroup_Container">
+						<StackPanel>
+							
+							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
+								<TextBox Name="redPrimaryTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+							</asControls:DialogItemGrid>
+							<Separator Classes="Dialog_Item_Separator"/>
+							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
+								<TextBox Name="greenPrimaryTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+							</asControls:DialogItemGrid>
+							<Separator Classes="Dialog_Item_Separator"/>
+							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
+								<TextBox Name="bluePrimaryTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+							</asControls:DialogItemGrid>
+							<Separator Classes="Dialog_Item_Separator"/>
+							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
+								<TextBox Name="whitePointTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+							</asControls:DialogItemGrid>
+							<Line Classes="Dialog_Item_Separator_Inner" IsVisible="{Binding #whitePointDescriptionTextBlock.IsVisible}"/>
+							<SelectableTextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>
+							
+						</StackPanel>
+					</Border>
 					<Separator Classes="Dialog_Separator_Large"/>
 
 					<!-- Other information -->
-					<Border Classes="Dialog_TextBlock_Header1">
-						<TextBlock Classes="Dialog_TextBlock_Header1" Text="{DynamicResource String/ColorSpaceInfoDialog.Other}"/>
+					<Border Classes="Dialog_ItemsGroup_Header">
+						<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ColorSpaceInfoDialog.Other}"/>
 					</Border>
-					<TextBlock Name="linearizationDescriptionTextBlock" Classes="Dialog_TextBlock" TextWrapping="Wrap"/>
-					<Separator Classes="Dialog_Separator" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
-					<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock" HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
+					<Border Classes="Dialog_ItemsGroup_Container">
+						<StackPanel>
+							
+							<asControls:CompactDialogItemBorder>
+								<SelectableTextBlock Name="linearizationDescriptionTextBlock" Classes="Dialog_TextBlock" TextWrapping="Wrap"/>
+							</asControls:CompactDialogItemBorder>
+							<Line Classes="Dialog_Item_Separator_Inner" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+							<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock" HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
+							
+						</StackPanel>
+					</Border>
 
 				</StackPanel>
 			</ScrollViewer>

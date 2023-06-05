@@ -1,0 +1,15 @@
+<Styles xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+	
+	<!-- Base style -->
+	<StyleInclude Source="/Styles/Base.axaml"/>
+
+	<!-- Resources -->
+	<Styles.Resources>
+		
+		<!-- ColorSpaceInfoDialog -->
+		<Thickness x:Key="Thickness/ColorSpaceInfoDialog.RightContentPanel.Padding">10,15,25,15</Thickness>
+		
+	</Styles.Resources>
+	
+</Styles>

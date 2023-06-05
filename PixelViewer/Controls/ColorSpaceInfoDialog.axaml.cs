@@ -65,8 +65,8 @@ class ColorSpaceInfoDialog : InputDialog
 
         // setup views
         AvaloniaXamlLoader.Load(this);
-        this.bluePrimaryTextBox = this.FindControl<TextBox>(nameof(bluePrimaryTextBox)).AsNonNull();
-        this.chromaticityDiagram = this.FindControl<CieChromaticityDiagram>(nameof(chromaticityDiagram)).AsNonNull().Also(it =>
+        this.bluePrimaryTextBox = this.Get<TextBox>(nameof(bluePrimaryTextBox));
+        this.chromaticityDiagram = this.Get<CieChromaticityDiagram>(nameof(chromaticityDiagram)).Also(it =>
         {
             this.colorSpaceChromaticityGamut.BorderPen = new Pen()
             {
@@ -93,7 +93,7 @@ class ColorSpaceInfoDialog : InputDialog
             it.ChromaticityGamuts.Add(this.refColorSpaceChromaticityGamut);
             it.ChromaticityGamuts.Add(this.colorSpaceChromaticityGamut);
         });
-        this.diagramTypeComboBox = this.FindControl<ComboBox>(nameof(diagramTypeComboBox)).AsNonNull().Also(it =>
+        this.diagramTypeComboBox = this.Get<ComboBox>(nameof(diagramTypeComboBox)).Also(it =>
         {
             it.GetObservable(ComboBox.SelectedIndexProperty).Subscribe(new Observer<int>(index =>
             {
@@ -103,17 +103,17 @@ class ColorSpaceInfoDialog : InputDialog
                     this.toNonLinearTransferFuncDiagram,
                 };
                 for (var i = diagramViews.Length - 1; i >= 0; --i)
-                    diagramViews[i]?.Parent?.Let(it => it.IsVisible = (i == index));
+                    diagramViews[i]?.Parent?.Let(it => it.Opacity = (i == index ? 1 : 0));
             }));
         });
-        this.greenPrimaryTextBox = this.FindControl<TextBox>(nameof(greenPrimaryTextBox)).AsNonNull();
+        this.greenPrimaryTextBox = this.Get<TextBox>(nameof(greenPrimaryTextBox));
         this.linearizationDescriptionTextBlock = this.Get<TextBlock>(nameof(linearizationDescriptionTextBlock));
-        this.redPrimaryTextBox = this.FindControl<TextBox>(nameof(redPrimaryTextBox)).AsNonNull();
-        this.nameTextBox = this.FindControl<TextBox>(nameof(nameTextBox)).AsNonNull().Also(it =>
+        this.redPrimaryTextBox = this.Get<TextBox>(nameof(redPrimaryTextBox));
+        this.nameTextBox = this.Get<TextBox>(nameof(nameTextBox)).Also(it =>
         {
             it.GetObservable(TextBox.TextProperty).Subscribe(new Observer<string?>(_ => this.InvalidateInput()));
         });
-        this.toLinearTransferFuncDiagram = this.FindControl<NormalizedTransferFunctionsDiagram>(nameof(toLinearTransferFuncDiagram)).AsNonNull().Also(it =>
+        this.toLinearTransferFuncDiagram = this.Get<NormalizedTransferFunctionsDiagram>(nameof(toLinearTransferFuncDiagram)).AsNonNull().Also(it =>
         {
             it.TransferFunctions.Add(new NormalizedTransferFunction(i => i)
             {
@@ -123,7 +123,7 @@ class ColorSpaceInfoDialog : InputDialog
                 })
             });
         });
-        this.toNonLinearTransferFuncDiagram = this.FindControl<NormalizedTransferFunctionsDiagram>(nameof(toNonLinearTransferFuncDiagram)).AsNonNull().Also(it =>
+        this.toNonLinearTransferFuncDiagram = this.Get<NormalizedTransferFunctionsDiagram>(nameof(toNonLinearTransferFuncDiagram)).Also(it =>
         {
             it.TransferFunctions.Add(new NormalizedTransferFunction(i => i)
             {
@@ -133,8 +133,8 @@ class ColorSpaceInfoDialog : InputDialog
                 })
             });
         });
-        this.whitePointDescriptionTextBlock = this.FindControl<TextBlock>(nameof(whitePointDescriptionTextBlock)).AsNonNull();
-        this.whitePointTextBox = this.FindControl<TextBox>(nameof(whitePointTextBox)).AsNonNull();
+        this.whitePointDescriptionTextBlock = this.Get<TextBlock>(nameof(whitePointDescriptionTextBlock));
+        this.whitePointTextBox = this.Get<TextBox>(nameof(whitePointTextBox));
 
         // attach to property
         this.GetObservable(ReferenceColorSpaceProperty).Subscribe(new Observer<Media.ColorSpace?>(colorSpace =>

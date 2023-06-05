@@ -67,7 +67,7 @@
 	<!-- ColorSpaceInfoDialog -->
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">藍色</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy 色度表</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.Diagram">圖表類型</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Diagram">圖表</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">綠色</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">紅/綠/藍在此色彩空間中為線性值，意即可以直接使用線性變換與 XYZ 色彩空間互相轉換。</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">名稱</sys:String>
@@ -75,7 +75,8 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Other">其他資訊</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">主色及白點</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">紅色</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">參考色彩空間 (虛線顯示)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">參考色彩空間</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace.Description">在圖表中以虛線顯示</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">色彩空間資訊</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram">非線性-線性轉換函數 (EOTF)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram">線性-非線性轉換函數 (OETF)</sys:String>
