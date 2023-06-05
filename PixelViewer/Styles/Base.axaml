@@ -10,14 +10,14 @@
 		<Color x:Key="Color/Accent">#50b29b</Color>
 
 		<!-- BitmapHistogramsView -->
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Bakground}"/>
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Bakground}"/>
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Bakground}"/>
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Bakground" Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Bakground}"/>
-		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Bakground">#3f3fff</Color>
-		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Bakground">#3fff3f</Color>
-		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Bakground">#bfbfbf</Color>
-		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Bakground">#ff3f3f</Color>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Background}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Background}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Background}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Background}"/>
+		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background">#3f3fff</Color>
+		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background">#3fff3f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background">#bfbfbf</Color>
+		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background">#ff3f3f</Color>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">1</Thickness>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
@@ -111,14 +111,14 @@
 	<!-- BitmapHistogramsView -->
 	<Style Selector="appControls|BitmapHistogramsView">
 		<Setter Property="Background" Value="{DynamicResource TextControlBackground}"/>
-		<Setter Property="BlueHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.BlueHistogram.Bakground}"/>
+		<Setter Property="BlueHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.BlueHistogram.Background}"/>
 		<Setter Property="BorderBrush" Value="{DynamicResource TextControlBorderBrush}"/>
 		<Setter Property="BorderThickness" Value="{DynamicResource Thickness/BitmapHistogramsView.Border}"/>
 		<Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}"/>
-		<Setter Property="GreenHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.GreenHistogram.Bakground}"/>
-		<Setter Property="LuminanceHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.LuminanceHistogram.Bakground}"/>
+		<Setter Property="GreenHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.GreenHistogram.Background}"/>
+		<Setter Property="LuminanceHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.LuminanceHistogram.Background}"/>
 		<Setter Property="Padding" Value="{DynamicResource Thickness/BitmapHistogramsView.Padding}"/>
-		<Setter Property="RedHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.RedHistogram.Bakground}"/>
+		<Setter Property="RedHistogramBrush" Value="{StaticResource Brush/BitmapHistogramsView.RedHistogram.Background}"/>
 	</Style>
 
 	<!-- CieChromaticityDiagram -->
