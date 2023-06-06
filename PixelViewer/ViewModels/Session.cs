@@ -574,7 +574,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="QuarterSizeRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<IBitmap?> QuarterSizeRenderedImageProperty = ObservableProperty.Register<Session, IBitmap?>(nameof(QuarterSizeRenderedImage));
+	public static readonly ObservableProperty<Bitmap?> QuarterSizeRenderedImageProperty = ObservableProperty.Register<Session, Bitmap?>(nameof(QuarterSizeRenderedImage));
 	/// <summary>
 	/// Property of <see cref="RedColorAdjustment"/>.
 	/// </summary>
@@ -586,7 +586,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="RenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<IBitmap?> RenderedImageProperty = ObservableProperty.Register<Session, IBitmap?>(nameof(RenderedImage));
+	public static readonly ObservableProperty<Bitmap?> RenderedImageProperty = ObservableProperty.Register<Session, Bitmap?>(nameof(RenderedImage));
 	/// <summary>
 	/// Property of <see cref="RenderedImagesMemoryUsage"/>.
 	/// </summary>
@@ -3595,7 +3595,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get rendered image with quarter size.
 	/// </summary>
-	public IBitmap? QuarterSizeRenderedImage => this.GetValue(QuarterSizeRenderedImageProperty);
+	public Bitmap? QuarterSizeRenderedImage => this.GetValue(QuarterSizeRenderedImageProperty);
 
 
 	/// <summary>
@@ -3660,7 +3660,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get rendered image.
 	/// </summary>
-	public IBitmap? RenderedImage => this.GetValue(RenderedImageProperty);
+	public Bitmap? RenderedImage => this.GetValue(RenderedImageProperty);
 
 
 	/// <summary>

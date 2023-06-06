@@ -576,7 +576,7 @@
 							</Border.Background>
 							<LayoutTransformControl>
 								<Border>
-									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" RenderOptions.BitmapInterpolationMode="{Binding $parent[UserControl].EffectiveRenderedImageInterpolationMode}" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
+									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
 								</Border>
 								<LayoutTransformControl.LayoutTransform>
 									<RotateTransform Angle="{Binding ImageDisplayRotation}"/>
@@ -667,7 +667,7 @@
 
 						<!-- Profile -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>
-						<ComboBox Classes="Dialog_ComboBox" Items="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
+						<ComboBox Classes="Dialog_ComboBox" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
 									<Grid ColumnDefinitions="*,Auto">
@@ -695,7 +695,7 @@
 
 						<!-- Image renderer -->
 						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
-						<ComboBox Name="imageRendererComboBox" Classes="Dialog_ComboBox" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
+						<ComboBox Name="imageRendererComboBox" Classes="Dialog_ComboBox" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
 									<Grid ColumnDefinitions="*,Auto">
@@ -726,7 +726,7 @@
 						<!-- YUV to RGB converter -->
 						<StackPanel IsVisible="{Binding IsYuvToBgraConverterSupported}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.YuvToBgraConverter}"/>
-							<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding YuvToBgraConverter, Mode=TwoWay}">
+							<ComboBox Classes="Dialog_ComboBox" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding YuvToBgraConverter, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
 										<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
@@ -741,7 +741,7 @@
 						<Panel>
 							<abControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
 							<StackPanel IsVisible="{Binding IsColorSpaceManagementEnabled}">
-								<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" Items="{Binding ColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" VerticalAlignment="Center">
+								<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding ColorSpaces}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" VerticalAlignment="Center">
 									<ComboBox.ItemTemplate>
 										<DataTemplate>
 											<Grid ColumnDefinitions="*,Auto">

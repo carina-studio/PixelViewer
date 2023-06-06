@@ -30,7 +30,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.34.1.117" />
-		<PackageReference Include="NUnit" Version="3.13.2" />
+		<PackageReference Include="NUnit" Version="3.13.3" />
 		<PackageReference Include="NUnit3TestAdapter" Version="4.2.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
 	</ItemGroup>

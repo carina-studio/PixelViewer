@@ -22,7 +22,7 @@
 		<!-- Content -->
 		<StackPanel Classes="Dialog_ContentPanel">
 			<TextBlock Classes="Dialog_TextBlock" Text="{Binding $parent[Window].Message}" TextWrapping="WrapWithOverflow"/>
-			<ComboBox Name="profileComboBox" Classes="Dialog_ComboBox" Items="{Binding $parent[Window].Profiles}">
+			<ComboBox Name="profileComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding $parent[Window].Profiles}">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>

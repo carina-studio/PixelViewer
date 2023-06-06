@@ -4,8 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:abConverters="using:CarinaStudio.Data.Converters"
 		xmlns:aConverters="using:Avalonia.Data.Converters"
-        xmlns:app="using:Carina.PixelViewer"
-        xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
         xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
@@ -29,7 +27,7 @@
 		<DataTemplate DataType="{x:Type appViewModels:Session}">
 			<Grid ColumnDefinitions="*,Auto">
 				<Grid.ContextMenu>
-					<ContextMenu PlacementMode="Bottom">
+					<ContextMenu Placement="Bottom">
 						<MenuItem Command="{Binding $parent[Window].SetCustomSessionTitleCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
 							<MenuItem.Icon>
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>

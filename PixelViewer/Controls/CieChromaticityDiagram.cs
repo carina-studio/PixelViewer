@@ -1,20 +1,18 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using Avalonia.Styling;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 
 namespace Carina.PixelViewer.Controls;
 
 /// <summary>
 /// CIE Chromaticity diagram.
 /// </summary>
-class CieChromaticityDiagram : Control, IStyleable
+class CieChromaticityDiagram : Control
 {
     /// <summary>
     /// Property of <see cref="AxisBrush"/>.
@@ -869,6 +867,10 @@ class CieChromaticityDiagram : Control, IStyleable
     }
 
 
+    /// <inheritdoc/>
+    protected override Type StyleKeyOverride => typeof(CieChromaticityDiagram);
+
+
     // Convert XY coordinate to control coordinate.
     static Point XYToControlCoordinate(double width, double height, double x, double y)
     {
@@ -878,10 +880,6 @@ class CieChromaticityDiagram : Control, IStyleable
         y -= MinCoordinateY;
         return new Point(x / xLength * width, (1 - y / yLength) * height);
     }
-
-
-    // Interface implementations.
-    Type IStyleable.StyleKey => typeof(CieChromaticityDiagram);
 }
 
 

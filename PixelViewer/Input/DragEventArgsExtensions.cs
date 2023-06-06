@@ -1,5 +1,5 @@
-﻿using Avalonia.Input;
-using Avalonia.VisualTree;
+﻿using Avalonia;
+using Avalonia.Input;
 
 namespace Carina.PixelViewer.Input
 {
@@ -9,12 +9,12 @@ namespace Carina.PixelViewer.Input
 	static class DragEventArgsExtensions
 	{
 		/// <summary>
-		/// Check whether dragging position is contained by given <see cref="IVisual"/> or not.
+		/// Check whether dragging position is contained by given <see cref="Visual"/> or not.
 		/// </summary>
 		/// <param name="e"><see cref="DragEventArgs"/>.</param>
-		/// <param name="visual"><see cref="IVisual"/>.</param>
-		/// <returns>True if dragging position is contained by given <see cref="IVisual"/>.</returns>
-		public static bool IsContainedBy(this DragEventArgs e, IVisual visual)
+		/// <param name="visual"><see cref="Visual"/>.</param>
+		/// <returns>True if dragging position is contained by given <see cref="Visual"/>.</returns>
+		public static bool IsContainedBy(this DragEventArgs e, Visual visual)
 		{
 			var position = e.GetPosition(visual);
 			var bounds = visual.Bounds;

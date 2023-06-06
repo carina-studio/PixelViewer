@@ -37,7 +37,7 @@
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace}"/>
 								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace.Description}"/>
 							</StackPanel>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" Items="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
+							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
 										<Grid ColumnDefinitions="*,Auto">

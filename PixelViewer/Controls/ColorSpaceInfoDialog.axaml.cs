@@ -103,7 +103,7 @@ class ColorSpaceInfoDialog : InputDialog
                     this.toNonLinearTransferFuncDiagram,
                 };
                 for (var i = diagramViews.Length - 1; i >= 0; --i)
-                    diagramViews[i]?.Parent?.Let(it => it.Opacity = (i == index ? 1 : 0));
+                    (diagramViews[i]?.Parent as Visual)?.Let(it => it.Opacity = (i == index ? 1 : 0));
             }));
         });
         this.greenPrimaryTextBox = this.Get<TextBox>(nameof(greenPrimaryTextBox));

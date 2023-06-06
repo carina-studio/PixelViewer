@@ -71,12 +71,7 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
                         Patterns = new[] { "*.json" }
                     }
                 }
-            })).Let(it =>
-            {
-                if (it.Count == 1 && it[0].TryGetUri(out var uri))
-                    return uri.LocalPath;
-                return null;
-            });
+            })).Let(it => it.Count == 1 ? it[0].TryGetLocalPath() : null);
             if (string.IsNullOrEmpty(fileName))
                 return;
             

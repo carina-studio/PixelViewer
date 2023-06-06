@@ -1,7 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
-using Avalonia.Styling;
 using CarinaStudio;
 using CarinaStudio.Collections;
 using System;
@@ -14,7 +13,7 @@ namespace Carina.PixelViewer.Controls;
 /// <summary>
 /// Control to show one or more normalized transfer functions.
 /// </summary>
-class NormalizedTransferFunctionsDiagram : Control, IStyleable
+class NormalizedTransferFunctionsDiagram : Control
 {
     /// <summary>
     /// Property of <see cref="AxisBrush"/>.
@@ -209,14 +208,14 @@ class NormalizedTransferFunctionsDiagram : Control, IStyleable
     }
 
 
+    /// <inheritdoc/>
+    protected override Type StyleKeyOverride => typeof(NormalizedTransferFunctionsDiagram);
+
+
     /// <summary>
     /// Get list of <see cref="NormalizedTransferFunction"/> to be shown in this diagram.
     /// </summary>
     public IList<NormalizedTransferFunction> TransferFunctions { get => this.transferFuncs; }
-
-
-    // Interface implementations.
-    Type IStyleable.StyleKey => typeof(NormalizedTransferFunctionsDiagram);
 }
 
 

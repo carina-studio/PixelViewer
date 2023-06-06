@@ -66,7 +66,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 	// Static fields.
 	static readonly StyledProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
-	static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.Default);
+	static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.None);
 	static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
 	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
@@ -267,14 +267,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
 		this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 		{
-			it.MenuClosed += (_, _) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
-			it.MenuOpened += (_, _) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
+			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
+			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
 		});
 		this.fileActionsButton = this.FindControl<ToggleButton>(nameof(this.fileActionsButton)).AsNonNull();
 		this.fileActionsMenu = ((ContextMenu)this.Resources[nameof(fileActionsMenu)].AsNonNull()).Also(it =>
 		{
-			it.MenuClosed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
-			it.MenuOpened += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
+			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
+			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 		});
 		SetupFilterParamsSliderAndButtons("greenColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("highlightAdjustment", BrightnessAdjustmentGroup);
@@ -324,7 +324,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 		{
 #if DEBUG
-			foreach (var item in it.Items!)
+			foreach (var item in it.Items)
 			{
 				if (item is MenuItem menuItem && menuItem.Name == "editConfigMenuItem")
 				{
@@ -333,8 +333,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 			}
 #endif
-			it.MenuClosed += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
-			it.MenuOpened += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
+			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
+			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 		});
 		SetupFilterParamsSliderAndButtons("redColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("saturationAdjustment", ColorAdjustmentGroup);
@@ -491,6 +491,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				return StatusBarState.Inactive;
 			}));
 		});
+		
+		// attach to self properties
+		this.GetObservable(EffectiveRenderedImageInterpolationModeProperty).Subscribe(new Observer<BitmapInterpolationMode>(mode =>
+		{
+			RenderOptions.SetBitmapInterpolationMode(this.image, mode);
+		}));
 	}
 
 
@@ -503,7 +509,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		session.SourceFileName?.Let(it =>
 		{
-			_ = ((App)this.Application).Clipboard?.SetTextAsync(Path.GetFileName(it));
+			_ = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(Path.GetFileName(it));
 		});
 	}
 
@@ -517,7 +523,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		session.SourceFileName?.Let(it =>
 		{
-			_ = ((App)this.Application).Clipboard?.SetTextAsync(it);
+			_ = TopLevel.GetTopLevel(this)?.Clipboard?.SetTextAsync(it);
 		});
 	}
 
@@ -547,8 +553,18 @@ class SessionControl : UserControl<IAppSuiteApplication>
 #pragma warning restore IDE0060
 	{
 		// get file names
-		var fileNames = data.GetFileNames()?.ToArray();
-		if (fileNames == null || fileNames.IsEmpty())
+		var fileNames = data.GetFiles()?.Let(it =>
+		{
+			var fileNames = new List<string>();
+			foreach (var file in it)
+			{
+				var fileName = file.TryGetLocalPath();
+				if (!string.IsNullOrEmpty(fileName))
+					fileNames.Add(fileName);
+			}
+			return fileNames;
+		});
+		if (fileNames.IsNullOrEmpty())
 			return false;
 
 		// get window
@@ -556,7 +572,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return false;
 
 		// check file count
-		if (fileNames.Length > 8)
+		if (fileNames.Count > 8)
 		{
 			await new ASControls.MessageDialog()
 			{
@@ -567,7 +583,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// open files
-		if (fileNames.Length > 1)
+		if (fileNames.Count > 1)
 		{
 			// select profile
 			var profile = await new ImageRenderingProfileSelectionDialog().Also(it =>
@@ -792,12 +808,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 
 		// check focus
-		var focusedElement = FocusManager.Instance?.Current;
-		if (focusedElement != null)
+		var focusedElement = this.attachedWindow?.FocusManager?.GetFocusedElement();
+		if (focusedElement is Visual focusedVisual)
 		{
 			if (focusedElement is TextBox || focusedElement is NumericUpDown)
 				return;
-			if (focusedElement.FindAncestorOfType<SessionControl>(true) != this)
+			if (focusedVisual.FindAncestorOfType<SessionControl>(true) != this)
 				return;
 		}
 
@@ -885,15 +901,15 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// check focus
-		var focusedElement = FocusManager.Instance?.Current;
-		if (focusedElement != null)
+		var focusedElement = this.attachedWindow?.FocusManager?.GetFocusedElement();
+		if (focusedElement is Visual focusedVisual)
 		{
 			if (focusedElement is TextBox || focusedElement is NumericUpDown)
 			{
 				this.pressedKeys.Remove(e.Key);
 				return;
 			}
-			if (focusedElement.FindAncestorOfType<SessionControl>(true) != this)
+			if (focusedVisual.FindAncestorOfType<SessionControl>(true) != this)
 			{
 				this.pressedKeys.Remove(e.Key);
 				return;
@@ -977,7 +993,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			if (point.Properties.IsLeftButtonPressed)
 			{
 				var bounds = this.imageScrollViewer.Bounds;
-				if (!bounds.IsEmpty)
+				if (bounds.Width > 0 && bounds.Height > 0)
 					this.ScrollImageScrollViewer(it, new Vector(point.Position.X / bounds.Width, point.Position.Y / bounds.Height));
 			}
 			else
@@ -988,7 +1004,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 
 		// select pixel on image
-		if (sender is IVisual imageControl && this.DataContext is Session session)
+		if (sender is Visual imageControl && this.DataContext is Session session)
 		{
 			var image = session.RenderedImage;
 			if (image != null)
@@ -1292,12 +1308,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		if (this.attachedWindow == null)
 			return;
-		var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new())).Let(it =>
-		{
-			if (it.Count == 1 && it[0].TryGetUri(out var uri))
-				return uri.LocalPath;
-			return null;
-		});
+		var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new())).Let(it => 
+			it.Count == 1 ? it[0].TryGetLocalPath() : null);
 		if (string.IsNullOrEmpty(fileName))
 			return;
 		
@@ -1357,12 +1369,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// select file
-		var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new())).Let(it =>
-		{
-			if (it.Count == 1 && it[0].TryGetUri(out var uri))
-				return uri.LocalPath;
-			return null;
-		});
+		var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new())).Let(it => 
+			it.Count == 1 ? it[0].TryGetLocalPath() : null);
 		if (fileName == null)
 			return;
 
@@ -1556,7 +1564,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 			},
 			SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg"
-		}))?.Let(it => it.TryGetUri(out var uri) ? uri.LocalPath : null);
+		}))?.Let(it => it.TryGetLocalPath());
 		if (fileName == null)
 			return;
 

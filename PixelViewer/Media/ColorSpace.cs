@@ -670,7 +670,7 @@ namespace Carina.PixelViewer.Media
                     }
 
                     // get DC
-                    var hWnd = (window?.PlatformImpl?.Handle?.Handle).GetValueOrDefault();
+                    var hWnd = (window?.TryGetPlatformHandle()?.Handle).GetValueOrDefault();
                     var hdc = Win32.GetWindowDC(hWnd);
                     if (hdc == IntPtr.Zero)
                         throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get DC of window or desktop.");

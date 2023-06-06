@@ -54,7 +54,7 @@
 									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
 								</Grid>
 							</StackPanel>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" Items="{Binding ThemeModes, Mode=OneTime}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}">
+							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{Binding ThemeModes, Mode=OneTime}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
 										<TextBlock Text="{Binding Converter={x:Static asViewModels:ApplicationOptions.ThemeModeConverter}}"/>
@@ -118,7 +118,7 @@
 						<!-- Default renderer -->
 						<asControls:DialogItemGrid>
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageRendererFormatName}"/>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" Items="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
+							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
 								<ComboBox.DataTemplates>
 									<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
 										<Grid ColumnDefinitions="*,Auto">
@@ -157,7 +157,7 @@
 						<!-- YUV to RGB conversion -->
 						<asControls:DialogItemGrid>
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" Items="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
+							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:YuvToBgraConverter">
 										<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
@@ -249,7 +249,7 @@
 						<!-- Default color space -->
 						<asControls:DialogItemGrid>
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
-							<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
+							<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 										<Grid ColumnDefinitions="*,Auto">
@@ -272,7 +272,7 @@
 						<!-- Screen color space -->
 						<asControls:DialogItemGrid>
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
-							<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
+							<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 										<Grid ColumnDefinitions="*,Auto">
@@ -310,7 +310,7 @@
 							<TextBlock Classes="Dialog_TextBlock" Grid.Column="1" IsVisible="{Binding !#customColorSpaceListBox.IsVisible}" Text="{DynamicResource String/Common.None}"/>
 						</asControls:DialogItemGrid>
 						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<asControls:ListBox Name="customColorSpaceListBox" Classes="Dialog_Item_ListBox" IsVisible="{Binding $self.ItemCount}" Items="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
+						<asControls:ListBox Name="customColorSpaceListBox" Classes="Dialog_Item_ListBox" IsVisible="{Binding $self.ItemCount}" ItemsSource="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
 							<asControls:ListBox.ItemTemplate>
 								<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 									<Grid ColumnDefinitions="*,Auto">

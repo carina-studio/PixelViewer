@@ -13,13 +13,14 @@ using System.Drawing.Imaging;
 #endif
 using System.Threading;
 using System.Threading.Tasks;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Carina.PixelViewer.Media
 {
 	/// <summary>
 	/// Data buffer of <see cref="IBitmap"/>.
 	/// </summary>
-	unsafe interface IBitmapBuffer : IShareableDisposable<IBitmapBuffer>, IMemoryOwner<byte>
+	interface IBitmapBuffer : IShareableDisposable<IBitmapBuffer>, IMemoryOwner<byte>
 	{
 		/// <summary>
 		/// Color space of bitmap.
@@ -62,7 +63,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Fields.
-		static readonly ILogger? Logger = App.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapBufferExtensions));
+		static readonly ILogger? Logger = App.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapBufferExtensions));
 
 
 		/// <summary>
@@ -128,8 +129,6 @@ namespace Carina.PixelViewer.Media
 												unpackFunc(*srcPixelPtr, &b, &g, &r, &a);
 												*destPixelPtr = packFunc((byte)(b >> 8), (byte)(g >> 8), (byte)(r >> 8), (byte)(a >> 8));
 											}
-											if (cancellationToken.IsCancellationRequested)
-												return;
 										});
 									}
 									break;
@@ -141,10 +140,10 @@ namespace Carina.PixelViewer.Media
 					if (stopWatch != null)
 					{
 						stopWatch.Stop();
-						Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert format of {width}x{sharedBitmapBuffer.Height} bitmap buffer from {sharedBitmapBuffer.Format} to Bgra32");
+						Logger?.LogTrace("Take {duration} ms to convert format of {width}x{height} bitmap buffer from {format} to Bgra32", stopWatch.ElapsedMilliseconds, width, sharedBitmapBuffer.Height, sharedBitmapBuffer.Format);
 					}
 				}
-			});
+			}, cancellationToken);
 		}
 
 
@@ -170,7 +169,7 @@ namespace Carina.PixelViewer.Media
 			// check color space
 			if (bitmapBuffer.ColorSpace.Equals(resultBitmapBuffer.ColorSpace))
 			{
-				await Task.Run(() => CopyTo(bitmapBuffer, resultBitmapBuffer));
+				await Task.Run(() => CopyTo(bitmapBuffer, resultBitmapBuffer), cancellationToken);
 				return;
 			}
 
@@ -224,8 +223,6 @@ namespace Carina.PixelViewer.Media
 												(r, g, b) = converter.Convert(r, g, b);
 												*destPixelPtr = packFunc(b, g, r, a);
 											}
-											if (cancellationToken.IsCancellationRequested)
-												return;
 										});
 									}
 									break;
@@ -247,8 +244,6 @@ namespace Carina.PixelViewer.Media
 												(r, g, b) = converter.Convert(r, g, b);
 												*destPixelPtr = packFunc(b, g, r, a);
 											}
-											if (cancellationToken.IsCancellationRequested)
-												return;
 										});
 									}
 									break;
@@ -260,10 +255,10 @@ namespace Carina.PixelViewer.Media
 					if (stopWatch != null)
 					{
 						stopWatch.Stop();
-						Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert color space of {width}x{sharedBitmapBuffer.Height} bitmap buffer from {srcColorSpace} to sRGB");
+						Logger?.LogTrace("Take {duration} ms to convert color space of {width}x{height} bitmap buffer from {srcColorSpace} to sRGB", stopWatch.ElapsedMilliseconds, width, sharedBitmapBuffer.Height, srcColorSpace);
 					}
 				}
-			});
+			}, cancellationToken);
 		}
 
 
@@ -272,10 +267,7 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="source">Source <see cref="IBitmapBuffer"/>.</param>
 		/// <returns><see cref="IBitmapBuffer"/> with copied data.</returns>
-		public static IBitmapBuffer Copy(this IBitmapBuffer source) => new BitmapBuffer(source.Format, source.ColorSpace, source.Width, source.Height).Also(it =>
-		{
-			source.CopyTo(it);
-		});
+		public static IBitmapBuffer Copy(this IBitmapBuffer source) => new BitmapBuffer(source.Format, source.ColorSpace, source.Width, source.Height).Also(source.CopyTo);
 
 
 		/// <summary>
@@ -433,7 +425,7 @@ namespace Carina.PixelViewer.Media
 			{
 				srcBitmapBuffer.Memory.Pin(srcBaseAddress =>
 					CopyToBgra32(srcBaseAddress, srcBitmapBuffer.Format, srcBitmapBuffer.Width, srcBitmapBuffer.Height, srcBitmapBuffer.RowBytes, destBitmapBuffer.Address, destBitmapBuffer.RowBytes, 0));
-			});
+			}, cancellationToken);
 		}
 
 
@@ -544,7 +536,7 @@ namespace Carina.PixelViewer.Media
 			{
 				srcBitmapBuffer.Memory.Pin(srcBaseAddress =>
 					CopyToQuarterBgra32(srcBaseAddress, srcBitmapBuffer.Format, srcBitmapBuffer.Width, srcBitmapBuffer.Height, srcBitmapBuffer.RowBytes, destBitmapBuffer.Address, destBitmapBuffer.RowBytes));
-			});
+			}, cancellationToken);
 		}
 
 
@@ -556,81 +548,79 @@ namespace Carina.PixelViewer.Media
 			switch (srcFormat)
 			{
 				case BitmapFormat.Bgra32:
-					unsafe
+				{
+					var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
+					var packFunc = ImageProcessing.SelectBgra32Packing();
+					ImageProcessing.ParallelFor(0, height, (y) =>
 					{
-						var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
-						var packFunc = ImageProcessing.SelectBgra32Packing();
-						ImageProcessing.ParallelFor(0, height, (y) =>
+						var r1 = (byte)0;
+						var r2 = (byte)0;
+						var g1 = (byte)0;
+						var g2 = (byte)0;
+						var b1 = (byte)0;
+						var b2 = (byte)0;
+						var a1 = (byte)0;
+						var a2 = (byte)0;
+						var selection = y;
+						var srcRowPtr = (uint*)((byte*)srcBaseAddress + (y * 2 * srcRowStride));
+						var srcNextRowPtr = (uint*)((byte*)srcRowPtr + srcRowStride);
+						var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
+						for (var x = width; x > 0; --x, srcRowPtr += 2, srcNextRowPtr += 2, ++destPixelPtr, ++selection)
 						{
-							var r1 = (byte)0;
-							var r2 = (byte)0;
-							var g1 = (byte)0;
-							var g2 = (byte)0;
-							var b1 = (byte)0;
-							var b2 = (byte)0;
-							var a1 = (byte)0;
-							var a2 = (byte)0;
-							var selection = y;
-							var srcRowPtr = (uint*)((byte*)srcBaseAddress + (y * 2 * srcRowStride));
-							var srcNextRowPtr = (uint*)((byte*)srcRowPtr + srcRowStride);
-							var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
-							for (var x = width; x > 0; --x, srcRowPtr += 2, srcNextRowPtr += 2, ++destPixelPtr, ++selection)
+							if ((selection & 0x1) == 0)
 							{
-								if ((selection & 0x1) == 0)
-								{
-									unpackFunc(srcRowPtr[0], &b1, &g1, &r1, &a1);
-									unpackFunc(srcNextRowPtr[1], &b2, &g2, &r2, &a2);
-								}
-								else
-								{
-									unpackFunc(srcRowPtr[1], &b1, &g1, &r1, &a1);
-									unpackFunc(srcNextRowPtr[0], &b2, &g2, &r2, &a2);
-								}
-								*destPixelPtr = packFunc((byte)((b1 + b2) >> 1), (byte)((g1 + g2) >> 1), (byte)((r1 + r2) >> 1), (byte)((a1 + a2) >> 1));
+								unpackFunc(srcRowPtr[0], &b1, &g1, &r1, &a1);
+								unpackFunc(srcNextRowPtr[1], &b2, &g2, &r2, &a2);
 							}
-						});
-					}
+							else
+							{
+								unpackFunc(srcRowPtr[1], &b1, &g1, &r1, &a1);
+								unpackFunc(srcNextRowPtr[0], &b2, &g2, &r2, &a2);
+							}
+							*destPixelPtr = packFunc((byte)((b1 + b2) >> 1), (byte)((g1 + g2) >> 1), (byte)((r1 + r2) >> 1), (byte)((a1 + a2) >> 1));
+						}
+					});
 					break;
+				}
 				case BitmapFormat.Bgra64:
-					unsafe
+				{
+					var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+					var packFunc = ImageProcessing.SelectBgra32Packing();
+					ImageProcessing.ParallelFor(0, height, (y) =>
 					{
-						var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
-						var packFunc = ImageProcessing.SelectBgra32Packing();
-						ImageProcessing.ParallelFor(0, height, (y) =>
+						var r1 = (ushort)0;
+						var r2 = (ushort)0;
+						var g1 = (ushort)0;
+						var g2 = (ushort)0;
+						var b1 = (ushort)0;
+						var b2 = (ushort)0;
+						var a1 = (ushort)0;
+						var a2 = (ushort)0;
+						var selection = y;
+						var srcRowPtr = (ulong*)((byte*)srcBaseAddress + (y * 2 * srcRowStride));
+						var srcNextRowPtr = (ulong*)((byte*)srcRowPtr + srcRowStride);
+						var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
+						for (var x = width; x > 0; --x, srcRowPtr += 2, srcNextRowPtr += 2, ++destPixelPtr, ++selection)
 						{
-							var r1 = (ushort)0;
-							var r2 = (ushort)0;
-							var g1 = (ushort)0;
-							var g2 = (ushort)0;
-							var b1 = (ushort)0;
-							var b2 = (ushort)0;
-							var a1 = (ushort)0;
-							var a2 = (ushort)0;
-							var selection = y;
-							var srcRowPtr = (ulong*)((byte*)srcBaseAddress + (y * 2 * srcRowStride));
-							var srcNextRowPtr = (ulong*)((byte*)srcRowPtr + srcRowStride);
-							var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
-							for (var x = width; x > 0; --x, srcRowPtr += 2, srcNextRowPtr += 2, ++destPixelPtr, ++selection)
+							if ((selection & 0x1) == 0)
 							{
-								if ((selection & 0x1) == 0)
-								{
-									unpackFunc(srcRowPtr[0], &b1, &g1, &r1, &a1);
-									unpackFunc(srcNextRowPtr[1], &b2, &g2, &r2, &a2);
-								}
-								else
-								{
-									unpackFunc(srcRowPtr[1], &b1, &g1, &r1, &a1);
-									unpackFunc(srcNextRowPtr[0], &b2, &g2, &r2, &a2);
-								}
-								var b = (byte)(((b1 + b2) >> 9) & 0xff);
-								var g = (byte)(((g1 + g2) >> 9) & 0xff);
-								var r = (byte)(((r1 + r2) >> 9) & 0xff);
-								var a = (byte)(((a1 + a2) >> 9) & 0xff);
-								*destPixelPtr = packFunc(b, g, r, a);
+								unpackFunc(srcRowPtr[0], &b1, &g1, &r1, &a1);
+								unpackFunc(srcNextRowPtr[1], &b2, &g2, &r2, &a2);
 							}
-						});
-					}
+							else
+							{
+								unpackFunc(srcRowPtr[1], &b1, &g1, &r1, &a1);
+								unpackFunc(srcNextRowPtr[0], &b2, &g2, &r2, &a2);
+							}
+							var b = (byte)(((b1 + b2) >> 9) & 0xff);
+							var g = (byte)(((g1 + g2) >> 9) & 0xff);
+							var r = (byte)(((r1 + r2) >> 9) & 0xff);
+							var a = (byte)(((a1 + a2) >> 9) & 0xff);
+							*destPixelPtr = packFunc(b, g, r, a);
+						}
+					});
 					break;
+				}
 				default:
 					throw new NotSupportedException($"Unsupported bitmap format: {srcFormat}");
 			}
@@ -643,42 +633,39 @@ namespace Carina.PixelViewer.Media
 		/// <param name="buffer"><see cref="IBitmapBuffer"/>.</param>
 		/// <param name="orientation">Orientation.</param>
 		/// <returns><see cref="IBitmap"/>.</returns>
-		public static IBitmap CreateAvaloniaBitmap(this IBitmapBuffer buffer, int orientation = 0)
+		public static Bitmap CreateAvaloniaBitmap(this IBitmapBuffer buffer, int orientation = 0)
 		{
 			return buffer.Memory.Pin((srcBaseAddr) =>
 			{
-				unsafe
+				var srcWidth = buffer.Width;
+				var srcHeight = buffer.Height;
+				var avaloniaBitmap = orientation switch
 				{
-					var srcWidth = buffer.Width;
-					var srcHeight = buffer.Height;
-					var avaloniaBitmap = orientation switch
-					{
-						0 or 180 => new WriteableBitmap(new PixelSize(srcWidth, srcHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul),
-						90 or 270 => new WriteableBitmap(new PixelSize(srcHeight, srcWidth), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul),
-						_ => throw new ArgumentException(),
-					};
-					using var avaloniaBitmapBuffer = avaloniaBitmap.Lock();
-					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
-						? new Stopwatch().Also(it => it.Start())
-						: null;
-					switch (buffer.Format)
-					{
-						case BitmapFormat.Bgra32:
-							CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, buffer.RowBytes, avaloniaBitmapBuffer.Address, avaloniaBitmapBuffer.RowBytes, orientation);
-							break;
-						case BitmapFormat.Bgra64:
-							CopyToBgra32(srcBaseAddr, buffer.Format, srcWidth, srcHeight, buffer.RowBytes, avaloniaBitmapBuffer.Address, avaloniaBitmapBuffer.RowBytes, orientation);
-							break;
-						default:
-							throw new NotSupportedException($"Unsupported bitmap format: {buffer.Format}");
-					}
-					if (stopWatch != null)
-					{
-						stopWatch.Stop();
-						Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {srcWidth}x{buffer.Height} {buffer.Format} bitmap buffer to Avalonia bitmap");
-					}
-					return avaloniaBitmap;
+					0 or 180 => new WriteableBitmap(new PixelSize(srcWidth, srcHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul),
+					90 or 270 => new WriteableBitmap(new PixelSize(srcHeight, srcWidth), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul),
+					_ => throw new ArgumentException(),
+				};
+				using var avaloniaBitmapBuffer = avaloniaBitmap.Lock();
+				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+					? new Stopwatch().Also(it => it.Start())
+					: null;
+				switch (buffer.Format)
+				{
+					case BitmapFormat.Bgra32:
+						CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, buffer.RowBytes, avaloniaBitmapBuffer.Address, avaloniaBitmapBuffer.RowBytes, orientation);
+						break;
+					case BitmapFormat.Bgra64:
+						CopyToBgra32(srcBaseAddr, buffer.Format, srcWidth, srcHeight, buffer.RowBytes, avaloniaBitmapBuffer.Address, avaloniaBitmapBuffer.RowBytes, orientation);
+						break;
+					default:
+						throw new NotSupportedException($"Unsupported bitmap format: {buffer.Format}");
 				}
+				if (stopWatch != null)
+				{
+					stopWatch.Stop();
+					Logger?.LogTrace("Take {duration} ms to convert from {srcWidth}x{srcHeight} {format} bitmap buffer to Avalonia bitmap", stopWatch.ElapsedMilliseconds, srcWidth, buffer.Height, buffer.Format);
+				}
+				return avaloniaBitmap;
 			});
 		}
 
@@ -690,10 +677,10 @@ namespace Carina.PixelViewer.Media
 		/// <param name="orientation">Orientation.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Task of creating <see cref="IBitmap"/>.</returns>
-		public static async Task<IBitmap> CreateAvaloniaBitmapAsync(this IBitmapBuffer buffer, int orientation = 0, CancellationToken cancellationToken = default)
+		public static async Task<Bitmap> CreateAvaloniaBitmapAsync(this IBitmapBuffer buffer, int orientation = 0, CancellationToken cancellationToken = default)
 		{
 			using var sharedBuffer = buffer.Share();
-			var bitmap = await Task.Run(() => CreateAvaloniaBitmap(sharedBuffer));
+			var bitmap = await Task.Run(() => CreateAvaloniaBitmap(sharedBuffer), cancellationToken);
 			if (cancellationToken.IsCancellationRequested)
 				throw new TaskCanceledException();
 			return bitmap;
@@ -758,7 +745,7 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
 		/// <returns><see cref="IBitmap"/>.</returns>
-		public static IBitmap CreateQuarterSizeAvaloniaBitmap(this IBitmapBuffer bitmapBuffer)
+		public static Bitmap CreateQuarterSizeAvaloniaBitmap(this IBitmapBuffer bitmapBuffer)
         {
 			// check size
 			var width = bitmapBuffer.Width;
@@ -865,7 +852,7 @@ namespace Carina.PixelViewer.Media
 				if (stopWatch != null)
 				{
 					stopWatch.Stop();
-					Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap buffer to quarter size Avalonia bitmap");
+					Logger?.LogTrace("Take {duration} ms to convert from {width}x{height} {format} bitmap buffer to quarter size Avalonia bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
 				}
 			});
         }
@@ -877,10 +864,10 @@ namespace Carina.PixelViewer.Media
 		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns>Task of creating <see cref="IBitmap"/>.</returns>
-		public static async Task<IBitmap> CreateQuarterSizeAvaloniaBitmapAsync(this IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
+		public static async Task<Bitmap> CreateQuarterSizeAvaloniaBitmapAsync(this IBitmapBuffer bitmapBuffer, CancellationToken cancellationToken)
 		{
 			using var sharedBitmapBuffer = bitmapBuffer.Share();
-			var bitmap = await Task.Run(() => CreateQuarterSizeAvaloniaBitmap(sharedBitmapBuffer));
+			var bitmap = await Task.Run(() => CreateQuarterSizeAvaloniaBitmap(sharedBitmapBuffer), cancellationToken);
 			if (cancellationToken.IsCancellationRequested)
 				throw new TaskCanceledException();
 			return bitmap;
@@ -911,30 +898,26 @@ namespace Carina.PixelViewer.Media
 			};
 			return new SKBitmap(skiaImageInfo).Also(skiaBitmap =>
 			{
-				unsafe
+				using var skiaPixels = skiaBitmap.PeekPixels().AsNonNull();
+				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+					? new Stopwatch().Also(it => it.Start())
+					: null;
+				bitmapBuffer.Memory.Pin(srcBaseAddr =>
 				{
-					using var skiaPixels = skiaBitmap.PeekPixels().AsNonNull();
-					var srcRowStride = bitmapBuffer.RowBytes;
-					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
-						? new Stopwatch().Also(it => it.Start())
-						: null;
-					bitmapBuffer.Memory.Pin(srcBaseAddr =>
+					switch (bitmapBuffer.Format)
 					{
-						switch (bitmapBuffer.Format)
-						{
-							case BitmapFormat.Bgra32:
-								CopyTo(srcBaseAddr, bitmapBuffer.Format, srcWidth, srcHeight, bitmapBuffer.RowBytes, skiaPixels.GetPixels(), skiaPixels.RowBytes, orientation);
-								break;
-							case BitmapFormat.Bgra64:
-								CopyToBgra32(srcBaseAddr, bitmapBuffer.Format, srcWidth, srcHeight, bitmapBuffer.RowBytes, skiaPixels.GetPixels(), skiaPixels.RowBytes, orientation);
-								break;
-						}
-					});
-					if (stopWatch != null)
-					{
-						stopWatch.Stop();
-						Logger?.LogTrace($"Take {stopWatch.ElapsedMilliseconds} ms to convert from {bitmapBuffer.Width}x{bitmapBuffer.Height} {bitmapBuffer.Format} bitmap buffer to Skia bitmap");
+						case BitmapFormat.Bgra32:
+							CopyTo(srcBaseAddr, bitmapBuffer.Format, srcWidth, srcHeight, bitmapBuffer.RowBytes, skiaPixels.GetPixels(), skiaPixels.RowBytes, orientation);
+							break;
+						case BitmapFormat.Bgra64:
+							CopyToBgra32(srcBaseAddr, bitmapBuffer.Format, srcWidth, srcHeight, bitmapBuffer.RowBytes, skiaPixels.GetPixels(), skiaPixels.RowBytes, orientation);
+							break;
 					}
+				});
+				if (stopWatch != null)
+				{
+					stopWatch.Stop();
+					Logger?.LogTrace("Take {duration} ms to convert from {width}x{height} {format} bitmap buffer to Skia bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
 				}
 			});
 		}
