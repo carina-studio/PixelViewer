@@ -723,7 +723,7 @@
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
-						<!-- YUV to RGB converte -->
+						<!-- YUV to RGB converter -->
 						<StackPanel IsVisible="{Binding IsYuvToBgraConverterSupported}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.YuvToBgraConverter}"/>
 							<ComboBox Classes="Dialog_ComboBox" Items="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding YuvToBgraConverter, Mode=TwoWay}">
@@ -769,7 +769,7 @@
 						</Panel>
 						<Separator Classes="Dialog_Separator"/>
 
-						<!-- Demisaicing -->
+						<!-- Demosaicing -->
 						<StackPanel IsVisible="{Binding IsDemosaicingSupported}">
 							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Demosaicing}"/>
 							<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding Demosaicing, Mode=TwoWay}"/>

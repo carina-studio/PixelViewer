@@ -12,15 +12,18 @@
 		xmlns:appImageFilters="using:Carina.PixelViewer.Media.ImageFilters"
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
+        xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog">
+        x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog"
+        x:CompileBindings="True"
+        x:DataType="appViewModels:AppOptions">
 
 	<DockPanel>
 
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel" DockPanel.Dock="Bottom">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
+				<Button Classes="Dialog_ControlButton" Command="{ReflectionBinding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
 			</StackPanel>
 		</Border>
 
@@ -156,7 +159,7 @@
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
 							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" Items="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
-									<DataTemplate>
+									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:YuvToBgraConverter">
 										<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
 									</DataTemplate>
 								</ComboBox.ItemTemplate>
@@ -248,7 +251,7 @@
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
 							<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
-									<DataTemplate>
+									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 										<Grid ColumnDefinitions="*,Auto">
 											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
 											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
@@ -263,7 +266,7 @@
 							</ComboBox>
 						</asControls:DialogItemGrid>
 						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{Binding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{Binding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+						<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{ReflectionBinding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
 						<Separator Classes="Dialog_Item_Separator"/>
 
 						<!-- Screen color space -->
@@ -271,7 +274,7 @@
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
 							<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" Items="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
-									<DataTemplate>
+									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 										<Grid ColumnDefinitions="*,Auto">
 											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
 											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
@@ -286,7 +289,7 @@
 							</ComboBox>
 						</asControls:DialogItemGrid>
 						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{Binding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{Binding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+						<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{Binding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{ReflectionBinding #screenColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
 						<Separator Classes="Dialog_Item_Separator"/>
 
 						<!-- Use system screen color space -->
@@ -309,15 +312,15 @@
 						<Line Classes="Dialog_Item_Separator_Inner"/>
 						<asControls:ListBox Name="customColorSpaceListBox" Classes="Dialog_Item_ListBox" IsVisible="{Binding $self.ItemCount}" Items="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
 							<asControls:ListBox.ItemTemplate>
-								<DataTemplate>
+								<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 									<Grid ColumnDefinitions="*,Auto">
 										<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
 										<Border Classes="InPlaceAction_Reserved"/>
 										<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
-											<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
+											<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
 												<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
 											</Button>
-											<Button Classes="InPlaceAction_Button" Command="{Binding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
+											<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
 												<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
 											</Button>
 										</StackPanel>
@@ -326,7 +329,7 @@
 							</asControls:ListBox.ItemTemplate>
 						</asControls:ListBox>
 						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding #customColorSpaceListBox.IsVisible}"/>
-						<Button Classes="Dialog_Item_Button" Command="{Binding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add.WithDialog}"/>
+						<Button Classes="Dialog_Item_Button" Command="{ReflectionBinding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add.WithDialog}"/>
 						
 					</StackPanel>
 				</Border>
@@ -371,7 +374,7 @@
 					<StackPanel>
 
 						<!-- Create new tab for drag-and-drop file -->
-						<StackPanel IsVisible="{Binding $parent[Window].IsDragAndDropSupported}">
+						<StackPanel IsVisible="{ReflectionBinding $parent[Window].IsDragAndDropSupported}">
 							<asControls:DialogItemGrid>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile}"/>
 								<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding CreateNewSessionForDragDropFile, Mode=TwoWay}"/>
@@ -421,7 +424,7 @@
 						</asControls:DialogItemGrid>
 
 						<!-- Log output target port -->
-						<StackPanel IsVisible="{Binding $parent[Window].Application.IsDebugMode}">
+						<StackPanel IsVisible="{ReflectionBinding $parent[Window].Application.IsDebugMode}">
 							<Separator Classes="Dialog_Item_Separator"/>
 							<asControls:DialogItemGrid>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.LogOutputTargetPort}"/>

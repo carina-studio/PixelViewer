@@ -161,7 +161,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
         /// Check whether system defined screen color space is supported or not. 
         /// </summary>
-        public bool IsSystemScreenColorSpaceSupported { get => Media.ColorSpace.IsSystemScreenColorSpaceSupported; }
+        public bool IsSystemScreenColorSpaceSupported => ColorSpace.IsSystemScreenColorSpaceSupported;
 
 
 		/// <summary>
@@ -261,18 +261,14 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Color space of screen.
 		/// </summary>
-		public Media.ColorSpace ScreenColorSpace
+		public ColorSpace ScreenColorSpace
 		{
 			get 
 			{
 				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
-			set
-			{
-				if (value != null)
-					this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);
-			}
+			set => this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);
 		}
 
 

@@ -60,7 +60,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia.Desktop" Version="11.0.0-preview4" />
-		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="2.2.92.531-preview" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="2.2.95.606-preview" />
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
 		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="12.2.2" />
