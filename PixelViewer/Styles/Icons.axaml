@@ -79,6 +79,38 @@
 	<DrawingImage x:Key="Image/Icon.ImageRenderingProfile.Default" Drawing="{StaticResource Drawing/Icon.ImageRenderingProfile.Default}"/>
 	<DrawingImage x:Key="Image/Icon.ImageRenderingProfile.FileFormat" Drawing="{DynamicResource Drawing/Icon.File}"/>
 	<DrawingImage x:Key="Image/Icon.ImageRenderingProfile.UserDefined" Drawing="{DynamicResource Drawing/Icon.Details}"/>
+	
+	<!-- MIT License, https://opensource.org/license/mit/ -->
+	<DrawingImage x:Key="Image/Icon.OneToOne">
+		<DrawingGroup>
+			<GeometryDrawing Geometry="F1 M3 17L3 7Q3 6.90175 3.00963 6.80397Q3.01926 6.70619 3.03843 6.60982Q3.0576 6.51345 3.08612 6.41943Q3.11464 6.32541 3.15224 6.23463Q3.18984 6.14386 3.23616 6.05721Q3.28247 5.97055 3.33706 5.88886Q3.39165 5.80716 3.45398 5.73121Q3.51631 5.65526 3.58579 5.58579Q3.65526 5.51631 3.73121 5.45398Q3.80716 5.39165 3.88886 5.33706Q3.97055 5.28247 4.05721 5.23616Q4.14386 5.18984 4.23463 5.15224Q4.32541 5.11464 4.41943 5.08612Q4.51345 5.0576 4.60982 5.03843Q4.70618 5.01926 4.80397 5.00963Q4.90175 5 5 5L19 5Q19.0983 5 19.196 5.00963Q19.2938 5.01926 19.3902 5.03843Q19.4865 5.0576 19.5806 5.08612Q19.6746 5.11464 19.7654 5.15224Q19.8561 5.18984 19.9428 5.23616Q20.0294 5.28247 20.1111 5.33706Q20.1928 5.39165 20.2688 5.45398Q20.3447 5.51631 20.4142 5.58579Q20.4837 5.65526 20.546 5.73121Q20.6084 5.80716 20.6629 5.88886Q20.7175 5.97055 20.7638 6.05721Q20.8102 6.14386 20.8478 6.23463Q20.8854 6.32541 20.9139 6.41943Q20.9424 6.51345 20.9616 6.60982Q20.9807 6.70619 20.9904 6.80397Q21 6.90175 21 7L21 17Q21 17.0983 20.9904 17.196Q20.9807 17.2938 20.9616 17.3902Q20.9424 17.4865 20.9139 17.5806Q20.8854 17.6746 20.8478 17.7654Q20.8102 17.8561 20.7638 17.9428Q20.7175 18.0294 20.6629 18.1111Q20.6084 18.1928 20.546 18.2688Q20.4837 18.3447 20.4142 18.4142Q20.3447 18.4837 20.2688 18.546Q20.1928 18.6083 20.1111 18.6629Q20.0294 18.7175 19.9428 18.7638Q19.8561 18.8102 19.7654 18.8478Q19.6746 18.8854 19.5806 18.9139Q19.4865 18.9424 19.3902 18.9616Q19.2938 18.9807 19.196 18.9904Q19.0983 19 19 19L5 19Q4.90175 19 4.80397 18.9904Q4.70618 18.9807 4.60982 18.9616Q4.51345 18.9424 4.41943 18.9139Q4.32541 18.8854 4.23463 18.8478Q4.14386 18.8102 4.05721 18.7638Q3.97055 18.7175 3.88886 18.6629Q3.80716 18.6083 3.73121 18.546Q3.65526 18.4837 3.58579 18.4142Q3.51631 18.3447 3.45398 18.2688Q3.39165 18.1928 3.33706 18.1111Q3.28247 18.0294 3.23616 17.9428Q3.18984 17.8561 3.15224 17.7654Q3.11464 17.6746 3.08612 17.5806Q3.0576 17.4865 3.03843 17.3902Q3.01926 17.2938 3.00963 17.196Q3 17.0983 3 17Z">
+				<GeometryDrawing.Pen>
+					<Pen Brush="{DynamicResource Brush/Icon}" Thickness="2" LineCap="Round" LineJoin="Round" MiterLimit="4"/>
+				</GeometryDrawing.Pen>
+			</GeometryDrawing>
+			<GeometryDrawing Geometry="F1 M8 10L9 10L9 14">
+				<GeometryDrawing.Pen>
+					<Pen Brush="{DynamicResource Brush/Icon}" Thickness="2" LineCap="Round" LineJoin="Round" MiterLimit="4"/>
+				</GeometryDrawing.Pen>
+			</GeometryDrawing>
+			<GeometryDrawing Geometry="F1 M15 10L16 10L16 14">
+				<GeometryDrawing.Pen>
+					<Pen Brush="{DynamicResource Brush/Icon}" Thickness="2" LineCap="Round" LineJoin="Round" MiterLimit="4"/>
+				</GeometryDrawing.Pen>
+			</GeometryDrawing>
+			<GeometryDrawing Geometry="F1 M12 10.5L12 10.51">
+				<GeometryDrawing.Pen>
+					<Pen Brush="{DynamicResource Brush/Icon}" Thickness="2" LineCap="Round" LineJoin="Round" MiterLimit="4"/>
+				</GeometryDrawing.Pen>
+			</GeometryDrawing>
+			<GeometryDrawing Geometry="F1 M12 13.5L12 13.51">
+				<GeometryDrawing.Pen>
+					<Pen Brush="{DynamicResource Brush/Icon}" Thickness="2" LineCap="Round" LineJoin="Round" MiterLimit="4"/>
+				</GeometryDrawing.Pen>
+			</GeometryDrawing>
+		</DrawingGroup>
+	</DrawingImage>
+	
 	<DrawingImage x:Key="Image/Icon.RotateLeft" Drawing="{StaticResource Drawing/Icon.RotateLeft}"/>
 	<DrawingImage x:Key="Image/Icon.RotateRight" Drawing="{StaticResource Drawing/Icon.RotateRight}"/>
 	

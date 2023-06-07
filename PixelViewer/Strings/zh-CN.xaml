@@ -254,6 +254,7 @@
 	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV 至 RGB 转换</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (Ctrl+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">缩小 (Ctrl-)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomToOriginalImageSize">缩放至 100% (Ctrl+1)</sys:String>
 
 	<!-- YuvToBgraConverter -->
 	<sys:String x:Key="String/YuvToBgraConverter.BT.656">BT.656 (SDTV，NTSC 标准)</sys:String>

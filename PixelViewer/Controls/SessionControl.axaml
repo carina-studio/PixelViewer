@@ -19,13 +19,14 @@
 			 xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.SessionControl"
-			 Background="{DynamicResource Brush/Window.Background}">
+			 Background="{DynamicResource Brush/Window.Background}"
+             Name="root">
 	
 	<!-- Resources -->
 	<UserControl.Resources>
 
 		<!-- Evaluate image dimensions -->
-		<ContextMenu x:Key="evaluateImageDimensionsMenu" PlacementMode="Bottom">
+		<ContextMenu x:Key="evaluateImageDimensionsMenu" Placement="Bottom">
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Unknown}" Header="{DynamicResource String/AspectRatio.Unknown}"/>
 			<Separator/>
 			<MenuItem Command="{Binding EvaluateImageDimensionsCommand}" CommandParameter="{x:Static appMedia:AspectRatio.Ratio_4x3}" Header="4:3"/>
@@ -147,6 +148,11 @@
 								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
 						</ToggleButton>
+						
+						<!-- Zoom to 100% -->
+						<Button Classes="ToolBar_Button" Command="{Binding #root.ZoomToOriginalImageSize}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomToOriginalImageSize}">
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.OneToOne}"/>
+						</Button>
 
 						<!-- Zoom-out -->
 						<RepeatButton Name="zoomOutButton" Classes="ToolBar_RepeatButton" Command="{Binding ZoomOutCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.ZoomOut}">

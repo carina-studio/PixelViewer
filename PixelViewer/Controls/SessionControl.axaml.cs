@@ -1735,4 +1735,16 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// Status bar state.
 	/// </summary>
 	public StatusBarState StatusBarState => this.GetValue(StatusBarStateProperty);
+
+
+	/// <summary>
+	/// Zoom image to 100%.
+	/// </summary>
+	public void ZoomToOriginalImageSize()
+	{
+		if (this.DataContext is not Session session)
+			return;
+		session.FitImageToViewport = false;
+		session.ZoomToCommand.TryExecute(1.0);
+	}
 }

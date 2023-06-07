@@ -11,5 +11,6 @@
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在 Finder 中顯示檔案</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (⌘+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">縮小 (⌘-)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomToOriginalImageSize">縮放至 100% (⌘1)</sys:String>
 
 </ResourceDictionary>
