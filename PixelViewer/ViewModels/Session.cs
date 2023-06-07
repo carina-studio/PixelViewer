@@ -2612,11 +2612,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get or set <see cref="IImageRenderer"/> for rendering image from current source file.
 	/// </summary>
+	// ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 	public IImageRenderer ImageRenderer
 	{
 		get => this.GetValue(ImageRendererProperty).AsNonNull();
-		set => this.SetValue(ImageRendererProperty, value.AsNonNull());
+		set => this.SetValue(ImageRendererProperty, value ?? this.SelectDefaultImageRenderer());
 	}
+	// ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 
 
 	/// <summary>

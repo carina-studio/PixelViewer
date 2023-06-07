@@ -425,12 +425,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			if (this.DataContext is not Session session)
 				return;
-			if (useSmallRenderedImage)
-				this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.LowQuality);
+			if (this.useSmallRenderedImage)
+				this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.None);
 			else
 			{
 				var image = this.GetValue(EffectiveRenderedImageProperty);
-				if (image != null)
+				if (image is not null)
 				{
 					// [Workaround] Make sure that instance is valid.
 					try
@@ -442,13 +442,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 						image = null;
 					}
 				}
-				if (image != null)
+				if (image is not null)
 				{
 					var displaySize = session.ImageDisplaySize;
-					if (image.Size.Width >= displaySize.Width || image.Size.Height >= displaySize.Height)
+					if (image.Size.Width > displaySize.Width || image.Size.Height > displaySize.Height)
 						this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.HighQuality);
 					else
-						this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.LowQuality);
+						this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.None);
 				}
 			}
 		});
