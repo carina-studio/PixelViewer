@@ -708,7 +708,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
 	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
 	static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new();
-	static readonly TimeSpan ZoomAnimationDuration = TimeSpan.FromMilliseconds(500);
 
 
 	// Fields.
@@ -5702,8 +5701,8 @@ class Session : ViewModel<IAppSuiteApplication>
 					this.updateImageDisplaySizeAction.Execute();
 					this.CompleteZooming(true);
 				};
-				it.Duration = ZoomAnimationDuration;
-				it.Interpolator = Interpolators.Deceleration;
+				it.Duration = TimeSpan.FromMilliseconds(this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.ZoomAnimationDuration));
+				it.Interpolator = Interpolators.FastDeceleration;
 				it.ProgressChanged += (_, _) =>
 				{
 					this.SetValue(ImageDisplayScaleProperty, it.Value);

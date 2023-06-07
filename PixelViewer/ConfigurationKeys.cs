@@ -24,6 +24,10 @@ namespace Carina.PixelViewer
         /// Sensitivity of vibrance adjustment.
         /// </summary>
         public static readonly SettingKey<double> VibranceAdjustmentSensitivity = new(nameof(VibranceAdjustmentSensitivity), 0.75);
+        /// <summary>
+        /// Duration of zoom animation in milliseconds.
+        /// </summary>
+        public static readonly SettingKey<int> ZoomAnimationDuration = new(nameof(ZoomAnimationDuration), 800);
 
 
         // Constructor.
