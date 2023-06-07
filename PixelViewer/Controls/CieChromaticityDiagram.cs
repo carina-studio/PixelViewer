@@ -569,25 +569,25 @@ class CieChromaticityDiagram : Control
 
 
     /// <summary>
-    /// Get or set brush to draw axises.
+    /// Get or set brush to draw axis.
     /// </summary>
     public IBrush? AxisBrush
     {
-        get => this.GetValue<IBrush?>(AxisBrushProperty);
-        set => this.SetValue<IBrush?>(AxisBrushProperty, value);
+        get => this.GetValue(AxisBrushProperty);
+        set => this.SetValue(AxisBrushProperty, value);
     }
 
 
     /// <summary>
     /// Get list of <see cref="CieChromaticity"/> to be shown in diagram.
     /// </summary>
-    public IList<CieChromaticity> Chromaticities { get => this.chromaticities; }
+    public IList<CieChromaticity> Chromaticities => this.chromaticities;
 
 
     /// <summary>
     /// Get list of <see cref="CieChromaticityGamut"/> to be shown in diagram.
     /// </summary>
-    public IList<CieChromaticityGamut> ChromaticityGamuts { get => this.chromaticityGamuts; }
+    public IList<CieChromaticityGamut> ChromaticityGamuts => this.chromaticityGamuts;
 
 
     /// <summary>
@@ -595,8 +595,8 @@ class CieChromaticityDiagram : Control
     /// </summary>
     public IBrush? DiagramBorderBrush
     {
-        get => this.GetValue<IBrush?>(DiagramBorderBrushProperty);
-        set => this.SetValue<IBrush?>(DiagramBorderBrushProperty, value);
+        get => this.GetValue(DiagramBorderBrushProperty);
+        set => this.SetValue(DiagramBorderBrushProperty, value);
     }
 
 
@@ -605,8 +605,8 @@ class CieChromaticityDiagram : Control
     /// </summary>
     public double FontSize
     {
-        get => this.GetValue<double>(FontSizeProperty);
-        set => this.SetValue<double>(FontSizeProperty, value);
+        get => this.GetValue(FontSizeProperty);
+        set => this.SetValue(FontSizeProperty, value);
     }
 
 
@@ -615,8 +615,8 @@ class CieChromaticityDiagram : Control
     /// </summary>
     public IBrush? GridBrush
     {
-        get => this.GetValue<IBrush?>(GridBrushProperty);
-        set => this.SetValue<IBrush?>(GridBrushProperty, value);
+        get => this.GetValue(GridBrushProperty);
+        set => this.SetValue(GridBrushProperty, value);
     }
 
 
@@ -789,7 +789,7 @@ class CieChromaticityDiagram : Control
                 this.gridPen = new Pen(brush);
         }
 
-        // draw axises
+        // draw axis
         var originPoint = XYToControlCoordinate(width, height, 0, 0);
         context.DrawLine(this.axisPen!, new Point(originPoint.X, 0), new Point(originPoint.X, height));
         context.DrawLine(this.axisPen!, new Point(0, originPoint.Y), new Point(width, originPoint.Y));
@@ -907,8 +907,8 @@ class CieChromaticity : AvaloniaObject
     /// </summary>
     public IPen? BorderPen
     {
-        get => this.GetValue<IPen?>(BorderPenProperty);
-        set => this.SetValue<IPen?>(BorderPenProperty, value);
+        get => this.GetValue(BorderPenProperty);
+        set => this.SetValue(BorderPenProperty, value);
     }
 
 
@@ -917,8 +917,8 @@ class CieChromaticity : AvaloniaObject
     /// </summary>
     public double X
     {
-        get => this.GetValue<double>(XProperty);
-        set => this.SetValue<double>(XProperty, value);
+        get => this.GetValue(XProperty);
+        set => this.SetValue(XProperty, value);
     }
 
 
@@ -927,8 +927,8 @@ class CieChromaticity : AvaloniaObject
     /// </summary>
     public double Y
     {
-        get => this.GetValue<double>(YProperty);
-        set => this.SetValue<double>(YProperty, value);
+        get => this.GetValue(YProperty);
+        set => this.SetValue(YProperty, value);
     }
 }
 
@@ -953,8 +953,8 @@ class CieChromaticityGamut : AvaloniaObject
     /// </summary>
     public IPen? BorderPen
     {
-        get => this.GetValue<IPen?>(BorderPenProperty);
-        set => this.SetValue<IPen?>(BorderPenProperty, value);
+        get => this.GetValue(BorderPenProperty);
+        set => this.SetValue(BorderPenProperty, value);
     }
 
 
@@ -963,7 +963,7 @@ class CieChromaticityGamut : AvaloniaObject
     /// </summary>
     public Media.ColorSpace ColorSpace
     {
-        get => this.GetValue<Media.ColorSpace>(ColorSpaceProperty);
-        set => this.SetValue<Media.ColorSpace>(ColorSpaceProperty, value);
+        get => this.GetValue(ColorSpaceProperty);
+        set => this.SetValue(ColorSpaceProperty, value);
     }
 }

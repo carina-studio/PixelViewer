@@ -61,8 +61,8 @@ class NormalizedTransferFunctionsDiagram : Control
     /// </summary>
     public IBrush? AxisBrush
     {
-        get => this.GetValue<IBrush?>(AxisBrushProperty);
-        set => this.SetValue<IBrush?>(AxisBrushProperty, value);
+        get => this.GetValue(AxisBrushProperty);
+        set => this.SetValue(AxisBrushProperty, value);
     }
 
 
@@ -71,8 +71,8 @@ class NormalizedTransferFunctionsDiagram : Control
     /// </summary>
     public IBrush? GridBrush
     {
-        get => this.GetValue<IBrush?>(GridBrushProperty);
-        set => this.SetValue<IBrush?>(GridBrushProperty, value);
+        get => this.GetValue(GridBrushProperty);
+        set => this.SetValue(GridBrushProperty, value);
     }
 
 
@@ -215,7 +215,7 @@ class NormalizedTransferFunctionsDiagram : Control
     /// <summary>
     /// Get list of <see cref="NormalizedTransferFunction"/> to be shown in this diagram.
     /// </summary>
-    public IList<NormalizedTransferFunction> TransferFunctions { get => this.transferFuncs; }
+    public IList<NormalizedTransferFunction> TransferFunctions => this.transferFuncs;
 }
 
 
@@ -247,8 +247,8 @@ class NormalizedTransferFunction : AvaloniaObject
     /// </summary>
     public IPen? Stroke
     {
-        get => this.GetValue<IPen?>(StrokeProperty);
-        set => this.SetValue<IPen?>(StrokeProperty, value);
+        get => this.GetValue(StrokeProperty);
+        set => this.SetValue(StrokeProperty, value);
     }
 
 

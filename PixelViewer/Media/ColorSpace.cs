@@ -19,6 +19,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Carina.PixelViewer.Media
 {
@@ -59,7 +60,7 @@ namespace Carina.PixelViewer.Media
                     this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
                 }
                 else
-                    this.matrix = new long[0];
+                    this.matrix = Array.Empty<long>();
                 this.skipSrcNumericalTransfer = skipSrcNumericalTransfer;
                 this.skipDestNumericalTransfer = skipDestNumericalTransfer;
             }
@@ -496,14 +497,14 @@ namespace Carina.PixelViewer.Media
             if (rhs == null)
                 return -1;
             if (lhs.IsBuiltIn)
-                return rhs.IsBuiltIn ? string.Compare(lhs.Name, rhs.Name) : -1;
+                return rhs.IsBuiltIn ? string.CompareOrdinal(lhs.Name, rhs.Name) : -1;
             if (rhs.IsBuiltIn)
                 return 1;
             if (lhs.IsSystemDefined)
-                return rhs.IsSystemDefined ? string.Compare(lhs.Name, rhs.Name) : -1;
+                return rhs.IsSystemDefined ? string.CompareOrdinal(lhs.Name, rhs.Name) : -1;
             if (rhs.IsSystemDefined)
                 return 1;
-            return string.Compare(lhs?.Name, rhs?.Name);
+            return string.CompareOrdinal(lhs.Name, rhs.Name);
         }
 
 
@@ -665,7 +666,7 @@ namespace Carina.PixelViewer.Media
                         }
                         catch (Exception ex)
                         {
-                            logger?.LogError(ex, "Unable to get system color space on Windows 10+.");
+                            logger?.LogError(ex, "Unable to get system color space on Windows 10+");
                         }
                     }
 
@@ -720,7 +721,7 @@ namespace Carina.PixelViewer.Media
                     });
                 }
                 throw new NotSupportedException();
-            });
+            }, cancellationToken);
 
             // use built-in color space instead
             foreach (var builtInColorSpace in builtInColorSpaces.Values)
@@ -734,7 +735,7 @@ namespace Carina.PixelViewer.Media
         }
 
 
-        // [Workaroung] Apply inverse-HLG transfer.
+        // [Workaround] Apply inverse-HLG transfer.
         // Please refer to https://en.wikipedia.org/wiki/Hybrid_log%E2%80%93gamma
         static double HlgNumericalTransferFromLinear(double value)
         {
@@ -748,7 +749,7 @@ namespace Carina.PixelViewer.Media
         }
 
 
-        // [Workaroung] Apply HLG transfer.
+        // [Workaround] Apply HLG transfer.
         // Please refer to https://en.wikipedia.org/wiki/Hybrid_log%E2%80%93gamma
         static double HlgNumericalTransferToLinear(double value)
         {
@@ -788,28 +789,28 @@ namespace Carina.PixelViewer.Media
                 {
                     if (Directory.Exists(directory))
                         return Directory.GetFiles(directory, "*.json");
-                    return new string[0];
+                    return Array.Empty<string>();
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"Failed to get color space files in '{directory}'");
-                    return new string[0];
+                    logger.LogError(ex, "Failed to get color space files in '{directory}'", directory);
+                    return Array.Empty<string>();
                 }
             });
-            logger.LogDebug($"Found {fileNames.Length} color space files");
+            logger.LogDebug("Found {count} color space files", fileNames.Length);
 
             // load color space files
             foreach (var fileName in fileNames)
             {
-                logger.LogTrace($"Load color space file '{fileName}'");
-                var colorSpace = (ColorSpace?)null;
+                logger.LogTrace("Load color space file '{fileName}'", fileName);
+                ColorSpace? colorSpace;
                 try
                 {
                     colorSpace = await LoadFromFileAsync(fileName);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"Failed to load color space file '{fileName}'");
+                    logger.LogError(ex, "Failed to load color space file '{fileName}'", fileName);
                     continue;
                 }
                 if (userDefinedColorSpaces.TryAdd(colorSpace.Name, colorSpace))
@@ -819,14 +820,14 @@ namespace Carina.PixelViewer.Media
                     userDefinedColorSpaceList.Add(colorSpace);
                 }
             }
-            logger.LogDebug($"{userDefinedColorSpaces.Count} color space(s) loaded");
+            logger.LogDebug("{count} color space(s) loaded", userDefinedColorSpaces.Count);
         }
         
 
         /// <summary>
         /// Check whether the source of color space is <see cref="ColorSpaceSource.BuiltIn"/> or not.
         /// </summary>
-        public bool IsBuiltIn { get => this.Source == ColorSpaceSource.BuiltIn; }
+        public bool IsBuiltIn => this.Source == ColorSpaceSource.BuiltIn;
 
 
         /// <summary>
@@ -844,10 +845,10 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Check whether the source of color space is <see cref="ColorSpaceSource.Embedded"/> or not.
         /// </summary>
-        public bool IsEmbedded { get => this.Source == ColorSpaceSource.Embedded; }
+        public bool IsEmbedded => this.Source == ColorSpaceSource.Embedded;
 
 
-        // [Workaroung] Check whether given transfer function is HLG or not.
+        // [Workaround] Check whether given transfer function is HLG or not.
         // Please refer to third_party/skcms/skcms.cc in Skia source code.
         static bool IsHlgTransferFunc(SKColorSpaceTransferFn fn) =>
             fn.G < 0 && Math.Abs((int)fn.G - SKColorSpaceTransferFn.Hlg.G) <= 0.0000001;
@@ -867,7 +868,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Check whether the source of color space is <see cref="ColorSpaceSource.UserDefined"/> or not.
         /// </summary>
-        public bool IsUserDefined { get => this.Source == ColorSpaceSource.UserDefined; }
+        public bool IsUserDefined => this.Source == ColorSpaceSource.UserDefined;
 
 
         /// <summary>
@@ -879,7 +880,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Check whether the source of color space is <see cref="ColorSpaceSource.SystemDefined"/> or not.
         /// </summary>
-        public bool IsSystemDefined { get => this.Source == ColorSpaceSource.SystemDefined; }
+        public bool IsSystemDefined => this.Source == ColorSpaceSource.SystemDefined;
 
 
         /// <summary>
@@ -943,7 +944,7 @@ namespace Carina.PixelViewer.Media
                 }
 
                 // get matrix to XYZ D50
-                var colorSpaceXyz = new SKColorSpaceXyz();
+                SKColorSpaceXyz colorSpaceXyz;
                 if (rootObject.TryGetProperty("MatrixToXyzD50", out jsonProperty) 
                     && jsonProperty.ValueKind == JsonValueKind.Array
                     && jsonProperty.GetArrayLength() == 9)
@@ -960,7 +961,7 @@ namespace Carina.PixelViewer.Media
                 // create color space
                 return new ColorSpace(ColorSpaceSource.UserDefined, name, customName, transferFunc, colorSpaceXyz, whitePoint, null);
             });
-        });
+        }, cancellationToken);
 
 
         // Load color space from ICC profile.
@@ -1119,7 +1120,7 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
-        /// Load ICC profile and create <see cref"ColorSpace"/>.
+        /// Load ICC profile and create <see cref="ColorSpace"/>.
         /// </summary>
         /// <param name="stream">Stream to read ICC profile.</param>
         /// <param name="source">Source of color space.</param>
@@ -1130,11 +1131,11 @@ namespace Carina.PixelViewer.Media
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
             return LoadFromIccProfile((stream as FileStream)?.Name, stream, source);
-        });
+        }, cancellationToken);
 
 
         /// <summary>
-        /// Load ICC profile and create <see cref"ColorSpace"/>.
+        /// Load ICC profile and create <see cref="ColorSpace"/>.
         /// </summary>
         /// <param name="fileName">File name of ICC profile.</param>
         /// <param name="cancellationToken">Cancellation token.</param>
@@ -1150,7 +1151,7 @@ namespace Carina.PixelViewer.Media
                 throw new IOException($"Unable to open file '{fileName}'.");
             }
             return stream.Use(it => LoadFromIccProfile(fileName, it, ColorSpaceSource.UserDefined));
-        });
+        }, cancellationToken);
         
 
         /// <summary>
@@ -1293,7 +1294,7 @@ namespace Carina.PixelViewer.Media
 
 
         // Quantize matrix of XYZ color space.
-        static long[] Quantize(SKColorSpaceXyz matrix) => new long[9]
+        static long[] Quantize(SKColorSpaceXyz matrix) => new[]
         {
             (long)((double)matrix[0, 0] * QuantizationSteps + 0.5), (long)((double)matrix[1, 0] * QuantizationSteps + 0.5), (long)((double)matrix[2, 0] * QuantizationSteps + 0.5),
             (long)((double)matrix[0, 1] * QuantizationSteps + 0.5), (long)((double)matrix[1, 1] * QuantizationSteps + 0.5), (long)((double)matrix[2, 1] * QuantizationSteps + 0.5),
@@ -1511,7 +1512,7 @@ namespace Carina.PixelViewer.Media
                     throw new TaskCanceledException();
                 throw new IOException($"Unable to open file '{fileName}' to save color space.");
             }
-            logger?.LogTrace($"Save color space '{this.Name}' to '{fileName}'");
+            logger?.LogTrace("Save color space '{name}' to '{fileName}'", this.Name, fileName);
             using (stream)
             {
                 using var jsonWriter = new Utf8JsonWriter(stream, new JsonWriterOptions(){ Indented = true });
@@ -1552,7 +1553,7 @@ namespace Carina.PixelViewer.Media
                 });
                 jsonWriter.WriteEndObject();
             }
-        });
+        }, cancellationToken);
 
 
         /// <summary>
