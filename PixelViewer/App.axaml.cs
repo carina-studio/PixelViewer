@@ -30,6 +30,26 @@ namespace Carina.PixelViewer
 	/// </summary>
 	class App : AppSuiteApplication
 	{
+		// Source of change list.
+		class ChangeListSource : DocumentSource
+		{
+			public ChangeListSource(App app) : base(app)
+			{ }
+			public override IList<ApplicationCulture> SupportedCultures => new[]
+			{
+				ApplicationCulture.EN_US,
+				ApplicationCulture.ZH_CN,
+				ApplicationCulture.ZH_TW,
+			};
+			public override Uri Uri => this.Culture switch
+			{
+				ApplicationCulture.ZH_CN => this.Application.CreateAvaloniaResourceUri("/ChangeList-zh-CN.md"),
+				ApplicationCulture.ZH_TW => this.Application.CreateAvaloniaResourceUri("/ChangeList-zh-TW.md"),
+				_ => this.Application.CreateAvaloniaResourceUri("/ChangeList.md"),
+			};
+		}
+		
+		
 		// Source of document of Privacy Policy.
 		class PrivacyPolicySource : DocumentSource
 		{
@@ -90,16 +110,18 @@ namespace Carina.PixelViewer
 
 		/// <inheritdoc/>
 		protected override bool AllowMultipleMainWindows => true;
+		
+		
+		/// <inheritdoc/>
+		public override DocumentSource ChangeList => new ChangeListSource(this);
 
 
 		/// <inheritdoc/>
-        public override ApplicationInfo CreateApplicationInfoViewModel() =>
-			new AppInfo();
+        public override ApplicationInfo CreateApplicationInfoViewModel() => new AppInfo();
 
 
         /// <inheritdoc/>
-        public override ApplicationOptions CreateApplicationOptionsViewModel() =>
-			new AppOptions();
+        public override ApplicationOptions CreateApplicationOptionsViewModel() => new AppOptions();
 
 
         /// <inheritdoc/>

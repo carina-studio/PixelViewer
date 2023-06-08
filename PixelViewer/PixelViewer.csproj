@@ -95,6 +95,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<AvaloniaResource Include="ChangeList.md" />
+		<AvaloniaResource Include="ChangeList-zh-CN.md" />
+		<AvaloniaResource Include="ChangeList-zh-TW.md" />
 		<AvaloniaResource Include="PixelViewer.ico" />
 		<AvaloniaResource Include="Resources/PrivacyPolicy.md" />
 		<AvaloniaResource Include="Resources/PrivacyPolicy-zh-TW.md" />
@@ -129,12 +132,6 @@
 		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
 			<_Parameter1>$(AssemblyName).Test</_Parameter1>
 		</AssemblyAttribute>
-	</ItemGroup>
-	
-	<ItemGroup>
-		<EmbeddedResource Include="ChangeList.json" />
-		<EmbeddedResource Include="ChangeList-zh-CN.json" />
-		<EmbeddedResource Include="ChangeList-zh-TW.json" />
 	</ItemGroup>
 	
 </Project>
