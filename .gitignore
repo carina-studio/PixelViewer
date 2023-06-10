@@ -5,6 +5,7 @@ obj
 bin
 BundleArtifacts
 AppPackages
+PixelViewer.sln.DotSettings.user
 /PixelViewer/PixelViewer.csproj.user
 /Windows10Installer/Windows10Installer.wapproj.user
 /Windows10Installer/Package.StoreAssociation.xml
