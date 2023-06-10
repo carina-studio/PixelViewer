@@ -21,18 +21,8 @@ namespace Carina.PixelViewer.Media
 		/// <param name="pixelStride">Pixel stride.</param>
 		/// <param name="minEffectiveBits">Minimum effective bits for each pixel.</param>
 		/// <param name="maxEffectiveBits">Maximum effective bits for each pixel.</param>
-		public ImagePlaneDescriptor(int pixelStride, int minEffectiveBits, int maxEffectiveBits) : this(pixelStride, minEffectiveBits, maxEffectiveBits, false)
-		{ }
-
-
-		/// <summary>
-		/// Initialize new <see cref="ImagePlaneDescriptor"/> instance.
-		/// </summary>
-		/// <param name="pixelStride">Pixel stride.</param>
-		/// <param name="minEffectiveBits">Minimum effective bits for each pixel.</param>
-		/// <param name="maxEffectiveBits">Maximum effective bits for each pixel.</param>
 		/// <param name="adjustableBlackWhiteLevels">Whether black/white levels are adjustable or not.</param>
-		public ImagePlaneDescriptor(int pixelStride, int minEffectiveBits, int maxEffectiveBits, bool adjustableBlackWhiteLevels)
+		public ImagePlaneDescriptor(int pixelStride, int minEffectiveBits, int maxEffectiveBits, bool adjustableBlackWhiteLevels = false)
 		{
 			if (pixelStride < 0)
 				throw new ArgumentOutOfRangeException(nameof(pixelStride));
@@ -56,19 +46,19 @@ namespace Carina.PixelViewer.Media
 		/// <summary>
 		/// Check whether effective bits is adjustable or not.
 		/// </summary>
-		public bool IsAdjustableEffectiveBits { get => this.MinEffectiveBits < this.MaxEffectiveBits; }
+		public bool IsAdjustableEffectiveBits => this.MinEffectiveBits < this.MaxEffectiveBits;
 
 
 		/// <summary>
 		/// Check whether pixel stride is adjustable or not.
 		/// </summary>
-		public bool IsAdjustablePixelStride { get => this.PixelStride > 0; }
+		public bool IsAdjustablePixelStride => this.PixelStride > 0;
 
 
 		/// <summary>
 		/// Check whether data of pixels are packed into bits instead of bytes.
 		/// </summary>
-		public bool IsPackedBits { get => this.PixelStride == 0; }
+		public bool IsPackedBits => this.PixelStride == 0;
 
 
 		/// <summary>

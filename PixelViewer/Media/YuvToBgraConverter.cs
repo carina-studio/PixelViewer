@@ -12,16 +12,13 @@ namespace Carina.PixelViewer.Media
     unsafe class YuvToBgraConverter
     {
         // Static fields.
-        static readonly SortedObservableList<YuvToBgraConverter> Converters = new SortedObservableList<YuvToBgraConverter>((x, y) =>
-        {
-            return x?.Name?.CompareTo(y?.Name) ?? -1;
-        });
+        static readonly SortedObservableList<YuvToBgraConverter> Converters = new((x, y) => string.Compare(x.Name, y.Name, StringComparison.InvariantCulture));
 
 
         /// <summary>
         /// ITU-R BT.2020.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_2020 = new YuvToBgraConverter("BT.2020", ColorSpace.BT_2020,
+        public static readonly YuvToBgraConverter BT_2020 = new("BT.2020", ColorSpace.BT_2020,
             -16, -128, -128,
             1.1632,
             0, 1.6794,
@@ -31,7 +28,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.601.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_601 = new YuvToBgraConverter("BT.601", ColorSpace.BT_601_625Line,
+        public static readonly YuvToBgraConverter BT_601 = new("BT.601", ColorSpace.BT_601_625Line,
             0, -128, -128,
             1,
             0, 1.402,
@@ -41,7 +38,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.656.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_656 = new YuvToBgraConverter("BT.656", ColorSpace.BT_601_625Line,
+        public static readonly YuvToBgraConverter BT_656 = new("BT.656", ColorSpace.BT_601_625Line,
             -16, -128, -128,
             1.164,
             0, 1.596,
@@ -51,7 +48,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// ITU-R BT.709.
         /// </summary>
-        public static readonly YuvToBgraConverter BT_709 = new YuvToBgraConverter("BT.709", ColorSpace.Srgb,
+        public static readonly YuvToBgraConverter BT_709 = new("BT.709", ColorSpace.Srgb,
             0, -128, -128,
             1,
             0, 1.5748,
@@ -105,7 +102,6 @@ namespace Carina.PixelViewer.Media
             // calculate quantized factors for 8-bit integer
             var yShift8 = yShift;
             var uShift8 = uShift;
-            var vShift8 = vShift;
             var yFactor8 = (long)(yFactor * 256 + 0.5);
             var uFactorForR8 = (long)(uFactorForR * 256 + 0.5);
             var vFactorForR8 = (long)(vFactorForR * 256 + 0.5);
@@ -117,7 +113,6 @@ namespace Carina.PixelViewer.Media
             // calculate quantized factors for 16-bit integer
             var yShift16 = yShift << 8;
             var uShift16 = uShift << 8;
-            var vShift16 = vShift << 8;
             var yFactor16 = (long)(yFactor * 65536 + 0.5);
             var uFactorForR16 = (long)(uFactorForR * 65536 + 0.5);
             var vFactorForR16 = (long)(vFactorForR * 65536 + 0.5);
@@ -127,7 +122,6 @@ namespace Carina.PixelViewer.Media
             var vFactorForB16 = (long)(vFactorForB * 65536 + 0.5);
 
             // pre-calculate coefficient for 8-bit integer
-            unsafe
             {
                 var rCoeffTable1 = this.rCoeff8Table1;
                 var rCoeffTable2 = this.rCoeff8Table2;
@@ -150,7 +144,6 @@ namespace Carina.PixelViewer.Media
             }
 
             // pre-calculate coefficient for 16-bit integer
-            unsafe
             {
                 var rCoeffTable1 = this.rCoeff16Table1;
                 var rCoeffTable2 = this.rCoeff16Table2;

@@ -1,7 +1,5 @@
 ﻿using Carina.PixelViewer.Runtime.InteropServices;
-using CarinaStudio;
 using CarinaStudio.Configuration;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -30,7 +28,6 @@ namespace Carina.PixelViewer.Media
 		// Static fields.
 		static readonly double* colorNormalizingTable16 = (double*)System.Runtime.InteropServices.NativeMemory.Alloc(65536 * sizeof(double));
 		static readonly double* colorNormalizingTable8 = (double*)System.Runtime.InteropServices.NativeMemory.Alloc(256 * sizeof(double));
-		static readonly ILogger logger = App.Current.LoggerFactory.CreateLogger(nameof(ImageProcessing));
 
 
 		// Static initializer.
@@ -133,13 +130,13 @@ namespace Carina.PixelViewer.Media
 		/// <summary>
 		/// Get pointer to access table directly for 16-bit color normalization.
 		/// </summary>
-		public static double* ColorNormalizingTableUnsafe16 { get => colorNormalizingTable16; }
+		public static double* ColorNormalizingTableUnsafe16 => colorNormalizingTable16;
 
 
 		/// <summary>
 		/// Get pointer to access table directly for 8-bit color normalization.
 		/// </summary>
-		public static double* ColorNormalizingTableUnsafe8 { get => colorNormalizingTable8; }
+		public static double* ColorNormalizingTableUnsafe8 => colorNormalizingTable8;
 
 
 		/// <summary>
@@ -482,9 +479,9 @@ namespace Carina.PixelViewer.Media
 		/// <param name="body">Body of loop.</param>
 		public static void ParallelFor(int fromInclusive, int toExclusive, Action<int> body)
 		{
-			var processorRatio = App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.MaxProcessorRatioOfParallImageProcessing) ?? 0.5;
+			var processorRatio = App.CurrentOrNull?.Configuration.GetValueOrDefault(ConfigurationKeys.MaxProcessorRatioOfParallImageProcessing) ?? 0.5;
 			var degree = processorRatio > 0 ? Math.Max(1, (int)(Environment.ProcessorCount * processorRatio + 0.5)) : 1;
-			Parallel.For(fromInclusive, toExclusive, new ParallelOptions(){ MaxDegreeOfParallelism = degree }, body);
+			Parallel.For(fromInclusive, toExclusive, new ParallelOptions { MaxDegreeOfParallelism = degree }, body);
 		}
 
 

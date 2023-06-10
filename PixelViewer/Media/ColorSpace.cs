@@ -614,10 +614,10 @@ namespace Carina.PixelViewer.Media
             // get screen color space
             var systemColorSpace = await Task.Run(() =>
             {
-                if (CarinaStudio.Platform.IsWindows)
+                if (Platform.IsWindows)
                 {
                     // use new API to get color profile
-                    if (CarinaStudio.Platform.IsWindows10OrAbove)
+                    if (Platform.IsWindows10OrAbove)
                     {
                         try
                         {
@@ -874,7 +874,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Check whether system defined screen color space is supported or not. 
         /// </summary>
-        public static bool IsSystemScreenColorSpaceSupported { get; } = CarinaStudio.Platform.IsWindows || CarinaStudio.Platform.IsMacOS;
+        public static bool IsSystemScreenColorSpaceSupported { get; } = Platform.IsWindows || Platform.IsMacOS;
 
 
         /// <summary>

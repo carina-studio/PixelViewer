@@ -20,17 +20,15 @@ namespace Carina.PixelViewer.Media
 		class HolderImpl : BaseResourceHolder
 		{
 			// Fields.
-			public readonly IApplication Application;
 			public readonly FileStream BaseStream;
-			public readonly bool DeleteWhenReleasing;
+			readonly bool DeleteWhenReleasing;
 			public readonly ILogger Logger;
 
 			// Constructor.
 			public HolderImpl(IApplication app, string fileName, bool deleteWhenReleasing)
 			{
 				this.Logger = app.LoggerFactory.CreateLogger(nameof(FileImageDataSource));
-				this.Logger.LogDebug($"Create source of '{fileName}'");
-				this.Application = app;
+				this.Logger.LogDebug("Create source of '{fileName}'", fileName);
 				this.BaseStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 				this.DeleteWhenReleasing = deleteWhenReleasing;
 			}
@@ -39,7 +37,7 @@ namespace Carina.PixelViewer.Media
 			protected override void Release()
 			{
 				var fileName = this.BaseStream.Name;
-				this.Logger.LogDebug($"Release source of '{fileName}'");
+				this.Logger.LogDebug("Release source of '{fileName}'", fileName);
 				Global.RunWithoutError(this.BaseStream.Close);
 				if (this.DeleteWhenReleasing)
 				{
@@ -47,7 +45,7 @@ namespace Carina.PixelViewer.Media
 					{
 						if (System.IO.File.Exists(fileName))
 						{
-							this.Logger.LogTrace($"Delete file '{fileName}' when releasing");
+							this.Logger.LogTrace("Delete file '{fileName}' when releasing", fileName);
 							System.IO.File.Delete(fileName);
 						}
 					});
@@ -119,7 +117,7 @@ namespace Carina.PixelViewer.Media
 			// close all opened streams
 			if (disposing && this.openedStreams.IsNotEmpty())
 			{
-				this.logger.LogWarning($"Close {this.openedStreams.Count} opened stream(s) of '{this.FileName}'");
+				this.logger.LogWarning("Close {count} opened stream(s) of '{fileName}'", this.openedStreams.Count, this.FileName);
 				foreach (var streamRef in this.openedStreams.ToArray())
 				{
 					if (streamRef.TryGetTarget(out var stream))
@@ -172,7 +170,7 @@ namespace Carina.PixelViewer.Media
 					throw new TaskCanceledException();
 
 				// open stream
-				var fileStream = (FileStream?)null;
+				FileStream? fileStream;
 				try
                 {
 					fileStream = new FileStream(this.FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -184,7 +182,7 @@ namespace Carina.PixelViewer.Media
 					throw;
 				}
 				return new StreamImpl(this, fileStream);
-			});
+			}, token);
 
 			// check state
 			lock (this)
@@ -219,7 +217,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Size of image data.
-		public long Size { get => this.GetResourceHolder<HolderImpl>().BaseStream.Length; }
+		public long Size => this.GetResourceHolder<HolderImpl>().BaseStream.Length;
 
 
 		// To readable string.

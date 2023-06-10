@@ -58,10 +58,6 @@ namespace Carina.PixelViewer.Media
 	/// </summary>
 	static class BitmapBufferExtensions
 	{
-		// Function to convert color space.
-		unsafe delegate void ColorSpaceConversion(double* r, double* g, double* b);
-
-
 		// Fields.
 		static readonly ILogger? Logger = App.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapBufferExtensions));
 

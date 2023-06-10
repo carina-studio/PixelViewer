@@ -18,7 +18,7 @@ namespace Carina.PixelViewer.Media
             this.Extensions = new HashSet<string>(extensions).AsReadOnly();
             this.Id = id;
             this.Name = app.GetStringNonNull($"FileType.{id}", id);
-            app.StringsUpdated += (_, e) =>
+            app.StringsUpdated += (_, _) =>
             {
                 this.Name = app.GetStringNonNull($"FileType.{id}", id);
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));

@@ -42,7 +42,7 @@ namespace Carina.PixelViewer.Media.Profiles
         IList<uint> blackLevels = emptyBlackLevels;
         double blueColorGain = 1.0;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
-        ColorSpace colorSpace = Media.ColorSpace.Default;
+        ColorSpace colorSpace;
         long dataOffset;
         bool demosaicing = true;
         IList<int> effectiveBits = emptyEffectiveBits;

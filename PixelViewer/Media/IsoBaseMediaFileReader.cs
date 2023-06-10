@@ -41,7 +41,7 @@ class IsoBaseMediaFileReader
     /// <summary>
     /// Get type identifier of current box.
     /// </summary>
-    public uint CurrentBoxType { get => this.currentBoxType; }
+    public uint CurrentBoxType => this.currentBoxType;
 
 
     /// <summary>

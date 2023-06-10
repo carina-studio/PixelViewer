@@ -8,16 +8,17 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Carina.PixelViewer.Media
 {
     /// <summary>
-    /// Histograms generated from <see cref="IBimapBuffer"/>.
+    /// Histograms generated from <see cref="IBitmapBuffer"/>.
     /// </summary>
     class BitmapHistograms
     {
         // Static fields.
-        static readonly ILogger? Logger = AppSuiteApplication.CurrentOrNull?.LoggerFactory?.CreateLogger(nameof(BitmapHistograms));
+        static readonly ILogger? Logger = AppSuiteApplication.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapHistograms));
 
 
         // Fields.
@@ -199,7 +200,7 @@ namespace Carina.PixelViewer.Media
                     if (stopWatch != null)
                         Logger?.LogTrace("Take {ms} ms to create histograms for {width}x{height} {format} bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
                     return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
-                });
+                }, cancellationToken);
             }
             finally
             {
@@ -272,7 +273,7 @@ namespace Carina.PixelViewer.Media
                     if (stopWatch != null)
                         Logger?.LogTrace("Take {ms} ms to create histograms for {width}x{height} {format} bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
                     return new BitmapHistograms(bitmapBuffer.Width * bitmapBuffer.Height, red, green, blue, luminance);
-                });
+                }, cancellationToken);
             }
             finally
             {
@@ -296,25 +297,25 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Get highlight value of blue channel.
         /// </summary>
-        public int HighlightOfBlue { get => this.highlightOfBlue; }
+        public int HighlightOfBlue => this.highlightOfBlue;
 
 
         /// <summary>
         /// Get highlight value of green channel.
         /// </summary>
-        public int HighlightOfGreen { get => this.highlightOfGreen; }
+        public int HighlightOfGreen => this.highlightOfGreen;
 
 
         /// <summary>
         /// Get highlight value of luminance.
         /// </summary>
-        public int HighlightOfLuminance { get => this.highlightOfLuminance; }
+        public int HighlightOfLuminance => this.highlightOfLuminance;
 
 
         /// <summary>
         /// Get highlight value of red channel.
         /// </summary>
-        public int HighlightOfRed { get => this.highlightOfRed; }
+        public int HighlightOfRed => this.highlightOfRed;
 
 
         /// <summary>
@@ -332,97 +333,97 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Get maximum value of blue channel.
         /// </summary>
-        public int MaxOfBlue { get => this.maxOfBlue; }
+        public int MaxOfBlue => this.maxOfBlue;
 
 
         /// <summary>
         /// Get maximum value of green channel.
         /// </summary>
-        public int MaxOfGreen { get => this.maxOfGreen; }
+        public int MaxOfGreen => this.maxOfGreen;
 
 
         /// <summary>
         /// Get maximum value of luminance.
         /// </summary>
-        public int MaxOfLuminance { get => this.maxOfLuminance; }
+        public int MaxOfLuminance => this.maxOfLuminance;
 
 
         /// <summary>
         /// Get maximum value of red channel.
         /// </summary>
-        public int MaxOfRed { get => this.maxOfRed; }
+        public int MaxOfRed => this.maxOfRed;
 
 
         /// <summary>
         /// Get mean value of blue channel.
         /// </summary>
-        public double MeanOfBlue { get => this.meanOfBlue; }
+        public double MeanOfBlue => this.meanOfBlue;
 
 
         /// <summary>
         /// Get mean value of green channel.
         /// </summary>
-        public double MeanOfGreen { get => this.meanOfGreen; }
+        public double MeanOfGreen => this.meanOfGreen;
 
 
         /// <summary>
         /// Get mean value of luminance.
         /// </summary>
-        public double MeanOfLuminance { get => this.meanOfLuminance; }
+        public double MeanOfLuminance => this.meanOfLuminance;
 
 
         /// <summary>
         /// Get mean value of red channel.
         /// </summary>
-        public double MeanOfRed { get => this.meanOfRed; }
+        public double MeanOfRed => this.meanOfRed;
 
 
         /// <summary>
         /// Get median value of blue channel.
         /// </summary>
-        public int MedianOfBlue { get => this.medianOfBlue; }
+        public int MedianOfBlue => this.medianOfBlue;
 
 
         /// <summary>
         /// Get median value of green channel.
         /// </summary>
-        public int MedianOfGreen { get => this.medianOfGreen; }
+        public int MedianOfGreen => this.medianOfGreen;
 
 
         /// <summary>
         /// Get median value of luminance.
         /// </summary>
-        public int MedianOfLuminance { get => this.medianOfLuminance; }
+        public int MedianOfLuminance => this.medianOfLuminance;
 
 
         /// <summary>
         /// Get median value of red channel.
         /// </summary>
-        public int MedianOfRed { get => this.medianOfRed; }
+        public int MedianOfRed => this.medianOfRed;
 
 
         /// <summary>
         /// Get minimum value of blue channel.
         /// </summary>
-        public int MinOfBlue { get => this.minOfBlue; }
+        public int MinOfBlue => this.minOfBlue;
 
 
         /// <summary>
         /// Get minimum value of green channel.
         /// </summary>
-        public int MinOfGreen { get => this.minOfGreen; }
+        public int MinOfGreen => this.minOfGreen;
 
 
         /// <summary>
         /// Get minimum value of luminance.
         /// </summary>
-        public int MinOfLuminance { get => this.minOfLuminance; }
+        public int MinOfLuminance => this.minOfLuminance;
 
 
         /// <summary>
         /// Get minimum value of red channel.
         /// </summary>
-        public int MinOfRed { get => this.minOfRed; }
+        public int MinOfRed => this.minOfRed;
 
 
         /// <summary>
@@ -434,24 +435,24 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Get shadow value of blue channel.
         /// </summary>
-        public int ShadowOfBlue { get => this.shadowOfBlue; }
+        public int ShadowOfBlue => this.shadowOfBlue;
 
 
         /// <summary>
         /// Get shadow value of green channel.
         /// </summary>
-        public int ShadowOfGreen { get => this.shadowOfGreen; }
+        public int ShadowOfGreen => this.shadowOfGreen;
 
 
         /// <summary>
         /// Get shadow value of luminance.
         /// </summary>
-        public int ShadowOfLuminance { get => this.shadowOfLuminance; }
+        public int ShadowOfLuminance => this.shadowOfLuminance;
 
 
         /// <summary>
         /// Get shadow value of red channel.
         /// </summary>
-        public int ShadowOfRed { get => this.shadowOfRed; }
+        public int ShadowOfRed => this.shadowOfRed;
     }
 }

@@ -21,18 +21,10 @@ namespace Carina.PixelViewer.Media
 		// Static fields.
 		static readonly SortedList<string, ImageFormat> formatsByKeyword = new(Comparer<string>.Create((x, y) =>
 		{
-			if (x == null)
-			{
-				if (y == null)
-					return 0;
-				return 1;
-			}
-			if (y == null)
-				return -1;
 			var result = y.Length - x.Length;
 			if (result != 0)
 				return result;
-			return string.Compare(x, y, true);
+			return string.Compare(x, y, StringComparison.InvariantCultureIgnoreCase);
 		}));
 		static readonly Dictionary<string, ImageFormat> formatsByName = new();
 
@@ -43,7 +35,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="category">Category of format.</param>
 		/// <param name="name">Name.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
-		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor) : this(category, name, new ImagePlaneDescriptor[] { planeDescriptor }, new string[0])
+		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor) : this(category, name, new[] { planeDescriptor }, Array.Empty<string>())
 		{ }
 
 
@@ -54,7 +46,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="name">Name.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
 		/// <param name="keywords">Keywords.</param>
-		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, new ImagePlaneDescriptor[] { planeDescriptor }, keywords)
+		public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, new[] { planeDescriptor }, keywords)
 		{ }
 
 
@@ -65,7 +57,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="name">Name.</param>
 		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
-		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor }, new string[0])
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, hasMultiByteOrderings, new[] { planeDescriptor }, Array.Empty<string>())
 		{ }
 
 
@@ -77,7 +69,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 		/// <param name="planeDescriptor">Plane descriptor.</param>
 		/// <param name="keywords">Keywords.</param>
-		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, hasMultiByteOrderings, new ImagePlaneDescriptor[] { planeDescriptor }, keywords)
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, hasMultiByteOrderings, new[] { planeDescriptor }, keywords)
 		{ }
 
 
@@ -87,7 +79,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="category">Category of format.</param>
 		/// <param name="name">Name.</param>
 		/// <param name="planeDescriptors">Plane descriptors.</param>
-		public ImageFormat(ImageFormatCategory category, string name, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, false, planeDescriptors, new string[0])
+		public ImageFormat(ImageFormatCategory category, string name, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, false, planeDescriptors, Array.Empty<string>())
 		{ }
 
 
@@ -109,7 +101,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="name">Name.</param>
 		/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 		/// <param name="planeDescriptors">Plane descriptors.</param>
-		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, false, planeDescriptors, new string[0])
+		public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors) : this(category, name, hasMultiByteOrderings, planeDescriptors, Array.Empty<string>())
 		{ }
 
 
@@ -167,7 +159,7 @@ namespace Carina.PixelViewer.Media
 		/// <summary>
 		/// Get number of planes of this format.
 		/// </summary>
-		public int PlaneCount { get => this.PlaneDescriptors.Count; }
+		public int PlaneCount => this.PlaneDescriptors.Count;
 
 
 		/// <summary>

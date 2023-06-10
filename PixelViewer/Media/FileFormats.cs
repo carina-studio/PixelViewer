@@ -29,25 +29,25 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Windows Bitmap.
         /// </summary>
-        public static FileFormat Bmp { get => bmp ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat Bmp => bmp ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         /// <summary>
         /// Digital Negative (DNG).
         /// </summary>
-        public static FileFormat Dng { get => dng ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat Dng => dng ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         /// <summary>
         /// Get all defined formats.
         /// </summary>
-        public static IEnumerable<FileFormat> Formats { get => formatsById.Values; }
+        public static IEnumerable<FileFormat> Formats => formatsById.Values;
 
 
         /// <summary>
         /// High Efficiency Image File Format (HEIF).
         /// </summary>
-        public static FileFormat Heif { get => heif ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat Heif => heif ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         /// <summary>
@@ -62,32 +62,32 @@ namespace Carina.PixelViewer.Media
                     throw new InvalidOperationException();
                 FileFormats.app = app;
             }
-            bmp = Register(new FileFormat(app, "Bmp", new string[] { ".bmp" }));
-            dng = Register(new FileFormat(app, "Dng", new string[] { ".dng" }));
-            heif = Register(new FileFormat(app, "Heif", new string[] { ".heif", ".heic" }));
-            jpeg = Register(new FileFormat(app, "Jpeg", new string[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
-            png = Register(new FileFormat(app, "Png", new string[] { ".png" }));
-            rawBgra = Register(new FileFormat(app, "RawBgra", new string[] { ".bgra" }));
-            yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new string[] { ".y4m" }));
+            bmp = Register(new FileFormat(app, "Bmp", new[] { ".bmp" }));
+            dng = Register(new FileFormat(app, "Dng", new[] { ".dng" }));
+            heif = Register(new FileFormat(app, "Heif", new[] { ".heif", ".heic" }));
+            jpeg = Register(new FileFormat(app, "Jpeg", new[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
+            png = Register(new FileFormat(app, "Png", new[] { ".png" }));
+            rawBgra = Register(new FileFormat(app, "RawBgra", new[] { ".bgra" }));
+            yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new[] { ".y4m" }));
         }
 
 
         /// <summary>
         /// JPEG.
         /// </summary>
-        public static FileFormat Jpeg { get => jpeg ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat Jpeg => jpeg ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         /// <summary>
         /// Portable Network Graphic (PNG).
         /// </summary>
-        public static FileFormat Png { get => png ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat Png => png ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         /// <summary>
         /// Raw BGRA data.
         /// </summary>
-        public static FileFormat RawBgra { get => rawBgra ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat RawBgra => rawBgra ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         // Register format.
@@ -127,6 +127,6 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// YUV4MPEG2.
         /// </summary>
-        public static FileFormat Yuv4Mpeg2 { get => yuv4mpeg2 ?? throw new InvalidOperationException("File format is not ready yet."); }
+        public static FileFormat Yuv4Mpeg2 => yuv4mpeg2 ?? throw new InvalidOperationException("File format is not ready yet.");
     }
 }

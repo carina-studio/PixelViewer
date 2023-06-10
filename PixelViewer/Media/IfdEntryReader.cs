@@ -1,5 +1,4 @@
-﻿using CarinaStudio.Collections;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -15,13 +14,13 @@ namespace Carina.PixelViewer.Media
         uint currentEntryDataCount;
         long currentEntryDataSize;
         readonly byte[] entryBuffer = new byte[12];
-        readonly Dictionary<string, int> nextIfdIndices = new Dictionary<string, int>();
+        readonly Dictionary<string, int> nextIfdIndices = new();
         bool isCompleted;
         readonly Func<byte[], int, ushort> parseUInt16;
         readonly Func<byte[], int, uint> parseUInt32;
         readonly Func<byte[], int, ulong> parseUInt64;
         int remainingEntries;
-        readonly Queue<Tuple<long, string>> pendingIfdsToRead = new Queue<Tuple<long, string>>();
+        readonly Queue<Tuple<long, string>> pendingIfdsToRead = new();
         readonly Stream stream;
 
 
@@ -123,7 +122,7 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Move to next entry.
         /// </summary>
-        /// <returns>True if sucessfully moved to next entry.</returns>
+        /// <returns>True if successfully moved to next entry.</returns>
         public bool Read()
         {
             while (true)
@@ -305,7 +304,7 @@ namespace Carina.PixelViewer.Media
                 data = null;
                 return false;
             }
-            if (bytes.Length > 0 && bytes[bytes.Length - 1] == 0)
+            if (bytes.Length > 0 && bytes[^1] == 0)
                 data = Encoding.ASCII.GetString(bytes, 0, bytes.Length - 1);
             else
                 data = Encoding.ASCII.GetString(bytes);
@@ -444,7 +443,7 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         Byte = 1,
         /// <summary>
-        /// String in ASCII endding with '\0'.
+        /// String in ASCII ending with '\0'.
         /// </summary>
         AsciiString = 2,
         /// <summary>

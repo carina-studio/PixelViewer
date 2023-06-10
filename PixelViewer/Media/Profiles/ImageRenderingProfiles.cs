@@ -78,40 +78,40 @@ namespace Carina.PixelViewer.Media.Profiles
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, $"Error occurred while getting file names of profile in '{ImageRenderingProfile.DirectoryPath}'");
+                    logger.LogError(ex, "Error occurred while getting file names of profile in '{path}'", ImageRenderingProfile.DirectoryPath);
                 }
                 return fileNames;
             });
-            logger.LogTrace($"{fileNames.Count} user-defined profile file(s) found");
+            logger.LogTrace("{count} user-defined profile file(s) found", fileNames.Count);
 
             // load user defined profiles
             foreach (var fileName in fileNames)
             {
-                var profile = (ImageRenderingProfile?)null;
+                ImageRenderingProfile? profile;
                 try
                 {
-                    logger.LogTrace($"Load '{fileName}'");
+                    logger.LogTrace("Load '{fileName}'", fileName);
                     profile = await ImageRenderingProfile.LoadAsync(fileName);
                 }
                 catch(Exception ex)
                 {
-                    logger.LogError(ex, $"Unable to load '{fileName}'");
+                    logger.LogError(ex, "Unable to load '{fileName}'", fileName);
                     continue;
                 }
                 if (!ValidateNewUserDefinedProfileName(profile.Name))
                 {
-                    logger.LogError($"Duplicate name of user-defined profile '{profile.Name}'");
+                    logger.LogError("Duplicate name of user-defined profile '{name}'", profile.Name);
                     continue;
                 }
                 if (profile.IsUpgradedWhenLoading)
                 {
-                    logger.LogWarning($"User-defined profile '{profile.Name}' was upgraded, save back to file");
+                    logger.LogWarning("User-defined profile '{name}' was upgraded, save back to file", profile.Name);
                     _ = profile.SaveAsync();
                 }
                 profile.PropertyChanged += OnProfilePropertyChanged;
                 userDefinedProfiles.Add(profile);
             }
-            logger.LogDebug($"{userDefinedProfiles.Count} user-defined profile(s) loaded");
+            logger.LogDebug("{count} user-defined profile(s) loaded", userDefinedProfiles.Count);
         }
 
 
@@ -125,7 +125,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 var newName = profile.Name;
                 if (userDefinedProfiles.FirstOrDefault(it => it.Type == ImageRenderingProfileType.UserDefined && it != profile && it.Name == newName) != null)
                 {
-                    logger?.LogError($"Duplicate profile name '{newName}', remove changed profile");
+                    logger?.LogError("Duplicate profile name '{newName}', remove changed profile", newName);
                     RemoveUserDefinedProfile(profile);
                 }
             }
