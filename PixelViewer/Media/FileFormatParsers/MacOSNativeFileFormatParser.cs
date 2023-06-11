@@ -1,8 +1,8 @@
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
-using Carina.PixelViewer.Native;
 using CarinaStudio;
 using CarinaStudio.MacOS.CoreFoundation;
+using CarinaStudio.MacOS.CoreGraphics;
 using CarinaStudio.MacOS.ImageIO;
 using System;
 using System.IO;
@@ -62,7 +62,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             {
                 stream.Position = position;
             }
-        });
+        }, cancellationToken);
         if (!checkingResult)
             return null;
 
@@ -88,7 +88,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             {
                 stream.Position = position;
             }
-        });
+        }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
         
@@ -105,20 +105,32 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             var primaryImageIndex = imageSource.PrimaryImageIndex;
             
             // get dimensions
-            using var imageProperties = CFObject.FromHandle(MacOS.CGImageSourceCopyPropertiesAtIndex(imageSource.Handle, (nuint)primaryImageIndex, IntPtr.Zero), true);
-            MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelWidth, out width);
-            MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelHeight, out height);
-            if (MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyOrientation, out int rawOrientation))
+            using var imageProperties = imageSource.CopyPropertiesAtIndex(primaryImageIndex);
+            if (imageProperties is not null)
             {
-                orientation = rawOrientation switch
+                if (imageProperties.TryGetValue(CGImageProperties.PixelWidth, out var widthNumber)
+                    && widthNumber?.TypeDescription == nameof(CFNumber))
                 {
-                    3 or 4 => 180,
-                    5 or 8 => 270,
-                    6 or 7 => 90,
-                    _ => 0,
-                };
+                    width = CFObject.FromHandle<CFNumber>(widthNumber.Handle).ToInt32();
+                }
+                if (imageProperties.TryGetValue(CGImageProperties.PixelHeight, out var heightNumber)
+                    && heightNumber?.TypeDescription == nameof(CFNumber))
+                {
+                    height = CFObject.FromHandle<CFNumber>(heightNumber.Handle).ToInt32();
+                }
+                if (imageProperties.TryGetValue(CGImageProperties.Orientation, out var orientationNumber)
+                    && orientationNumber?.TypeDescription == nameof(CFNumber))
+                {
+                    orientation = CFObject.FromHandle<CFNumber>(orientationNumber.Handle).ToInt32() switch
+                    {
+                        3 or 4 => 180,
+                        5 or 8 => 270,
+                        6 or 7 => 90,
+                        _ => 0,
+                    };
+                }
             }
-        });
+        }, cancellationToken);
 
         // create profile
         if (width <= 0 || height <= 0)

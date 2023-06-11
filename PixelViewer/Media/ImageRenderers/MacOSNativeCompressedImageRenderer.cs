@@ -1,4 +1,3 @@
-using Carina.PixelViewer.Native;
 using CarinaStudio;
 using CarinaStudio.MacOS.CoreFoundation;
 using CarinaStudio.MacOS.CoreGraphics;
@@ -48,7 +47,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaFirst: // ARGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc(srcPixelPtr[3], srcPixelPtr[2], srcPixelPtr[1], srcPixelPtr[0]);
@@ -59,7 +58,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaLast: // RGBA
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc(srcPixelPtr[2], srcPixelPtr[1], srcPixelPtr[0], srcPixelPtr[3]);
@@ -70,7 +69,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc(srcPixelPtr[3], srcPixelPtr[2], srcPixelPtr[1], 255);
@@ -82,7 +81,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc(srcPixelPtr[2], srcPixelPtr[1], srcPixelPtr[0], 255);
@@ -100,7 +99,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaFirst: // ARGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                     {
@@ -124,7 +123,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaLast: // RGBA
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                     {
@@ -148,7 +147,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                     {
@@ -166,7 +165,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (uint*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                     {
@@ -216,7 +215,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaFirst: // ARGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (ulong*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc((ushort)(srcPixelPtr[3] << 8 | srcPixelPtr[3]), (ushort)(srcPixelPtr[2] << 8 | srcPixelPtr[2]), (ushort)(srcPixelPtr[1] << 8 | srcPixelPtr[1]), (ushort)(srcPixelPtr[0] << 8 | srcPixelPtr[0]));
@@ -227,7 +226,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaLast: // RGBA
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (ulong*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc((ushort)(srcPixelPtr[2] << 8 | srcPixelPtr[2]), (ushort)(srcPixelPtr[1] << 8 | srcPixelPtr[1]), (ushort)(srcPixelPtr[0] << 8 | srcPixelPtr[0]), (ushort)(srcPixelPtr[3] << 8 | srcPixelPtr[3]));
@@ -238,7 +237,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaNoneSkipFirst: // XRGB
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (ulong*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc((ushort)(srcPixelPtr[3] << 8 | srcPixelPtr[3]), (ushort)(srcPixelPtr[2] << 8 | srcPixelPtr[2]), (ushort)(srcPixelPtr[1] << 8 | srcPixelPtr[1]), 65535);
@@ -250,7 +249,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                             case CGImageAlphaInfo.AlphaNoneSkipLast: // RGBX
                                 for (var y = bitmapBuffer.Height; y > 0; --y, srcRowPtr += srcRowStride, destRowPtr += destRowStride)
                                 {
-                                    var srcPixelPtr = (byte*)srcRowPtr;
+                                    var srcPixelPtr = srcRowPtr;
                                     var destPixelPtr = (ulong*)destRowPtr;
                                     for (var x = bitmapBuffer.Width; x > 0; --x, srcPixelPtr += srcPixelStride, ++destPixelPtr)
                                         *destPixelPtr = packFunc((ushort)(srcPixelPtr[2] << 8 | srcPixelPtr[2]), (ushort)(srcPixelPtr[1] << 8 | srcPixelPtr[1]), (ushort)(srcPixelPtr[0] << 8 | srcPixelPtr[0]), 65535);
@@ -280,7 +279,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
 
 
     /// <inheritdoc/>
-    protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+    protected override ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
     {
         // check file header first to prevent decoding image
         var position = imageStream.Position;
@@ -299,18 +298,24 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
             throw new TaskCanceledException();
         
         // check image dimensions
-        using var imageProperties = CFObject.FromHandle(MacOS.CGImageSourceCopyPropertiesAtIndex(imageSource.Handle, (nuint)imageSource.PrimaryImageIndex, IntPtr.Zero), true);
-        if (!MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelWidth, out int width)
-            || !MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyPixelHeight, out int height))
+        using var imageProperties = imageSource.CopyPropertiesAtIndex(imageSource.PrimaryImageIndex);
+        if (imageProperties is null 
+            || !imageProperties.TryGetValue(CGImageProperties.PixelWidth, out var widthNumber)
+            || widthNumber?.TypeDescription != nameof(CFNumber)
+            || !imageProperties.TryGetValue(CGImageProperties.PixelHeight, out var heightNumber)
+            || heightNumber?.TypeDescription != nameof(CFNumber))
         {
             throw new Exception($"Unable to get dimensions of image.");
         }
+        var width = CFObject.FromHandle<CFNumber>(widthNumber.Handle).ToInt32();
+        var height = CFObject.FromHandle<CFNumber>(heightNumber.Handle).ToInt32();
         if (width != bitmapBuffer.Width || height != bitmapBuffer.Height)
             throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {width}x{height} expected.");
         
         // check image format
-        if (!MacOS.CFDictionaryGetValue(imageProperties.Handle, MacOS.kCGImagePropertyColorModel, out string? colorModel)
-            || colorModel != "RGB")
+        if (!imageProperties.TryGetValue(CGImageProperties.ColorModel, out var colorModelString)
+            || colorModelString?.TypeDescription != nameof(CFString)
+            || CFObject.FromHandle<CFString>(colorModelString.Handle).ToString() != CGImageProperties.ColorModelRGB.ToString())
         {
             throw new Exception($"Only RGB color model is supported.");
         }
@@ -349,11 +354,11 @@ class MacOSHeifImageRenderer : MacOSNativeCompressedImageRenderer
     /// <summary>
     /// Initialize new <see cref="MacOSHeifImageRenderer"/> instance.
     /// </summary>
-    public MacOSHeifImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "HEIF", new ImagePlaneDescriptor(0), new string[] { "HEIF" }))
+    public MacOSHeifImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "HEIF", new ImagePlaneDescriptor(0), new[] { "HEIF" }))
     { }
 
 
     /// <inheritdoc/>
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
-        Media.FileFormatParsers.HeifFileFormatParser.CheckFileHeader(imageStream);
+        FileFormatParsers.HeifFileFormatParser.CheckFileHeader(imageStream);
 }
