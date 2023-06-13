@@ -470,6 +470,32 @@ namespace Carina.PixelViewer.Media
 		public static ulong PackBgra64LE(ushort b, ushort g, ushort r, ushort a) =>
 			((ulong)a << 48) | ((ulong)r << 32) | ((ulong)g << 16) | b;
 		
+		
+		/// <summary>
+		/// Pack B/G/R/A to 62-bit RGBA for Big-Endian system.
+		/// </summary>
+		/// <param name="r">R.</param>
+		/// <param name="g">G.</param>
+		/// <param name="b">B.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong PackRgba64BE(ushort r, ushort g, ushort b, ushort a) =>
+			((ulong)r << 48) | ((ulong)g << 32) | ((ulong)b << 16) | a;
+
+
+		/// <summary>
+		/// Pack B/G/R/A to 62-bit RGBA for Little-Endian system.
+		/// </summary>
+		/// <param name="r">R.</param>
+		/// <param name="g">G.</param>
+		/// <param name="b">B.</param>
+		/// <param name="a">A.</param>
+		/// <returns>Packed BGRA.</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static ulong PackRgba64LE(ushort r, ushort g, ushort b, ushort a) =>
+			((ulong)a << 48) | ((ulong)b << 32) | ((ulong)g << 16) | r;
+		
 
 		/// <summary>
 		/// Perform parallel for-loop for image processing.
@@ -669,6 +695,18 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <returns>RGB to luminance conversion function.</returns>
 		public static delegate*<ushort, ushort, ushort, ushort> SelectRgb48ToLuminanceConversion() => &Rgb48ToLuminanceBT709;
+		
+		
+		/// <summary>
+		/// Select property function to pack R/G/B/A into 64-bit integer.
+		/// </summary>
+		/// <returns>Pointer to packing function.</returns>
+		public static delegate*<ushort, ushort, ushort, ushort, ulong> SelectRgba64Packing()
+		{
+			if (IsLittleEndian)
+				return &PackRgba64LE;
+			return &PackRgba64BE;
+		}
 
 
 		/// <summary>

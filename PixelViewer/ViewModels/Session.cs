@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageEncoders;
 using Carina.PixelViewer.Media.ImageFilters;
@@ -4125,10 +4126,19 @@ class Session : ViewModel<IAppSuiteApplication>
 			// released cached image if it is not suitable
 			var width = imageFrame.BitmapBuffer.Width;
 			var height = imageFrame.BitmapBuffer.Height;
+			var avaloniaPixelFormat = this.Settings.GetValueOrDefault(SettingKeys.Render32BitsColorsOnly)
+				? PixelFormats.Bgra8888
+				: imageFrame.BitmapBuffer.Format switch
+				{
+					BitmapFormat.Bgra32 => PixelFormats.Bgra8888,
+					BitmapFormat.Bgra64 => PixelFormats.Rgba64,
+					_ => throw new NotSupportedException(),
+				};
 			if (this.cachedAvaRenderedImage != null)
-            {
+			{
 				if (this.cachedAvaRenderedImage.PixelSize.Width != width
-					|| this.cachedAvaRenderedImage.PixelSize.Height != height)
+				    || this.cachedAvaRenderedImage.PixelSize.Height != height
+				    || this.cachedAvaRenderedImage.Format != avaloniaPixelFormat)
                 {
 					if (this.Application.IsDebugMode)
 						this.Logger.LogTrace("Release cached Avalonia bitmap, size: {w}x{h}", this.cachedAvaRenderedImage.PixelSize.Width, this.cachedAvaRenderedImage.PixelSize.Height);
@@ -4148,7 +4158,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			else
 			{
-				var dataSize = (width * height * 4);
+				var dataSize = (width * height * (avaloniaPixelFormat.BitsPerPixel >> 3));
 				memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
 				while (memoryUsageToken == null)
 				{
@@ -4191,9 +4201,9 @@ class Session : ViewModel<IAppSuiteApplication>
 				{
 					if (this.Application.IsDebugMode)
 						this.Logger.LogWarning("Allocate Avalonia bitmap, size: {width}x{height}", width, height);
-					bitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul));
+					bitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), avaloniaPixelFormat, AlphaFormat.Unpremul));
 				}
-				await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap);
+				await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap, cancellationTokenSource.Token);
 
 				// create quarter-size Avalonia bitmap
 				var halfWidth = width >> 1;
@@ -4204,7 +4214,8 @@ class Session : ViewModel<IAppSuiteApplication>
 					if (this.cachedAvaQuarterSizeRenderedImage != null)
 					{
 						if (this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width != halfWidth
-							|| this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height != halfHeight)
+							|| this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height != halfHeight
+							|| this.cachedAvaQuarterSizeRenderedImage.Format != avaloniaPixelFormat)
 						{
 							if (this.Application.IsDebugMode)
 								this.Logger.LogTrace("Release cached quarter-size Avalonia bitmap, size: {w}x{h}", this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width, this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height);
@@ -4220,7 +4231,7 @@ class Session : ViewModel<IAppSuiteApplication>
 						this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = null;
                     }
 					else
-						quarterSizeMemoryUsageToken = this.RequestRenderedImageMemoryUsage(halfWidth * halfHeight * 4);
+						quarterSizeMemoryUsageToken = this.RequestRenderedImageMemoryUsage(halfWidth * halfHeight * (avaloniaPixelFormat.BitsPerPixel >> 3));
 
 					// create bitmap
 					if (quarterSizeMemoryUsageToken != null)
@@ -4234,9 +4245,9 @@ class Session : ViewModel<IAppSuiteApplication>
 						{
 							if (this.Application.IsDebugMode)
 								this.Logger.LogWarning("Allocate quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}", halfWidth, halfHeight);
-							quarterSizeBitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), Avalonia.Platform.PixelFormat.Bgra8888, Avalonia.Platform.AlphaFormat.Unpremul));
+							quarterSizeBitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), avaloniaPixelFormat, AlphaFormat.Unpremul));
 						}
-						await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap);
+						await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap, cancellationTokenSource.Token);
 					}
 					else
 						this.Logger.LogWarning("Unable to request memory usage for quarter-size Avalonia bitmap");
