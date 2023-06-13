@@ -1,4 +1,5 @@
 using CarinaStudio;
+using CarinaStudio.IO;
 using SkiaSharp;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,39 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
     { 
         this.encodedFormat = encodedFormat;
     }
+    
+    
+    // Create SKCodec from stream.
+    SKCodec CreateCodec(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
+    {
+        // check file header first to prevent decoding image
+        var position = stream.Position;
+        if (!this.OnCheckFileHeader(source, stream))
+            throw new ArgumentException("Unsupported format.");
+        stream.Position = position;
+
+        // create codec
+        // [Workaround] Read to memory first to prevent unrecoverable crash on some images
+        // Please refer to https://github.com/mono/SkiaSharp/issues/1551
+        if (cancellationToken.IsCancellationRequested)
+            throw new TaskCanceledException();
+        var codec = SKData.Create(stream)?.Use(it => 
+            SKCodec.Create(it)) ?? new SKManagedStream(stream, false).Use(stream =>
+            SKCodec.Create(stream));
+        if (codec is null)
+            throw new ArgumentException("Unable to create codec.");
+        if (codec.EncodedFormat != this.encodedFormat)
+        {
+            Global.RunWithoutError(codec.Dispose);
+            throw new ArgumentException($"Incorrect format: {codec.EncodedFormat}, {this.encodedFormat} expected.");
+        }
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Global.RunWithoutError(codec.Dispose);
+            throw new TaskCanceledException();
+        }
+        return codec;
+    }
 
 
     /// <summary>
@@ -41,24 +75,8 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
     /// <inheritdoc/>
     protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
     {
-        // check file header first to prevent decoding image
-        var position = imageStream.Position;
-        if (!this.OnCheckFileHeader(source, imageStream))
-            throw new ArgumentException("Unsupported format.");
-        imageStream.Position = position;
-
         // create codec
-        // [Workaround] Read to memory first to prevent unrecoverable crash on some images
-        // Please refer to https://github.com/mono/SkiaSharp/issues/1551
-        if (cancellationToken.IsCancellationRequested)
-            throw new TaskCanceledException();
-        using var codec = SKData.Create(imageStream)?.Use(it => 
-            SKCodec.Create(it)) ?? new SKManagedStream(imageStream, false).Use(stream =>
-                SKCodec.Create(stream));
-        if (codec == null)
-            throw new ArgumentException("Unable to create codec.");
-        if (codec.EncodedFormat != this.encodedFormat)
-            throw new ArgumentException($"Incorrect format: {codec.EncodedFormat}, {this.encodedFormat} expected.");
+        using var codec = this.CreateCodec(source, imageStream, cancellationToken);
         var imageInfo = codec.Info;
         if (imageInfo.Width != bitmapBuffer.Width || imageInfo.Height != bitmapBuffer.Height)
             throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {imageInfo.Width}x{imageInfo.Height} expected.");
@@ -131,8 +149,33 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
 
 
     /// <inheritdoc/>
-    public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
-        Task.FromResult(BitmapFormat.Bgra64);
+    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default)
+    {
+        var stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);
+        try
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            return await Task.Run(() =>
+            {
+                using var codec = this.CreateCodec(source, stream, cancellationToken);
+                return codec.Info.ColorType switch
+                {
+                    SKColorType.Bgr101010x
+                        or SKColorType.Bgra1010102
+                        or SKColorType.Rgb101010x
+                        or SKColorType.Rgba1010102
+                        or SKColorType.Rgba16161616
+                        or SKColorType.RgbaF16 => BitmapFormat.Bgra64,
+                    _ => BitmapFormat.Bgra32,
+                };
+            }, cancellationToken);
+        }
+        finally
+        {
+            Global.RunWithoutErrorAsync(stream.Close);
+        }
+    }
 }
 
 

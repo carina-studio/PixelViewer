@@ -1,4 +1,5 @@
 using CarinaStudio;
+using CarinaStudio.IO;
 using CarinaStudio.MacOS.CoreFoundation;
 using CarinaStudio.MacOS.CoreGraphics;
 using CarinaStudio.MacOS.ImageIO;
@@ -15,6 +16,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 /// </summary>
 abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRenderer
 {
+    // Constants.
+    const long MaxImageDataSize = 256L << 20; // 256 MB
+    
+    
     /// <summary>
     /// Initialize new <see cref="MacOSNativeCompressedImageRenderer"/> instance.
     /// </summary>
@@ -269,6 +274,31 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
     }
 
 
+    // Create CGImageSource from stream.
+    CGImageSource CreateImageSource(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
+    {
+        // check file header first to prevent decoding image
+        var position = stream.Position;
+        if (!this.OnCheckFileHeader(source, stream))
+            throw new ArgumentException("Unsupported format.");
+        stream.Position = position;
+
+        // check data size
+        var dataSize = Math.Max(0, stream.Length - position);
+        if (dataSize > MaxImageDataSize)
+            throw new NotSupportedException($"Data is too large to load into memory: {dataSize}");
+
+        // create image source
+        var imageSource = CGImageSource.FromStream(stream);
+        if (cancellationToken.IsCancellationRequested)
+        {
+            Global.RunWithoutError(imageSource.Release);
+            throw new TaskCanceledException();
+        }
+        return imageSource;
+    }
+
+
     /// <summary>
     /// Called to check file header.
     /// </summary>
@@ -281,21 +311,8 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
     /// <inheritdoc/>
     protected override ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
     {
-        // check file header first to prevent decoding image
-        var position = imageStream.Position;
-        if (!this.OnCheckFileHeader(source, imageStream))
-            throw new ArgumentException("Unsupported format.");
-        imageStream.Position = position;
-
-        // check data size
-        var dataSize = Math.Max(0, imageStream.Length - position);
-        if (dataSize > 256L << 20) // 256 MB
-            throw new NotSupportedException($"Data is too large to load into memory: {dataSize}");
-
         // create image source
-        using var imageSource = CGImageSource.FromStream(imageStream);
-        if (cancellationToken.IsCancellationRequested)
-            throw new TaskCanceledException();
+        using var imageSource = this.CreateImageSource(source, imageStream, cancellationToken);
         
         // check image dimensions
         using var imageProperties = imageSource.CopyPropertiesAtIndex(imageSource.PrimaryImageIndex);
@@ -342,8 +359,48 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
 
 
     /// <inheritdoc/>
-    public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
-        Task.FromResult(BitmapFormat.Bgra64);
+    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default)
+    {
+        var stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);
+        try
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            return await Task.Run(() =>
+            {
+                // create image source
+                using var imageSource = this.CreateImageSource(source, stream, cancellationToken);
+                
+                // check color model
+                using var imageProperties = imageSource.CopyPropertiesAtIndex(imageSource.PrimaryImageIndex);
+                if (imageProperties is null)
+                    return BitmapFormat.Bgra32;
+                if (!imageProperties.TryGetValue(CGImageProperties.ColorModel, out var colorModelString)
+                    || colorModelString?.TypeDescription != nameof(CFString)
+                    || CFObject.FromHandle<CFString>(colorModelString.Handle).ToString() != CGImageProperties.ColorModelRGB.ToString())
+                {
+                    throw new Exception($"Only RGB color model is supported.");
+                }
+
+                // check color depth
+                using var depthKey = new CFString("Depth");
+                if (imageProperties.TryGetValue(depthKey, out var depthNumber)
+                    && depthNumber?.TypeDescription == nameof(CFNumber))
+                {
+                    return CFObject.FromHandle<CFNumber>(depthNumber.Handle).ToInt32() switch
+                    {  
+                        >= 16 => BitmapFormat.Bgra64,
+                        _ => BitmapFormat.Bgra32,
+                    };
+                }
+                return BitmapFormat.Bgra32;
+            }, cancellationToken);
+        }
+        finally
+        {
+            Global.RunWithoutErrorAsync(stream.Close);
+        }
+    }
 }
 
 

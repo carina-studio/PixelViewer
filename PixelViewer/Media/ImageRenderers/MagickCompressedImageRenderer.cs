@@ -1,4 +1,5 @@
 ﻿using CarinaStudio;
+using CarinaStudio.IO;
 using ImageMagick;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,27 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
     {
         this.magickFormats.AddRange(magickFormats);
     }
+    
+    
+    // Create IMagickImageInfo from stream.
+    IMagickImageInfo CreateImageInfo(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
+    {
+        // check file header first to prevent decoding image
+        var position = stream.Position;
+        if (!this.OnCheckFileHeader(source, stream))
+            throw new ArgumentException("Unsupported format.");
+        stream.Position = position;
+
+        // decode image info
+        if (cancellationToken.IsCancellationRequested)
+            throw new TaskCanceledException();
+        var imageInfo = new MagickImageInfoFactory().Create(stream);
+        if (imageInfo is null)
+            throw new ArgumentException("Unable to decode image info.");
+        if (!this.magickFormats.Contains(imageInfo.Format))
+            throw new ArgumentException($"Incorrect format: {imageInfo.Format}.");
+        return imageInfo;
+    }
 
 
     /// <summary>
@@ -41,20 +63,9 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
     /// <inheritdoc/>
     protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
     {
-        // check file header first to prevent decoding image
-        var position = imageStream.Position;
-        if (!this.OnCheckFileHeader(source, imageStream))
-            throw new ArgumentException("Unsupported format.");
-        imageStream.Position = position;
-
         // decode image info
-        if (cancellationToken.IsCancellationRequested)
-            throw new TaskCanceledException();
-        var imageInfo = new MagickImageInfoFactory().Create(imageStream);
-        if (imageInfo == null)
-            throw new ArgumentException("Unable to decode image info.");
-        if (!this.magickFormats.Contains(imageInfo.Format))
-            throw new ArgumentException($"Incorrect format: {imageInfo.Format}.");
+        var position = imageStream.Position;
+        var imageInfo = this.CreateImageInfo(source, imageStream, cancellationToken);
         if (imageInfo.Width != bitmapBuffer.Width || imageInfo.Height != bitmapBuffer.Height)
             throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {imageInfo.Width}x{imageInfo.Height} expected.");
 
@@ -178,8 +189,27 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
 
 
     /// <inheritdoc/>
-    public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
-        Task.FromResult(BitmapFormat.Bgra64);
+    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default)
+    {
+        var stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);
+        try
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            return await Task.Run(() =>
+            {
+                return this.CreateImageInfo(source, stream, cancellationToken).Compression switch
+                {
+                    CompressionMethod.JPEG => BitmapFormat.Bgra32,
+                    _ => BitmapFormat.Bgra64,
+                };
+            }, cancellationToken);
+        }
+        finally
+        {
+            Global.RunWithoutErrorAsync(stream.Close);
+        }
+    }
 }
 
 

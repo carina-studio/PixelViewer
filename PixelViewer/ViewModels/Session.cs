@@ -3899,6 +3899,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		try
 		{
 			renderedFormat = await imageRenderer.SelectRenderedFormatAsync(imageDataSource, cancellationTokenSource.Token);
+			this.Logger.LogTrace("Select {format} as rendered format", renderedFormat);
 		}
 		catch (Exception ex)
 		{
