@@ -29,70 +29,70 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         // Static fields.
-        static readonly Dictionary<BayerPattern, int[][]> ColorPatternMap = new Dictionary<BayerPattern, int[][]>()
+        static readonly Dictionary<BayerPattern, int[][]> ColorPatternMap = new()
         {
             { 
 				BayerPattern.BGGR_2x2, 
-				new int[][]{
-					new int[]{ BlueColorComponent, GreenColorComponent },
-					new int[]{ GreenColorComponent, RedColorComponent },
+				new[]{
+					new[]{ BlueColorComponent, GreenColorComponent },
+					new[]{ GreenColorComponent, RedColorComponent },
 				}
 			},
             { 
 				BayerPattern.GBRG_2x2, 
-				new int[][]{
-					new int[]{ GreenColorComponent, BlueColorComponent },
-					new int[]{ RedColorComponent, GreenColorComponent },
+				new[]{
+					new[]{ GreenColorComponent, BlueColorComponent },
+					new[]{ RedColorComponent, GreenColorComponent },
 				} 
 			},
             { 
 				BayerPattern.GRBG_2x2, 
-				new int[][]{
-					new int[]{ GreenColorComponent, RedColorComponent },
-					new int[]{ BlueColorComponent, GreenColorComponent },
+				new[]{
+					new[]{ GreenColorComponent, RedColorComponent },
+					new[]{ BlueColorComponent, GreenColorComponent },
 				}
 			},
             { 
 				BayerPattern.RGGB_2x2, 
-				new int[][]{
-					new int[]{ RedColorComponent, GreenColorComponent },
-					new int[]{ GreenColorComponent, BlueColorComponent },
+				new[]{
+					new[]{ RedColorComponent, GreenColorComponent },
+					new[]{ GreenColorComponent, BlueColorComponent },
 				} 
 			},
 			{ 
 				BayerPattern.BGGR_4x4, 
-				new int[][]{
-					new int[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
-					new int[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
-					new int[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
-					new int[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
+				new[]{
+					new[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
+					new[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
+					new[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
+					new[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
 				} 
 			},
 			{
 				BayerPattern.GBRG_4x4,
-				new int[][]{
-					new int[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
-					new int[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
-					new int[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
-					new int[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
+				new[]{
+					new[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
+					new[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
+					new[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
+					new[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
 				}
 			},
 			{
 				BayerPattern.GRBG_4x4,
-				new int[][]{
-					new int[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
-					new int[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
-					new int[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
-					new int[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
+				new[]{
+					new[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
+					new[]{ GreenColorComponent, GreenColorComponent, RedColorComponent, RedColorComponent },
+					new[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
+					new[]{ BlueColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent },
 				}
 			},
 			{
 				BayerPattern.RGGB_4x4,
-				new int[][]{
-					new int[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
-					new int[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
-					new int[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
-					new int[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
+				new[]{
+					new[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
+					new[]{ RedColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent },
+					new[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
+					new[]{ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent },
 				}
 			},
 		};
@@ -152,7 +152,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var centerComponent = colorComponentSelector(x, y);
 
 						// collect colors around current pixel
-						var neighborComponent = 0;
+						int neighborComponent;
 						if (isNotTopRow)
 						{
 							if (x > 0)
@@ -270,7 +270,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var centerComponent = colorComponentSelector(x, y);
 
 						// collect colors in 3x3 sub block first
-						var neighborComponent = 0;
+						int neighborComponent;
 						if (isNotTop1Row)
 						{
 							if (x > 0)
@@ -526,7 +526,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <inheritdoc/>
-		protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+		protected override ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// get parameters
 			var width = bitmapBuffer.Width;
@@ -558,13 +558,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					if (yMask != 0)
 						return new Func<int, int, int>((x, y) => colorPattern[y & yMask][x & xMask]);
-					return new Func<int, int, int>((x, y) => colorPattern[y % colorPatternHeight][x & xMask]);
+					return (x, y) => colorPattern[y % colorPatternHeight][x & xMask];
 				}
 				else
 				{
 					if (yMask != 0)
-						return new Func<int, int, int>((x, y) => colorPattern[y & yMask][x % colorPatternWidth]);
-					return new Func<int, int, int>((x, y) => colorPattern[y % colorPatternHeight][x % colorPatternWidth]);
+						return (x, y) => colorPattern[y & yMask][x % colorPatternWidth];
+					return (x, y) => colorPattern[y % colorPatternHeight][x % colorPatternWidth];
 				}
 			});
 
@@ -589,7 +589,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						break;
 				}
 				if (!cancellationToken.IsCancellationRequested)
-					this.Logger.LogTrace($"Demosaicing time: {stopwatch.ElapsedMilliseconds} ms");
+					this.Logger.LogTrace("Demosaicing time: {duration} ms", stopwatch.ElapsedMilliseconds);
 			}
 			finally
 			{
@@ -616,6 +616,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         /// <inheritdoc/>
-        public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+        public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+	        Task.FromResult(BitmapFormat.Bgra64);
     }
 }

@@ -342,7 +342,8 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
 
 
     /// <inheritdoc/>
-    public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+    public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+        Task.FromResult(BitmapFormat.Bgra64);
 }
 
 

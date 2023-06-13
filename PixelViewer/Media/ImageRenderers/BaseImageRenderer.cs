@@ -172,10 +172,6 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <inheritdoc/>
 	public async Task<ImageRenderingResult> RenderAsync(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 	{
-		// check parameter
-		if (bitmapBuffer.Format != this.RenderedFormat)
-			throw new ArgumentException($"Invalid format of bitmap buffer: {bitmapBuffer.Format}.");
-
 		// share resources
 		using var sharedSource = source.Share();
 		using var sharedBitmapBuffer = bitmapBuffer.Share();
@@ -209,10 +205,14 @@ abstract class BaseImageRenderer : IImageRenderer
 	}
 
 
+	/// <inheritdoc/>
+	public virtual Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+		Task.FromResult(BitmapFormat.Bgra32);
+
+
 	// Implementations.
 	public abstract IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height);
 	public abstract int EvaluatePixelCount(IImageDataSource source);
 	public abstract long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions);
 	public ImageFormat Format { get; }
-	public virtual BitmapFormat RenderedFormat => BitmapFormat.Bgra32;
 }

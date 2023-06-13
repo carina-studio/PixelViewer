@@ -99,7 +99,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						if (cancellationToken.IsCancellationRequested)
 							return;
 						if (isLastRow)
-							break; ;
+							break;
 						Array.Clear(yRow, 0, yRowStride);
 					}
 				}
@@ -170,7 +170,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Rendered format.
-		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+		public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+			Task.FromResult(BitmapFormat.Bgra64);
 
 
 		/// <summary>
@@ -190,10 +191,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     class P410ImageRenderer : BaseYuv444p16ImageRenderer
     {
         public P410ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P410", true, new ImagePlaneDescriptor[] {
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-        }, new string[]{ "P410" }), 10)
+            new(2),
+            new(2),
+            new(2),
+        }, new[]{ "P410" }), 10)
         { }
 
 
@@ -212,10 +213,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     class P412ImageRenderer : BaseYuv444p16ImageRenderer
     {
         public P412ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P412", true, new ImagePlaneDescriptor[] {
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-        }, new string[]{ "P412" }), 12)
+            new(2),
+            new(2),
+            new(2),
+        }, new[]{ "P412" }), 12)
         { }
 
 
@@ -234,10 +235,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     class P416ImageRenderer : BaseYuv444p16ImageRenderer
     {
         public P416ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P416", true, new ImagePlaneDescriptor[] {
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-        }, new string[]{ "P416" }), 16)
+            new(2),
+            new(2),
+            new(2),
+        }, new[]{ "P416" }), 16)
         { }
 
 

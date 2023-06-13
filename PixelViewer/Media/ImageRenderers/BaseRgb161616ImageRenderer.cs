@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -21,7 +22,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 		/// <inheritdoc/>
 		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new ImagePlaneOptions[]{
-			new ImagePlaneOptions(16, 6, width * 6)
+			new(16, 6, width * 6)
 		};
 
 
@@ -75,7 +76,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         /// <inheritdoc/>
-		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+        public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+	        Task.FromResult(BitmapFormat.Bgra64);
 
 
         /// <summary>
@@ -99,7 +101,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Bgr161616ImageRenderer"/> instance.
 		/// </summary>
-		public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6, 9, 16), new string[]{ "BGR161616", "BGR_161616", "BGR48" }))
+		public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6, 9, 16), new[]{ "BGR161616", "BGR_161616", "BGR48" }))
 		{ }
 
 
@@ -121,7 +123,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Rgb161616ImageRenderer"/> instance.
 		/// </summary>
-		public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6, 9, 16), new string[]{ "RGB161616", "RGB_161616", "RGB48" }))
+		public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6, 9, 16), new[]{ "RGB161616", "RGB_161616", "RGB48" }))
 		{ }
 
 

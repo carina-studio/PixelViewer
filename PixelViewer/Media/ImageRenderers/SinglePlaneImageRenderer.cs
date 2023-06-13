@@ -13,7 +13,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		/// <summary>
-		/// Initialize new <see cref="BaseImageRendererFactory"/> instance.
+		/// Initialize new <see cref="SinglePlaneImageRenderer"/> instance.
 		/// </summary>
 		/// <param name="format">Format supported by <see cref="IImageRenderer"/> created by this factory.</param>
 		protected SinglePlaneImageRenderer(ImageFormat format) : base(format)
@@ -26,7 +26,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 		/// <inheritdoc/>
 		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new ImagePlaneOptions[]{
-			new ImagePlaneOptions(this.bytesPerPixel, width * this.bytesPerPixel)
+			new(this.bytesPerPixel, width * this.bytesPerPixel)
 		};
 
 

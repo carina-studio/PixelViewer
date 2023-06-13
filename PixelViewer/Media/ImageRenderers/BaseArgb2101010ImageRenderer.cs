@@ -1,9 +1,9 @@
 using CarinaStudio;
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -34,7 +34,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			// prepare packing function
 			var readPixelFunc = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian
                 ? new Func<byte, byte, byte, byte, uint>((c0, c1, c2, c3) => (uint)((c3 << 24) | (c2 << 16) | (c1 << 8) | c0))
-                : new Func<byte, byte, byte, byte, uint>((c0, c1, c2, c3) => (uint)((c0 << 24) | (c1 << 16) | (c2 << 8) | c3));
+                : (c0, c1, c2, c3) => (uint)((c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
@@ -81,7 +81,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         /// <inheritdoc/>
-        public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+        public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+	        Task.FromResult(BitmapFormat.Bgra64);
 
 
         /// <summary>
@@ -104,7 +105,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         /// <summary>
         /// Initialize new <see cref="Abgr2101010ImageRenderer"/> instance.
         /// </summary>
-        public Abgr2101010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_2101010", true, new ImagePlaneDescriptor(4), new string[]{ "ABGR2101010" }))
+        public Abgr2101010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_2101010", true, new ImagePlaneDescriptor(4), new[]{ "ABGR2101010" }))
         { }
 
 
@@ -127,7 +128,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         /// <summary>
         /// Initialize new <see cref="Argb2101010ImageRenderer"/> instance.
         /// </summary>
-        public Argb2101010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ARGB_2101010", true, new ImagePlaneDescriptor(4), new string[]{ "ARGB2101010" }))
+        public Argb2101010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ARGB_2101010", true, new ImagePlaneDescriptor(4), new[]{ "ARGB2101010" }))
         { }
 
 
@@ -150,7 +151,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         /// <summary>
         /// Initialize new <see cref="Bgra1010102ImageRenderer"/> instance.
         /// </summary>
-        public Bgra1010102ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "BGRA_1010102", true, new ImagePlaneDescriptor(4), new string[]{ "BGRA1010102" }))
+        public Bgra1010102ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "BGRA_1010102", true, new ImagePlaneDescriptor(4), new[]{ "BGRA1010102" }))
         { }
 
 
@@ -173,7 +174,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
         /// <summary>
         /// Initialize new <see cref="Rgba1010102ImageRenderer"/> instance.
         /// </summary>
-        public Rgba1010102ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "RGBA_1010102", true, new ImagePlaneDescriptor(4), new string[]{ "RGBA1010102" }))
+        public Rgba1010102ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "RGBA_1010102", true, new ImagePlaneDescriptor(4), new[]{ "RGBA1010102" }))
         { }
 
 

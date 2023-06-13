@@ -71,7 +71,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var uv1RowStride = planeOptions[1].RowStride;
 			var uv2PixelStride = planeOptions[2].PixelStride;
 			var uv2RowStride = planeOptions[2].RowStride;
-			bool isLittleEndian = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian;
 			if (width <= 0 || height <= 0
 				|| yPixelStride <= 0 || yRowStride <= 0 || (yPixelStride * width) > yRowStride
 				|| uv2PixelStride <= 0 || uv2RowStride <= 0 || (uv2PixelStride * width / 2) > uv2RowStride
@@ -186,7 +185,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Rendered format.
-		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+		public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+			Task.FromResult(BitmapFormat.Bgra64);
 
 
 		/// <summary>

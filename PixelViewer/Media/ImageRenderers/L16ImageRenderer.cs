@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
@@ -12,9 +13,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	class L16ImageRenderer : SinglePlaneImageRenderer
 	{
 		/// <summary>
-		/// Initiaize new <see cref="L16ImageRenderer"/> instance.
+		/// Initialize new <see cref="L16ImageRenderer"/> instance.
 		/// </summary>
-		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16), new string[]{ "L16", "Y16" }))
+		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16), new[]{ "L16", "Y16" }))
 		{ }
 
 
@@ -76,6 +77,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Rendered format.
-		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+		public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+			Task.FromResult(BitmapFormat.Bgra64);
     }
 }

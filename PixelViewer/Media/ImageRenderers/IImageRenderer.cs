@@ -53,17 +53,21 @@ interface IImageRenderer
 	/// Start rendering.
 	/// </summary>
 	/// <param name="source"><see cref="IImageDataSource"/>.</param>
-	/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/> to receive rendered image. The format of buffer should be same as <see cref="RenderedFormat"/>.</param>
+	/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/> to receive rendered image. The format of buffer should be same as result of <see cref="SelectRenderedFormatAsync"/>.</param>
 	/// <param name="renderingOptions">Rendering options.</param>
 	/// <param name="planeOptions">Rendering options for each plane.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Task of rendering.</returns>
 	Task<ImageRenderingResult> RenderAsync(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
 
 
 	/// <summary>
-	/// Get the format rendered by this renderer.
+	/// Select proper format to be rendered by this renderer.
 	/// </summary>
-	BitmapFormat RenderedFormat { get; }
+	/// <param name="source"><see cref="IImageDataSource"/>.</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Task of format selection.</returns>
+	Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default);
 }
 
 

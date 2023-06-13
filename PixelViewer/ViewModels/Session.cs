@@ -3891,11 +3891,42 @@ class Session : ViewModel<IAppSuiteApplication>
             }
 			return false;
 		}) ?? true;
-
-		// create rendered image
+		
+		// select rendered format
 		var cancellationTokenSource = new CancellationTokenSource();
 		this.imageRenderingCancellationTokenSource = cancellationTokenSource;
-		var renderedFormat = imageRenderer.RenderedFormat;
+		BitmapFormat renderedFormat;
+		try
+		{
+			renderedFormat = await imageRenderer.SelectRenderedFormatAsync(imageDataSource, cancellationTokenSource.Token);
+		}
+		catch (Exception ex)
+		{
+			if (ex is TaskCanceledException)
+			{
+				this.Logger.LogWarning("Image rendering for '{sourceFileName}' has been cancelled", sourceFileName);
+				if (this.hasPendingImageRendering)
+				{
+					if (this.IsActivated)
+					{
+						this.Logger.LogWarning("Start next rendering");
+						this.renderImageAction.Schedule();
+					}
+					else
+						this.hasPendingImageRendering = false;
+				}
+			}
+			else
+			{
+				this.Logger.LogError(ex, "Error occurred while selecting rendered format for '{sourceFileName}'", sourceFileName);
+				this.imageRenderingCancellationTokenSource = null;
+				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
+				this.SetValue(IsRenderingImageProperty, false);
+			}
+			return;
+		}
+
+		// create rendered image
 		var renderedImageFrame = isRenderingNeeded ? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight) : null;
 		var colorSpaceConvertedImageFrame = isColorSpaceConversionNeeded
 			? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, screenColorSpace, this.ImageWidth, this.ImageHeight)
@@ -4021,7 +4052,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.renderedImageFrame?.Dispose();
 				this.renderedImageFrame = renderedImageFrame;
 			}
-			this.SetValue(HasRenderingErrorProperty, false);
+			this.ResetValue(HasRenderingErrorProperty);
 			this.SetValue(SourceDataSizeProperty, frameDataSize);
 			this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 			this.canMoveToPreviousFrame.Update(frameNumber > 1);
@@ -4175,7 +4206,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					else
 					{
 						this.Logger.LogError("Unable to request memory usage for Avalonia Bitmap");
-						this.SetValue(HasRenderingErrorProperty, false);
+						this.ResetValue(HasRenderingErrorProperty);
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 						this.SetValue(HistogramsProperty, null);
 						this.SetValue(QuarterSizeRenderedImageProperty, null);
@@ -4287,7 +4318,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.avaRenderedImageMemoryUsageToken = memoryUsageToken;
 			this.canSaveFilteredImage.Update(!this.IsSavingFilteredImage && this.filteredImageFrame != null);
 			this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
-			this.SetValue(HasRenderingErrorProperty, false);
+			this.ResetValue(HasRenderingErrorProperty);
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 			this.SetValue(HistogramsProperty, imageFrame.Histograms);
 			this.SetValue(QuarterSizeRenderedImageProperty, quarterSizeBitmap);

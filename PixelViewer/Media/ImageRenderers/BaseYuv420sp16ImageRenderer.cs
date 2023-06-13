@@ -112,11 +112,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var vuPixelPtr = uvRowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, vuPixelPtr += uvPixelStride, bitmapPixelPtr += 8)
-						{
-							var y1 = bitmapPixelPtr[0];
-							var y2 = bitmapPixelPtr[4];
 							this.SelectUV(yuvExtractor(vuPixelPtr[0], vuPixelPtr[1]), yuvExtractor(vuPixelPtr[2], vuPixelPtr[3]), out bitmapPixelPtr[1], out bitmapPixelPtr[2]);
-						}
 
 						// check state
 						if (cancellationToken.IsCancellationRequested)
@@ -150,7 +146,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Rendered format.
-		public override BitmapFormat RenderedFormat => BitmapFormat.Bgra64;
+		public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+			Task.FromResult(BitmapFormat.Bgra64);
 
 
 		/// <summary>
@@ -170,10 +167,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     class P010ImageRenderer : BaseYuv420p16ImageRenderer
     {
         public P010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P010", true, new ImagePlaneDescriptor[] {
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-        }, new string[]{ "P010" }), 10)
+            new(2),
+            new(2),
+            new(2),
+        }, new[]{ "P010" }), 10)
         { }
 
 
@@ -192,10 +189,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     class P012ImageRenderer : BaseYuv420p16ImageRenderer
     {
         public P012ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P012", true, new ImagePlaneDescriptor[] {
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-        }, new string[]{ "P012" }), 12)
+            new(2),
+            new(2),
+            new(2),
+        }, new[]{ "P012" }), 12)
         { }
 
 
@@ -214,10 +211,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     class P016ImageRenderer : BaseYuv420p16ImageRenderer
     {
         public P016ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P016", true, new ImagePlaneDescriptor[] {
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-            new ImagePlaneDescriptor(2),
-        }, new string[]{ "P016" }), 16)
+            new(2),
+            new(2),
+            new(2),
+        }, new[]{ "P016" }), 16)
         { }
 
 
