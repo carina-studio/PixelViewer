@@ -3941,7 +3941,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			// render
 			if (isRenderingNeeded && renderedImageFrame != null)
 			{
-				renderedImageFrame.RenderingResult = await imageRenderer.Render(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				renderedImageFrame.RenderingResult = await imageRenderer.RenderAsync(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 				renderedImageFrame.ImageRenderer = imageRenderer;
 				renderedImageFrame.RenderingOptions = renderingOptions;
 				renderedImageFrame.PlaneOptions = planeOptionsList;

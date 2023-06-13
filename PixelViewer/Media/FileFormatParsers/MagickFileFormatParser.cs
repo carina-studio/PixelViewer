@@ -1,7 +1,6 @@
 ﻿using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using ImageMagick;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -84,7 +83,7 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             {
                 stream.Position = position;
             }
-        });
+        }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
         if (imageInfo == null || !this.magickFormats.Contains(imageInfo.Format))
@@ -107,7 +106,7 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             {
                 stream.Position = position;
             }
-        });
+        }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
 

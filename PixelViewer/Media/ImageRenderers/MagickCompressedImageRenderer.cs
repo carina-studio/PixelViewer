@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+// ReSharper disable AccessToDisposedClosure
 
 namespace Carina.PixelViewer.Media.ImageRenderers;
 
@@ -46,7 +47,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
             throw new ArgumentException("Unsupported format.");
         imageStream.Position = position;
 
-        // decode inage info
+        // decode image info
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
         var imageInfo = new MagickImageInfoFactory().Create(imageStream);
@@ -189,11 +190,11 @@ class HeifImageRenderer : MagickCompressedImageRenderer
     /// <summary>
     /// Initialize new <see cref="HeifImageRenderer"/> instance.
     /// </summary>
-    public HeifImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "HEIF", new ImagePlaneDescriptor(0), new string[] { "HEIF" }), new[] { MagickFormat.Heic, MagickFormat.Heif })
+    public HeifImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "HEIF", new ImagePlaneDescriptor(0), new[] { "HEIF" }), new[] { MagickFormat.Heic, MagickFormat.Heif })
     { }
 
 
     /// <inheritdoc/>
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
-        Media.FileFormatParsers.HeifFileFormatParser.CheckFileHeader(imageStream);
+        FileFormatParsers.HeifFileFormatParser.CheckFileHeader(imageStream);
 }
