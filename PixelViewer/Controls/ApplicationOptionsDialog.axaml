@@ -84,9 +84,10 @@
 										</MultiBinding>
 									</Grid.IsVisible>
 									<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
-									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
-				</Grid>
-				</StackPanel>
+									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding !HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillCloseAllWindowsToTakeEffect}"/>
+									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
+								</Grid>
+							</StackPanel>
 							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseCompactUserInterface, Mode=TwoWay}"/>
 						</asControls:DialogItemGrid>
 						<Separator Classes="Dialog_Item_Separator"/>
