@@ -42,11 +42,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <summary>
 	/// Maximum value of RGB gain.
 	/// </summary>
-	public static readonly decimal MaxRgbGain = (decimal)Media.ImageRenderers.ImageRenderingOptions.MaxRgbGain;
+	public static readonly double MaxRgbGain = Media.ImageRenderers.ImageRenderingOptions.MaxRgbGain;
 	/// <summary>
 	/// Minimum value of RGB gain.
 	/// </summary>
-	public static readonly decimal MinRgbGain = (decimal)Media.ImageRenderers.ImageRenderingOptions.MinRgbGain;
+	public static readonly double MinRgbGain = Media.ImageRenderers.ImageRenderingOptions.MinRgbGain;
 
 
 	/// <summary>

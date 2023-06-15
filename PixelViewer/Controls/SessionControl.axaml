@@ -663,16 +663,13 @@
 
 						<!-- Styles -->
 						<StackPanel.Styles>
-							<Style Selector="abControls|IntegerTextBox">
-								<Setter Property="IsNullValueAllowed" Value="False"/>
-							</Style>
 							<Style Selector="TextBlock">
 								<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
 							</Style>
 						</StackPanel.Styles>
 
 						<!-- Profile -->
-						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Profile}"/>
+						<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.Profile}"/>
 						<ComboBox Classes="Dialog_ComboBox" ItemsSource="{Binding Profiles}" SelectedItem="{Binding Profile, Mode=TwoWay}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
@@ -688,19 +685,19 @@
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Data offset -->
-						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.DataOffset}"/>
-						<abControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
+						<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.DataOffset}"/>
+						<abControls:IntegerTextBox Classes="Dialog_TextBlock" IsNullValueAllowed="False" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Frame padding bytes -->
 						<StackPanel IsVisible="{Binding HasMultipleFrames}">
-							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.FramePaddingSize}"/>
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.FramePaddingSize}"/>
 							<abControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
 						<!-- Image renderer -->
-						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
+						<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.ImageRenderer}"/>
 						<ComboBox Name="imageRendererComboBox" Classes="Dialog_ComboBox" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
@@ -717,21 +714,21 @@
 
 						<!-- Byte ordering -->
 						<StackPanel IsVisible="{Binding HasMultipleByteOrderings}">
-							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ByteOrdering}"/>
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.ByteOrdering}"/>
 							<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type app:ByteOrdering}" SelectedItem="{Binding ByteOrdering, Mode=TwoWay}"/>
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
 						<!-- Bayer Pattern -->
 						<StackPanel IsVisible="{Binding IsBayerPatternSupported}">
-							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BayerPattern}"/>
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.BayerPattern}"/>
 							<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:BayerPattern}" SelectedItem="{Binding BayerPattern, Mode=TwoWay}"/>
 							<Separator Classes="Dialog_Separator"/>
 						</StackPanel>
 
 						<!-- YUV to RGB converter -->
 						<StackPanel IsVisible="{Binding IsYuvToBgraConverterSupported}">
-							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.YuvToBgraConverter}"/>
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.YuvToBgraConverter}"/>
 							<ComboBox Classes="Dialog_ComboBox" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding YuvToBgraConverter, Mode=TwoWay}">
 								<ComboBox.ItemTemplate>
 									<DataTemplate>
@@ -743,7 +740,7 @@
 						</StackPanel>
 
 						<!-- Color space -->
-						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
+						<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.ColorSpace}"/>
 						<Panel>
 							<abControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{DynamicResource String/SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
 							<StackPanel IsVisible="{Binding IsColorSpaceManagementEnabled}">
@@ -766,28 +763,28 @@
 									</ComboBox.ItemTemplate>
 								</ComboBox>
 								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Command="{Binding $parent[UserControl].ShowColorSpaceInfo}" Text="{DynamicResource String/Common.Details.WithDialog}"/>
-								<StackPanel IsVisible="{Binding !ColorSpace.IsLinear}">
-									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.UseLinearColorSpace}"/>
-									<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding UseLinearColorSpace, Mode=TwoWay}"/>
-								</StackPanel>
+								<Separator Classes="Dialog_Separator" IsVisible="{Binding !ColorSpace.IsLinear}"/>
+								<Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !ColorSpace.IsLinear}">
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.UseLinearColorSpace}" VerticalAlignment="Center"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseLinearColorSpace, Mode=TwoWay}"/>
+								</Grid>
 							</StackPanel>
 						</Panel>
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Demosaicing -->
-						<StackPanel IsVisible="{Binding IsDemosaicingSupported}">
-							<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.Demosaicing}"/>
-							<ToggleSwitch Classes="Dialog_ToggleSwitch" IsChecked="{Binding Demosaicing, Mode=TwoWay}"/>
-							<Separator Classes="Dialog_Separator"/>
-						</StackPanel>
+						<Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsDemosaicingSupported}">
+							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.Demosaicing}" VerticalAlignment="Center"/>
+							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding Demosaicing, Mode=TwoWay}"/>
+						</Grid>
+						<Separator Classes="Dialog_Separator" IsVisible="{Binding IsDemosaicingSupported}"/>
 
 						<!-- Dimensions -->
-						<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
+						<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
 						<Grid ColumnDefinitions="*,Auto,*">
-							<abControls:IntegerTextBox Classes="Dialog_TextBox" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
-							<TextBlock Grid.Column="1" Text=" × " VerticalAlignment="Center"/>
-							<abControls:IntegerTextBox Classes="Dialog_TextBox" Grid.Column="2" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
+							<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
+							<TextBlock Grid.Column="1" Margin="3,0,3,0" Text="×" VerticalAlignment="Center"/>
+							<abControls:IntegerTextBox Classes="Dialog_TextBox" Grid.Column="2" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
 						</Grid>
 						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
 						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}" IsVisible="{Binding !IsCompressedImageFormat}"/>
@@ -796,21 +793,21 @@
 						<!-- Plane options #1 -->
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
 							<StackPanel>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" Value="{Binding RowStride1, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RowStride}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride1}"/>
-								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
-								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
 								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels1}">
 									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="0" Value="{Binding BlackLevel1, Mode=TwoWay}"/>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel1, Mode=TwoWay}"/>
 									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="1" Value="{Binding WhiteLevel1, Mode=TwoWay}"/>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel1, Mode=TwoWay}"/>
 								</StackPanel>
 							</StackPanel>
 						</Expander>
@@ -819,21 +816,21 @@
 						<!-- Plane options #2 -->
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
 							<StackPanel>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" Value="{Binding RowStride2, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RowStride}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride2}"/>
-								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
-								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
 								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels2}">
 									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="0" Value="{Binding BlackLevel2, Mode=TwoWay}"/>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel2, Mode=TwoWay}"/>
 									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="1" Value="{Binding WhiteLevel2, Mode=TwoWay}"/>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel2, Mode=TwoWay}"/>
 								</StackPanel>
 							</StackPanel>
 						</Expander>
@@ -842,21 +839,21 @@
 						<!-- Plane options #3 -->
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
 							<StackPanel>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" Value="{Binding RowStride3, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RowStride}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride3}"/>
-								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
-								<TextBlock Classes="Dialog_TextBlock" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{DynamicResource String/SessionControl.EffectiveBits}"/>
+								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
 								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels3}">
 									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="0" Value="{Binding BlackLevel3, Mode=TwoWay}"/>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.BlackLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel3, Mode=TwoWay}"/>
 									<Separator Classes="Dialog_Separator"/>
-									<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" Minimum="1" Value="{Binding WhiteLevel3, Mode=TwoWay}"/>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.WhiteLevel}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel3, Mode=TwoWay}"/>
 								</StackPanel>
 							</StackPanel>
 						</Expander>
@@ -865,14 +862,14 @@
 						<!-- RGB gain -->
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.RgbGain}" IsExpanded="True" IsVisible="{Binding IsRgbGainSupported}">
 							<StackPanel>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.RedColorGain}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Increment="0.1" Value="{Binding RedColorGain, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RedColorGain}"/>
+								<abControls:RealNumberTextBox Classes="Dialog_TextBox" DefaultValue="1" IsNullValueAllowed="False" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Value="{Binding RedColorGain, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator"/>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.GreenColorGain}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Increment="0.1" Value="{Binding GreenColorGain, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.GreenColorGain}"/>
+								<abControls:RealNumberTextBox Classes="Dialog_TextBox" DefaultValue="1" IsNullValueAllowed="False" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Value="{Binding GreenColorGain, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator"/>
-								<TextBlock Classes="Dialog_TextBlock" Text="{DynamicResource String/SessionControl.BlueColorGain}"/>
-								<NumericUpDown Classes="Dialog_NumericUpDown" FormatString="F2" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Increment="0.1" Value="{Binding BlueColorGain, Mode=TwoWay}"/>
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.BlueColorGain}"/>
+								<abControls:RealNumberTextBox Classes="Dialog_TextBox" DefaultValue="1" IsNullValueAllowed="False" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Value="{Binding BlueColorGain, Mode=TwoWay}"/>
 								<Separator Classes="Dialog_Separator"/>
 								<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{DynamicResource String/SessionControl.SelectRgbGain}"/>
 								<Separator Classes="Dialog_Separator_Small"/>
