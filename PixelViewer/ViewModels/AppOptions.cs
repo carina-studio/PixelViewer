@@ -205,6 +205,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EvaluateImageRendererByFileName));
 			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
+			else if (key == SettingKeys.Render32BitColorsOnly)
+				this.OnPropertyChanged(nameof(this.Render32BitColorsOnly));
 			else if (key == SettingKeys.ResetFilterParamsAfterOpeningSourceFile)
 				this.OnPropertyChanged(nameof(this.ResetFilterParamsAfterOpeningSourceFile));
 			else if (key == SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions)
@@ -225,6 +227,16 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.UseDefaultImageRendererAfterOpeningSourceFile));
 			else if (key == SettingKeys.UseSystemScreenColorSpace)
 				this.OnPropertyChanged(nameof(this.UseSystemScreenColorSpace));
+		}
+		
+		
+		/// <summary>
+		/// Whether using 32-bit colors to render images only or not.
+		/// </summary>
+		public bool Render32BitColorsOnly
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.Render32BitColorsOnly);
+			set => this.Settings.SetValue<bool>(SettingKeys.Render32BitColorsOnly, value);
 		}
 
 

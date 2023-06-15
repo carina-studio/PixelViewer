@@ -31,6 +31,8 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">影像濾鏡</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">影像繪製記憶體使用上限 (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly">僅使用 32 位元色彩繪製影像</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly.Description">內部仍可能使用更高位元數以處理影像。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">開啟檔案後重設濾鏡參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">儲存影像時套用目前的旋轉方向</sys:String>

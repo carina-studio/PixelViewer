@@ -233,6 +233,16 @@
 							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelXyzColor, Mode=TwoWay}"/>
 						</asControls:DialogItemGrid>
 						<Separator Classes="Dialog_Item_Separator"/>
+						
+						<!-- Use 32-bit colors only -->
+						<asControls:DialogItemGrid>
+							<StackPanel Classes="Dialog_Item_Text_Container">
+								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.Render32BitColorsOnly}"/>
+								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.Render32BitColorsOnly.Description}"/>
+							</StackPanel>
+							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding Render32BitColorsOnly, Mode=TwoWay}"/>
+						</asControls:DialogItemGrid>
+						<Separator Classes="Dialog_Item_Separator"/>
 
 						<!-- Enable color space management -->
 						<asControls:DialogItemGrid>

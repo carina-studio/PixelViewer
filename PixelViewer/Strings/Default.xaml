@@ -31,6 +31,8 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">Image filter</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max memory usage of all rendered images (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly">Use 32-bit color only to render image</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly.Description">May still use more bits internally to process images.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">Reset filter parameters after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">Apply current rotation on saved images.</sys:String>

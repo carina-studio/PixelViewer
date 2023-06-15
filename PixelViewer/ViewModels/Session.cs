@@ -3349,6 +3349,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		else if (key == SettingKeys.EnableColorSpaceManagement)
 			this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
+		else if (key == SettingKeys.Render32BitColorsOnly)
+			this.RenderImageCommand.TryExecute();
     }
 
 
@@ -4158,7 +4160,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			// released cached image if it is not suitable
 			var width = imageFrame.BitmapBuffer.Width;
 			var height = imageFrame.BitmapBuffer.Height;
-			var avaloniaPixelFormat = this.Settings.GetValueOrDefault(SettingKeys.Render32BitsColorsOnly)
+			var avaloniaPixelFormat = this.Settings.GetValueOrDefault(SettingKeys.Render32BitColorsOnly)
 				? PixelFormats.Bgra8888
 				: imageFrame.BitmapBuffer.Format switch
 				{

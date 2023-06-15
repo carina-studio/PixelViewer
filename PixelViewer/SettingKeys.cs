@@ -84,9 +84,9 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<long> MaxRenderedImagesMemoryUsageMB = new SettingKey<long>(nameof(MaxRenderedImagesMemoryUsageMB), Environment.Is64BitProcess ? 2048 : 1024);
 		/// <summary>
-		/// Whether using 32-bits colors to render images only or not.
+		/// Whether using 32-bit colors to render images only or not.
 		/// </summary>
-		public static readonly SettingKey<bool> Render32BitsColorsOnly = new (nameof(Render32BitsColorsOnly), false);
+		public static readonly SettingKey<bool> Render32BitColorsOnly = new (nameof(Render32BitColorsOnly), false);
 		/// <summary>
 		/// Reset image filter parameters after opening image source file.
 		/// </summary>
