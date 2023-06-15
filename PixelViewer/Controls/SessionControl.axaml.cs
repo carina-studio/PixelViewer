@@ -26,6 +26,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -187,6 +188,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// setup controls
 		void SetupFilterParamsSliderAndButtons(string name, int group)
 		{
+			var doubleClickedHandler = group switch
+			{
+				BrightnessAdjustmentGroup => (Action<Control>)this.OnDoubleClickedOnBrightnessAdjustmentUI,
+				ColorAdjustmentGroup => this.OnDoubleClickedOnColorAdjustmentUI,
+				ContrastAdjustmentGroup => this.OnDoubleClickedOnContrastAdjustmentUI,
+				_ => throw new ArgumentException(),
+			};
 			var pointerPressedHandler = group switch
 			{
 				BrightnessAdjustmentGroup => (EventHandler<PointerPressedEventArgs>)this.OnPointerPressedOnBrightnessAdjustmentUI,
@@ -215,6 +223,27 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			{
 				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
 				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
+				it.TemplateApplied += (_, e) =>
+				{
+					e.NameScope.Find<Track>("PART_Track")?.Thumb?.Let(thumb =>
+					{
+						var doubleTappedWatch = new Stopwatch();
+						thumb.DoubleTapped += (_, _) =>
+						{
+							doubleTappedWatch.Start();
+						};
+						thumb.AddHandler(PointerReleasedEvent, (_, e) =>
+						{
+							if (e.InitialPressMouseButton == MouseButton.Left
+							    && doubleTappedWatch.IsRunning)
+							{
+								if (doubleTappedWatch.ElapsedMilliseconds <= 300)
+									doubleClickedHandler(it);
+								doubleTappedWatch.Reset();
+							}
+						}, RoutingStrategies.Tunnel);
+					});
+				};
 			});
 		}
 		SetupFilterParamsSliderAndButtons("blueColorAdjustment", ColorAdjustmentGroup);
@@ -776,6 +805,49 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// call base
 		base.OnDetachedFromLogicalTree(e);
 	}
+    
+    
+    // Called when double clicked on brightness adjustment UI.
+    void OnDoubleClickedOnBrightnessAdjustmentUI(Control control)
+    {
+	    if (this.DataContext is not Session session)
+		    return;
+	    string controlName = control.Name ?? "";
+	    if (controlName.StartsWith("brightness"))
+		    session.BrightnessAdjustment = 0;
+	    else if (controlName.StartsWith("highlight"))
+		    session.HighlightAdjustment = 0;
+	    else if (controlName.StartsWith("shadow"))
+		    session.ShadowAdjustment = 0;
+    }
+    
+    
+    // Called when double clicked on color adjustment UI.
+    void OnDoubleClickedOnColorAdjustmentUI(Control control)
+    {
+	    if (this.DataContext is not Session session)
+		    return;
+	    string controlName = control.Name ?? "";
+	    if (controlName.StartsWith("red"))
+		    session.RedColorAdjustment = 0;
+	    else if (controlName.StartsWith("green"))
+		    session.GreenColorAdjustment = 0;
+	    else if (controlName.StartsWith("blue"))
+		    session.BlueColorAdjustment = 0;
+	    else if (controlName.StartsWith("saturation"))
+		    session.SaturationAdjustment = 0;
+	    else if (controlName.StartsWith("vibrance"))
+		    session.VibranceAdjustment = 0;
+    }
+    
+    
+    // Called when double clicked on contrast adjustment UI.
+    void OnDoubleClickedOnContrastAdjustmentUI(Control control)
+    {
+	    if (this.DataContext is not Session session)
+		    return;
+	    session.ContrastAdjustment = 0;
+    }
 
 
 	// Called when drag over.
