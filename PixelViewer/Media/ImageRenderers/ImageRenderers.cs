@@ -1,5 +1,4 @@
 ﻿using CarinaStudio;
-using System;
 using System.Collections.Generic;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
@@ -69,12 +68,13 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new BayerPattern12MipiImageRenderer(),
 				new BayerPattern16ImageRenderer(),
 			});
-			it.Add(CarinaStudio.Platform.IsMacOS 
+			it.Add(Platform.IsMacOS 
 				? new MacOSHeifImageRenderer() 
 				: new HeifImageRenderer());
 			it.AddRange(new IImageRenderer[] {
 				new JpegImageRenderer(),
 				new PngImageRenderer(),
+				new WebPImageRenderer(),
 			});
 
 		}).AsReadOnly();

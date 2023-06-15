@@ -24,6 +24,7 @@ namespace Carina.PixelViewer.Media
         static volatile FileFormat? png;
         static volatile FileFormat? rawBgra;
         static volatile FileFormat? yuv4mpeg2;
+        static volatile FileFormat? webP;
 
 
         /// <summary>
@@ -69,6 +70,7 @@ namespace Carina.PixelViewer.Media
             png = Register(new FileFormat(app, "Png", new[] { ".png" }));
             rawBgra = Register(new FileFormat(app, "RawBgra", new[] { ".bgra" }));
             yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new[] { ".y4m" }));
+            webP = Register(new FileFormat(app, "WebP", new[] { ".webp" }));
         }
 
 
@@ -128,5 +130,11 @@ namespace Carina.PixelViewer.Media
         /// YUV4MPEG2.
         /// </summary>
         public static FileFormat Yuv4Mpeg2 => yuv4mpeg2 ?? throw new InvalidOperationException("File format is not ready yet.");
+        
+        
+        /// <summary>
+        /// WebP.
+        /// </summary>
+        public static FileFormat WebP => webP ?? throw new InvalidOperationException("File format is not ready yet.");
     }
 }

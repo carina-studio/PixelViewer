@@ -127,6 +127,7 @@
 	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">Raw 32/64-bit BGRA pixels</sys:String>
 	<sys:String x:Key="String/FileType.Yuv4Mpeg2">YUV4MPEG2</sys:String>
+	<sys:String x:Key="String/FileType.WebP">WebP image</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to frame</sys:String>
@@ -154,6 +155,7 @@
 	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16-bit YUV420sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YUVY">YUVY (YUV422)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YV12">YV12 (YUV420)</sys:String>
+	<sys:String x:Key="String/ImageFormat.WebP">WebP</sys:String>
 
 	<!-- ImageFormatCategory -->
 	<sys:String x:Key="String/ImageFormatCategory.ARGB">ARGB</sys:String>

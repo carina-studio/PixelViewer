@@ -104,6 +104,7 @@
 	<sys:String x:Key="String/FileType.Jpeg">JPEG 图像</sys:String>
 	<sys:String x:Key="String/FileType.Png">可携式网路图像 (PNG)</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位 BGRA 像素</sys:String>
+	<sys:String x:Key="String/FileType.WebP">WebP 图像</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至画面</sys:String>

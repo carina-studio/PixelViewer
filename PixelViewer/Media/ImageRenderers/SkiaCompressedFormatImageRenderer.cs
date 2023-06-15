@@ -213,3 +213,21 @@ class PngImageRenderer : SkiaCompressedFormatImageRenderer
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
         FileFormatParsers.PngFileFormatParser.CheckFileHeader(imageStream);
 }
+
+
+/// <summary>
+/// <see cref="IImageRenderer"/> for WebP format.
+/// </summary>
+class WebPImageRenderer : SkiaCompressedFormatImageRenderer
+{
+    /// <summary>
+    /// Initialize new <see cref="WebPImageRenderer"/> instance.
+    /// </summary>
+    public WebPImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "WebP", new ImagePlaneDescriptor(0), new[] { "WebP" }), SKEncodedImageFormat.Webp)
+    { }
+
+
+    /// <inheritdoc/>
+    protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
+        FileFormatParsers.WebPFileFormatParser.CheckFileHeader(imageStream);
+}

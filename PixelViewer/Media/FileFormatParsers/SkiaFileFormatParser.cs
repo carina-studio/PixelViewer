@@ -82,7 +82,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 // Please refer to https://github.com/mono/SkiaSharp/issues/1551
                 using var data = SKData.Create(stream);
                 return SKCodec.Create(data);
-            });
+            }, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
             if (codec == null || codec.EncodedFormat != this.encodedFormat)
@@ -98,9 +98,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     stream.Position = position;
                     hasIccProfile = this.OnSeekToIccProfile(stream);
                 }
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch
                 { }
-            });
+            }, cancellationToken);
             if (hasIccProfile)
             {
                 // read ICC profile into memory
@@ -118,7 +119,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     {
                         stream.Position = position;
                     }
-                });
+                }, cancellationToken);
                 if (cancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException();
                 
@@ -131,6 +132,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         colorSpaceFromIccProfile = await ColorSpace.LoadFromIccProfileAsync(iccProfileStream, ColorSpaceSource.Embedded, cancellationToken);
                     }
                 }
+                // ReSharper disable once EmptyGeneralCatchClause
                 catch
                 { }
                 if (cancellationToken.IsCancellationRequested)

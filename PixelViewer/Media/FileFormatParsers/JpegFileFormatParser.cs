@@ -83,8 +83,8 @@ class JpegFileFormatParser : SkiaFileFormatParser
                         return;
                     }
                     var entryReader = new IfdEntryReader(new MemoryStream(segmentDataBuffer).Also(it => it.Position = 6));
-                    var ushortData = (ushort[]?)null;
-                    var uintData = (uint[]?)null;
+                    ushort[]? ushortData;
+                    uint[]? uintData;
                     while (entryReader.Read())
                     {
                         switch (entryReader.CurrentIfdName)
@@ -118,7 +118,7 @@ class JpegFileFormatParser : SkiaFileFormatParser
                 else
                     stream.Seek(segmentSize - 2, SeekOrigin.Current);
             }
-        });
+        }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
 
