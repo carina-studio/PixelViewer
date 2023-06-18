@@ -52,7 +52,7 @@
 		<CFBundleExecutable>PixelViewer</CFBundleExecutable>
 		<CFBundleIdentifier>com.carina-studio.pixelviewer</CFBundleIdentifier>
 		<CFBundleShortVersionString>$(Version)</CFBundleShortVersionString>
-		<CFBundleIconFile>PixelViewer.icns</CFBundleIconFile>
+		<CFBundleIconFile>PixelViewer.2.icns</CFBundleIconFile>
 		<CFBundlePackageType>APPL</CFBundlePackageType>
 		<NSPrincipalClass>NSApplication</NSPrincipalClass>
     	<NSHighResolutionCapable>True</NSHighResolutionCapable>
