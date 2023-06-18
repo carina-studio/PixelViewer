@@ -4,7 +4,7 @@
 		<Version>3.0.0.0</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
-		<Copyright>©2021 Carina Studio</Copyright>
+		<Copyright>©2021-2023 Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -56,7 +56,7 @@
 		<CFBundlePackageType>APPL</CFBundlePackageType>
 		<NSPrincipalClass>NSApplication</NSPrincipalClass>
     	<NSHighResolutionCapable>True</NSHighResolutionCapable>
-		<NSHumanReadableCopyright>©2022 Carina Studio</NSHumanReadableCopyright>
+		<NSHumanReadableCopyright>©2021-2023 Carina Studio</NSHumanReadableCopyright>
 	</PropertyGroup>
 
 	<ItemGroup>
