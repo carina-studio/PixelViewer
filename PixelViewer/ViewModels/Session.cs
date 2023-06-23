@@ -796,6 +796,11 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// create commands
 		var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceFileOpenedProperty);
+		this.AlignImageHeightCommand = new Command<int>(this.AlignImageHeight, isSrcFileOpenedObservable);
+		this.AlignImageWidthCommand = new Command<int>(this.AlignImageWidth, isSrcFileOpenedObservable);
+		this.AlignRowStride1Command = new Command<int>(this.AlignRowStride1, isSrcFileOpenedObservable);
+		this.AlignRowStride2Command = new Command<int>(this.AlignRowStride2, isSrcFileOpenedObservable);
+		this.AlignRowStride3Command = new Command<int>(this.AlignRowStride3, isSrcFileOpenedObservable);
 		this.ApplyProfileCommand = new Command(this.ApplyProfile, this.canApplyProfile);
 		this.CloseSourceFileCommand = new Command(() => this.CloseSourceFile(false), isSrcFileOpenedObservable);
 		this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
@@ -1055,6 +1060,76 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(IsActivatedProperty, true);
 		}
 		return token;
+	}
+	
+	
+	// Change height of image with given alignment.
+	void AlignImageHeight(int bytes) =>
+		this.SetValue(ImageHeightProperty, this.AlignToInteger(this.GetValue(ImageHeightProperty), bytes));
+	
+	
+	/// <summary>
+	/// Command to change height of image with given alignment.
+	/// </summary>
+	/// <remarks>The parameter is number to align, type is <see cref="int"/>.</remarks>
+	public ICommand AlignImageHeightCommand { get; }
+	
+	
+	// Change width of image with given alignment.
+	void AlignImageWidth(int bytes) =>
+		this.SetValue(ImageWidthProperty, this.AlignToInteger(this.GetValue(ImageWidthProperty), bytes));
+	
+	
+	/// <summary>
+	/// Command to change width of image with given alignment.
+	/// </summary>
+	/// <remarks>The parameter is number to align, type is <see cref="int"/>.</remarks>
+	public ICommand AlignImageWidthCommand { get; }
+	
+	
+	// Change row stride of 1st plane of image with given alignment.
+	void AlignRowStride1(int bytes) =>
+		this.ChangeRowStride(0, this.AlignToInteger(this.rowStrides[0], bytes));
+	
+	
+	/// <summary>
+	/// Command to change row stride of 1st plane of image with given alignment.
+	/// </summary>
+	/// <remarks>The parameter is number to align, type is <see cref="int"/>.</remarks>
+	public ICommand AlignRowStride1Command { get; }
+	
+	
+	// Change row stride of 2nd plane of image with given alignment.
+	void AlignRowStride2(int bytes) =>
+		this.ChangeRowStride(1, this.AlignToInteger(this.rowStrides[1], bytes));
+	
+	
+	/// <summary>
+	/// Command to change row stride of 2nd plane of image with given alignment.
+	/// </summary>
+	/// <remarks>The parameter is number to align, type is <see cref="int"/>.</remarks>
+	public ICommand AlignRowStride2Command { get; }
+	
+	
+	// Change row stride of 3rd plane of image with given alignment.
+	void AlignRowStride3(int bytes) =>
+		this.ChangeRowStride(2, this.AlignToInteger(this.rowStrides[2], bytes));
+	
+	
+	/// <summary>
+	/// Command to change row stride of 3rd plane of image with given alignment.
+	/// </summary>
+	/// <remarks>The parameter is number to align, type is <see cref="int"/>.</remarks>
+	public ICommand AlignRowStride3Command { get; }
+
+
+	// Align value to given integer.
+	int AlignToInteger(int value, int n)
+	{
+		if (n <= 1)
+			return value;
+		var remaining = value % n;
+		return remaining > 0 ? value + n - remaining : value;
 	}
 
 

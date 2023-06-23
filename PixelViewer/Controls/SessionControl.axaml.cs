@@ -83,6 +83,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Fields.
+	readonly ContextMenu alignToIntegerMenu;
 	Avalonia.Controls.Window? attachedWindow;
 	readonly ToggleButton brightnessAndContrastAdjustmentButton;
 	readonly Popup brightnessAndContrastAdjustmentPopup;
@@ -248,6 +249,22 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 		SetupFilterParamsSliderAndButtons("blueColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("brightnessAdjustment", BrightnessAdjustmentGroup);
+		this.alignToIntegerMenu = ((ContextMenu)this.Resources[nameof(alignToIntegerMenu)].AsNonNull()).Also(it =>
+		{
+			it.Closed += (_, _) => this.SynchronizationContext.Post(() =>
+			{
+				if (it.PlacementTarget is ToggleButton toggleButton)
+				{
+					toggleButton.IsChecked = false;
+					(toggleButton.Tag as Control)?.Focus();
+				}
+			});
+			it.Opened += (_, _) => this.SynchronizationContext.Post(() =>
+			{
+				if (it.PlacementTarget is ToggleButton toggleButton)
+					toggleButton.IsChecked = true;
+			});
+		});
 		this.brightnessAndContrastAdjustmentButton = this.FindControl<ToggleButton>(nameof(brightnessAndContrastAdjustmentButton)).AsNonNull();
 		this.brightnessAndContrastAdjustmentPopup = this.FindControl<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).AsNonNull().Also(it =>
 		{
@@ -709,6 +726,29 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// move to frame
 		if (this.DataContext == session)
 			session.FrameNumber = selectFrameNumber.Value;
+	}
+
+
+	/// <summary>
+	/// Called when clicking on menu item of align to integer.
+	/// </summary>
+	public void OnAlignToIntegerMenuItemClick(object? sender, RoutedEventArgs e)
+	{
+		if (this.DataContext is not Session session)
+			return;
+		if (sender is not MenuItem menuItem || !int.TryParse(menuItem.Tag as string, out var bytes))
+			return;
+		if (this.alignToIntegerMenu.PlacementTarget is not Control control)
+			return;
+		(control.Name switch
+		{
+			"alignImageHeightButton" => session.AlignImageHeightCommand,
+			"alignImageWidthButton" => session.AlignImageWidthCommand,
+			"alignRowStride1Button" => session.AlignRowStride1Command,
+			"alignRowStride2Button" => session.AlignRowStride2Command,
+			"alignRowStride3Button" => session.AlignRowStride3Command,
+			_ => null,
+		})?.TryExecute(bytes);
 	}
 
 
@@ -1690,6 +1730,18 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		else if (offsetY + viewportSize.Height > contentSize.Height)
 			offsetY = contentSize.Height - viewportSize.Height;
 		this.imageScrollViewer.Offset = new Vector(offsetX, offsetY);
+	}
+
+
+	/// <summary>
+	/// Show menu of aligning to integer.
+	/// </summary>
+	public void ShowAlignToIntegerMenu(object? parameters)
+	{
+		if (parameters is not Control control)
+			return;
+		this.alignToIntegerMenu.PlacementTarget = control;
+		this.alignToIntegerMenu.Open(control);
 	}
 
 

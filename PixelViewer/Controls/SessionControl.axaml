@@ -24,6 +24,16 @@
 	
 	<!-- Resources -->
 	<UserControl.Resources>
+		
+		<!-- Align to bytes -->
+		<ContextMenu x:Key="alignToIntegerMenu">
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="4" Tag="4"/>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="8" Tag="8"/>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="16" Tag="16"/>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="32" Tag="32"/>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="64" Tag="64"/>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="128" Tag="128"/>
+		</ContextMenu>
 
 		<!-- Evaluate image dimensions -->
 		<ContextMenu x:Key="evaluateImageDimensionsMenu" Placement="Bottom">
@@ -40,7 +50,7 @@
 		</ContextMenu>
 
 		<!-- File actions -->
-		<ContextMenu x:Key="fileActionsMenu" PlacementMode="Top">
+		<ContextMenu x:Key="fileActionsMenu" Placement="Top">
 			<MenuItem Command="{Binding $parent[UserControl].CopyFileName}" Header="{DynamicResource String/SessionControl.CopyFileName}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Copy.Outline}"/>
@@ -60,7 +70,7 @@
 		</ContextMenu>
 
 		<!-- Other actions -->
-		<ContextMenu x:Key="otherActionsMenu" PlacementMode="Bottom">
+		<ContextMenu x:Key="otherActionsMenu" Placement="Bottom">
 			<MenuItem Command="{Binding $parent[UserControl].Application.ShowApplicationOptionsDialog}" Header="{DynamicResource String/SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Settings.Outline}"/>
@@ -782,9 +792,29 @@
 						<!-- Dimensions -->
 						<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.ImageDimensions}"/>
 						<Grid ColumnDefinitions="*,Auto,*">
-							<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
+							<Panel>
+								<abControls:IntegerTextBox Name="imageWidthTextBox" Classes="Dialog_TextBox,WithInPlaceAction" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}"/>
+								<Panel Classes="TextBox_InPlaceActions">
+									<ToggleButton Name="alignImageWidthButton" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #imageWidthTextBox}" ToolTip.Tip="{DynamicResource String/SessionControl.AlignToInteger}" VerticalAlignment="Center">
+										<Panel>
+											<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+											<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+										</Panel>
+									</ToggleButton>
+								</Panel>
+							</Panel>
 							<TextBlock Grid.Column="1" Margin="3,0,3,0" Text="×" VerticalAlignment="Center"/>
-							<abControls:IntegerTextBox Classes="Dialog_TextBox" Grid.Column="2" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
+							<Panel Grid.Column="2">
+								<abControls:IntegerTextBox Name="imageHeightTextBox" Classes="Dialog_TextBox,WithInPlaceAction" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}"/>
+								<Panel Classes="TextBox_InPlaceActions">
+									<ToggleButton Name="alignImageHeightButton" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #imageHeightTextBox}" ToolTip.Tip="{DynamicResource String/SessionControl.AlignToInteger}" VerticalAlignment="Center">
+										<Panel>
+											<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Vertical}"/>
+											<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Vertical.Light}"/>
+										</Panel>
+									</ToggleButton>
+								</Panel>
+							</Panel>
 						</Grid>
 						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
 						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}" IsVisible="{Binding !IsCompressedImageFormat}"/>
@@ -794,7 +824,17 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride1, Mode=TwoWay}"/>
+								<Panel>
+									<abControls:IntegerTextBox Name="rowStride1TextBox" Classes="Dialog_TextBox,WithInPlaceAction" IsNullValueAllowed="False" Value="{Binding RowStride1, Mode=TwoWay}"/>
+									<Panel Classes="TextBox_InPlaceActions">
+										<ToggleButton Name="alignRowStride1Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride1TextBox}" ToolTip.Tip="{DynamicResource String/SessionControl.AlignToInteger}" VerticalAlignment="Center">
+											<Panel>
+												<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+												<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+											</Panel>
+										</ToggleButton>
+									</Panel>
+								</Panel>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride1}"/>
 								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
@@ -817,7 +857,17 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride2, Mode=TwoWay}"/>
+								<Panel>
+									<abControls:IntegerTextBox Name="rowStride2TextBox" Classes="Dialog_TextBox,WithInPlaceAction" IsNullValueAllowed="False" Value="{Binding RowStride2, Mode=TwoWay}"/>
+									<Panel Classes="TextBox_InPlaceActions">
+										<ToggleButton Name="alignRowStride2Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride2TextBox}" ToolTip.Tip="{DynamicResource String/SessionControl.AlignToInteger}" VerticalAlignment="Center">
+											<Panel>
+												<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+												<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+											</Panel>
+										</ToggleButton>
+									</Panel>
+								</Panel>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride2}"/>
 								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
@@ -840,7 +890,17 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{DynamicResource String/SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
 							<StackPanel>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/SessionControl.RowStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride3, Mode=TwoWay}"/>
+								<Panel>
+									<abControls:IntegerTextBox Name="rowStride3TextBox" Classes="Dialog_TextBox,WithInPlaceAction" IsNullValueAllowed="False" Value="{Binding RowStride3, Mode=TwoWay}"/>
+									<Panel Classes="TextBox_InPlaceActions">
+										<ToggleButton Name="alignRowStride3Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride3TextBox}" ToolTip.Tip="{DynamicResource String/SessionControl.AlignToInteger}" VerticalAlignment="Center">
+											<Panel>
+												<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+												<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+											</Panel>
+										</ToggleButton>
+									</Panel>
+								</Panel>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding IsAdjustablePixelStride3}"/>
 								<TextBlock Classes="Dialog_TextBlock_Label" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{DynamicResource String/SessionControl.PixelStride}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>

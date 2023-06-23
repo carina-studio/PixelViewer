@@ -196,6 +196,7 @@
 	<sys:String x:Key="String/Session.EmptyTitle">Empty tab</sys:String>
 
 	<!-- SessionControl -->
+	<sys:String x:Key="String/SessionControl.AlignToInteger">Align to integer</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
