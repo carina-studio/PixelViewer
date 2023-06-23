@@ -17,7 +17,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 abstract class BaseImageRenderer : IImageRenderer
 {
 	// Static fields.
-	static readonly TaskFactory RenderingTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(Math.Min(2, Environment.ProcessorCount)));
+	static readonly TaskFactory RenderingTaskFactory = new(new FixedThreadsTaskScheduler(Math.Min(2, Environment.ProcessorCount)));
 
 
 	/// <summary>
@@ -206,7 +206,7 @@ abstract class BaseImageRenderer : IImageRenderer
 
 
 	/// <inheritdoc/>
-	public virtual Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default) =>
+	public virtual Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
 		Task.FromResult(BitmapFormat.Bgra32);
 
 

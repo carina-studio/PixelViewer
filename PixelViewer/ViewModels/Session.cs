@@ -3975,7 +3975,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		BitmapFormat renderedFormat;
 		try
 		{
-			renderedFormat = await imageRenderer.SelectRenderedFormatAsync(imageDataSource, cancellationTokenSource.Token);
+			renderedFormat = await imageRenderer.SelectRenderedFormatAsync(imageDataSource, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 			this.Logger.LogTrace("Select {format} as rendered format", renderedFormat);
 		}
 		catch (Exception ex)

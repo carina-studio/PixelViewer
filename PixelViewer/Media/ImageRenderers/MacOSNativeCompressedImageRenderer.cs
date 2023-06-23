@@ -359,7 +359,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
 
 
     /// <inheritdoc/>
-    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default)
+    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default)
     {
         var stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);
         try
@@ -369,6 +369,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
             return await Task.Run(() =>
             {
                 // create image source
+                stream.Position = renderingOptions.DataOffset;
                 using var imageSource = this.CreateImageSource(source, stream, cancellationToken);
                 
                 // check color model

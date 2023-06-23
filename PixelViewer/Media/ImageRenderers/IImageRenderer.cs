@@ -65,9 +65,11 @@ interface IImageRenderer
 	/// Select proper format to be rendered by this renderer.
 	/// </summary>
 	/// <param name="source"><see cref="IImageDataSource"/>.</param>
+	/// <param name="renderingOptions">Rendering options.</param>
+	/// <param name="planeOptions">Rendering options for each plane.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
 	/// <returns>Task of format selection.</returns>
-	Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default);
+	Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default);
 }
 
 

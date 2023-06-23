@@ -149,7 +149,7 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
 
 
     /// <inheritdoc/>
-    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default)
+    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default)
     {
         var stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);
         try
@@ -158,6 +158,7 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
                 throw new TaskCanceledException();
             return await Task.Run(() =>
             {
+                stream.Position = renderingOptions.DataOffset;
                 using var codec = this.CreateCodec(source, stream, cancellationToken);
                 return codec.Info.ColorType switch
                 {

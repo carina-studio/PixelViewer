@@ -17,14 +17,14 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         // Static fields.
         static readonly IList<Tuple<byte[], BayerPattern>> CfaPatternToBayerPatternMap = new Tuple<byte[], BayerPattern>[]
         {
-            new Tuple<byte[], BayerPattern>(new byte[] { 2, 1, 1, 0 }, BayerPattern.BGGR_2x2),
-            new Tuple<byte[], BayerPattern>(new byte[] { 1, 2, 0, 1 }, BayerPattern.GBRG_2x2),
-            new Tuple<byte[], BayerPattern>(new byte[] { 1, 0, 2, 1 }, BayerPattern.GRBG_2x2),
-            new Tuple<byte[], BayerPattern>(new byte[] { 0, 1, 1, 2 }, BayerPattern.RGGB_2x2),
-            new Tuple<byte[], BayerPattern>(new byte[] { 2, 2, 1, 1, 2, 2, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0 }, BayerPattern.BGGR_4x4),
-            new Tuple<byte[], BayerPattern>(new byte[] { 1, 1, 2, 2, 1, 1, 2, 2, 0, 0, 1, 1, 0, 0, 1, 1 }, BayerPattern.GBRG_2x2),
-            new Tuple<byte[], BayerPattern>(new byte[] { 1, 1, 0, 0, 1, 1, 0, 0, 2, 2, 1, 1, 2, 2, 1, 1 }, BayerPattern.GRBG_4x4),
-            new Tuple<byte[], BayerPattern>(new byte[] { 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 2, 2, 1, 1, 2, 2 }, BayerPattern.RGGB_4x4),
+            new(new byte[] { 2, 1, 1, 0 }, BayerPattern.BGGR_2x2),
+            new(new byte[] { 1, 2, 0, 1 }, BayerPattern.GBRG_2x2),
+            new(new byte[] { 1, 0, 2, 1 }, BayerPattern.GRBG_2x2),
+            new(new byte[] { 0, 1, 1, 2 }, BayerPattern.RGGB_2x2),
+            new(new byte[] { 2, 2, 1, 1, 2, 2, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0 }, BayerPattern.BGGR_4x4),
+            new(new byte[] { 1, 1, 2, 2, 1, 1, 2, 2, 0, 0, 1, 1, 0, 0, 1, 1 }, BayerPattern.GBRG_2x2),
+            new(new byte[] { 1, 1, 0, 0, 1, 1, 0, 0, 2, 2, 1, 1, 2, 2, 1, 1 }, BayerPattern.GRBG_4x4),
+            new(new byte[] { 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 2, 2, 1, 1, 2, 2 }, BayerPattern.RGGB_4x4),
         };
 
 
@@ -64,7 +64,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             await Task.Run(async () =>
             {
                 // create reader
-                var entryReader = (IfdEntryReader?)null;
+                IfdEntryReader? entryReader;
                 try
                 {
                     entryReader = new IfdEntryReader(stream);
@@ -80,14 +80,14 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 var rowsPerStrip = (uint[]?)null;
                 var stripOffsets = (uint[]?)null;
                 var stripByteCounts = (uint[]?)null;
-                var ushortData = (ushort[]?)null;
-                var uintData = (uint[]?)null;
+                ushort[]? ushortData;
+                uint[]? uintData;
                 var thumbWidth = 0;
                 var thumbHeight = 0;
                 var isJpegThumb = false;
                 var thumbOrientation = 0;
                 var thumbStripOffsets = (uint[]?)null;
-                var thumbStripByteCounts = (uint[]?)null;
+                uint[]? thumbStripByteCounts;
                 while (entryReader.Read())
                 {
                     switch (entryReader.CurrentIfdName)
@@ -270,7 +270,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                             && uintData != null
                                             && uintData.Length >= 4)
                                         {
-                                            activeArea = new int[] { (int)uintData[1], (int)uintData[0], (int)uintData[3], (int)uintData[2] };
+                                            activeArea = new[] { (int)uintData[1], (int)uintData[0], (int)uintData[3], (int)uintData[2] };
                                         }
                                     }
                                     break;
@@ -320,7 +320,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                     effectiveBits = (pixelStride << 3);
                 
                 // get color space
-                var useJpepImage = false;
+                var useJpegImage = false;
                 switch (compression)
                 {
                     case 1: // uncompressed raw
@@ -329,19 +329,19 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                         if (imageDataOffset > 0)
                         {
                             stream.Position = imageDataOffset;
-                            useJpepImage = true;
+                            useJpegImage = true;
                         }
                         break;
                     default:
                         if (hasJpegThumb && jpegThumbOffset > 0)
                         {
                             stream.Position = jpegThumbOffset;
-                            useJpepImage = true;
+                            useJpegImage = true;
                         }
                         break;
                 }
-                if (useJpepImage && JpegFileFormatParser.SeekToIccProfile(stream))
-                    colorSpace = await Media.ColorSpace.LoadFromIccProfileAsync(stream, Media.ColorSpaceSource.Embedded, cancellationToken);
+                if (useJpegImage && JpegFileFormatParser.SeekToIccProfile(stream))
+                    colorSpace = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
             });
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
@@ -358,13 +358,13 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             }
 
             // treat as compressed format
-            var imageRenderer = (Media.ImageRenderers.IImageRenderer?)null;
+            ImageRenderers.IImageRenderer? imageRenderer;
             switch (compression)
             {
                 case 1: // uncompressed raw
                     break;
                 case 7: // JPEG
-                    imageRenderer = Media.ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is Media.ImageRenderers.JpegImageRenderer);
+                    imageRenderer = ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.JpegImageRenderer);
                     if (imageRenderer != null)
                     {
                         return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>
@@ -381,7 +381,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 default:
                     if (hasJpegThumb && jpegThumbOffset > 0 && jpegThumbWidth > 0 && jpegThumbHeight > 0)
                     {
-                        imageRenderer = Media.ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is Media.ImageRenderers.JpegImageRenderer);
+                        imageRenderer = ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.JpegImageRenderer);
                         if (imageRenderer != null)
                         {
                             return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>

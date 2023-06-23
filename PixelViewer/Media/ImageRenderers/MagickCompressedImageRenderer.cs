@@ -189,7 +189,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
 
 
     /// <inheritdoc/>
-    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, CancellationToken cancellationToken = default)
+    public override async Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default)
     {
         var stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);
         try
@@ -198,6 +198,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                 throw new TaskCanceledException();
             return await Task.Run(() =>
             {
+                stream.Position = renderingOptions.DataOffset;
                 return this.CreateImageInfo(source, stream, cancellationToken).Compression switch
                 {
                     CompressionMethod.JPEG => BitmapFormat.Bgra32,
