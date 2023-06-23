@@ -5747,7 +5747,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (it <= 0.999)
 				return (Math.Floor(it * 20) + 1) / 20;
-			return (Math.Floor(it * 2) + 1) / 2;
+			return (int)it + 1;
 		});
 		scale = this.ZoomTo(scale);
 		this.SetValue(RequestedImageDisplayScaleProperty, scale);
@@ -5771,7 +5771,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (it <= 1.001)
 				return (Math.Ceiling(it * 20) - 1) / 20;
-			return (Math.Ceiling(it * 2) - 1) / 2;
+			return Math.Ceiling(it) - 1;
 		});
 		scale = this.ZoomTo(scale);
 		this.SetValue(RequestedImageDisplayScaleProperty, scale);
