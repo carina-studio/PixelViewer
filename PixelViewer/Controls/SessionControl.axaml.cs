@@ -55,6 +55,20 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// </summary>
 	public static readonly IValueConverter BooleanToScrollBarVisibilityConverter = new BooleanToValueConverter<ScrollBarVisibility>(ScrollBarVisibility.Auto, ScrollBarVisibility.Disabled);
 
+	/// <summary>
+	/// <see cref="IValueConverter"/> to insert color.
+	/// </summary>
+	public static readonly IValueConverter InverseColorConverter = new FuncValueConverter<Color, Color>(color =>
+	{
+		var hsv = color.ToHsv();
+		var v = 1.0 - hsv.V;
+		if (v >= 0.5)
+			v = Math.Max(0.75, v);
+		else
+			v = Math.Min(0.25, v);
+		return new HsvColor(1.0, (hsv.H + 180) % 360, hsv.S, v).ToRgb();
+	});
+
 
 	// Constants.
 	const int BrightnessAdjustmentGroup = 1;
@@ -75,6 +89,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly StyledProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnContrastAdjustmentUI");
 	static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
 	static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
+	static readonly StyledProperty<Rect> SelectedImageDisplayPixelBoundsProperty = AvaloniaProperty.Register<SessionControl, Rect>(nameof(SelectedImageDisplayPixelBounds));
 	static readonly StyledProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
 	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelLabColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
@@ -141,6 +156,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction updateImageCursorAction;
 	readonly ScheduledAction updateImageFilterParamsPopupOpacityAction;
 	readonly ScheduledAction updateIsImageViewerScrollableAction;
+	readonly ScheduledAction updateSelectedImageDisplayPixelBoundsAction;
 	readonly ScheduledAction updateStatusBarStateAction;
 	bool useSmallRenderedImage;
 
@@ -405,7 +421,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.imageScrollViewerPadding = thicknessRes.GetValueOrDefault();
 
 		// create scheduled actions
-		this.hidePanelsByImageViewerSizeAction = new ScheduledAction(() =>
+		this.hidePanelsByImageViewerSizeAction = new(() =>
 		{
 			if (this.imageViewerGrid.Bounds.Width > this.minImageViewerSizeToHidePanels)
 			{
@@ -427,13 +443,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			else
 				this.keepHistogramsVisible = false;
 		});
-		this.resetPointerPressedOnBrightnessAdjustmentUIAction = new ScheduledAction(() =>
+		this.resetPointerPressedOnBrightnessAdjustmentUIAction = new(() =>
 			this.SetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty, false));
-		this.resetPointerPressedOnColorAdjustmentUIAction = new ScheduledAction(() =>
+		this.resetPointerPressedOnColorAdjustmentUIAction = new(() =>
 			this.SetValue(IsPointerPressedOnColorAdjustmentUIProperty, false));
-		this.resetPointerPressedOnContrastAdjustmentUIAction = new ScheduledAction(() =>
+		this.resetPointerPressedOnContrastAdjustmentUIAction = new(() =>
 			this.SetValue(IsPointerPressedOnContrastAdjustmentUIProperty, false));
-		this.stopUsingSmallRenderedImageAction = new ScheduledAction(() =>
+		this.stopUsingSmallRenderedImageAction = new(() =>
 		{
 			if (this.useSmallRenderedImage)
 			{
@@ -442,7 +458,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				this.updateEffectiveRenderedImageIntModeAction?.Schedule();
 			}
 		});
-		this.updateEffectiveRenderedImageAction = new ScheduledAction(() =>
+		this.updateEffectiveRenderedImageAction = new(() =>
 		{
 			if (this.DataContext is not Session session)
 				this.SetValue(EffectiveRenderedImageProperty, null);
@@ -467,7 +483,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					this.SetValue(EffectiveRenderedImageProperty, null);
 			}
 		});
-		this.updateEffectiveRenderedImageIntModeAction = new ScheduledAction(() =>
+		this.updateEffectiveRenderedImageIntModeAction = new(() =>
 		{
 			if (this.DataContext is not Session session)
 				return;
@@ -498,14 +514,18 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 			}
 		});
-		this.updateImageCursorAction = new ScheduledAction(() =>
+		this.updateImageCursorAction = new(() =>
 		{
 			var cursorType = StandardCursorType.Arrow;
-			if (this.GetValue(IsPointerOverImageProperty)
-				&& this.GetValue(IsPointerPressedOnImageProperty) 
-				&& this.IsImageViewerScrollable)
+			if (this.GetValue(IsPointerOverImageProperty))
 			{
-				cursorType = StandardCursorType.SizeAll;
+				if (this.GetValue(IsPointerPressedOnImageProperty)
+				    && this.IsImageViewerScrollable)
+				{
+					cursorType = StandardCursorType.SizeAll;
+				}
+				else
+					cursorType = StandardCursorType.None;
 			}
 			if (this.imageCursorType != cursorType)
             {
@@ -513,18 +533,39 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				this.image.Cursor = new Cursor(cursorType);
             }
 		});
-		this.updateImageFilterParamsPopupOpacityAction = new ScheduledAction(() =>
+		this.updateImageFilterParamsPopupOpacityAction = new(() =>
 		{
 			this.brightnessAndContrastAdjustmentPopupBorder.Opacity = (this.GetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty) || this.GetValue(IsPointerPressedOnContrastAdjustmentUIProperty)) ? 0.5 : 1;
 			this.colorAdjustmentPopupBorder.Opacity = this.GetValue(IsPointerPressedOnColorAdjustmentUIProperty) ? 0.5 : 1;
 		});
-		this.updateIsImageViewerScrollableAction = new ScheduledAction(() =>
+		this.updateIsImageViewerScrollableAction = new(() =>
 		{
 			var contentSize = this.imageScrollViewer.Extent;
 			var viewport = this.imageScrollViewer.Viewport;
 			this.SetValue(IsImageViewerScrollableProperty, contentSize.Width > viewport.Width || contentSize.Height > viewport.Height);
 		});
-		this.updateStatusBarStateAction = new ScheduledAction(() =>
+		this.updateSelectedImageDisplayPixelBoundsAction = new(() =>
+		{
+			if (this.DataContext is not Session session || !this.GetValue(IsPointerOverImageProperty))
+			{
+				this.SetValue(SelectedImageDisplayPixelBoundsProperty, default);
+				return;
+			}
+			var x = (double)Math.Max(0, session.SelectedRenderedImagePixelPositionX);
+			var y = (double)Math.Max(0, session.SelectedRenderedImagePixelPositionY);
+			var scale = session.ImageDisplayScale;
+			x = (int)(x * scale + 0.5);
+			y = (int)(y * scale + 0.5);
+			if (scale <= 6.999)
+			{
+				x -= (scale - 7.0) * 0.5;
+				y -= (scale - 7.0) * 0.5;
+				this.SetValue(SelectedImageDisplayPixelBoundsProperty, new(x, y, 7, 7));
+			}
+			else
+				this.SetValue(SelectedImageDisplayPixelBoundsProperty, new(x, y, scale, scale));
+		});
+		this.updateStatusBarStateAction = new(() =>
 		{
 			this.SetValue(StatusBarStateProperty, Global.Run(() =>
 			{
@@ -1086,6 +1127,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.SetValue(IsPointerOverImageProperty, false);
 		this.SetValue(PointerPositionOnImageControlProperty, new Point(-1, -1));
 		(this.DataContext as Session)?.SelectRenderedImagePixel(-1, -1);
+		this.updateSelectedImageDisplayPixelBoundsAction.Execute();
 	}
 
 
@@ -1125,10 +1167,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				var imageBounds = imageControl.Bounds;
 				var relativeX = (position.X / imageBounds.Width);
 				var relativeY = (position.Y / imageBounds.Height);
-				session.SelectRenderedImagePixel((int)(image.Size.Width * relativeX + 0.5), (int)(image.Size.Height * relativeY + 0.5));
+				session.SelectRenderedImagePixel((int)(image.Size.Width * relativeX), (int)(image.Size.Height * relativeY));
 			}
 			else
 				session.SelectRenderedImagePixel(-1, -1);
+			this.updateSelectedImageDisplayPixelBoundsAction.Execute();
 		}
 	}
 
@@ -1315,6 +1358,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.keepRenderingParamsPanelVisible = false;
 			this.ReportImageViewportSize();
 			this.ReportScreenPixelDensity();
+			this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 			this.updateStatusBarStateAction.Schedule();
 		}
 		else if (property == EffectiveRenderedImageProperty)
@@ -1364,6 +1408,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
 					this.targetImageViewportCenter = new Vector(centerX, centerY);
 				}
+                this.updateSelectedImageDisplayPixelBoundsAction.Execute();
 				break;
 			case nameof(Session.ImageDisplaySize):
 				this.updateEffectiveRenderedImageIntModeAction.Schedule();
@@ -1394,6 +1439,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			case nameof(Session.QuarterSizeRenderedImage):
 			case nameof(Session.RenderedImage):
 				this.updateEffectiveRenderedImageAction.Execute();
+				break;
+			case nameof(Session.SelectedRenderedImagePixelPositionX):
+			case nameof(Session.SelectedRenderedImagePixelPositionY):
+				this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 				break;
 		}
 	}
@@ -1731,6 +1780,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			offsetY = contentSize.Height - viewportSize.Height;
 		this.imageScrollViewer.Offset = new Vector(offsetX, offsetY);
 	}
+	
+	
+	/// <summary>
+	/// Bounds of selected pixel for displaying.
+	/// </summary>
+	public Rect SelectedImageDisplayPixelBounds => this.GetValue(SelectedImageDisplayPixelBoundsProperty);
 
 
 	/// <summary>

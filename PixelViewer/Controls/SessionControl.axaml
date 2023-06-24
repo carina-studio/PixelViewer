@@ -591,9 +591,17 @@
 								<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 							</Border.Background>
 							<LayoutTransformControl>
-								<Border>
+								<Panel>
 									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
-								</Border>
+									<Border BorderThickness="2" Height="{Binding #root.SelectedImageDisplayPixelBounds.Height}" HorizontalAlignment="Left" IsHitTestVisible="False" IsVisible="{Binding #root.IsPointerOverImage}" VerticalAlignment="Top" Width="{Binding #root.SelectedImageDisplayPixelBounds.Width}">
+										<Border.BorderBrush>
+											<SolidColorBrush Color="{Binding SelectedRenderedImagePixelColor, Converter={x:Static appControls:SessionControl.InverseColorConverter}, FallbackValue={}#000000}"/>
+										</Border.BorderBrush>
+										<Border.RenderTransform>
+											<TranslateTransform X="{Binding #root.SelectedImageDisplayPixelBounds.X}" Y="{Binding #root.SelectedImageDisplayPixelBounds.Y}"/>
+										</Border.RenderTransform>
+									</Border>
+								</Panel>
 								<LayoutTransformControl.LayoutTransform>
 									<RotateTransform Angle="{Binding ImageDisplayRotation}"/>
 								</LayoutTransformControl.LayoutTransform>
