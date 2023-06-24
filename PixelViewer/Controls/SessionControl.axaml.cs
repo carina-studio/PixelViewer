@@ -55,20 +55,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// </summary>
 	public static readonly IValueConverter BooleanToScrollBarVisibilityConverter = new BooleanToValueConverter<ScrollBarVisibility>(ScrollBarVisibility.Auto, ScrollBarVisibility.Disabled);
 
-	/// <summary>
-	/// <see cref="IValueConverter"/> to insert color.
-	/// </summary>
-	public static readonly IValueConverter InverseColorConverter = new FuncValueConverter<Color, Color>(color =>
-	{
-		var hsv = color.ToHsv();
-		var v = 1.0 - hsv.V;
-		if (v >= 0.5)
-			v = Math.Max(0.75, v);
-		else
-			v = Math.Min(0.25, v);
-		return new HsvColor(1.0, (hsv.H + 180) % 360, hsv.S, v).ToRgb();
-	});
-
 
 	// Constants.
 	const int BrightnessAdjustmentGroup = 1;
@@ -558,12 +544,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			y = (int)(y * scale + 0.5);
 			if (scale <= 6.999)
 			{
-				x -= (scale - 7.0) * 0.5;
-				y -= (scale - 7.0) * 0.5;
-				this.SetValue(SelectedImageDisplayPixelBoundsProperty, new(x, y, 7, 7));
+				x -= (7.0 - scale) * 0.5;
+				y -= (7.0 - scale) * 0.5;
+				this.SetValue(SelectedImageDisplayPixelBoundsProperty, new(x - 1, y - 1, 9, 9));
 			}
 			else
-				this.SetValue(SelectedImageDisplayPixelBoundsProperty, new(x, y, scale, scale));
+				this.SetValue(SelectedImageDisplayPixelBoundsProperty, new(x - 1, y - 1, scale + 2, scale + 2));
 		});
 		this.updateStatusBarStateAction = new(() =>
 		{
