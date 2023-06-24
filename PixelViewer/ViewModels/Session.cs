@@ -3504,7 +3504,7 @@ namespace Carina.PixelViewer.ViewModels
 			}
 
 			// update state
-			this.SetValue(DataOffsetProperty, 0L);
+			this.canZoomTo.Update(!this.GetValue(FitImageToViewportProperty));this.SetValue(DataOffsetProperty, 0L);
 			this.SetValue(FrameNumberProperty, 1);
 			this.SetValue(FramePaddingSizeProperty, 0L);
 			this.SetValue(IsOpeningSourceFileProperty, false);
@@ -5644,7 +5644,7 @@ namespace Carina.PixelViewer.ViewModels
 				return (Math.Floor(it * 2) + 1) / 2;
 			});
 			scale = this.ZoomTo(scale);
-			this.SetValue(RequestedImageDisplayScaleProperty, scale);
+			if (double.IsFinite(scale))this.SetValue(RequestedImageDisplayScaleProperty, scale);
 		}
 
 
@@ -5668,7 +5668,7 @@ namespace Carina.PixelViewer.ViewModels
 				return (Math.Ceiling(it * 2) - 1) / 2;
 			});
 			scale = this.ZoomTo(scale);
-			this.SetValue(RequestedImageDisplayScaleProperty, scale);
+			if (double.IsFinite(scale))this.SetValue(RequestedImageDisplayScaleProperty, scale);
 		}
 
 
