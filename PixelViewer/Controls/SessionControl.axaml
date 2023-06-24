@@ -586,10 +586,12 @@
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="False" HorizontalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<Panel Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
-						<Border Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
-							<Border.Background>
-								<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
-							</Border.Background>
+						<Panel Name="imageContainerBorder" HorizontalAlignment="Center" VerticalAlignment="Center">
+							<Border Margin="0,0,0.5,0.5"> <!-- [Workaround] Prevent background being larger than image -->
+								<Border.Background>
+									<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
+								</Border.Background>
+							</Border>
 							<LayoutTransformControl>
 								<Panel>
 									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
@@ -606,7 +608,7 @@
 									<RotateTransform Angle="{Binding ImageDisplayRotation}"/>
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
-						</Border>
+						</Panel>
 						<Canvas ClipToBounds="False" Height="{Binding #imageContainerBorder.Bounds.Height}" HorizontalAlignment="Center" IsVisible="{Binding HasRenderedImage}" VerticalAlignment="Center" Width="{Binding #imageContainerBorder.Bounds.Width}"/>
 					</Panel>
 				</ScrollViewer>

@@ -129,7 +129,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction hidePanelsByImageViewerSizeAction;
 	readonly ToggleButton histogramsButton;
 	readonly Image image;
-	readonly Border imageContainerBorder;
+	readonly Panel imageContainerBorder;
 	StandardCursorType imageCursorType = StandardCursorType.Arrow;
 	Vector? imagePointerPressedContentPosition;
 	readonly ComboBox imageRendererComboBox;
@@ -342,7 +342,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		SetupFilterParamsSliderAndButtons("highlightAdjustment", BrightnessAdjustmentGroup);
 		this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
 		this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
-		this.imageContainerBorder = this.FindControl<Border>(nameof(imageContainerBorder)).AsNonNull().Also(it =>
+		this.imageContainerBorder = this.Get<Panel>(nameof(imageContainerBorder)).Also(it =>
 		{
 			it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
 			{
