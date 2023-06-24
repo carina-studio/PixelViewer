@@ -7,6 +7,7 @@
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
         xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+        xmlns:asMedia="using:CarinaStudio.AppSuite.Media"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ColorSpaceInfoDialog"
 		Classes="Dialog"
@@ -128,22 +129,22 @@
 							
 							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
-								<TextBox Name="redPrimaryTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+								<TextBox Name="redPrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
 							</asControls:DialogItemGrid>
 							<Separator Classes="Dialog_Item_Separator"/>
 							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
-								<TextBox Name="greenPrimaryTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+								<TextBox Name="greenPrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
 							</asControls:DialogItemGrid>
 							<Separator Classes="Dialog_Item_Separator"/>
 							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
-								<TextBox Name="bluePrimaryTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+								<TextBox Name="bluePrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
 							</asControls:DialogItemGrid>
 							<Separator Classes="Dialog_Item_Separator"/>
 							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
-								<TextBox Name="whitePointTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="True"/>
+								<TextBox Name="whitePointTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
 							</asControls:DialogItemGrid>
 							<Line Classes="Dialog_Item_Separator_Inner" IsVisible="{Binding #whitePointDescriptionTextBlock.IsVisible}"/>
 							<SelectableTextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>

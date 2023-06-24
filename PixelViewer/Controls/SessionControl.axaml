@@ -8,6 +8,7 @@
 			 xmlns:aConverters="using:Avalonia.Data.Converters"
 			 xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 			 xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
+             xmlns:asMedia="using:CarinaStudio.AppSuite.Media"
 			 xmlns:app="using:Carina.PixelViewer"
              xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
              xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
@@ -625,15 +626,12 @@
 					<Panel>
 						<TextBlock Opacity="0" Text="{DynamicResource String/SessionControl.SelectedPixel.None}"/>
 						<TextBlock IsVisible="{Binding !HasSelectedRenderedImagePixel}" Text="{DynamicResource String/SessionControl.SelectedPixel.None}" TextWrapping="Wrap"/>
-						<WrapPanel Opacity="{Binding HasSelectedRenderedImagePixel, Converter={x:Static abConverters:BooleanToValueConverters.BooleanToOpacity}}" Orientation="Horizontal">
+						<WrapPanel Opacity="{Binding HasSelectedRenderedImagePixel, Converter={x:Static abConverters:BooleanToValueConverters.BooleanToOpacity}}" Orientation="Horizontal" TextElement.FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}">
 							
 							<!-- Position -->
 							<StackPanel Orientation="Horizontal">
 								<Image Classes="StatusBar_Icon" Source="{StaticResource Image/Icon.Coordinates}"/>
-								<Panel>
-									<TextBlock Text="(0000, 0000)" Opacity="0"/>
-									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelPositionX}" Arg2="{Binding SelectedRenderedImagePixelPositionY}" Format="({0}, {1})"/>
-								</Panel>
+								<abControls:FormattedTextBlock Classes="StatusBar_TextBlock" Arg1="{Binding SelectedRenderedImagePixelPositionX}" Arg2="{Binding SelectedRenderedImagePixelPositionY}" Format="({0}, {1})"/>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
@@ -649,27 +647,19 @@
 
 							<!-- ARGB Color -->
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
-								<Panel>
-									<TextBlock Text="ARGB(000, 000, 000, 000)" Opacity="0"/>
-									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelColor.A}" Arg2="{Binding SelectedRenderedImagePixelColor.R}" Arg3="{Binding SelectedRenderedImagePixelColor.G}" Arg4="{Binding SelectedRenderedImagePixelColor.B}" Format="ARGB({0}, {1}, {2}, {3})"/>
-								</Panel>
+								<abControls:FormattedTextBlock Classes="StatusBar_TextBlock" Arg1="{Binding SelectedRenderedImagePixelColor.A}" Arg2="{Binding SelectedRenderedImagePixelColor.R}" Arg3="{Binding SelectedRenderedImagePixelColor.G}" Arg4="{Binding SelectedRenderedImagePixelColor.B}" Format="ARGB({0:D3}, {1:D3}, {2:D3}, {3:D3})"/>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
 							<!-- CIELAB Color -->
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
-								<Panel>
-									<TextBlock Text="L*a*b*(000.00, 000.00, 000.00)" Opacity="0"/>
-									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelLabColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelLabColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelLabColor.Item3}" Format="L*a*b*({0:F2}, {1:F2}, {2:F2})"/>
-								</Panel>
+								<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelLabColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelLabColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelLabColor.Item3}" Format="L*a*b*({0:F2}, {1:F2}, {2:F2})"/>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
 							<!-- XYZ Color -->
-							<Panel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelXyzColor}">
-								<TextBlock Text="XYZ(000.00, 000.00, 000.00)" Opacity="0"/>
-								<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelXyzColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelXyzColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelXyzColor.Item3}" Format="XYZ({0:F2}, {1:F2}, {2:F2})"/>
-							</Panel>
+							<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelXyzColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelXyzColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelXyzColor.Item3}" Format="XYZ({0:F2}, {1:F2}, {2:F2})"/>
+							
 						</WrapPanel>
 					</Panel>
 				</Border>
