@@ -3570,6 +3570,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 
 		// update state
+		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProperty));
 		this.SetValue(DataOffsetProperty, 0L);
 		this.SetValue(FrameNumberProperty, 1);
 		this.SetValue(FramePaddingSizeProperty, 0L);
@@ -5750,7 +5751,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			return (int)it + 1;
 		});
 		scale = this.ZoomTo(scale);
-		this.SetValue(RequestedImageDisplayScaleProperty, scale);
+		if (double.IsFinite(scale))
+			this.SetValue(RequestedImageDisplayScaleProperty, scale);
 	}
 
 
@@ -5774,7 +5776,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			return Math.Ceiling(it) - 1;
 		});
 		scale = this.ZoomTo(scale);
-		this.SetValue(RequestedImageDisplayScaleProperty, scale);
+		if (double.IsFinite(scale))
+			this.SetValue(RequestedImageDisplayScaleProperty, scale);
 	}
 
 
