@@ -24,6 +24,9 @@
 		<!-- ColorSpaceInfoDialog -->
 		<sys:Double x:Key="Double/ColorSpaceInfoDialog.Width">900</sys:Double>
 		<Thickness x:Key="Thickness/ColorSpaceInfoDialog.RightContentPanel.Padding">10,20,30,20</Thickness>
+		
+		<!-- Cursor -->
+		<sys:Double x:Key="Double/Cursor.MaxSide">16</sys:Double>
 
 		<!-- FrameNumberSelectionDialog -->
 		<sys:Double x:Key="Double/FrameNumberSelectionDialog.Width">300</sys:Double>

@@ -596,7 +596,16 @@
 							<LayoutTransformControl ClipToBounds="False">
 								<Panel ClipToBounds="False">
 									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
-									<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" BorderThickness="1" CornerRadius="2" Height="{Binding #root.SelectedImageDisplayPixelBounds.Height}" HorizontalAlignment="Left" IsHitTestVisible="False" IsVisible="{Binding #root.IsPointerOverImage}" VerticalAlignment="Top" Width="{Binding #root.SelectedImageDisplayPixelBounds.Width}">
+									<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" BorderThickness="1" CornerRadius="2" Height="{Binding #root.SelectedImageDisplayPixelBounds.Height}" HorizontalAlignment="Left" IsHitTestVisible="False" VerticalAlignment="Top" Width="{Binding #root.SelectedImageDisplayPixelBounds.Width}">
+										<Border.IsVisible>
+											<MultiBinding Converter="{x:Static BoolConverters.And}">
+												<Binding Path="IsPointerOverImage" ElementName="root"/>
+												<MultiBinding Converter="{x:Static BoolConverters.Or}">
+													<Binding Path="!IsImageViewerScrollable" ElementName="root"/>
+													<Binding Path="!IsPointerPressedOnImage" ElementName="root"/>
+												</MultiBinding>
+											</MultiBinding>
+										</Border.IsVisible>
 										<Border.RenderTransform>
 											<TranslateTransform X="{Binding #root.SelectedImageDisplayPixelBounds.X}" Y="{Binding #root.SelectedImageDisplayPixelBounds.Y}"/>
 										</Border.RenderTransform>

@@ -68,6 +68,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Static fields.
 	static readonly StyledProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 	static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.None);
+	static Cursor? ImageDraggingCursor;
 	static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
 	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
@@ -508,12 +509,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				if (this.GetValue(IsPointerPressedOnImageProperty)
 				    && this.IsImageViewerScrollable)
 				{
-					cursorType = StandardCursorType.SizeAll;
+					ImageDraggingCursor ??= LoadCursor("Image/Cursor.Hand");
+					this.image.Cursor = ImageDraggingCursor;
+					return;
 				}
-				else
-					cursorType = StandardCursorType.None;
+				cursorType = StandardCursorType.None;
 			}
-			if (this.imageCursorType != cursorType)
+			if (this.imageCursorType != cursorType
+			    || this.image.Cursor == ImageDraggingCursor)
             {
 				this.imageCursorType = cursorType;
 				this.image.Cursor = new Cursor(cursorType);
@@ -724,6 +727,24 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 	// Check whether image viewer is scrollable in current state or not.
 	bool IsImageViewerScrollable => this.GetValue(IsImageViewerScrollableProperty);
+	
+	
+	// Load cursor from resource.
+	static Cursor LoadCursor(string resourceKey)
+	{
+		var image = App.Current.FindResourceOrDefault<IImage?>(resourceKey) ?? throw new ArgumentException();
+		var imageSize = image.Size;
+		var maxSide = App.Current.FindResourceOrDefault("Double/Cursor.MaxSide", 30.0);
+		var scaleX = maxSide / imageSize.Width;
+		var scaleY = maxSide / imageSize.Height;
+		var scale = Math.Min(scaleX, scaleY);
+		var cursorWidth = (int)(imageSize.Width * scale + 0.5);
+		var cursorHeight = (int)(imageSize.Height * scale + 0.5);
+		var cursorBitmap = new RenderTargetBitmap(new(cursorWidth, cursorHeight));
+		using var cursorDrawingContext = cursorBitmap.CreateDrawingContext();
+		image.Draw(cursorDrawingContext, new(default, imageSize), new(0, 0, cursorWidth, cursorHeight));
+		return new(cursorBitmap, new(cursorWidth >> 1, cursorHeight >> 1));
+	}
 
 
 	/// <summary>
