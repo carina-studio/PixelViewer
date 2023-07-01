@@ -640,7 +640,12 @@
 							<!-- Position -->
 							<StackPanel Orientation="Horizontal">
 								<Image Classes="StatusBar_Icon" Source="{StaticResource Image/Icon.Coordinates}"/>
-								<abControls:FormattedTextBlock Classes="StatusBar_TextBlock" Arg1="{Binding SelectedRenderedImagePixelPositionX}" Arg2="{Binding SelectedRenderedImagePixelPositionY}" Format="({0}, {1})"/>
+								<LayoutTransformControl>
+									<LayoutTransformControl.LayoutTransform>
+										<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
+									</LayoutTransformControl.LayoutTransform>
+									<abControls:FormattedTextBlock Classes="StatusBar_TextBlock" Arg1="{Binding SelectedRenderedImagePixelPositionX}" Arg2="{Binding SelectedRenderedImagePixelPositionY}" Format="({0}, {1})"/>
+								</LayoutTransformControl>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
@@ -656,18 +661,33 @@
 
 							<!-- ARGB Color -->
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
-								<abControls:FormattedTextBlock Classes="StatusBar_TextBlock" Arg1="{Binding SelectedRenderedImagePixelColor.A}" Arg2="{Binding SelectedRenderedImagePixelColor.R}" Arg3="{Binding SelectedRenderedImagePixelColor.G}" Arg4="{Binding SelectedRenderedImagePixelColor.B}" Format="ARGB({0:D3}, {1:D3}, {2:D3}, {3:D3})"/>
+								<LayoutTransformControl>
+									<LayoutTransformControl.LayoutTransform>
+										<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
+									</LayoutTransformControl.LayoutTransform>
+									<abControls:FormattedTextBlock Classes="StatusBar_TextBlock" Arg1="{Binding SelectedRenderedImagePixelColor.A}" Arg2="{Binding SelectedRenderedImagePixelColor.R}" Arg3="{Binding SelectedRenderedImagePixelColor.G}" Arg4="{Binding SelectedRenderedImagePixelColor.B}" Format="ARGB({0:D3}, {1:D3}, {2:D3}, {3:D3})"/>
+								</LayoutTransformControl>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
 							<!-- CIELAB Color -->
 							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
-								<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelLabColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelLabColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelLabColor.Item3}" Format="L*a*b*({0:F2}, {1:F2}, {2:F2})"/>
+								<LayoutTransformControl>
+									<LayoutTransformControl.LayoutTransform>
+										<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
+									</LayoutTransformControl.LayoutTransform>
+									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelLabColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelLabColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelLabColor.Item3}" Format="L*a*b*({0:F2}, {1:F2}, {2:F2})"/>
+								</LayoutTransformControl>
 								<Separator Classes="StatusBar_Separator"/>
 							</StackPanel>
 
 							<!-- XYZ Color -->
-							<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelXyzColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelXyzColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelXyzColor.Item3}" Format="XYZ({0:F2}, {1:F2}, {2:F2})"/>
+							<LayoutTransformControl>
+								<LayoutTransformControl.LayoutTransform>
+									<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
+								</LayoutTransformControl.LayoutTransform>
+								<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelXyzColor.Item1}" Arg2="{Binding SelectedRenderedImagePixelXyzColor.Item2}" Arg3="{Binding SelectedRenderedImagePixelXyzColor.Item3}" Format="XYZ({0:F2}, {1:F2}, {2:F2})"/>
+							</LayoutTransformControl>
 							
 						</WrapPanel>
 					</Panel>
