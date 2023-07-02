@@ -1,7 +1,7 @@
 ﻿using Avalonia.Data.Converters;
 using Carina.PixelViewer.Media;
+using CarinaStudio;
 using CarinaStudio.AppSuite;
-using CarinaStudio.Controls;
 using System;
 using System.Globalization;
 
@@ -41,7 +41,7 @@ namespace Carina.PixelViewer.Data.Converters
             }
             if (value is not string name)
                 return null;
-            if (app.TryGetResource<string>($"String/ColorSpace.{name}", out var res) == true)
+            if (app.TryFindResource<string>($"String/ColorSpace.{name}", out var res))
                 return res;
             return name;
         }

@@ -402,10 +402,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		SetupFilterParamsSliderAndButtons("vibranceAdjustment", ColorAdjustmentGroup);
 
 		// load resources
-		if (this.Application.TryGetResource<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels", out var doubleRes))
-			this.minImageViewerSizeToHidePanels = doubleRes.GetValueOrDefault();
-		if (this.Application.TryGetResource<Thickness>("Thickness/SessionControl.ImageViewer.Padding", out var thicknessRes))
-			this.imageScrollViewerPadding = thicknessRes.GetValueOrDefault();
+		this.minImageViewerSizeToHidePanels = this.Application.FindResourceOrDefault<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels");
+		this.imageScrollViewerPadding = this.Application.FindResourceOrDefault<Thickness>("Thickness/SessionControl.ImageViewer.Padding");
 
 		// create scheduled actions
 		this.hidePanelsByImageViewerSizeAction = new(() =>
@@ -732,9 +730,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Load cursor from resource.
 	static Cursor LoadCursor(string resourceKey)
 	{
-		var image = App.Current.FindResourceOrDefault<IImage?>(resourceKey) ?? throw new ArgumentException();
+		var image = ((IAvaloniaApplication)App.Current).FindResourceOrDefault<IImage?>(resourceKey) ?? throw new ArgumentException();
 		var imageSize = image.Size;
-		var maxSide = App.Current.FindResourceOrDefault("Double/Cursor.MaxSide", 30.0);
+		var maxSide = ((IAvaloniaApplication)App.Current).FindResourceOrDefault("Double/Cursor.MaxSide", 30.0);
 		var scaleX = maxSide / imageSize.Width;
 		var scaleY = maxSide / imageSize.Height;
 		var scale = Math.Min(scaleX, scaleY);

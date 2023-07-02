@@ -1,8 +1,8 @@
 ﻿using Avalonia.Data.Converters;
 using Avalonia.Media;
 using Carina.PixelViewer.Media;
+using CarinaStudio;
 using CarinaStudio.AppSuite;
-using CarinaStudio.Controls;
 using System;
 using System.Globalization;
 
@@ -30,9 +30,7 @@ namespace Carina.PixelViewer.Data.Converters
                 return null;
             if (value is not ImageFormatCategory category)
                 return null;
-            var brush = (IBrush?)null;
-            app?.TryGetResource($"Brush/SessionControl.ImageFormatCategoryLabel.Background.{category}", out brush);
-            return brush;
+            return app?.FindResourceOrDefault<IBrush?>($"Brush/SessionControl.ImageFormatCategoryLabel.Background.{category}");
         }
 
 
