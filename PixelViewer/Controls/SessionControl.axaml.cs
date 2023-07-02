@@ -59,6 +59,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Constants.
+	private const int AttachedScreenCheckingInterval = 500;
 	const int BrightnessAdjustmentGroup = 1;
 	const int ColorAdjustmentGroup = 2;
 	const int ContrastAdjustmentGroup = 3;
@@ -88,6 +89,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 	// Fields.
 	readonly ContextMenu alignToIntegerMenu;
+	private Screen? attachedScreen;
 	Avalonia.Controls.Window? attachedWindow;
 	readonly ToggleButton brightnessAndContrastAdjustmentButton;
 	readonly Popup brightnessAndContrastAdjustmentPopup;
@@ -107,6 +109,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveRenderedImage = new();
 	readonly ForwardedObservableBoolean canSaveImage;
 	readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new();
+	private readonly ScheduledAction checkAttachedScreenAction;
 	readonly ToggleButton colorAdjustmentButton;
 	readonly Popup colorAdjustmentPopup;
 	readonly Border colorAdjustmentPopupBorder;
@@ -215,17 +218,17 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				ContrastAdjustmentGroup => this.OnPointerReleasedOnContrastAdjustmentUI,
 				_ => throw new ArgumentException(),
 			};
-			this.FindControl<Control>($"{name}DecreaseButton")?.Also(it =>
+			this.Get<Control>($"{name}DecreaseButton").Also(it =>
 			{
 				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
 				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
 			});
-			this.FindControl<Control>($"{name}IncreaseButton")?.Also(it =>
+			this.Get<Control>($"{name}IncreaseButton").Also(it =>
 			{
 				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
 				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
 			});
-			this.FindControl<Slider>($"{name}Slider")?.Also(it =>
+			this.Get<Slider>($"{name}Slider").Also(it =>
 			{
 				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
 				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
@@ -270,8 +273,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					toggleButton.IsChecked = true;
 			});
 		});
-		this.brightnessAndContrastAdjustmentButton = this.FindControl<ToggleButton>(nameof(brightnessAndContrastAdjustmentButton)).AsNonNull();
-		this.brightnessAndContrastAdjustmentPopup = this.FindControl<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).AsNonNull().Also(it =>
+		this.brightnessAndContrastAdjustmentButton = this.Get<ToggleButton>(nameof(brightnessAndContrastAdjustmentButton));
+		this.brightnessAndContrastAdjustmentPopup = this.Get<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).Also(it =>
 		{
 			it.PlacementTarget = this.brightnessAndContrastAdjustmentButton;
 			it.Closed += (_, _) => 
@@ -291,9 +294,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			// [Workaround] Prevent handling pointer event by parent button
 			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 		});
-		this.brightnessAndContrastAdjustmentPopupBorder = this.FindControl<Border>(nameof(brightnessAndContrastAdjustmentPopupBorder)).AsNonNull();
-		this.colorAdjustmentButton = this.FindControl<ToggleButton>(nameof(colorAdjustmentButton)).AsNonNull();
-		this.colorAdjustmentPopup = this.FindControl<Popup>(nameof(colorAdjustmentPopup)).AsNonNull().Also(it =>
+		this.brightnessAndContrastAdjustmentPopupBorder = this.Get<Border>(nameof(brightnessAndContrastAdjustmentPopupBorder));
+		this.colorAdjustmentButton = this.Get<ToggleButton>(nameof(colorAdjustmentButton));
+		this.colorAdjustmentPopup = this.Get<Popup>(nameof(colorAdjustmentPopup)).Also(it =>
 		{
 			it.PlacementTarget = this.colorAdjustmentButton;
 			it.Closed += (_, _) => 
@@ -312,16 +315,16 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			// [Workaround] Prevent handling pointer event by parent button
 			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 		});
-		this.colorAdjustmentPopupBorder = this.FindControl<Border>(nameof(colorAdjustmentPopupBorder)).AsNonNull();
-		this.colorSpaceComboBox = this.FindControl<ComboBox>(nameof(colorSpaceComboBox)).AsNonNull();
+		this.colorAdjustmentPopupBorder = this.Get<Border>(nameof(colorAdjustmentPopupBorder));
+		this.colorSpaceComboBox = this.Get<ComboBox>(nameof(colorSpaceComboBox));
 		SetupFilterParamsSliderAndButtons("contrastAdjustment", ContrastAdjustmentGroup);
-		this.evaluateImageDimensionsButton = this.FindControl<ToggleButton>(nameof(this.evaluateImageDimensionsButton)).AsNonNull();
+		this.evaluateImageDimensionsButton = this.Get<ToggleButton>(nameof(this.evaluateImageDimensionsButton));
 		this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 		{
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.evaluateImageDimensionsButton.IsChecked = true);
 		});
-		this.fileActionsButton = this.FindControl<ToggleButton>(nameof(this.fileActionsButton)).AsNonNull();
+		this.fileActionsButton = this.Get<ToggleButton>(nameof(this.fileActionsButton));
 		this.fileActionsMenu = ((ContextMenu)this.Resources[nameof(fileActionsMenu)].AsNonNull()).Also(it =>
 		{
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
@@ -329,8 +332,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 		SetupFilterParamsSliderAndButtons("greenColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("highlightAdjustment", BrightnessAdjustmentGroup);
-		this.histogramsButton = this.FindControl<ToggleButton>(nameof(histogramsButton)).AsNonNull();
-		this.image = this.FindControl<Image>(nameof(image)).AsNonNull();
+		this.histogramsButton = this.Get<ToggleButton>(nameof(histogramsButton));
+		this.image = this.Get<Image>(nameof(image));
 		this.imageContainerBorder = this.Get<Panel>(nameof(imageContainerBorder)).Also(it =>
 		{
 			it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
@@ -339,8 +342,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					this.SetValue(PointerPositionOnImageControlProperty, this.latestPointerEventArgsOnImage.GetCurrentPoint(it).Position);
 			}));
 		});
-		this.imageRendererComboBox = this.FindControl<ComboBox>(nameof(imageRendererComboBox)).AsNonNull();
-		this.imageScrollViewer = this.FindControl<ScrollViewer>(nameof(this.imageScrollViewer)).AsNonNull().Also(it =>
+		this.imageRendererComboBox = this.Get<ComboBox>(nameof(imageRendererComboBox));
+		this.imageScrollViewer = this.Get<ScrollViewer>(nameof(this.imageScrollViewer)).Also(it =>
 		{
 			it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ => this.ReportImageViewportSize()));
 			it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(new Observer<Size>(_ =>
@@ -358,9 +361,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				this.updateIsImageViewerScrollableAction?.Schedule();
 			}));
 		});
-		this.imageViewerGrid = this.FindControl<Control>(nameof(imageViewerGrid)).AsNonNull().Also(it =>
+		this.imageViewerGrid = this.Get<Control>(nameof(imageViewerGrid)).Also(it =>
 		{
-			it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>((_) =>
+			it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
 			{
 				if (this.isFirstImageViewerBoundsChanged)
 				{
@@ -371,7 +374,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					this.hidePanelsByImageViewerSizeAction?.Schedule(HidePanelsByImageViewerSizeDelay);
 			}));
 		});
-		this.otherActionsButton = this.FindControl<ToggleButton>(nameof(otherActionsButton)).AsNonNull();
+		this.otherActionsButton = this.Get<ToggleButton>(nameof(otherActionsButton));
 		this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 		{
 #if DEBUG
@@ -389,17 +392,17 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 		SetupFilterParamsSliderAndButtons("redColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("saturationAdjustment", ColorAdjustmentGroup);
-		this.renderingParamsPanelColumn = this.FindControl<Grid>("workingAreaGrid").AsNonNull().ColumnDefinitions.Last().Also(column =>
+		this.renderingParamsPanelColumn = this.Get<Grid>("workingAreaGrid").ColumnDefinitions.Last().Also(column =>
 		{
 			column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>((_) =>
 			{
 				(this.DataContext as Session)?.Let(it => it.RenderingParametersPanelSize = column.Width.Value);
 			}));
 		});
-		this.renderingParamsPanelScrollViewer = this.FindControl<ScrollViewer>(nameof(renderingParamsPanelScrollViewer)).AsNonNull();
+		this.renderingParamsPanelScrollViewer = this.Get<ScrollViewer>(nameof(renderingParamsPanelScrollViewer));
 		SetupFilterParamsSliderAndButtons("shadowAdjustment", BrightnessAdjustmentGroup);
 #if DEBUG
-		this.FindControl<Button>("testButton").AsNonNull().IsVisible = true;
+		this.Get<Button>("testButton").IsVisible = true;
 #endif
 		SetupFilterParamsSliderAndButtons("vibranceAdjustment", ColorAdjustmentGroup);
 
@@ -408,6 +411,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.imageScrollViewerPadding = this.Application.FindResourceOrDefault<Thickness>("Thickness/SessionControl.ImageViewer.Padding");
 
 		// create scheduled actions
+		this.checkAttachedScreenAction = new(() =>
+		{
+			var screen = this.attachedWindow?.Screens.ScreenFromWindow(this.attachedWindow);
+			if (this.attachedScreen?.Equals(screen) ?? screen is null)
+				return;
+			this.attachedScreen = screen;
+			this.OnAttachedScreenChanged();
+		});
 		this.hidePanelsByImageViewerSizeAction = new(() =>
 		{
 			if (this.imageViewerGrid.Bounds.Width > this.minImageViewerSizeToHidePanels)
@@ -552,6 +563,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			var x = (double)Math.Max(0, session.SelectedRenderedImagePixelPositionX);
 			var y = (double)Math.Max(0, session.SelectedRenderedImagePixelPositionY);
 			var scale = session.ImageDisplayScale;
+			if (this.attachedScreen is not null)
+				scale /= this.attachedScreen.Scaling; // [Workaround]
 			x = (int)(x * scale + 0.5);
 			y = (int)(y * scale + 0.5);
 			if (scale <= 6.999)
@@ -816,6 +829,15 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.imageRendererComboBox.ItemTemplate = null;
 		this.imageRendererComboBox.ItemTemplate = imageRendererTemplate;
 	}
+	
+	
+	// Called when attached screen changed.
+	void OnAttachedScreenChanged()
+	{
+		this.Logger.LogWarning("Attached screen changed");
+		this.ReportScreenPixelDensity();
+		this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
+	}
 
 
 	// Called when attached to logical tree.
@@ -847,6 +869,40 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.PropertyChanged += this.OnWindowPropertyChanged;
 		});
 	}
+	
+	
+	// Called to attach to session.
+	void OnAttachToSession(Session session)
+	{
+		// attach
+		session.PropertyChanged += this.OnSessionPropertyChanged;
+		this.canOpenSourceFile.Bind(session.OpenSourceFileCommand, "");
+		this.canResetBrightnessAdjustment.Bind(session.ResetBrightnessAdjustmentCommand);
+		this.canResetColorAdjustment.Bind(session.ResetColorAdjustmentCommand);
+		this.canResetContrastAdjustment.Bind(session.ResetContrastAdjustmentCommand);
+		this.canResetHighlightAdjustment.Bind(session.ResetHighlightAdjustmentCommand);
+		this.canResetSaturationAdjustment.Bind(session.ResetSaturationAdjustmentCommand);
+		this.canResetShadowAdjustment.Bind(session.ResetShadowAdjustmentCommand);
+		this.canResetVibranceAdjustment.Bind(session.ResetVibranceAdjustmentCommand);
+		this.canSaveAsNewProfile.Bind(session.SaveAsNewProfileCommand, "");
+		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
+		this.canSaveRenderedImage.Bind(session.SaveRenderedImageCommand, new Session.ImageSavingParams());
+		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceFileOpened);
+
+		// setup histograms panel
+		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 1 : 3);
+		this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
+
+		// update rendered image
+		this.updateEffectiveRenderedImageAction.Schedule();
+		this.updateEffectiveRenderedImageIntModeAction.Schedule();
+		
+		// update state
+		this.ReportImageViewportSize();
+		this.ReportScreenPixelDensity();
+		this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
+		this.updateStatusBarStateAction.Schedule();
+	}
 
 
 	// Called when attached to visual tree.
@@ -861,10 +917,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// [Workaround] Force refreshing status bar state to make background applied as expected
 		this.SetValue(StatusBarStateProperty, StatusBarState.None);
 		this.updateStatusBarStateAction.Reschedule();
-
-		// report pixel density
-		this.ReportScreenPixelDensity();
-	}
+    }
 
 
 	// Called when custom name of color space changed.
@@ -898,10 +951,40 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.PropertyChanged -= this.OnWindowPropertyChanged;
 			return (Avalonia.Controls.Window?)null;
 		});
+		this.checkAttachedScreenAction.Execute();
 
 		// call base
 		base.OnDetachedFromLogicalTree(e);
 	}
+    
+    
+    // Called to detach from session.
+    void OnDetachFromSession(Session session)
+    {
+	    // detach
+	    session.PropertyChanged -= this.OnSessionPropertyChanged;
+	    this.canOpenSourceFile.Unbind();
+	    this.canResetBrightnessAdjustment.Unbind();
+	    this.canResetColorAdjustment.Unbind();
+	    this.canResetContrastAdjustment.Unbind();
+	    this.canResetHighlightAdjustment.Unbind();
+	    this.canResetSaturationAdjustment.Unbind();
+	    this.canResetShadowAdjustment.Unbind();
+	    this.canResetVibranceAdjustment.Unbind();
+	    this.canSaveAsNewProfile.Unbind();
+	    this.canSaveFilteredImage.Unbind();
+	    this.canSaveRenderedImage.Unbind();
+	    this.canShowEvaluateImageDimensionsMenu.Update(false);
+	    this.updateEffectiveRenderedImageAction.Execute();
+	    
+	    // update state
+	    this.keepHistogramsVisible = false;
+	    this.keepRenderingParamsPanelVisible = false;
+	    this.ReportImageViewportSize();
+	    this.ReportScreenPixelDensity();
+	    this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
+	    this.updateStatusBarStateAction.Schedule();
+    }
     
     
     // Called when double clicked on brightness adjustment UI.
@@ -1328,54 +1411,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		if (property == DataContextProperty)
 		{
 			if (change.OldValue is Session oldSession)
-				oldSession.PropertyChanged -= this.OnSessionPropertyChanged;
+				this.OnDetachFromSession(oldSession);
 			if (change.NewValue is Session newSession)
-			{
-				// attach to session
-				newSession.PropertyChanged += this.OnSessionPropertyChanged;
-				this.canOpenSourceFile.Bind(newSession.OpenSourceFileCommand, "");
-				this.canResetBrightnessAdjustment.Bind(newSession.ResetBrightnessAdjustmentCommand);
-				this.canResetColorAdjustment.Bind(newSession.ResetColorAdjustmentCommand);
-				this.canResetContrastAdjustment.Bind(newSession.ResetContrastAdjustmentCommand);
-				this.canResetHighlightAdjustment.Bind(newSession.ResetHighlightAdjustmentCommand);
-				this.canResetSaturationAdjustment.Bind(newSession.ResetSaturationAdjustmentCommand);
-				this.canResetShadowAdjustment.Bind(newSession.ResetShadowAdjustmentCommand);
-				this.canResetVibranceAdjustment.Bind(newSession.ResetVibranceAdjustmentCommand);
-				this.canSaveAsNewProfile.Bind(newSession.SaveAsNewProfileCommand, "");
-				this.canSaveFilteredImage.Bind(newSession.SaveFilteredImageCommand, new Session.ImageSavingParams());
-				this.canSaveRenderedImage.Bind(newSession.SaveRenderedImageCommand, new Session.ImageSavingParams());
-				this.canShowEvaluateImageDimensionsMenu.Update(newSession.IsSourceFileOpened);
-
-				// setup histograms panel
-				Grid.SetColumnSpan(this.imageViewerGrid, newSession.IsRenderingParametersPanelVisible ? 1 : 3);
-				this.renderingParamsPanelColumn.Width = new GridLength(newSession.RenderingParametersPanelSize, GridUnitType.Pixel);
-
-				// update rendered image
-				this.updateEffectiveRenderedImageAction.Schedule();
-				this.updateEffectiveRenderedImageIntModeAction.Schedule();
-			}
-			else
-			{
-				this.canOpenSourceFile.Unbind();
-				this.canResetBrightnessAdjustment.Unbind();
-				this.canResetColorAdjustment.Unbind();
-				this.canResetContrastAdjustment.Unbind();
-				this.canResetHighlightAdjustment.Unbind();
-				this.canResetSaturationAdjustment.Unbind();
-				this.canResetShadowAdjustment.Unbind();
-				this.canResetVibranceAdjustment.Unbind();
-				this.canSaveAsNewProfile.Unbind();
-				this.canSaveFilteredImage.Unbind();
-				this.canSaveRenderedImage.Unbind();
-				this.canShowEvaluateImageDimensionsMenu.Update(false);
-				this.updateEffectiveRenderedImageAction.Execute();
-			}
-			this.keepHistogramsVisible = false;
-			this.keepRenderingParamsPanelVisible = false;
-			this.ReportImageViewportSize();
-			this.ReportScreenPixelDensity();
-			this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
-			this.updateStatusBarStateAction.Schedule();
+				this.OnAttachToSession(newSession);
 		}
 		else if (property == EffectiveRenderedImageProperty)
 			this.updateEffectiveRenderedImageIntModeAction.Schedule();
@@ -1498,8 +1536,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	void OnWindowPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
 	{
 		var property = e.Property;
-		if (property == Avalonia.Controls.Window.HeightProperty 
-			|| property == Avalonia.Controls.Window.WidthProperty)
+		if (property == BoundsProperty)
+		{
+			if (this.attachedWindow is not CarinaStudio.Controls.Window csWindow || csWindow.IsOpened)
+				this.checkAttachedScreenAction.Schedule(AttachedScreenCheckingInterval);
+		}
+		else if (property == HeightProperty 
+		         || property == WidthProperty)
 		{
 			this.StartUsingSmallRenderedImage();
 			this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelay);
@@ -1507,7 +1550,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		else if (property == CarinaStudio.AppSuite.Controls.Window.IsOpenedProperty)
 		{
 			if ((bool)e.NewValue.AsNonNull())
-				this.ReportScreenPixelDensity();
+				this.checkAttachedScreenAction.Execute();
 		}
 		else if (property == Avalonia.Controls.Window.WindowStateProperty)
 		{
@@ -1598,9 +1641,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		if (this.DataContext is not Session session)
 			return;
-		if (this.attachedWindow == null)
+		if (this.attachedScreen is null)
 			return;
-		session.ScreenPixelDensity = (this.attachedWindow.Screens.ScreenFromVisual(this.attachedWindow) ?? this.attachedWindow.Screens.Primary)?.Scaling ?? 1.0;
+		session.ScreenPixelDensity = this.attachedScreen.Scaling;
 	}
 
 
