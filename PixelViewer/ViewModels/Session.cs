@@ -2298,6 +2298,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				if (sourceImageFrame == renderedImageFrame)
 				{
 					sourceImageFrame = resultImageFrame;
+					// ReSharper disable once RedundantAssignment
 					resultImageFrame = filteredImageFrame2;
 				}
 				else

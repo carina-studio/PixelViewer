@@ -3,7 +3,6 @@ using Avalonia.Controls;
 using Avalonia.Platform;
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.Profiles;
-using Carina.PixelViewer.Threading;
 using CarinaStudio;
 using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Collections;
@@ -77,7 +76,7 @@ namespace Carina.PixelViewer.ViewModels
 				
 				// get screen color space
 				this.currentScreen = screen;
-				var screenColorSpace = ColorSpace.Default;
+				ColorSpace screenColorSpace;
 				if (!ColorSpace.IsSystemScreenColorSpaceSupported || !this.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace))
 					ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out screenColorSpace);
 				else
@@ -92,7 +91,7 @@ namespace Carina.PixelViewer.ViewModels
 						ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out screenColorSpace);
 					}
 				}
-				this.Logger.LogDebug($"Screen color space is '{screenColorSpace}'");
+				this.Logger.LogDebug("Screen color space is '{screenColorSpace}'", screenColorSpace);
 
 				// update state
 				if (!this.IsDisposed)
@@ -137,7 +136,7 @@ namespace Carina.PixelViewer.ViewModels
 					this.SetValue(ActivatedSessionProperty, this.sessions[intValue]);
 				}
 
-				this.Logger.LogWarning($"State restored, session count: {this.sessions.Count}");
+				this.Logger.LogWarning("State restored, session count: {count}", this.sessions.Count);
 			});
 		}
 
@@ -176,7 +175,7 @@ namespace Carina.PixelViewer.ViewModels
 			session.Owner = this;
 			session.PropertyChanged += this.OnSessionPropertyChanged;
 			this.sessions.Insert(index, session);
-			this.Logger.LogDebug($"Attach session {session} at {index}, count: {this.sessions.Count}");
+			this.Logger.LogDebug("Attach session {session} at {index}, count: {count}", session, index, this.sessions.Count);
 		}
 
 
@@ -193,7 +192,7 @@ namespace Carina.PixelViewer.ViewModels
 
 			// create session
 			var session = new Session(this.Application, null);
-			this.Logger.LogDebug($"Create session {session}");
+			this.Logger.LogDebug("Create session {session}", session);
 
 			// attach
 			this.AttachSession(index, session);
@@ -218,7 +217,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
 		/// <param name="fileName">Name of source image file.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateAndAttachSession(int index, string? fileName = null)
+		public Session CreateAndAttachSession(int index, string? fileName)
 		{
 			// check state
 			this.VerifyAccess();
@@ -230,9 +229,9 @@ namespace Carina.PixelViewer.ViewModels
 			// open file
 			if (fileName != null)
 			{
-				this.Logger.LogDebug($"Open '{fileName}' after creating {session}");
+				this.Logger.LogDebug("Open '{fileName}' after creating {session}", fileName, session);
 				if (!session.OpenSourceFileCommand.TryExecute(fileName))
-					this.Logger.LogError($"Unable to open '{fileName}' after creating {session}");
+					this.Logger.LogError("Unable to open '{fileName}' after creating {session}", fileName, session);
 			}
 
 			// complete
@@ -295,7 +294,7 @@ namespace Carina.PixelViewer.ViewModels
 			session.PropertyChanged -= this.OnSessionPropertyChanged;
 			session.Owner = null;
 			this.sessions.Remove(session);
-			this.Logger.LogDebug($"Detach session {session}, count: {this.sessions.Count}");
+			this.Logger.LogDebug("Detach session {session}, count: {count}", session, this.sessions.Count);
 		}
 
 
@@ -305,7 +304,7 @@ namespace Carina.PixelViewer.ViewModels
 			// close all sessions
 			foreach (var session in this.sessions)
 			{
-				this.Logger.LogWarning($"Close session {session} when disposing workspace");
+				this.Logger.LogWarning("Close session {session} when disposing workspace", session);
 				session.PropertyChanged -= this.OnSessionPropertyChanged;
 				session.Dispose();
 			}
@@ -322,7 +321,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get effective screen color space.
 		/// </summary>
-		public ColorSpace EffectiveScreenColorSpace { get => this.GetValue(EffectiveScreenColorSpaceProperty); }
+		public ColorSpace EffectiveScreenColorSpace => this.GetValue(EffectiveScreenColorSpaceProperty);
 
 
 		/// <summary>
@@ -356,7 +355,7 @@ namespace Carina.PixelViewer.ViewModels
 				var newSession = (newValue as Session);
 				if (newSession != null && !this.sessions.Contains(newSession))
 				{
-					this.Logger.LogError($"Invalid session: {newSession}");
+					this.Logger.LogError("Invalid session: {newSession}", newSession);
 					this.SynchronizationContext.Post(() => this.ActivatedSession = null);
 					return;
 				}
@@ -364,7 +363,7 @@ namespace Carina.PixelViewer.ViewModels
 				// activate
 				if (newSession != null)
 				{
-					this.Logger.LogDebug($"Activate session {newSession}");
+					this.Logger.LogDebug("Activate session {newSession}", newSession);
 					this.sessionActivationToken = newSession.Activate();
 				}
 				this.InvalidateTitle();
@@ -418,10 +417,8 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		// Update title.
-        protected override string? OnUpdateTitle() => this.ActivatedSession?.Let(it =>
-		{
-			return $"PixelViewer - {it.Title}";
-		}) ?? "PixelViewer";
+        protected override string OnUpdateTitle() => this.ActivatedSession?.Let(it => 
+	        $"PixelViewer - {it.Title}") ?? "PixelViewer";
 
 
 		// Called when window position changed.

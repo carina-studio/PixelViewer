@@ -142,7 +142,7 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
 
 
     // Whether drag-and-drop is supported or not.
-    public bool IsDragAndDropSupported { get; } = !CarinaStudio.Platform.IsLinux;
+    public bool IsDragAndDropSupported { get; } = !Platform.IsLinux;
 
 
     // Called when strings updated.

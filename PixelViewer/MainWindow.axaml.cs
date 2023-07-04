@@ -39,7 +39,6 @@ namespace Carina.PixelViewer
 
 		// Fields.
 		Session? attachedActivatedSession;
-		readonly Border baseBorder;
 		bool isPerformingContentRelayout;
 		readonly AsTabControl mainTabControl;
 		readonly ObservableList<TabItem> mainTabItems = new();
@@ -60,11 +59,11 @@ namespace Carina.PixelViewer
 
 			// initialize Avalonia resources
 			AvaloniaXamlLoader.Load(this);
-			if (CarinaStudio.Platform.IsMacOS)
+			if (Platform.IsMacOS)
 				NativeMenu.SetMenu(this, (NativeMenu)this.Resources["nativeMenu"].AsNonNull());
 
 			// setup controls
-			this.baseBorder = this.FindControl<Border>(nameof(baseBorder)).AsNonNull().Also(it => 
+			var baseBorder = this.Get<Border>("baseBorder").Also(it => 
 			{
 				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
 				{
@@ -80,7 +79,7 @@ namespace Carina.PixelViewer
 			// setup main tab control
 			this.mainTabControl = this.Get<AsTabControl>("tabControl").Also((it) =>
 			{
-				it.SelectionChanged += (s, _) => this.OnMainTabControlSelectionChanged();
+				it.SelectionChanged += (_, _) => this.OnMainTabControlSelectionChanged();
 			});
 			this.mainTabItems.AddRange(this.mainTabControl.Items.Cast<TabItem>());
 			this.mainTabControl.Items.Clear();
@@ -91,7 +90,7 @@ namespace Carina.PixelViewer
 			{
 				// [Workaround] Trigger layout to make sure that content will be placed correctly after changing size of window by code
 				this.isPerformingContentRelayout = true;
-				this.baseBorder.Padding = new Thickness(0, 0, 0, -1);
+				baseBorder.Padding = new Thickness(0, 0, 0, -1);
 			});
 			this.updateTitleBarAction = new ScheduledAction(() =>
 			{
@@ -127,7 +126,7 @@ namespace Carina.PixelViewer
 
 			// create tab item header
 			var header = this.DataTemplates[0].Build(session);
-			if (CarinaStudio.Platform.IsMacOS)
+			if (Platform.IsMacOS)
 				header?.Let(it => it.ContextMenu = null);
 
 			// create tab item
@@ -367,7 +366,7 @@ namespace Carina.PixelViewer
 			if (e.Data.HasFileNames())
 			{
 				if (e.ItemIndex < this.mainTabItems.Count - 1)
-				this.mainTabControl.SelectedIndex = e.ItemIndex;
+					this.mainTabControl.SelectedIndex = e.ItemIndex;
 				e.DragEffects = DragDropEffects.Copy;
 				return;
 			}
@@ -496,7 +495,7 @@ namespace Carina.PixelViewer
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-			if (e.Handled || (e.KeyModifiers & KeyModifiers.Control) == 0 || CarinaStudio.Platform.IsMacOS)
+			if (e.Handled || (e.KeyModifiers & KeyModifiers.Control) == 0 || Platform.IsMacOS)
 				return;
 			switch (e.Key)
 			{
@@ -575,10 +574,12 @@ namespace Carina.PixelViewer
 				|| property == WidthProperty
 				|| property == WindowStateProperty)
 			{
+				// ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 				if (this.WindowState == WindowState.Normal)
 					this.relayoutContentAction?.Reschedule();
 				else
 					this.relayoutContentAction?.Cancel();
+				// ReSharper restore ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 			}
 		}
 
@@ -641,7 +642,7 @@ namespace Carina.PixelViewer
 					}
 					break;
 			}
-			this.SetValue(HasMultipleSessionsProperty, (this.DataContext as Workspace)?.Sessions?.Count > 1);
+			this.SetValue(HasMultipleSessionsProperty, (this.DataContext as Workspace)?.Sessions.Count > 1);
 		}
 
 
@@ -649,7 +650,7 @@ namespace Carina.PixelViewer
 		void OnTabItemDragged(object? sender, TabItemDraggedEventArgs e)
 		{
 			// prevent dragging tab on Linux because drag-and-drop is not supported properly
-			if (CarinaStudio.Platform.IsLinux)
+			if (Platform.IsLinux)
 				return;
 
 			// get session

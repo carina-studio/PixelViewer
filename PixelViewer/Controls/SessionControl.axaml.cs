@@ -1075,7 +1075,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 		// handle key event
 		this.pressedKeys.Add(e.Key);
-		var isCtrlPressed = CarinaStudio.Platform.IsMacOS 
+		var isCtrlPressed = Platform.IsMacOS 
 			? (e.KeyModifiers & KeyModifiers.Meta) != 0 
 			: (e.KeyModifiers & KeyModifiers.Control) != 0;
 		if (isCtrlPressed)
@@ -1099,7 +1099,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 						break;
 					}
 				case Key.N:
-					if (CarinaStudio.Platform.IsMacOS)
+					if (Platform.IsMacOS)
 						return;
 					this.FindAncestorOfType<MainWindow>()?.CreateMainWindow();
 					break;
@@ -1177,7 +1177,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 
 		// handle key event
-		var isCmdPressed = CarinaStudio.Platform.IsMacOS
+		var isCmdPressed = Platform.IsMacOS
 			? (this.pressedKeys.Contains(Key.LWin) || this.pressedKeys.Contains(Key.RWin))
 			: (this.pressedKeys.Contains(Key.LeftCtrl) || this.pressedKeys.Contains(Key.RightCtrl));
 		if (e.KeyModifiers == 0 && !isCmdPressed)
@@ -1942,13 +1942,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// </summary>
 	public void ShowSourceFileInFileExplorer()
     {
-		if (!CarinaStudio.Platform.IsOpeningFileManagerSupported)
+		if (!Platform.IsOpeningFileManagerSupported)
 			return;
 		if (this.DataContext is not Session session)
 			return;
 		var fileName = session.SourceFileName;
 		if (!string.IsNullOrEmpty(fileName))
-			CarinaStudio.Platform.OpenFileManager(fileName);
+			Platform.OpenFileManager(fileName);
 	}
 
 
