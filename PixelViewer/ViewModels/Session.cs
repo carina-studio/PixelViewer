@@ -3221,9 +3221,12 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.filterImageAction.Schedule();
 			else
 			{
-				using var cancellationTokenSource = new CancellationTokenSource();
 				this.CancelFilteringImage();
-				_ = this.ReportRenderedImageAsync(cancellationTokenSource);
+				this.SynchronizationContext.Post(async () =>
+				{
+					using var cancellationTokenSource = new CancellationTokenSource();
+					await this.ReportRenderedImageAsync(cancellationTokenSource);
+				});
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			}
 		}
