@@ -2,6 +2,7 @@
 using CarinaStudio;
 using CarinaStudio.IO;
 using CarinaStudio.Threading;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Threading;
@@ -14,6 +15,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
     /// </summary>
     abstract class BaseFileFormatParser : IFileFormatParser
     {
+        // Fields.
+        ILogger? logger;
+        
+        
         /// <summary>
         /// Initialize new <see cref="BaseFileFormatParser"/> instance.
         /// </summary>
@@ -37,6 +42,19 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         public FileFormat FileFormat { get; }
 
 
+        /// <summary>
+        /// Get logger.
+        /// </summary>
+        protected ILogger Logger
+        {
+            get
+            {
+                this.logger ??= this.Application.LoggerFactory.CreateLogger(this.GetType().Name);
+                return this.logger;
+            }
+        }
+
+
         /// <inheritdoc/>
         public SynchronizationContext SynchronizationContext => this.Application.SynchronizationContext;
 
@@ -46,7 +64,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         {
             // open stream
             this.VerifyAccess();
-            var stream = (Stream?)null;
+            Stream? stream;
             try
             {
                 stream = await source.OpenStreamAsync(StreamAccess.Read, cancellationToken);

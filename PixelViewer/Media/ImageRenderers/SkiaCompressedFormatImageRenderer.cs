@@ -4,6 +4,7 @@ using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 // ReSharper disable AccessToDisposedClosure
@@ -16,17 +17,26 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
 {
     // Fields.
-    readonly SKEncodedImageFormat encodedFormat;
+    readonly SKEncodedImageFormat[] encodedFormats;
+    
+    
+    /// <summary>
+    /// Initialize new <see cref="SkiaCompressedFormatImageRenderer"/> instance.
+    /// </summary>
+    /// <param name="format">Format supported by this instance.</param>
+    /// <param name="encodedFormat">Format defined by Skia.</param>      
+    protected SkiaCompressedFormatImageRenderer(ImageFormat format, SKEncodedImageFormat encodedFormat) : this(format, new[] { encodedFormat })
+    { }
 
 
     /// <summary>
 	/// Initialize new <see cref="SkiaCompressedFormatImageRenderer"/> instance.
 	/// </summary>
 	/// <param name="format">Format supported by this instance.</param>
-    /// <param name="encodedFormat">Format defined by Skia.</param>      
-	protected SkiaCompressedFormatImageRenderer(ImageFormat format, SKEncodedImageFormat encodedFormat) : base(format)
+    /// <param name="encodedFormats">Formats defined by Skia.</param>      
+	protected SkiaCompressedFormatImageRenderer(ImageFormat format, IList<SKEncodedImageFormat> encodedFormats) : base(format)
     { 
-        this.encodedFormat = encodedFormat;
+        this.encodedFormats = encodedFormats.ToArray();
     }
     
     
@@ -49,14 +59,14 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
             SKCodec.Create(stream));
         if (codec is null)
             throw new ArgumentException("Unable to create codec.");
-        if (codec.EncodedFormat != this.encodedFormat)
+        if (!this.encodedFormats.Contains(codec.EncodedFormat))
         {
-            Global.RunWithoutErrorAsync(codec.Dispose);
-            throw new ArgumentException($"Incorrect format: {codec.EncodedFormat}, {this.encodedFormat} expected.");
+            //Global.RunWithoutErrorAsync(codec.Dispose);
+            throw new ArgumentException($"Incorrect format: {codec.EncodedFormat}.");
         }
         if (cancellationToken.IsCancellationRequested)
         {
-            Global.RunWithoutErrorAsync(codec.Dispose);
+            //Global.RunWithoutErrorAsync(codec.Dispose);
             throw new TaskCanceledException();
         }
         return codec;
@@ -188,7 +198,7 @@ class JpegImageRenderer : SkiaCompressedFormatImageRenderer
     /// <summary>
     /// Initialize new <see cref="JpegImageRenderer"/> instance.
     /// </summary>
-    public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), new[] { "JPEG" }), SKEncodedImageFormat.Jpeg)
+    public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), new[] { "JPEG" }), new[] { SKEncodedImageFormat.Dng, SKEncodedImageFormat.Jpeg })
     { }
 
 

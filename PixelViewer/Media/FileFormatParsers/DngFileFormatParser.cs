@@ -1,5 +1,7 @@
 ﻿using Carina.PixelViewer.Media.Profiles;
 using CarinaStudio;
+using Microsoft.Extensions.Logging;
+using SkiaSharp;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +16,13 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
     /// </summary>
     class DngFileFormatParser : BaseFileFormatParser
     {
+        // Constants.
+        const int Uncompressed = 1;
+        const int Compressed = 7;
+        const int Deflate = 8;
+        const int LossyJpeg = 34892;
+        
+        
         // Static fields.
         static readonly IList<Tuple<byte[], BayerPattern>> CfaPatternToBayerPatternMap = new Tuple<byte[], BayerPattern>[]
         {
@@ -40,12 +49,12 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
         {
             // get image info
             var byteOrdering = ByteOrdering.LittleEndian;
-            var hasJpegThumb = false;
-            var jpegThumbWidth = 0;
-            var jpegThumbHeight = 0;
-            var jpegThumbOffset = 0u;
-            var jpegThumbDataSize = 0u;
-            var jpegOrientation = 0;
+            var hasCompressedThumb = false;
+            var compressedThumbWidth = 0;
+            var compressedThumbHeight = 0;
+            var compressedThumbOffset = 0u;
+            var compressedThumbDataSize = 0u;
+            var compressedThumbOrientation = -1;
             var compression = 0u;
             var imageWidth = 0;
             var imageHeight = 0;
@@ -84,10 +93,11 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 uint[]? uintData;
                 var thumbWidth = 0;
                 var thumbHeight = 0;
-                var isJpegThumb = false;
+                var isCompressedThumb = false;
                 var thumbOrientation = 0;
                 var thumbStripOffsets = (uint[]?)null;
                 uint[]? thumbStripByteCounts;
+                var compressedThumbFormat = default(SKEncodedImageFormat?);
                 while (entryReader.Read())
                 {
                     switch (entryReader.CurrentIfdName)
@@ -104,18 +114,30 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                     if (entryReader.TryGetEntryData(out uintData) && uintData != null)
                                     {
                                         if (isFullSizeImage)
+                                        {
                                             imageWidth = (int)uintData[0];
+                                            this.Logger.LogTrace("Full image width: {width}", uintData[0]);
+                                        }
                                         else
+                                        {
                                             thumbWidth = (int)uintData[0];
+                                            this.Logger.LogTrace("Thumbnail image width: {width}", uintData[0]);
+                                        }
                                     }
                                     break;
                                 case 0x0101: // ImageLength
                                     if (entryReader.TryGetEntryData(out uintData) && uintData != null)
                                     {
                                         if (isFullSizeImage)
+                                        {
                                             imageHeight = (int)uintData[0];
+                                            this.Logger.LogTrace("Full image height: {height}", uintData[0]);
+                                        }
                                         else
+                                        {
                                             thumbHeight = (int)uintData[0];
+                                            this.Logger.LogTrace("Thumbnail image height: {height}", uintData[0]);
+                                        }
                                     }
                                     break;
                                 case 0x0102: // BitsPerSample
@@ -132,11 +154,11 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                     {
                                         if (isFullSizeImage)
                                         {
-                                            isJpegThumb = false;
+                                            isCompressedThumb = false;
                                             compression = ushortData[0];
                                         }
                                         else
-                                            isJpegThumb = ushortData[0] == 7;
+                                            isCompressedThumb = ushortData[0] == Compressed;
                                     }
                                     break;
                                 case 0x0106: // PhotometricInterpretation
@@ -146,7 +168,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 case 0x0111: // StripOffsets
                                     if (isFullSizeImage)
                                         entryReader.TryGetEntryData(out stripOffsets);
-                                    else if (isJpegThumb)
+                                    else if (isCompressedThumb)
                                         entryReader.TryGetEntryData(out thumbStripOffsets);
                                     break;
                                 case 0x0112: // Orientation
@@ -155,7 +177,11 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                         if (isFullSizeImage)
                                             orientation = ushortData[0];
                                         else
+                                        {
                                             thumbOrientation = ushortData[0];
+                                            if (isCompressedThumb && compressedThumbOrientation < 0)
+                                                compressedThumbOrientation = thumbOrientation;
+                                        }
                                     }
                                     break;
                                 case 0x0116: // RowsPerStrip:
@@ -165,19 +191,19 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 case 0x0117: // StripByteCounts
                                     if (isFullSizeImage)
                                         entryReader.TryGetEntryData(out stripByteCounts);
-                                    else if (isJpegThumb && entryReader.TryGetEntryData(out thumbStripByteCounts))
+                                    else if (isCompressedThumb && entryReader.TryGetEntryData(out thumbStripByteCounts))
                                     {
-                                        // select this JPEG thumbnail if it is the largest one
-                                        if (thumbWidth > jpegThumbWidth && thumbHeight > jpegThumbHeight
+                                        // select this compressed thumbnail if it is the largest one
+                                        if (thumbWidth > compressedThumbWidth && thumbHeight > compressedThumbHeight
                                             && thumbStripOffsets != null && thumbStripOffsets.Length == 1
                                             && thumbStripByteCounts != null && thumbStripByteCounts.Length == 1)
                                         {
-                                            hasJpegThumb = true;
-                                            jpegThumbWidth = thumbWidth;
-                                            jpegThumbHeight = thumbHeight;
-                                            jpegThumbOffset = thumbStripOffsets[0];
-                                            jpegThumbDataSize = thumbStripByteCounts[0];
-                                            jpegOrientation = thumbOrientation;
+                                            hasCompressedThumb = true;
+                                            compressedThumbWidth = thumbWidth;
+                                            compressedThumbHeight = thumbHeight;
+                                            compressedThumbOffset = thumbStripOffsets[0];
+                                            compressedThumbDataSize = thumbStripByteCounts[0];
+                                            compressedThumbOrientation = thumbOrientation;
                                         }
                                     }
                                     break;
@@ -255,6 +281,29 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                         }
                                     }
                                     break;
+                                case 0xc620: // DefaultCropSize
+                                    if (isFullSizeImage)
+                                    {
+                                        if (entryReader.CurrentEntryType == IfdEntryType.UInt16
+                                            && entryReader.TryGetEntryData(out ushortData)
+                                            && ushortData != null
+                                            && ushortData.Length >= 2)
+                                        {
+                                            imageWidth = Math.Min(imageWidth, ushortData[0]);
+                                            imageHeight = Math.Min(imageHeight, ushortData[1]);
+                                            this.Logger.LogTrace("Full image crop size: {width}x{height}", imageWidth, imageHeight);
+                                        }
+                                        else if (entryReader.CurrentEntryType == IfdEntryType.UInt32
+                                                 && entryReader.TryGetEntryData(out uintData)
+                                                 && uintData != null
+                                                 && uintData.Length >= 2)
+                                        {
+                                            imageWidth = Math.Min(imageWidth, (int)uintData[0]);
+                                            imageHeight = Math.Min(imageHeight, (int)uintData[1]);
+                                            this.Logger.LogTrace("Full image crop size: {width}x{height}", imageWidth, imageHeight);
+                                        }
+                                    }
+                                    break;
                                 case 0xc68d: // ActiveArea
                                     if (isFullSizeImage)
                                     {
@@ -273,6 +322,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                             activeArea = new[] { (int)uintData[1], (int)uintData[0], (int)uintData[3], (int)uintData[2] };
                                         }
                                     }
+                                    break;
+                                case 0xc68f: // AsShotICCProfile
+                                    break;
+                                case 0xc691: // CurrentICCProfile
                                     break;
                                 case 0x828e: // CFAPattern
                                     if (isFullSizeImage)
@@ -319,30 +372,73 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 if (effectiveBits <= 0)
                     effectiveBits = (pixelStride << 3);
                 
-                // get color space
-                var useJpegImage = false;
+                // get compression format and color space
+                var useCompressedImage = false;
                 switch (compression)
                 {
-                    case 1: // uncompressed raw
+                    case Uncompressed:
                         break;
-                    case 7: // JPEG
+                    case Compressed:
                         if (imageDataOffset > 0)
                         {
                             stream.Position = imageDataOffset;
-                            useJpegImage = true;
+                            useCompressedImage = true;
+                        }
+                        break;
+                    case LossyJpeg:
+                        if (imageDataOffset > 0)
+                        {
+                            stream.Position = imageDataOffset;
+                            useCompressedImage = true;
+                            compressedThumbFormat = SKEncodedImageFormat.Jpeg;
                         }
                         break;
                     default:
-                        if (hasJpegThumb && jpegThumbOffset > 0)
+                        if (hasCompressedThumb && compressedThumbOffset > 0)
                         {
-                            stream.Position = jpegThumbOffset;
-                            useJpegImage = true;
+                            stream.Position = compressedThumbOffset;
+                            useCompressedImage = true;
                         }
                         break;
                 }
-                if (useJpegImage && JpegFileFormatParser.SeekToIccProfile(stream))
-                    colorSpace = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
-            });
+                if (useCompressedImage && !compressedThumbFormat.HasValue)
+                {
+                    var headerBuffer = new byte[4];
+                    try
+                    {
+                        // ReSharper disable once MethodHasAsyncOverloadWithCancellation
+                        if (stream.Read(headerBuffer, 0, 4) == 4)
+                        {
+                            if (headerBuffer[0] == 0xff && headerBuffer[1] == 0xd8)
+                                compressedThumbFormat = SKEncodedImageFormat.Jpeg;
+                            else
+                            {
+                                this.Logger.LogError("Unrecognized format of thumbnail");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            this.Logger.LogError("Unable to read header of thumbnail");
+                            return;
+                        }
+                    }
+                    finally
+                    {
+                        stream.Position = compressedThumbOffset;
+                    }
+                }
+                if (compressedThumbFormat.HasValue)
+                {
+                    switch (compressedThumbFormat.Value)
+                    {
+                        case SKEncodedImageFormat.Jpeg:
+                            if (JpegFileFormatParser.SeekToIccProfile(stream))
+                                colorSpace = await ColorSpace.LoadFromIccProfileAsync(stream, ColorSpaceSource.Embedded, cancellationToken);
+                            break;
+                    }
+                }
+            }, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
 
@@ -361,9 +457,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             ImageRenderers.IImageRenderer? imageRenderer;
             switch (compression)
             {
-                case 1: // uncompressed raw
+                case Uncompressed:
                     break;
-                case 7: // JPEG
+                case Compressed:
+                case LossyJpeg:
                     imageRenderer = ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.JpegImageRenderer);
                     if (imageRenderer != null)
                     {
@@ -374,12 +471,12 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                             profile.DataOffset = imageDataOffset;
                             profile.Height = imageHeight;
                             profile.Width = imageWidth;
-                            profile.Orientation = Tiff.FromTiffOrientation(jpegOrientation);
+                            profile.Orientation = Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation);
                         });
                     }
                     return null;
                 default:
-                    if (hasJpegThumb && jpegThumbOffset > 0 && jpegThumbWidth > 0 && jpegThumbHeight > 0)
+                    if (hasCompressedThumb && compressedThumbOffset > 0 && compressedThumbWidth > 0 && compressedThumbHeight > 0)
                     {
                         imageRenderer = ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.JpegImageRenderer);
                         if (imageRenderer != null)
@@ -388,10 +485,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                             {
                                 if (colorSpace != null)
                                     profile.ColorSpace = colorSpace;
-                                profile.DataOffset = jpegThumbOffset;
-                                profile.Height = jpegThumbHeight;
-                                profile.Width = jpegThumbWidth;
-                                profile.Orientation = Tiff.FromTiffOrientation(jpegOrientation);
+                                profile.DataOffset = compressedThumbOffset;
+                                profile.Height = compressedThumbHeight;
+                                profile.Width = compressedThumbWidth;
+                                profile.Orientation = Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation);
                             });
                         }
                     }
