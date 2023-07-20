@@ -179,6 +179,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 								// collect colors around current pixel
 								int neighborComponent;
+								var isNotLastPixelInRow = (x < width - 1);
 								if (isNotTopRow)
 								{
 									if (x > 0)
@@ -196,7 +197,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 										accumColors[neighborComponent] += topBitmapPixelPtr[neighborComponent];
 										++colorCounts[neighborComponent];
 									}
-									if (x < width - 1)
+									if (isNotLastPixelInRow)
 									{
 										neighborComponent = colorComponentSelector(x + 1, y - 1);
 										if (neighborComponent != centerComponent)
@@ -206,16 +207,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 										}
 									}
 								}
-								if (x > 0 && leftBitmapPixelPtr != null)
+								if (x > 0)
 								{
 									neighborComponent = colorComponentSelector(x - 1, y);
 									if (neighborComponent != centerComponent)
 									{
+#pragma warning disable CS8602
 										accumColors[neighborComponent] += leftBitmapPixelPtr[neighborComponent];
+#pragma warning restore CS8602
 										++colorCounts[neighborComponent];
 									}
 								}
-								if (x < width - 1)
+								if (isNotLastPixelInRow)
 								{
 									neighborComponent = colorComponentSelector(x + 1, y);
 									if (neighborComponent != centerComponent)
@@ -241,7 +244,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 										accumColors[neighborComponent] += bottomBitmapPixelPtr[neighborComponent];
 										++colorCounts[neighborComponent];
 									}
-									if (x < width - 1)
+									if (isNotLastPixelInRow)
 									{
 										neighborComponent = colorComponentSelector(x + 1, y + 1);
 										if (neighborComponent != centerComponent)
@@ -253,13 +256,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								}
 
 								// combine to full RGB color
-								for (var i = 2; i >= 0; --i)
-								{
-									if (i != centerComponent && colorCounts[i] > 0)
-										bitmapPixelPtr[i] = (byte)(accumColors[i] / colorCounts[i]);
-									accumColors[i] = 0;
-									colorCounts[i] = 0;
-								}
+								if (colorCounts[0] > 0)
+									bitmapPixelPtr[0] = (byte)(accumColors[0] / colorCounts[0]);
+								if (colorCounts[1] > 0)
+									bitmapPixelPtr[1] = (byte)(accumColors[1] / colorCounts[1]);
+								if (colorCounts[2] > 0)
+									bitmapPixelPtr[2] = (byte)(accumColors[2] / colorCounts[2]);
+								accumColors[0] = 0;
+								accumColors[1] = 0;
+								accumColors[2] = 0;
+								colorCounts[0] = 0;
+								colorCounts[1] = 0;
+								colorCounts[2] = 0;
 							}
 						});
 						break;
@@ -285,6 +293,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 								// collect colors around current pixel
 								int neighborComponent;
+								var isNotLastPixelInRow = (x < width - 1);
 								if (isNotTopRow)
 								{
 									if (x > 0)
@@ -302,7 +311,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 										accumColors[neighborComponent] += topBitmapPixelPtr[neighborComponent];
 										++colorCounts[neighborComponent];
 									}
-									if (x < width - 1)
+									if (isNotLastPixelInRow)
 									{
 										neighborComponent = colorComponentSelector(x + 1, y - 1);
 										if (neighborComponent != centerComponent)
@@ -312,16 +321,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 										}
 									}
 								}
-								if (x > 0 && leftBitmapPixelPtr != null)
+								if (x > 0)
 								{
 									neighborComponent = colorComponentSelector(x - 1, y);
 									if (neighborComponent != centerComponent)
 									{
+#pragma warning disable CS8602
 										accumColors[neighborComponent] += leftBitmapPixelPtr[neighborComponent];
+#pragma warning restore CS8602
 										++colorCounts[neighborComponent];
 									}
 								}
-								if (x < width - 1)
+								if (isNotLastPixelInRow)
 								{
 									neighborComponent = colorComponentSelector(x + 1, y);
 									if (neighborComponent != centerComponent)
@@ -347,7 +358,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 										accumColors[neighborComponent] += bottomBitmapPixelPtr[neighborComponent];
 										++colorCounts[neighborComponent];
 									}
-									if (x < width - 1)
+									if (isNotLastPixelInRow)
 									{
 										neighborComponent = colorComponentSelector(x + 1, y + 1);
 										if (neighborComponent != centerComponent)
@@ -359,13 +370,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								}
 
 								// combine to full RGB color
-								for (var i = 2; i >= 0; --i)
-								{
-									if (i != centerComponent && colorCounts[i] > 0)
-										bitmapPixelPtr[i] = (ushort)(accumColors[i] / colorCounts[i]);
-									accumColors[i] = 0;
-									colorCounts[i] = 0;
-								}
+								if (colorCounts[0] > 0)
+									bitmapPixelPtr[0] = (ushort)(accumColors[0] / colorCounts[0]);
+								if (colorCounts[1] > 0)
+									bitmapPixelPtr[1] = (ushort)(accumColors[1] / colorCounts[1]);
+								if (colorCounts[2] > 0)
+									bitmapPixelPtr[2] = (ushort)(accumColors[2] / colorCounts[2]);
+								accumColors[0] = 0;
+								accumColors[1] = 0;
+								accumColors[2] = 0;
+								colorCounts[0] = 0;
+								colorCounts[1] = 0;
+								colorCounts[2] = 0;
 							}
 						});
 						break;

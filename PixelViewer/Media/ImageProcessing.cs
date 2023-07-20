@@ -506,7 +506,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="body">Body of loop.</param>
 		public static void ParallelFor(int fromInclusive, int toExclusive, Action<int> body)
 		{
-			var processorRatio = IAppSuiteApplication.CurrentOrNull?.Configuration.GetValueOrDefault(ConfigurationKeys.MaxProcessorRatioOfParallImageProcessing) ?? 0.5;
+			var processorRatio = IAppSuiteApplication.CurrentOrNull?.Configuration.GetValueOrDefault(ConfigurationKeys.MaxProcessorRatioOfParallelImageProcessing) ?? 0.5;
 			var degree = processorRatio > 0 ? Math.Max(1, (int)(Environment.ProcessorCount * processorRatio + 0.5)) : 1;
 			Parallel.For(fromInclusive, toExclusive, new ParallelOptions { MaxDegreeOfParallelism = degree }, body);
 		}

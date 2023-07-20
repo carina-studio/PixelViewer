@@ -15,7 +15,7 @@ namespace Carina.PixelViewer
         /// <summary>
         /// Maximum ratio of processor for parallel image processing.
         /// </summary>
-        public static readonly SettingKey<double> MaxProcessorRatioOfParallImageProcessing = new(nameof(MaxProcessorRatioOfParallImageProcessing), CarinaStudio.Platform.IsMacOS && RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? 0.8 : 0.5);
+        public static readonly SettingKey<double> MaxProcessorRatioOfParallelImageProcessing = new(nameof(MaxProcessorRatioOfParallelImageProcessing), CarinaStudio.Platform.IsMacOS && RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? 0.8 : 0.5);
         /// <summary>
         /// Sensitivity of saturation adjustment.
         /// </summary>
