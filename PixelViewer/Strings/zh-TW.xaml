@@ -112,6 +112,7 @@
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至畫面</sys:String>
 
 	<!-- ImageFormat -->
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer 排列 (8 位元)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位元，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer 排列 (12 位元，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer 排列 (16 位元)</sys:String>

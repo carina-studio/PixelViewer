@@ -136,6 +136,7 @@
 
 	<!-- ImageFormat -->
 	<sys:String x:Key="String/ImageFormat.Android_YUV_420_888">YUV_420_888 (Android)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer Pattern (8-bit)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer Pattern (10-bit, MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer Pattern (12-bit, MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer Pattern (16-bit)</sys:String>

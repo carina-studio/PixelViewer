@@ -269,7 +269,12 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                         {
                                             whiteLevel = uintData[0];
                                         }
-                                        if (whiteLevel > 0)
+                                        if (whiteLevel >= (1 << effectiveBits))
+                                        {
+                                            whiteLevel = (uint)((1 << effectiveBits) - 1);
+                                            this.Logger.LogWarning("Unexpected white level: {whiteLevel}, effect bits: {effectiveBits}", whiteLevel, effectiveBits);
+                                        }
+                                        else if (whiteLevel > 0)
                                         {
                                             var mask = 1u;
                                             effectiveBits = 1;
@@ -516,6 +521,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             // select renderer
             imageRenderer = pixelStride switch
             { 
+                1 => ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.BayerPattern8ImageRenderer),
                 2 => ImageRenderers.ImageRenderers.All.FirstOrDefault(it => it is ImageRenderers.BayerPattern16ImageRenderer),
                 _ => null,
             };

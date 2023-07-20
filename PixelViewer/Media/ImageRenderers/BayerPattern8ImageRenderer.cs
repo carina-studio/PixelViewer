@@ -4,15 +4,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers
 {
     /// <summary>
-    /// Base implementation of <see cref="IImageRenderer"/> which renders image with 16-bit bayer filter pattern.
+    /// Implementation of <see cref="IImageRenderer"/> which renders image with 8-bit bayer filter pattern.
     /// </summary>
-    class BayerPattern16ImageRenderer : BayerPatternImageRenderer
+    class BayerPattern8ImageRenderer : BayerPatternImageRenderer
     {
-        public BayerPattern16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_16", true, new ImagePlaneDescriptor(2, 9, 16, true), new[] { "RAW16" }))
+        public BayerPattern8ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_8", true, new ImagePlaneDescriptor(1, 1, 8, true), new[] { "RAW8" }))
         { }
 
 
@@ -29,18 +30,18 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid size: {width}x{height}.");
 			if (pixelStride <= 0 || (pixelStride * width) > rowStride)
 				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
-			if (effectiveBits <= 8 || effectiveBits > 16)
+			if (effectiveBits <= 0 || effectiveBits > 8)
 				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
-
+			
 			// prepare conversion
 			var blackLevel = planeOptions[0].BlackLevel.GetValueOrDefault();
 			var whiteLevel = planeOptions[0].WhiteLevel ?? (uint)(1 << effectiveBits) - 1;
 			if (blackLevel >= whiteLevel || whiteLevel >= (1 << effectiveBits))
 				throw new ArgumentException($"Invalid black/white level: {blackLevel}, {whiteLevel}.");
-			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits, blackLevel, whiteLevel);
+			var extractFunc = this.Create8BitColorExtraction(effectiveBits, blackLevel, whiteLevel);
 
 			// render
-			var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
+			var baseColorTransformationTable = (byte*)NativeMemory.Alloc(256 * sizeof(byte) * 3);
 			// ReSharper disable IdentifierTypo
 			var accuColor = stackalloc ulong[] { 0L, 0L, 0L };
 			var accuPixelCount = stackalloc int[] { 0, 0, 0 };
@@ -53,10 +54,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var wBottom = height - wTop;
 			try
 			{
-				var colorTransformationTables = stackalloc ushort*[3] { 
+				var colorTransformationTables = stackalloc byte*[3] { 
 					baseColorTransformationTable,
-					baseColorTransformationTable + 65536,
-					baseColorTransformationTable + 131072,
+					baseColorTransformationTable + 256,
+					baseColorTransformationTable + 512,
 				};
 				BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
 				BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
@@ -74,17 +75,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							// ReSharper disable once MustUseReturnValue
 							imageStream.Read(row, 0, rowStride);
 							var pixelPtr = rowPtr;
-							var bitmapPixelPtr = (ushort*)bitmapRowPtr;
+							var bitmapPixelPtr = bitmapRowPtr;
 							var isVerticalWeightedArea = (y >= wTop && y <= wBottom);
 							for (var x = 0; x < width; ++x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 							{
 								var colorComponent = colorComponentSelector(x, y);
-								var color = extractFunc(pixelPtr[0], pixelPtr[1]);
+								var color = extractFunc(pixelPtr[0]);
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
 								{
-									wAccuColor[colorComponent] += (ushort)(color << 1);
+									wAccuColor[colorComponent] += (ulong)(color << 1);
 									wAccuPixelCount[colorComponent] += 2;
 								}
 								else
@@ -93,7 +94,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 									++wAccuPixelCount[colorComponent];
 								}
 								bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
-								bitmapPixelPtr[3] = 65535;
+								bitmapPixelPtr[3] = 255;
 							}
 							if (cancellationToken.IsCancellationRequested)
 								break;
@@ -119,5 +120,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				WeightedMeanOfRed = wAccuColor[RedColorComponent] / (double)wAccuPixelCount[RedColorComponent],
 			};
 		}
+
+
+        /// <inheritdoc/>
+        public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
+	        Task.FromResult(BitmapFormat.Bgra32);
     }
 }
