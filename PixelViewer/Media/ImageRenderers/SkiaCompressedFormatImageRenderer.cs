@@ -51,12 +51,12 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
             throw new ArgumentException("Unable to create codec.");
         if (codec.EncodedFormat != this.encodedFormat)
         {
-            Global.RunWithoutError(codec.Dispose);
+            Global.RunWithoutErrorAsync(codec.Dispose);
             throw new ArgumentException($"Incorrect format: {codec.EncodedFormat}, {this.encodedFormat} expected.");
         }
         if (cancellationToken.IsCancellationRequested)
         {
-            Global.RunWithoutError(codec.Dispose);
+            Global.RunWithoutErrorAsync(codec.Dispose);
             throw new TaskCanceledException();
         }
         return codec;

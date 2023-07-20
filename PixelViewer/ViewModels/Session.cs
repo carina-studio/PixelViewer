@@ -4005,6 +4005,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageRenderingCancellationTokenSource = null;
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 				this.SetValue(IsRenderingImageProperty, false);
+				this.SetValue(HasRenderingErrorProperty, true);
 			}
 			return;
 		}
