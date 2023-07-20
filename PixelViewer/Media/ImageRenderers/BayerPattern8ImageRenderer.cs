@@ -13,7 +13,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
     /// </summary>
     class BayerPattern8ImageRenderer : BayerPatternImageRenderer
     {
-        public BayerPattern8ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_8", true, new ImagePlaneDescriptor(1, 1, 8, true), new[] { "RAW8" }))
+        public BayerPattern8ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_8", false, new ImagePlaneDescriptor(1, 1, 8, true), new[] { "RAW8" }))
         { }
 
 
