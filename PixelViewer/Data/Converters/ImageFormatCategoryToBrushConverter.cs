@@ -20,7 +20,7 @@ namespace Carina.PixelViewer.Data.Converters
 
 
         // Fields.
-        readonly IAppSuiteApplication? app = App.CurrentOrNull;
+        readonly IAppSuiteApplication? app = IAppSuiteApplication.CurrentOrNull;
 
 
         /// <inheritdoc/>

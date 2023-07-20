@@ -144,7 +144,7 @@ namespace Carina.PixelViewer.Media
             {
                 return await Task.Run(() =>
                 {
-                    var stopWatch = AppSuiteApplication.CurrentOrNull?.IsDebugMode == true
+                    var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
                         ? new Stopwatch().Also(it => it.Start())
                         : null;
                     var red = new int[256];
@@ -217,7 +217,7 @@ namespace Carina.PixelViewer.Media
             {
                 return await Task.Run(() =>
                 {
-                    var stopWatch = AppSuiteApplication.CurrentOrNull?.IsDebugMode == true
+                    var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
                         ? new Stopwatch().Also(it => it.Start())
                         : null;
                     var red = new int[256];

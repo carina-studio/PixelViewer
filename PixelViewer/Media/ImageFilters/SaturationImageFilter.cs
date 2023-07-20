@@ -1,4 +1,5 @@
 using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Configuration;
 using System;
 using System.Runtime.CompilerServices;
@@ -123,8 +124,8 @@ namespace Carina.PixelViewer.Media.ImageFilters
         protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
         {
             this.VerifyFormats(source, result);
-            var qSaturation = (int)(Math.Max(-1, parameters.Saturation * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity)) * 4096 + 0.5);
-            var vibrance = parameters.Vibrance * (App.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity);
+            var qSaturation = (int)(Math.Max(-1, parameters.Saturation * (IAppSuiteApplication.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity)) * 4096 + 0.5);
+            var vibrance = parameters.Vibrance * (IAppSuiteApplication.CurrentOrNull?.Configuration).GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity);
             var qVibrance = (int)(vibrance * 4096 + 0.5);
             if (qSaturation != 0 || qVibrance != 0)
             {

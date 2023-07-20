@@ -530,7 +530,7 @@ namespace Carina.PixelViewer
 				});
 
 				// focus on content later to make sure that view has been attached to visual tree
-				SynchronizationContext.Current?.Post(() =>
+				this.SynchronizationContext.Post(() =>
 				{
 					((this.mainTabControl.SelectedItem as TabItem)?.Content as IInputElement)?.Focus();
 				});

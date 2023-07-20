@@ -1,4 +1,5 @@
 ﻿using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using System;
@@ -61,7 +62,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 return;
             
             // apply
-            var sensitivity = Math.Max(0.1, App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
+            var sensitivity = Math.Max(0.1, IAppSuiteApplication.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
             var maxColor = lut.Count - 1.0;
             var startNormColor = start / maxColor;
             var endNormColor = (end - 1) / maxColor;
@@ -505,7 +506,7 @@ namespace Carina.PixelViewer.Media.ImageFilters
                 originalLuminance += (i / maxColor) * histogram[i] / pixelCount;
             
             // find target intensity
-            var sensitivity = Math.Max(0.1, App.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
+            var sensitivity = Math.Max(0.1, IAppSuiteApplication.CurrentOrNull?.Configuration?.GetValueOrDefault(ConfigurationKeys.ArctanTransformationSensitivity) ?? ConfigurationKeys.ArctanTransformationSensitivity.DefaultValue);
             var targetLuminance = originalLuminance * Math.Pow(2, ev);
             var min = 0.0;
             var max = 0.0;

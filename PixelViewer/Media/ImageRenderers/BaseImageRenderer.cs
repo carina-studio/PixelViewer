@@ -1,4 +1,5 @@
 ﻿using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.IO;
 using CarinaStudio.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -191,7 +192,7 @@ abstract class BaseImageRenderer : IImageRenderer
 			{
 				if (renderingOptions.DataOffset > 0)
 					stream.Seek(renderingOptions.DataOffset, SeekOrigin.Begin);
-				var stopWatch = App.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
+				var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
 				stopWatch?.Start();
 				var result = this.OnRender(sharedSource, stream, sharedBitmapBuffer, renderingOptions, planeOptions, cancellationToken);
 				stopWatch?.Let(it => this.Logger.LogTrace("Rendering time: {duration} ms", it.ElapsedMilliseconds));

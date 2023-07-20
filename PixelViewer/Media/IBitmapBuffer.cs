@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Carina.PixelViewer.Runtime.InteropServices;
 using CarinaStudio;
+using CarinaStudio.AppSuite;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using System;
@@ -100,7 +101,7 @@ namespace Carina.PixelViewer.Media
 					var width = sharedBitmapBuffer.Width;
 					var srcRowStride = sharedBitmapBuffer.RowBytes;
 					var destRowStride = sharedResultBitmapBuffer.RowBytes;
-					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+					var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
 						? new Stopwatch().Also(it => it.Start())
 						: null;
 					sharedBitmapBuffer.Memory.Pin(srcBaseAddr =>
@@ -193,7 +194,7 @@ namespace Carina.PixelViewer.Media
 					var width = sharedBitmapBuffer.Width;
 					var srcRowStride = sharedBitmapBuffer.RowBytes;
 					var destRowStride = sharedResultBitmapBuffer.RowBytes;
-					var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+					var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
 						? new Stopwatch().Also(it => it.Start())
 						: null;
 					sharedBitmapBuffer.Memory.Pin(srcBaseAddr =>
@@ -958,7 +959,7 @@ namespace Carina.PixelViewer.Media
 					_ => throw new ArgumentException(),
 				};
 				using var avaloniaBitmapBuffer = avaloniaBitmap.Lock();
-				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+				var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
 					? new Stopwatch().Also(it => it.Start())
 					: null;
 				switch (buffer.Format)
@@ -1077,7 +1078,7 @@ namespace Carina.PixelViewer.Media
 				using var bitmapFrame = bitmap.Lock();
 				var srcRowStride = bitmapBuffer.RowBytes;
 				var destRowStride = bitmapFrame.RowBytes;
-				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+				var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
 					? new Stopwatch().Also(it => it.Start())
 					: null;
 				bitmapBuffer.Memory.Pin(srcBaseAddr =>
@@ -1216,7 +1217,7 @@ namespace Carina.PixelViewer.Media
 			return new SKBitmap(skiaImageInfo).Also(skiaBitmap =>
 			{
 				using var skiaPixels = skiaBitmap.PeekPixels().AsNonNull();
-				var stopWatch = App.CurrentOrNull?.IsDebugMode == true
+				var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true
 					? new Stopwatch().Also(it => it.Start())
 					: null;
 				bitmapBuffer.Memory.Pin(srcBaseAddr =>

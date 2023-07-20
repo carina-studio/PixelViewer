@@ -1,4 +1,5 @@
 ﻿using CarinaStudio;
+using CarinaStudio.AppSuite;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
@@ -40,11 +41,11 @@ namespace Carina.PixelViewer.Media.ImageFilters
             {
                 await Task.Run(() =>
                 {
-                    var stopWatch = App.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
+                    var stopWatch = IAppSuiteApplication.CurrentOrNull?.IsDebugMode == true ? new Stopwatch() : null;
                     stopWatch?.Start();
                     this.OnApplyFilter(sharedSource, sharedResult, parameters, cancellationToken);
-                    stopWatch?.Let(it => this.Logger.LogTrace($"Filtering time: {it.ElapsedMilliseconds} ms"));
-                });
+                    stopWatch?.Let(it => this.Logger.LogTrace("Filtering time: {duration} ms", it.ElapsedMilliseconds));
+                }, cancellationToken);
             }
             catch (Exception ex)
             {
