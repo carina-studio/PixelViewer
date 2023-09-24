@@ -329,6 +329,7 @@ namespace Carina.PixelViewer
 		protected override SplashWindowParams OnPrepareSplashWindow() => base.OnPrepareSplashWindow().Also((ref SplashWindowParams it) =>
 		{
 			it.AccentColor = Avalonia.Media.Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
+			it.BackgroundImageOpacity = 0.75;
 		});
 
 
