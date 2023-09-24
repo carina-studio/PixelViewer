@@ -862,7 +862,7 @@
 							</Panel>
 						</Grid>
 						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
-						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsEnabled="{Binding CanChangeImageRenderer}" IsVisible="{Binding !IsCompressedImageFormat}"/>
+						<ToggleButton Name="evaluateImageDimensionsButton" Classes="SessionControl_OptionsPanel_ToggleButton" Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" Content="{DynamicResource String/SessionControl.EvaluateImageDimensions}" IsVisible="{Binding !IsCompressedImageFormat}"/>
 						<Separator Classes="Dialog_Separator"/>
 
 						<!-- Plane options #1 -->
