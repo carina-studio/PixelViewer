@@ -72,6 +72,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly StyledProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 	static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.None);
 	static readonly Dictionary<int, Cursor> ImageDraggingCursors = new();
+	static readonly StyledProperty<Thickness> ImageViewerShadowsMarginProperty = AvaloniaProperty.Register<SessionControl, Thickness>(nameof(ImageViewerShadowsMargin), new Thickness(-100, 0, 0, 0));
 	static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
 	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
 	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
@@ -733,6 +734,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	BitmapInterpolationMode EffectiveRenderedImageInterpolationMode => this.GetValue(EffectiveRenderedImageInterpolationModeProperty);
 
 
+	/// <summary>
+	/// Margin of shadows of image viewer.
+	/// </summary>
+	public Thickness ImageViewerShadowsMargin => this.GetValue(ImageViewerShadowsMarginProperty);
+
+
 	// Increase value of given slider.
 	void IncreaseSliderValue(Slider slider)
 	{
@@ -898,6 +905,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.updateEffectiveRenderedImageIntModeAction.Schedule();
 		
 		// update state
+		this.SetValue(ImageViewerShadowsMarginProperty, session.IsHistogramsVisible ? default : new(-100, 0, 0, 0));
 		this.ReportImageViewportSize();
 		this.ReportScreenPixelDensity();
 		this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
@@ -1469,7 +1477,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				break;
 			case nameof(Session.IsHistogramsVisible):
 				if (session.IsHistogramsVisible)
+				{
 					this.keepHistogramsVisible = true;
+					this.SetValue(ImageViewerShadowsMarginProperty, default);
+				}
+				else
+					this.SetValue(ImageViewerShadowsMarginProperty, new(-100, 0, 0, 0));
 				break;
 			case nameof(Session.IsRenderingParametersPanelVisible):
 				if (session.IsRenderingParametersPanelVisible)
