@@ -506,7 +506,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				if (image is not null)
 				{
 					var displaySize = session.ImageDisplaySize;
-					if (image.Size.Width > displaySize.Width || image.Size.Height > displaySize.Height)
+					if (image.Size.Width - 1 > displaySize.Width || image.Size.Height - 1 > displaySize.Height)
 						this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.HighQuality);
 					else
 						this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.None);
@@ -1970,7 +1970,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		if (this.DataContext is not Session session)
 			return;
-		if (!session.FitImageToViewport && session.ImageDisplayScale >= 2)
+		if (!session.FitImageToViewport && session.ImageDisplayScale > 0.999)
 			return;
 		this.stopUsingSmallRenderedImageAction.Cancel();
 		if (!this.useSmallRenderedImage)
