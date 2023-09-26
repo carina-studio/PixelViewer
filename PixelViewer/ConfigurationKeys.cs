@@ -27,7 +27,7 @@ namespace Carina.PixelViewer
         /// <summary>
         /// Duration of zoom animation in milliseconds.
         /// </summary>
-        public static readonly SettingKey<int> ZoomAnimationDuration = new(nameof(ZoomAnimationDuration), 800);
+        public static readonly SettingKey<int> ZoomAnimationDuration = new(nameof(ZoomAnimationDuration), 500);
 
 
         // Constructor.
