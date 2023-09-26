@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
 using Carina.PixelViewer.ViewModels;
@@ -12,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Windows.Input;
+using TextBlock = Avalonia.Controls.TextBlock;
 
 namespace Carina.PixelViewer.Controls;
 
@@ -22,18 +25,43 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
 {
     // Fields.
     readonly MutableObservableBoolean canAddCustomColorSpace = new(true);
+    readonly Panel colorsPanel;
+    readonly ToggleButton colorsPanelButton;
+    readonly ScrollViewer contentScrollViewer;
     readonly Avalonia.Controls.ListBox customColorSpaceListBox;
     readonly ComboBox defaultColorSpaceComboBox;
+    readonly Panel imageDimensionsEvaluationPanel;
+    readonly ToggleButton imageDimensionsEvaluationPanelButton;
+    readonly Panel imageFilterPanel;
+    readonly ToggleButton imageFilterPanelButton;
+    readonly Panel imageFormatPanel;
+    readonly ToggleButton imageFormatPanelButton;
+    readonly Panel othersPanel;
+    readonly ToggleButton othersPanelButton;
     readonly ComboBox screenColorSpaceComboBox;
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+    readonly Panel userInterfacePanel;
+    readonly ToggleButton userInterfacePanelButton;
 
 
     // Constructor.
     public ApplicationOptionsDialog()
     {
         this.AddCustomColorSpaceCommand = new Command(this.AddCustomColorSpace, this.canAddCustomColorSpace);
+        this.HasNavigationBar = true;
         this.RemoveCustomColorSpaceCommand = new Command<ListBoxItem>(this.RemoveCustomColorSpace);
         this.ShowColorSpaceInfoCommand = new Command<Media.ColorSpace>(this.ShowColorSpaceInfo);
         AvaloniaXamlLoader.Load(this);
+        this.colorsPanel = this.Get<Panel>(nameof(colorsPanel));
+        this.colorsPanelButton = this.Get<ToggleButton>(nameof(colorsPanelButton)).Also(it =>
+        {
+            it.Click += (_, _) => this.contentScrollViewer!.SmoothScrollIntoView(this.colorsPanel);
+        });
+        this.contentScrollViewer = this.Get<ScrollViewer>(nameof(contentScrollViewer)).Also(it =>
+        {
+            it.GetObservable(ScrollViewer.OffsetProperty).Subscribe(this.InvalidateNavigationBar);
+            it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(this.InvalidateNavigationBar);
+        });
         this.customColorSpaceListBox = this.Get<CarinaStudio.AppSuite.Controls.ListBox>(nameof(customColorSpaceListBox)).Also(it =>
         {
             it.DoubleClickOnItem += (_, e) =>
@@ -43,11 +71,36 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
             };
         });
         this.defaultColorSpaceComboBox = this.Get<ComboBox>(nameof(defaultColorSpaceComboBox));
+        this.imageDimensionsEvaluationPanel = this.Get<Panel>(nameof(imageDimensionsEvaluationPanel));
+        this.imageDimensionsEvaluationPanelButton = this.Get<ToggleButton>(nameof(imageDimensionsEvaluationPanelButton)).Also(it =>
+        {
+            it.Click += (_, _) => this.contentScrollViewer.SmoothScrollIntoView(this.imageDimensionsEvaluationPanel);
+        });
+        this.imageFilterPanel = this.Get<Panel>(nameof(imageFilterPanel));
+        this.imageFilterPanelButton = this.Get<ToggleButton>(nameof(imageFilterPanelButton)).Also(it =>
+        {
+            it.Click += (_, _) => this.contentScrollViewer.SmoothScrollIntoView(this.imageFilterPanel);
+        });
+        this.imageFormatPanel = this.Get<Panel>(nameof(imageFormatPanel));
+        this.imageFormatPanelButton = this.Get<ToggleButton>(nameof(imageFormatPanelButton)).Also(it =>
+        {
+            it.Click += (_, _) => this.contentScrollViewer.SmoothScrollIntoView(this.imageFormatPanel);
+        });
         this.Get<IntegerTextBox>("maxRenderedImageMemoryUsageTextBox").Let(it =>
         {
             it.Maximum = Environment.Is64BitProcess ? 8192 : 1324;
         });
+        this.othersPanel = this.Get<Panel>(nameof(othersPanel));
+        this.othersPanelButton = this.Get<ToggleButton>(nameof(othersPanelButton)).Also(it =>
+        {
+            it.Click += (_, _) => this.contentScrollViewer.SmoothScrollIntoView(this.othersPanel);
+        });
         this.screenColorSpaceComboBox = this.Get<ComboBox>(nameof(screenColorSpaceComboBox));
+        this.userInterfacePanel = this.Get<Panel>(nameof(userInterfacePanel));
+        this.userInterfacePanelButton = this.Get<ToggleButton>(nameof(userInterfacePanelButton)).Also(it =>
+        {
+            it.Click += (_, _) => this.contentScrollViewer.SmoothScrollIntoView(this.userInterfacePanel);
+        });
     }
 
 
@@ -192,22 +245,63 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
         this.Application.StringsUpdated += this.OnAppStringsUpdated;
 
         // scroll to focused section
-        this.FindControl<ScrollViewer>("contentScrollViewer").AsNonNull().Let(scrollViewer =>
+        var header = this.InitialFocusedSection switch
         {
-            var header = this.InitialFocusedSection switch
+            ApplicationOptionsDialogSection.ColorSpaceManagement => this.FindControl<Control>("enableColorSpaceManagementLabel"),
+            _ => null,
+        };
+        if (header is not null)
+        {
+            this.SynchronizationContext.Post(() =>
             {
-                ApplicationOptionsDialogSection.ColorSpaceManagement => this.FindControl<Control>("colorSpaceManagementHeader"),
-                _ => null,
-            };
-            if (header != null)
-            {
-                scrollViewer.ScrollToEnd();
-                this.SynchronizationContext.PostDelayed(() =>
-                {
-                    scrollViewer.ScrollIntoView(header);
-                }, 10);
-            }
-        });
+                this.contentScrollViewer.ScrollIntoView(header, true);
+                if (header is TextBlock textBlock)
+                    this.AnimateTextBlock(textBlock);
+            });
+        }
+    }
+
+
+    /// <inheritdoc/>
+    protected override void OnUpdateNavigationBar()
+    {
+        // call base
+        base.OnUpdateNavigationBar();
+        
+        // check state
+        if (!this.contentScrollViewer.TryGetSmoothScrollingTargetOffset(out var offset))
+            offset = this.contentScrollViewer.Offset;
+        var viewport = this.contentScrollViewer.Viewport;
+        if (viewport.Width <= 0 || viewport.Height <= 0)
+            return;
+        
+        // find button to select
+        var viewportCenter = offset.Y + (viewport.Height / 2);
+        ToggleButton button;
+        if (offset.Y <= 1)
+            button = this.userInterfacePanelButton;
+        else if (offset.Y + viewport.Height >= this.contentScrollViewer.Extent.Height - 1)
+            button = this.othersPanelButton;
+        else if (this.othersPanel.Bounds.Y < viewportCenter)
+            button = this.othersPanelButton;
+        else if (this.imageFilterPanel.Bounds.Y < viewportCenter)
+            button = this.imageFilterPanelButton;
+        else if (this.colorsPanel.Bounds.Y < viewportCenter)
+            button = this.colorsPanelButton;
+        else if (this.imageDimensionsEvaluationPanel.Bounds.Y < viewportCenter)
+            button = this.imageDimensionsEvaluationPanelButton;
+        else if (this.imageFormatPanel.Bounds.Y < viewportCenter)
+            button = this.imageFormatPanelButton;
+        else
+            button = this.userInterfacePanelButton;
+
+        // select button
+        this.userInterfacePanelButton.IsChecked = (this.userInterfacePanelButton == button);
+        this.imageFormatPanelButton.IsChecked = (this.imageFormatPanelButton == button);
+        this.imageDimensionsEvaluationPanelButton.IsChecked = (this.imageDimensionsEvaluationPanelButton == button);
+        this.colorsPanelButton.IsChecked = (this.colorsPanelButton == button);
+        this.imageFilterPanelButton.IsChecked = (this.imageFilterPanelButton == button);
+        this.othersPanelButton.IsChecked = (this.othersPanelButton == button);
     }
 
 

@@ -21,433 +21,505 @@
 	<DockPanel>
 
 		<!-- Control buttons -->
-		<Border Classes="Dialog_ControlButtonsPanel" DockPanel.Dock="Bottom">
+		<Border Classes="Dialog_ControlButtonsPanel" BoxShadow="{StaticResource BoxShadows/None}" DockPanel.Dock="Bottom">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
 				<Button Classes="Dialog_ControlButton" Command="{ReflectionBinding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
 			</StackPanel>
 		</Border>
+		
+		<!-- Navigation bar -->
+		<Border Classes="ToolBar" DockPanel.Dock="Left">
+			<asControls:ToolBarScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+				<StackPanel>
+					
+					<!-- User interface -->
+					<ToggleButton Name="userInterfacePanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptions.UserInterface}">
+						<Panel>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Light}"/>
+						</Panel>
+					</ToggleButton>
+					
+					<!-- Image format -->
+					<ToggleButton Name="imageFormatPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptionsDialog.ImageFormat}">
+						<Panel>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Light}"/>
+						</Panel>
+					</ToggleButton>
+					
+					<!-- Image dimensions evaluation -->
+					<ToggleButton Name="imageDimensionsEvaluationPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptionsDialog.ImageDimensionsEvaluation}">
+						<Panel>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Dimensions}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Dimensions.Light}"/>
+						</Panel>
+					</ToggleButton>
+					
+					<!-- Colors -->
+					<ToggleButton Name="colorsPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptionsDialog.Colors}">
+						<Panel>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Light}"/>
+						</Panel>
+					</ToggleButton>
+					
+					<!-- Image filter -->
+					<ToggleButton Name="imageFilterPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptionsDialog.ImageFilter}">
+						<Panel>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.ImageFilter}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.ImageFilter.Light}"/>
+						</Panel>
+					</ToggleButton>
+					
+					<!-- Other -->
+					<ToggleButton Name="othersPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptions.Others}">
+						<Panel>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Light}"/>
+						</Panel>
+					</ToggleButton>
+					
+				</StackPanel>
+			</asControls:ToolBarScrollViewer>
+		</Border>
 
 		<!-- Content -->
-		<ScrollViewer Name="contentScrollViewer" MaxHeight="{DynamicResource Double/ApplicationOptionsDialog.Content.MaxHeight}">
-			<StackPanel Classes="Dialog_ContentPanel_WithItemsGroups">
+		<Panel>
+			<ScrollViewer Name="contentScrollViewer">
+				<StackPanel Classes="Dialog_ContentPanel_WithItemsGroups">
 
-				<!-- User interface -->
-				<Border Classes="Dialog_ItemsGroup_Header">
-					<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptions.UserInterface}"/>
-				</Border>
-				<Border Classes="Dialog_ItemsGroup_Container">
-					<StackPanel>
-					
-						<!-- Theme mode -->
-						<asControls:DialogItemGrid>
-							<StackPanel Classes="Dialog_Item_Text_Container">
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.ThemeMode}"/>
-								<Grid Classes="Dialog_IconText_Container_Description" ColumnDefinitions="Auto,*">
-									<Grid.IsVisible>
-										<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
-											<Binding Path="IsRestartingRootWindowsNeeded"/>
-											<Binding Path="IsThemeModeChanged"/>
-										</MultiBinding>
-									</Grid.IsVisible>
-									<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
-									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding !HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillCloseAllWindowsToTakeEffect}"/>
-									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
-								</Grid>
-							</StackPanel>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{Binding ThemeModes, Mode=OneTime}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}">
-								<ComboBox.ItemTemplate>
-									<DataTemplate>
-										<TextBlock Text="{Binding Converter={x:Static asViewModels:ApplicationOptions.ThemeModeConverter}}"/>
-									</DataTemplate>
-								</ComboBox.ItemTemplate>
-							</ComboBox>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Compact UI -->
-						<asControls:DialogItemGrid>
-							<StackPanel Classes="Dialog_Item_Text_Container">
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.UseCompactUserInterface}"/>
-								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptions.UseCompactUserInterface.Description}">
-									<TextBlock.IsVisible>
-										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
-											<Binding Path="!IsRestartingRootWindowsNeeded"/>
-											<Binding Path="!IsUseCompactUserInterfaceChanged"/>
-										</MultiBinding>
-									</TextBlock.IsVisible>
-								</TextBlock>
-								<Grid Classes="Dialog_IconText_Container_Description" ColumnDefinitions="Auto,*">
-									<Grid.IsVisible>
-										<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
-											<Binding Path="IsRestartingRootWindowsNeeded"/>
-											<Binding Path="IsUseCompactUserInterfaceChanged"/>
-										</MultiBinding>
-									</Grid.IsVisible>
-									<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
-									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding !HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillCloseAllWindowsToTakeEffect}"/>
-									<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
-								</Grid>
-							</StackPanel>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseCompactUserInterface, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Enable blurry background -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.EnableBlurryBackground}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EnableBlurryBackground, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Culture -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.Culture}"/>
-							<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type as:ApplicationCulture}" Grid.Column="1" SelectedItem="{Binding Culture, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-					
-					</StackPanel>
-				</Border>
-				<Separator Classes="Dialog_Separator_Large"/>
-
-				<!-- Image format -->
-				<Border Classes="Dialog_ItemsGroup_Header">
-					<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.ImageFormat}"/>
-				</Border>
-				<Border Classes="Dialog_ItemsGroup_Container">
-					<StackPanel>
-
-						<!-- Default renderer -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageRendererFormatName}"/>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
-								<ComboBox.DataTemplates>
-									<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
-										<Grid ColumnDefinitions="*,Auto">
-											<TextBlock Text="{Binding Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-											<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Default}}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category, Converter={x:Static appConverters:EnumConverters.ImageFormatCategory}}"/>
-											</Border>
+					<!-- User interface -->
+					<StackPanel Name="userInterfacePanel">
+						<Border Classes="Dialog_ItemsGroup_Header">
+							<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptions.UserInterface}"/>
+						</Border>
+						<Border Classes="Dialog_ItemsGroup_Container">
+							<StackPanel>
+							
+								<!-- Theme mode -->
+								<asControls:DialogItemGrid>
+									<StackPanel Classes="Dialog_Item_Text_Container">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.ThemeMode}"/>
+										<Grid Classes="Dialog_IconText_Container_Description" ColumnDefinitions="Auto,*">
+											<Grid.IsVisible>
+												<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+													<Binding Path="IsRestartingRootWindowsNeeded"/>
+													<Binding Path="IsThemeModeChanged"/>
+												</MultiBinding>
+											</Grid.IsVisible>
+											<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
+											<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding !HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillCloseAllWindowsToTakeEffect}"/>
+											<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
 										</Grid>
-									</DataTemplate>
-								</ComboBox.DataTemplates>
-							</ComboBox>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+									</StackPanel>
+									<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{Binding ThemeModes, Mode=OneTime}" SelectedItem="{Binding ThemeMode, Mode=TwoWay}">
+										<ComboBox.ItemTemplate>
+											<DataTemplate>
+												<TextBlock Text="{Binding Converter={x:Static asViewModels:ApplicationOptions.ThemeModeConverter}}"/>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Evaluate by file name -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageRendererByFileName}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EvaluateImageRendererByFileName, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Reset renderer after opening file -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Default byte ordering -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultByteOrdering}"/>
-							<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type app:ByteOrdering}" Grid.Column="1" SelectedItem="{Binding DefaultByteOrdering, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- YUV to RGB conversion -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
-							<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
-								<ComboBox.ItemTemplate>
-									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:YuvToBgraConverter">
-										<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
-									</DataTemplate>
-								</ComboBox.ItemTemplate>
-							</ComboBox>
-						</asControls:DialogItemGrid>
-						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
-						
-					</StackPanel>
-				</Border>
-				<Separator Classes="Dialog_Separator_Large"/>
-
-				<!-- Image dimensions evaluation -->
-				<Border Classes="Dialog_ItemsGroup_Header">
-					<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.ImageDimensionsEvaluation}"/>
-				</Border>
-				<Border Classes="Dialog_ItemsGroup_Container">
-					<StackPanel>
-
-						<!-- Default aspect ratio -->
-						<asControls:DialogItemGrid>
-							<StackPanel Classes="Dialog_Item_Text_Container">
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio}"/>
-								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description}"/>
-							</StackPanel>
-							<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appMedia:AspectRatio}" Grid.Column="1" SelectedItem="{Binding DefaultImageDimensionsEvaluationAspectRatio, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Evaluate after opening file -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EvaluateImageDimensionsAfterOpeningSourceFile, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Evaluate after changing renderer -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						
-					</StackPanel>
-				</Border>
-				<Separator Classes="Dialog_Separator_Large"/>
-
-				<!-- Colors -->
-				<Border Name="colorSpaceManagementHeader" Classes="Dialog_ItemsGroup_Header">
-					<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.Colors}"/>
-				</Border>
-				<Border Classes="Dialog_ItemsGroup_Container">
-					<StackPanel>
-
-						<!-- Show ARGB color -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelArgbColor, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Show L*a*b* color -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelLabColor, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Show XYZ color -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelXyzColor, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-						
-						<!-- Use 32-bit colors only -->
-						<asControls:DialogItemGrid>
-							<StackPanel Classes="Dialog_Item_Text_Container">
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.Render32BitColorsOnly}"/>
-								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.Render32BitColorsOnly.Description}"/>
-							</StackPanel>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding Render32BitColorsOnly, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Enable color space management -->
-						<asControls:DialogItemGrid>
-							<StackPanel Classes="Dialog_Item_Text_Container">
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>	
-								<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
-							</StackPanel>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/Color_management"/>
-						<Separator Classes="Dialog_Item_Separator"/>
-
-						<!-- Default color space -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
-							<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
-								<ComboBox.ItemTemplate>
-									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
-										<Grid ColumnDefinitions="*,Auto">
-											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
-											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
-											</Border>
-											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
-											</Border>
+								<!-- Compact UI -->
+								<asControls:DialogItemGrid>
+									<StackPanel Classes="Dialog_Item_Text_Container">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.UseCompactUserInterface}"/>
+										<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptions.UseCompactUserInterface.Description}">
+											<TextBlock.IsVisible>
+												<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
+													<Binding Path="!IsRestartingRootWindowsNeeded"/>
+													<Binding Path="!IsUseCompactUserInterfaceChanged"/>
+												</MultiBinding>
+											</TextBlock.IsVisible>
+										</TextBlock>
+										<Grid Classes="Dialog_IconText_Container_Description" ColumnDefinitions="Auto,*">
+											<Grid.IsVisible>
+												<MultiBinding Converter="{x:Static aConverters:BoolConverters.And}">
+													<Binding Path="IsRestartingRootWindowsNeeded"/>
+													<Binding Path="IsUseCompactUserInterfaceChanged"/>
+												</MultiBinding>
+											</Grid.IsVisible>
+											<Image Classes="Dialog_Icon" Source="{StaticResource Image/Icon.Warning.Outline.Colored}"/>
+											<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding !HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillCloseAllWindowsToTakeEffect}"/>
+											<TextBlock Classes="Dialog_Icon_TextBlock_Description_Warning" Grid.Column="1" IsVisible="{Binding HasMainWindows}" Text="{DynamicResource String/ApplicationOptions.WillRestartMainWindowsToTakeEffect}"/>
 										</Grid>
-									</DataTemplate>
-								</ComboBox.ItemTemplate>
-							</ComboBox>
-						</asControls:DialogItemGrid>
-						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{ReflectionBinding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
-						<Separator Classes="Dialog_Item_Separator"/>
+									</StackPanel>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseCompactUserInterface, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Screen color space -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
-							<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
-								<ComboBox.ItemTemplate>
-									<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
-										<Grid ColumnDefinitions="*,Auto">
-											<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
-											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
-											</Border>
-											<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
-												<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
-											</Border>
-										</Grid>
-									</DataTemplate>
-								</ComboBox.ItemTemplate>
-							</ComboBox>
-						</asControls:DialogItemGrid>
-						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{Binding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{ReflectionBinding #screenColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Enable blurry background -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.EnableBlurryBackground}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EnableBlurryBackground, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Use system screen color space -->
-						<StackPanel IsVisible="{Binding IsSystemScreenColorSpaceSupported}">
-							<asControls:DialogItemGrid>
-								<StackPanel Classes="Dialog_Item_Text_Container">
-									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace}"/>
-									<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description}"/>
-								</StackPanel>
-								<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseSystemScreenColorSpace, Mode=TwoWay}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
-							</asControls:DialogItemGrid>
-							<Separator Classes="Dialog_Item_Separator"/>
-						</StackPanel>
+								<!-- Culture -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.Culture}"/>
+									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type as:ApplicationCulture}" Grid.Column="1" SelectedItem="{Binding Culture, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+							
+							</StackPanel>
+						</Border>
+					</StackPanel>
+					<Separator Classes="Dialog_Separator_Large"/>
 
-						<!-- Custom color spaces -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
-							<TextBlock Classes="Dialog_TextBlock" Grid.Column="1" IsVisible="{Binding !#customColorSpaceListBox.IsVisible}" Text="{DynamicResource String/Common.None}"/>
-						</asControls:DialogItemGrid>
-						<Line Classes="Dialog_Item_Separator_Inner"/>
-						<asControls:ListBox Name="customColorSpaceListBox" Classes="Dialog_Item_ListBox" IsVisible="{Binding $self.ItemCount}" ItemsSource="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
-							<asControls:ListBox.ItemTemplate>
-								<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
-									<Grid ColumnDefinitions="*,Auto">
-										<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
-										<Border Classes="InPlaceAction_Reserved"/>
-										<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
-											<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
-												<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
-											</Button>
-											<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
-												<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
-											</Button>
+					<!-- Image format -->
+					<StackPanel Name="imageFormatPanel">
+						<Border Classes="Dialog_ItemsGroup_Header">
+							<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.ImageFormat}"/>
+						</Border>
+						<Border Classes="Dialog_ItemsGroup_Container">
+							<StackPanel>
+
+								<!-- Default renderer -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageRendererFormatName}"/>
+									<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
+										<ComboBox.DataTemplates>
+											<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
+												<Grid ColumnDefinitions="*,Auto">
+													<TextBlock Text="{Binding Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+													<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Default}}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+														<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category, Converter={x:Static appConverters:EnumConverters.ImageFormatCategory}}"/>
+													</Border>
+												</Grid>
+											</DataTemplate>
+										</ComboBox.DataTemplates>
+									</ComboBox>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Evaluate by file name -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageRendererByFileName}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EvaluateImageRendererByFileName, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Reset renderer after opening file -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseDefaultImageRendererAfterOpeningSourceFile, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Default byte ordering -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultByteOrdering}"/>
+									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type app:ByteOrdering}" Grid.Column="1" SelectedItem="{Binding DefaultByteOrdering, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- YUV to RGB conversion -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
+									<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
+										<ComboBox.ItemTemplate>
+											<DataTemplate x:CompileBindings="True" x:DataType="appMedia:YuvToBgraConverter">
+												<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
+								</asControls:DialogItemGrid>
+								<Line Classes="Dialog_Item_Separator_Inner"/>
+								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
+								
+							</StackPanel>
+						</Border>
+					</StackPanel>
+					<Separator Classes="Dialog_Separator_Large"/>
+
+					<!-- Image dimensions evaluation -->
+					<StackPanel Name="imageDimensionsEvaluationPanel">
+						<Border Classes="Dialog_ItemsGroup_Header">
+							<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.ImageDimensionsEvaluation}"/>
+						</Border>
+						<Border Classes="Dialog_ItemsGroup_Container">
+							<StackPanel>
+
+								<!-- Default aspect ratio -->
+								<asControls:DialogItemGrid>
+									<StackPanel Classes="Dialog_Item_Text_Container">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio}"/>
+										<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description}"/>
+									</StackPanel>
+									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appMedia:AspectRatio}" Grid.Column="1" SelectedItem="{Binding DefaultImageDimensionsEvaluationAspectRatio, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Evaluate after opening file -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EvaluateImageDimensionsAfterOpeningSourceFile, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Evaluate after changing renderer -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EvaluateImageDimensionsAfterChangingRenderer, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								
+							</StackPanel>
+						</Border>
+					</StackPanel>
+					<Separator Classes="Dialog_Separator_Large"/>
+
+					<!-- Colors -->
+					<StackPanel Name="colorsPanel">
+						<Border Classes="Dialog_ItemsGroup_Header">
+							<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.Colors}"/>
+						</Border>
+						<Border Classes="Dialog_ItemsGroup_Container">
+							<StackPanel>
+
+								<!-- Show ARGB color -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelArgbColor, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Show L*a*b* color -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelLabColor, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Show XYZ color -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowSelectedRenderedImagePixelXyzColor, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+								
+								<!-- Use 32-bit colors only -->
+								<asControls:DialogItemGrid>
+									<StackPanel Classes="Dialog_Item_Text_Container">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.Render32BitColorsOnly}"/>
+										<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.Render32BitColorsOnly.Description}"/>
+									</StackPanel>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding Render32BitColorsOnly, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Enable color space management -->
+								<asControls:DialogItemGrid>
+									<StackPanel Classes="Dialog_Item_Text_Container">
+										<TextBlock Name="enableColorSpaceManagementLabel" Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>	
+										<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
+									</StackPanel>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Line Classes="Dialog_Item_Separator_Inner"/>
+								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/Color_management"/>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Default color space -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
+									<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
+										<ComboBox.ItemTemplate>
+											<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
+												<Grid ColumnDefinitions="*,Auto">
+													<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+														<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
+													</Border>
+													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+														<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+													</Border>
+												</Grid>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
+								</asControls:DialogItemGrid>
+								<Line Classes="Dialog_Item_Separator_Inner"/>
+								<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{ReflectionBinding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Screen color space -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
+									<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
+										<ComboBox.ItemTemplate>
+											<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
+												<Grid ColumnDefinitions="*,Auto">
+													<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+														<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/SessionControl.ColorSpace.SystemDefined}"/>
+													</Border>
+													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsUserDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
+														<TextBlock FontSize="{DynamicResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{DynamicResource String/Common.Custom}"/>
+													</Border>
+												</Grid>
+											</DataTemplate>
+										</ComboBox.ItemTemplate>
+									</ComboBox>
+								</asControls:DialogItemGrid>
+								<Line Classes="Dialog_Item_Separator_Inner"/>
+								<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{Binding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{ReflectionBinding #screenColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+								<Separator Classes="Dialog_Item_Separator"/>
+
+								<!-- Use system screen color space -->
+								<StackPanel IsVisible="{Binding IsSystemScreenColorSpaceSupported}">
+									<asControls:DialogItemGrid>
+										<StackPanel Classes="Dialog_Item_Text_Container">
+											<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace}"/>
+											<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description}"/>
 										</StackPanel>
-									</Grid>
-								</DataTemplate>
-							</asControls:ListBox.ItemTemplate>
-						</asControls:ListBox>
-						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding #customColorSpaceListBox.IsVisible}"/>
-						<Button Classes="Dialog_Item_Button" Command="{ReflectionBinding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add.WithDialog}"/>
-						
+										<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding UseSystemScreenColorSpace, Mode=TwoWay}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
+									</asControls:DialogItemGrid>
+									<Separator Classes="Dialog_Item_Separator"/>
+								</StackPanel>
+
+								<!-- Custom color spaces -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
+									<TextBlock Classes="Dialog_TextBlock" Grid.Column="1" IsVisible="{Binding !#customColorSpaceListBox.IsVisible}" Text="{DynamicResource String/Common.None}"/>
+								</asControls:DialogItemGrid>
+								<Line Classes="Dialog_Item_Separator_Inner"/>
+								<asControls:ListBox Name="customColorSpaceListBox" Classes="Dialog_Item_ListBox" IsVisible="{Binding $self.ItemCount}" ItemsSource="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
+									<asControls:ListBox.ItemTemplate>
+										<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
+											<Grid ColumnDefinitions="*,Auto">
+												<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
+												<Border Classes="InPlaceAction_Reserved"/>
+												<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
+													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{DynamicResource String/Common.Delete}">
+														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
+													</Button>
+													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{DynamicResource String/Common.Edit}">
+														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
+													</Button>
+												</StackPanel>
+											</Grid>
+										</DataTemplate>
+									</asControls:ListBox.ItemTemplate>
+								</asControls:ListBox>
+								<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding #customColorSpaceListBox.IsVisible}"/>
+								<Button Classes="Dialog_Item_Button" Command="{ReflectionBinding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add.WithDialog}"/>
+								
+							</StackPanel>
+						</Border>
 					</StackPanel>
-				</Border>
-				<Separator Classes="Dialog_Separator_Large"/>
+					<Separator Classes="Dialog_Separator_Large"/>
 
-				<!-- Image filter -->
-				<Border Classes="Dialog_ItemsGroup_Header">
-					<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.ImageFilter}"/>
-				</Border>
-				<Border Classes="Dialog_ItemsGroup_Container">
-					<StackPanel>
+					<!-- Image filter -->
+					<StackPanel Name="imageFilterPanel">
+						<Border Classes="Dialog_ItemsGroup_Header">
+							<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptionsDialog.ImageFilter}"/>
+						</Border>
+						<Border Classes="Dialog_ItemsGroup_Container">
+							<StackPanel>
 
-						<!-- Brightness transformation -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.BrightnessTransformationFunction}"/>
-							<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appImageFilters:BrightnessTransformationFunction}" Grid.Column="1" SelectedItem="{Binding BrightnessTransformationFunction, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Brightness transformation -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.BrightnessTransformationFunction}"/>
+									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appImageFilters:BrightnessTransformationFunction}" Grid.Column="1" SelectedItem="{Binding BrightnessTransformationFunction, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Contrast transformation -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ContrastTransformationFunction}"/>
-							<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appImageFilters:ContrastTransformationFunction}" Grid.Column="1" SelectedItem="{Binding ContrastTransformationFunction, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Contrast transformation -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ContrastTransformationFunction}"/>
+									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appImageFilters:ContrastTransformationFunction}" Grid.Column="1" SelectedItem="{Binding ContrastTransformationFunction, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Reset filter params after opening file -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ResetFilterParamsAfterOpeningSourceFile, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						
+								<!-- Reset filter params after opening file -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ResetFilterParamsAfterOpeningSourceFile, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								
+							</StackPanel>
+						</Border>
 					</StackPanel>
-				</Border>
-				<Separator Classes="Dialog_Separator_Large"/>
+					<Separator Classes="Dialog_Separator_Large"/>
 
-				<!-- Other -->
-				<Border Classes="Dialog_ItemsGroup_Header">
-					<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptions.Others}"/>
-				</Border>
-				<Border Classes="Dialog_ItemsGroup_Container">
-					<StackPanel>
+					<!-- Other -->
+					<StackPanel Name="othersPanel">
+						<Border Classes="Dialog_ItemsGroup_Header">
+							<TextBlock Classes="Dialog_ItemsGroup_Header" Text="{DynamicResource String/ApplicationOptions.Others}"/>
+						</Border>
+						<Border Classes="Dialog_ItemsGroup_Container">
+							<StackPanel>
 
-						<!-- Create new tab for drag-and-drop file -->
-						<StackPanel IsVisible="{ReflectionBinding $parent[Window].IsDragAndDropSupported}">
-							<asControls:DialogItemGrid>
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile}"/>
-								<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding CreateNewSessionForDragDropFile, Mode=TwoWay}"/>
-							</asControls:DialogItemGrid>
-							<Separator Classes="Dialog_Item_Separator"/>
-						</StackPanel>
+								<!-- Create new tab for drag-and-drop file -->
+								<StackPanel IsVisible="{ReflectionBinding $parent[Window].IsDragAndDropSupported}">
+									<asControls:DialogItemGrid>
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile}"/>
+										<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding CreateNewSessionForDragDropFile, Mode=TwoWay}"/>
+									</asControls:DialogItemGrid>
+									<Separator Classes="Dialog_Item_Separator"/>
+								</StackPanel>
 
-						<!-- Reset plane options after changing dimensions -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ResetImagePlaneOptionsAfterChangingImageDimensions, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Reset plane options after changing dimensions -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ResetImagePlaneOptionsAfterChangingImageDimensions, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Apply orientation on saved images -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding SaveRenderedImageWithOrientation, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Apply orientation on saved images -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding SaveRenderedImageWithOrientation, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Show process info -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowProcessInfo}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowProcessInfo, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Show process info -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ShowProcessInfo}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding ShowProcessInfo, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Notify application update -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.NotifyApplicationUpdate}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding NotifyApplicationUpdate, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Notify application update -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.NotifyApplicationUpdate}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding NotifyApplicationUpdate, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Accept non-stable update -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.AcceptNonStableApplicationUpdate}"/>
-							<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding AcceptNonStableApplicationUpdate, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
-						<Separator Classes="Dialog_Item_Separator"/>
+								<!-- Accept non-stable update -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.AcceptNonStableApplicationUpdate}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding AcceptNonStableApplicationUpdate, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
 
-						<!-- Max rendered images memory usage -->
-						<asControls:DialogItemGrid>
-							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
-							<abControls:IntegerTextBox Name="maxRenderedImageMemoryUsageTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsNullValueAllowed="False" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
-						</asControls:DialogItemGrid>
+								<!-- Max rendered images memory usage -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
+									<abControls:IntegerTextBox Name="maxRenderedImageMemoryUsageTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsNullValueAllowed="False" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
 
-						<!-- Log output target port -->
-						<StackPanel IsVisible="{ReflectionBinding $parent[Window].Application.IsDebugMode}">
-							<Separator Classes="Dialog_Item_Separator"/>
-							<asControls:DialogItemGrid>
-								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.LogOutputTargetPort}"/>
-								<abControls:IntegerTextBox Classes="Dialog_Item_TextBox" Grid.Column="1" IsNullValueAllowed="False" Maximum="65535" Minimum="1000" Value="{Binding LogOutputTargetPort, Mode=TwoWay}"/>
-							</asControls:DialogItemGrid>
-						</StackPanel>
-						
+								<!-- Log output target port -->
+								<StackPanel IsVisible="{ReflectionBinding $parent[Window].Application.IsDebugMode}">
+									<Separator Classes="Dialog_Item_Separator"/>
+									<asControls:DialogItemGrid>
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.LogOutputTargetPort}"/>
+										<abControls:IntegerTextBox Classes="Dialog_Item_TextBox" Grid.Column="1" IsNullValueAllowed="False" Maximum="65535" Minimum="1000" Value="{Binding LogOutputTargetPort, Mode=TwoWay}"/>
+									</asControls:DialogItemGrid>
+								</StackPanel>
+								
+							</StackPanel>
+						</Border>
 					</StackPanel>
-				</Border>
-				
-			</StackPanel>
-		</ScrollViewer>
+					
+				</StackPanel>
+			</ScrollViewer>
+			<Border BoxShadow="{DynamicResource BoxShadows/Shadow.Inner.Light}" IsHitTestVisible="False" Margin="0,-100,-100,0"/>
+		</Panel>
 		
 	</DockPanel>
 	
