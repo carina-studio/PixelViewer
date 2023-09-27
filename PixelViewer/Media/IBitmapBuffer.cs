@@ -181,7 +181,7 @@ namespace Carina.PixelViewer.Media
 					// select color space converter
 					var srcColorSpace = sharedBitmapBuffer.ColorSpace;
 					var targetColorSpace = resultBitmapBuffer.ColorSpace;
-					var converter = new ColorSpace.Converter(srcColorSpace, useLinearSourceColorSpace, targetColorSpace, useLinearTargetColorSpace);
+					var converter = srcColorSpace.CreateConverter(targetColorSpace, useLinearSourceColorSpace, useLinearTargetColorSpace);
 
 					// copy directly
 					if (srcColorSpace == resultBitmapBuffer.ColorSpace)

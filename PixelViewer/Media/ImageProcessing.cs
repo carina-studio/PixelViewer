@@ -1,9 +1,10 @@
-﻿using Carina.PixelViewer.Runtime.InteropServices;
-using CarinaStudio.AppSuite;
+﻿using CarinaStudio.AppSuite;
 using CarinaStudio.Configuration;
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Marshal = Carina.PixelViewer.Runtime.InteropServices.Marshal;
 
 namespace Carina.PixelViewer.Media
 {
@@ -29,6 +30,7 @@ namespace Carina.PixelViewer.Media
 		// Static fields.
 		static readonly double* colorNormalizingTable16 = (double*)System.Runtime.InteropServices.NativeMemory.Alloc(65536 * sizeof(double));
 		static readonly double* colorNormalizingTable8 = (double*)System.Runtime.InteropServices.NativeMemory.Alloc(256 * sizeof(double));
+		static volatile int isSimdSupported = -1;
 
 
 		// Static initializer.
@@ -417,6 +419,38 @@ namespace Carina.PixelViewer.Media
 			var g16 = ClipToUInt16(g * 65535);
 			var r16 = ClipToUInt16(r * 65535);
 			return ((ulong)x << 48) | ((ulong)r16 << 32) | ((ulong)g16 << 16) | b16;
+		}
+
+
+		/// <summary>
+		/// Check whether SIMD is supported by device or not.
+		/// </summary>
+		public static bool IsSimdSupported
+		{
+			get
+			{
+				if (isSimdSupported >= 0)
+					return (isSimdSupported != 0);
+				switch (RuntimeInformation.ProcessArchitecture)
+				{
+					case Architecture.Arm64:
+						isSimdSupported = System.Runtime.Intrinsics.Arm.AdvSimd.Arm64.IsSupported 
+							? 1 : 0;
+						break;
+					case Architecture.X64:
+						isSimdSupported = System.Runtime.Intrinsics.X86.Sse.X64.IsSupported || System.Runtime.Intrinsics.X86.Avx.X64.IsSupported 
+							? 1 : 0;
+						break;
+					case Architecture.X86:
+						isSimdSupported = System.Runtime.Intrinsics.X86.Sse.IsSupported || System.Runtime.Intrinsics.X86.Avx.IsSupported 
+							? 1 : 0;
+						break;
+					default:
+						isSimdSupported = 0;
+						break;
+				}
+				return (isSimdSupported != 0);
+			}
 		}
 
 

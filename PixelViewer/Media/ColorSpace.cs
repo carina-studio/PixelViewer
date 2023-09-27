@@ -1,5 +1,6 @@
 using Carina.PixelViewer.Native;
 using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.MacOS.CoreGraphics;
@@ -13,6 +14,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -31,16 +33,8 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Convert RGB color between color spaces.
         /// </summary>
-        public class Converter
+        public abstract class Converter
         {
-            // Fields.
-            readonly ColorSpace destColorSpace;
-            readonly bool isIdentical;
-            readonly long[] matrix;
-            readonly bool skipDestNumericalTransfer;
-            readonly bool skipSrcNumericalTransfer;
-            readonly ColorSpace srcColorSpace;
-
             /// <summary>
             /// Initialize new <see cref="Converter"/> instance.
             /// </summary>
@@ -48,88 +42,31 @@ namespace Carina.PixelViewer.Media
             /// <param name="skipSrcNumericalTransfer">Skip numerical transfer from source color space.</param>
             /// <param name="destColorSpace">Target color space.</param>
             /// <param name="skipDestNumericalTransfer">Skip numerical transfer to target color space.</param>
-            public Converter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer)
+            protected Converter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer)
             {
-                this.srcColorSpace = srcColorSpace;
-                this.destColorSpace = destColorSpace;
-                this.isIdentical = srcColorSpace.Equals(destColorSpace);
-                if (!this.isIdentical)
-                {
-                    var m1 = this.srcColorSpace.skiaColorSpaceXyz;
-                    var m2 = this.destColorSpace.skiaColorSpaceXyz.Invert();
-                    this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
-                }
-                else
-                    this.matrix = Array.Empty<long>();
-                this.skipSrcNumericalTransfer = skipSrcNumericalTransfer;
-                this.skipDestNumericalTransfer = skipDestNumericalTransfer;
+                this.Source = srcColorSpace;
+                this.Destination = destColorSpace;
+                this.SkipSourceNumericalTransfer = skipSrcNumericalTransfer;
+                this.SkipDestinationNumericalTransfer = skipDestNumericalTransfer;
             }
 
             /// <summary>
             /// Convert 8-bit RGB color.
             /// </summary>
-            /// <param name="r">Normalized R.</param>
-            /// <param name="g">Normalized G.</param>
-            /// <param name="b">Normalized B.</param>
+            /// <param name="r">R.</param>
+            /// <param name="g">G.</param>
+            /// <param name="b">B.</param>
             /// <returns>Converted normalized RGB color.</returns>
-            public unsafe (byte, byte, byte) Convert(byte r, byte g, byte b)
-            {
-                if (this.isIdentical)
-                    return (r, g, b);
-                var qR = mappingTableFrom8Bit[r];
-                var qG = mappingTableFrom8Bit[g];
-                var qB = mappingTableFrom8Bit[b];
-                if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
-                {
-                    qR = this.srcColorSpace.NumericalTransferToLinear(qR);
-                    qG = this.srcColorSpace.NumericalTransferToLinear(qG);
-                    qB = this.srcColorSpace.NumericalTransferToLinear(qB);
-                }
-                var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
-                if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
-                {
-                    qR = this.destColorSpace.NumericalTransferFromLinear(qR);
-                    qG = this.destColorSpace.NumericalTransferFromLinear(qG);
-                    qB = this.destColorSpace.NumericalTransferFromLinear(qB);
-                }
-                return (mappingTableTo8Bit[qR], mappingTableTo8Bit[qG], mappingTableTo8Bit[qB]);
-            }
+            public abstract (byte, byte, byte) Convert(byte r, byte g, byte b);
 
             /// <summary>
             /// Convert 16-bit RGB color.
             /// </summary>
-            /// <param name="r">Normalized R.</param>
-            /// <param name="g">Normalized G.</param>
-            /// <param name="b">Normalized B.</param>
+            /// <param name="r">R.</param>
+            /// <param name="g">G.</param>
+            /// <param name="b">B.</param>
             /// <returns>Converted normalized RGB color.</returns>
-            public unsafe (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
-            {
-                if (this.isIdentical)
-                    return (r, g, b);
-                var qR = mappingTableFrom16Bit[r];
-                var qG = mappingTableFrom16Bit[g];
-                var qB = mappingTableFrom16Bit[b];
-                if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
-                {
-                    qR = this.srcColorSpace.NumericalTransferToLinear(qR);
-                    qG = this.srcColorSpace.NumericalTransferToLinear(qG);
-                    qB = this.srcColorSpace.NumericalTransferToLinear(qB);
-                }
-                var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
-                if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
-                {
-                    qR = this.destColorSpace.NumericalTransferFromLinear(qR);
-                    qG = this.destColorSpace.NumericalTransferFromLinear(qG);
-                    qB = this.destColorSpace.NumericalTransferFromLinear(qB);
-                }
-                return (mappingTableTo16Bit[qR], mappingTableTo16Bit[qG], mappingTableTo16Bit[qB]);
-            }
+            public abstract (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b);
 
             /// <summary>
             /// Convert RGB color.
@@ -138,31 +75,263 @@ namespace Carina.PixelViewer.Media
             /// <param name="g">Normalized G.</param>
             /// <param name="b">Normalized B.</param>
             /// <returns>Converted normalized RGB color.</returns>
-            public (double, double, double) Convert(double r, double g, double b)
+            public abstract (double, double, double) Convert(double r, double g, double b);
+            
+            /// <summary>
+            /// Get destination color space.
+            /// </summary>
+            public ColorSpace Destination { get; }
+
+            /// <summary>
+            /// Check whether source and destination color spaces are identical or not.
+            /// </summary>
+            public virtual bool IsIdentical => false;
+
+            /// <summary>
+            /// Check whether conversion has been accelerated by using SIMD or not.
+            /// </summary>
+            public virtual bool IsSimdAccelerated => false;
+
+            /// <summary>
+            /// Check whether numerical transfer should be skipped on destination color space or not.
+            /// </summary>
+            public bool SkipDestinationNumericalTransfer { get; }
+            
+            /// <summary>
+            /// Check whether numerical transfer should be skipped on source color space or not.
+            /// </summary>
+            public bool SkipSourceNumericalTransfer { get; }
+            
+            /// <summary>
+            /// Get source color space.
+            /// </summary>
+            public ColorSpace Source { get; }
+        }
+
+
+        // Default implementation of Converter.
+        class DefaultConverter : Converter
+        {
+            // Fields.
+            readonly long[] matrix;
+            
+            // Constructor.
+            public DefaultConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : base(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
             {
-                if (this.isIdentical)
-                    return (r, g, b);
-                var qR = Quantize(r);
-                var qG = Quantize(g);
-                var qB = Quantize(b);
-                if (!this.skipSrcNumericalTransfer && this.srcColorSpace.hasTransferFunc)
+                var m1 = srcColorSpace.skiaColorSpaceXyz;
+                var m2 = destColorSpace.skiaColorSpaceXyz.Invert();
+                this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
+            }
+            
+            /// <inheritdoc/>
+            public override unsafe (byte, byte, byte) Convert(byte r, byte g, byte b)
+            {
+                var qR = mappingTableFrom8Bit[r];
+                var qG = mappingTableFrom8Bit[g];
+                var qB = mappingTableFrom8Bit[b];
+                if (!this.SkipSourceNumericalTransfer)
                 {
-                    qR = this.srcColorSpace.NumericalTransferToLinear(qR);
-                    qG = this.srcColorSpace.NumericalTransferToLinear(qG);
-                    qB = this.srcColorSpace.NumericalTransferToLinear(qB);
+                    var src = this.Source;
+                    qR = src.NumericalTransferToLinear(qR);
+                    qG = src.NumericalTransferToLinear(qG);
+                    qB = src.NumericalTransferToLinear(qB);
                 }
                 var m = this.matrix;
                 qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
                 qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
                 qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
-                if (!this.skipDestNumericalTransfer && this.destColorSpace.hasTransferFunc)
+                if (!this.SkipDestinationNumericalTransfer)
                 {
-                    qR = this.destColorSpace.NumericalTransferFromLinear(qR);
-                    qG = this.destColorSpace.NumericalTransferFromLinear(qG);
-                    qB = this.destColorSpace.NumericalTransferFromLinear(qB);
+                    var dest = this.Destination;
+                    qR = dest.NumericalTransferFromLinear(qR);
+                    qG = dest.NumericalTransferFromLinear(qG);
+                    qB = dest.NumericalTransferFromLinear(qB);
+                }
+                return (mappingTableTo8Bit[qR], mappingTableTo8Bit[qG], mappingTableTo8Bit[qB]);
+            }
+            
+            /// <inheritdoc/>
+            public override unsafe (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
+            {
+                var qR = mappingTableFrom16Bit[r];
+                var qG = mappingTableFrom16Bit[g];
+                var qB = mappingTableFrom16Bit[b];
+                if (!this.SkipSourceNumericalTransfer)
+                {
+                    var src = this.Source;
+                    qR = src.NumericalTransferToLinear(qR);
+                    qG = src.NumericalTransferToLinear(qG);
+                    qB = src.NumericalTransferToLinear(qB);
+                }
+                var m = this.matrix;
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
+                if (!this.SkipDestinationNumericalTransfer)
+                {
+                    var dest = this.Destination;
+                    qR = dest.NumericalTransferFromLinear(qR);
+                    qG = dest.NumericalTransferFromLinear(qG);
+                    qB = dest.NumericalTransferFromLinear(qB);
+                }
+                return (mappingTableTo16Bit[qR], mappingTableTo16Bit[qG], mappingTableTo16Bit[qB]);
+            }
+            
+            /// <inheritdoc/>
+            public override (double, double, double) Convert(double r, double g, double b)
+            {
+                var qR = Quantize(r);
+                var qG = Quantize(g);
+                var qB = Quantize(b);
+                if (!this.SkipSourceNumericalTransfer)
+                {
+                    var src = this.Source;
+                    qR = src.NumericalTransferToLinear(qR);
+                    qG = src.NumericalTransferToLinear(qG);
+                    qB = src.NumericalTransferToLinear(qB);
+                }
+                var m = this.matrix;
+                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
+                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
+                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
+                if (!this.SkipDestinationNumericalTransfer)
+                {
+                    var dest = this.Destination;
+                    qR = dest.NumericalTransferFromLinear(qR);
+                    qG = dest.NumericalTransferFromLinear(qG);
+                    qB = dest.NumericalTransferFromLinear(qB);
                 }
                 return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
             }
+        }
+        
+        
+        // Implementation of Converter without conversion.
+        class IdenticalConverter : Converter
+        {
+            // Constructor.
+            public IdenticalConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : base(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
+            { }
+            
+            /// <inheritdoc/>
+            public override (byte, byte, byte) Convert(byte r, byte g, byte b) =>
+                (r, g, b);
+            
+            /// <inheritdoc/>
+            public override (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b) =>
+                (r, g, b);
+            
+            /// <inheritdoc/>
+            public override (double, double, double) Convert(double r, double g, double b) =>
+                (r, g, b);
+
+            /// <inheritdoc/>
+            public override bool IsIdentical => true;
+        }
+        
+        
+        // Implementation of Converter with SIMD acceleration.
+        class SimdConverter : Converter
+        {
+            // Fields.
+            readonly Vector3 coeffB;
+            readonly Vector3 coeffG;
+            readonly Vector3 coeffR;
+            
+            // Constructor.
+            public SimdConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : base(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
+            {
+                var m1 = srcColorSpace.skiaColorSpaceXyz;
+                var m2 = destColorSpace.skiaColorSpaceXyz.Invert();
+                var m = SKColorSpaceXyz.Concat(m2, m1);
+                this.coeffR = new(m[0, 0], m[1, 0], m[2, 0]);
+                this.coeffG = new(m[0, 1], m[1, 1], m[2, 1]);
+                this.coeffB = new(m[0, 2], m[1, 2], m[2, 2]);
+            }
+            
+            /// <inheritdoc/>
+            public override unsafe (byte, byte, byte) Convert(byte r, byte g, byte b)
+            {
+                var qR = mappingTableFrom8Bit[r];
+                var qG = mappingTableFrom8Bit[g];
+                var qB = mappingTableFrom8Bit[b];
+                if (!this.SkipSourceNumericalTransfer)
+                {
+                    var src = this.Source;
+                    qR = src.NumericalTransferToLinear(qR);
+                    qG = src.NumericalTransferToLinear(qG);
+                    qB = src.NumericalTransferToLinear(qB);
+                }
+                var s = new Vector3(qR, qG, qB);
+                qR = Clip((long)(Vector3.Dot(s, this.coeffR) + 0.5));
+                qG = Clip((long)(Vector3.Dot(s, this.coeffG) + 0.5));
+                qB = Clip((long)(Vector3.Dot(s, this.coeffB) + 0.5));
+                if (!this.SkipDestinationNumericalTransfer)
+                {
+                    var dest = this.Destination;
+                    qR = dest.NumericalTransferFromLinear(qR);
+                    qG = dest.NumericalTransferFromLinear(qG);
+                    qB = dest.NumericalTransferFromLinear(qB);
+                }
+                return (mappingTableTo8Bit[qR], mappingTableTo8Bit[qG], mappingTableTo8Bit[qB]);
+            }
+            
+            /// <inheritdoc/>
+            public override unsafe (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
+            {
+                var qR = mappingTableFrom16Bit[r];
+                var qG = mappingTableFrom16Bit[g];
+                var qB = mappingTableFrom16Bit[b];
+                if (!this.SkipSourceNumericalTransfer)
+                {
+                    var src = this.Source;
+                    qR = src.NumericalTransferToLinear(qR);
+                    qG = src.NumericalTransferToLinear(qG);
+                    qB = src.NumericalTransferToLinear(qB);
+                }
+                var s = new Vector3(qR, qG, qB);
+                qR = Clip((long)(Vector3.Dot(s, this.coeffR) + 0.5));
+                qG = Clip((long)(Vector3.Dot(s, this.coeffG) + 0.5));
+                qB = Clip((long)(Vector3.Dot(s, this.coeffB) + 0.5));
+                if (!this.SkipDestinationNumericalTransfer)
+                {
+                    var dest = this.Destination;
+                    qR = dest.NumericalTransferFromLinear(qR);
+                    qG = dest.NumericalTransferFromLinear(qG);
+                    qB = dest.NumericalTransferFromLinear(qB);
+                }
+                return (mappingTableTo16Bit[qR], mappingTableTo16Bit[qG], mappingTableTo16Bit[qB]);
+            }
+            
+            /// <inheritdoc/>
+            public override (double, double, double) Convert(double r, double g, double b)
+            {
+                var qR = Quantize(r);
+                var qG = Quantize(g);
+                var qB = Quantize(b);
+                if (!this.SkipSourceNumericalTransfer)
+                {
+                    var src = this.Source;
+                    qR = src.NumericalTransferToLinear(qR);
+                    qG = src.NumericalTransferToLinear(qG);
+                    qB = src.NumericalTransferToLinear(qB);
+                }
+                var s = new Vector3(qR, qG, qB);
+                qR = Clip((long)(Vector3.Dot(s, this.coeffR) + 0.5));
+                qG = Clip((long)(Vector3.Dot(s, this.coeffG) + 0.5));
+                qB = Clip((long)(Vector3.Dot(s, this.coeffB) + 0.5));
+                if (!this.SkipDestinationNumericalTransfer)
+                {
+                    var dest = this.Destination;
+                    qR = dest.NumericalTransferFromLinear(qR);
+                    qG = dest.NumericalTransferFromLinear(qG);
+                    qB = dest.NumericalTransferFromLinear(qB);
+                }
+                return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
+            }
+
+            /// <inheritdoc/>
+            public override bool IsSimdAccelerated => true;
         }
 
 
@@ -334,7 +503,7 @@ namespace Carina.PixelViewer.Media
 
         // Static fields.
         static readonly SortedObservableList<ColorSpace> allColorSpaceList = new(Compare);
-        static CarinaStudio.AppSuite.IAppSuiteApplication? app;
+        static IAppSuiteApplication? app;
         static readonly Dictionary<string, ColorSpace> builtInColorSpaces = new()
         {
             { AdobeRGB_1998.Name, AdobeRGB_1998 },
@@ -348,7 +517,7 @@ namespace Carina.PixelViewer.Media
             { Srgb.Name, Srgb },
         };
         static volatile ILogger? logger;
-        static readonly TaskFactory ioTaskFactory = new TaskFactory(new FixedThreadsTaskScheduler(1));
+        static readonly TaskFactory ioTaskFactory = new(new FixedThreadsTaskScheduler(1));
         static readonly unsafe long* mappingTableFrom16Bit = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
         static readonly unsafe long* mappingTableFrom8Bit = (long*)NativeMemory.Alloc(sizeof(long) * 256);
         static readonly unsafe ushort* mappingTableTo16Bit = (ushort*)NativeMemory.Alloc(sizeof(ushort) * (QuantizationSteps + 1));
@@ -505,6 +674,23 @@ namespace Carina.PixelViewer.Media
             if (rhs.IsSystemDefined)
                 return 1;
             return string.CompareOrdinal(lhs.Name, rhs.Name);
+        }
+
+
+        /// <summary>
+        /// Create converter to convert between color spaces.
+        /// </summary>
+        /// <param name="dest">Destination color space.</param>
+        /// <param name="skipSrcNumericalTransfer">Skip numerical transfer from source color space.</param>
+        /// <param name="skipDestNumericalTransfer">Skip numerical transfer to target color space.</param>
+        /// <returns>Converter.</returns>
+        public Converter CreateConverter(ColorSpace dest, bool skipSrcNumericalTransfer, bool skipDestNumericalTransfer)
+        {
+            if (dest == this || this.Equals(dest))
+                return new IdenticalConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
+            //if (app?.Configuration.GetValueOrDefault(ConfigurationKeys.UseSimdAcceleration) == true && ImageProcessing.IsSimdSupported)
+                //return new SimdConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
+            return new DefaultConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
         }
 
 
@@ -694,7 +880,7 @@ namespace Carina.PixelViewer.Media
                         Win32.ReleaseDC(hWnd, hdc);
                     }
                 }
-                else if (CarinaStudio.Platform.IsMacOS)
+                if (Platform.IsMacOS)
                 {
                     // get display ID
                     var windowBounds = (window?.Bounds).GetValueOrDefault();
@@ -768,7 +954,7 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="app">Application.</param>
         /// <returns>Task of initialization.</returns>
-        public static async Task InitializeAsync(CarinaStudio.AppSuite.IAppSuiteApplication app)
+        public static async Task InitializeAsync(IAppSuiteApplication app)
         {
             // check state
             if (ColorSpace.app != null)

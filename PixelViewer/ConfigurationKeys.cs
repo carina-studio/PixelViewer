@@ -21,6 +21,10 @@ namespace Carina.PixelViewer
         /// </summary>
         public static readonly SettingKey<double> SaturationAdjustmentSensitivity = new(nameof(SaturationAdjustmentSensitivity), 1);
         /// <summary>
+        /// Use SIMD acceleration if available.
+        /// </summary>
+        public static readonly SettingKey<bool> UseSimdAcceleration = new(nameof(UseSimdAcceleration), true);
+        /// <summary>
         /// Sensitivity of vibrance adjustment.
         /// </summary>
         public static readonly SettingKey<double> VibranceAdjustmentSensitivity = new(nameof(VibranceAdjustmentSensitivity), 0.75);
