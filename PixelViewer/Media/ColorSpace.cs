@@ -113,7 +113,9 @@ namespace Carina.PixelViewer.Media
         class DefaultConverter : Converter
         {
             // Fields.
+            readonly Func<long, long> destNumericalTransferFromLinear;
             readonly long[] matrix;
+            readonly Func<long, long> srcNumericalTransferToLinear;
             
             // Constructor.
             public DefaultConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : base(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
@@ -121,20 +123,22 @@ namespace Carina.PixelViewer.Media
                 var m1 = srcColorSpace.skiaColorSpaceXyz;
                 var m2 = destColorSpace.skiaColorSpaceXyz.Invert();
                 this.matrix = Quantize(SKColorSpaceXyz.Concat(m2, m1));
+                this.srcNumericalTransferToLinear = srcColorSpace.NumericalTransferToLinear;
+                this.destNumericalTransferFromLinear = destColorSpace.NumericalTransferFromLinear;
             }
             
             /// <inheritdoc/>
-            public override unsafe (byte, byte, byte) Convert(byte r, byte g, byte b)
+            public override (byte, byte, byte) Convert(byte r, byte g, byte b)
             {
-                var qR = mappingTableFrom8Bit[r];
-                var qG = mappingTableFrom8Bit[g];
-                var qB = mappingTableFrom8Bit[b];
+                var qR = (long)r << QuantizationBitsFrom8Bit;
+                var qG = (long)g << QuantizationBitsFrom8Bit;
+                var qB = (long)b << QuantizationBitsFrom8Bit;
                 if (!this.SkipSourceNumericalTransfer)
                 {
-                    var src = this.Source;
-                    qR = src.NumericalTransferToLinear(qR);
-                    qG = src.NumericalTransferToLinear(qG);
-                    qB = src.NumericalTransferToLinear(qB);
+                    var transfer = this.srcNumericalTransferToLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 var m = this.matrix;
                 qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
@@ -142,26 +146,26 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
                 if (!this.SkipDestinationNumericalTransfer)
                 {
-                    var dest = this.Destination;
-                    qR = dest.NumericalTransferFromLinear(qR);
-                    qG = dest.NumericalTransferFromLinear(qG);
-                    qB = dest.NumericalTransferFromLinear(qB);
+                    var transfer = this.destNumericalTransferFromLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
-                return (mappingTableTo8Bit[qR], mappingTableTo8Bit[qG], mappingTableTo8Bit[qB]);
+                return ((byte)(qR >> QuantizationBitsFrom8Bit), (byte)(qG >> QuantizationBitsFrom8Bit), (byte)(qB >> QuantizationBitsFrom8Bit));
             }
             
             /// <inheritdoc/>
-            public override unsafe (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
+            public override (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
             {
-                var qR = mappingTableFrom16Bit[r];
-                var qG = mappingTableFrom16Bit[g];
-                var qB = mappingTableFrom16Bit[b];
+                var qR = (long)r << QuantizationBitsFrom16Bit;
+                var qG = (long)g << QuantizationBitsFrom16Bit;
+                var qB = (long)b << QuantizationBitsFrom16Bit;
                 if (!this.SkipSourceNumericalTransfer)
                 {
-                    var src = this.Source;
-                    qR = src.NumericalTransferToLinear(qR);
-                    qG = src.NumericalTransferToLinear(qG);
-                    qB = src.NumericalTransferToLinear(qB);
+                    var transfer = this.srcNumericalTransferToLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 var m = this.matrix;
                 qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
@@ -169,12 +173,12 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
                 if (!this.SkipDestinationNumericalTransfer)
                 {
-                    var dest = this.Destination;
-                    qR = dest.NumericalTransferFromLinear(qR);
-                    qG = dest.NumericalTransferFromLinear(qG);
-                    qB = dest.NumericalTransferFromLinear(qB);
+                    var transfer = this.destNumericalTransferFromLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
-                return (mappingTableTo16Bit[qR], mappingTableTo16Bit[qG], mappingTableTo16Bit[qB]);
+                return ((ushort)(qR >> QuantizationBitsFrom16Bit), (ushort)(qG >> QuantizationBitsFrom16Bit), (ushort)(qB >> QuantizationBitsFrom16Bit));
             }
             
             /// <inheritdoc/>
@@ -185,10 +189,10 @@ namespace Carina.PixelViewer.Media
                 var qB = Quantize(b);
                 if (!this.SkipSourceNumericalTransfer)
                 {
-                    var src = this.Source;
-                    qR = src.NumericalTransferToLinear(qR);
-                    qG = src.NumericalTransferToLinear(qG);
-                    qB = src.NumericalTransferToLinear(qB);
+                    var transfer = this.srcNumericalTransferToLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 var m = this.matrix;
                 qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
@@ -196,10 +200,10 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
                 if (!this.SkipDestinationNumericalTransfer)
                 {
-                    var dest = this.Destination;
-                    qR = dest.NumericalTransferFromLinear(qR);
-                    qG = dest.NumericalTransferFromLinear(qG);
-                    qB = dest.NumericalTransferFromLinear(qB);
+                    var transfer = this.destNumericalTransferFromLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
             }
@@ -237,6 +241,8 @@ namespace Carina.PixelViewer.Media
             readonly Vector3 coeffB;
             readonly Vector3 coeffG;
             readonly Vector3 coeffR;
+            readonly Func<long, long> destNumericalTransferFromLinear;
+            readonly Func<long, long> srcNumericalTransferToLinear;
             
             // Constructor.
             public SimdConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : base(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
@@ -247,20 +253,22 @@ namespace Carina.PixelViewer.Media
                 this.coeffR = new(m[0, 0], m[1, 0], m[2, 0]);
                 this.coeffG = new(m[0, 1], m[1, 1], m[2, 1]);
                 this.coeffB = new(m[0, 2], m[1, 2], m[2, 2]);
+                this.srcNumericalTransferToLinear = srcColorSpace.NumericalTransferToLinear;
+                this.destNumericalTransferFromLinear = destColorSpace.NumericalTransferFromLinear;
             }
             
             /// <inheritdoc/>
-            public override unsafe (byte, byte, byte) Convert(byte r, byte g, byte b)
+            public override (byte, byte, byte) Convert(byte r, byte g, byte b)
             {
-                var qR = mappingTableFrom8Bit[r];
-                var qG = mappingTableFrom8Bit[g];
-                var qB = mappingTableFrom8Bit[b];
+                var qR = (long)r << QuantizationBitsFrom8Bit;
+                var qG = (long)g << QuantizationBitsFrom8Bit;
+                var qB = (long)b << QuantizationBitsFrom8Bit;
                 if (!this.SkipSourceNumericalTransfer)
                 {
-                    var src = this.Source;
-                    qR = src.NumericalTransferToLinear(qR);
-                    qG = src.NumericalTransferToLinear(qG);
-                    qB = src.NumericalTransferToLinear(qB);
+                    var transfer = this.srcNumericalTransferToLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 var s = new Vector3(qR, qG, qB);
                 qR = Clip((long)(Vector3.Dot(s, this.coeffR) + 0.5));
@@ -268,26 +276,26 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((long)(Vector3.Dot(s, this.coeffB) + 0.5));
                 if (!this.SkipDestinationNumericalTransfer)
                 {
-                    var dest = this.Destination;
-                    qR = dest.NumericalTransferFromLinear(qR);
-                    qG = dest.NumericalTransferFromLinear(qG);
-                    qB = dest.NumericalTransferFromLinear(qB);
+                    var transfer = this.destNumericalTransferFromLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
-                return (mappingTableTo8Bit[qR], mappingTableTo8Bit[qG], mappingTableTo8Bit[qB]);
+                return ((byte)(qR >> QuantizationBitsFrom8Bit), (byte)(qG >> QuantizationBitsFrom8Bit), (byte)(qB >> QuantizationBitsFrom8Bit));
             }
             
             /// <inheritdoc/>
-            public override unsafe (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
+            public override (ushort, ushort, ushort) Convert(ushort r, ushort g, ushort b)
             {
-                var qR = mappingTableFrom16Bit[r];
-                var qG = mappingTableFrom16Bit[g];
-                var qB = mappingTableFrom16Bit[b];
+                var qR = (long)r << QuantizationBitsFrom16Bit;
+                var qG = (long)g << QuantizationBitsFrom16Bit;
+                var qB = (long)b << QuantizationBitsFrom16Bit;
                 if (!this.SkipSourceNumericalTransfer)
                 {
-                    var src = this.Source;
-                    qR = src.NumericalTransferToLinear(qR);
-                    qG = src.NumericalTransferToLinear(qG);
-                    qB = src.NumericalTransferToLinear(qB);
+                    var transfer = this.srcNumericalTransferToLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 var s = new Vector3(qR, qG, qB);
                 qR = Clip((long)(Vector3.Dot(s, this.coeffR) + 0.5));
@@ -295,12 +303,12 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((long)(Vector3.Dot(s, this.coeffB) + 0.5));
                 if (!this.SkipDestinationNumericalTransfer)
                 {
-                    var dest = this.Destination;
-                    qR = dest.NumericalTransferFromLinear(qR);
-                    qG = dest.NumericalTransferFromLinear(qG);
-                    qB = dest.NumericalTransferFromLinear(qB);
+                    var transfer = this.destNumericalTransferFromLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
-                return (mappingTableTo16Bit[qR], mappingTableTo16Bit[qG], mappingTableTo16Bit[qB]);
+                return ((ushort)(qR >> QuantizationBitsFrom16Bit), (ushort)(qG >> QuantizationBitsFrom16Bit), (ushort)(qB >> QuantizationBitsFrom16Bit));
             }
             
             /// <inheritdoc/>
@@ -311,10 +319,10 @@ namespace Carina.PixelViewer.Media
                 var qB = Quantize(b);
                 if (!this.SkipSourceNumericalTransfer)
                 {
-                    var src = this.Source;
-                    qR = src.NumericalTransferToLinear(qR);
-                    qG = src.NumericalTransferToLinear(qG);
-                    qB = src.NumericalTransferToLinear(qB);
+                    var transfer = this.srcNumericalTransferToLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 var s = new Vector3(qR, qG, qB);
                 qR = Clip((long)(Vector3.Dot(s, this.coeffR) + 0.5));
@@ -322,10 +330,10 @@ namespace Carina.PixelViewer.Media
                 qB = Clip((long)(Vector3.Dot(s, this.coeffB) + 0.5));
                 if (!this.SkipDestinationNumericalTransfer)
                 {
-                    var dest = this.Destination;
-                    qR = dest.NumericalTransferFromLinear(qR);
-                    qG = dest.NumericalTransferFromLinear(qG);
-                    qB = dest.NumericalTransferFromLinear(qB);
+                    var transfer = this.destNumericalTransferFromLinear;
+                    qR = transfer(qR);
+                    qG = transfer(qG);
+                    qB = transfer(qB);
                 }
                 return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
             }
@@ -497,6 +505,8 @@ namespace Carina.PixelViewer.Media
 
         // Constants.
         const int QuantizationBits = 20;
+        const int QuantizationBitsFrom16Bit = QuantizationBits - 16;
+        const int QuantizationBitsFrom8Bit = QuantizationBits - 8;
         const int QuantizationSteps = 0x1 << QuantizationBits;
         const double QuantizationSteps2 = (double)QuantizationSteps * QuantizationSteps;
 
@@ -518,10 +528,6 @@ namespace Carina.PixelViewer.Media
         };
         static volatile ILogger? logger;
         static readonly TaskFactory ioTaskFactory = new(new FixedThreadsTaskScheduler(1));
-        static readonly unsafe long* mappingTableFrom16Bit = (long*)NativeMemory.Alloc(sizeof(long) * 65536);
-        static readonly unsafe long* mappingTableFrom8Bit = (long*)NativeMemory.Alloc(sizeof(long) * 256);
-        static readonly unsafe ushort* mappingTableTo16Bit = (ushort*)NativeMemory.Alloc(sizeof(ushort) * (QuantizationSteps + 1));
-        static readonly unsafe byte* mappingTableTo8Bit = (byte*)NativeMemory.Alloc(sizeof(byte) * (QuantizationSteps + 1));
         static readonly Random random = new();
         static readonly SortedObservableList<ColorSpace> userDefinedColorSpaceList = new(Compare);
         static readonly Dictionary<string, ColorSpace> userDefinedColorSpaces = new();
@@ -540,22 +546,13 @@ namespace Carina.PixelViewer.Media
 
 
         // Static initializer.
-        static unsafe ColorSpace()
+        static ColorSpace()
         {
             allColorSpaceList.AddAll(builtInColorSpaces.Values);
             AllColorSpaces = ListExtensions.AsReadOnly(allColorSpaceList);
             BuiltInColorSpaces = builtInColorSpaces.Values.ToList().Also(it =>
                 it.Sort(Compare)).AsReadOnly();
             Default = Srgb;
-            for (var input = 0; input < 256; ++input)
-                mappingTableFrom8Bit[input] = (long)(input / 255.0 * QuantizationSteps + 0.5);
-            for (var input = 0; input < 65536; ++input)
-                mappingTableFrom16Bit[input] = (long)(input / 65535.0 * QuantizationSteps + 0.5);
-            for (var input = QuantizationSteps; input >= 0; --input)
-            {
-                mappingTableTo8Bit[input] = (byte)((double)input / QuantizationSteps * 255 + 0.5);
-                mappingTableTo16Bit[input] = (ushort)((double)input / QuantizationSteps * 65535 + 0.5);
-            }
             UserDefinedColorSpaces = ListExtensions.AsReadOnly(userDefinedColorSpaceList);
         }
 
@@ -652,8 +649,8 @@ namespace Carina.PixelViewer.Media
         {
             if (color < 0)
                 return 0;
-            if (color > QuantizationSteps)
-                return QuantizationSteps;
+            if (color >= QuantizationSteps)
+                return QuantizationSteps - 1;
             return color;
         }
 
@@ -1373,27 +1370,27 @@ namespace Carina.PixelViewer.Media
         unsafe long NumericalTransferFromLinear(long color)
         {
             var table = this.numericalTransferTableFromLinear;
-            if (table == null)
+            if (table is not null)
+                return table[color];
+            lock (this)
             {
-                lock (this)
+                table = this.numericalTransferTableFromLinear;
+                if (table is null)
                 {
-                    table = this.numericalTransferTableFromLinear;
-                    if (table == null)
+                    table = (long*)NativeMemory.Alloc(sizeof(long) * QuantizationSteps);
+                    var transferFunc = this.numericalTransferFuncFromLinear;
+                    var maxQuantizedValue = (QuantizationSteps - 1);
+                    if (IsHlgTransferFunc(transferFunc))
                     {
-                        table = (long*)NativeMemory.Alloc(sizeof(long) * (QuantizationSteps + 1));
-                        var transferFunc = this.numericalTransferFuncFromLinear;
-                        if (IsHlgTransferFunc(transferFunc))
-                        {
-                            for (var i = QuantizationSteps; i >= 0; --i)
-                                table[i] = (long)(HlgNumericalTransferFromLinear((double)i / QuantizationSteps) * QuantizationSteps + 0.5);
-                        }
-                        else
-                        {
-                            for (var i = QuantizationSteps; i >= 0; --i)
-                                table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
-                        }
-                        this.numericalTransferTableFromLinear = table;
+                        for (var i = maxQuantizedValue; i >= 0; --i)
+                            table[i] = Clip((long)(HlgNumericalTransferFromLinear((double)i / maxQuantizedValue) * maxQuantizedValue + 0.5));
                     }
+                    else
+                    {
+                        for (var i = maxQuantizedValue; i >= 0; --i)
+                            table[i] = Clip((long)(transferFunc.Transform((float)i / maxQuantizedValue) * maxQuantizedValue + 0.5));
+                    }
+                    this.numericalTransferTableFromLinear = table;
                 }
             }
             return table[color];
@@ -1424,27 +1421,27 @@ namespace Carina.PixelViewer.Media
         unsafe long NumericalTransferToLinear(long color)
         {
             var table = this.numericalTransferTableToLinear;
-            if (table == null)
+            if (table is not null)
+                return table[color];
+            lock (this)
             {
-                lock (this)
+                table = this.numericalTransferTableToLinear;
+                if (table is null)
                 {
-                    table = this.numericalTransferTableToLinear;
-                    if (table == null)
+                    table = (long*)NativeMemory.Alloc(sizeof(long) * QuantizationSteps);
+                    var transferFunc = this.numericalTransferFuncToLinear;
+                    var maxQuantizedValue = (QuantizationSteps - 1);
+                    if (IsHlgTransferFunc(transferFunc))
                     {
-                        table = (long*)NativeMemory.Alloc(sizeof(long) * (QuantizationSteps + 1));
-                        var transferFunc = this.numericalTransferFuncToLinear;
-                        if (IsHlgTransferFunc(transferFunc))
-                        {
-                            for (var i = QuantizationSteps; i >= 0; --i)
-                                table[i] = (long)(HlgNumericalTransferToLinear((double)i / QuantizationSteps) * QuantizationSteps + 0.5);
-                        }
-                        else
-                        {
-                            for (var i = QuantizationSteps; i >= 0; --i)
-                                table[i] = (long)(transferFunc.Transform((float)i / QuantizationSteps) * QuantizationSteps + 0.5);
-                        }
-                        this.numericalTransferTableToLinear = table;
+                        for (var i = maxQuantizedValue; i >= 0; --i)
+                            table[i] = Clip((long)(HlgNumericalTransferToLinear((double)i / maxQuantizedValue) * maxQuantizedValue + 0.5));
                     }
+                    else
+                    {
+                        for (var i = maxQuantizedValue; i >= 0; --i)
+                            table[i] = Clip((long)(transferFunc.Transform((float)i / maxQuantizedValue) * maxQuantizedValue + 0.5));
+                    }
+                    this.numericalTransferTableToLinear = table;
                 }
             }
             return table[color];
@@ -1610,9 +1607,9 @@ namespace Carina.PixelViewer.Media
         /// <returns>XYZ color.</returns>
         public unsafe (double, double, double) RgbToXyz(byte r, byte g, byte b)
         {
-            var qR = mappingTableFrom8Bit[r];
-            var qG = mappingTableFrom8Bit[g];
-            var qB = mappingTableFrom8Bit[b];
+            var qR = (long)r << QuantizationBitsFrom8Bit;
+            var qG = (long)g << QuantizationBitsFrom8Bit;
+            var qB = (long)b << QuantizationBitsFrom8Bit;
             if (this.hasTransferFunc)
             {
                 qR = this.NumericalTransferToLinear(qR);
@@ -1637,9 +1634,9 @@ namespace Carina.PixelViewer.Media
         /// <returns>XYZ color.</returns>
         public unsafe (double, double, double) RgbToXyz(ushort r, ushort g, ushort b)
         {
-            var qR = mappingTableFrom16Bit[r];
-            var qG = mappingTableFrom16Bit[g];
-            var qB = mappingTableFrom16Bit[b];
+            var qR = (long)r << QuantizationBitsFrom16Bit;
+            var qG = (long)g << QuantizationBitsFrom16Bit;
+            var qB = (long)b << QuantizationBitsFrom16Bit;
             if (this.hasTransferFunc)
             {
                 qR = this.NumericalTransferToLinear(qR);
