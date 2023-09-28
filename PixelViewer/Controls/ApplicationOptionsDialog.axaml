@@ -406,6 +406,13 @@
 								</asControls:ListBox>
 								<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding #customColorSpaceListBox.IsVisible}"/>
 								<Button Classes="Dialog_Item_Button" Command="{ReflectionBinding $parent[Window].AddCustomColorSpaceCommand}" Content="{DynamicResource String/Common.Add.WithDialog}"/>
+								<Separator Classes="Dialog_Item_Separator"/>
+								
+								<!-- Timing of conversion -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceConversionTiming}"/>
+									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type appMedia:ColorSpaceConversionTiming}" Grid.Column="1" SelectedItem="{Binding ColorSpaceConversionTiming, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
 								
 							</StackPanel>
 						</Border>

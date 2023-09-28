@@ -33,6 +33,16 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction);
 			set => this.Settings.SetValue<Media.ImageFilters.BrightnessTransformationFunction>(SettingKeys.BrightnessTransformationFunction, value);
 		}
+		
+		
+		/// <summary>
+		/// Timing of color space conversion.
+		/// </summary>
+		public ColorSpaceConversionTiming ColorSpaceConversionTiming
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming);
+			set => this.Settings.SetValue<ColorSpaceConversionTiming>(SettingKeys.ColorSpaceConversionTiming, value);
+		}
 
 
 		/// <summary>
@@ -181,6 +191,8 @@ namespace Carina.PixelViewer.ViewModels
 			var key = e.Key;
 			if (key == SettingKeys.BrightnessTransformationFunction)
 				this.OnPropertyChanged(nameof(this.BrightnessTransformationFunction));
+			else if (key == SettingKeys.ColorSpaceConversionTiming)
+				this.OnPropertyChanged(nameof(this.ColorSpaceConversionTiming));
 			else if (key == SettingKeys.ContrastTransformationFunction)
 				this.OnPropertyChanged(nameof(this.ContrastTransformationFunction));
 			else if (key == SettingKeys.CreateNewSessionForDragDropFile)

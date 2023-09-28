@@ -11,6 +11,7 @@
 	<!-- ApplicationOptionsDialog -->
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度调整函数</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">色彩空间转换时机</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">{0} 的详细信息…</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更准确的色彩输出，但将会影响绘制图像的效能。 </sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空间「{0}」与「{1}」相同，您是否还要将其加入？ </sys:String>
@@ -65,6 +66,10 @@
 	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625 行，SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">内嵌色彩空间</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">系统定义色彩空间</sys:String>
+	
+	<!-- ColorSpaceConversionTiming -->
+	<sys:String x:Key="String/ColorSpaceConversionTiming.BeforeApplyingFilters">套用滤镜前</sys:String>
+	<sys:String x:Key="String/ColorSpaceConversionTiming.BeforeRenderingToDisplay">输出至屏幕前</sys:String>
 
 	<!-- ColorSpaceInfoDialog -->
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">蓝色</sys:String>

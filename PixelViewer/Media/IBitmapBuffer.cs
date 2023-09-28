@@ -253,7 +253,7 @@ namespace Carina.PixelViewer.Media
 					if (stopWatch != null)
 					{
 						stopWatch.Stop();
-						Logger?.LogTrace("Take {duration} ms to convert color space of {width}x{height} bitmap buffer from {srcColorSpace} to sRGB", stopWatch.ElapsedMilliseconds, width, sharedBitmapBuffer.Height, srcColorSpace);
+						Logger?.LogTrace("Take {duration} ms to convert color space of {width}x{height} bitmap buffer from {srcColorSpace} to {targetColorSpace}", stopWatch.ElapsedMilliseconds, width, sharedBitmapBuffer.Height, srcColorSpace, targetColorSpace);
 					}
 				}
 			}, cancellationToken);

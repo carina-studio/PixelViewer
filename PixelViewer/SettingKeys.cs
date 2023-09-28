@@ -19,6 +19,10 @@ namespace Carina.PixelViewer
 		/// </summary>
 		public static readonly SettingKey<Media.ImageFilters.BrightnessTransformationFunction> BrightnessTransformationFunction = new(nameof(BrightnessTransformationFunction), Media.ImageFilters.BrightnessTransformationFunction.Arctan);
 		/// <summary>
+		/// Timing to perform color space conversion.
+		/// </summary>
+		public static readonly SettingKey<ColorSpaceConversionTiming> ColorSpaceConversionTiming = new(nameof(ColorSpaceConversionTiming), Media.ColorSpaceConversionTiming.BeforeRenderingToDisplay);
+		/// <summary>
 		/// Contrast transformation function.
 		/// </summary>
 		public static readonly SettingKey<Media.ImageFilters.ContrastTransformationFunction> ContrastTransformationFunction = new(nameof(ContrastTransformationFunction), Media.ImageFilters.ContrastTransformationFunction.Arctan);

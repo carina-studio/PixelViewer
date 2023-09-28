@@ -688,8 +688,11 @@ namespace Carina.PixelViewer.Media
         {
             if (dest == this || this.Equals(dest))
                 return new IdenticalConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
+            
+            // Note: The performance of using SIMD it not better than default implementation on both x64 and arm64 (M1)
             //if (app?.Configuration.GetValueOrDefault(ConfigurationKeys.UseSimdAcceleration) == true && ImageProcessing.IsSimdSupported)
                 //return new SimdConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
+                
             return new DefaultConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
         }
 
