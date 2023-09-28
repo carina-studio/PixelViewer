@@ -28,6 +28,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">Try selecting image format according to file name first</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">Hide scroll bars of image viewer automatically</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">Image filter</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>

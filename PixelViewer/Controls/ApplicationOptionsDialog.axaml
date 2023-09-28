@@ -163,6 +163,13 @@
 									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.Culture}"/>
 									<asControls:EnumComboBox Classes="Dialog_Item_ComboBox" EnumType="{x:Type as:ApplicationCulture}" Grid.Column="1" SelectedItem="{Binding Culture, Mode=TwoWay}"/>
 								</asControls:DialogItemGrid>
+								<Separator Classes="Dialog_Item_Separator"/>
+								
+								<!-- Hide scroll bars automatically -->
+								<asControls:DialogItemGrid>
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically}"/>
+									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding HideImageViewerScrollBarsAutomatically, Mode=TwoWay}"/>
+								</asControls:DialogItemGrid>
 							
 							</StackPanel>
 						</Border>

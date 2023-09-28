@@ -28,6 +28,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">变更格式后评估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">开启文件后评估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">优先尝试从文件名称判断图像格式</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">自动隐藏影像查看区的卷轴</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">图像尺寸评估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">图像滤镜</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">图像格式</sys:String>

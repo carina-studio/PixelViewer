@@ -71,6 +71,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Static fields.
 	static readonly StyledProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 	static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.None);
+	static readonly StyledProperty<bool> HideImageViewerScrollBarsAutomaticallyProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(HideImageViewerScrollBarsAutomatically), true);
 	static readonly Dictionary<int, Cursor> ImageDraggingCursors = new();
 	static readonly StyledProperty<Thickness> ImageViewerShadowsMarginProperty = AvaloniaProperty.Register<SessionControl, Thickness>(nameof(ImageViewerShadowsMargin), new Thickness(-100, 0, 0, 0));
 	static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
@@ -735,6 +736,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Hide scroll bars of image viewer automatically.
+	/// </summary>
+	public bool HideImageViewerScrollBarsAutomatically => this.GetValue(HideImageViewerScrollBarsAutomaticallyProperty);
+
+
+	/// <summary>
 	/// Margin of shadows of image viewer.
 	/// </summary>
 	public Thickness ImageViewerShadowsMargin => this.GetValue(ImageViewerShadowsMarginProperty);
@@ -865,6 +872,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// attach to settings
 		var settings = this.Settings;
 		settings.SettingChanged += this.OnSettingChanged;
+		this.SetValue(HideImageViewerScrollBarsAutomaticallyProperty, settings.GetValueOrDefault(SettingKeys.HideImageViewerScrollBarsAutomatically));
 		this.SetValue(ShowProcessInfoProperty, settings.GetValueOrDefault(SettingKeys.ShowProcessInfo));
 		this.SetValue(ShowSelectedRenderedImagePixelArgbColorProperty, settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
 		this.SetValue(ShowSelectedRenderedImagePixelLabColorProperty, settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
@@ -1518,7 +1526,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when setting changed.
 	void OnSettingChanged(object? sender, SettingChangedEventArgs e)
 	{
-		if (e.Key == SettingKeys.ShowProcessInfo)
+		if (e.Key == SettingKeys.HideImageViewerScrollBarsAutomatically)
+			this.SetValue(HideImageViewerScrollBarsAutomaticallyProperty, (bool)e.Value);
+		else if (e.Key == SettingKeys.ShowProcessInfo)
 			this.SetValue(ShowProcessInfoProperty, (bool)e.Value);
 		else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelArgbColor)
 			this.SetValue(ShowSelectedRenderedImagePixelArgbColorProperty, (bool)e.Value);

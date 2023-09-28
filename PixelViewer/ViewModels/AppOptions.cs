@@ -166,6 +166,16 @@ namespace Carina.PixelViewer.ViewModels
 			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageRendererByFileName);
 			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageRendererByFileName, value);
 		}
+		
+		
+		/// <summary>
+		/// Hide scroll bars of image viewer automatically.
+		/// </summary>
+		public bool HideImageViewerScrollBarsAutomatically
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.HideImageViewerScrollBarsAutomatically);
+			set => this.Settings.SetValue<bool>(SettingKeys.HideImageViewerScrollBarsAutomatically, value);
+		}
 
 
 		/// <summary>
@@ -215,6 +225,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.EvaluateImageDimensionsAfterOpeningSourceFile));
 			else if (key == SettingKeys.EvaluateImageRendererByFileName)
 				this.OnPropertyChanged(nameof(this.EvaluateImageRendererByFileName));
+			else if (key == SettingKeys.HideImageViewerScrollBarsAutomatically)
+				this.OnPropertyChanged(nameof(this.HideImageViewerScrollBarsAutomatically));
 			else if (key == SettingKeys.MaxRenderedImagesMemoryUsageMB)
 				this.OnPropertyChanged(nameof(this.MaxRenderedImagesMemoryUsageMB));
 			else if (key == SettingKeys.Render32BitColorsOnly)
