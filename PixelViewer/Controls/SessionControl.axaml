@@ -384,13 +384,6 @@
 												</StackPanel>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
-												<StackPanel.Styles>
-													<Style Selector="Slider">
-														<Setter Property="Maximum" Value="1"/>
-														<Setter Property="Minimum" Value="-1"/>
-														<Setter Property="TickFrequency" Value="0.01"/>
-													</Style>
-												</StackPanel.Styles>
 
 												<!-- Red -->
 												<abControls:FormattedTextBlock Classes="Dialog_TextBlock" Arg1="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{DynamicResource String/SessionControl.ColorAdjustment.Label.Red}" HorizontalAlignment="Center"/>
@@ -398,7 +391,7 @@
 													<RepeatButton Name="redColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
-													<Slider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
+													<Slider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
 													<RepeatButton Name="redColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
@@ -411,7 +404,7 @@
 													<RepeatButton Name="greenColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
-													<Slider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
+													<Slider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
 													<RepeatButton Name="greenColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
@@ -424,7 +417,7 @@
 													<RepeatButton Name="blueColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
-													<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
+													<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
 													<RepeatButton Name="blueColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
@@ -437,7 +430,7 @@
 													<RepeatButton Name="saturationAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
-													<Slider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
+													<Slider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
 													<RepeatButton Name="saturationAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
@@ -450,7 +443,7 @@
 													<RepeatButton Name="vibranceAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
-													<Slider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
+													<Slider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
 													<RepeatButton Name="vibranceAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
