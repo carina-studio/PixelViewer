@@ -172,6 +172,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							var bottomBitmapPixelPtr = bitmapPixelPtr + bitmapRowStride;
 							var isNotTopRow = (y > 0);
 							var isNotBottomRow = (y < height - 1);
+							var isNotLastPixelInRow = false;
 							for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4, topBitmapPixelPtr += 4, bottomBitmapPixelPtr += 4)
 							{
 								// get component at current pixel
@@ -179,7 +180,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 								// collect colors around current pixel
 								int neighborComponent;
-								var isNotLastPixelInRow = (x < width - 1);
 								if (isNotTopRow)
 								{
 									if (x > 0)
@@ -268,6 +268,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								colorCounts[0] = 0;
 								colorCounts[1] = 0;
 								colorCounts[2] = 0;
+								
+								// update state
+								isNotLastPixelInRow = true;
 							}
 						});
 						break;
@@ -286,6 +289,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							var bottomBitmapPixelPtr = (ushort*)((byte*)bitmapPixelPtr + bitmapRowStride);
 							var isNotTopRow = (y > 0);
 							var isNotBottomRow = (y < height - 1);
+							var isNotLastPixelInRow = false;
 							for (var x = 0; x < width; ++x, leftBitmapPixelPtr = bitmapPixelPtr, bitmapPixelPtr = rightBitmapPixelPtr, rightBitmapPixelPtr += 4, topBitmapPixelPtr += 4, bottomBitmapPixelPtr += 4)
 							{
 								// get component at current pixel
@@ -293,7 +297,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 								// collect colors around current pixel
 								int neighborComponent;
-								var isNotLastPixelInRow = (x < width - 1);
 								if (isNotTopRow)
 								{
 									if (x > 0)
@@ -382,6 +385,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								colorCounts[0] = 0;
 								colorCounts[1] = 0;
 								colorCounts[2] = 0;
+								
+								// update state
+								isNotLastPixelInRow = true;
 							}
 						});
 						break;

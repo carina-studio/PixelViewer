@@ -109,7 +109,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			}
 
 			// complete
-			return new ImageRenderingResult()
+			return new ImageRenderingResult
 			{
 				MeanOfBlue = accuColor[BlueColorComponent] / (double)accuPixelCount[BlueColorComponent],
 				MeanOfGreen = accuColor[GreenColorComponent] / (double)accuPixelCount[GreenColorComponent],

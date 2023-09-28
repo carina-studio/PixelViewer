@@ -15,7 +15,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="BayerPattern10MipiImageRenderer"/> instance.
 		/// </summary>
-		public BayerPattern10MipiImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_10_MIPI", true, new ImagePlaneDescriptor(0, 10, 10, true), new string[]{ "RAW10" }))
+		public BayerPattern10MipiImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_10_MIPI", true, new ImagePlaneDescriptor(0, 10, 10, true), new[]{ "RAW10" }))
 		{ }
 
 
@@ -67,7 +67,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				{
 					return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
 						? new Func<byte, byte, ushort>((b1, b2) => (ushort)(((b1 << 2) | (b2 & 0x3)) << 6))
-						: new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 | ((b2 & 0x3) << 8)) << 6));
+						: ((b1, b2) => (ushort)((b1 | ((b2 & 0x3) << 8)) << 6));
 				})
 				: Global.Run(() =>
 				{
@@ -85,11 +85,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							var color = correctedColors[(b1 << 2) | (b2 & 0x3)];
 							return (ushort)(color << 6);
 						})
-						: new Func<byte, byte, ushort>((b1, b2) => 
+						: (b1, b2) => 
 						{
 							var color = correctedColors[b1 | ((b2 & 0x3) << 8)];
 							return (ushort)(color << 6);
-						});
+						};
 				});
 
 			// render
@@ -122,6 +122,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					{
 						for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 						{
+							// ReSharper disable once MustUseReturnValue
 							imageStream.Read(row, 0, rowStride);
 							var packedPixelsPtr = rowPtr;
 							var bitmapPixelPtr = (ushort*)bitmapRowPtr;
