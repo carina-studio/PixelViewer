@@ -17,7 +17,6 @@ using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Windows.Input;
 
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
@@ -166,8 +165,18 @@ namespace Carina.PixelViewer
 			if (tabItem.DataContext is not Session session)
 				return;
 
-			// close session
-			(this.DataContext as Workspace)?.DetachAndCloseSession(session);
+			// close file or session
+			(this.DataContext as Workspace)?.Let(workspace =>
+			{
+				if (workspace.Sessions.Count == 1
+				    && workspace.Sessions[0] == session
+				    && !this.HasMultipleMainWindows)
+				{
+					if (!session.IsSourceFileOpened || session.ClearSourceFileCommand.TryExecute())
+						return;
+				}
+				workspace.DetachAndCloseSession(session);
+			});
 		}
 
 
@@ -410,7 +419,7 @@ namespace Carina.PixelViewer
 		void OnDropOnTabItem(object? sender, DragOnTabItemEventArgs e)
 		{
 			// drag and drop is not supported properly on Linux
-			if (CarinaStudio.Platform.IsLinux)
+			if (Platform.IsLinux)
 				return;
 			
 			// check state

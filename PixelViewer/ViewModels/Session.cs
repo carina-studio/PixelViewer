@@ -803,7 +803,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.AlignRowStride2Command = new Command<int>(this.AlignRowStride2, isSrcFileOpenedObservable);
 		this.AlignRowStride3Command = new Command<int>(this.AlignRowStride3, isSrcFileOpenedObservable);
 		this.ApplyProfileCommand = new Command(this.ApplyProfile, this.canApplyProfile);
-		this.CloseSourceFileCommand = new Command(() => this.CloseSourceFile(false), isSrcFileOpenedObservable);
+		this.ClearSourceFileCommand = new Command(this.ClearSourceFile, isSrcFileOpenedObservable);
 		this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
 		this.EvaluateImageDimensionsCommand = new Command<AspectRatio>(this.EvaluateImageDimensions, isSrcFileOpenedObservable);
 		this.MoveToFirstFrameCommand = new Command(() =>
@@ -1682,6 +1682,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update title
 		this.UpdateTitle();
 	}
+	
+	
+	/// <summary>
+	/// Command for clear opened source file.
+	/// </summary>
+	public ICommand ClearSourceFileCommand { get; }
 
 
 	// Close current source file.
@@ -1764,12 +1770,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			});
 		}
 	}
-
-
-	/// <summary>
-	/// Command for closing opened source file.
-	/// </summary>
-	public ICommand CloseSourceFileCommand { get; }
 
 
 	/// <summary>
@@ -5757,9 +5757,9 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// generate title
 		var title = this.CustomTitle;
-		if (title == null)
+		if (title is null)
 		{
-			if (this.SourceFileName != null)
+			if (this.SourceFileName is not null)
 				title = Path.GetFileName(this.SourceFileName);
 			else
 				title = this.Application.GetString("Session.EmptyTitle");
