@@ -5,6 +5,7 @@
 + Add **'Bayer Pattern (8-bit)'** format.
 + Support specifying timing of color space conversion.
 + Support minimizing scroll bars of image viewer automatically, it can be turned off if you don't want it.
++ Save image with color space when **'Enable color management'** is on.
 + Support using built-in font (Noto Sans) for Chinese.
 + Add **'Use compact layout'** setting for device with small screen.
 

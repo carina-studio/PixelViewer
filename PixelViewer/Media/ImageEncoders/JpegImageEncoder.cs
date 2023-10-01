@@ -23,7 +23,7 @@ namespace Carina.PixelViewer.Media.ImageEncoders
         protected override void OnEncode(IBitmapBuffer bitmapBuffer, Stream stream, ImageEncodingOptions options, CancellationToken cancellationToken)
         {
             // encode to JPEG
-            using var bitmap = bitmapBuffer.CreateSkiaBitmap(options.Orientation);
+            using var bitmap = bitmapBuffer.CreateSkiaBitmap(options.Orientation, options.ColorSpace);
             using var memoryStream = new MemoryStream();
             bitmap.Encode(memoryStream, SKEncodedImageFormat.Jpeg, Math.Max(1, Math.Min(100, options.QualityLevel)));
 

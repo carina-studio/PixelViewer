@@ -1196,9 +1196,10 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
 		/// <param name="orientation">Orientation.</param>
+		/// <param name="colorSpace">Color space.</param>
 		/// <param name="cancellationToken">Cancellation token.</param>
 		/// <returns><see cref="SKBitmap"/>.</returns>
-		public static SKBitmap CreateSkiaBitmap(this IBitmapBuffer bitmapBuffer, int orientation = 0, CancellationToken cancellationToken = default)
+		public static SKBitmap CreateSkiaBitmap(this IBitmapBuffer bitmapBuffer, int orientation = 0, ColorSpace? colorSpace = null, CancellationToken cancellationToken = default)
 		{
 			var srcWidth = bitmapBuffer.Width;
 			var srcHeight = bitmapBuffer.Height;
@@ -1214,6 +1215,8 @@ namespace Carina.PixelViewer.Media
 				90 or 270 => new SKImageInfo(srcHeight, srcWidth, skiaColorType, SKAlphaType.Unpremul),
 				_ => throw new ArgumentException(),
 			};
+			if (colorSpace is not null)
+				skiaImageInfo.ColorSpace = colorSpace.ToSkiaColorSpace();
 			return new SKBitmap(skiaImageInfo).Also(skiaBitmap =>
 			{
 				using var skiaPixels = skiaBitmap.PeekPixels().AsNonNull();

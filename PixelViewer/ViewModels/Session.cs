@@ -3087,13 +3087,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	});
 
 
-	// Called when state of loading profiles has been changed.
-	void OnLoadingProfilesStateChanged()
-	{
-		this.UpdateCanSaveDeleteProfile();
-	}
-
-
 	// Called when owner changed.
 	protected override void OnOwnerChanged(ViewModel? prevOwner, ViewModel? newOwner)
 	{
@@ -5078,16 +5071,20 @@ class Session : ViewModel<IAppSuiteApplication>
 	async Task<bool> SaveFilteredImage(ImageSavingParams parameters)
 	{
 		// check state
-		if (parameters.FileName == null)
+		if (string.IsNullOrWhiteSpace(parameters.FileName))
 			return false;
 		if (!this.canSaveFilteredImage.Value)
 			return false;
+		
+		// clear color space
+		var options = parameters.Options;
+		if (!this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
+			options.ColorSpace = null;
 
 		// save image
 		var encoder = parameters.Encoder;
 		if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
-		var options = parameters.Options;
 		if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 		this.canSaveFilteredImage.Update(false);
@@ -5155,16 +5152,20 @@ class Session : ViewModel<IAppSuiteApplication>
 	async Task<bool> SaveRenderedImage(ImageSavingParams parameters)
 	{
 		// check state
-		if (parameters.FileName == null)
+		if (string.IsNullOrWhiteSpace(parameters.FileName))
 			return false;
 		if (!this.canSaveRenderedImage.Value)
 			return false;
+		
+		// clear color space
+		var options = parameters.Options;
+		if (!this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
+			options.ColorSpace = null;
 
 		// save image
 		var encoder = parameters.Encoder;
 		if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
-		var options = parameters.Options;
 		if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 		this.canSaveRenderedImage.Update(false);

@@ -1,5 +1,4 @@
 ﻿using SkiaSharp;
-using System;
 #if WINDOWS
 using System.Drawing.Imaging;
 #endif
@@ -24,14 +23,19 @@ namespace Carina.PixelViewer.Media.ImageEncoders
         protected override void OnEncode(IBitmapBuffer bitmapBuffer, Stream stream, ImageEncodingOptions options, CancellationToken cancellationToken)
         {
 #if WINDOWS
-            using var bitmap = bitmapBuffer.CreateSystemDrawingBitmap(options.Orientation);
-            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-#else
-            using var bitmap = bitmapBuffer.CreateSkiaBitmap(options.Orientation);
+            // use GDI+ to encode
+            if (options.ColorSpace is null)
+            {
+                using var gdiBitmap = bitmapBuffer.CreateSystemDrawingBitmap(options.Orientation);
+                gdiBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                return;
+            }
+#endif
+            // use Skia to encode
+            using var bitmap = bitmapBuffer.CreateSkiaBitmap(options.Orientation, options.ColorSpace);
             using var memoryStream = new MemoryStream();
             bitmap.Encode(memoryStream, SKEncodedImageFormat.Png, 0);
             stream.Write(memoryStream.ToArray());
-#endif
         }
     }
 }

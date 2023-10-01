@@ -1757,7 +1757,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// find window
-		if (this.attachedWindow == null)
+		if (this.attachedWindow is null)
 		{
 			Logger.LogError("No window to show dialog");
 			return;
@@ -1770,6 +1770,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			var result = await new ASControls.MessageDialog()
 			{
 				Buttons = ASControls.MessageDialogButtons.YesNoCancel,
+				DefaultResult = ASControls.MessageDialogResult.Yes,
 				Icon = ASControls.MessageDialogIcon.Question,
 				Message = this.GetResourceObservable("String/SessionControl.ConfirmSavingFilteredImage")
 			}.ShowDialog(this.attachedWindow);
@@ -1799,7 +1800,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			},
 			SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg"
 		}))?.Let(it => it.TryGetLocalPath());
-		if (fileName == null)
+		if (string.IsNullOrEmpty(fileName))
 			return;
 
 		// check format
@@ -1821,6 +1822,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// find encoder
 		if (fileFormat != null && Media.ImageEncoders.ImageEncoders.TryGetEncoderByFormat(fileFormat, out var encoder))
 			parameters.Encoder = encoder;
+		
+		// select color space
+		if (this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
+		{
+			var options = parameters.Options;
+			options.ColorSpace = session.ColorSpace;
+			parameters.Options = options;
+		}
 
 		// save
 		if (saveFilteredImage)

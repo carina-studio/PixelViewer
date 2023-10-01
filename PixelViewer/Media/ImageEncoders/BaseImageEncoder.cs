@@ -37,14 +37,14 @@ namespace Carina.PixelViewer.Media.ImageEncoders
             var stream = await outputStreamProvider.OpenStreamAsync(StreamAccess.ReadWrite, cancellationToken);
             if (cancellationToken.IsCancellationRequested)
             {
-                Global.RunWithoutErrorAsync(() => stream?.Close());
+                Global.RunWithoutErrorAsync(() => stream.Close());
                 throw new TaskCanceledException();
             }
 
             // encode
             try
             {
-                await EncodingTaskFactory.StartNew(() => this.OnEncode(sharedBitmapBuffer, stream, options, cancellationToken));
+                await EncodingTaskFactory.StartNew(() => this.OnEncode(sharedBitmapBuffer, stream, options, cancellationToken), cancellationToken);
             }
             catch (Exception ex)
             {

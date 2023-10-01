@@ -1,5 +1,4 @@
 ﻿using CarinaStudio.Collections;
-using System;
 using System.Collections.Generic;
 
 namespace Carina.PixelViewer.Media.ImageEncoders
@@ -10,8 +9,8 @@ namespace Carina.PixelViewer.Media.ImageEncoders
     static class ImageEncoders
     {
         // Fields.
-        static readonly Dictionary<FileFormat, IImageEncoder> encodersByFormat = new Dictionary<FileFormat, IImageEncoder>();
-        static readonly Dictionary<string, IImageEncoder> encodersByName = new Dictionary<string, IImageEncoder>();
+        static readonly Dictionary<FileFormat, IImageEncoder> encodersByFormat = new();
+        static readonly Dictionary<string, IImageEncoder> encodersByName = new();
 
 
         // Static initializer.
