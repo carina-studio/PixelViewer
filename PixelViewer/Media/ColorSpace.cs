@@ -1474,8 +1474,8 @@ namespace Carina.PixelViewer.Media
             if (color < 0)
                 return 0;
             if (color > 1)
-                return QuantizationSteps;
-            return (long)(color * QuantizationSteps + 0.5);
+                return QuantizationSteps - 1;
+            return (long)(color * (QuantizationSteps - 1) + 0.5);
         }
 
 
