@@ -592,7 +592,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			}));
 		});
 		
-		// attach to self properties
+		// attach to self
 		this.GetObservable(EffectiveRenderedImageInterpolationModeProperty).Subscribe(new Observer<BitmapInterpolationMode>(mode =>
 		{
 			RenderOptions.SetBitmapInterpolationMode(this.image, mode);
@@ -1067,160 +1067,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	}
 
 
-    // Called when key down.
-    protected override void OnKeyDown(KeyEventArgs e)
-    {
-		// call base
-		base.OnKeyDown(e);
-		if (e.Handled)
-			return;
-
-		// check focus
-		var focusedElement = this.attachedWindow?.FocusManager?.GetFocusedElement();
-		if (focusedElement is Visual focusedVisual)
-		{
-			if (focusedElement is TextBox || focusedElement is NumericUpDown)
-				return;
-			if (focusedVisual.FindAncestorOfType<SessionControl>(true) != this)
-				return;
-		}
-
-		// get session
-		if (this.DataContext is not Session session)
-			return;
-
-		// handle key event
-		this.pressedKeys.Add(e.Key);
-		var isCtrlPressed = Platform.IsMacOS 
-			? (e.KeyModifiers & KeyModifiers.Meta) != 0 
-			: (e.KeyModifiers & KeyModifiers.Control) != 0;
-		if (isCtrlPressed)
-		{
-			switch (e.Key)
-			{
-				case Key.D0:
-					{
-						session.FitImageToViewport = true;
-						break;
-					}
-				case Key.D1:
-					{
-						if (session.FitImageToViewport)
-						{
-							session.RequestedImageDisplayScale = 1.0;
-							session.FitImageToViewport = false;
-						}
-						else
-							session.ZoomToCommand.TryExecute(1.0);
-						break;
-					}
-				case Key.N:
-					if (Platform.IsMacOS)
-						return;
-					this.FindAncestorOfType<MainWindow>()?.CreateMainWindow();
-					break;
-				case Key.O:
-					{
-						this.OpenSourceFile();
-						break;
-					}
-				case Key.OemPlus:
-					{
-						if (session.FitImageToViewport)
-						{
-							session.RequestedImageDisplayScale = session.ImageDisplayScale;
-							session.FitImageToViewport = false;
-						}
-						session.ZoomInCommand.Execute(null);
-						break;
-					}
-				case Key.OemMinus:
-					{
-						if (session.FitImageToViewport)
-						{
-							session.RequestedImageDisplayScale = session.ImageDisplayScale;
-							session.FitImageToViewport = false;
-						}
-						session.ZoomOutCommand.Execute(null);
-						break;
-					}
-				case Key.S:
-					{
-						this.SaveImage();
-						break;
-					}
-				default:
-					return;
-			}
-			e.Handled = true;
-		}
-	}
-
-
-    // Called when key up.
-    protected override void OnKeyUp(KeyEventArgs e)
-	{
-		// call base
-		base.OnKeyUp(e);
-		if (e.Handled)
-		{
-			this.pressedKeys.Remove(e.Key);
-			return;
-		}
-
-		// check focus
-		var focusedElement = this.attachedWindow?.FocusManager?.GetFocusedElement();
-		if (focusedElement is Visual focusedVisual)
-		{
-			if (focusedElement is TextBox || focusedElement is NumericUpDown)
-			{
-				this.pressedKeys.Remove(e.Key);
-				return;
-			}
-			if (focusedVisual.FindAncestorOfType<SessionControl>(true) != this)
-			{
-				this.pressedKeys.Remove(e.Key);
-				return;
-			}
-		}
-
-		// prevent handling key without pressing
-		if (!this.pressedKeys.Contains(e.Key))
-			return;
-
-		// get session
-		if (this.DataContext is not Session session)
-			return;
-
-		// handle key event
-		var isCmdPressed = Platform.IsMacOS
-			? (this.pressedKeys.Contains(Key.LWin) || this.pressedKeys.Contains(Key.RWin))
-			: (this.pressedKeys.Contains(Key.LeftCtrl) || this.pressedKeys.Contains(Key.RightCtrl));
-		if (e.KeyModifiers == 0 && !isCmdPressed)
-		{
-			switch (e.Key)
-			{
-				case Key.End:
-					session.MoveToLastFrameCommand.TryExecute();
-					break;
-				case Key.Home:
-					session.MoveToFirstFrameCommand.TryExecute();
-					break;
-				case Key.PageDown:
-					session.MoveToNextFrameCommand.TryExecute();
-					break;
-				case Key.PageUp:
-					session.MoveToPreviousFrameCommand.TryExecute();
-					break;
-				default:
-					return;
-			}
-			e.Handled = true;
-		}
-		this.pressedKeys.Remove(e.Key);
-	}
-
-
 	// Called when double tap on image.
 	void OnImageDoubleTapped(object? sender, TappedEventArgs e)
 	{
@@ -1329,7 +1175,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when pressing on image scroll viewer.
 	void OnImageScrollViewerPointerPressed(object? sender, PointerPressedEventArgs e)
 	{
+		this.imageScrollViewer.Focusable = true;
 		this.imageScrollViewer.Focus();
+		this.imageScrollViewer.Focusable = false;
 	}
 
 
@@ -1341,6 +1189,149 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when start dragging splitter of options panel.
 	void OnOptionsPanelSplitterDragStarted(object? sender, VectorEventArgs e) =>
 		this.StartUsingSmallRenderedImage();
+	
+	
+	// Called to handle key down event.
+    internal void OnPreviewKeyDown(KeyEventArgs e)
+    {
+		// call base
+		if (e.Handled)
+			return;
+
+		// check focus
+		var isFocusedOnEditor = this.attachedWindow?.FocusManager?.GetFocusedElement()?.Let(it => 
+			it is TextBox || it is NumericUpDown) ?? false;
+
+		// get session
+		if (this.DataContext is not Session session)
+			return;
+
+		// handle key event
+		this.pressedKeys.Add(e.Key);
+		var isCtrlPressed = Platform.IsMacOS 
+			? (e.KeyModifiers & KeyModifiers.Meta) != 0 
+			: (e.KeyModifiers & KeyModifiers.Control) != 0;
+		if (isCtrlPressed)
+		{
+			switch (e.Key)
+			{
+				case Key.D0:
+					if (!isFocusedOnEditor)
+					{
+						session.FitImageToViewport = true;
+						e.Handled = true;
+					}
+					break;
+				case Key.D1:
+					if (!isFocusedOnEditor)
+					{
+						if (session.FitImageToViewport)
+						{
+							session.RequestedImageDisplayScale = 1.0;
+							session.FitImageToViewport = false;
+						}
+						else
+							session.ZoomToCommand.TryExecute(1.0);
+						e.Handled = true;
+					}
+					break;
+				case Key.O:
+				{
+					this.OpenSourceFile();
+					e.Handled = true;
+					break;
+				}
+				case Key.OemPlus:
+					if (!isFocusedOnEditor)
+					{
+						if (session.FitImageToViewport)
+						{
+							session.RequestedImageDisplayScale = session.ImageDisplayScale;
+							session.FitImageToViewport = false;
+						}
+						session.ZoomInCommand.Execute(null);
+						e.Handled = true;
+					}
+					break;
+				case Key.OemMinus:
+					if (!isFocusedOnEditor)
+					{
+						if (session.FitImageToViewport)
+						{
+							session.RequestedImageDisplayScale = session.ImageDisplayScale;
+							session.FitImageToViewport = false;
+						}
+						session.ZoomOutCommand.Execute(null);
+						e.Handled = true;
+					}
+					break;
+				case Key.S:
+					this.SaveImage();
+					e.Handled = true;
+					break;
+			}
+		}
+	}
+
+
+    // Called to handle key up event.
+	internal void OnPreviewKeyUp(KeyEventArgs e)
+	{
+		// call base
+		if (e.Handled)
+		{
+			this.pressedKeys.Remove(e.Key);
+			return;
+		}
+
+		// check focus
+		var focusedElement = this.attachedWindow?.FocusManager?.GetFocusedElement();
+		if (focusedElement is Visual focusedVisual)
+		{
+			if (focusedElement is TextBox || focusedElement is NumericUpDown)
+			{
+				this.pressedKeys.Remove(e.Key);
+				return;
+			}
+			if (focusedVisual.FindAncestorOfType<SessionControl>(true) != this)
+			{
+				this.pressedKeys.Remove(e.Key);
+				return;
+			}
+		}
+
+		// prevent handling key without pressing
+		if (!this.pressedKeys.Contains(e.Key))
+			return;
+
+		// get session
+		if (this.DataContext is not Session session)
+			return;
+
+		// handle key event
+		if (e.KeyModifiers == 0)
+		{
+			switch (e.Key)
+			{
+				case Key.End:
+					session.MoveToLastFrameCommand.TryExecute();
+					break;
+				case Key.Home:
+					session.MoveToFirstFrameCommand.TryExecute();
+					break;
+				case Key.PageDown:
+					session.MoveToNextFrameCommand.TryExecute();
+					break;
+				case Key.PageUp:
+					session.MoveToPreviousFrameCommand.TryExecute();
+					break;
+				default:
+					return;
+			}
+			e.Handled = true;
+		}
+		this.pressedKeys.Remove(e.Key);
+	}
 	
 
 	// Called when pointer pressed on brightness adjustment UI.

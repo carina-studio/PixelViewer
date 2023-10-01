@@ -585,7 +585,7 @@
 				</Viewbox>
 
 				<!-- Image -->
-				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="{Binding #root.HideImageViewerScrollBarsAutomatically}" HorizontalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
+				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="{Binding #root.HideImageViewerScrollBarsAutomatically}" Background="{x:Static Brushes.Transparent}" HorizontalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}" PointerPressed="OnImageScrollViewerPointerPressed" VerticalScrollBarVisibility="{Binding !FitImageToViewport, Converter={x:Static appControls:SessionControl.BooleanToScrollBarVisibilityConverter}}">
 					<Panel ClipToBounds="False" Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
 						<Panel Name="imageContainerBorder" ClipToBounds="False" HorizontalAlignment="Center" VerticalAlignment="Center">
 							<Border Margin="0,0,0.5,0.5"> <!-- [Workaround] Prevent background being larger than image -->

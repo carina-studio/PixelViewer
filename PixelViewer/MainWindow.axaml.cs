@@ -3,6 +3,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.ViewModels;
@@ -111,6 +112,10 @@ namespace Carina.PixelViewer
 				else
 					this.TaskbarIconProgressState = TaskbarIconProgressState.None;
 			});
+			
+			// intercept key events
+			this.AddHandler(KeyDownEvent, this.OnPreviewKeyDown, RoutingStrategies.Tunnel);
+			this.AddHandler(KeyUpEvent, this.OnPreviewKeyUp, RoutingStrategies.Tunnel);
 		}
 
 
@@ -500,27 +505,6 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Handle key down.
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-			if (e.Handled || (e.KeyModifiers & KeyModifiers.Control) == 0 || Platform.IsMacOS)
-				return;
-			switch (e.Key)
-			{
-				case Key.T:
-					this.CreateMainTabItem();
-					break;
-				case Key.W:
-					this.CloseCurrentMainTabItem();
-					break;
-				default:
-					return;
-			}
-			e.Handled = true;
-        }
-
-
         // Called when selection of main tab control changed.
         void OnMainTabControlSelectionChanged()
 		{
@@ -571,6 +555,44 @@ namespace Carina.PixelViewer
 				});
 			});
 #endif
+		}
+		
+		
+		// Called when previewing key down.
+		void OnPreviewKeyDown(object?  sender, KeyEventArgs e)
+		{
+			var isCtrlPressed = Platform.IsMacOS
+				? (e.KeyModifiers & KeyModifiers.Meta) != 0
+				: (e.KeyModifiers & KeyModifiers.Control) != 0;
+			if (isCtrlPressed)
+			{
+				switch (e.Key)
+				{
+					case Key.N:
+						if (Platform.IsNotMacOS) // Will be triggered through NativeMenu on macOS
+							this.CreateMainWindow();
+						e.Handled = true;
+						break;
+					case Key.T:
+						if (Platform.IsNotMacOS) // Will be triggered through NativeMenu on macOS
+							this.CreateMainTabItem();
+						e.Handled = true;
+						break;
+					case Key.W:
+						if (Platform.IsNotMacOS) // Will be triggered through NativeMenu on macOS
+							this.CloseCurrentMainTabItem();
+						e.Handled = true;
+						break;
+				}
+			}
+			((this.mainTabControl.SelectedItem as TabItem)?.Content as SessionControl)?.OnPreviewKeyDown(e);
+		}
+		
+		
+		// Called when previewing key up.
+		void OnPreviewKeyUp(object?  sender, KeyEventArgs e)
+		{
+			((this.mainTabControl.SelectedItem as TabItem)?.Content as SessionControl)?.OnPreviewKeyUp(e);
 		}
 
 
