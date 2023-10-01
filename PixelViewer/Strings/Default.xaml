@@ -258,6 +258,8 @@
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">Plane #2</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">Plane #3</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageRenderer">Format</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageSavingFailed">Failed to save image to '{0}'.</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">Image saved to '{0}'.</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">Name of profile:</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">Insufficient memory. You can try enlarging maximum memory usage in application options.</sys:String>
 	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">Max supported number of dragged files is 8.</sys:String>

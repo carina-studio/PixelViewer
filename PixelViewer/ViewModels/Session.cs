@@ -157,6 +157,34 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Data for image saving completed event.
+	/// </summary>
+	public class ImageSavingCompletedEventArgs : EventArgs
+	{
+		/// <summary>
+		/// Initialize new <see cref="ImageSavingCompletedEventArgs"/> instance.
+		/// </summary>
+		/// <param name="fileName">File name to save image to.</param>
+		/// <param name="succeeded">Whether image saving is succeeded or not.</param>
+		public ImageSavingCompletedEventArgs(string fileName, bool succeeded)
+		{
+			this.FileName = fileName;
+			this.IsSucceeded = succeeded;
+		}
+		
+		/// <summary>
+		/// File name to save image to.
+		/// </summary>
+		public string FileName { get; }
+		
+		/// <summary>
+		/// Whether image saving is succeeded or not.
+		/// </summary>
+		public bool IsSucceeded { get; }
+	}
+
+
+	/// <summary>
 	/// Parameters of saving image.
 	/// </summary>
 	public struct ImageSavingParams
@@ -2761,6 +2789,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Raised when image saving completed.
+	/// </summary>
+	public event EventHandler<ImageSavingCompletedEventArgs>? ImageSavingCompleted;
+
+
+	/// <summary>
 	/// Get or set size of viewport of showing rendered image.
 	/// </summary>
 	public Size ImageViewportSize
@@ -5076,10 +5110,17 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (!this.canSaveFilteredImage.Value)
 			return false;
 		
-		// clear color space
+		// select color space
 		var options = parameters.Options;
 		if (!this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
 			options.ColorSpace = null;
+		else if (options.ColorSpace is null)
+		{
+			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeRenderingToDisplay)
+				options.ColorSpace = this.ColorSpace;
+			else
+				options.ColorSpace = this.ScreenColorSpace;
+		}
 
 		// save image
 		var encoder = parameters.Encoder;
@@ -5092,11 +5133,13 @@ class Session : ViewModel<IAppSuiteApplication>
 		try
 		{
 			await encoder.AsNonNull().EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
+			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
 		}
 		catch (Exception ex)
 		{
 			this.Logger.LogError(ex, "Unable to save filtered image");
+			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, false));
 			return false;
 		}
 		finally
@@ -5157,10 +5200,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (!this.canSaveRenderedImage.Value)
 			return false;
 		
-		// clear color space
+		// select color space
 		var options = parameters.Options;
 		if (!this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
 			options.ColorSpace = null;
+		else if (options.ColorSpace is null)
+			options.ColorSpace = this.ColorSpace;
 
 		// save image
 		var encoder = parameters.Encoder;
@@ -5172,18 +5217,14 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsSavingRenderedImageProperty, true);
 		try
 		{
-			var imageFrame = Global.Run(() =>
-			{
-				if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
-					return this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame.AsNonNull();
-				return this.renderedImageFrame.AsNonNull();
-			});
-			await encoder.AsNonNull().EncodeAsync(imageFrame.BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
+			await encoder.AsNonNull().EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
+			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
 		}
 		catch (Exception ex)
 		{
 			this.Logger.LogError(ex, "Unable to save rendered image");
+			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, false));
 			return false;
 		}
 		finally

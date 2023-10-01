@@ -28,7 +28,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">变更格式后评估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">开启文件后评估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">优先尝试从文件名称判断图像格式</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">自动隐藏影像查看区的卷轴</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">自动隐藏图像查看区的滚动条</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">图像尺寸评估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">图像滤镜</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">图像格式</sys:String>
@@ -222,6 +222,8 @@
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">图层 #2</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">图层 #3</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageRenderer">格式</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageSavingFailed">无法将图像储存至 '{0}'。</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">图像已储存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">配置名称：</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">内存不足。您可以尝试在应用程序选项中调高内存使用上限。 </sys:String>
 	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">最多支持拖放 8 个文件。 </sys:String>

@@ -156,21 +156,34 @@
 			<Setter Property="MaxHeight" Value="{Binding $parent[Window].ExtendClientAreaTitleBarHeightHint}"/>
 		</Style>
 	</Window.Styles>
+	
+	<!-- Content -->
+	<Panel>
 
-	<!-- Layout -->
-	<Border Name="baseBorder">
-		<asControls:TabControl Name="tabControl" DragDrop.AllowDrop="True" DragLeaveItem="OnDragLeaveTabItem" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" ItemDragged="OnTabItemDragged" Padding="0">
+		<!-- Layout -->
+		<Border Name="baseBorder">
+			<asControls:TabControl Name="tabControl" DragDrop.AllowDrop="True" DragLeaveItem="OnDragLeaveTabItem" DragOverItem="OnDragOverTabItem" DropOnItem="OnDropOnTabItem" ItemDragged="OnTabItemDragged" Padding="0">
 
-			<!-- New tab -->
-			<TabItem Classes="Empty">
-				<TabItem.Header>
-					<Button Classes="AddTabItem" Command="{Binding $parent[Window].CreateMainTabItem}">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
-					</Button>
-				</TabItem.Header>
-			</TabItem>
+				<!-- New tab -->
+				<TabItem Classes="Empty">
+					<TabItem.Header>
+						<Button Classes="AddTabItem" Command="{Binding $parent[Window].CreateMainTabItem}">
+							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
+						</Button>
+					</TabItem.Header>
+				</TabItem>
 
-		</asControls:TabControl>
-	</Border>
+			</asControls:TabControl>
+		</Border>
+		
+		<!-- Notifications -->
+		<DockPanel>
+			<Border Classes="StatusBar" Background="{x:Null}" DockPanel.Dock="Bottom">
+				<TextBlock Classes="StatusBar_TextBlock" Foreground="{x:Null}" Text=" "/>
+			</Border>
+			<asControls:NotificationPresenter Name="notificationPresenter"/>
+		</DockPanel>
+		
+	</Panel>
 	
 </Window>

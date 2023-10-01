@@ -890,6 +890,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	void OnAttachToSession(Session session)
 	{
 		// attach
+		session.ImageSavingCompleted += this.OnImageSavingCompleted;
 		session.PropertyChanged += this.OnSessionPropertyChanged;
 		this.canOpenSourceFile.Bind(session.OpenSourceFileCommand, "");
 		this.canResetBrightnessAdjustment.Bind(session.ResetBrightnessAdjustmentCommand);
@@ -978,6 +979,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
     void OnDetachFromSession(Session session)
     {
 	    // detach
+	    session.ImageSavingCompleted -= this.OnImageSavingCompleted;
 	    session.PropertyChanged -= this.OnSessionPropertyChanged;
 	    this.canOpenSourceFile.Unbind();
 	    this.canResetBrightnessAdjustment.Unbind();
@@ -1169,6 +1171,74 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.imagePointerPressedContentPosition = null;
 		this.stopUsingSmallRenderedImageAction.Schedule();
 		this.SetValue(IsPointerPressedOnImageProperty, false);
+	}
+	
+	
+	// Called when image saving completed.
+	void OnImageSavingCompleted(object? sender, Session.ImageSavingCompletedEventArgs e)
+	{
+		if (this.attachedWindow is null)
+			return;
+		// ReSharper disable once SuspiciousTypeConversion.Global
+		if (this.attachedWindow is ASControls.INotificationPresenter notificationPresenter)
+		{
+			notificationPresenter.AddNotification(new ASControls.Notification().Also(it =>
+			{
+				if (e.IsSucceeded)
+				{
+					if (Platform.IsOpeningFileManagerSupported)
+					{
+						it.Actions = new List<ASControls.NotificationAction>
+						{
+							new ASControls.NotificationAction().Also(it =>
+							{
+								it.Command = new Command(() => Platform.OpenFileManager(e.FileName));
+								it.BindToResource(ASControls.NotificationAction.NameProperty, this, "String/SessionControl.ShowFileInExplorer");
+							})
+						};
+					}
+					it.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Success.Colored");
+					it.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
+					{
+						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingSucceeded");
+						it.Arg1 = e.FileName;
+					}));
+				}
+				else
+				{
+					it.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Error.Colored");
+					it.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
+					{
+						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingFailed");
+						it.Arg1 = e.FileName;
+					}));
+				}
+			}));
+		}
+		else
+		{
+			new ASControls.MessageDialog().Also(it =>
+			{
+				if (e.IsSucceeded)
+				{
+					it.Icon = ASControls.MessageDialogIcon.Success;
+					it.Message = new FormattedString().Also(it =>
+					{
+						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingSucceeded");
+						it.Arg1 = e.FileName;
+					});
+				}
+				else
+				{
+					it.Icon = ASControls.MessageDialogIcon.Error;
+					it.Message = new FormattedString().Also(it =>
+					{
+						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingFailed");
+						it.Arg1 = e.FileName;
+					});
+				}
+			}).ShowDialog(this.attachedWindow);
+		}
 	}
 
 
@@ -1822,14 +1892,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// find encoder
 		if (fileFormat != null && Media.ImageEncoders.ImageEncoders.TryGetEncoderByFormat(fileFormat, out var encoder))
 			parameters.Encoder = encoder;
-		
-		// select color space
-		if (this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
-		{
-			var options = parameters.Options;
-			options.ColorSpace = session.ColorSpace;
-			parameters.Options = options;
-		}
 
 		// save
 		if (saveFilteredImage)

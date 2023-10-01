@@ -27,7 +27,7 @@ namespace Carina.PixelViewer
 	/// <summary>
 	/// Main window of PixelViewer.
 	/// </summary>
-	class MainWindow : MainWindow<Workspace>
+	class MainWindow : MainWindow<Workspace>, INotificationPresenter
 	{
 		// Static fields.
 		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
@@ -42,6 +42,7 @@ namespace Carina.PixelViewer
 		bool isPerformingContentRelayout;
 		readonly AsTabControl mainTabControl;
 		readonly ObservableList<TabItem> mainTabItems = new();
+		readonly NotificationPresenter notificationPresenter;
 		readonly ScheduledAction relayoutContentAction;
 		readonly ScheduledAction updateTitleBarAction;
 
@@ -75,6 +76,7 @@ namespace Carina.PixelViewer
 					}
 				}));
 			});
+			this.notificationPresenter = this.Get<NotificationPresenter>(nameof(notificationPresenter));
 
 			// setup main tab control
 			this.mainTabControl = this.Get<AsTabControl>("tabControl").Also((it) =>
@@ -116,6 +118,15 @@ namespace Carina.PixelViewer
 			// intercept key events
 			this.AddHandler(KeyDownEvent, this.OnPreviewKeyDown, RoutingStrategies.Tunnel);
 			this.AddHandler(KeyUpEvent, this.OnPreviewKeyUp, RoutingStrategies.Tunnel);
+		}
+		
+		
+		/// <inheritdoc/>
+		public void AddNotification(Notification notification)
+		{
+			if (notification.Icon is null)
+				notification.BindToResource(Notification.IconProperty, this, "Image/Icon.Information.Colored");
+			this.notificationPresenter.AddNotification(notification);
 		}
 
 

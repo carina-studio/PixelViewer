@@ -14,6 +14,7 @@
 + Update pixel rendering mode to help you see each pixel clearly.
 + Select proper scale factor of screen on **Linux** automatically.
 + Allow using **System** theme on **Linux** with Gnome.
++ Show notification after saving image to file.
 + Improve layout of items on toolbar.
 + Improve performance and memory usage.
 + Improve displaying of Chinese.
