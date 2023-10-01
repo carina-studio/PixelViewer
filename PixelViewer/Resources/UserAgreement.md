@@ -1,7 +1,6 @@
-# User Agreement of PixelViewer
  ---
-+ Version: 1.3
-+ Update: 2022/8/16
++ Version: 1.4
++ Update: 2023/10/1
 
 This is the User Agreement of PixelViewer which you need to read before you using PixelViewer. The User Agreement may be updated in the future and you can check it on the website of PixelViewer. It means that you have agreed this User Agreement once you start using PixelViewer.
 
@@ -12,13 +11,7 @@ PixelViewer is a software based-on Open Source Project. The PixelViewer mentione
 + [Website of PixelViewer](https://carinastudio.azurewebsites.net/PixelViewer/)
 + [Project and release pages of PixelViewer on GitHub](https://github.com/carina-studio/PixelViewer)
 
-This User Agreement will be applied when you use PixelViewer 2.7 and any future versions before the version specified in next version of User Agreement.
-
-
-## External Dependencies
-
-### Resize and Rotate Extension for X Window System (XRandR)
-To detect display settings and apply user interface scale factor on **Linux**. Need to restart application to take effect after installation.
+This User Agreement will be applied when you use PixelViewer 3.0 and any future versions before the version specified in next version of User Agreement.
 
 
 ## File Access
@@ -54,6 +47,9 @@ There are 4 type of data will be downloaded when updating PixelViewer:
 + Package of auto updater.
 + Update package of PixelViewer.
 
+### Taking Memory Snapshot
+[dotMemory](https://www.jetbrains.com/dotmemory/) is the main tool for memory usage analysis by Carina Studio. When you start taking memory snapshot first time in debug mode, all necessary files of [dotMemory](https://www.jetbrains.com/dotmemory/) will be downloaded into the directory of PixelViewer.
+
 Other network access outside from executable of PixelViewer are not dominated by this User Agreement.
 
 
@@ -65,8 +61,7 @@ There are some necessary external command execution when running PixelViewer:
 + Run **open** to open Finder on **mscOS**.
 + Run **defaults** to check system language and theme mode on **macOS**.
 + Run **nautilus** or **xdg-open** to open File Manager on **Linux**.
-+ Run **gnome-shell** to check GUI environment on **Linux**.
-+ Run **xrandr** to detect display settings and apply user interface scale factor on **Linux**.
++ Run **gsettings** to check system theme mode on Linux.
 
 
 ## Modification of Your Computer
@@ -77,6 +72,8 @@ Except for file access, PixelViewer **WON’T** change the settings of your comp
 PixelViewer is an Open Source Project of Carina Studio under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license. All icons except for application icon are distributed under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) or [CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) license. Please refer to [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks) for more information of icons and its license.
  
 Application icon is made by [Freepik](https://www.freepik.com/) from [Flaticon](https://www.flaticon.com/).
+
+Built-in fonts **'Noto Sans SC'** and **'Noto Sans TC'** are distributed under [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
  
 License and copyright of images loaded into PixelViewer or saved by PixelViewer is not dominated by this User Agreement. You should take care of the license and copyright of images by yourself.
 

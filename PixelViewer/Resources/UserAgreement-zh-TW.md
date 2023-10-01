@@ -1,7 +1,7 @@
 # PixelViewer 使用者協議
  ---
-+ 版本：1.3
-+ 更新時間：2022/8/16
++ 版本：1.4
++ 更新時間：2023/10/1
 
 這是 PixelViewer 的使用者協議，您應該要在使用 PixelViewer 之前詳細閱讀本協議。 使用者協議可能會在未來有所更新，您可以在 PixelViewer 網站中查看。 當您開始使用 PixelViewer 表示您同意本使用者協議。
 
@@ -12,13 +12,7 @@ PixelViewer 為基於開放原始碼專案之軟體，以下所指 PixelViewer *
 + [PixelViewer 網站](https://carinastudio.azurewebsites.net/PixelViewer/)
 + [GitHub 上之 PixelViewer 專案頁面及各版本釋出頁面](https://github.com/carina-studio/PixelViewer)
 
-本使用者協議適用於您使用 PixelViewer 2.7 及下一份使用者協議所指定之版本之間 (但不包括) 的所有版本。
-
-
-## 外部相依性
-
-### X 視窗系統調整及旋轉延伸工具 (XRandR)
-在 **Linux** 上偵測顯示設定及套用使用者介面縮放比例。安裝完成後需重新啟動應用程式。
+本使用者協議適用於您使用 PixelViewer 3.0 及下一份使用者協議所指定之版本之間 (但不包括) 的所有版本。
 
 
 ## 檔案存取
@@ -56,6 +50,9 @@ PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有�
 + 自動更新程式封裝。
 + PixelViewer 升級封裝。
 
+### 擷取記憶體快照
+[dotMemory](https://www.jetbrains.com/dotmemory/) 是 Carina Studio 用以分析記憶體使用狀況的主要工具。當您第一次在偵錯模式中擷取記憶體快照時，所有 [dotMemory](https://www.jetbrains.com/dotmemory/) 所需的檔案將下載至 PixelViewer 的目錄中。
+
 其他由 PixelViewer 執行檔以外的網路存取不受本協議之約束。
 
 
@@ -67,8 +64,7 @@ PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有�
 + 執行 **open** 以在 **macOS** 上開啟 Finder。
 + 執行 **defaults** 以確認在 **macOS** 上的系統語系與佈景設定。
 + 執行 **nautilus** 或 **xdg-open** 以在 **Linux** 上開啟檔案管理器。
-+ 執行 **gnome-shell** 以在 **Linux** 上確認圖形化介面環境。
-+ 執行 **xrandr** 以在 **Linux** 上偵測顯示設定及套用使用者介面縮放比例。
++ 執行 **gsettings** 以確認在 Linux 上的系統佈景設定。
 
 
 ## 變更您的電腦
@@ -79,6 +75,8 @@ PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有�
 PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授權之下的開放原始碼專案。除了應用程式圖示外，所有圖示皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 或 [CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 授權下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks) 了解更多圖示相關資訊與授權。
  
 應用程式圖示由 [Freepik](https://www.freepik.com/) 提供並發布於 [Flaticon](https://www.flaticon.com/)。
+
+內建字型 **「Noto Sans SC」** 及 **「Noto Sans TC」** 在 [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) 授權下使用及發佈。
  
 載入至 PixelViewer 或由 PixelViewer 儲存之圖片的授權與著作權不受本協議之約束。您必須自行注意及負責圖片的授權與著作權。
 
