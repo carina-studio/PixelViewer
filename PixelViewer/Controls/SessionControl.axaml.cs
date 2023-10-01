@@ -53,6 +53,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// <see cref="IValueConverter"/> which maps boolean to opacity of label of image format category.
+	/// </summary>
+	public static IValueConverter BooleanToImageFormatCategoryLabelOpacityConverter = new FuncValueConverter<bool, double>(isEnabled => 
+		isEnabled
+			? 1.0
+			: IAppSuiteApplication.CurrentOrNull?.FindResourceOrDefault("Double/SessionControl.ImageFormatCategoryLabel.Opacity.Disabled", 0.5) ?? 0.5);
+	/// <summary>
 	/// <see cref="IValueConverter"/> which maps boolean to <see cref="ScrollBarVisibility.Auto"/>(True) and <see cref="ScrollBarVisibility.Disabled"/>(False).
 	/// </summary>
 	public static readonly IValueConverter BooleanToScrollBarVisibilityConverter = new BooleanToValueConverter<ScrollBarVisibility>(ScrollBarVisibility.Auto, ScrollBarVisibility.Disabled);
