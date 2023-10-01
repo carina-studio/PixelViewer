@@ -30,6 +30,7 @@ class ColorSpaceInfoDialog : InputDialog
 
     // Fields.
     readonly TextBox bluePrimaryTextBox;
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     readonly CieChromaticityDiagram chromaticityDiagram;
     readonly CieChromaticityGamut colorSpaceChromaticityGamut = new();
     readonly Pen colorSpaceTransferFuncStroke = new()
@@ -43,6 +44,7 @@ class ColorSpaceInfoDialog : InputDialog
     readonly TextBlock linearizationDescriptionTextBlock;
     readonly TextBox redPrimaryTextBox;
     readonly CieChromaticityGamut refColorSpaceChromaticityGamut = new();
+    // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     readonly Pen refColorSpaceTransferFuncStroke;
     readonly CieChromaticity refColorSpaceWhitePointChromaticity = new();
     readonly TextBox nameTextBox;
@@ -311,6 +313,10 @@ class ColorSpaceInfoDialog : InputDialog
 
         // call base
         base.OnOpened(e);
+        
+        // allow resize
+        this.CanResize = true;
+        this.SizeToContent = SizeToContent.Manual;
 
         // focus to control or close if it shows built-in color space without read-only set
         if (colorSpace.IsBuiltIn && !this.IsReadOnly)

@@ -20,6 +20,7 @@
 + Improve animations of user interface.
 + Redesigned dialogs.
 + Improve shortcut keys handling.
++ Allow resizing dialogs with complex content.
 + Add more details of UI element.
 
 ## Behavior Changes
