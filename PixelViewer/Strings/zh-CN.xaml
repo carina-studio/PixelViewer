@@ -147,7 +147,7 @@
 	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">选择配置</sys:String>
 
 	<!-- JpegImageEncodingOptionsDialog -->
-	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">压缩质量：</sys:String>
+	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">压缩质量：{0}</sys:String>
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG 选项</sys:String>
 
 	<!-- MainWindow -->
