@@ -1864,20 +1864,32 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsConvertingColorSpaceProperty, true);
 		
 		// allocate frame
-		if (this.Application.IsDebugMode)
-			this.Logger.LogWarning("Allocate color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
-		var colorSpaceConvertedImageFrame = await this.AllocateRenderedImageFrame(src.FrameNumber, src.BitmapBuffer.Format, destColorSpace, src.BitmapBuffer.Width, src.BitmapBuffer.Height);
-		if (colorSpaceConvertedImageFrame is null)
+		var colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame;
+		if (colorSpaceConvertedImageFrame is not null
+		    && colorSpaceConvertedImageFrame.BitmapBuffer.Width == src.BitmapBuffer.Width
+		    && colorSpaceConvertedImageFrame.BitmapBuffer.Height == src.BitmapBuffer.Height
+		    && colorSpaceConvertedImageFrame.BitmapBuffer.Format == src.BitmapBuffer.Format)
 		{
-			this.ResetValue(IsConvertingColorSpaceProperty);
-			if (cancellationToken.IsCancellationRequested)
+			if (this.Application.IsDebugMode)
+				this.Logger.LogDebug("Reuse color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+		}
+		else
+		{
+			if (this.Application.IsDebugMode)
+				this.Logger.LogWarning("Allocate color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+			colorSpaceConvertedImageFrame = await this.AllocateRenderedImageFrame(src.FrameNumber, src.BitmapBuffer.Format, destColorSpace, src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+			if (colorSpaceConvertedImageFrame is null)
 			{
-				this.Logger.LogWarning("Color space conversion has been cancelled");
-				throw new TaskCanceledException();
+				this.ResetValue(IsConvertingColorSpaceProperty);
+				if (cancellationToken.IsCancellationRequested)
+				{
+					this.Logger.LogWarning("Color space conversion has been cancelled");
+					throw new TaskCanceledException();
+				}
+				this.Logger.LogError("Unable to allocate image frame for color space conversion");
+				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+				return null;
 			}
-			this.Logger.LogError("Unable to allocate image frame for color space conversion");
-			this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-			return null;
 		}
 		if (cancellationToken.IsCancellationRequested)
 		{
@@ -4134,6 +4146,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// render
 		this.Logger.LogDebug("Render image for '{sourceFileName}', dimensions: {width}x{height}", sourceFileName, this.ImageWidth, this.ImageHeight);
+		bool isColorSpaceConversionNeeded = false;
 		var colorSpaceConvertedImageFrame = default(ImageFrame);
 		var exception = (Exception?)null;
 		try
@@ -4153,8 +4166,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			
 			// convert color space
-			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters
-			    && !cancellationTokenSource.IsCancellationRequested)
+			isColorSpaceConversionNeeded = this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters;
+			if (isColorSpaceConversionNeeded && !cancellationTokenSource.IsCancellationRequested)
 			{
 				var screenColorSpace = this.ScreenColorSpace;
 				if (this.IsColorSpaceManagementEnabled && !screenColorSpace.Equals(renderedColorSpace))
@@ -4212,8 +4225,11 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.Logger.LogDebug("Image for '{sourceFileName}' rendered", sourceFileName);
 
 			// update state
-			this.colorSpaceConvertedImageFrame?.Dispose();
-			this.colorSpaceConvertedImageFrame = colorSpaceConvertedImageFrame;
+			if (isColorSpaceConversionNeeded && this.colorSpaceConvertedImageFrame != colorSpaceConvertedImageFrame)
+			{
+				this.colorSpaceConvertedImageFrame?.Dispose();
+				this.colorSpaceConvertedImageFrame = colorSpaceConvertedImageFrame;
+			}
 			if (renderedImageFrame is not null)
 			{
 				this.renderedImageFrame?.Dispose();
@@ -4228,10 +4244,13 @@ class Session : ViewModel<IAppSuiteApplication>
 				it.HasMeanOfRgb || it.HasWeightedMeanOfRgb) ?? false);
 
 			// filter image or report now
-			if (this.IsFilteringRenderedImageNeeded)
+			var imageFrameToFilter = isColorSpaceConversionNeeded
+				? colorSpaceConvertedImageFrame
+				: this.renderedImageFrame;
+			if (this.IsFilteringRenderedImageNeeded && imageFrameToFilter is not null)
 			{
 				this.Logger.LogDebug("Continue filtering image after rendering");
-				this.FilterImage(colorSpaceConvertedImageFrame ?? this.renderedImageFrame.AsNonNull());
+				this.FilterImage(imageFrameToFilter);
 			}
 			else
 			{
@@ -4322,8 +4341,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsFilteringRenderedImageNeeded)
 				return this.filteredImageFrame;
 			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
-				return this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame;
-			return this.filteredImageFrame ?? this.renderedImageFrame;
+				return this.colorSpaceConvertedImageFrame;
+			return this.renderedImageFrame;
 		});
 		
 		// convert color space if needed
@@ -4339,6 +4358,11 @@ class Session : ViewModel<IAppSuiteApplication>
 					if (colorSpaceConvertedImageFrame is null)
 						this.Logger.LogError("Failed to convert color space before reporting rendered image");
 					imageFrame = colorSpaceConvertedImageFrame;
+					if (this.colorSpaceConvertedImageFrame != colorSpaceConvertedImageFrame)
+					{
+						this.colorSpaceConvertedImageFrame?.Dispose();
+						this.colorSpaceConvertedImageFrame = colorSpaceConvertedImageFrame;
+					}
 				}
 				catch (Exception ex)
 				{
@@ -4508,11 +4532,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 
 			// update state
-			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeRenderingToDisplay)
-			{
-				this.colorSpaceConvertedImageFrame?.Dispose();
-				this.colorSpaceConvertedImageFrame = colorSpaceConvertedImageFrame;
-			}
 			this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			this.cachedAvaRenderedImage = this.GetValue(RenderedImageProperty) as WriteableBitmap;
 			this.cachedAvaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken;
