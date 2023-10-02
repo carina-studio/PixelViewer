@@ -247,7 +247,8 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
         // scroll to focused section
         var header = this.InitialFocusedSection switch
         {
-            ApplicationOptionsDialogSection.ColorSpaceManagement => this.FindControl<Control>("enableColorSpaceManagementLabel"),
+            ApplicationOptionsDialogSection.ColorSpaceManagement => this.Get<Control>("enableColorSpaceManagementLabel"),
+            ApplicationOptionsDialogSection.MaxRenderedImagesMemoryUsage => this.Get<Control>("maxRenderedImagesMemoryUsageLabel"),
             _ => null,
         };
         if (header is not null)
@@ -358,4 +359,8 @@ enum ApplicationOptionsDialogSection
     /// Color space management.
     /// </summary>
     ColorSpaceManagement,
+    /// <summary>
+    /// Maximum memory usage for rendering images.
+    /// </summary>
+    MaxRenderedImagesMemoryUsage,
 }
