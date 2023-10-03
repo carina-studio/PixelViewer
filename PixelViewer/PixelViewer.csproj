@@ -69,8 +69,8 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
-		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.4" />
-		<PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0-rc.1.23419.5" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
