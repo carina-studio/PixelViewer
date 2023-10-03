@@ -55,7 +55,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <summary>
 	/// <see cref="IValueConverter"/> which maps boolean to opacity of label of image format category.
 	/// </summary>
-	public static IValueConverter BooleanToImageFormatCategoryLabelOpacityConverter = new FuncValueConverter<bool, double>(isEnabled => 
+	public static readonly IValueConverter BooleanToImageFormatCategoryLabelOpacityConverter = new FuncValueConverter<bool, double>(isEnabled => 
 		isEnabled
 			? 1.0
 			: IAppSuiteApplication.CurrentOrNull?.FindResourceOrDefault("Double/SessionControl.ImageFormatCategoryLabel.Opacity.Disabled", 0.5) ?? 0.5);
@@ -137,6 +137,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScrollViewer imageScrollViewer;
 	readonly Thickness imageScrollViewerPadding;
 	readonly Control imageViewerGrid;
+	ASControls.Notification? insufficientMemoryForRenderedImagesNotification;
 	bool isFirstImageViewerBoundsChanged = true;
 	bool keepHistogramsVisible;
 	bool keepRenderingParamsPanelVisible;
@@ -1002,6 +1003,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	    this.canShowEvaluateImageDimensionsMenu.Update(false);
 	    this.updateEffectiveRenderedImageAction.Execute();
 	    
+	    // dismiss notification
+	    if (this.insufficientMemoryForRenderedImagesNotification is not null)
+	    {
+		    this.insufficientMemoryForRenderedImagesNotification.Dismiss();
+		    this.insufficientMemoryForRenderedImagesNotification = null;
+	    }
+	    
 	    // update state
 	    this.keepHistogramsVisible = false;
 	    this.keepRenderingParamsPanelVisible = false;
@@ -1189,23 +1197,27 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// ReSharper disable once SuspiciousTypeConversion.Global
 		if (this.attachedWindow is ASControls.INotificationPresenter notificationPresenter)
 		{
-			notificationPresenter.AddNotification(new ASControls.Notification().Also(it =>
+			notificationPresenter.AddNotification(new ASControls.Notification().Also(notification =>
 			{
 				if (e.IsSucceeded)
 				{
 					if (Platform.IsOpeningFileManagerSupported)
 					{
-						it.Actions = new List<ASControls.NotificationAction>
+						notification.Actions = new List<ASControls.NotificationAction>
 						{
-							new ASControls.NotificationAction().Also(it =>
+							new ASControls.NotificationAction().Also(action =>
 							{
-								it.Command = new Command(() => Platform.OpenFileManager(e.FileName));
-								it.BindToResource(ASControls.NotificationAction.NameProperty, this, "String/SessionControl.ShowFileInExplorer");
+								action.Command = new Command(() =>
+								{
+									Platform.OpenFileManager(e.FileName);
+									notification.Dismiss();
+								});
+								action.BindToResource(ASControls.NotificationAction.NameProperty, this, "String/SessionControl.ShowFileInExplorer");
 							})
 						};
 					}
-					it.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Success.Colored");
-					it.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
+					notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Success.Colored");
+					notification.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
 					{
 						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingSucceeded");
 						it.Arg1 = e.FileName;
@@ -1213,8 +1225,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 				else
 				{
-					it.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Error.Colored");
-					it.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
+					notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Error.Colored");
+					notification.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
 					{
 						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingFailed");
 						it.Arg1 = e.FileName;
@@ -1534,6 +1546,47 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 			case nameof(Session.HasRenderingError):
 			case nameof(Session.InsufficientMemoryForRenderedImage):
+				if (session.InsufficientMemoryForRenderedImage)
+				{
+					if (this.insufficientMemoryForRenderedImagesNotification is null && this.attachedWindow is not null)
+					{
+						if (this.attachedWindow is ASControls.INotificationPresenter notificationPresenter)
+						{
+							this.insufficientMemoryForRenderedImagesNotification = new ASControls.Notification().Also(notification =>
+							{
+								notification.Actions = new List<ASControls.NotificationAction>
+								{
+									new ASControls.NotificationAction().Also(action =>
+									{
+										action.Command = new Command(() =>
+										{
+											_ = this.Application.ShowApplicationOptionsDialogAsync(this.attachedWindow, ApplicationOptionsDialogSection.MaxRenderedImagesMemoryUsage.ToString());
+											notification.Dismiss();
+										});
+										action.BindToResource(ASControls.NotificationAction.NameProperty, this, "String/SessionControl.ApplicationOptions");
+									})
+								};
+								notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Warning.Colored");
+								notification.BindToResource(ASControls.Notification.MessageProperty, this, "String/SessionControl.InsufficientMemoryForRenderedImage");
+								notification.Timeout = null;
+							});
+							notificationPresenter.AddNotification(this.insufficientMemoryForRenderedImagesNotification);
+						}
+						else
+						{
+							_ = new ASControls.MessageDialog().Also(it =>
+							{
+								it.Icon = ASControls.MessageDialogIcon.Warning;
+								it.Message = this.Application.GetObservableString("SessionControl.InsufficientMemoryForRenderedImage");
+							}).ShowDialog(this.attachedWindow);
+						}
+					}
+				}
+				else if (this.insufficientMemoryForRenderedImagesNotification is not null)
+				{
+					this.insufficientMemoryForRenderedImagesNotification.Dismiss();
+					this.insufficientMemoryForRenderedImagesNotification = null;
+				}
 				this.updateStatusBarStateAction.Schedule();
 				break;
 			case nameof(Session.ImageDisplayScale):
@@ -1559,6 +1612,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 				else
 					this.SetValue(ImageViewerShadowsMarginProperty, new(-100, 0, 0, 0));
+				break;
+			case nameof(Session.IsRenderingImage):
+				if (session.IsRenderingImage && this.insufficientMemoryForRenderedImagesNotification is not null)
+				{
+					this.insufficientMemoryForRenderedImagesNotification.Dismiss();
+					this.insufficientMemoryForRenderedImagesNotification = null;
+				}
 				break;
 			case nameof(Session.IsRenderingParametersPanelVisible):
 				if (session.IsRenderingParametersPanelVisible)

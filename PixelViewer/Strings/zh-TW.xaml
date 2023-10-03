@@ -221,13 +221,14 @@
 	<sys:String x:Key="String/SessionControl.ImageSavingFailed">無法將影像儲存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">影像已儲存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱：</sys:String>
-	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">記憶體不足。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImage">記憶體不足以繪製影像。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
 	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">最多支援拖放 8 個檔案。</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一張畫面 (Home)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最後一張畫面 (End)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一張畫面 (Page Down)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一張畫面 (Page Up)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至畫面…</sys:String>
+	<sys:String x:Key="String/SessionControl.NoImageRendered">沒有繪製的影像。</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">沒有影像檔案開啟</sys:String>
 	<sys:String x:Key="String/SessionControl.OpeningSourceFile">正在開啟影像檔案…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">開啟影像檔案 (Ctrl+O)</sys:String>

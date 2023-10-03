@@ -569,16 +569,21 @@
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.OpeningSourceFile}"/>
 						</StackPanel>
 
-						<!-- Insufficient memory hint -->
-						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding InsufficientMemoryForRenderedImage}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Warning}"/>
-							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.InsufficientMemoryForRenderedImageHint}"/>
-						</StackPanel>
-
 						<!-- Rendering error -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
 							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Error}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.RenderingErrorOccurred}"/>
+						</StackPanel>
+						
+						<!-- Other error -->
+						<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
+							<StackPanel.IsVisible>
+								<MultiBinding Converter="{x:Static BoolConverters.Or}">
+									<Binding Path="InsufficientMemoryForRenderedImage"/>
+								</MultiBinding>
+							</StackPanel.IsVisible>
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Warning}"/>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{DynamicResource String/SessionControl.NoImageRendered}"/>
 						</StackPanel>
 
 					</Panel>

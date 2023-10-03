@@ -225,13 +225,14 @@
 	<sys:String x:Key="String/SessionControl.ImageSavingFailed">无法将图像储存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">图像已储存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">配置名称：</sys:String>
-	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">内存不足。您可以尝试在应用程序选项中调高内存使用上限。 </sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImageHint">内存不足以绘制图像。您可以尝试在应用程序选项中调高内存使用上限。 </sys:String>
 	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">最多支持拖放 8 个文件。 </sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一帧 (Home)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最后一帧 (End)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一帧 (Page Down)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一帧 (Page Up)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至帧…</sys:String>
+	<sys:String x:Key="String/SessionControl.NoImageRendered">没有绘制的图像。</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">没有图像文件开启</sys:String>
 	<sys:String x:Key="String/SessionControl.OpeningSourceFile">正在开启图像文件…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">开启图像文件 (Ctrl+O)</sys:String>
