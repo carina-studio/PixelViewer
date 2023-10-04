@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Markup.Xaml;
 using Carina.PixelViewer.Media;
@@ -60,6 +61,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     static readonly StyledProperty<double> GreenHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(GreenHistogramScaleY), 0);
     static readonly StyledProperty<IImage?> LuminanceHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(LuminanceHistogramImage));
     static readonly StyledProperty<double> LuminanceHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(LuminanceHistogramScaleY), 0);
+    static readonly StyledProperty<double> MeanOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfBlueOffset), double.NaN);
+    static readonly StyledProperty<double> MeanOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfGreenOffset), double.NaN);
+    static readonly StyledProperty<double> MeanOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfLuminanceOffset), double.NaN);
+    static readonly StyledProperty<double> MeanOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfRedOffset), double.NaN);
     static readonly StyledProperty<IImage?> RedHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(RedHistogramImage));
     static readonly StyledProperty<double> RedHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RedHistogramScaleY), 0);
 
@@ -71,6 +76,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     int maxRedValue;
     readonly ScheduledAction updateHistogramImagesAction;
     readonly ScheduledAction updateHistogramScalesAction;
+    readonly ScheduledAction updateMeanOfColorsAction;
 
 
     /// <summary>
@@ -83,7 +89,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         this.IsEnabled = false;
 
         // create actions
-        this.updateHistogramImagesAction = new ScheduledAction(() =>
+        this.updateHistogramImagesAction = new(() =>
         {
             if (this.DataContext is BitmapHistograms histograms)
             {
@@ -100,7 +106,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
                 this.SetValue(LuminanceHistogramImageProperty, null);
             }
         });
-        this.updateHistogramScalesAction = new ScheduledAction(() =>
+        this.updateHistogramScalesAction = new(() =>
         {
             // check state
             if (this.DataContext is not BitmapHistograms histograms)
@@ -114,6 +120,26 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
             this.SetValue(GreenHistogramScaleYProperty, this.IsGreenHistogramVisible ? this.maxGreenValue / maxValue : 0);
             this.SetValue(BlueHistogramScaleYProperty, this.IsBlueHistogramVisible ? this.maxBlueValue / maxValue : 0);
             this.SetValue(LuminanceHistogramScaleYProperty, this.IsLuminanceHistogramVisible ? this.maxLuminanceValue / maxValue : 0);
+        });
+        this.updateMeanOfColorsAction = new(() =>
+        {
+            var width = this.Bounds.Width;
+            if (width <= 0)
+                return;
+            if (this.DataContext is BitmapHistograms histograms)
+            {
+                this.SetValue(MeanOfBlueOffsetProperty, width * histograms.MeanOfBlue / histograms.ColorCount);
+                this.SetValue(MeanOfGreenOffsetProperty, width * histograms.MeanOfGreen / histograms.ColorCount);
+                this.SetValue(MeanOfLuminanceOffsetProperty, width * histograms.MeanOfLuminance / histograms.ColorCount);
+                this.SetValue(MeanOfRedOffsetProperty, width * histograms.MeanOfRed / histograms.ColorCount);
+            }
+            else
+            {
+                this.SetValue(MeanOfBlueOffsetProperty, double.NaN);
+                this.SetValue(MeanOfGreenOffsetProperty, double.NaN);
+                this.SetValue(MeanOfLuminanceOffsetProperty, double.NaN);
+                this.SetValue(MeanOfRedOffsetProperty, double.NaN);
+            }
         });
     }
 
@@ -173,12 +199,12 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         pathBuilder.Append(" Z");
         try
         {
-            return new DrawingImage()
+            return new DrawingImage
             {
-                Drawing = new GeometryDrawing()
+                Drawing = new GeometryDrawing
                 {
                     Brush = brush,
-                    Geometry = PathGeometry.Parse(pathBuilder.ToString()),
+                    Geometry = StreamGeometry.Parse(pathBuilder.ToString()),
                 },
             };
         }
@@ -270,6 +296,22 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     double LuminanceHistogramScaleY => this.GetValue(LuminanceHistogramScaleYProperty);
 
 
+    // Pixel offset of mean of blue.
+    double MeanOfBlueOffset => this.GetValue(MeanOfBlueOffsetProperty);
+    
+    
+    // Pixel offset of mean of green.
+    double MeanOfGreenOffset => this.GetValue(MeanOfGreenOffsetProperty);
+    
+    
+    // Pixel offset of mean of luminance.
+    double MeanOfLuminanceOffset => this.GetValue(MeanOfLuminanceOffsetProperty);
+    
+    
+    // Pixel offset of mean of red.
+    double MeanOfRedOffset => this.GetValue(MeanOfRedOffsetProperty);
+
+
     /// <inheritdoc/>
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
@@ -286,6 +328,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         {
             (change.OldValue as BitmapHistograms)?.Let(this.DetachFromBitmapHistograms);
             (change.NewValue as BitmapHistograms)?.Let(this.AttachToBitmapHistograms);
+            this.updateMeanOfColorsAction.Schedule();
         }
         else if (property == IsBlueHistogramVisibleProperty
             || property == IsGreenHistogramVisibleProperty
@@ -294,6 +337,14 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         {
             this.updateHistogramScalesAction.Schedule();
         }
+    }
+
+
+    /// <inheritdoc/>
+    protected override void OnSizeChanged(SizeChangedEventArgs e)
+    {
+        base.OnSizeChanged(e);
+        this.updateMeanOfColorsAction.Schedule();
     }
 
 

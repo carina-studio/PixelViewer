@@ -4,6 +4,16 @@
 
 	<!-- Resources -->
 	<Styles.Resources>
+		
+		<!-- BitmapHistogramsView -->
+		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background">#1717e6</Color>
+		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background">#10a610</Color>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background">#7f7f7f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfBlue">#0a0a66</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfGreen">#084d08</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfLuminance">#333333</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfRed">#801313</Color>
+		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background">#cd1e1e</Color>
 
 		<!-- SessionControl -->
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#004a7f</Color>

@@ -13,10 +13,18 @@
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Background}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Background}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Background}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfBlue" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfBlue}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfGreen" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfGreen}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfLuminance" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfLuminance}"/>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfRed" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfRed}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Background}"/>
 		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background">#3f3fff</Color>
-		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background">#3fff3f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background">#32cc32</Color>
 		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background">#bfbfbf</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfBlue">#80b0ff</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfGreen">#99ff99</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfLuminance">#ffffff</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MeanOfRed">#ff9a9a</Color>
 		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background">#ff3f3f</Color>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">1</Thickness>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>

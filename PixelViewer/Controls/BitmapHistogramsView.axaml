@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 			 xmlns:a="using:Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:Class="Carina.PixelViewer.Controls.BitmapHistogramsView">
+             x:Class="Carina.PixelViewer.Controls.BitmapHistogramsView"
+             Name="root">
 
 	<Grid RowDefinitions="Auto,*,Auto">
 
@@ -21,32 +22,52 @@
 			</Panel.Styles>
 			
 			<!-- Red -->
-			<Image IsVisible="{Binding $parent[UserControl].IsRedHistogramVisible}" Source="{Binding $parent[UserControl].RedHistogramImage}">
+			<Image IsVisible="{Binding #root.IsRedHistogramVisible}" Source="{Binding #root.RedHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].RedHistogramScaleY}"/>
+					<ScaleTransform ScaleY="{Binding #root.RedHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
+			<Line EndPoint="0,10" HorizontalAlignment="Left" IsVisible="{Binding #root.IsRedHistogramVisible}" StartPoint="0,0" Stretch="Fill" Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}" StrokeDashArray="3,1.5" VerticalAlignment="Stretch" Width="1">
+				<Line.RenderTransform>
+					<TranslateTransform X="{Binding #root.MeanOfRedOffset}"/>
+				</Line.RenderTransform>
+			</Line>
 			
 			<!-- Green -->
-			<Image IsVisible="{Binding $parent[UserControl].IsGreenHistogramVisible}" Source="{Binding $parent[UserControl].GreenHistogramImage}">
+			<Image IsVisible="{Binding #root.IsGreenHistogramVisible}" Source="{Binding #root.GreenHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].GreenHistogramScaleY}"/>
+					<ScaleTransform ScaleY="{Binding #root.GreenHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
+			<Line EndPoint="0,10" HorizontalAlignment="Left" IsVisible="{Binding #root.IsGreenHistogramVisible}" StartPoint="0,0" Stretch="Fill" Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}" StrokeDashArray="3,1.5" VerticalAlignment="Stretch" Width="1">
+				<Line.RenderTransform>
+					<TranslateTransform X="{Binding #root.MeanOfGreenOffset}"/>
+				</Line.RenderTransform>
+			</Line>
 			
 			<!-- Blue -->
-			<Image IsVisible="{Binding $parent[UserControl].IsBlueHistogramVisible}" Source="{Binding $parent[UserControl].BlueHistogramImage}">
+			<Image IsVisible="{Binding #root.IsBlueHistogramVisible}" Source="{Binding #root.BlueHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].BlueHistogramScaleY}"/>
+					<ScaleTransform ScaleY="{Binding #root.BlueHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
+			<Line EndPoint="0,10" HorizontalAlignment="Left" IsVisible="{Binding #root.IsBlueHistogramVisible}" StartPoint="0,0" Stretch="Fill" Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}" StrokeDashArray="3,1.5" VerticalAlignment="Stretch" Width="1">
+				<Line.RenderTransform>
+					<TranslateTransform X="{Binding #root.MeanOfBlueOffset}"/>
+				</Line.RenderTransform>
+			</Line>
 			
 			<!-- Luminance -->
-			<Image IsVisible="{Binding $parent[UserControl].IsLuminanceHistogramVisible}" Source="{Binding $parent[UserControl].LuminanceHistogramImage}">
+			<Image IsVisible="{Binding #root.IsLuminanceHistogramVisible}" Source="{Binding #root.LuminanceHistogramImage}">
 				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding $parent[UserControl].LuminanceHistogramScaleY}"/>
+					<ScaleTransform ScaleY="{Binding #root.LuminanceHistogramScaleY}"/>
 				</Image.RenderTransform>
 			</Image>
+			<Line EndPoint="0,10" HorizontalAlignment="Left" IsVisible="{Binding #root.IsLuminanceHistogramVisible}" StartPoint="0,0" Stretch="Fill" Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}" StrokeDashArray="3,1.5" VerticalAlignment="Stretch" Width="1">
+				<Line.RenderTransform>
+					<TranslateTransform X="{Binding #root.MeanOfLuminanceOffset}"/>
+				</Line.RenderTransform>
+			</Line>
 			
 		</Panel>
 		
