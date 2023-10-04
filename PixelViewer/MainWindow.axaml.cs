@@ -13,6 +13,8 @@ using CarinaStudio.Collections;
 using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
+using Key = Avalonia.Input.Key;
+using KeyEventArgs = Avalonia.Input.KeyEventArgs;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Specialized;

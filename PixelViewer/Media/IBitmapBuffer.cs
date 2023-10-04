@@ -9,10 +9,6 @@ using SkiaSharp;
 using System;
 using System.Buffers;
 using System.Diagnostics;
-#if WINDOWS
-using System.Drawing;
-using System.Drawing.Imaging;
-#endif
 using System.Threading;
 using System.Threading.Tasks;
 // ReSharper disable AccessToDisposedClosure
@@ -1003,8 +999,9 @@ namespace Carina.PixelViewer.Media
 		/// </summary>
 		/// <param name="buffer"><see cref="IBitmapBuffer"/>.</param>
 		/// <param name="orientation">Orientation.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>/// 
 		/// <returns><see cref="System.Drawing.Bitmap"/>.</returns>
-		public static unsafe System.Drawing.Bitmap CreateSystemDrawingBitmap(this IBitmapBuffer buffer, int orientation = 0)
+		public static unsafe System.Drawing.Bitmap CreateSystemDrawingBitmap(this IBitmapBuffer buffer, int orientation, CancellationToken cancellationToken)
 		{
 			return buffer.Memory.Pin((srcBaseAddr) =>
 			{
@@ -1019,10 +1016,10 @@ namespace Carina.PixelViewer.Media
 					case 270:
 						return new System.Drawing.Bitmap(srcHeight, srcWidth, buffer.Format.ToSystemDrawingPixelFormat()).Also(bitmap =>
 						{
-							var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+							var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
 							try
 							{
-								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation);
+								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation, cancellationToken);
 							}
 							finally
 							{
@@ -1032,10 +1029,10 @@ namespace Carina.PixelViewer.Media
 					case 180:
 						return new System.Drawing.Bitmap(srcWidth, srcHeight, buffer.Format.ToSystemDrawingPixelFormat()).Also(bitmap =>
 						{
-							var bitmapData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.ReadWrite, bitmap.PixelFormat);
+							var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
 							try
 							{
-								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation);
+								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation, cancellationToken);
 							}
 							finally
 							{

@@ -20,7 +20,7 @@
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net7.0-windows</TargetFramework>
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx.11.0-arm64</RuntimeIdentifiers>
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>

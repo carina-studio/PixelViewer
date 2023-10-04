@@ -26,7 +26,7 @@ namespace Carina.PixelViewer.Media.ImageEncoders
             // use GDI+ to encode
             if (options.ColorSpace is null)
             {
-                using var gdiBitmap = bitmapBuffer.CreateSystemDrawingBitmap(options.Orientation);
+                using var gdiBitmap = bitmapBuffer.CreateSystemDrawingBitmap(options.Orientation, cancellationToken);
                 gdiBitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
                 return;
             }
