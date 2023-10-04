@@ -157,6 +157,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
 	readonly ScheduledAction updateImageCursorAction;
 	readonly ScheduledAction updateImageFilterParamsPopupOpacityAction;
+	readonly ScheduledAction updateImageViewerShadowMarginAction;
 	readonly ScheduledAction updateIsImageViewerScrollableAction;
 	readonly ScheduledAction updateSelectedImageDisplayPixelBoundsAction;
 	readonly ScheduledAction updateStatusBarStateAction;
@@ -557,6 +558,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.brightnessAndContrastAdjustmentPopupBorder.Opacity = (this.GetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty) || this.GetValue(IsPointerPressedOnContrastAdjustmentUIProperty)) ? 0.5 : 1;
 			this.colorAdjustmentPopupBorder.Opacity = this.GetValue(IsPointerPressedOnColorAdjustmentUIProperty) ? 0.5 : 1;
 		});
+		this.updateImageViewerShadowMarginAction = new(() =>
+		{
+			var session = this.DataContext as Session;
+			var leftMargin = session?.IsHistogramsVisible == true ? 0 : -100;
+			var rightMargin = session?.IsRenderingParametersPanelVisible == true ? 0 : -100;
+			this.SetValue(ImageViewerShadowsMarginProperty, new(leftMargin, 0, rightMargin, 0));
+		});
 		this.updateIsImageViewerScrollableAction = new(() =>
 		{
 			var contentSize = this.imageScrollViewer.Extent;
@@ -922,9 +930,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.updateEffectiveRenderedImageIntModeAction.Schedule();
 		
 		// update state
-		this.SetValue(ImageViewerShadowsMarginProperty, session.IsHistogramsVisible ? default : new(-100, 0, 0, 0));
 		this.ReportImageViewportSize();
 		this.ReportScreenPixelDensity();
+		this.updateImageViewerShadowMarginAction.Schedule();
 		this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 		this.updateStatusBarStateAction.Schedule();
 	}
@@ -1606,12 +1614,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				break;
 			case nameof(Session.IsHistogramsVisible):
 				if (session.IsHistogramsVisible)
-				{
 					this.keepHistogramsVisible = true;
-					this.SetValue(ImageViewerShadowsMarginProperty, default);
-				}
-				else
-					this.SetValue(ImageViewerShadowsMarginProperty, new(-100, 0, 0, 0));
+				this.updateImageViewerShadowMarginAction.Schedule();
 				break;
 			case nameof(Session.IsRenderingImage):
 				if (session.IsRenderingImage && this.insufficientMemoryForRenderedImagesNotification is not null)
@@ -1628,6 +1632,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 				else
 					Grid.SetColumnSpan(this.imageViewerGrid, 3);
+				this.updateImageViewerShadowMarginAction.Schedule();
 				break;
 			case nameof(Session.IsSourceFileOpened):
 				this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceFileOpened);

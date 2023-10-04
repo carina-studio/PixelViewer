@@ -704,8 +704,11 @@
 				</Border>
 				
 			</Grid>
+			
+			<!-- Shadow -->
 			<Border BoxShadow="{DynamicResource BoxShadows/Shadow.Inner.Light}" 
 			        Grid.Column="1"
+			        Grid.ColumnSpan="{Binding #imageViewerGrid.(Grid.ColumnSpan)}"
 			        IsHitTestVisible="false"
 			        Margin="{ReflectionBinding #root.ImageViewerShadowsMargin}"/>
 
