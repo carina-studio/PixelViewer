@@ -4462,7 +4462,10 @@ class Session : ViewModel<IAppSuiteApplication>
 				// create quarter-size Avalonia bitmap
 				var halfWidth = width >> 1;
 				var halfHeight = height >> 1;
-				if (!cancellationTokenSource.IsCancellationRequested && (halfWidth > 1024 || halfHeight > 1024))
+				if (!cancellationTokenSource.IsCancellationRequested 
+				    && (halfWidth > 1024 || halfHeight > 1024) 
+				    && halfWidth > 0 
+				    && halfHeight > 0)
 				{
 					// released cached image if it is not suitable
 					if (this.cachedAvaQuarterSizeRenderedImage != null)
