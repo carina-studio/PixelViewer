@@ -788,11 +788,5 @@ namespace Carina.PixelViewer
 		/// Command to set custom title of session.
 		/// </summary>
 		public ICommand SetCustomSessionTitleCommand { get; }
-
-
-#if WINDOWS10_0_17763_0_OR_GREATER
-		/// <inheritdoc/>
-		protected override Type? TaskbarManagerType => typeof(Microsoft.WindowsAPICodePack.Taskbar.TaskbarManager);
-#endif
 	}
 }
