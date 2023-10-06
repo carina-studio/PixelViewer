@@ -15,7 +15,7 @@
 		<NoWin32Manifest>true</NoWin32Manifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
-		<Configurations>Debug;Release;MSStore-Debug;MSStore-Release;Debug-Windows;Release-Windows</Configurations>
+		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
 	</PropertyGroup>
 	
@@ -25,7 +25,7 @@
 		<DefineConstants>DEBUG</DefineConstants>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Debug-Windows'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 		<DefineConstants>DEBUG;WINDOWS_ONLY</DefineConstants>
 	</PropertyGroup>
@@ -34,17 +34,9 @@
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx.11.0-arm64</RuntimeIdentifiers>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'=='Release-Windows'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 		<DefineConstants>WINDOWS_ONLY</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)'=='MSStore-Debug'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>DEBUG;MSSTORE</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)'=='MSStore-Release'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
-		<DefineConstants>MSSTORE</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -69,10 +61,9 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
-		<PackageReference Include="Microsoft-WindowsAPICodePack-Shell" Version="1.1.5" />
 		<PackageReference Include="System.Drawing.Common" Version="8.0.0-rc.1.23419.5" />
 	</ItemGroup>
-
+    
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
 		<TrimmerRootAssembly Include="System.Management" />
 	</ItemGroup>
@@ -87,7 +78,6 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
-		<TrimmerRootAssembly Include="Microsoft.Windows.SDK.NET" />
 		<TrimmerRootAssembly Include="System.Management" />
 	</ItemGroup>
 
