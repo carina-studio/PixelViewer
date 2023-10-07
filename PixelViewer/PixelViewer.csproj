@@ -52,8 +52,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="2.3.46.1003-dev" />
-		<PackageReference Include="CarinaStudio.AppSuite.Fonts" Version="2.3.46.1003-dev" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="2.3.47.1007-preview" />
+		<PackageReference Include="CarinaStudio.AppSuite.Fonts" Version="2.3.47.1007-preview" />
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
 		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.3.0" />
@@ -62,10 +62,6 @@
 
 	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
 		<PackageReference Include="System.Drawing.Common" Version="8.0.0-rc.1.23419.5" />
-	</ItemGroup>
-    
-	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
-		<TrimmerRootAssembly Include="System.Management" />
 	</ItemGroup>
 
 	<!-- Trimming options -->
