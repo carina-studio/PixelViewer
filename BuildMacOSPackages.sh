@@ -65,7 +65,7 @@ for i in "${!RID_LIST[@]}"; do
     fi
 
     # copy application icon and remove unnecessary files
-    cp ./$APP_NAME/$APP_NAME.2.icns ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/Resources/$APP_NAME.2.icns
+    cp ./$APP_NAME/$APP_NAME.3.icns ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/Resources/$APP_NAME.3.icns
     if [ "$?" != "0" ]; then
         exit
     fi
