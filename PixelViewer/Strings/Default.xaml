@@ -12,7 +12,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness adjustment function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">Timing of color space conversion</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">Details of {0}…</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">Details of {0}</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color management improves the accuracy of color of rendered image, but it will affects the performance of image rendering.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">The color space '{0}' is same as '{1}', do you still want to add it?</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast adjustment function</sys:String>

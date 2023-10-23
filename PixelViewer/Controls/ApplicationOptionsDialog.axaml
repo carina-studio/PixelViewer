@@ -13,6 +13,7 @@
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
         xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
+        xmlns:cs="using:CarinaStudio"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog"
         x:CompileBindings="True"
@@ -225,7 +226,12 @@
 
 								<!-- YUV to RGB conversion -->
 								<asControls:DialogItemGrid>
-									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
+									<WrapPanel VerticalAlignment="Center">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultYuvToBgraConverter}"/>
+										<Button Classes="Dialog_Info_Button" Command="{x:Static cs:PlatformCommands.OpenLinkCommand}" CommandParameter="https://en.wikipedia.org/wiki/YUV" ToolTip.Tip="{DynamicResource String/Common.KnowMoreAbout}">
+											<Image Classes="Icon" Source="{DynamicResource Image/Icon.Question.Outline}"/>
+										</Button>
+									</WrapPanel>
 									<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" SelectedItem="{Binding DefaultYuvToBgraConverter, Mode=TwoWay}">
 										<ComboBox.ItemTemplate>
 											<DataTemplate x:CompileBindings="True" x:DataType="appMedia:YuvToBgraConverter">
@@ -234,8 +240,6 @@
 										</ComboBox.ItemTemplate>
 									</ComboBox>
 								</asControls:DialogItemGrid>
-								<Line Classes="Dialog_Item_Separator_Inner"/>
-								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/YUV"/>
 								
 							</StackPanel>
 						</Border>
@@ -320,18 +324,29 @@
 								<!-- Enable color space management -->
 								<asControls:DialogItemGrid>
 									<StackPanel Classes="Dialog_Item_Text_Container">
-										<TextBlock Name="enableColorSpaceManagementLabel" Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>	
+										<WrapPanel>
+											<TextBlock Name="enableColorSpaceManagementLabel" Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
+											<Button Classes="Dialog_Info_Button" Command="{x:Static cs:PlatformCommands.OpenLinkCommand}" CommandParameter="https://en.wikipedia.org/wiki/Color_management" ToolTip.Tip="{DynamicResource String/Common.KnowMoreAbout}">
+												<Image Classes="Icon" Source="{DynamicResource Image/Icon.Question.Outline}"/>
+											</Button>
+										</WrapPanel>
 										<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceManagement.Description}"/>
 									</StackPanel>
 									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" Grid.Column="1" IsChecked="{Binding EnableColorSpaceManagement, Mode=TwoWay}"/>
 								</asControls:DialogItemGrid>
-								<Line Classes="Dialog_Item_Separator_Inner"/>
-								<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock_Description" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="https://en.wikipedia.org/wiki/Color_management"/>
 								<Separator Classes="Dialog_Item_Separator"/>
 
 								<!-- Default color space -->
 								<asControls:DialogItemGrid>
-									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
+									<WrapPanel VerticalAlignment="Center">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultColorSpace}"/>
+										<Button Classes="Dialog_Info_Button" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}">
+											<ToolTip.Tip>
+												<cs:FormattedString Arg1="{ReflectionBinding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}"/>
+											</ToolTip.Tip>
+											<Image Classes="Icon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
+										</Button>
+									</WrapPanel>
 									<ComboBox Name="defaultColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding DefaultColorSpace, Mode=TwoWay}">
 										<ComboBox.ItemTemplate>
 											<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
@@ -348,13 +363,19 @@
 										</ComboBox.ItemTemplate>
 									</ComboBox>
 								</asControls:DialogItemGrid>
-								<Line Classes="Dialog_Item_Separator_Inner"/>
-								<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{ReflectionBinding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
 								<Separator Classes="Dialog_Item_Separator"/>
 
 								<!-- Screen color space -->
 								<asControls:DialogItemGrid>
-									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
+									<WrapPanel VerticalAlignment="Center">
+										<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.ScreenColorSpace}"/>
+										<Button Classes="Dialog_Info_Button" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}">
+											<ToolTip.Tip>
+												<cs:FormattedString Arg1="{ReflectionBinding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}"/>
+											</ToolTip.Tip>
+											<Image Classes="Icon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
+										</Button>
+									</WrapPanel>
 									<ComboBox Name="screenColorSpaceComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" IsEnabled="{Binding EnableColorSpaceManagement}" ItemsSource="{x:Static appMedia:ColorSpace.AllColorSpaces}" SelectedItem="{Binding ScreenColorSpace, Mode=TwoWay}">
 										<ComboBox.ItemTemplate>
 											<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
@@ -371,8 +392,6 @@
 										</ComboBox.ItemTemplate>
 									</ComboBox>
 								</asControls:DialogItemGrid>
-								<Line Classes="Dialog_Item_Separator_Inner"/>
-								<abControls:FormattedLinkTextBlock Classes="Dialog_LinkTextBlock_Description" Arg1="{Binding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{ReflectionBinding #screenColorSpaceComboBox.SelectedItem}" Format="{DynamicResource String/ApplicationOptionsDialog.ColorSpaceDetails}" IsEnabled="{Binding EnableColorSpaceManagement}"/>
 								<Separator Classes="Dialog_Item_Separator"/>
 
 								<!-- Use system screen color space -->
