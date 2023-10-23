@@ -229,7 +229,7 @@
 								<!-- Default renderer -->
 								<asControls:DialogItemGrid>
 									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.DefaultImageRendererFormatName}"/>
-									<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
+									<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" SelectedItem="{Binding DefaultImageRenderer, Mode=TwoWay}">
 										<ComboBox.DataTemplates>
 											<DataTemplate DataType="{x:Type appImageRenderers:IImageRenderer}">
 												<Grid ColumnDefinitions="*,Auto">
