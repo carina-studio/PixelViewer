@@ -118,10 +118,6 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
                     new(this.Application.GetStringNonNull("FileType.Icc"))
                     {
                         Patterns = new[] { "*.icc" }
-                    },
-                    new(this.Application.GetStringNonNull("FileType.Json"))
-                    {
-                        Patterns = new[] { "*.json" }
                     }
                 }
             })).Let(it => it.Count == 1 ? it[0].TryGetLocalPath() : null);
