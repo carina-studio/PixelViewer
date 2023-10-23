@@ -300,6 +300,22 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
         this.imageFilterPanelButton.IsChecked = (this.imageFilterPanelButton == button);
         this.othersPanelButton.IsChecked = (this.othersPanelButton == button);
     }
+    
+    
+    /// <summary>
+    /// Open document of Noto Sans font.
+    /// </summary>
+    public void OpenNotoSansDocument() =>
+        Platform.OpenLink(this.Application.CultureInfo.Name.Let(name =>
+        {
+            if (name.StartsWith("zh"))
+            {
+                if (name.EndsWith("TW"))
+                    return "https://zh.wikipedia.org/zh-tw/%E6%80%9D%E6%BA%90%E9%BB%91%E9%AB%94";
+                return "https://zh.wikipedia.org/zh-cn/%E6%80%9D%E6%BA%90%E9%BB%91%E9%AB%94";
+            }
+            return "https://en.wikipedia.org/wiki/Source_Han_Sans";
+        }));
 
 
     // Remove custom color space.
