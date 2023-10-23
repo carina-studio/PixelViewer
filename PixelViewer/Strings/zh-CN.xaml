@@ -151,6 +151,7 @@
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG 选项</sys:String>
 
 	<!-- MainWindow -->
+	<sys:String x:Key="String/MainWindow.RefreshingAppIconOnMacOSHint">针对 macOS 用户，您可能会发现升级之后在 Dock 及 Launchpad 中的应用程序图标没有刷新。您是否想了解如何刷新应用程序图标？</sys:String>
 	<sys:String x:Key="String/MainWindow.ResetSessionTitle">重置标题</sys:String>
 	<sys:String x:Key="String/MainWindow.Session.Hibernated">休眠中以节省资源</sys:String>
 	<sys:String x:Key="String/MainWindow.Session.RenderedImagesMemoryUsage">内存使用：</sys:String>

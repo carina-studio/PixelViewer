@@ -33,6 +33,7 @@ namespace Carina.PixelViewer
 	{
 		// Static fields.
 		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
+		static bool IsRefreshingAppIconOnMacOSHintDialogShown;
 
 
 		// Constants.
@@ -361,7 +362,7 @@ namespace Carina.PixelViewer
 			// detach from workspace
 			workspace.Window = null;
 			this.SetValue(HasMultipleSessionsProperty, false);
-			(workspace.Sessions as INotifyCollectionChanged)?.Let((it) => it.CollectionChanged -= this.OnSessionsChanged);
+			(workspace.Sessions as INotifyCollectionChanged)?.Let(it => it.CollectionChanged -= this.OnSessionsChanged);
 
 			// call base
 			base.OnDetachFromViewModel(workspace);
@@ -518,7 +519,15 @@ namespace Carina.PixelViewer
 		}
 
 
-        // Called when selection of main tab control changed.
+		/// <inheritdoc/>
+		protected override void OnInitialDialogsClosed()
+		{
+			base.OnInitialDialogsClosed();
+			this.ShowPixelViewerInitialDialogs();
+		}
+
+
+		// Called when selection of main tab control changed.
         void OnMainTabControlSelectionChanged()
 		{
 			if (this.mainTabControl.SelectedIndex >= this.mainTabItems.Count - 1 && !this.IsClosed)
@@ -788,5 +797,34 @@ namespace Carina.PixelViewer
 		/// Command to set custom title of session.
 		/// </summary>
 		public ICommand SetCustomSessionTitleCommand { get; }
+
+
+		// Show PixelViewer specific initial dialogs.
+		async void ShowPixelViewerInitialDialogs()
+		{
+			// check state
+			if (this.IsClosed || this.Application.IsShutdownStarted)
+				return;
+			
+			// hint for refreshing application icon on macOS
+			var appVersion = this.Application.Assembly.GetName().Version;
+			var prevVersion = this.Application.PreviousVersion;
+			if (Platform.IsMacOS 
+			    && appVersion?.Major == 3
+			    && (prevVersion?.Major).GetValueOrDefault() < 3
+			    && !this.Application.IsFirstLaunch
+			    && !IsRefreshingAppIconOnMacOSHintDialogShown)
+			{
+				IsRefreshingAppIconOnMacOSHintDialogShown = true;
+				var result = await new MessageDialog
+				{
+					Buttons = MessageDialogButtons.YesNo,
+					Icon = MessageDialogIcon.Information,
+					Message = this.Application.GetObservableString("MainWindow.RefreshingAppIconOnMacOSHint"),
+				}.ShowDialog(this);
+				if (result == MessageDialogResult.Yes)
+					Platform.OpenLink("https://carinastudio.azurewebsites.net/PixelViewer/InstallAndUpgrade#Upgrade");
+			}
+		}
 	}
 }
