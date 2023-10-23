@@ -3,7 +3,7 @@
 set APP_NAME=PixelViewer
 set RID_LIST=win-arm64 win-x64 win-x86
 set CONFIG=Release-Windows
-set FRAMEWORK=net7.0-windows10.0.17763.0
+set FRAMEWORK=net7.0
 set ERRORLEVEL=0
 
 echo ********** Start building %APP_NAME% **********
@@ -65,9 +65,6 @@ REM Build packages
     )
     if exist %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\ULogViewer.png (
         del /Q %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\ULogViewer.png
-    )
-    if exist %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\System.Windows.Forms.dll (
-        del /Q %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\System.Windows.Forms.dll
     )
 
     REM Generate package

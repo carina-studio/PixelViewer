@@ -60,7 +60,7 @@
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 	</ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
+	<ItemGroup Condition="$(RuntimeIdentifier.Contains('windows'))">
 		<PackageReference Include="System.Drawing.Common" Version="8.0.0-rc.1.23419.5" />
 	</ItemGroup>
 
@@ -69,16 +69,13 @@
 		<TrimmerRootAssembly Include="netstandard" />
 		<TrimmerRootAssembly Include="NLog" />
 		<TrimmerRootAssembly Include="System.Console" />
+		<TrimmerRootAssembly Include="System.Management" />
 		<TrimmerRootAssembly Include="System.Private.Xml" />
 		<TrimmerRootAssembly Include="System.Private.CoreLib" />
 	</ItemGroup>
 
-	<ItemGroup Condition="$(TargetFramework.Contains('windows'))">
-		<TrimmerRootAssembly Include="System.Management" />
-	</ItemGroup>
-
-	<ItemGroup Condition="$(TargetFramework.Contains('linux'))">
-		<TrimmerRootAssembly Include="Tmds.DBus" />
+	<ItemGroup Condition="$(RuntimeIdentifier.Contains('linux'))">
+		<TrimmerRootAssembly Include="Tmds.DBus.Protocol" />
 	</ItemGroup>
 	
 	<ItemGroup>
