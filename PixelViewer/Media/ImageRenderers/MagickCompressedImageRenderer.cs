@@ -1,4 +1,5 @@
-﻿using CarinaStudio;
+﻿using Carina.PixelViewer.Media.FileFormatParsers;
+using CarinaStudio;
 using CarinaStudio.IO;
 using ImageMagick;
 using System;
@@ -23,7 +24,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
     /// Initialize new <see cref="MagickCompressedImageRenderer"/> instance.
     /// </summary>
     /// <param name="format">Format supported by this instance.</param>
-    /// <param name="magickFormats">Formats defined by >.</param>      
+    /// <param name="magickFormats">Formats defined by <see cref="MagickFormat"/>.</param>      
     protected MagickCompressedImageRenderer(ImageFormat format, IEnumerable<MagickFormat> magickFormats) : base(format)
     {
         this.magickFormats.AddRange(magickFormats);
@@ -52,6 +53,26 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
 
 
     /// <summary>
+    /// Called to check dimensions of bitmap buffer for image rendering.
+    /// </summary>
+    /// <param name="source">Source of image.</param>
+    /// <param name="imageStream">Stream to read image data.</param>
+    /// <param name="bufferWidth">Pixel width of buffer.</param>
+    /// <param name="bufferHeight">Pixel height of buffer.</param>
+    /// <param name="expectedWidth">Expected pixel width of buffer.</param>
+    /// <param name="expectedHeight">Expected pixel height of buffer.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>True if dimensions of bitmap buffer is correct.</returns>
+    protected virtual bool OnCheckBufferDimensions(IImageDataSource source, Stream imageStream, int bufferWidth, int bufferHeight, out int expectedWidth, out int expectedHeight, CancellationToken cancellationToken)
+    {
+        var imageInfo = this.CreateImageInfo(source, imageStream, cancellationToken);
+        expectedWidth = imageInfo.Width;
+        expectedHeight = imageInfo.Height;
+        return bufferWidth == expectedWidth && bufferHeight == expectedHeight;
+    }
+
+
+    /// <summary>
     /// Called to check file header.
     /// </summary>
     /// <param name="source">Source of image.</param>
@@ -63,19 +84,32 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
     /// <inheritdoc/>
     protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
     {
-        // decode image info
+        // check file header first to prevent decoding image
         var position = imageStream.Position;
-        var imageInfo = this.CreateImageInfo(source, imageStream, cancellationToken);
-        if (imageInfo.Width != bitmapBuffer.Width || imageInfo.Height != bitmapBuffer.Height)
-            throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {imageInfo.Width}x{imageInfo.Height} expected.");
+        if (!this.OnCheckFileHeader(source, imageStream))
+            throw new ArgumentException("Unsupported format.");
+        imageStream.Position = position;
+        
+        // check buffer dimensions
+        if (!this.OnCheckBufferDimensions(source, imageStream, bitmapBuffer.Width, bitmapBuffer.Height, out var width, out var height, cancellationToken))
+        {
+            if (cancellationToken.IsCancellationRequested)
+                throw new TaskCanceledException();
+            throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {width}x{height} expected.");
+        }
+        imageStream.Position = position;
 
         // decode
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
-        imageStream.Position = position;
-        using var image = new MagickImageFactory().Create(imageStream);
-        if (image == null)
+        using var image = new MagickImageFactory().Create(imageStream, new MagickReadSettings
+        {
+            Format = this.OnSelectMagickFormatToRender(this.magickFormats),
+        });
+        if (image is null)
             throw new ArgumentException("Failed to decode.");
+        if (bitmapBuffer.Width != image.Width || bitmapBuffer.Height != image.Height)
+            throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {image.Width}x{image.Height} expected.");
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
 
@@ -84,7 +118,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
         {
             using var srcUnsafePixels = image.GetPixelsUnsafe();
             var srcBaseAddr = srcUnsafePixels.GetAreaPointer(0, 0, image.Width, image.Height);
-            var srcRowStride = imageInfo.Width * image.ChannelCount * sizeof(ushort);
+            var srcRowStride = width * image.ChannelCount * sizeof(ushort);
             var destRowStride = bitmapBuffer.RowBytes;
             switch (bitmapBuffer.Format)
             {
@@ -97,7 +131,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
                                 var destPixelPtr = (uint*)((byte*)destBaseAddr + destRowStride * y);
-                                for (var x = imageInfo.Width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+                                for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
                                 {
                                     var l = (byte)(*srcPixelPtr >> 8);
                                     *destPixelPtr = packFunc(l, l, l, 255);
@@ -112,7 +146,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
                                 var destPixelPtr = (uint*)((byte*)destBaseAddr + destRowStride * y);
-                                for (var x = imageInfo.Width; x > 0; --x, srcPixelPtr += 3, ++destPixelPtr)
+                                for (var x = width; x > 0; --x, srcPixelPtr += 3, ++destPixelPtr)
                                     *destPixelPtr = packFunc((byte)(srcPixelPtr[2] >> 8), (byte)(srcPixelPtr[1] >> 8), (byte)(srcPixelPtr[0] >> 8), 255);
                                 if (cancellationToken.IsCancellationRequested)
                                     throw new TaskCanceledException();
@@ -124,7 +158,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
                                 var destPixelPtr = (uint*)((byte*)destBaseAddr + destRowStride * y);
-                                for (var x = imageInfo.Width; x > 0; --x, srcPixelPtr += 4, ++destPixelPtr)
+                                for (var x = width; x > 0; --x, srcPixelPtr += 4, ++destPixelPtr)
                                     *destPixelPtr = packFunc((byte)(srcPixelPtr[2] >> 8), (byte)(srcPixelPtr[1] >> 8), (byte)(srcPixelPtr[0] >> 8), (byte)(srcPixelPtr[3] >> 8));
                                 if (cancellationToken.IsCancellationRequested)
                                     throw new TaskCanceledException();
@@ -143,7 +177,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
                                 var destPixelPtr = (ulong*)((byte*)destBaseAddr + destRowStride * y);
-                                for (var x = imageInfo.Width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+                                for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
                                 {
                                     var l = *srcPixelPtr;
                                     *destPixelPtr = packFunc(l, l, l, 65535);
@@ -158,7 +192,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
                                 var destPixelPtr = (ulong*)((byte*)destBaseAddr + destRowStride * y);
-                                for (var x = imageInfo.Width; x > 0; --x, srcPixelPtr += 3, ++destPixelPtr)
+                                for (var x = width; x > 0; --x, srcPixelPtr += 3, ++destPixelPtr)
                                     *destPixelPtr = packFunc(srcPixelPtr[2], srcPixelPtr[1], srcPixelPtr[0], 65535);
                                 if (cancellationToken.IsCancellationRequested)
                                     throw new TaskCanceledException();
@@ -170,7 +204,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
                                 var destPixelPtr = (ulong*)((byte*)destBaseAddr + destRowStride * y);
-                                for (var x = imageInfo.Width; x > 0; --x, srcPixelPtr += 4, ++destPixelPtr)
+                                for (var x = width; x > 0; --x, srcPixelPtr += 4, ++destPixelPtr)
                                     *destPixelPtr = packFunc(srcPixelPtr[2], srcPixelPtr[1], srcPixelPtr[0], srcPixelPtr[3]);
                                 if (cancellationToken.IsCancellationRequested)
                                     throw new TaskCanceledException();
@@ -186,6 +220,15 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
         // complete
         return new ImageRenderingResult();
     }
+
+
+    /// <summary>
+    /// Called to select proper <see cref="MagickFormat"/> to decode/render image.
+    /// </summary>
+    /// <param name="candidates">Candidate formats.</param>
+    /// <returns>Selected <see cref="MagickFormat"/>.</returns>
+    protected virtual MagickFormat OnSelectMagickFormatToRender(IReadOnlyList<MagickFormat> candidates) =>
+        candidates[0];
 
 
     /// <inheritdoc/>
@@ -228,5 +271,5 @@ class HeifImageRenderer : MagickCompressedImageRenderer
 
     /// <inheritdoc/>
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
-        FileFormatParsers.HeifFileFormatParser.CheckFileHeader(imageStream);
+        HeifFileFormatParser.CheckFileHeader(imageStream);
 }

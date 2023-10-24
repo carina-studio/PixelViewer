@@ -106,10 +106,12 @@
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有文件</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows 位图</sys:String>
+	<sys:String x:Key="String/FileType.Cr2">Canon 原始图像格式第 2 版 (CR2)</sys:String>
 	<sys:String x:Key="String/FileType.Dng">数位负片 (DNG)</sys:String>
 	<sys:String x:Key="String/FileType.Heif">高效率图像文件格式 (HEIF)</sys:String>
 	<sys:String x:Key="String/FileType.Icc">ICC 色彩描述文件</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG 图像</sys:String>
+	<sys:String x:Key="String/FileType.Nef">Nikon 原始图像格式 (NEF)</sys:String>
 	<sys:String x:Key="String/FileType.Png">可携式网路图像 (PNG)</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位 BGRA 像素</sys:String>
 	<sys:String x:Key="String/FileType.WebP">WebP 图像</sys:String>
@@ -122,6 +124,8 @@
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer 排列 (12 位，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer 排列 (16 位)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Cr2">Canon 原始图像格式第 2 版 (CR2)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Nef">Nikon 原始图像格式 (NEF)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P010">P010 (10 位 YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P012">P012 (12 位 YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P016">P016 (16 位 YUV420p)</sys:String>
