@@ -59,7 +59,7 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
 
 
     /// <inheritdoc/>
-    protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
+    protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
     {
         // decode image info
         var position = stream.Position;
@@ -77,6 +77,8 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
             }
             catch
             {
+                if (source is FileImageDataSource fileImageDataSource)
+                    return new MagickImageInfoFactory().Create(fileImageDataSource.FileName);
                 return null;
             }
             finally

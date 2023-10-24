@@ -1,4 +1,3 @@
-using Carina.PixelViewer.Media.FileFormatParsers;
 using ImageMagick;
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +42,7 @@ abstract class TiffBasedMagickCompressedImageRenderer : MagickCompressedImageRen
         var thumbHeight = -1;
         ushort[]? ushortData;
         uint[]? uintData;
-        while (entryReader.Read() && (expectedWidth <= 0 || expectedHeight <= 0))
+        while (entryReader.Read())
         {
             switch (entryReader.CurrentIfdName)
             {
@@ -95,6 +94,10 @@ abstract class TiffBasedMagickCompressedImageRenderer : MagickCompressedImageRen
                                     entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + offset, "Raw");
                             }
                             break;
+                        case 0xc61f: // DefaultCropOrigin
+                            break;
+                        case 0xc620: // DefaultCropSize
+                            break;
                     }
                     break;
                 }
@@ -114,5 +117,5 @@ abstract class TiffBasedMagickCompressedImageRenderer : MagickCompressedImageRen
 
     /// <inheritdoc/>
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
-        TiffBasedFileFormatParser.CheckFileHeader(imageStream);
+        Tiff.CheckFileHeader(imageStream, out _);
 }

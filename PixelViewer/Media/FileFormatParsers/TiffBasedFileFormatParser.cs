@@ -1,7 +1,6 @@
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using CarinaStudio;
-using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,28 +25,10 @@ abstract class TiffBasedFileFormatParser : BaseFileFormatParser
     {
         this.imageRenderer = renderer;
     }
-    
-    
-    /// <summary>
-    /// Check whether header of file represents TIFF or not.
-    /// </summary>
-    /// <param name="stream">Stream to read image data.</param>
-    /// <returns>True if header represents TIFF.</returns>
-    public static unsafe bool CheckFileHeader(Stream stream)
-    {
-        var buffer = stackalloc byte[4];
-        if (stream.Read(new Span<byte>(buffer, 4)) < 4)
-            return false;
-        if (buffer[0] == 'I' && buffer[1] == 'I')
-            return buffer[2] == 0x2a && buffer[3] == 0;
-        if (buffer[0] == 'M' && buffer[1] == 'M')
-            return buffer[2] == 0 && buffer[3] == 0x2a;
-        return false;
-    }
 
 
     /// <inheritdoc/>
-    protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
+    protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
     {
         // get image info
         var streamPosition = stream.Position;

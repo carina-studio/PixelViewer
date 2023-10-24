@@ -48,7 +48,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
 
 
     /// <inheritdoc/>
-    protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
+    protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
     {
         // check file header first to prevent decoding image
         var position = stream.Position;

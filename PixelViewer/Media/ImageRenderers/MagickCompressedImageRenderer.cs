@@ -43,7 +43,16 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
         // decode image info
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
-        var imageInfo = new MagickImageInfoFactory().Create(stream);
+        var imageInfo = default(IMagickImageInfo);
+        try
+        {
+            imageInfo = new MagickImageInfoFactory().Create(stream);
+        }
+        catch
+        {
+            if (source is FileImageDataSource fileImageDataSource)
+                imageInfo = new MagickImageInfoFactory().Create(fileImageDataSource.FileName);
+        }
         if (imageInfo is null)
             throw new ArgumentException("Unable to decode image info.");
         if (!this.magickFormats.Contains(imageInfo.Format))

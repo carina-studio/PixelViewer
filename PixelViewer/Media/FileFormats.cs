@@ -14,6 +14,7 @@ namespace Carina.PixelViewer.Media
     {
         // Fields.
         static volatile IApplication? app;
+        static volatile FileFormat? arw;
         static volatile FileFormat? bmp;
         static volatile FileFormat? cr2;
         static volatile FileFormat? dng;
@@ -27,6 +28,12 @@ namespace Carina.PixelViewer.Media
         static volatile FileFormat? rawBgra;
         static volatile FileFormat? yuv4mpeg2;
         static volatile FileFormat? webP;
+        
+        
+        /// <summary>
+        /// Sony RAW format.
+        /// </summary>
+        public static FileFormat Arw => arw ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
         /// <summary>
@@ -71,6 +78,7 @@ namespace Carina.PixelViewer.Media
                     throw new InvalidOperationException();
                 FileFormats.app = app;
             }
+            arw = Register(new FileFormat(app, "Arw", new[] { ".arw" }));
             bmp = Register(new FileFormat(app, "Bmp", new[] { ".bmp" }));
             cr2 = Register(new FileFormat(app, "Cr2", new[] { ".cr2" }));
             dng = Register(new FileFormat(app, "Dng", new[] { ".dng" }));

@@ -67,7 +67,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
 
 
         /// <inheritdoc/>
-        protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(Stream stream, CancellationToken cancellationToken)
+        protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
         {
             // decode image info
             var position = stream.Position;
