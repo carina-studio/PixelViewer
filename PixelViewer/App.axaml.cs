@@ -1,5 +1,4 @@
 using ASControls = CarinaStudio.AppSuite.Controls;
-using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
@@ -142,11 +141,8 @@ namespace Carina.PixelViewer
 
 		// Application entry point.
 		[STAThread]
-		public static void Main(string[] args)
-		{
-			BuildApplication<App>()
-				.StartWithClassicDesktopLifetime(args);
-		}
+		public static void Main(string[] args) =>
+			BuildApplicationAndStart<App>(args);
 
 
 		// Create main window.
