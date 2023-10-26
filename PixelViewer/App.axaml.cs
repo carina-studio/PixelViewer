@@ -7,6 +7,7 @@ using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
 using CarinaStudio.AppSuite.Controls;
+using CarinaStudio.AppSuite.Product;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Controls;
@@ -137,6 +138,12 @@ namespace Carina.PixelViewer
 
         // Initialize.
         public override void Initialize() => AvaloniaXamlLoader.Load(this);
+        
+        
+        /// <summary>
+        /// Check whether PixelViewer Pro is activated or not.
+        /// </summary>
+        public bool IsProVersionActivated { get; private set; }
 
 
 		// Application entry point.
@@ -359,6 +366,20 @@ namespace Carina.PixelViewer
 				}
 			});
 #endif
+			
+			// attach to product manager
+			this.ProductManager.Let(it =>
+			{
+				if (!it.IsMock)
+				{
+					it.ProductActivationChanged += this.OnProductActivationChanged;
+					if (it.IsProductActivated(Products.Professional))
+					{
+						this.IsProVersionActivated = true;
+						this.OnPropertyChanged(nameof(IsProVersionActivated));
+					}
+				}
+			});
 
 			// initialize file formats
 			Media.FileFormats.Initialize(this);
@@ -388,6 +409,17 @@ namespace Carina.PixelViewer
 			// show main window
 			if (!this.IsRestoringMainWindowsRequested)
 				await this.ShowMainWindowAsync();
+		}
+		
+		
+		// Called when product activated/deactivated.
+		void OnProductActivationChanged(IProductManager productManager, string productId, bool isActivated)
+		{
+			if (productId == Products.Professional && this.IsProVersionActivated != isActivated)
+			{
+				this.IsProVersionActivated = isActivated;
+				this.OnPropertyChanged(nameof(IsProVersionActivated));
+			}
 		}
 
 

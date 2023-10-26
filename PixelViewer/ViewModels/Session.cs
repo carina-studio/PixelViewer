@@ -545,6 +545,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsProcessingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsProcessingImage));
 	/// <summary>
+	/// Property of <see cref="IsProVersionActivated"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsProVersionActivatedProperty = ObservableProperty.Register<Session, bool>(nameof(IsProVersionActivated));
+	/// <summary>
 	/// Property of <see cref="IsRenderingImage"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
@@ -1011,6 +1015,10 @@ class Session : ViewModel<IAppSuiteApplication>
 				|| this.canResetVibranceAdjustment.Value
 				|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 		});
+		
+		// attach to application
+		app.PropertyChanged += this.OnApplicationPropertyChanged;
+		this.SetValue(IsProVersionActivatedProperty, (app as App)?.IsProVersionActivated == true);
 
 		// setup rendered images memory usage
 		this.SetValue(TotalRenderedImagesMemoryUsageProperty, SharedRenderedImagesMemoryUsage.Value);
@@ -2011,6 +2019,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		// close source file
 		if (disposing)
 			this.CloseSourceFile(true);
+		
+		// detach from application
+		this.Application.PropertyChanged -= this.OnApplicationPropertyChanged;
 
 		// detach from profiles
 		((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged -= this.OnUserDefinedProfilesChanged;
@@ -2985,6 +2996,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Check whether PixelViewer Pro is activated or not.
+	/// </summary>
+	public bool IsProVersionActivated => this.GetValue(IsProVersionActivatedProperty);
+
+
+	/// <summary>
 	/// Check whether image is being rendered or not.
 	/// </summary>
 	public bool IsRenderingImage => this.GetValue(IsRenderingImageProperty);
@@ -3102,6 +3119,14 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.colorSpaces.RemoveAll(e.OldItems.AsNonNull().Cast<ColorSpace>());
 				break;
 		}
+	}
+	
+	
+	// Called when property of application changed.
+	void OnApplicationPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		if (e.PropertyName == nameof(App.IsProVersionActivated))
+			this.SetValue(IsProVersionActivatedProperty, (sender as App)?.IsProVersionActivated == true);
 	}
 
 
