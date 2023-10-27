@@ -136,12 +136,12 @@
 
 						<!-- Open file -->
 						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].OpenSourceFileCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.OpenSourceFile}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.OpenFile}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
 						</Button>
 
 						<!-- Save image -->
 						<Button Classes="ToolBar_Button" Command="{Binding $parent[UserControl].SaveImageCommand}" ToolTip.Tip="{DynamicResource String/SessionControl.SaveImage}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.Save}"/>
+							<Image Classes="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
 						</Button>
 
 						<!-- Refresh -->
@@ -358,17 +358,21 @@
 						<!-- Color adjustment -->
 						<ToggleButton Name="colorAdjustmentButton" Classes="ToolBar_ToggleButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" ToolTip.Tip="{DynamicResource String/SessionControl.ColorAdjustment}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Color}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Active}">
-									<Image.IsVisible>
+								<Panel IsVisible="{Binding !#activeColorAdjustmentButtonIcon.IsVisible}">
+									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Outline}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Outline.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								</Panel>
+								<Panel Name="activeColorAdjustmentButtonIcon">
+									<Panel.IsVisible>
 										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
 											<Binding Path="HasColorAdjustment"/>
 											<Binding Path="HasSaturationAdjustment"/>
 											<Binding Path="HasVibranceAdjustment"/>
 										</MultiBinding>
-									</Image.IsVisible>
-								</Image>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+									</Panel.IsVisible>
+									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Active}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								</Panel>
 								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="colorAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
 										<Border.Transitions>
@@ -861,7 +865,7 @@
 										</ComboBox.ItemTemplate>
 									</ComboBox>
 									<Button Classes="BrowseButton" Command="{Binding $parent[UserControl].ShowColorSpaceInfo}" Grid.Column="1" ToolTip.Tip="{DynamicResource String/Common.Details}" VerticalAlignment="Center">
-										<Image Classes="BrowseButtonIcon" Source="{DynamicResource Image/Icon.Information}"/>
+										<Image Classes="BrowseButtonIcon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
 									</Button>
 								</Grid>
 								<Separator Classes="Dialog_Separator" IsVisible="{Binding !ColorSpace.IsLinear}"/>

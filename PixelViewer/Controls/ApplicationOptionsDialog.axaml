@@ -36,16 +36,16 @@
 					<!-- User interface -->
 					<ToggleButton Name="userInterfacePanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptions.UserInterface}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Light}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Outline}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
 					<!-- Image format -->
 					<ToggleButton Name="imageFormatPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptionsDialog.ImageFormat}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Light}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Outline}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
@@ -60,8 +60,8 @@
 					<!-- Colors -->
 					<ToggleButton Name="colorsPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptionsDialog.Colors}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Light}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Outline}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
@@ -76,8 +76,8 @@
 					<!-- Other -->
 					<ToggleButton Name="othersPanelButton" Classes="ToolBar_ToggleButton" ToolTip.Tip="{DynamicResource String/ApplicationOptions.Others}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Light}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Outline}"/>
+							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
