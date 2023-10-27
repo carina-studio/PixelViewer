@@ -114,7 +114,7 @@
 		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Border">1</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">5,0,0,0</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">5,2,5,2</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">4,1,4,1</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
