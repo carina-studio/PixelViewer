@@ -4,6 +4,7 @@ PUB_PLATFORM_LIST=("osx-x64" "osx-arm64")
 CONFIG="Release"
 TRIM_ASSEMBLIES="true"
 READY_TO_RUN="false"
+ICON_VERSION="3"
 CERT_NAME="" # Name of certification to sign the application
 
 echo "********** Start building $APP_NAME **********"
@@ -43,6 +44,7 @@ for i in "${!RID_LIST[@]}"; do
     fi
     
     # build
+    dotnet publish $APP_NAME -c $CONFIG -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=$TRIM_ASSEMBLIES -p:RuntimeIdentifier=$RID -p:PublishReadyToRun=$READY_TO_RUN
     dotnet msbuild $APP_NAME -t:BundleApp -property:Configuration=$CONFIG -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=$TRIM_ASSEMBLIES -p:RuntimeIdentifier=$RID -p:PublishReadyToRun=$READY_TO_RUN
     if [ "$?" != "0" ]; then
         exit
@@ -65,7 +67,7 @@ for i in "${!RID_LIST[@]}"; do
     fi
 
     # copy application icon and remove unnecessary files
-    cp ./$APP_NAME/$APP_NAME.3.icns ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/Resources/$APP_NAME.3.icns
+    cp ./$APP_NAME/$APP_NAME.$ICON_VERSION.icns ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/Resources/$APP_NAME.$ICON_VERSION.icns
     if [ "$?" != "0" ]; then
         exit
     fi
