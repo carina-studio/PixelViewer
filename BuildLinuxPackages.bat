@@ -3,7 +3,7 @@
 set APP_NAME=PixelViewer
 set RID_LIST=linux-arm64 linux-x64
 set CONFIG=Release
-set FRAMEWORK=net7.0
+set FRAMEWORK=net8.0
 set SELF_CONTAINED=true
 set TRIM_ASSEMBLIES=true
 set READY_TO_RUN=false
