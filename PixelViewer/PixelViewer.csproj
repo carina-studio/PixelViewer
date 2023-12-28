@@ -56,12 +56,12 @@
 		<PackageReference Include="CarinaStudio.AppSuite.Fonts" Version="2.3.68.1226-preview" />
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
-		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.4.0" />
+		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.5.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RuntimeIdentifier.Contains('windows'))">
-		<PackageReference Include="System.Drawing.Common" Version="8.0.0-rc.1.23419.5" />
+		<PackageReference Include="System.Drawing.Common" Version="8.0.0" />
 	</ItemGroup>
 
 	<!-- Trimming options -->
