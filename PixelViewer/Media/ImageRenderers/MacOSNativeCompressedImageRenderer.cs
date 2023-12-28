@@ -39,11 +39,11 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
         var destRowStride = bitmapBuffer.RowBytes;
         imagePixels.AsSpan().Pin(srcBaseAddr =>
         {
-            bitmapBuffer.Memory.Pin(destBaseAddr =>
+            bitmapBuffer.Memory.PinAs((byte* destBaseAddr) =>
             {
                 var packFunc = ImageProcessing.SelectBgra32Packing();
-                var srcRowPtr = (byte*)srcBaseAddr;
-                var destRowPtr = (byte*)destBaseAddr;
+                var srcRowPtr = srcBaseAddr;
+                var destRowPtr = destBaseAddr;
                 switch (srcPixelFormat)
                 {
                     case CGImagePixelFormatInfo.Packed:
@@ -207,11 +207,11 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
         var destRowStride = bitmapBuffer.RowBytes;
         imagePixels.AsSpan().Pin(srcBaseAddr =>
         {
-            bitmapBuffer.Memory.Pin(destBaseAddr =>
+            bitmapBuffer.Memory.PinAs((byte* destBaseAddr) =>
             {
                 var packFunc = ImageProcessing.SelectBgra64Packing();
-                var srcRowPtr = (byte*)srcBaseAddr;
-                var destRowPtr = (byte*)destBaseAddr;
+                var srcRowPtr = srcBaseAddr;
+                var destRowPtr = destBaseAddr;
                 switch (srcPixelFormat)
                 {
                     case CGImagePixelFormatInfo.Packed:
