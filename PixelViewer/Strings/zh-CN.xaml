@@ -21,7 +21,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">默认字结顺序</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">默认图像色彩空间</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">默认评估之长宽比例</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若选择&lt;不指定&gt;将尝试使用文件名称评估尺寸</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若选择&lt;不指定&gt;将尝试使用文件名称评估尺寸。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">默认格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">默认 YUV 至 RGB 转换</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">启用色彩管理</sys:String>
@@ -46,7 +46,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">无法从文件载入色彩空间。 </sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">开启文件后重置至默认格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">优先使用系统定义的屏幕色彩空间</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">若无法取得系统定义的屏幕色彩空间，将改为使用「屏幕色彩空间」</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">若无法取得系统定义的屏幕色彩空间，将改为使用「屏幕色彩空间」。</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>

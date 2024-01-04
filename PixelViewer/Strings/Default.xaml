@@ -21,7 +21,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">Default byte ordering</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">Default color space of image</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB conversion</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">Enable color management</sys:String>
@@ -46,7 +46,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">Unable to load color space from file.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">Prefer using system defined screen color space</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">Will fall back to 'Color space of screen' if system defined screen color space is unavailable</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">Will fall back to 'Color space of screen' if system defined screen color space is unavailable.</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Ratio_1x1">1:1</sys:String>
