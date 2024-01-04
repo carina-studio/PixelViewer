@@ -155,8 +155,15 @@
 						<!-- Fit to viewport -->
 						<ToggleButton Classes="ToolBar_ToggleButton" IsChecked="{Binding FitImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" ToolTip.Tip="{DynamicResource String/SessionControl.FitRenderedImageToViewport}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen}" IsVisible="{Binding !#fitToViewportLightIcon.IsVisible}"/>
+								<Image Name="fitToViewportLightIcon" Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}">
+									<Image.IsVisible>
+										<MultiBinding Converter="{x:Static BoolConverters.And}">
+											<Binding Path="IsChecked" RelativeSource="{RelativeSource AncestorType={x:Type ToggleButton}}"/>
+											<Binding Path="IsEnabled" RelativeSource="{RelativeSource AncestorType={x:Type ToggleButton}}"/>
+										</MultiBinding>
+									</Image.IsVisible>
+								</Image>
 							</Panel>
 						</ToggleButton>
 						
