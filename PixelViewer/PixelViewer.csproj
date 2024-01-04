@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<AssemblyVersion>3.0.1.1024</AssemblyVersion>
-		<Version>3.0.1.1024</Version>
+		<AssemblyVersion>3.0.2.104</AssemblyVersion>
+		<Version>3.0.2.104</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
-		<Copyright>©2021-2023 Carina Studio</Copyright>
+		<Copyright>©2021-2024 Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
