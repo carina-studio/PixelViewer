@@ -1714,6 +1714,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update state
 		this.SetValue(SourceFileNameProperty, null);
 		this.SetValue(SourceFileSizeStringProperty, null);
+		
+		// reset scaling
+		this.FitImageToViewport = true;
+		this.RequestedImageDisplayScale = 1.0;
 
 		// update title
 		this.UpdateTitle();
