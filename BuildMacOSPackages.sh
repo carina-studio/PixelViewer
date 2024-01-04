@@ -97,4 +97,4 @@ for i in "${!RID_LIST[@]}"; do
 done
 
 # Generate package manifest
-dotnet run --project PackagingTool create-package-manifest osx $APP_NAME $VERSION
+# dotnet run --project PackagingTool create-package-manifest osx $APP_NAME $VERSION

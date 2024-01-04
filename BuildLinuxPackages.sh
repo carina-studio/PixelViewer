@@ -67,4 +67,4 @@ if [ ! -z "$PREV_VERSION" ]; then
 fi
 
 # Generate package manifest
-dotnet run --project PackagingTool create-package-manifest linux $APP_NAME $VERSION
+# dotnet run --project PackagingTool create-package-manifest linux $APP_NAME $VERSION
