@@ -317,14 +317,18 @@ namespace Carina.PixelViewer
 
 
 		// Prepare shutting down.
-        protected override async Task OnPrepareShuttingDownAsync()
+        protected override async Task OnPrepareShuttingDownAsync(bool isCritical)
         {
 			// wait for I/O completion
-			await Media.ColorSpace.WaitForIOTasksAsync();
-			await Media.Profiles.ImageRenderingProfiles.WaitForIOTasksAsync();
+			var colorSpaceTasks = Media.ColorSpace.WaitForIOTasksAsync();
+			var renderingProfileTasks = Media.Profiles.ImageRenderingProfiles.WaitForIOTasksAsync();
+			if (isCritical)
+				Task.WaitAll(colorSpaceTasks, renderingProfileTasks);
+			else
+				await Task.WhenAll(colorSpaceTasks, renderingProfileTasks);
 
 			// call base
-            await base.OnPrepareShuttingDownAsync();
+            await base.OnPrepareShuttingDownAsync(isCritical);
         }
 
 
