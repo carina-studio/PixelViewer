@@ -2,6 +2,7 @@ using ASControls = CarinaStudio.AppSuite.Controls;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -202,7 +203,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			if (this.evaluateImageDimensionsMenu == null)
 				return;
-			this.evaluateImageDimensionsMenu.PlacementTarget ??= this.evaluateImageDimensionsButton;
+			if (this.evaluateImageDimensionsMenu.PlacementTarget is null)
+			{
+				this.evaluateImageDimensionsMenu.Bind(MinWidthProperty, new Binding { Path = $"{nameof(Bounds)}.{nameof(Size.Width)}", Source = this.evaluateImageDimensionsButton });
+				this.evaluateImageDimensionsMenu.PlacementTarget = this.evaluateImageDimensionsButton;
+			}
 			this.evaluateImageDimensionsMenu.Open(this.evaluateImageDimensionsButton);
 		}, this.canShowEvaluateImageDimensionsMenu);
 

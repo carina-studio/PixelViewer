@@ -27,7 +27,7 @@
 	<UserControl.Resources>
 		
 		<!-- Align to bytes -->
-		<ContextMenu x:Key="alignToIntegerMenu">
+		<ContextMenu x:Key="alignToIntegerMenu" Placement="Bottom">
 			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="4" Tag="4"/>
 			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="8" Tag="8"/>
 			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="16" Tag="16"/>
