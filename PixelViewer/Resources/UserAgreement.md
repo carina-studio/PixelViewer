@@ -1,6 +1,6 @@
  ---
-+ Version: 1.4
-+ Update: 2023/10/1
++ Version: 1.5
++ Update: 2024/1/23
 
 This is the User Agreement of PixelViewer which you need to read before you using PixelViewer. The User Agreement may be updated in the future and you can check it on the website of PixelViewer. It means that you have agreed this User Agreement once you start using PixelViewer.
 
@@ -69,7 +69,7 @@ Except for file access, PixelViewer **WON’T** change the settings of your comp
 
 
 ## License and Copyright
-PixelViewer is an Open Source Project of Carina Studio under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license. All icons except for application icon are distributed under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) or [CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) license. Please refer to [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks) for more information of icons and its license.
+PixelViewer is an Open Source Project of Carina Studio under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license. All icons except for application icon are distributed under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE), [CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) or [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) license. Please refer to [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks) and [Icons8](https://icons8.com/) for more information of icons and its license.
  
 Application icon is made by [Freepik](https://www.freepik.com/) from [Flaticon](https://www.flaticon.com/).
 

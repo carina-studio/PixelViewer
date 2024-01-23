@@ -619,6 +619,6 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version UserAgreementVersion => new(1, 4);
+		public override Version UserAgreementVersion => new(1, 5);
 	}
 }
