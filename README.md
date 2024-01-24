@@ -9,16 +9,16 @@ PixelViewer 是一個由 C# 撰寫並基於 [.NET](https://dotnet.microsoft.com/
 
 ## 📥 Download
 
-### 3.0.2.104 RC
-[![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-win-x64.zip)
-[![](https://img.shields.io/badge/Windows-arm64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-win-arm64.zip)
-[![](https://img.shields.io/badge/Windows-x86-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-win-x86.zip)
+### 3.0.3.123 RC
+[![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-win-x64.zip)
+[![](https://img.shields.io/badge/Windows-arm64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-win-arm64.zip)
+[![](https://img.shields.io/badge/Windows-x86-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-win-x86.zip)
 
-[![](https://img.shields.io/badge/macOS-arm64%20(M1/M2)-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-osx-arm64.zip)
-[![](https://img.shields.io/badge/macOS-x64-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-osx-x64.zip)
+[![](https://img.shields.io/badge/macOS-arm64%20(M1/M2)-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-osx-arm64.zip)
+[![](https://img.shields.io/badge/macOS-x64-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-osx-x64.zip)
 
-[![](https://img.shields.io/badge/Linux-x64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-linux-x64.zip)
-[![](https://img.shields.io/badge/Linux-arm64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.2.104/PixelViewer-3.0.2.104-linux-arm64.zip)
+[![](https://img.shields.io/badge/Linux-x64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-linux-x64.zip)
+[![](https://img.shields.io/badge/Linux-arm64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.3.123/PixelViewer-3.0.3.123-linux-arm64.zip)
 
 ### 2.7.4.312
 [![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x64.zip)
@@ -91,6 +91,7 @@ PixelViewer 是一個由 C# 撰寫並基於 [.NET](https://dotnet.microsoft.com/
   * HEIF
   * JPEG/JFIF
   * PNG
+  * WebP (v3.0+)
   
 ## ⭐ Supported color spaces
 * sRGB
