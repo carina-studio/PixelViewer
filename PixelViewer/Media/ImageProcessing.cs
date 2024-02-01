@@ -551,8 +551,26 @@ namespace Carina.PixelViewer.Media
 		/// <param name="fromInclusive">Inclusive number which loop starts from.</param>
 		/// <param name="toExclusive">Exclusive number which loop ends to.</param>
 		/// <param name="body">Body of loop.</param>
-		public static void ParallelFor(int fromInclusive, int toExclusive, Action<int> body) =>
-			Parallel.For(fromInclusive, toExclusive, new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism }, body);
+		public static void ParallelFor(int fromInclusive, int toExclusive, Action<int> body)
+		{
+			try
+			{
+				Parallel.For(fromInclusive, toExclusive, new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism }, body);
+			}
+			catch (AggregateException ex)
+			{
+				var actualEx = default(Exception);
+				foreach (var innerEx in ex.InnerExceptions)
+				{
+					if (innerEx is TaskCanceledException)
+						throw new TaskCanceledException();
+					actualEx ??= innerEx;
+				}
+				if (actualEx is not null)
+					throw actualEx;
+				throw;
+			}
+		}
 
 
 		// Convert from RGB24 to Luminance based-on ITU-R BT.709.
