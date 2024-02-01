@@ -80,7 +80,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			var renderedImageDataSize = ((long)width * height * format.GetByteSize()); // no need to reserve for Avalonia bitmap
 			var memoryUsageToken = session.RequestRenderedImageMemoryUsage(renderedImageDataSize);
-			if (memoryUsageToken == null)
+			if (memoryUsageToken is null)
 			{
 				session.Logger.LogError("Unable to request memory usage for image frame");
 				throw new OutOfMemoryException();
@@ -144,7 +144,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
             // request memory usage
             var memoryUsageToken = session.RequestRenderedImageMemoryUsage(this.dataSize);
-			if (memoryUsageToken == null)
+			if (memoryUsageToken is null)
 			{
 				this.session.Logger.LogError("Failed to transfer image frame to {session}", session);
 				return null;
@@ -804,6 +804,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	IImageDataSource? imageDataSource;
 	CancellationTokenSource? imageFilteringCancellationTokenSource;
 	CancellationTokenSource? imageRenderingCancellationTokenSource;
+	CancellationTokenSource? imageReportingCancellationTokenSource;
 	DoubleAnimator? imageScalingAnimator;
 	bool isFirstImageRenderingForSource = true;
 	bool isImageDimensionsEvaluationNeeded = true;
@@ -939,7 +940,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			
 			// get original image size
 			var image = this.GetValue(RenderedImageProperty);
-			if (image == null)
+			if (image is null)
 			{
 				this.ResetValue(ImageDisplaySizeProperty);
 				return;
@@ -1192,7 +1193,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				if (ex is OutOfMemoryException)
 				{
-					if (this.filteredImageFrame != null)
+					if (this.filteredImageFrame is not null)
 					{
 						this.Logger.LogWarning("Unable to request memory usage for filtered image, dispose current images");
 						this.SetValue(HistogramsProperty, null);
@@ -1243,7 +1244,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				if (ex is OutOfMemoryException)
 				{
-					if (this.renderedImageFrame != null)
+					if (this.renderedImageFrame is not null)
 					{
 						this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current images");
 						this.SetValue(HistogramsProperty, null);
@@ -1537,11 +1538,21 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// cancel
 		this.filterImageAction.Cancel();
-		if (this.imageFilteringCancellationTokenSource == null)
+		if (this.imageFilteringCancellationTokenSource is null)
 			return false;
 		this.Logger.LogWarning("Cancel filtering image for source '{sourceFileName}'", this.SourceFileName);
 		this.imageFilteringCancellationTokenSource.Cancel();
+		if (this.imageFilteringCancellationTokenSource == this.imageReportingCancellationTokenSource)
+		{
+			this.Logger.LogWarning("Cancel reporting rendered image by cancelling filtering image");
+			this.imageReportingCancellationTokenSource = null;
+		}
 		this.imageFilteringCancellationTokenSource = null;
+		if (this.GetValue(IsConvertingColorSpaceProperty))
+		{
+			this.Logger.LogWarning("Cancel color space conversion for filtering image");
+			this.ResetValue(IsConvertingColorSpaceProperty);
+		}
 
 		// update state
 		if (!this.IsDisposed)
@@ -1552,6 +1563,23 @@ class Session : ViewModel<IAppSuiteApplication>
 		// complete
 		return true;
 	}
+	
+	
+	// Cancel reporting rendered image.
+	bool CancelReportingRenderedImage()
+	{
+		if (this.imageReportingCancellationTokenSource is null)
+			return false;
+		this.Logger.LogWarning("Cancel reporting rendered image for source '{sourceFileName}'", this.SourceFileName);
+		this.imageReportingCancellationTokenSource.Cancel();
+		this.imageReportingCancellationTokenSource = null;
+		if (this.GetValue(IsConvertingColorSpaceProperty))
+		{
+			this.Logger.LogWarning("Cancel color space conversion for reporting rendered image");
+			this.ResetValue(IsConvertingColorSpaceProperty);
+		}
+		return true;
+	}
 
 
 	// Cancel rendering image.
@@ -1559,11 +1587,21 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// cancel
 		this.renderImageAction.Cancel();
-		if (this.imageRenderingCancellationTokenSource == null)
+		if (this.imageRenderingCancellationTokenSource is null)
 			return false;
 		this.Logger.LogWarning("Cancel rendering image for source '{sourceFileName}'", this.SourceFileName);
 		this.imageRenderingCancellationTokenSource.Cancel();
+		if (this.imageRenderingCancellationTokenSource == this.imageReportingCancellationTokenSource)
+		{
+			this.Logger.LogWarning("Cancel reporting rendered image by cancelling rendering image");
+			this.imageReportingCancellationTokenSource = null;
+		}
 		this.imageRenderingCancellationTokenSource = null;
+		if (this.GetValue(IsConvertingColorSpaceProperty))
+		{
+			this.Logger.LogWarning("Cancel color space conversion for rendering image");
+			this.ResetValue(IsConvertingColorSpaceProperty);
+		}
 
 		// update state
 		if (!this.IsDisposed)
@@ -1607,7 +1645,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (effectiveBits > 0)
 		{
 			var imageFormat = this.GetValue(ImageRendererProperty)?.Format;
-			if (imageFormat != null && imageFormat.PlaneDescriptors.Count > index)
+			if (imageFormat is not null && imageFormat.PlaneDescriptors.Count > index)
 			{
 				var planeDescriptor = imageFormat.PlaneDescriptors[index];
 				if (planeDescriptor.AreAdjustableBlackWhiteLevels)
@@ -1668,7 +1706,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.CancelFilteringImage(true);
 
 		// clear images
-		if (!this.IsFilteringRenderedImage && this.filteredImageFrame != null)
+		if (!this.IsFilteringRenderedImage && this.filteredImageFrame is not null)
 		{
 			this.SetValue(HistogramsProperty, null);
 			this.SetValue(QuarterSizeRenderedImageProperty, null);
@@ -1692,7 +1730,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.CancelRenderingImage(true);
 
 		// clear images
-		if (!this.IsRenderingImage && this.renderedImageFrame != null)
+		if (!this.IsRenderingImage && this.renderedImageFrame is not null)
 		{
 			this.SetValue(HistogramsProperty, null);
 			this.SetValue(QuarterSizeRenderedImageProperty, null);
@@ -1783,9 +1821,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		// cancel rendering image
 		this.CancelFilteringImage(true);
 		this.CancelRenderingImage(true);
+		this.CancelReportingRenderedImage();
 
 		// remove profile generated for file format
-		if (this.fileFormatProfile != null)
+		if (this.fileFormatProfile is not null)
 		{
 			if (!disposing)
 			{
@@ -1801,7 +1840,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var imageDataSource = this.imageDataSource;
 		var sourceFileName = this.SourceFileName;
 		this.imageDataSource = null;
-		if (imageDataSource != null)
+		if (imageDataSource is not null)
 		{
 			_ = Task.Run(() =>
 			{
@@ -1831,9 +1870,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Compare profiles.
 	static int CompareProfiles(ImageRenderingProfile? x, ImageRenderingProfile? y)
 	{
-		if (x == null)
-			return y == null ? 0 : -1;
-		if (y == null)
+		if (x is null)
+			return y is null ? 0 : -1;
+		if (y is null)
 			return 1;
 		var result = x.Type.CompareTo(y.Type);
 		if (result != 0)
@@ -1846,7 +1885,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Complete current smooth zooming.
 	void CompleteZooming(bool resetIsZooming)
 	{
-		if (this.imageScalingAnimator == null)
+		if (this.imageScalingAnimator is null)
 			return;
 		this.imageScalingAnimator.Cancel();
 		this.imageScalingAnimator = null;
@@ -1870,12 +1909,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// check state
 		if (this.GetValue(IsConvertingColorSpaceProperty))
+		{
+			this.Logger.LogError("Previous color space conversion is not completed yet");
 			return null;
-		
+		}
+
 		// update state
 		this.SetValue(IsConvertingColorSpaceProperty, true);
 		
 		// allocate frame
+		var isReusingImageFrame = false;
 		var colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame;
 		if (colorSpaceConvertedImageFrame is not null
 		    && colorSpaceConvertedImageFrame.BitmapBuffer.Width == src.BitmapBuffer.Width
@@ -1884,6 +1927,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.Application.IsDebugMode)
 				this.Logger.LogDebug("Reuse color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+			isReusingImageFrame = true;
 		}
 		else
 		{
@@ -1892,13 +1936,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			colorSpaceConvertedImageFrame = await this.AllocateRenderedImageFrame(src.FrameNumber, src.BitmapBuffer.Format, destColorSpace, src.BitmapBuffer.Width, src.BitmapBuffer.Height);
 			if (colorSpaceConvertedImageFrame is null)
 			{
-				this.ResetValue(IsConvertingColorSpaceProperty);
 				if (cancellationToken.IsCancellationRequested)
 				{
 					this.Logger.LogWarning("Color space conversion has been cancelled");
 					throw new TaskCanceledException();
 				}
 				this.Logger.LogError("Unable to allocate image frame for color space conversion");
+				this.ResetValue(IsConvertingColorSpaceProperty);
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 				return null;
 			}
@@ -1906,32 +1950,52 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (cancellationToken.IsCancellationRequested)
 		{
 			this.Logger.LogWarning("Color space conversion has been cancelled");
-			this.ResetValue(IsConvertingColorSpaceProperty);
-			colorSpaceConvertedImageFrame.Dispose();
+			if (!isReusingImageFrame)
+				colorSpaceConvertedImageFrame.Dispose();
 			throw new TaskCanceledException();
 		}
 		
 		// convert color space
 		this.Logger.LogTrace("Convert color space from {s} to {d}", srcColorSpace, destColorSpace);
-		await src.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.UseLinearColorSpace, false, cancellationToken);
-		colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
-		if (cancellationToken.IsCancellationRequested)
+		try
+		{
+			await src.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.UseLinearColorSpace, false, cancellationToken);
+		}
+		catch (TaskCanceledException)
 		{
 			this.Logger.LogWarning("Color space conversion has been cancelled");
-			this.ResetValue(IsConvertingColorSpaceProperty);
-			colorSpaceConvertedImageFrame.Dispose();
-			throw new TaskCanceledException();
+			throw;
 		}
+		catch 
+		{
+			if (!isReusingImageFrame)
+				colorSpaceConvertedImageFrame.Dispose();
+			if (!cancellationToken.IsCancellationRequested)
+				this.ResetValue(IsConvertingColorSpaceProperty);
+			throw;
+		}
+		colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
 		
 		// generate histogram
-		colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, cancellationToken);
-		this.ResetValue(IsConvertingColorSpaceProperty);
-		if (cancellationToken.IsCancellationRequested)
+		try
+		{
+			colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, cancellationToken);
+		}
+		catch (TaskCanceledException)
 		{
 			this.Logger.LogWarning("Color space conversion has been cancelled");
-			colorSpaceConvertedImageFrame.Dispose();
-			throw new TaskCanceledException();
+			throw;
 		}
+		catch 
+		{
+			if (!isReusingImageFrame)
+				colorSpaceConvertedImageFrame.Dispose();
+			if (!cancellationToken.IsCancellationRequested)
+				this.ResetValue(IsConvertingColorSpaceProperty);
+			throw;
+		}
+		this.Logger.LogTrace("Color space converted");
+		this.ResetValue(IsConvertingColorSpaceProperty);
 		return colorSpaceConvertedImageFrame;
 	}
 
@@ -2082,7 +2146,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	void EvaluateImageDimensions(AspectRatio aspectRatio)
 	{
 		// check state
-		if (this.imageDataSource == null)
+		if (this.imageDataSource is null)
 			return;
 
 		// evaluate
@@ -2196,7 +2260,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.Logger.LogWarning("Allocate filtered image frame 1, size: {width}x{height}", width, height);
 			filteredImageFrame1 = await this.AllocateFilteredImageFrame(renderedImageFrame);
 		}
-		if (filteredImageFrame1 == null)
+		if (filteredImageFrame1 is null)
 		{
 			if (!cancellationTokenSource.IsCancellationRequested)
 			{
@@ -2236,7 +2300,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					this.Logger.LogWarning("Allocate filtered image frame 2, size: {width}x{height}", width, height);
 				filteredImageFrame2 = await this.AllocateFilteredImageFrame(renderedImageFrame);
 			}
-			if (filteredImageFrame2 == null)
+			if (filteredImageFrame2 is null)
 			{
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
@@ -2287,7 +2351,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					ColorLut.Multiply(gLut, gFactor);
 					ColorLut.Multiply(bLut, bFactor);
 				}
-				if (stopwatch != null)
+				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to prepare color LUT", stopwatch.ElapsedMilliseconds);
 			}
 			catch (Exception ex)
@@ -2309,7 +2373,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			stopwatch?.Restart();
 			if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 			{
-				if (stopwatch != null)
+				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to apply color LUT filter", stopwatch.ElapsedMilliseconds);
 				if (sourceImageFrame == renderedImageFrame)
 				{
@@ -2337,7 +2401,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			stopwatch?.Restart();
 			if (await this.ApplyImageFilterAsync(new SaturationImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 			{
-				if (stopwatch != null)
+				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to apply saturation filter", stopwatch.ElapsedMilliseconds);
 				if (sourceImageFrame == renderedImageFrame)
 				{
@@ -2368,7 +2432,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					await ColorLut.HighlightTransformAsync(lut, this.HighlightAdjustment, cancellationTokenSource.Token);
 				if (this.canResetShadowAdjustment.Value)
 					await ColorLut.ShadowTransformAsync(lut, this.ShadowAdjustment, cancellationTokenSource.Token);
-				if (stopwatch != null)
+				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to prepare luminance LUT", stopwatch.ElapsedMilliseconds);
 			}
 			catch (Exception ex)
@@ -2390,7 +2454,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			stopwatch?.Restart();
 			if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 			{
-				if (stopwatch != null)
+				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to apply luminance LUT filter", stopwatch.ElapsedMilliseconds);
 				if (sourceImageFrame == renderedImageFrame)
 				{
@@ -2411,7 +2475,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			stopwatch?.Restart();
 			if (await this.ApplyImageFilterAsync(new LuminanceImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), cancellationTokenSource.Token))
 			{
-				if (stopwatch != null)
+				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to apply grayscale filter", stopwatch.ElapsedMilliseconds);
 				if (sourceImageFrame == renderedImageFrame)
 				{
@@ -2430,7 +2494,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (failedToApply)
 		{
 			this.cachedFilteredImageFrames.Add(filteredImageFrame1);
-			if (filteredImageFrame2 != null)
+			if (filteredImageFrame2 is not null)
 				this.cachedFilteredImageFrames.Add(filteredImageFrame2);
 			if (!cancellationTokenSource.IsCancellationRequested)
 			{
@@ -2466,7 +2530,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (cancellationTokenSource.IsCancellationRequested)
 		{
 			this.cachedFilteredImageFrames.Add(filteredImageFrame1);
-			if (filteredImageFrame2 != null)
+			if (filteredImageFrame2 is not null)
 				this.cachedFilteredImageFrames.Add(filteredImageFrame2);
 			if (this.hasPendingImageFiltering)
 			{
@@ -2484,12 +2548,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// complete
 		this.imageFilteringCancellationTokenSource = null;
-		if (this.filteredImageFrame != null)
+		if (this.filteredImageFrame is not null)
 			this.cachedFilteredImageFrames.Add(this.filteredImageFrame);
 		if (sourceImageFrame == filteredImageFrame1)
 		{
 			this.filteredImageFrame = filteredImageFrame1;
-			if (filteredImageFrame2 != null)
+			if (filteredImageFrame2 is not null)
 				this.cachedFilteredImageFrames.Add(filteredImageFrame2);
 		}
 		else
@@ -2507,6 +2571,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (ex is TaskCanceledException)
 				return;
 		}
+		this.imageFilteringCancellationTokenSource = null;
 		this.SetValue(IsFilteringRenderedImageProperty, false);
 	}
 
@@ -2715,6 +2780,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsHibernatedProperty, true);
 
 		// clear images
+		this.CancelReportingRenderedImage();
 		this.ClearRenderedImage();
 
 		// complete
@@ -2737,7 +2803,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				sessionToClearRenderedImage = candidateSession;
 			}
 		}
-		if (sessionToClearRenderedImage != null)
+		if (sessionToClearRenderedImage is not null)
 		{
 			this.Logger.LogWarning("Hibernate {sessionToClearRenderedImage}", sessionToClearRenderedImage);
 			if (sessionToClearRenderedImage.Hibernate())
@@ -3286,7 +3352,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
 		else if (property == HistogramsProperty)
-			this.SetValue(HasHistogramsProperty, newValue != null);
+			this.SetValue(HasHistogramsProperty, newValue is not null);
 		else if (property == ImageRendererProperty)
 		{
 			if (ImageRenderers.All.Contains(newValue))
@@ -3429,24 +3495,24 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		else if (property == QuarterSizeRenderedImageProperty)
 		{
-			if (newValue == null)
+			if (newValue is null)
 			{
 				this.cachedAvaQuarterSizeRenderedImage = null;
 				this.avaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			}
-			this.SetValue(HasQuarterSizeRenderedImageProperty, newValue != null);
+			this.SetValue(HasQuarterSizeRenderedImageProperty, newValue is not null);
 		}
 		else if (property == RenderedImageProperty)
 		{
-			if (newValue == null)
+			if (newValue is null)
 			{
 				this.cachedAvaRenderedImage = null;
 				this.avaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			}
-			this.SetValue(HasRenderedImageProperty, newValue != null);
-			if (oldValue == null || newValue == null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
+			this.SetValue(HasRenderedImageProperty, newValue is not null);
+			if (oldValue is null || newValue is null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
 				this.fitRenderedImageToViewportScale = double.NaN;
 			this.updateImageDisplaySizeAction.Execute();
 		}
@@ -3458,7 +3524,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				var scale = (double)newValue.AsNonNull();
 				this.UpdateCanZoomInOut();
-				if (this.imageScalingAnimator == null 
+				if (this.imageScalingAnimator is null 
 					|| Math.Abs(this.imageScalingAnimator.EndValue - scale) > 0.0001)
 				{
 					this.ZoomTo(scale, false);
@@ -3525,7 +3591,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	void OnScreenColorSpaceChanged()
 	{
 		var prevScreenColorSpace = this.colorSpaces.FirstOrDefault(it => it.IsSystemDefined);
-		if (prevScreenColorSpace != null)
+		if (prevScreenColorSpace is not null)
 		{
 			if (this.GetValue(ColorSpaceProperty) == prevScreenColorSpace)
 			{
@@ -3614,7 +3680,7 @@ class Session : ViewModel<IAppSuiteApplication>
     async Task OpenSourceFile(string? fileName)
 	{
 		// check state
-		if (fileName == null)
+		if (fileName is null)
 			return;
 		if (!this.canOpenSourceFile.Value)
 		{
@@ -3657,11 +3723,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (this.IsDisposed)
 		{
 			this.Logger.LogWarning("Source for '{fileName}' created after disposing", fileName);
-			if (imageDataSource != null)
+			if (imageDataSource is not null)
 				_ = Task.Run(imageDataSource.Dispose);
 			return;
 		}
-		if (imageDataSource == null)
+		if (imageDataSource is null)
 		{
 			// reset state
 			this.SetValue(SourceFileNameProperty, null);
@@ -3682,7 +3748,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		try
 		{
 			this.fileFormatProfile = await Media.FileFormatParsers.FileFormatParsers.ParseImageRenderingProfileAsync(imageDataSource, new CancellationToken());
-			if (this.fileFormatProfile != null)
+			if (this.fileFormatProfile is not null)
 				this.profiles.Add(this.fileFormatProfile);
 		}
 		// ReSharper disable EmptyGeneralCatchClause
@@ -3692,10 +3758,10 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// select image renderer by file name
 		var evaluatedImageRenderer = (IImageRenderer?)null;
-		if (this.fileFormatProfile == null 
+		if (this.fileFormatProfile is null 
 			&& this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageRendererByFileName)
 			&& ImageFormat.TryGetByFileName(fileName, out var imageFormat)
-			&& imageFormat != null)
+			&& imageFormat is not null)
 		{
 			foreach (var candidateRenderer in ImageRenderers.All)
 			{
@@ -3719,9 +3785,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.UpdateCanSaveDeleteProfile();
 
 		// use profile of file format or reset to default renderer
-		if (this.fileFormatProfile != null)
+		if (this.fileFormatProfile is not null)
 			this.Profile = this.fileFormatProfile;
-		else if (evaluatedImageRenderer != null)
+		else if (evaluatedImageRenderer is not null)
 		{
 			this.SetValue(ImageRendererProperty, evaluatedImageRenderer);
 			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
@@ -3840,13 +3906,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	bool ReleaseCachedImages()
 	{
 		var released = false;
-		if (this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken != null)
+		if (this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken is not null)
 		{
 			released = true;
 			this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			this.cachedAvaQuarterSizeRenderedImage = null;
 		}
-		if (this.cachedAvaRenderedImageMemoryUsageToken != null)
+		if (this.cachedAvaRenderedImageMemoryUsageToken is not null)
 		{
 			released = true;
 			this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
@@ -3901,7 +3967,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// get state
 		var imageDataSource = this.imageDataSource;
-		if (imageDataSource == null)
+		if (imageDataSource is null)
 			return;
 		var imageRenderer = this.ImageRenderer;
 		var sourceFileName = this.SourceFileName;
@@ -4092,7 +4158,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (it.RenderingOptions != renderingOptions)
 				return true;
 			var planeOptions = it.PlaneOptions;
-			if (planeOptions == null || planeOptions.Count != planeOptionsList.Count)
+			if (planeOptions is null || planeOptions.Count != planeOptionsList.Count)
 				return true;
 			for (var i = planeOptionsList.Count - 1; i >= 0; --i)
             {
@@ -4268,7 +4334,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(SourceDataSizeProperty, frameDataSize);
 			this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
 			this.canMoveToPreviousFrame.Update(frameNumber > 1);
-			this.canSelectColorAdjustment.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.Histograms != null);
+			this.canSelectColorAdjustment.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.Histograms is not null);
 			this.canSelectRgbGain.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.RenderingResult.Let(it =>
 				it.HasMeanOfRgb || it.HasWeightedMeanOfRgb) ?? false);
 
@@ -4364,6 +4430,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Report rendered image according to current state.
 	async Task ReportRenderedImageAsync(CancellationTokenSource cancellationTokenSource)
 	{
+		// cancel current reporting
+		if (this.Application.IsDebugMode)
+			this.Logger.LogTrace("Start reporting rendered image");
+		this.CancelReportingRenderedImage();
+		this.imageReportingCancellationTokenSource = cancellationTokenSource;
+		
 		// get image frame to be used
 		var imageFrame = Global.Run(() =>
 		{
@@ -4383,6 +4455,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				try
 				{
+					if (this.Application.IsDebugMode)
+						this.Logger.LogTrace("Convert color space before reporting rendered image");
 					colorSpaceConvertedImageFrame = await this.ConvertColorSpaceAsync(imageFrame, this.ColorSpace, screenColorSpace, cancellationTokenSource.Token);
 					if (colorSpaceConvertedImageFrame is null)
 						this.Logger.LogError("Failed to convert color space before reporting rendered image");
@@ -4396,7 +4470,10 @@ class Session : ViewModel<IAppSuiteApplication>
 				catch (Exception ex)
 				{
 					if (ex is TaskCanceledException)
+					{
+						this.Logger.LogWarning("Color space conversion has been cancelled before reporting rendered image");
 						return;
+					}
 					this.Logger.LogError(ex, "Error occurred while converting color space before reporting rendered image");
 				}
 			}
@@ -4416,7 +4493,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					BitmapFormat.Bgra64 => PixelFormats.Rgba64,
 					_ => throw new NotSupportedException(),
 				};
-			if (this.cachedAvaRenderedImage != null)
+			if (this.cachedAvaRenderedImage is not null)
 			{
 				if (this.cachedAvaRenderedImage.PixelSize.Width != width
 				    || this.cachedAvaRenderedImage.PixelSize.Height != height
@@ -4431,7 +4508,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 			// request memory usage
 			IDisposable? memoryUsageToken;
-			if (this.cachedAvaRenderedImage != null)
+			if (this.cachedAvaRenderedImage is not null)
 			{
 				if (this.Application.IsDebugMode)
 					this.Logger.LogTrace("Use cached Avalonia bitmap, size: {w}x{h}", this.cachedAvaRenderedImage.PixelSize.Width, this.cachedAvaRenderedImage.PixelSize.Height);
@@ -4442,9 +4519,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				var dataSize = (width * height * (avaloniaPixelFormat.BitsPerPixel >> 3));
 				memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
-				while (memoryUsageToken == null)
+				while (memoryUsageToken is null)
 				{
-					if (this.RenderedImage != null)
+					if (this.RenderedImage is not null)
 					{
 						this.SetValue(QuarterSizeRenderedImageProperty, null);
 						this.SetValue(RenderedImageProperty, null);
@@ -4457,7 +4534,8 @@ class Session : ViewModel<IAppSuiteApplication>
 					else
 					{
 						this.Logger.LogError("Unable to request memory usage for Avalonia Bitmap");
-						colorSpaceConvertedImageFrame?.Dispose();
+						if (colorSpaceConvertedImageFrame != this.colorSpaceConvertedImageFrame)
+							colorSpaceConvertedImageFrame?.Dispose();
 						this.ResetValue(HasRenderingErrorProperty);
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 						this.SetValue(HistogramsProperty, null);
@@ -4475,7 +4553,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			try
 			{
 				// create full-size Avalonia bitmap
-				if (this.cachedAvaRenderedImage != null)
+				if (this.cachedAvaRenderedImage is not null)
 				{
 					bitmap = this.cachedAvaRenderedImage;
 					this.cachedAvaRenderedImage = null;
@@ -4497,7 +4575,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				    && halfHeight > 0)
 				{
 					// released cached image if it is not suitable
-					if (this.cachedAvaQuarterSizeRenderedImage != null)
+					if (this.cachedAvaQuarterSizeRenderedImage is not null)
 					{
 						if (this.cachedAvaQuarterSizeRenderedImage.PixelSize.Width != halfWidth
 							|| this.cachedAvaQuarterSizeRenderedImage.PixelSize.Height != halfHeight
@@ -4511,7 +4589,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					}
 
 					// request memory usage
-					if (this.cachedAvaQuarterSizeRenderedImage != null)
+					if (this.cachedAvaQuarterSizeRenderedImage is not null)
                     {
 						quarterSizeMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
 						this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = null;
@@ -4520,9 +4598,9 @@ class Session : ViewModel<IAppSuiteApplication>
 						quarterSizeMemoryUsageToken = this.RequestRenderedImageMemoryUsage(halfWidth * halfHeight * (avaloniaPixelFormat.BitsPerPixel >> 3));
 
 					// create bitmap
-					if (quarterSizeMemoryUsageToken != null)
+					if (quarterSizeMemoryUsageToken is not null)
 					{
-						if (this.cachedAvaQuarterSizeRenderedImage != null)
+						if (this.cachedAvaQuarterSizeRenderedImage is not null)
 						{
 							quarterSizeBitmap = this.cachedAvaQuarterSizeRenderedImage;
 							this.cachedAvaQuarterSizeRenderedImage = null;
@@ -4543,9 +4621,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				this.cachedAvaQuarterSizeRenderedImage = null;
 				this.cachedAvaRenderedImage = null;
-				colorSpaceConvertedImageFrame?.Dispose();
+				if (colorSpaceConvertedImageFrame != this.colorSpaceConvertedImageFrame)
+					colorSpaceConvertedImageFrame?.Dispose();
 				quarterSizeMemoryUsageToken?.Dispose();
-				if (bitmap == null)
+				if (bitmap is null)
 					memoryUsageToken.Dispose();
 				if (ex is TaskCanceledException)
 				{
@@ -4572,7 +4651,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken;
 			this.avaQuarterSizeRenderedImageMemoryUsageToken = quarterSizeMemoryUsageToken;
 			this.avaRenderedImageMemoryUsageToken = memoryUsageToken;
-			this.canSaveFilteredImage.Update(!this.IsSavingFilteredImage && this.filteredImageFrame != null);
+			this.canSaveFilteredImage.Update(!this.IsSavingFilteredImage && this.filteredImageFrame is not null);
 			this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
 			this.ResetValue(HasRenderingErrorProperty);
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
@@ -4588,7 +4667,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(QuarterSizeRenderedImageProperty, null);
 			this.SetValue(RenderedImageProperty, null);
 		}
+		this.imageReportingCancellationTokenSource = null;
 		this.releasedCachedImagesAction.Reschedule(ReleaseCachedImagesDelay);
+		if (this.Application.IsDebugMode)
+			this.Logger.LogTrace("Rendered image reported");
 	}
 
 
@@ -4946,7 +5028,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(CustomTitleProperty, jsonProperty.GetString());
 
 		// open source file
-		if (fileName != null)
+		if (fileName is not null)
 		{
 			await this.OpenSourceFile(fileName);
 			if (!this.IsSourceFileOpened)
@@ -4954,11 +5036,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 
 		// apply profile
-		if (profile != null)
+		if (profile is not null)
 			this.SetValue(ProfileProperty, profile);
 
 		// apply rendering parameters
-		if (renderer != null)
+		if (renderer is not null)
 			this.SetValue(ImageRendererProperty, renderer);
 		this.SetValue(DataOffsetProperty, dataOffset);
 		this.SetValue(FramePaddingSizeProperty, framePaddingSize);
@@ -5175,7 +5257,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// save image
 		var encoder = parameters.Encoder;
-		if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
+		if (encoder is null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
 		if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
@@ -5260,7 +5342,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// save image
 		var encoder = parameters.Encoder;
-		if (encoder == null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
+		if (encoder is null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
 		if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
@@ -5390,7 +5472,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
 
 		// other state
-		if (this.CustomTitle != null)
+		if (this.CustomTitle is not null)
 			writer.WriteString(nameof(CustomTitle), this.CustomTitle ?? "");
 		
 		// complete
@@ -5431,7 +5513,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return this.renderedImageFrame;
 		});
 		var histograms = imageFrame?.Histograms;
-		if (histograms == null)
+		if (histograms is null)
 			return;
 		
 		// calculate ratio of RGB
