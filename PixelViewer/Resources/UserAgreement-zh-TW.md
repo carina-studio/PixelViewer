@@ -1,7 +1,7 @@
 # PixelViewer 使用者協議
  ---
-+ 版本：1.5
-+ 更新時間：2024/1/23
++ 版本：1.6
++ 更新時間：2024/2/1
 
 這是 PixelViewer 的使用者協議，您應該要在使用 PixelViewer 之前詳細閱讀本協議。 使用者協議可能會在未來有所更新，您可以在 PixelViewer 網站中查看。 當您開始使用 PixelViewer 表示您同意本使用者協議。
 
@@ -72,7 +72,7 @@ PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有�
 
 
 ## 授權及著作權
-PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授權之下的開放原始碼專案。除了應用程式圖示外，所有圖示皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE)、[CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 或  [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) 授權下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks) 及 [Icons8](https://icons8.com/) 了解更多圖示相關資訊與授權。
+PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授權之下的開放原始碼專案。除了應用程式圖示外，所有圖示皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE)、[CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 或 [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) 授權下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks)、[SVG Repo](https://www.svgrepo.com/) 及 [Icons8](https://icons8.com/) 了解更多圖示相關資訊與授權。
  
 應用程式圖示由 [Freepik](https://www.freepik.com/) 提供並發布於 [Flaticon](https://www.flaticon.com/)。
 
