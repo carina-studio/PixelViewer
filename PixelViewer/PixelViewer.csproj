@@ -17,7 +17,7 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>2.3.80.123-preview</AppSuiteVersion>
+		<AppSuiteVersion>2.3.83.131-rc</AppSuiteVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">

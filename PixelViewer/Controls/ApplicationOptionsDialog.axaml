@@ -450,7 +450,7 @@
 								<!-- Custom color spaces -->
 								<asControls:DialogItemGrid>
 									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.CustomColorSpaces}"/>
-									<TextBlock Classes="Dialog_TextBlock" Grid.Column="1" IsVisible="{Binding !#customColorSpaceListBox.IsVisible}" Text="{DynamicResource String/Common.None}"/>
+									<TextBlock Classes="Dialog_TextBlock" Grid.Column="1" HorizontalAlignment="Right" IsVisible="{Binding !#customColorSpaceListBox.IsVisible}" Text="{DynamicResource String/Common.None}"/>
 								</asControls:DialogItemGrid>
 								<Line Classes="Dialog_Item_Separator_Inner"/>
 								<asControls:ListBox Name="customColorSpaceListBox" Classes="Dialog_Item_ListBox" IsVisible="{Binding $self.ItemCount}" ItemsSource="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
