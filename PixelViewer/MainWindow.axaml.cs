@@ -236,6 +236,21 @@ namespace Carina.PixelViewer
 			(tabItem.Content as Control)?.Let((it) => it.DataContext = null);
 			tabItem.DataContext = null;
 		}
+		
+		
+		// Dispose native menu item properly.
+		void DisposeNativeMenuItem(NativeMenuItem menuItem)
+		{
+			menuItem.Menu?.Let(menu =>
+			{
+				foreach (var item in menu.Items)
+				{
+					if (item is NativeMenuItem menuItem)
+						this.DisposeNativeMenuItem(menuItem);
+				}
+				menu.Items.Clear();
+			});
+		}
 
 
 		// Find index of main tab item attached to given session.
@@ -345,7 +360,29 @@ namespace Carina.PixelViewer
 		}
 
 
-        // Detach from view-model.
+		/// <inheritdoc/>
+		protected override void OnClosed(EventArgs e)
+		{
+			// [Workaround] Remove bindings to window to prevent window leakage
+			if (Platform.IsMacOS) 
+			{
+				NativeMenu.GetMenu(this)?.Let(menu =>
+				{
+					foreach (var item in menu.Items)
+					{
+						if (item is NativeMenuItem menuItem)
+							this.DisposeNativeMenuItem(menuItem);
+					}
+					menu.Items.Clear();
+				});
+			}
+			
+			// call base
+			base.OnClosed(e);
+		}
+
+
+		// Detach from view-model.
         protected override void OnDetachFromViewModel(Workspace workspace)
         {
 			// detach from activated session
