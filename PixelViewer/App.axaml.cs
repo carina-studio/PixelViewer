@@ -567,7 +567,7 @@ namespace Carina.PixelViewer
 
 
 		// Releasing type.
-		public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.ReleaseCandidate;
+		public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Development;
 
 
 		// Version of settings.
