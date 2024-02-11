@@ -36,12 +36,12 @@
 						<StackPanel>
 							
 							<!-- Reference color space -->
-							<asControls:DialogItemGrid>
+							<asControls:DialogItem>
 								<StackPanel Classes="Dialog_Item_Text_Container">
 									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace}"/>
 									<TextBlock Classes="Dialog_TextBlock_Description" Text="{DynamicResource String/ColorSpaceInfoDialog.ReferenceColorSpace.Description}"/>
 								</StackPanel>
-								<ComboBox Classes="Dialog_Item_ComboBox" Grid.Column="1" ItemsSource="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
+								<ComboBox Classes="Dialog_Item_ComboBox" ItemsSource="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
 									<ComboBox.ItemTemplate>
 										<DataTemplate>
 											<Grid ColumnDefinitions="*,Auto">
@@ -56,18 +56,18 @@
 										</DataTemplate>
 									</ComboBox.ItemTemplate>
 								</ComboBox>
-							</asControls:DialogItemGrid>
+							</asControls:DialogItem>
 							<Separator Classes="Dialog_Item_Separator"/>
 
 							<!-- Diagrams -->
-							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<asControls:DialogItem>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.Diagram}"/>
-								<ComboBox Name="diagramTypeComboBox" Classes="Dialog_Item_ComboBox" Grid.Column="1" SelectedIndex="0">
+								<ComboBox Name="diagramTypeComboBox" Classes="Dialog_Item_ComboBox" SelectedIndex="0">
 									<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ChromaticityDiagram}"/>
 									<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram}"/>
 									<ComboBoxItem Content="{DynamicResource String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram}"/>
 								</ComboBox>
-							</asControls:DialogItemGrid>
+							</asControls:DialogItem>
 							<Separator Classes="Dialog_Separator_Small"/>
 
 							<!-- Diagrams -->
@@ -117,10 +117,10 @@
 
 					<!-- Name -->
 					<Border Classes="Dialog_ItemsGroup_Container">
-						<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+						<asControls:DialogItem>
 							<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.Name}"/>
-							<TextBox Name="nameTextBox" Classes="Dialog_Item_TextBox" Grid.Column="1" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
-						</asControls:DialogItemGrid>
+							<TextBox Name="nameTextBox" Classes="Dialog_Item_TextBox" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
+						</asControls:DialogItem>
 					</Border>
 					<Separator Classes="Dialog_Separator_Large"/>
 
@@ -131,25 +131,25 @@
 					<Border Classes="Dialog_ItemsGroup_Container">
 						<StackPanel>
 							
-							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<asControls:DialogItem>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.RedPrimary}"/>
-								<TextBox Name="redPrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
-							</asControls:DialogItemGrid>
+								<TextBox Name="redPrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" IsReadOnly="True"/>
+							</asControls:DialogItem>
 							<Separator Classes="Dialog_Item_Separator"/>
-							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<asControls:DialogItem>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.GreenPrimary}"/>
-								<TextBox Name="greenPrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
-							</asControls:DialogItemGrid>
+								<TextBox Name="greenPrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" IsReadOnly="True"/>
+							</asControls:DialogItem>
 							<Separator Classes="Dialog_Item_Separator"/>
-							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<asControls:DialogItem>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.BluePrimary}"/>
-								<TextBox Name="bluePrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
-							</asControls:DialogItemGrid>
+								<TextBox Name="bluePrimaryTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" IsReadOnly="True"/>
+							</asControls:DialogItem>
 							<Separator Classes="Dialog_Item_Separator"/>
-							<asControls:DialogItemGrid ColumnDefinitions="Auto,*">
+							<asControls:DialogItem>
 								<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ColorSpaceInfoDialog.WhitePoint}"/>
-								<TextBox Name="whitePointTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" Grid.Column="1" IsReadOnly="True"/>
-							</asControls:DialogItemGrid>
+								<TextBox Name="whitePointTextBox" Classes="Dialog_Item_TextBox" FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}" IsReadOnly="True"/>
+							</asControls:DialogItem>
 							<Line Classes="Dialog_Item_Separator_Inner" IsVisible="{Binding #whitePointDescriptionTextBlock.IsVisible}"/>
 							<SelectableTextBlock Name="whitePointDescriptionTextBlock" Classes="Dialog_TextBlock_Description"/>
 							
@@ -164,9 +164,9 @@
 					<Border Classes="Dialog_ItemsGroup_Container">
 						<StackPanel>
 							
-							<asControls:CompactDialogItemBorder>
+							<asControls:DialogItem ItemSize="Small">
 								<SelectableTextBlock Name="linearizationDescriptionTextBlock" Classes="Dialog_TextBlock" TextWrapping="Wrap"/>
-							</asControls:CompactDialogItemBorder>
+							</asControls:DialogItem>
 							<Line Classes="Dialog_Item_Separator_Inner" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
 							<abControls:LinkTextBlock Classes="Dialog_LinkTextBlock" HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Text="{DynamicResource String/Common.KnowMoreAbout}" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
 							
