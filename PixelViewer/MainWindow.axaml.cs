@@ -487,14 +487,12 @@ namespace Carina.PixelViewer
 			ItemInsertionIndicator.SetInsertingItemBefore(tabItem, false);
 			
 			// drop files
-			Session? session;
 			if (e.Data.HasFileNames())
 			{
 				// find tab
 				if (e.ItemIndex >= this.mainTabItems.Count - 1)
 				{
-					session = (this.DataContext as Workspace)?.CreateAndAttachSession();
-					if (session is null)
+					if ((this.DataContext as Workspace)?.CreateAndAttachSession() is null)
 						return;
 				}
 
@@ -510,8 +508,7 @@ namespace Carina.PixelViewer
 			}
 
 			// drop session
-			session = e.Data.Get(DraggingSessionKey) as Session;
-			if (session is not null)
+			if (e.Data.Get(DraggingSessionKey) is Session session)
 			{
 				// find source position
 				var srcWorkspace = (Workspace)session.Owner.AsNonNull();
@@ -540,6 +537,9 @@ namespace Carina.PixelViewer
 					// attach to target workspace
 					targetWorkspace.AttachSession(targetIndex, session);
 					targetWorkspace.ActivatedSession = session;
+					
+					// activate
+					this.ActivateAndBringToFront();
 				}
 
 				// [Workaround] Sometimes the content of tab item will gone after moving tab item
@@ -695,57 +695,67 @@ namespace Carina.PixelViewer
 			switch (e.Action)
 			{
 				case NotifyCollectionChangedAction.Add:
+				{
+					var tabIndex = e.NewStartingIndex;
+					foreach (Session? session in e.NewItems.AsNonNull())
 					{
-						var tabIndex = e.NewStartingIndex;
-						foreach (Session? session in e.NewItems.AsNonNull())
-						{
-							if (session is null)
-								continue;
-							var tabItem = this.AttachTabItemToSession(session);
-							this.mainTabItems.Insert(tabIndex, tabItem);
-							this.mainTabControl.SelectedIndex = tabIndex++;
-						}
+						if (session is null)
+							continue;
+						var tabItem = this.AttachTabItemToSession(session);
+						this.mainTabItems.Insert(tabIndex, tabItem);
+						this.mainTabControl.SelectedIndex = tabIndex++;
 					}
 					break;
+				}
 				case NotifyCollectionChangedAction.Move:
+				{
+					var selectedIndex = this.mainTabControl.SelectedIndex;
+					if (selectedIndex == e.OldStartingIndex)
+						this.StopRendering();
 					this.mainTabItems.Move(e.OldStartingIndex, e.NewStartingIndex);
-					break;
-				case NotifyCollectionChangedAction.Remove:
+					if (selectedIndex == e.OldStartingIndex)
 					{
-						foreach (Session? session in e.OldItems.AsNonNull())
-						{
-							if (session is null)
-								continue;
-							var tabIndex = this.FindMainTabItemIndex(session);
-							if (tabIndex < 0)
-								continue;
-							if (this.mainTabControl.SelectedIndex == tabIndex)
-							{
-								if (tabIndex > 0)
-									this.mainTabControl.SelectedIndex = (tabIndex - 1);
-								else if (tabIndex < this.mainTabItems.Count - 2)
-									this.mainTabControl.SelectedIndex = (tabIndex + 1);
-								else
-									this.mainTabControl.SelectedIndex = -1;
-							}
-							DetachTabItemFromSession(this.mainTabItems[tabIndex]);
-							this.mainTabItems.RemoveAt(tabIndex);
-						}
-						(this.DataContext as Workspace)?.Let((it) =>
-						{
-							if (it.Sessions.IsEmpty() && !this.IsClosed)
-							{
-								if (this.HasMultipleMainWindows)
-								{
-									this.Logger.LogWarning("Close window because all sessions were closed");
-									this.Close();
-								}
-								else
-									it.CreateAndAttachSession();
-							}
-						});
+						this.mainTabControl.SelectedIndex = e.NewStartingIndex;
+						this.StartRendering();
 					}
 					break;
+				}
+				case NotifyCollectionChangedAction.Remove:
+				{
+					foreach (Session? session in e.OldItems.AsNonNull())
+					{
+						if (session is null)
+							continue;
+						var tabIndex = this.FindMainTabItemIndex(session);
+						if (tabIndex < 0)
+							continue;
+						if (this.mainTabControl.SelectedIndex == tabIndex)
+						{
+							if (tabIndex > 0)
+								this.mainTabControl.SelectedIndex = (tabIndex - 1);
+							else if (tabIndex < this.mainTabItems.Count - 2)
+								this.mainTabControl.SelectedIndex = (tabIndex + 1);
+							else
+								this.mainTabControl.SelectedIndex = -1;
+						}
+						DetachTabItemFromSession(this.mainTabItems[tabIndex]);
+						this.mainTabItems.RemoveAt(tabIndex);
+					}
+					(this.DataContext as Workspace)?.Let((it) =>
+					{
+						if (it.Sessions.IsEmpty() && !this.IsClosed)
+						{
+							if (this.HasMultipleMainWindows)
+							{
+								this.Logger.LogWarning("Close window because all sessions were closed");
+								this.Close();
+							}
+							else
+								it.CreateAndAttachSession();
+						}
+					});
+					break;
+				} 
 			}
 			this.SetValue(HasMultipleSessionsProperty, (this.DataContext as Workspace)?.Sessions.Count > 1);
 		}
