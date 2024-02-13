@@ -628,9 +628,23 @@ namespace Carina.PixelViewer
 			{
 				switch (e.Key)
 				{
+					case Key.Left:
+						if (this.mainTabControl.SelectedIndex > 0)
+							--this.mainTabControl.SelectedIndex;
+						else if (this.mainTabItems.Count > 1)
+							this.mainTabControl.SelectedIndex = this.mainTabItems.Count - 2;
+						e.Handled = true;
+						break;
 					case Key.N:
 						if (Platform.IsNotMacOS) // Will be triggered through NativeMenu on macOS
 							this.CreateMainWindow();
+						e.Handled = true;
+						break;
+					case Key.Right:
+						if (this.mainTabControl.SelectedIndex < this.mainTabItems.Count - 2)
+							++this.mainTabControl.SelectedIndex;
+						else if (this.mainTabItems.Count > 1)
+							this.mainTabControl.SelectedIndex = 0;
 						e.Handled = true;
 						break;
 					case Key.T:
