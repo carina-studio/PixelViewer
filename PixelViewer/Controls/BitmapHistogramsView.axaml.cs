@@ -52,6 +52,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     /// Property of <see cref="RedHistogramBrush"/>.
     /// </summary>
     public static readonly StyledProperty<IBrush?> RedHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(RedHistogramBrush));
+    
+    
+    // Constants.
+    const double DefaultMeanOfBlueOffset = -999;
 
 
     // Static fields.
@@ -61,10 +65,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     static readonly StyledProperty<double> GreenHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(GreenHistogramScaleY), 0);
     static readonly StyledProperty<IImage?> LuminanceHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(LuminanceHistogramImage));
     static readonly StyledProperty<double> LuminanceHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(LuminanceHistogramScaleY), 0);
-    static readonly StyledProperty<double> MeanOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfBlueOffset), double.NaN);
-    static readonly StyledProperty<double> MeanOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfGreenOffset), double.NaN);
-    static readonly StyledProperty<double> MeanOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfLuminanceOffset), double.NaN);
-    static readonly StyledProperty<double> MeanOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfRedOffset), double.NaN);
+    static readonly StyledProperty<double> MeanOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfBlueOffset), DefaultMeanOfBlueOffset);
+    static readonly StyledProperty<double> MeanOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfGreenOffset), DefaultMeanOfBlueOffset);
+    static readonly StyledProperty<double> MeanOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfLuminanceOffset), DefaultMeanOfBlueOffset);
+    static readonly StyledProperty<double> MeanOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfRedOffset), DefaultMeanOfBlueOffset);
     static readonly StyledProperty<IImage?> RedHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(RedHistogramImage));
     static readonly StyledProperty<double> RedHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RedHistogramScaleY), 0);
 
@@ -135,10 +139,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
             }
             else
             {
-                this.SetValue(MeanOfBlueOffsetProperty, double.NaN);
-                this.SetValue(MeanOfGreenOffsetProperty, double.NaN);
-                this.SetValue(MeanOfLuminanceOffsetProperty, double.NaN);
-                this.SetValue(MeanOfRedOffsetProperty, double.NaN);
+                this.SetValue(MeanOfBlueOffsetProperty, DefaultMeanOfBlueOffset);
+                this.SetValue(MeanOfGreenOffsetProperty, DefaultMeanOfBlueOffset);
+                this.SetValue(MeanOfLuminanceOffsetProperty, DefaultMeanOfBlueOffset);
+                this.SetValue(MeanOfRedOffsetProperty, DefaultMeanOfBlueOffset);
             }
         });
     }

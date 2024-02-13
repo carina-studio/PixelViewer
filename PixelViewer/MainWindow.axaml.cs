@@ -67,9 +67,9 @@ namespace Carina.PixelViewer
 				NativeMenu.SetMenu(this, (NativeMenu)this.Resources["nativeMenu"].AsNonNull());
 
 			// setup controls
-			var baseBorder = this.Get<Border>("baseBorder").Also(it => 
+			var baseBorder = this.Get<Border>("baseBorder").Also(it =>
 			{
-				it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ =>
+				it.LayoutUpdated += (_, _) =>
 				{
 					if (this.isPerformingContentRelayout)
 					{
@@ -77,12 +77,12 @@ namespace Carina.PixelViewer
 						this.isPerformingContentRelayout = false;
 						it.Padding = new Thickness();
 					}
-				}));
+				};
 			});
 			this.notificationPresenter = this.Get<NotificationPresenter>(nameof(notificationPresenter));
 
 			// setup main tab control
-			this.mainTabControl = this.Get<AsTabControl>("tabControl").Also((it) =>
+			this.mainTabControl = this.Get<AsTabControl>("tabControl").Also(it =>
 			{
 				it.SelectionChanged += (_, _) => this.OnMainTabControlSelectionChanged();
 			});
@@ -91,18 +91,18 @@ namespace Carina.PixelViewer
 			this.mainTabControl.ItemsSource = this.mainTabItems;
 
 			// create scheduled actions
-			this.relayoutContentAction = new ScheduledAction(() =>
+			this.relayoutContentAction = new(() =>
 			{
 				// [Workaround] Trigger layout to make sure that content will be placed correctly after changing size of window by code
 				this.isPerformingContentRelayout = true;
 				baseBorder.Padding = new Thickness(0, 0, 0, -1);
 			});
-			this.updateTitleBarAction = new ScheduledAction(() =>
+			this.updateTitleBarAction = new(() =>
 			{
 				if (this.IsClosed)
 					return;
 				var session = this.attachedActivatedSession;
-				if (session == null)
+				if (session is null)
 					this.TaskbarIconProgressState = TaskbarIconProgressState.None;
 				else if (session.InsufficientMemoryForRenderedImage
 					|| session.HasRenderingError)
@@ -137,7 +137,7 @@ namespace Carina.PixelViewer
 		TabItem AttachTabItemToSession(Session session)
 		{
 			// create session control
-			var sessionControl = new SessionControl()
+			var sessionControl = new SessionControl
 			{
 				DataContext = session,
 			};
@@ -148,7 +148,7 @@ namespace Carina.PixelViewer
 				header?.Let(it => it.ContextMenu = null);
 
 			// create tab item
-			var tabItem = new TabItem()
+			var tabItem = new TabItem
 			{
 				Content = sessionControl,
 				DataContext = session,
@@ -222,7 +222,7 @@ namespace Carina.PixelViewer
 		// Detach from activated session.
 		void DetachFromActivatedSession()
         {
-			if (this.attachedActivatedSession == null)
+			if (this.attachedActivatedSession is null)
 				return;
 			this.attachedActivatedSession.PropertyChanged -= this.OnActivatedSessionPropertyChanged;
 			this.updateTitleBarAction.Schedule();
@@ -299,7 +299,7 @@ namespace Carina.PixelViewer
 			newWorkspace.ActivatedSession = session;
 
 			// close empty session
-			if (emptySession != null)
+			if (emptySession is not null)
 				newWorkspace.DetachAndCloseSession(emptySession);
 		}
 
@@ -346,7 +346,7 @@ namespace Carina.PixelViewer
 			// select tab item according to activated session
 			if (workspace.Sessions.IsNotEmpty())
 			{
-				var tabIndex = workspace.ActivatedSession != null ? this.FindMainTabItemIndex(workspace.ActivatedSession) : -1;
+				var tabIndex = workspace.ActivatedSession is not null ? this.FindMainTabItemIndex(workspace.ActivatedSession) : -1;
 				if (tabIndex > 0)
 					this.mainTabControl.SelectedIndex = tabIndex;
 				else
@@ -494,7 +494,7 @@ namespace Carina.PixelViewer
 				if (e.ItemIndex >= this.mainTabItems.Count - 1)
 				{
 					session = (this.DataContext as Workspace)?.CreateAndAttachSession();
-					if (session == null)
+					if (session is null)
 						return;
 				}
 
@@ -511,7 +511,7 @@ namespace Carina.PixelViewer
 
 			// drop session
 			session = e.Data.Get(DraggingSessionKey) as Session;
-			if (session != null)
+			if (session is not null)
 			{
 				// find source position
 				var srcWorkspace = (Workspace)session.Owner.AsNonNull();
@@ -575,10 +575,11 @@ namespace Carina.PixelViewer
 			else
 			{
 				// update activated session
-				var selectedSession = (this.mainTabControl.SelectedItem as Control)?.DataContext as Session;
-				(this.DataContext as Workspace)?.Let((workspace) =>
+				var sessionControl = this.mainTabControl.SelectedItem as Control;
+				var session = sessionControl?.DataContext as Session;
+				(this.DataContext as Workspace)?.Let(workspace =>
 				{
-					workspace.ActivatedSession = selectedSession;
+					workspace.ActivatedSession = session;
 				});
 
 				// focus on content later to make sure that view has been attached to visual tree
@@ -684,7 +685,7 @@ namespace Carina.PixelViewer
 						var tabIndex = e.NewStartingIndex;
 						foreach (Session? session in e.NewItems.AsNonNull())
 						{
-							if (session == null)
+							if (session is null)
 								continue;
 							var tabItem = this.AttachTabItemToSession(session);
 							this.mainTabItems.Insert(tabIndex, tabItem);
@@ -699,7 +700,7 @@ namespace Carina.PixelViewer
 					{
 						foreach (Session? session in e.OldItems.AsNonNull())
 						{
-							if (session == null)
+							if (session is null)
 								continue;
 							var tabIndex = this.FindMainTabItemIndex(session);
 							if (tabIndex < 0)
@@ -765,15 +766,15 @@ namespace Carina.PixelViewer
 			if (e.PropertyName == nameof(Workspace.ActivatedSession))
 			{
 				var activatedSession = workspace.ActivatedSession;
-				var tabIndex = activatedSession != null ? this.FindMainTabItemIndex(activatedSession) : -1;
+				var tabIndex = activatedSession is not null ? this.FindMainTabItemIndex(activatedSession) : -1;
 				if (tabIndex < 0)
 				{
-					if (activatedSession != null)
+					if (activatedSession is not null)
 						this.mainTabControl.SelectedIndex = 0;
 				}
 				else if (this.mainTabControl.SelectedIndex != tabIndex)
 					this.mainTabControl.SelectedIndex = tabIndex;
-				if (activatedSession != null)
+				if (activatedSession is not null)
 					this.AttachToActivatedSession(activatedSession);
 				else
 					this.DetachFromActivatedSession();
