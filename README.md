@@ -9,27 +9,16 @@ PixelViewer 是一個由 C# 撰寫並基於 [.NET](https://dotnet.microsoft.com/
 
 ## 📥 Download
 
-### 3.0.4.208 RC
-[![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-win-x64.zip)
-[![](https://img.shields.io/badge/Windows-arm64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-win-arm64.zip)
-[![](https://img.shields.io/badge/Windows-x86-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-win-x86.zip)
+### 3.0.5.214
+[![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-win-x64.zip)
+[![](https://img.shields.io/badge/Windows-arm64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-win-arm64.zip)
+[![](https://img.shields.io/badge/Windows-x86-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-win-x86.zip)
 
-[![](https://img.shields.io/badge/macOS-arm64%20(M1/M2)-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-osx-arm64.zip)
-[![](https://img.shields.io/badge/macOS-x64-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-osx-x64.zip)
+[![](https://img.shields.io/badge/macOS-arm64%20(M1/M2/M3)-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-osx-arm64.zip)
+[![](https://img.shields.io/badge/macOS-x64-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-osx-x64.zip)
 
-[![](https://img.shields.io/badge/Linux-x64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-linux-x64.zip)
-[![](https://img.shields.io/badge/Linux-arm64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.4.208/PixelViewer-3.0.4.208-linux-arm64.zip)
-
-### 2.7.4.312
-[![](https://img.shields.io/badge/Windows-x64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x64.zip)
-[![](https://img.shields.io/badge/Windows-arm64-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-arm64.zip)
-[![](https://img.shields.io/badge/Windows-x86-blue?style=flat-square&logo=windows&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-win-x86.zip)
-
-[![](https://img.shields.io/badge/macOS-arm64%20(M1/M2)-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-osx-arm64.zip)
-[![](https://img.shields.io/badge/macOS-x64-blueviolet?style=flat-square&logo=apple&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-osx-x64.zip)
-
-[![](https://img.shields.io/badge/Linux-x64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-linux-x64.zip)
-[![](https://img.shields.io/badge/Linux-arm64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/2.7.4.312/PixelViewer-2.7.4.312-linux-arm64.zip)
+[![](https://img.shields.io/badge/Linux-x64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-linux-x64.zip)
+[![](https://img.shields.io/badge/Linux-arm64-orange?style=flat-square&logo=linux&logoColor=fff)](https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-linux-arm64.zip)
 
 ## ⭐ Supported formats
 * Luminance
