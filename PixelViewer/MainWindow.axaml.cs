@@ -23,6 +23,7 @@ using System.Linq;
 using System.Windows.Input;
 
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
+using TabItem = CarinaStudio.AppSuite.Controls.TabItem;
 
 namespace Carina.PixelViewer
 {

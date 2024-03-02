@@ -14,7 +14,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Windows.Input;
-using TextBlock = Avalonia.Controls.TextBlock;
 
 namespace Carina.PixelViewer.Controls;
 
@@ -241,19 +240,18 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
         this.Application.StringsUpdated += this.OnAppStringsUpdated;
 
         // scroll to focused section
-        var header = this.InitialFocusedSection switch
+        var initialItem = this.InitialFocusedSection switch
         {
-            ApplicationOptionsDialogSection.ColorSpaceManagement => this.Get<Control>("enableColorSpaceManagementLabel"),
-            ApplicationOptionsDialogSection.MaxRenderedImagesMemoryUsage => this.Get<Control>("maxRenderedImagesMemoryUsageLabel"),
+            ApplicationOptionsDialogSection.ColorSpaceManagement => this.Get<Control>("enableColorSpaceManagementItem"),
+            ApplicationOptionsDialogSection.MaxRenderedImagesMemoryUsage => this.Get<Control>("maxRenderedImagesMemoryUsageItem"),
             _ => null,
         };
-        if (header is not null)
+        if (initialItem is not null)
         {
             this.SynchronizationContext.Post(() =>
             {
-                this.contentScrollViewer.ScrollIntoView(header, true);
-                if (header is TextBlock textBlock)
-                    this.AnimateTextBlock(textBlock);
+                this.contentScrollViewer.ScrollIntoView(initialItem, true);
+                this.AnimateItem(initialItem);
             });
         }
     }

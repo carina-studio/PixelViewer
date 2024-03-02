@@ -152,13 +152,6 @@
 								</asControls:DialogItem>
 								<Separator Classes="Dialog_Item_Separator"/>
 
-								<!-- Enable blurry background -->
-								<asControls:DialogItem>
-									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.EnableBlurryBackground}"/>
-									<ToggleSwitch Classes="Dialog_Item_ToggleSwitch" IsChecked="{Binding EnableBlurryBackground, Mode=TwoWay}"/>
-								</asControls:DialogItem>
-								<Separator Classes="Dialog_Item_Separator"/>
-
 								<!-- Culture -->
 								<asControls:DialogItem>
 									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptions.Culture}"/>
@@ -363,10 +356,10 @@
 								<Separator Classes="Dialog_Item_Separator"/>
 
 								<!-- Enable color space management -->
-								<asControls:DialogItem>
+								<asControls:DialogItem Name="enableColorSpaceManagementItem">
 									<StackPanel Classes="Dialog_Item_Text_Container">
 										<WrapPanel>
-											<TextBlock Name="enableColorSpaceManagementLabel" Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
+											<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.EnableColorSpaceManagement}"/>
 											<Button Classes="Dialog_Info_Button" Command="{x:Static cs:PlatformCommands.OpenLinkCommand}" CommandParameter="https://en.wikipedia.org/wiki/Color_management" ToolTip.Tip="{DynamicResource String/Common.Help}">
 												<Image Classes="Icon" Source="{DynamicResource Image/Icon.Question.Outline}"/>
 											</Button>
@@ -572,8 +565,8 @@
 								<Separator Classes="Dialog_Item_Separator"/>
 
 								<!-- Max rendered images memory usage -->
-								<asControls:DialogItem>
-									<TextBlock Name="maxRenderedImagesMemoryUsageLabel" Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
+								<asControls:DialogItem Name="maxRenderedImagesMemoryUsageItem">
+									<TextBlock Classes="Dialog_TextBlock_Label" Text="{DynamicResource String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage}"/>
 									<abControls:IntegerTextBox Name="maxRenderedImageMemoryUsageTextBox" Classes="Dialog_Item_TextBox" IsNullValueAllowed="False" Minimum="128" Value="{Binding MaxRenderedImagesMemoryUsageMB, Mode=TwoWay}"/>
 								</asControls:DialogItem>
 
