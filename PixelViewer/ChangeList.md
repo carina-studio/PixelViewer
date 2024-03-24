@@ -1,4 +1,4 @@
-﻿# What's Change in PixelViewer 3.1
+﻿# What's Change in PixelViewer 4.0
  ---
 
 ## New Features
