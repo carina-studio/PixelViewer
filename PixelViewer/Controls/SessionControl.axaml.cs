@@ -678,7 +678,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 #pragma warning restore IDE0060
 	{
 		// get file names
-		var fileNames = data.GetFiles()?.Let(it =>
+		var fileNames = Global.RunOrDefault(() => data.GetFiles()?.Let(it =>
 		{
 			var fileNames = new List<string>();
 			foreach (var file in it)
@@ -688,7 +688,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					fileNames.Add(fileName);
 			}
 			return fileNames;
-		});
+		}));
 		if (fileNames.IsNullOrEmpty())
 			return false;
 
