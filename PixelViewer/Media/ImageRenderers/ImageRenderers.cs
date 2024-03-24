@@ -67,6 +67,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new BayerPattern8ImageRenderer(),
 				new BayerPattern10MipiImageRenderer(),
 				new BayerPattern12MipiImageRenderer(),
+				new BayerPattern14MipiImageRenderer(),
 				new BayerPattern16ImageRenderer(),
 			});
 			it.Add(Platform.IsMacOS 
