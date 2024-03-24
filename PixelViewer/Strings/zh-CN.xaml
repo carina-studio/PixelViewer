@@ -123,6 +123,7 @@
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer 排列 (8 位)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer 排列 (12 位，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_14_MIPI">Bayer 排列 (14 位，MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer 排列 (16 位)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Cr2">Canon 原始图像格式第 2 版 (CR2)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Nef">Nikon 原始图像格式 (NEF)</sys:String>

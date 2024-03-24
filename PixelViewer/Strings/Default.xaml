@@ -147,6 +147,7 @@
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer Pattern (8-bit)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer Pattern (10-bit, MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_12_MIPI">Bayer Pattern (12-bit, MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_14_MIPI">Bayer Pattern (14-bit, MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_16">Bayer Pattern (16-bit)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Cr2">Canon RAW Format v2 (CR2)</sys:String>
 	<sys:String x:Key="String/ImageFormat.I420">I420 (YUV420)</sys:String>

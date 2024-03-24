@@ -2,7 +2,7 @@
  ---
 
 ## New Features
-+ 
++ Add **Bayer Pattern (14-bit, MIPI)** format.
 
 ## Improvement
 + 
