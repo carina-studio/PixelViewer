@@ -66,8 +66,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				? Global.Run(() =>
 				{
 					return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
-						? new Func<byte, byte, ushort>((b1, b2) => (ushort)(((b1 << 2) | (b2 & 0x3)) << 6))
-						: ((b1, b2) => (ushort)((b1 | ((b2 & 0x3) << 8)) << 6));
+						? new Func<byte, byte, ushort>((msb, lsb) => (ushort)((msb << 8) | ((lsb & 0x3) << 6) | ((msb >> 2) & 0x3f)))
+						: (lsb, msb) =>
+						{
+							msb &= 0x3;
+							return (ushort)((msb << 14) | (lsb << 6) | (msb << 4) | (msb << 2) | msb);
+						};
 				})
 				: Global.Run(() =>
 				{
@@ -80,14 +84,14 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 							it[i] = 1023;
 					});
 					return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
-						? new Func<byte, byte, ushort>((b1, b2) => 
+						? new Func<byte, byte, ushort>((msb, lsb) => 
 						{
-							var color = correctedColors[(b1 << 2) | (b2 & 0x3)];
+							var color = correctedColors[(msb << 2) | (lsb & 0x3)];
 							return (ushort)(color << 6);
 						})
-						: (b1, b2) => 
+						: (lsb, msb) => 
 						{
-							var color = correctedColors[b1 | ((b2 & 0x3) << 8)];
+							var color = correctedColors[msb | ((lsb & 0x3) << 8)];
 							return (ushort)(color << 6);
 						};
 				});
@@ -132,7 +136,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								// 1st pixel
 								var bytes4 = packedPixelsPtr[4];
 								var colorComponent = colorComponentSelector(x, y);
-								var color = bitsCombinationFunc(packedPixelsPtr[0], bytes4);
+								var color = bitsCombinationFunc(packedPixelsPtr[0], (byte)(bytes4 >> 6));
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -149,11 +153,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
 								++x;
-								bytes4 >>= 2;
 
 								// 2nd pixel
 								colorComponent = colorComponentSelector(x, y);
-								color = bitsCombinationFunc(packedPixelsPtr[1], bytes4);
+								color = bitsCombinationFunc(packedPixelsPtr[1], (byte)(bytes4 >> 4));
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -170,11 +173,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
 								++x;
-								bytes4 >>= 2;
 
 								// 3rd pixel
 								colorComponent = colorComponentSelector(x, y);
-								color = bitsCombinationFunc(packedPixelsPtr[2], bytes4);
+								color = bitsCombinationFunc(packedPixelsPtr[2], (byte)(bytes4 >> 2));
 								accuColor[colorComponent] += color;
 								++accuPixelCount[colorComponent];
 								if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -191,7 +193,6 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 								bitmapPixelPtr[3] = 65535;
 								bitmapPixelPtr += 4;
 								++x;
-								bytes4 >>= 2;
 
 								// 4th pixel
 								colorComponent = colorComponentSelector(x, y);
