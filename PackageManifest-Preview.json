@@ -1,84 +1,49 @@
 {
   "Name": "PixelViewer",
-  "Version": "3.0.5.214",
-  "PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/3.0.5.214",
+  "Version": "3.1.0.326",
+  "PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/3.1.0.326",
   "Packages": [
     {
       "Architecture": "Arm64",
-      "BaseVersion": "3.0.4.208",
       "OperatingSystem": "Linux",
-      "SHA256": "4E135E5E397373FE7B465E43C797834E4B093300508E8E8E61EE9739671165A8",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.4.208-3.0.5.214-linux-arm64.zip"
-    },
-    {
-      "Architecture": "X64",
-      "BaseVersion": "3.0.4.208",
-      "OperatingSystem": "Linux",
-      "SHA256": "39E3F8B7A2C2B19E468700C3F642985075DC7A9A3649E973DEBEAA32BEFF8018",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.4.208-3.0.5.214-linux-x64.zip"
-    },
-    {
-      "Architecture": "Arm64",
-      "BaseVersion": "3.0.4.208",
-      "OperatingSystem": "Windows",
-      "SHA256": "C4E6F84FC47FC21BD81CD9281B65E82C6EDA08B61E257D88FC615DE8AADCBBFA",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.4.208-3.0.5.214-win-arm64.zip"
-    },
-    {
-      "Architecture": "X64",
-      "BaseVersion": "3.0.4.208",
-      "OperatingSystem": "Windows",
-      "SHA256": "27D3793EF95E0200FBEFB322281E186F7E617AB7133990A93208E74F99C17D4B",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.4.208-3.0.5.214-win-x64.zip"
-    },
-    {
-      "Architecture": "X86",
-      "BaseVersion": "3.0.4.208",
-      "OperatingSystem": "Windows",
-      "SHA256": "0F68A209EF7D634C03A3B623A7A21474940A1A425C74C0E6592E8930AE94F012",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.4.208-3.0.5.214-win-x86.zip"
-    },
-    {
-      "Architecture": "Arm64",
-      "OperatingSystem": "Linux",
-      "SHA256": "300682E7D37195868F2A2F8D5CC6A1F5FD44799103A68D5D8430C6868F65F806",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-linux-arm64.zip"
+      "SHA256": "E8E2B31306901962A98DAC0DBE6C839DA81CA378059353B37E19747616D68863",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-linux-arm64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "Linux",
-      "SHA256": "D44CE2A2AF25B5CBB3686FE4F852EECF4527638629B711AE35C8E52C67AA88DE",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-linux-x64.zip"
+      "SHA256": "0DEDCBEA5F37A7E39A4DE43A737D150563A987A255632A08FD403ADA7372433C",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-linux-x64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "OSX",
-      "SHA256": "B08678217EABC6DBF5CFA0AED9AE688D40375D4CEB5D8A5C6AF383B90B7FB62E",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-osx-arm64.zip"
+      "SHA256": "31E83A6FE53D11B6C5CA99EDA967D65EC653285BFC3233DF35D17E5722AC7E7E",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-osx-arm64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "Windows",
-      "SHA256": "24218C9BCD2E19AF3E4A5A574E1C958819F65ED73C90832A3CD1F313A9709DB7",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-win-arm64.zip"
+      "SHA256": "E1A692AA0C0E6357739013B63683FC32E587251FE203A3C813E08C65D869A2A4",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-win-arm64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "OSX",
-      "SHA256": "EA9AEC10C76672ED258D9BCFBF966EFB1D1872D1C25D878FC1DF5FCE81295EE9",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-osx-x64.zip"
+      "SHA256": "F8872BDD78F94B64BEE94EE0784D2CB2DE3B6FAE13A805F0BCECB5EBD90B1BB1",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-osx-x64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "Windows",
-      "SHA256": "A8C7C4B2E071DB7BA3BB1171F99BD683C39265C3ADEE392F17AAC2ECA11E1505",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-win-x64.zip"
+      "SHA256": "63A0EE6786060BFD7CB1BD229F35E2D45C25B26376515C6FF79179F492A78BBD",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-win-x64.zip"
     },
     {
       "Architecture": "X86",
       "OperatingSystem": "Windows",
-      "SHA256": "0F1689FB873F01CB6C7E7C813532CD379E99EC06FA250449DF42F0FD174C7E4A",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.0.5.214/PixelViewer-3.0.5.214-win-x86.zip"
+      "SHA256": "27FE696D052CC68450C7ACBCF3EABC591D8064D8C264139D45D7FE3493DAEAA9",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/3.1.0.326/PixelViewer-3.1.0.326-win-x86.zip"
     }
   ]
 }
