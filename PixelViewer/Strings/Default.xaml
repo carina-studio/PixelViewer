@@ -168,6 +168,8 @@
 	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10-bit YUV420sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16-bit YUV420sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YUVY">YUVY (YUV422)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUYV">YUYV (YUV422)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YVYU">YVYU (YUV422)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YV12">YV12 (YUV420)</sys:String>
 	<sys:String x:Key="String/ImageFormat.WebP">WebP</sys:String>
 
