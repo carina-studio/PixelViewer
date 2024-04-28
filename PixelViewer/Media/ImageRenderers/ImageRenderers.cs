@@ -31,6 +31,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new P216ImageRenderer(),
 				new UyvyImageRenderer(),
 				new YuvyImageRenderer(),
+				new YuyvImageRenderer(),
+				new YvyuImageRenderer(),
 				new Yuv444pImageRenderer(),
 				new P410ImageRenderer(),
 				new P412ImageRenderer(),
