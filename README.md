@@ -46,6 +46,8 @@ PixelViewer 是一個由 C# 撰寫並基於 [.NET](https://dotnet.microsoft.com/
   * P216
   * UYVY
   * YUVY
+  * YUYV (v3.1+)
+  * YVYU (v3.1+)
   * NV12
   * NV21
   * Y010
