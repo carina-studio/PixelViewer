@@ -21,7 +21,7 @@ echo "Version: $VERSION"
 # Create output directory
 if [[ ! -d "./Packages/$VERSION" ]]; then
     echo "Create directory 'Packages/$VERSION'"
-    mkdir ./Packages/$VERSION
+    mkdir -p ./Packages/$VERSION
     if [ "$?" != "0" ]; then
         exit
     fi
