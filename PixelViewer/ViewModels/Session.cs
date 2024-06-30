@@ -4517,7 +4517,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			else
 			{
-				var dataSize = (width * height * (avaloniaPixelFormat.BitsPerPixel >> 3));
+				var dataSize = width * height * (avaloniaPixelFormat.BitsPerPixel >> 3);
 				memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
 				while (memoryUsageToken is null)
 				{
@@ -4536,6 +4536,8 @@ class Session : ViewModel<IAppSuiteApplication>
 						this.Logger.LogError("Unable to request memory usage for Avalonia Bitmap");
 						if (colorSpaceConvertedImageFrame != this.colorSpaceConvertedImageFrame)
 							colorSpaceConvertedImageFrame?.Dispose();
+						this.canSelectColorAdjustment.Update(false);
+						this.canSelectRgbGain.Update(false);
 						this.ResetValue(HasRenderingErrorProperty);
 						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 						this.SetValue(HistogramsProperty, null);
@@ -4653,6 +4655,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.avaRenderedImageMemoryUsageToken = memoryUsageToken;
 			this.canSaveFilteredImage.Update(!this.IsSavingFilteredImage && this.filteredImageFrame is not null);
 			this.canSaveRenderedImage.Update(!this.IsSavingRenderedImage);
+			this.canSelectColorAdjustment.Update(imageFrame.Histograms is not null);
+			this.canSelectRgbGain.Update(imageFrame.RenderingResult.Let(it =>
+				it.HasMeanOfRgb || it.HasWeightedMeanOfRgb));
 			this.ResetValue(HasRenderingErrorProperty);
 			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
 			this.SetValue(HistogramsProperty, imageFrame.Histograms);
@@ -4663,6 +4668,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.canSaveFilteredImage.Update(false);
 			this.canSaveRenderedImage.Update(false);
+			this.canSelectColorAdjustment.Update(false);
+			this.canSelectRgbGain.Update(false);
 			this.SetValue(HistogramsProperty, null);
 			this.SetValue(QuarterSizeRenderedImageProperty, null);
 			this.SetValue(RenderedImageProperty, null);
