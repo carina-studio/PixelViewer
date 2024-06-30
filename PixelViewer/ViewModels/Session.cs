@@ -37,16 +37,10 @@ namespace Carina.PixelViewer.ViewModels;
 class Session : ViewModel<IAppSuiteApplication>
 {
 	// Activation token.
-	class ActivationToken : IDisposable
+	class ActivationToken(Session session) : IDisposable
 	{
-		// Fields.
-		readonly Session session;
-
-		// Constructor.
-		public ActivationToken(Session session) => this.session = session;
-
 		// Dispose.
-		public void Dispose() => this.session.Deactivate(this);
+		public void Dispose() => session.Deactivate(this);
 	}
 
 	// Frame of image.
@@ -129,6 +123,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		public ImageRenderingResult RenderingResult { get; set; } = new();
 
 		// Transfer resource ownership.
+		// ReSharper disable once UnusedMember.Local
 		public ImageFrame? Transfer(Session session)
 		{
 			// check state
@@ -209,19 +204,11 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Token of memory usage of rendered image.
-	class RenderedImageMemoryUsageToken : IDisposable
+	class RenderedImageMemoryUsageToken(Session session, long dataSize) : IDisposable
 	{
 		// Fields.
-		public readonly long DataSize;
-		bool isDisposed; 
-		readonly Session Session;
-
-		// Constructor.
-		public RenderedImageMemoryUsageToken(Session session, long dataSize)
-		{
-			this.DataSize = dataSize;
-			this.Session = session;
-		}
+		public readonly long DataSize = dataSize;
+		bool isDisposed;
 
 		// Dispose.
 		public void Dispose()
@@ -229,7 +216,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.isDisposed)
 				return;
 			this.isDisposed = true;
-			this.Session.ReleaseRenderedImageMemoryUsage(this);
+			session.ReleaseRenderedImageMemoryUsage(this);
 		}
 	}
 
@@ -3568,7 +3555,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Called before removing user-defined color space.
 	void OnRemovingUserDefinedColorSpace(object? sender, ColorSpaceEventArgs e)
 	{
-		if (e.ColorSpace == this.GetValue(ColorSpaceProperty))
+		if (e.ColorSpace.Equals(this.GetValue(ColorSpaceProperty)))
 		{
 			this.Logger.LogWarning("Color space '{colorSpace}' is being removed, switch back to default color space", e.ColorSpace);
 			ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
@@ -3593,7 +3580,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var prevScreenColorSpace = this.colorSpaces.FirstOrDefault(it => it.IsSystemDefined);
 		if (prevScreenColorSpace is not null)
 		{
-			if (this.GetValue(ColorSpaceProperty) == prevScreenColorSpace)
+			if (this.GetValue(ColorSpaceProperty).Equals(prevScreenColorSpace))
 			{
 				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
 				this.SetValue(ColorSpaceProperty, colorSpace);
@@ -3765,7 +3752,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			foreach (var candidateRenderer in ImageRenderers.All)
 			{
-				if (candidateRenderer.Format == imageFormat)
+				if (candidateRenderer.Format.Equals(imageFormat))
 				{
 					evaluatedImageRenderer = candidateRenderer;
 					break;
@@ -5249,10 +5236,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			options.ColorSpace = null;
 		else if (options.ColorSpace is null)
 		{
-			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeRenderingToDisplay)
-				options.ColorSpace = this.ColorSpace;
-			else
-				options.ColorSpace = this.ScreenColorSpace;
+			options.ColorSpace = this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeRenderingToDisplay 
+				? this.ColorSpace 
+				: this.ScreenColorSpace;
 		}
 
 		// save image
@@ -5931,14 +5917,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 
 		// generate title
-		var title = this.CustomTitle;
-		if (title is null)
-		{
-			if (this.SourceFileName is not null)
-				title = Path.GetFileName(this.SourceFileName);
-			else
-				title = this.Application.GetString("Session.EmptyTitle");
-		}
+		var title = this.CustomTitle
+		            ?? (this.SourceFileName is not null
+			            ? Path.GetFileName(this.SourceFileName)
+			            : this.Application.GetString("Session.EmptyTitle"));
 
 		// update property
 		if (this.Title != title)

@@ -793,9 +793,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Load cursor from resource.
 	static Cursor LoadCursor(string resourceKey, Screen screen)
 	{
-		var image = ((IAvaloniaApplication)App.Current).FindResourceOrDefault<IImage?>(resourceKey) ?? throw new ArgumentException();
+		var image = IAppSuiteApplication.Current.FindResourceOrDefault<IImage?>(resourceKey) ?? throw new ArgumentException();
 		var imageSize = image.Size;
-		var maxSide = ((IAvaloniaApplication)App.Current).FindResourceOrDefault("Double/Cursor.MaxSide", 30.0);
+		var maxSide = IAppSuiteApplication.Current.FindResourceOrDefault("Double/Cursor.MaxSide", 30.0);
 		var scaleX = maxSide / imageSize.Width;
 		var scaleY = maxSide / imageSize.Height;
 		var scale = Math.Min(scaleX, scaleY);
@@ -847,7 +847,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		if (sender is not MenuItem menuItem || !int.TryParse(menuItem.Tag as string, out var bytes))
 			return;
-		if (this.alignToIntegerMenu.PlacementTarget is not Control control)
+		if (this.alignToIntegerMenu.PlacementTarget is not { } control)
 			return;
 		(control.Name switch
 		{
@@ -1712,7 +1712,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.StartUsingSmallRenderedImage();
 			this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelay);
 		}
-		else if (property == CarinaStudio.AppSuite.Controls.Window.IsOpenedProperty)
+		else if (property == CarinaStudio.Controls.Window.IsOpenedProperty)
 		{
 			if ((bool)e.NewValue.AsNonNull())
 				this.checkAttachedScreenAction.Execute();

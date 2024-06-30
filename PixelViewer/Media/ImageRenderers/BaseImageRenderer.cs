@@ -28,7 +28,7 @@ abstract class BaseImageRenderer : IImageRenderer
 	protected BaseImageRenderer(ImageFormat format)
 	{
 		this.Format = format;
-		this.Logger = App.Current.LoggerFactory.CreateLogger(this.GetType().Name);
+		this.Logger = IAppSuiteApplication.Current.LoggerFactory.CreateLogger(this.GetType().Name);
 	}
 
 
