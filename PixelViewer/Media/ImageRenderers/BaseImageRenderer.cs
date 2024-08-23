@@ -86,6 +86,7 @@ abstract class BaseImageRenderer : IImageRenderer
 		// conversion with partial bits
 		var effectiveBitsShiftCount = (16 - effectiveBits);
 		var effectiveBitsMask = (0xffff >> effectiveBitsShiftCount);
+		var paddingBitsShiftCount = ((effectiveBits << 1) - 16);
 		var paddingBitsMask = (0xffff >> effectiveBits);
 		if (blackLevel == 0 && whiteLevel == (1 << effectiveBits) - 1)
 		{
@@ -93,12 +94,12 @@ abstract class BaseImageRenderer : IImageRenderer
 				? (b1, b2) =>
 				{
 					var value = (b2 << 8) | b1;
-					return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+					return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 				}
 				: (b1, b2) =>
 				{
 					var value = (b1 << 8) | b2;
-					return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
+					return (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 				};
 		}
 		correctedColors = new ushort[1 << effectiveBits].Also(it =>
@@ -114,14 +115,14 @@ abstract class BaseImageRenderer : IImageRenderer
 			? (b1, b2) =>
 			{
 				var value = (b2 << 8) | b1;
-				value = (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
-				return correctedColors[value];
+				value = correctedColors[(ushort)(value & effectiveBitsMask)];
+				return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 			}
 			: (b1, b2) =>
 			{
 				var value = (b1 << 8) | b2;
-				value = (ushort)(((value & effectiveBitsMask) << effectiveBitsShiftCount) | (value & paddingBitsMask));
-				return correctedColors[value];
+				value = correctedColors[(ushort)(value & effectiveBitsMask)];
+				return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 			};
 	}
 
@@ -196,9 +197,10 @@ abstract class BaseImageRenderer : IImageRenderer
 		// conversion with partial bits
 		var effectiveBitsShiftCount = (8 - effectiveBits);
 		var effectiveBitsMask = (0xff >> effectiveBitsShiftCount);
+		var paddingBitsShiftCount = ((effectiveBits << 1) - 8);
 		var paddingBitsMask = (0xff >> effectiveBits);
 		if (blackLevel == 0 && whiteLevel == (1 << effectiveBits) - 1)
-			return b => (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | (b & paddingBitsMask));
+			return b => (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | ((b >> paddingBitsShiftCount) & paddingBitsMask));
 		correctedColors = new byte[1 << effectiveBits].Also(it =>
 		{
 			var maxColor = (byte)(it.Length - 1);
@@ -210,7 +212,7 @@ abstract class BaseImageRenderer : IImageRenderer
 		});
 		return b =>
 		{
-			b = (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | (b & paddingBitsMask));
+			b = (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | ((b >> paddingBitsShiftCount) & paddingBitsMask));
 			return correctedColors[b];
 		};
 	}
