@@ -70,6 +70,7 @@ namespace Carina.PixelViewer.Media
 		};
 
 
+#if WINDOWS
 		/// <summary>
 		/// Convert <see cref="BitmapFormat"/> to <see cref="System.Drawing.Imaging.PixelFormat"/>.
 		/// </summary>
@@ -83,5 +84,6 @@ namespace Carina.PixelViewer.Media
 			_ => throw new ArgumentException($"Unknown format: {format}"),
 		};
 #pragma warning restore CA1416
+#endif
 	}
 }
