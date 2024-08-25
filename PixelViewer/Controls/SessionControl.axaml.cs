@@ -553,7 +553,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					this.image.Cursor = draggingCursor;
 					return;
 				}
-				cursorType = StandardCursorType.None;
 			}
 			if (this.imageCursorType != cursorType
 			    || this.image.Cursor == draggingCursor)
