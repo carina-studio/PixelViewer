@@ -20,7 +20,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// Initialize new <see cref="BaseYuv420sp16ImageRenderer"/> instance.
 		/// </summary>
 		/// <param name="format">Supported format.</param>
-		/// <param name="effectiveBits">Effective bits for each Y/U/V coponent.</param>
+		/// <param name="effectiveBits">Effective bits for each Y/U/V component.</param>
 		public BaseYuv420sp16ImageRenderer(ImageFormat format, int effectiveBits) : base(format)
 		{
 			if (effectiveBits < 10 || effectiveBits > 16)
