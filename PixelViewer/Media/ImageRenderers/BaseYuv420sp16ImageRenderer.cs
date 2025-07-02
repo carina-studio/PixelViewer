@@ -162,15 +162,14 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 	/// <summary>
-    /// <see cref="IImageRenderer"/> which supports rendering image with 10-bit YUV420p based format.
+    /// <see cref="IImageRenderer"/> which supports rendering image with 10-bit YUV420sp based format.
     /// </summary>
-    class P010ImageRenderer : BaseYuv420p16ImageRenderer
+    class P010ImageRenderer : BaseYuv420sp16ImageRenderer
     {
         public P010ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P010", true, new ImagePlaneDescriptor[] {
             new(2),
-            new(2),
-            new(2),
-        }, new[]{ "P010" }), 10)
+            new(4),
+        }, new[]{ "P010" }), 16)
         { }
 
 
@@ -184,15 +183,14 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 	/// <summary>
-    /// <see cref="IImageRenderer"/> which supports rendering image with 12-bit YUV420p based format.
+    /// <see cref="IImageRenderer"/> which supports rendering image with 12-bit YUV420sp based format.
     /// </summary>
-    class P012ImageRenderer : BaseYuv420p16ImageRenderer
+    class P012ImageRenderer : BaseYuv420sp16ImageRenderer
     {
         public P012ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P012", true, new ImagePlaneDescriptor[] {
             new(2),
-            new(2),
-            new(2),
-        }, new[]{ "P012" }), 12)
+            new(4),
+        }, new[]{ "P012" }), 16)
         { }
 
 
@@ -208,12 +206,11 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 	/// <summary>
     /// <see cref="IImageRenderer"/> which supports rendering image with 16-bit YUV420p based format.
     /// </summary>
-    class P016ImageRenderer : BaseYuv420p16ImageRenderer
+    class P016ImageRenderer : BaseYuv420sp16ImageRenderer
     {
         public P016ImageRenderer() : base(new ImageFormat(ImageFormatCategory.YUV, "P016", true, new ImagePlaneDescriptor[] {
             new(2),
-            new(2),
-            new(2),
+            new(4),
         }, new[]{ "P016" }), 16)
         { }
 
