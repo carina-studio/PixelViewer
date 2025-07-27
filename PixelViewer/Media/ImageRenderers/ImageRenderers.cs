@@ -18,8 +18,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new L16ImageRenderer(),
 				new NV12ImageRenderer(),
 				new NV21ImageRenderer(),
-				new Y010ImageRenderer(),
-				new Y016ImageRenderer(),
+				//new Y010ImageRenderer(), // Not standardized by Microsoft
+				//new Y016ImageRenderer(), // Not standardized by Microsoft
 				new I420ImageRenderer(),
 				new P010ImageRenderer(),
 				new P012ImageRenderer(),
