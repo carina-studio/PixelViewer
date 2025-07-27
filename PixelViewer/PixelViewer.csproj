@@ -4,7 +4,7 @@
 		<Version>3.1.3.825</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
-		<Copyright>©2021-2024 Carina Studio</Copyright>
+		<Copyright>©2021-2025 Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -17,7 +17,7 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>2.3.90.818</AppSuiteVersion>
+		<AppSuiteVersion>2.3.92.727</AppSuiteVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">

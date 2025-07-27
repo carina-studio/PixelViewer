@@ -4,6 +4,7 @@
 obj
 bin
 BundleArtifacts
+global.json
 AppPackages
 PixelViewer.sln.DotSettings.user
 /PixelViewer/PixelViewer.csproj.user

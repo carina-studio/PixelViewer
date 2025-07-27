@@ -21,8 +21,8 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Input;
-
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
+using TabItem = Avalonia.Controls.TabItem;
 
 namespace Carina.PixelViewer
 {
