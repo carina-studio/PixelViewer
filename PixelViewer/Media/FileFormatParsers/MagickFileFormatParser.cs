@@ -1,6 +1,7 @@
 ﻿using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using ImageMagick;
+using ImageMagick.Factories;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -116,8 +117,8 @@ abstract class MagickFileFormatParser : BaseFileFormatParser
         var profile = new ImageRenderingProfile(this.FileFormat, this.imageRenderer);
         if (colorSpace != null)
             profile.ColorSpace = colorSpace;
-        profile.Width = imageInfo.Width;
-        profile.Height = imageInfo.Height;
+        profile.Width = (int)imageInfo.Width;
+        profile.Height = (int)imageInfo.Height;
 
         // parse extra info
         await this.OnParseExtraInformationAsync(stream, profile, cancellationToken);

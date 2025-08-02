@@ -2,6 +2,7 @@
 using CarinaStudio;
 using CarinaStudio.IO;
 using ImageMagick;
+using ImageMagick.Factories;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -75,8 +76,8 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
     protected virtual bool OnCheckBufferDimensions(IImageDataSource source, Stream imageStream, int bufferWidth, int bufferHeight, out int expectedWidth, out int expectedHeight, CancellationToken cancellationToken)
     {
         var imageInfo = this.CreateImageInfo(source, imageStream, cancellationToken);
-        expectedWidth = imageInfo.Width;
-        expectedHeight = imageInfo.Height;
+        expectedWidth = (int)imageInfo.Width;
+        expectedHeight = (int)imageInfo.Height;
         return bufferWidth == expectedWidth && bufferHeight == expectedHeight;
     }
 
@@ -135,7 +136,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                     switch (image.ChannelCount)
                     {
                         case 1:
-                            ImageProcessing.ParallelFor(0, image.Height, (y) =>
+                            ImageProcessing.ParallelFor(0, (int)image.Height, (y) =>
                             {
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
@@ -150,7 +151,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                             });
                             break;
                         case 3:
-                            ImageProcessing.ParallelFor(0, image.Height, (y) =>
+                            ImageProcessing.ParallelFor(0, (int)image.Height, (y) =>
                             {
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
@@ -162,7 +163,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                             });
                             break;
                         case 4:
-                            ImageProcessing.ParallelFor(0, image.Height, (y) =>
+                            ImageProcessing.ParallelFor(0, (int)image.Height, (y) =>
                             {
                                 var packFunc = ImageProcessing.SelectBgra32Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
@@ -181,7 +182,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                     switch (image.ChannelCount)
                     {
                         case 1:
-                            ImageProcessing.ParallelFor(0, image.Height, (y) =>
+                            ImageProcessing.ParallelFor(0, (int)image.Height, (y) =>
                             {
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
@@ -196,7 +197,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                             });
                             break;
                         case 3:
-                            ImageProcessing.ParallelFor(0, image.Height, (y) =>
+                            ImageProcessing.ParallelFor(0, (int)image.Height, (y) =>
                             {
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
@@ -208,7 +209,7 @@ abstract class MagickCompressedImageRenderer : CompressedFormatImageRenderer
                             });
                             break;
                         case 4:
-                            ImageProcessing.ParallelFor(0, image.Height, (y) =>
+                            ImageProcessing.ParallelFor(0, (int)image.Height, (y) =>
                             {
                                 var packFunc = ImageProcessing.SelectBgra64Packing();
                                 var srcPixelPtr = (ushort*)((byte*)srcBaseAddr + srcRowStride * y);
