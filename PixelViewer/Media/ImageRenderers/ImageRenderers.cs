@@ -13,7 +13,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// </summary>
 		public static IList<IImageRenderer> All { get; } = new List<IImageRenderer>().Also(it =>
 		{
-			it.AddRange(new IImageRenderer[] {
+			it.AddRange([
 				new L8ImageRenderer(),
 				new L16ImageRenderer(),
 				new NV12ImageRenderer(),
@@ -71,16 +71,15 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new BayerPattern12MipiImageRenderer(),
 				new BayerPattern14MipiImageRenderer(),
 				new BayerPattern16ImageRenderer(),
-			});
+			]);
 			it.Add(Platform.IsMacOS 
 				? new MacOSHeifImageRenderer() 
 				: new HeifImageRenderer());
-			it.AddRange(new IImageRenderer[] {
+			it.AddRange([
 				new JpegImageRenderer(),
 				new PngImageRenderer(),
 				new WebPImageRenderer(),
-			});
-
+			]);
 		}).AsReadOnly();
 
 
