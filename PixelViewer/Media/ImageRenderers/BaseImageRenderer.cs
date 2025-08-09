@@ -37,9 +37,10 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// </summary>
 	/// <param name="byteOrdering">Byte ordering.</param>
 	/// <param name="effectiveBits">Effective bits, range is [9, 16].</param>
+	/// <param name="lsbAligned">True if effective bits are aligned to LSB, False if aligned to MSB.</param>
 	/// <returns>Extraction function.</returns>
-	protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits) =>
-		this.Create16BitColorExtraction(byteOrdering, effectiveBits, 0, (uint)(1 << effectiveBits) - 1);
+	protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits, bool lsbAligned = true) =>
+		this.Create16BitColorExtraction(byteOrdering, effectiveBits, lsbAligned, 0, (uint)(1 << effectiveBits) - 1);
 
 
 	/// <summary>
@@ -50,7 +51,20 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <param name="blackLevel">Black level.</param>
 	/// <param name="whiteLevel">White level.</param>
 	/// <returns>Extraction function.</returns>
-	protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits, uint blackLevel, uint whiteLevel)
+	protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits, uint blackLevel, uint whiteLevel) =>
+		this.Create16BitColorExtraction(byteOrdering, effectiveBits, true, blackLevel, whiteLevel);
+
+
+	/// <summary>
+	/// Create function to extract from [9, 16]-bit data to 16-bit data.
+	/// </summary>
+	/// <param name="byteOrdering">Byte ordering.</param>
+	/// <param name="effectiveBits">Effective bits, range is [9, 16].</param>
+	/// <param name="lsbAligned">True if effective bits are aligned to LSB, False if aligned to MSB.</param>
+	/// <param name="blackLevel">Black level.</param>
+	/// <param name="whiteLevel">White level.</param>
+	/// <returns>Extraction function.</returns>
+	protected Func<byte, byte, ushort> Create16BitColorExtraction(ByteOrdering byteOrdering, int effectiveBits, bool lsbAligned, uint blackLevel, uint whiteLevel)
 	{
 		// check parameters
 		if (effectiveBits < 9 || effectiveBits > 16)
@@ -84,10 +98,16 @@ abstract class BaseImageRenderer : IImageRenderer
 		}
 
 		// conversion with partial bits
-		var effectiveBitsShiftCount = (16 - effectiveBits);
-		var effectiveBitsMask = (0xffff >> effectiveBitsShiftCount);
-		var paddingBitsShiftCount = ((effectiveBits << 1) - 16);
-		var paddingBitsMask = (0xffff >> effectiveBits);
+		var effectiveBitsShiftCount = lsbAligned 
+			? 16 - effectiveBits 
+			: 0;
+		var effectiveBitsMask = lsbAligned 
+			? 0xffff >> effectiveBitsShiftCount 
+			: (0xffff << (16 - effectiveBits)) & 0xffff;
+		var paddingBitsShiftCount = lsbAligned 
+			? (effectiveBits << 1) - 16 
+			: 16 - effectiveBits;
+		var paddingBitsMask = 0xffff >> effectiveBits;
 		if (blackLevel == 0 && whiteLevel == (1 << effectiveBits) - 1)
 		{
 			return byteOrdering == ByteOrdering.LittleEndian
@@ -111,17 +131,33 @@ abstract class BaseImageRenderer : IImageRenderer
 			for (var i = it.Length - 1; i > whiteLevel; --i)
 				it[i] = maxColor;
 		});
+		if (lsbAligned)
+		{
+			return byteOrdering == ByteOrdering.LittleEndian
+				? (b1, b2) =>
+				{
+					var value = (b2 << 8) | b1;
+					value = correctedColors[(ushort)(value & effectiveBitsMask)];
+					return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
+				}
+				: (b1, b2) =>
+				{
+					var value = (b1 << 8) | b2;
+					value = correctedColors[(ushort)(value & effectiveBitsMask)];
+					return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
+				};
+		}
 		return byteOrdering == ByteOrdering.LittleEndian
 			? (b1, b2) =>
 			{
 				var value = (b2 << 8) | b1;
-				value = correctedColors[(ushort)(value & effectiveBitsMask)];
+				value = correctedColors[(ushort)((value & effectiveBitsMask) >> paddingBitsShiftCount)];
 				return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 			}
 			: (b1, b2) =>
 			{
 				var value = (b1 << 8) | b2;
-				value = correctedColors[(ushort)(value & effectiveBitsMask)];
+				value = correctedColors[(ushort)((value & effectiveBitsMask) >> paddingBitsShiftCount)];
 				return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 			};
 	}

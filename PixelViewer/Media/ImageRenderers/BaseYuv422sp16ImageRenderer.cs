@@ -13,7 +13,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 abstract class BaseYuv422sp16ImageRenderer : BaseImageRenderer
 {
     // Fields.
+    readonly ByteOrdering? byteOrdering;
     readonly int effectiveBits;
+    readonly bool isLsbAligned;
     
     
     /// <summary>
@@ -21,11 +23,17 @@ abstract class BaseYuv422sp16ImageRenderer : BaseImageRenderer
     /// </summary>
     /// <param name="format">Supported format.</param>
     /// <param name="effectiveBits">Effective bits for each Y/U/V component.</param>
-    protected BaseYuv422sp16ImageRenderer(ImageFormat format, int effectiveBits) : base(format)
+    /// <param name="lsbAligned">True if effective bits are aligned to LSB, False if aligned to MSB.</param>
+    /// <param name="byteOrdering">Fixed byte ordering, or Null if byte ordering can be specified by user.</param>
+    protected BaseYuv422sp16ImageRenderer(ImageFormat format, int effectiveBits, bool lsbAligned, ByteOrdering? byteOrdering = null) : base(format)
     {
         if (effectiveBits < 10 || effectiveBits > 16)
             throw new ArgumentOutOfRangeException(nameof(effectiveBits));
+        if (byteOrdering.HasValue == format.HasMultipleByteOrderings)
+	        throw new ArgumentException("Invalid combination of fixed byte ordering and image format.");
+        this.byteOrdering = byteOrdering;
         this.effectiveBits = effectiveBits;
+        this.isLsbAligned = lsbAligned;
     }
     
     
@@ -73,7 +81,7 @@ abstract class BaseYuv422sp16ImageRenderer : BaseImageRenderer
 
 			// select color converter
 			var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
-			var yuvExtractor = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, this.effectiveBits);
+			var yuvExtractor = this.Create16BitColorExtraction(this.byteOrdering ?? renderingOptions.ByteOrdering, this.effectiveBits, lsbAligned: this.isLsbAligned);
 
 			// render
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
@@ -161,10 +169,10 @@ abstract class BaseYuv422sp16ImageRenderer : BaseImageRenderer
 /// <summary>
 /// <see cref="IImageRenderer"/> which supports rendering image with 10-bit YUV422sp based format.
 /// </summary>
-class P210ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P210", true, [
+class P210ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P210", false, [
 	new(2),
-	new(4),
-], [ "P210" ]), 10)
+	new(4)
+], [ "P210" ]), 10, false, ByteOrdering.LittleEndian)
 {
 	// Select UV component.
 	protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
@@ -178,10 +186,10 @@ class P210ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFor
 /// <summary>
 /// <see cref="IImageRenderer"/> which supports rendering image with 12-bit YUV422sp based format.
 /// </summary>
-class P212ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P212", true, [
+class P212ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P212", false, [
 	new(2),
 	new(4)
-], [ "P212" ]), 12)
+], [ "P212" ]), 12, false, ByteOrdering.LittleEndian)
 {
 	// Select UV component.
 	protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
@@ -195,10 +203,10 @@ class P212ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFor
 /// <summary>
 /// <see cref="IImageRenderer"/> which supports rendering image with 16-bit YUV422sp based format.
 /// </summary>
-class P216ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P216", true, [
+class P216ImageRenderer() : BaseYuv422sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P216", false, [
 	new(2),
 	new(4)
-], [ "P216" ]), 16)
+], [ "P216" ]), 16, false, ByteOrdering.LittleEndian)
 {
 	// Select UV component.
 	protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)

@@ -13,7 +13,9 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 abstract class BaseYuv444sp16ImageRenderer : BaseImageRenderer
 {
     // Fields.
+    readonly ByteOrdering? byteOrdering;
     readonly int effectiveBits;
+    readonly bool isLsbAligned;
     
     
     /// <summary>
@@ -21,11 +23,17 @@ abstract class BaseYuv444sp16ImageRenderer : BaseImageRenderer
     /// </summary>
     /// <param name="format">Supported format.</param>
     /// <param name="effectiveBits">Effective bits for each Y/U/V component.</param>
-    protected BaseYuv444sp16ImageRenderer(ImageFormat format, int effectiveBits) : base(format)
+    /// <param name="lsbAligned">True if effective bits are aligned to LSB, False if aligned to MSB.</param>
+    /// <param name="byteOrdering">Fixed byte ordering, or Null if byte ordering can be specified by user.</param>
+    protected BaseYuv444sp16ImageRenderer(ImageFormat format, int effectiveBits, bool lsbAligned, ByteOrdering? byteOrdering = null) : base(format)
     {
         if (effectiveBits < 10 || effectiveBits > 16)
             throw new ArgumentOutOfRangeException(nameof(effectiveBits));
+        if (byteOrdering.HasValue == format.HasMultipleByteOrderings)
+	        throw new ArgumentException("Invalid combination of fixed byte ordering and image format.");
+        this.byteOrdering = byteOrdering;
         this.effectiveBits = effectiveBits;
+        this.isLsbAligned = lsbAligned;
     }
     
     
@@ -55,87 +63,87 @@ abstract class BaseYuv444sp16ImageRenderer : BaseImageRenderer
     
     
     // Render.
-		protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+	protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+	{
+		// get state
+		var width = (bitmapBuffer.Width & 0x7ffffffe);
+		var height = (bitmapBuffer.Height & 0x7ffffffe);
+		var yPixelStride = planeOptions[0].PixelStride;
+		var yRowStride = planeOptions[0].RowStride;
+		var uvPixelStride = planeOptions[1].PixelStride;
+		var uvRowStride = planeOptions[1].RowStride;
+		if (width <= 0 || height <= 0 
+			|| yPixelStride <= 0 || yRowStride <= 0 || (yPixelStride * width) > yRowStride
+			|| uvPixelStride <= 0 || uvRowStride <= 0 || (uvPixelStride * width / 2) > uvRowStride)
 		{
-			// get state
-			var width = (bitmapBuffer.Width & 0x7ffffffe);
-			var height = (bitmapBuffer.Height & 0x7ffffffe);
-			var yPixelStride = planeOptions[0].PixelStride;
-			var yRowStride = planeOptions[0].RowStride;
-			var uvPixelStride = planeOptions[1].PixelStride;
-			var uvRowStride = planeOptions[1].RowStride;
-			if (width <= 0 || height <= 0 
-				|| yPixelStride <= 0 || yRowStride <= 0 || (yPixelStride * width) > yRowStride
-				|| uvPixelStride <= 0 || uvRowStride <= 0 || (uvPixelStride * width / 2) > uvRowStride)
+			throw new ArgumentException("Invalid pixel/row stride.");
+		}
+
+		// select color converter
+		var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
+		var yuvExtractor = this.Create16BitColorExtraction(this.byteOrdering ?? renderingOptions.ByteOrdering, this.effectiveBits, lsbAligned: this.isLsbAligned);
+
+		// render
+		bitmapBuffer.Memory.Pin(bitmapBaseAddress =>
+		{
+			// read Y
+			var yRow = new byte[yRowStride];
+			var bitmapRowPtr = (byte*)bitmapBaseAddress;
+			var bitmapRowStride = bitmapBuffer.RowBytes;
+			fixed (byte* yRowPtr = yRow)
 			{
-				throw new ArgumentException("Invalid pixel/row stride.");
+				for (var rowIndex = height; rowIndex > 0; --rowIndex, bitmapRowPtr += bitmapRowStride)
+				{
+					var yPixelPtr = yRowPtr;
+					var bitmapPixelPtr = (ushort*)bitmapRowPtr;
+					var isLastRow = imageStream.Read(yRow, 0, yRowStride) < yRowStride || rowIndex <= 1;
+					for (var columnIndex = width; columnIndex > 0; --columnIndex, yPixelPtr += yPixelStride, bitmapPixelPtr += 4)
+						bitmapPixelPtr[0] = yuvExtractor(yPixelPtr[0], yPixelPtr[1]);
+					if (cancellationToken.IsCancellationRequested)
+						return;
+					if (isLastRow)
+						break;
+					Array.Clear(yRow, 0, yRowStride);
+				}
 			}
 
-			// select color converter
-			var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
-			var yuvExtractor = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, this.effectiveBits);
-
-			// render
-			bitmapBuffer.Memory.Pin(bitmapBaseAddress =>
+			// read UV
+			var uvRow = new byte[uvRowStride];
+			bitmapRowPtr = (byte*)bitmapBaseAddress;
+			fixed (byte* uvRowPtr = uvRow)
 			{
-				// read Y
-				var yRow = new byte[yRowStride];
-				var bitmapRowPtr = (byte*)bitmapBaseAddress;
-				var bitmapRowStride = bitmapBuffer.RowBytes;
-				fixed (byte* yRowPtr = yRow)
+				for (var rowIndex = height; rowIndex > 0; --rowIndex, bitmapRowPtr += bitmapRowStride)
 				{
-					for (var rowIndex = height; rowIndex > 0; --rowIndex, bitmapRowPtr += bitmapRowStride)
-					{
-						var yPixelPtr = yRowPtr;
-						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
-						var isLastRow = imageStream.Read(yRow, 0, yRowStride) < yRowStride || rowIndex <= 1;
-						for (var columnIndex = width; columnIndex > 0; --columnIndex, yPixelPtr += yPixelStride, bitmapPixelPtr += 4)
-							bitmapPixelPtr[0] = yuvExtractor(yPixelPtr[0], yPixelPtr[1]);
-						if (cancellationToken.IsCancellationRequested)
-							return;
-						if (isLastRow)
-							break;
-						Array.Clear(yRow, 0, yRowStride);
-					}
-				}
+					// read UV row
+					var isLastRow = imageStream.Read(uvRow, 0, uvRowStride) < uvRowStride || rowIndex <= 1;
+					var vuPixelPtr = uvRowPtr;
+					var bitmapPixelPtr = (ushort*)bitmapRowPtr;
+					for (var columnIndex = width; columnIndex > 0; --columnIndex, vuPixelPtr += uvPixelStride, bitmapPixelPtr += 4)
+						this.SelectUV(yuvExtractor(vuPixelPtr[0], vuPixelPtr[1]), yuvExtractor(vuPixelPtr[2], vuPixelPtr[3]), out bitmapPixelPtr[1], out bitmapPixelPtr[2]);
 
-				// read UV
-				var uvRow = new byte[uvRowStride];
-				bitmapRowPtr = (byte*)bitmapBaseAddress;
-				fixed (byte* uvRowPtr = uvRow)
-				{
-					for (var rowIndex = height; rowIndex > 0; --rowIndex, bitmapRowPtr += bitmapRowStride)
-					{
-						// read UV row
-						var isLastRow = imageStream.Read(uvRow, 0, uvRowStride) < uvRowStride || rowIndex <= 1;
-						var vuPixelPtr = uvRowPtr;
-						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
-						for (var columnIndex = width; columnIndex > 0; --columnIndex, vuPixelPtr += uvPixelStride, bitmapPixelPtr += 4)
-							this.SelectUV(yuvExtractor(vuPixelPtr[0], vuPixelPtr[1]), yuvExtractor(vuPixelPtr[2], vuPixelPtr[3]), out bitmapPixelPtr[1], out bitmapPixelPtr[2]);
-
-						// check state
-						if (cancellationToken.IsCancellationRequested)
-							return;
-						if (isLastRow)
-							break;
-						Array.Clear(uvRow, 0, uvRowStride);
-					}
-				}
-
-				// convert to BGRA
-				ImageProcessing.ParallelFor(0, height, y =>
-				{
-					var bitmapPixelPtr = (ushort*)((byte*)bitmapBaseAddress + (y * bitmapRowStride));
-					for (var x = width; x > 0; --x, bitmapPixelPtr += 4)
-						converter.ConvertFromYuv444ToBgra64(bitmapPixelPtr[0], bitmapPixelPtr[1], bitmapPixelPtr[2], (ulong*)bitmapPixelPtr);
+					// check state
 					if (cancellationToken.IsCancellationRequested)
-						throw new TaskCanceledException();
-				});
-			});
+						return;
+					if (isLastRow)
+						break;
+					Array.Clear(uvRow, 0, uvRowStride);
+				}
+			}
 
-			// complete
-			return new ImageRenderingResult();
-		}
+			// convert to BGRA
+			ImageProcessing.ParallelFor(0, height, y =>
+			{
+				var bitmapPixelPtr = (ushort*)((byte*)bitmapBaseAddress + (y * bitmapRowStride));
+				for (var x = width; x > 0; --x, bitmapPixelPtr += 4)
+					converter.ConvertFromYuv444ToBgra64(bitmapPixelPtr[0], bitmapPixelPtr[1], bitmapPixelPtr[2], (ulong*)bitmapPixelPtr);
+				if (cancellationToken.IsCancellationRequested)
+					throw new TaskCanceledException();
+			});
+		});
+
+		// complete
+		return new ImageRenderingResult();
+	}
     
     
     // Rendered format.
@@ -157,10 +165,10 @@ abstract class BaseYuv444sp16ImageRenderer : BaseImageRenderer
 /// <summary>
 /// <see cref="IImageRenderer"/> which supports rendering image with 10-bit YUV444sp based format.
 /// </summary>
-class P410ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P410", true, [
+class P410ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P410", false, [
 	new(2),
 	new(4)
-], [ "P410" ]), 10)
+], [ "P410" ]), 10, false, ByteOrdering.LittleEndian)
 {
 	// Select UV component.
 	protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
@@ -174,10 +182,10 @@ class P410ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFor
 /// <summary>
 /// <see cref="IImageRenderer"/> which supports rendering image with 12-bit YUV444sp based format.
 /// </summary>
-class P412ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P412", true, [
+class P412ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P412", false, [
 	new(2),
 	new(4)
-], [ "P412" ]), 12)
+], [ "P412" ]), 12, false, ByteOrdering.LittleEndian)
 {
 	// Select UV component.
 	protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
@@ -191,10 +199,10 @@ class P412ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFor
 /// <summary>
 /// <see cref="IImageRenderer"/> which supports rendering image with 16-bit YUV444sp based format.
 /// </summary>
-class P416ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P416", true, [
+class P416ImageRenderer() : BaseYuv444sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P416", false, [
 	new(2),
 	new(4)
-], [ "P416" ]), 16)
+], [ "P416" ]), 16, false, ByteOrdering.LittleEndian)
 {
 	// Select UV component.
 	protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)

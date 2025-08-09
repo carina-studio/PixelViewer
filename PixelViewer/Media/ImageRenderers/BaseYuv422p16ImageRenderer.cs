@@ -13,19 +13,27 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 abstract class BaseYuv422p16ImageRenderer : BaseImageRenderer
 {
 	// Fields.
+	readonly ByteOrdering? byteOrdering;
 	readonly int effectiveBits;
+	readonly bool isLsbAligned;
 
 
 	/// <summary>
 	/// Initialize new <see cref="BaseYuv422p16ImageRenderer"/> instance.
 	/// </summary>
 	/// <param name="format">Supported format.</param>
-	/// <param name="effectiveBits">Effective bits for each Y/U/V coponent.</param>
-	protected BaseYuv422p16ImageRenderer(ImageFormat format, int effectiveBits) : base(format)
+	/// <param name="effectiveBits">Effective bits for each Y/U/V component.</param>
+	/// <param name="lsbAligned">True if effective bits are aligned to LSB, False if aligned to MSB.</param>
+	/// <param name="byteOrdering">Fixed byte ordering, or Null if byte ordering can be specified by user.</param>
+	protected BaseYuv422p16ImageRenderer(ImageFormat format, int effectiveBits, bool lsbAligned, ByteOrdering? byteOrdering = null) : base(format)
 	{
 		if (effectiveBits < 10 || effectiveBits > 16)
 			throw new ArgumentOutOfRangeException(nameof(effectiveBits));
+		if (byteOrdering.HasValue == format.HasMultipleByteOrderings)
+			throw new ArgumentException("Invalid combination of fixed byte ordering and image format.");
+		this.byteOrdering = byteOrdering;
 		this.effectiveBits = effectiveBits;
+		this.isLsbAligned = lsbAligned;
 	}
 
 
@@ -78,7 +86,7 @@ abstract class BaseYuv422p16ImageRenderer : BaseImageRenderer
 
 		// select color converter
 		var converter = renderingOptions.YuvToBgraConverter ?? YuvToBgraConverter.Default;
-		var yuvExtractor = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, this.effectiveBits);
+		var yuvExtractor = this.Create16BitColorExtraction(this.byteOrdering ?? renderingOptions.ByteOrdering, this.effectiveBits, lsbAligned: this.isLsbAligned);
 
 		// render
 		bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>

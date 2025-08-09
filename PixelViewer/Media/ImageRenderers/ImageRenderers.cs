@@ -22,12 +22,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				//new Y016ImageRenderer(), // Not standardized by Microsoft
 				new I420ImageRenderer(),
 				new P010ImageRenderer(),
-				new P012ImageRenderer(),
+				//new P012ImageRenderer(), // Not standardized by Microsoft
 				new P016ImageRenderer(),
 				new YV12ImageRenderer(),
 				new Yuv422pImageRenderer(),
 				new P210ImageRenderer(),
-				new P212ImageRenderer(),
+				//new P212ImageRenderer(), // Not standardized by Microsoft
 				new P216ImageRenderer(),
 				new UyvyImageRenderer(),
 				new YuvyImageRenderer(),
@@ -35,7 +35,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				new YvyuImageRenderer(),
 				new Yuv444pImageRenderer(),
 				new P410ImageRenderer(),
-				new P412ImageRenderer(),
+				//new P412ImageRenderer(), // Not standardized by Microsoft
 				new P416ImageRenderer(),
 				new AndroidYuv420ImageRenderer(),
 
