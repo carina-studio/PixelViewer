@@ -175,7 +175,7 @@ abstract class BaseYuv420sp16ImageRenderer : BaseImageRenderer
 class P010ImageRenderer() : BaseYuv420sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P010", false, [
 	new(2),
 	new(4)
-], [ "P010" ]), 16, false, ByteOrdering.LittleEndian)
+], [ "P010" ]), 10, false, ByteOrdering.LittleEndian)
 {
     // Select UV component.
     protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
@@ -192,7 +192,7 @@ class P010ImageRenderer() : BaseYuv420sp16ImageRenderer(new ImageFormat(ImageFor
 class P012ImageRenderer() : BaseYuv420sp16ImageRenderer(new ImageFormat(ImageFormatCategory.YUV, "P012", false, [
 	new(2),
 	new(4)
-], [ "P012" ]), 16, false, ByteOrdering.LittleEndian)
+], [ "P012" ]), 12, false, ByteOrdering.LittleEndian)
 {
     // Select UV component.
     protected override void SelectUV(ushort uv1, ushort uv2, out ushort u, out ushort v)
