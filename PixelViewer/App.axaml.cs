@@ -35,12 +35,12 @@ namespace Carina.PixelViewer
 		{
 			public ChangeListSource(App app) : base(app)
 			{ }
-			public override IList<ApplicationCulture> SupportedCultures => new[]
-			{
+			public override IList<ApplicationCulture> SupportedCultures =>
+			[
 				ApplicationCulture.EN_US,
 				ApplicationCulture.ZH_CN,
-				ApplicationCulture.ZH_TW,
-			};
+				ApplicationCulture.ZH_TW
+			];
 			public override Uri Uri => this.Culture switch
 			{
 				ApplicationCulture.ZH_CN => this.Application.CreateAvaloniaResourceUri("/ChangeList-zh-CN.md"),
@@ -57,11 +57,11 @@ namespace Carina.PixelViewer
 			{ 
 				this.SetToCurrentCulture();
 			}
-			public override IList<ApplicationCulture> SupportedCultures => new[]
-			{
+			public override IList<ApplicationCulture> SupportedCultures =>
+			[
 				ApplicationCulture.EN_US,
-				ApplicationCulture.ZH_TW,
-			};
+				ApplicationCulture.ZH_TW
+			];
 			public override Uri Uri => this.Culture switch
 			{
 				ApplicationCulture.ZH_TW => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/PrivacyPolicy-zh-TW.md"),
@@ -77,11 +77,11 @@ namespace Carina.PixelViewer
 			{ 
 				this.SetToCurrentCulture();
 			}
-			public override IList<ApplicationCulture> SupportedCultures => new[]
-			{
+			public override IList<ApplicationCulture> SupportedCultures => 
+			[
 				ApplicationCulture.EN_US,
 				ApplicationCulture.ZH_TW,
-			};
+			];
 			public override Uri Uri => this.Culture switch
 			{
 				ApplicationCulture.ZH_TW => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/UserAgreement-zh-TW.md"),
@@ -149,7 +149,7 @@ namespace Carina.PixelViewer
 		// Application entry point.
 		[STAThread]
 		public static void Main(string[] args) =>
-			BuildApplicationAndStart<App>(args);
+			BuildApplicationAndStart<App>(args, argsParser: ParseArguments);
 
 
 		// Create main window.
@@ -301,19 +301,6 @@ namespace Carina.PixelViewer
 		}
 
 
-		// Parse argument.
-        protected override int OnParseArguments(string[] args, int index, IDictionary<string, object> launchOptions)
-        {
-			var arg = args[index];
-			if (arg.Length > 0 && arg[0] != '-')
-			{
-				launchOptions[FilePathKey] = arg;
-				return ++index;
-			}
-            return base.OnParseArguments(args, index, launchOptions);
-        }
-
-
 		// Prepare shutting down.
         protected override async Task OnPrepareShuttingDownAsync(bool isCritical)
         {
@@ -405,7 +392,7 @@ namespace Carina.PixelViewer
 			{
 				var upperBound = Environment.Is64BitProcess ? 8192 : 1324;
 				if (mb > upperBound)
-					this.Settings.SetValue<long>(SettingKeys.MaxRenderedImagesMemoryUsageMB, upperBound);
+					this.Settings.SetValue(SettingKeys.MaxRenderedImagesMemoryUsageMB, upperBound);
 			});
 
 			// show main window
@@ -471,7 +458,7 @@ namespace Carina.PixelViewer
                 {
 					settings.ResetValue(SettingKeys.AutoSelectLanguage);
 					if (!it)
-						settings.SetValue<ApplicationCulture>(CarinaStudio.AppSuite.SettingKeys.Culture, ApplicationCulture.EN_US);
+						settings.SetValue(CarinaStudio.AppSuite.SettingKeys.Culture, ApplicationCulture.EN_US);
 				});
 			}
 
@@ -484,7 +471,7 @@ namespace Carina.PixelViewer
 					"BT.601" => "BT.601-625-line",
 					_ => it,
 				});
-				settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, name);
+				settings.SetValue(SettingKeys.DefaultColorSpaceName, name);
 			}
 
 			// upgrade screen color space
@@ -495,13 +482,13 @@ namespace Carina.PixelViewer
 					switch (it)
 					{
 						case "DCI_P3":
-							settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.DCI_P3.Name);
+							settings.SetValue(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.DCI_P3.Name);
 							break;
 						case "Display_P3":
-							settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Display_P3.Name);
+							settings.SetValue(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Display_P3.Name);
 							break;
 						case "Srgb":
-							settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Srgb.Name);
+							settings.SetValue(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Srgb.Name);
 							break;
 					}
 				});
@@ -511,9 +498,9 @@ namespace Carina.PixelViewer
 			if (oldVersion <= 7)
 			{
 				if (settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName) == "Linear-sRGB")
-					settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, Media.ColorSpace.Srgb.Name);
+					settings.SetValue(SettingKeys.DefaultColorSpaceName, Media.ColorSpace.Srgb.Name);
 				if (settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName) == "Linear-sRGB")
-					settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Srgb.Name);
+					settings.SetValue(SettingKeys.ScreenColorSpaceName, Media.ColorSpace.Srgb.Name);
 			}
 
 			// upgrade theme mode
@@ -523,13 +510,13 @@ namespace Carina.PixelViewer
 				{
 					settings.ResetValue(SettingKeys.DarkMode);
 					if (!this.IsSystemThemeModeSupported)
-						settings.SetValue<ThemeMode>(CarinaStudio.AppSuite.SettingKeys.ThemeMode, it ? ThemeMode.Dark : ThemeMode.Light);
+						settings.SetValue(CarinaStudio.AppSuite.SettingKeys.ThemeMode, it ? ThemeMode.Dark : ThemeMode.Light);
 				});
 			}
 			else if (oldVersion <= 3)
 			{
 				if (CarinaStudio.Platform.IsMacOS && settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.ThemeMode) == ThemeMode.Light)
-					settings.SetValue<ThemeMode>(CarinaStudio.AppSuite.SettingKeys.ThemeMode, ThemeMode.System);
+					settings.SetValue(CarinaStudio.AppSuite.SettingKeys.ThemeMode, ThemeMode.System);
 			}
 
 			// upgrade YUV conversion mode
@@ -538,7 +525,7 @@ namespace Carina.PixelViewer
 				settings.GetValueOrDefault(LegacyYuvConversionModeKey).Let(it =>
 				{
 					settings.ResetValue(LegacyYuvConversionModeKey);
-					settings.SetValue<string>(SettingKeys.DefaultYuvToBgraConversion, it switch
+					settings.SetValue(SettingKeys.DefaultYuvToBgraConversion, it switch
 					{
 						"ITU_R" => Media.YuvToBgraConverter.BT_601.Name,
 						"NTSC" => Media.YuvToBgraConverter.BT_656.Name,
@@ -554,6 +541,19 @@ namespace Carina.PixelViewer
         public override IEnumerable<Uri> PackageManifestUris => this.Settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.AcceptNonStableApplicationUpdate)
 			? new[] { PreviewPackageManifestUri, StablePackageManifestUri }
 			: new[] {StablePackageManifestUri };
+        
+        
+        // Parse argument.
+        static int ParseArguments(string[] args, int index, IDictionary<string, object> launchOptions)
+        {
+	        var arg = args[index];
+	        if (arg.Length > 0 && arg[0] != '-')
+	        {
+		        launchOptions[FilePathKey] = arg;
+		        return 1;
+	        }
+	        return 0;
+        }
 
 
 		/// <inheritdoc/>

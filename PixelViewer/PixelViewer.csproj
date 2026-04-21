@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<AssemblyVersion>4.0.0.0</AssemblyVersion>
-		<Version>4.0.0.0</Version>
+		<Version>2026.0.0</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
-		<Copyright>©2021-2025 Carina Studio</Copyright>
+		<Copyright>©2021-$([System.DateTime]::Now.Year) Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -17,8 +17,11 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>3.0.1.804-dev</AppSuiteVersion>
+		<AppSuiteVersion>3.0.7.418-preview</AppSuiteVersion>
+		<AvaloniaVersion>11.3.13</AvaloniaVersion>
 		<AvaloniaXamlBehaviorsVersion>11.3.0.6</AvaloniaXamlBehaviorsVersion>
+		<DotNetLibVersion>10.0.4</DotNetLibVersion>
+		<SkiaSharpVersion>3.119.2</SkiaSharpVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -50,8 +53,15 @@
 		<CFBundlePackageType>APPL</CFBundlePackageType>
 		<NSPrincipalClass>NSApplication</NSPrincipalClass>
     	<NSHighResolutionCapable>True</NSHighResolutionCapable>
-		<NSHumanReadableCopyright>©2021-2025 Carina Studio</NSHumanReadableCopyright>
+		<NSHumanReadableCopyright>©2021-$([System.DateTime]::Now.Year) Carina Studio</NSHumanReadableCopyright>
 	</PropertyGroup>
+
+	<ItemGroup Condition="'$(AvaloniaVersion)'!=''">
+		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="$(AvaloniaXamlBehaviorsVersion)" />
@@ -62,6 +72,8 @@
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
 		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.7.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+		<PackageReference Include="SkiaSharp" Version="$(SkiaSharpVersion)" />
+		<PackageReference Include="SkiaSharp.HarfBuzz" Version="$(SkiaSharpVersion)" />
 	</ItemGroup>
 
 	<ItemGroup Condition="$(RuntimeIdentifier.Contains('windows'))">

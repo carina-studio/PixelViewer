@@ -10,6 +10,7 @@ using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
 using Carina.PixelViewer.Media.Profiles;
@@ -36,7 +37,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Platform;
 
 // ReSharper disable PrivateFieldCanBeConvertedToLocalVariable
 
@@ -672,12 +672,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <param name="data">Dropped data.</param>
 	/// <param name="keyModifiers">Key modifiers.</param>
 	/// <returns>True if data has been accepted.</returns>
-#pragma warning disable IDE0060
-	public async Task<bool> DropDataAsync(IDataObject data, KeyModifiers keyModifiers)
-#pragma warning restore IDE0060
+	public async Task<bool> DropDataAsync(IDataTransfer data, KeyModifiers keyModifiers)
 	{
 		// get file names
-		var fileNames = Global.RunOrDefault(() => data.GetFiles()?.Let(it =>
+		var fileNames = Global.RunOrDefault(() => data.TryGetFiles()?.Let(it =>
 		{
 			var fileNames = new List<string>();
 			foreach (var file in it)
@@ -1092,10 +1090,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	}
 
 
-	// Called when drop.
+	// Called when dropped.
 	void OnDrop(object? sender, DragEventArgs e)
 	{
-		_ = this.DropDataAsync(e.Data, e.KeyModifiers);
+		_ = this.DropDataAsync(e.DataTransfer, e.KeyModifiers);
 		e.Handled = true;
 	}
 

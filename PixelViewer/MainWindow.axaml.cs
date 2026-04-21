@@ -9,8 +9,8 @@ using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
+using CarinaStudio.AppSuite.Input;
 using CarinaStudio.Collections;
-using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Key = Avalonia.Input.Key;
@@ -20,8 +20,8 @@ using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Input;
-
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
 using TabItem = CarinaStudio.AppSuite.Controls.TabItem;
 
@@ -33,12 +33,9 @@ namespace Carina.PixelViewer
 	class MainWindow : MainWindow<Workspace>, INotificationPresenter
 	{
 		// Static fields.
+		static readonly DataFormat<byte[]> DraggingSessionFormat = DataFormat.CreateBytesApplicationFormat("DraggingSession");
 		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
 		static bool IsRefreshingAppIconOnMacOSHintDialogShown;
-
-
-		// Constants.
-		const string DraggingSessionKey = "DraggingSettion";
 
 
 		// Fields.
@@ -429,7 +426,7 @@ namespace Carina.PixelViewer
 			e.Handled = true;
 
 			// handle file dragging
-			if (e.Data.HasFileNames())
+			if (e.DataTransfer.HasFiles())
 			{
 				if (e.ItemIndex < this.mainTabItems.Count - 1)
 					this.mainTabControl.SelectedIndex = e.ItemIndex;
@@ -438,7 +435,9 @@ namespace Carina.PixelViewer
 			}
 			
 			// handle session dragging
-			if (e.Data.Get(DraggingSessionKey) is Session session && e.ItemIndex != this.mainTabItems.Count - 1)
+			if (e.DataTransfer.TryGetGCHandle(DraggingSessionFormat, out var sessionHandle) 
+			    && sessionHandle.Target is Session session
+			    && e.ItemIndex < this.mainTabItems.Count - 1)
 			{
 				// find source position
 				var workspace = (Workspace)session.Owner.AsNonNull();
@@ -488,7 +487,7 @@ namespace Carina.PixelViewer
 			ItemInsertionIndicator.SetInsertingItemBefore(tabItem, false);
 			
 			// drop files
-			if (e.Data.HasFileNames())
+			if (e.DataTransfer.HasFiles())
 			{
 				// find tab
 				if (e.ItemIndex >= this.mainTabItems.Count - 1)
@@ -500,7 +499,7 @@ namespace Carina.PixelViewer
 				// drop data
 				(this.mainTabItems[e.ItemIndex].Content as SessionControl)?.Let(it =>
 				{
-					_ = it.DropDataAsync(e.Data, e.KeyModifiers);
+					_ = it.DropDataAsync(e.DataTransfer, e.KeyModifiers);
 				});
 
 				// complete
@@ -509,7 +508,9 @@ namespace Carina.PixelViewer
 			}
 
 			// drop session
-			if (e.Data.Get(DraggingSessionKey) is Session session)
+			if (e.DataTransfer.TryGetGCHandle(DraggingSessionFormat, out var sessionHandle)
+			    && sessionHandle.Target is Session session
+			    && e.ItemIndex < this.mainTabItems.Count - 1)
 			{
 				// find source position
 				var srcWorkspace = (Workspace)session.Owner.AsNonNull();
@@ -774,11 +775,12 @@ namespace Carina.PixelViewer
 				return;
 			
 			// prepare dragging data
-			var data = new DataObject();
-			data.Set(DraggingSessionKey, session);
+			var data = new DataTransfer();
+			var sessionHandle = GCHandle.Alloc(session, GCHandleType.Weak);
+			data.Add(DraggingSessionFormat, sessionHandle);
 
 			// start dragging session
-			DragDrop.DoDragDrop(e.PointerEventArgs, data, DragDropEffects.Move);
+			DragDrop.DoDragDropAsync(e.PointerEventArgs, data, DragDropEffects.Move).GetAwaiter().UnsafeOnCompleted(() => sessionHandle.Free());
 		}
 
 

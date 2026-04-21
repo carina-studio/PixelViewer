@@ -2,7 +2,6 @@ using Carina.PixelViewer.Native;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
-using CarinaStudio.Configuration;
 using CarinaStudio.MacOS.CoreGraphics;
 using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
@@ -451,23 +450,21 @@ namespace Carina.PixelViewer.Media
             D65, 
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
 
-#pragma warning disable CS0618
         /// <summary>
         /// DCI-P3 (D63).
         /// </summary>
         public static readonly ColorSpace DCI_P3 = new ColorSpace(
             ColorSpaceSource.BuiltIn,
-            "DCI-P3", 
-            null, 
+            "DCI-P3",
+            null,
             new SKColorSpaceTransferFn()
             {
                 G = 2.6f,
                 A = 1f
             },
-            SKColorSpaceXyz.Dcip3,
-            (0.894587, 1, 0.954416), 
+            SKColorSpaceXyz.DisplayP3,
+            (0.894587, 1, 0.954416),
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
-#pragma warning restore CS0618
 
         /// <summary>
         /// Default color space.
@@ -482,12 +479,8 @@ namespace Carina.PixelViewer.Media
             "Display-P3", 
             null, 
             SKColorSpaceTransferFn.Srgb,
-            new SKColorSpaceXyz(
-                0.51512146f, 0.29197693f, 0.15710449f,
-                0.24119568f, 0.6922455f, 0.0665741f,
-                -0.0010528564f, 0.041885376f, 0.7840729f
-            ),
-            D65, 
+            SKColorSpaceXyz.DisplayP3,
+            D65,
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         
         /// <summary>
