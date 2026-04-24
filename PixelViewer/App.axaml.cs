@@ -320,8 +320,12 @@ namespace Carina.PixelViewer
 		/// <inheritdoc/>
 		protected override SplashWindowParams OnPrepareSplashWindow() => base.OnPrepareSplashWindow().Also((ref SplashWindowParams it) =>
 		{
+			var isDarkMode = this.EffectiveThemeMode == ThemeMode.Dark;
 			it.AccentColor = Avalonia.Media.Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
 			it.BackgroundImageOpacity = 0.75;
+			it.BackgroundImageUri = isDarkMode
+				? new Uri($"avares://{this.Assembly.GetName().Name}/SplashWindowBackground-Dark.png")
+				: new Uri($"avares://{this.Assembly.GetName().Name}/SplashWindowBackground-Light.png");
 		});
 
 
