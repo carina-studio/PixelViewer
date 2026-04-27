@@ -16,19 +16,19 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更準確的色彩輸出，但將會影響繪製影像的效能。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空間「{0}」與「{1}」相同，您是否還要將其加入？</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">對比調整函數</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新的分頁開啟拖放的檔案</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新分頁以開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">自訂色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">預設位元組順序</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">預設影像色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">預設評估之長寬比例</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;將嘗試使用檔案名稱評估尺寸。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">若選擇&lt;不指定&gt;，將嘗試使用檔案名稱評估尺寸。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">預設格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">預設 YUV 至 RGB 轉換</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">啟用色彩管理</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">變更格式後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">開啟檔案後評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">優先嘗試從檔案名稱判斷影像格式</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">自動隱藏影像檢視區的捲動軸</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">自動隱藏影像檢視區的捲軸</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">影像尺寸評估</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">影像濾鏡</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">影像格式</sys:String>
@@ -84,7 +84,7 @@
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">主色及白點</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">紅色</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">參考色彩空間</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace.Description">在圖表中以虛線顯示</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace.Description">在圖表中以虛線顯示。</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">色彩空間資訊</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram">非線性-線性轉換函數 (EOTF)</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram">線性-非線性轉換函數 (OETF)</sys:String>
@@ -112,7 +112,7 @@
 	<sys:String x:Key="String/FileType.Icc">ICC 色彩描述檔</sys:String>
 	<sys:String x:Key="String/FileType.Jpeg">JPEG 影像</sys:String>
 	<sys:String x:Key="String/FileType.Nef">Nikon 原始影像格式 (NEF)</sys:String>
-	<sys:String x:Key="String/FileType.Png">可攜式網路影像 (PNG)</sys:String>
+	<sys:String x:Key="String/FileType.Png">可攜式網路圖形 (PNG)</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位元 BGRA 像素</sys:String>
 	<sys:String x:Key="String/FileType.WebP">WebP 影像</sys:String>
 
@@ -226,9 +226,9 @@
 	<sys:String x:Key="String/SessionControl.ImageRenderer">格式</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageSavingFailed">無法將影像儲存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">影像已儲存至 '{0}'。</sys:String>
-	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱：</sys:String>
+	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImage">記憶體不足以繪製影像。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
-	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">最多支援拖放 8 個檔案。</sys:String>
+	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">一次最多可拖放 8 個檔案。</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一張畫面 (Home)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最後一張畫面 (End)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一張畫面 (Page Down)</sys:String>

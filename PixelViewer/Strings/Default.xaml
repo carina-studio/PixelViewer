@@ -4,49 +4,49 @@
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 	<!-- App -->
-	<sys:String x:Key="String/App.InitializingColorSpaces">Loading color spaces</sys:String>
-	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">Loading profiles</sys:String>
+	<sys:String x:Key="String/App.InitializingColorSpaces">Loading Color Spaces</sys:String>
+	<sys:String x:Key="String/App.InitializingImageRenderingProfiles">Loading Profiles</sys:String>
 	<sys:String x:Key="String/App.Shutdown">Exit</sys:String>
 
 	<!-- ApplicationOptionsDialog -->
-	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness adjustment function</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness Adjustment Function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">Timing of color space conversion</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">Color Space Conversion Timing</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">Details of {0}</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color management improves the accuracy of color of rendered image, but it will affects the performance of image rendering.</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">The color space '{0}' is same as '{1}', do you still want to add it?</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast adjustment function</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create new tab to open dragged file</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">Custom color spaces</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">Default byte ordering</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">Default color space of image</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default aspect ratio for evaluation</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">Will try evaluating according to file name if you select &lt;Unspecified&gt;.</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default format</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB conversion</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">Enable color management</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after changing format</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after opening file</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">Try selecting image format according to file name first</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">Hide scroll bars of image viewer automatically</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image dimensions evaluation</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">Image filter</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image format</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Max memory usage of all rendered images (MB)</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly">Use 32-bit color only to render image</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color management improves the color accuracy of rendered images, but it affects rendering performance.</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">The color space '{0}' is the same as '{1}'. Do you still want to add it?</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast Adjustment Function</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create New Tab to Open Dragged File</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">Custom Color Spaces</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">Default Byte Ordering</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultColorSpace">Default Image Color Space</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio">Default Aspect Ratio for Evaluation</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageDimensionsEvaluationAspectRatio.Description">If &lt;Unspecified&gt; is selected, the aspect ratio will be evaluated based on the file name.</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultImageRendererFormatName">Default Format</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultYuvToBgraConverter">Default YUV to RGB Conversion</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EnableColorSpaceManagement">Enable Color Management</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterChangingRenderer">Evaluate after Changing Format</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageDimensionsAfterOpeningSourceFile">Evaluate after Opening File</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.EvaluateImageRendererByFileName">Detect Image Format by File Name First</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.HideImageViewerScrollBarsAutomatically">Automatically Hide Image Viewer Scroll Bars</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageDimensionsEvaluation">Image Dimensions Evaluation</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFilter">Image Filter</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ImageFormat">Image Format</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.MaxRenderedImagesMemoryUsage">Maximum Memory Usage of All Rendered Images (MB)</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly">Render Images Using 32-bit Color Only</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly.Description">May still use more bits internally to process images.</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">Reset filter parameters after opening file</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset plane parameters if changing width of image</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">Apply current rotation on saved images.</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Color space of screen</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/memory usage on status bar</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB color of selected pixel</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* D50 color of selected pixel</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">Show XYZ D50 color of selected pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">Reset Filter Parameters after Opening File</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset Plane Parameters when Changing Image Width</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">Apply Current Rotation to Saved Images</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Screen Color Space</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/Memory Usage on the Status Bar</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB Color of Selected Pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* D50 Color of Selected Pixel</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelXyzColor">Show XYZ D50 Color of Selected Pixel</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">Unable to load color space from file.</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to default format after opening file</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">Prefer using system defined screen color space</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">Will fall back to 'Color space of screen' if system defined screen color space is unavailable.</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to Default Format after Opening File</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">Prefer Using System-Defined Screen Color Space</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">Falls back to 'Screen color space' if the system-defined screen color space is unavailable.</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Ratio_1x1">1:1</sys:String>
@@ -69,9 +69,9 @@
 	<sys:String x:Key="String/BayerPattern.RGGB_4x4">RGGB (4x4)</sys:String>
 
 	<!-- BrightnessTransformationFunction -->
-	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangent-based transformation</sys:String>
-	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma transformation</sys:String>
-	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">Linear transformation</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangent-Based Transformation</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma Transformation</sys:String>
+	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">Linear Transformation</sys:String>
 
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">Big-Endian</sys:String>
@@ -86,31 +86,31 @@
 	<sys:String x:Key="String/ColorSpace.BT.601-625-line">BT.601 (625-line, SDTV)</sys:String>
 	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
-	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">Embedded color space</sys:String>
+	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">Embedded Color Space</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
-	<sys:String x:Key="String/ColorSpace.SystemDefined">System defined color space</sys:String>
+	<sys:String x:Key="String/ColorSpace.SystemDefined">System-Defined Color Space</sys:String>
 	
 	<!-- ColorSpaceConversionTiming -->
-	<sys:String x:Key="String/ColorSpaceConversionTiming.BeforeApplyingFilters">Before applying filters</sys:String>
-	<sys:String x:Key="String/ColorSpaceConversionTiming.BeforeRenderingToDisplay">Before output to display</sys:String>
+	<sys:String x:Key="String/ColorSpaceConversionTiming.BeforeApplyingFilters">Before Applying Filters</sys:String>
+	<sys:String x:Key="String/ColorSpaceConversionTiming.BeforeRenderingToDisplay">Before Output to Display</sys:String>
 
 	<!-- ColorSpaceInfoDialog -->
 	<sys:String x:Key="String/ColorSpaceInfoDialog.BluePrimary">Blue</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy chromaticity diagram</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ChromaticityDiagram">CIE 1931 xy Chromaticity Diagram</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Diagram">Diagram</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.GreenPrimary">Green</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">R/G/B are linear in this color space, they can be converted between XYZ color space by linear combination directly.</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.LinearColorSpace">R/G/B are linear in this color space; they can be converted to and from the XYZ color space directly by linear combination.</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.Name">Name</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.NonLinearColorSpace">R/G/B are non-linear in this color space. A set of transfer functions (OETF/EOTF) must be applied before converting between XYZ color space.</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.Other">Other information</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">Primaries and white point</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.NonLinearColorSpace">R/G/B are non-linear in this color space. A set of transfer functions (OETF/EOTF) must be applied before converting to or from the XYZ color space.</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Other">Other Information</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Primaries">Primaries and White Point</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.RedPrimary">Red</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced color space</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace.Description">Show as dashed lines in diagram</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">Color space information</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram">Non-linear to linear transfer function (EOTF)</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram">Linear to non-linear transfer function (OETF)</sys:String>
-	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">White point</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace">Referenced Color Space</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ReferenceColorSpace.Description">Shown as dashed lines in the diagram.</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.Title">Color Space Information</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ToLinearTransferFunctionDiagram">Non-Linear to Linear Transfer Function (EOTF)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.ToNonLinearTransferFunctionDiagram">Linear to Non-Linear Transfer Function (OETF)</sys:String>
+	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint">White Point</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description">This is for reference only. CIE standard illuminant D50 is always used for internal color conversion.</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.CCT">CCT {0:F0}K</sys:String>
 	<sys:String x:Key="String/ColorSpaceInfoDialog.WhitePoint.Description.Prefix.StandardIlluminantWithCCT">CIE standard illuminant {0}, CCT {1:F0}K</sys:String>
@@ -121,26 +121,26 @@
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
 
 	<!-- ContrastTransformationFunction -->
-	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">Dual arctangent-based transformation</sys:String>
-	<sys:String x:Key="String/ContrastTransformationFunction.Linear">Linear transformation</sys:String>
-	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange interpolation</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">Dual Arctangent-Based Transformation</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Linear">Linear Transformation</sys:String>
+	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange Interpolation</sys:String>
 
 	<!-- FileType -->
-	<sys:String x:Key="String/FileType.All">All files</sys:String>
+	<sys:String x:Key="String/FileType.All">All Files</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows Bitmap</sys:String>
 	<sys:String x:Key="String/FileType.Cr2">Canon RAW Format v2 (CR2)</sys:String>
 	<sys:String x:Key="String/FileType.Dng">Digital Negative (DNG)</sys:String>
 	<sys:String x:Key="String/FileType.Heif">High Efficiency Image File Format (HEIF)</sys:String>
-	<sys:String x:Key="String/FileType.Icc">ICC color profile</sys:String>
-	<sys:String x:Key="String/FileType.Jpeg">JPEG image</sys:String>
+	<sys:String x:Key="String/FileType.Icc">ICC Color Profile</sys:String>
+	<sys:String x:Key="String/FileType.Jpeg">JPEG Image</sys:String>
 	<sys:String x:Key="String/FileType.Nef">Nikon Electronic Format (NEF)</sys:String>
-	<sys:String x:Key="String/FileType.Png">PNG image</sys:String>
-	<sys:String x:Key="String/FileType.RawBgra">Raw 32/64-bit BGRA pixels</sys:String>
+	<sys:String x:Key="String/FileType.Png">PNG Image</sys:String>
+	<sys:String x:Key="String/FileType.RawBgra">Raw 32/64-bit BGRA Pixels</sys:String>
 	<sys:String x:Key="String/FileType.Yuv4Mpeg2">YUV4MPEG2</sys:String>
-	<sys:String x:Key="String/FileType.WebP">WebP image</sys:String>
+	<sys:String x:Key="String/FileType.WebP">WebP Image</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
-	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to frame</sys:String>
+	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to Frame</sys:String>
 
 	<!-- ImageFormat -->
 	<sys:String x:Key="String/ImageFormat.Android_YUV_420_888">YUV_420_888 (Android)</sys:String>
@@ -186,19 +186,19 @@
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;None&gt;</sys:String>
 
 	<!-- ImageRenderingProfileSelectionDialog -->
-	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">Select profile</sys:String>
+	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">Select Profile</sys:String>
 
 	<!-- JpegImageEncodingOptionsDialog -->
 	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.QualityLevel">Compression quality: {0}</sys:String>
-	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG options</sys:String>
+	<sys:String x:Key="String/JpegImageEncodingOptionsDialog.Title">JPEG Options</sys:String>
 
 	<!-- MainWindow -->
-	<sys:String x:Key="String/MainWindow.RefreshingAppIconOnMacOSHint">For macOS user, you may find that application icon doesn't updated on Dock (also in Launchpad) after upgrading. Do you want to see how to refresh the application icon?</sys:String>
-	<sys:String x:Key="String/MainWindow.ResetSessionTitle">Reset title</sys:String>
-	<sys:String x:Key="String/MainWindow.Session.Hibernated">Hibernated to save resources</sys:String>
+	<sys:String x:Key="String/MainWindow.RefreshingAppIconOnMacOSHint">For macOS users, you may notice that the application icon doesn't update on the Dock (also in the Launchpad) after upgrading. Do you want to check how to refresh the application icon?</sys:String>
+	<sys:String x:Key="String/MainWindow.ResetSessionTitle">Reset Title</sys:String>
+	<sys:String x:Key="String/MainWindow.Session.Hibernated">Hibernated to Save Resources</sys:String>
 	<sys:String x:Key="String/MainWindow.Session.RenderedImagesMemoryUsage">Memory usage:</sys:String>
-	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">Custom title…</sys:String>
-	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">Custom title</sys:String>
+	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">Custom Title…</sys:String>
+	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">Custom Title</sys:String>
 	<sys:String x:Key="String/MainWindow.Tabs">Tabs</sys:String>
 	<sys:String x:Key="String/MainWindow.Windows">Windows</sys:String>
 	
@@ -208,54 +208,54 @@
 	<sys:String x:Key="String/ScreenColorSpace.Srgb">sRGB</sys:String>
 
 	<!-- Session -->
-	<sys:String x:Key="String/Session.EmptyTitle">Empty tab</sys:String>
+	<sys:String x:Key="String/Session.EmptyTitle">Empty Tab</sys:String>
 
 	<!-- SessionControl -->
-	<sys:String x:Key="String/SessionControl.AlignToInteger">Align to integer</sys:String>
+	<sys:String x:Key="String/SessionControl.AlignToInteger">Align to Integer</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
-	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to parameters in profile</sys:String>
-	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer pattern</sys:String>
-	<sys:String x:Key="String/SessionControl.BlackLevel">Black level</sys:String>
-	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue gain</sys:String>
+	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to Profile Parameters</sys:String>
+	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer Pattern</sys:String>
+	<sys:String x:Key="String/SessionControl.BlackLevel">Black Level</sys:String>
+	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue Gain</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness and Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">Contrast: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight">Highlight: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">Shadow: {0}</sys:String>
-	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte ordering</sys:String>
-	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for update…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color: Adjust ratio of R/G/B without changing the luminance.</sys:String>
+	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte Ordering</sys:String>
+	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for Update…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color: adjust the R/G/B ratio without changing luminance.</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Saturation">Saturation: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">Vibrance: {0}</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace">Color space</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management has been disabled, click to open options…</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace">Color Space</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management is disabled. Click to open options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">In File</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.SystemDefined">System</sys:String>
-	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save image which has been filtered?</sys:String>
+	<sys:String x:Key="String/SessionControl.ConfirmSavingFilteredImage">Save the filtered image?</sys:String>
 	<sys:String x:Key="String/SessionControl.ConvertingColorSpace">Converting color space…</sys:String>
-	<sys:String x:Key="String/SessionControl.CopyFileName">Copy file name</sys:String>
-	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy full path</sys:String>
-	<sys:String x:Key="String/SessionControl.CpuUsage">CPU usage</sys:String>
-	<sys:String x:Key="String/SessionControl.DataOffset">Starting data offset (bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.CopyFileName">Copy File Name</sys:String>
+	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy Full Path</sys:String>
+	<sys:String x:Key="String/SessionControl.CpuUsage">CPU Usage</sys:String>
+	<sys:String x:Key="String/SessionControl.DataOffset">Starting Data Offset (Bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
-	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete profile</sys:String>
+	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.Demosaicing">Demosaicing</sys:String>
-	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Drag file to here, or click</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">Drag a file here, or click</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
-	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">Profile '{0}' is existent.</sys:String>
-	<sys:String x:Key="String/SessionControl.EffectiveBits">Effective bits</sys:String>
-	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate automatically</sys:String>
+	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">A profile named '{0}' already exists.</sys:String>
+	<sys:String x:Key="String/SessionControl.EffectiveBits">Effective Bits</sys:String>
+	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate Automatically</sys:String>
 	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">Applying filters…</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">Decrease</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">Increase</sys:String>
-	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (Ctrl+0)</sys:String>
-	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding between frames (bytes)</sys:String>
-	<sys:String x:Key="String/SessionControl.GrayscaleFilter">Grayscale filter</sys:String>
-	<sys:String x:Key="String/SessionControl.GreenColorGain">Green gain</sys:String>
+	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to Viewport (Ctrl+0)</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding Between Frames (Bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.GrayscaleFilter">Grayscale Filter</sys:String>
+	<sys:String x:Key="String/SessionControl.GreenColorGain">Green Gain</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Blue">Blue</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Green">Green</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Luminance">Luminance</sys:String>
@@ -268,50 +268,50 @@
 	<sys:String x:Key="String/SessionControl.ImageRenderer">Format</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageSavingFailed">Failed to save image to '{0}'.</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">Image saved to '{0}'.</sys:String>
-	<sys:String x:Key="String/SessionControl.InputNameOfProfile">Name of profile:</sys:String>
-	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImage">Insufficient memory to render image. You can try enlarging maximum memory usage in application options.</sys:String>
-	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">Max supported number of dragged files is 8.</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">Move to the first frame (Home)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToLastFrame">Move to the last frame (End)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToNextFrame">Move to next frame (Page Down)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">Move to previous frame (Page Up)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">Move to frame…</sys:String>
+	<sys:String x:Key="String/SessionControl.InputNameOfProfile">Profile Name</sys:String>
+	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImage">Insufficient memory to render the image. Try increasing the maximum memory usage in application options.</sys:String>
+	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">The maximum number of files you can drag and drop is 8.</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">Move to First Frame (Home)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToLastFrame">Move to Last Frame (End)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToNextFrame">Move to Next Frame (Page Down)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">Move to Previous Frame (Page Up)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">Move to Frame…</sys:String>
 	<sys:String x:Key="String/SessionControl.NoImageRendered">No image rendered.</sys:String>
-	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No image file opened</sys:String>
+	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No Image File Opened</sys:String>
 	<sys:String x:Key="String/SessionControl.OpeningSourceFile">Opening image file…</sys:String>
-	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (Ctrl+O)</sys:String>
-	<sys:String x:Key="String/SessionControl.OtherActions">Other actions</sys:String>
-	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-stride (bytes)</sys:String>
-	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">Process private memory usage</sys:String>
+	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open Image File (Ctrl+O)</sys:String>
+	<sys:String x:Key="String/SessionControl.OtherActions">Other Actions</sys:String>
+	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-Stride (Bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">Process Private Memory Usage</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.ProfileTypeLabel.FileFormat">File Format</sys:String>
-	<sys:String x:Key="String/SessionControl.RedColorGain">Red gain</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory usage of rendered images by this tab</sys:String>
+	<sys:String x:Key="String/SessionControl.RedColorGain">Red Gain</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory Usage of Rendered Images by This Tab</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed which is usually caused by incorrect rendering parameters.</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">Rendering parameters panel</sys:String>
-	<sys:String x:Key="String/SessionControl.RgbGain">Color pre-correction</sys:String>
-	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate counter-clockwise</sys:String>
-	<sys:String x:Key="String/SessionControl.RotateRight">Rotate clockwise</sys:String>
-	<sys:String x:Key="String/SessionControl.RowStride">Row-stride (bytes)</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as new profile</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveImage">Save image (Ctrl+S)</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveProfile">Save profile</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed. This is usually caused by incorrect rendering parameters.</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">Rendering Parameters Panel</sys:String>
+	<sys:String x:Key="String/SessionControl.RgbGain">Color Pre-Correction</sys:String>
+	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate Counter-Clockwise</sys:String>
+	<sys:String x:Key="String/SessionControl.RotateRight">Rotate Clockwise</sys:String>
+	<sys:String x:Key="String/SessionControl.RowStride">Row-Stride (Bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as New Profile</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveImage">Save Image (Ctrl+S)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveProfile">Save Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
-	<sys:String x:Key="String/SessionControl.ScreenColorSpace">Color space of screen</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectedPixel.None">Move cursor on image to view pixel information.</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">Auto adjust</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectRgbGain">Auto adjust</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to open files</sys:String>
-	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show file in Windows File Explorer</sys:String>
-	<sys:String x:Key="String/SessionControl.SourceDataSize">Size of source data</sys:String>
-	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total memory usage of rendered images</sys:String>
-	<sys:String x:Key="String/SessionControl.UIResponseDuration">User interface response time</sys:String>
-	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">Treat as linear color space</sys:String>
-	<sys:String x:Key="String/SessionControl.WhiteLevel">White level</sys:String>
-	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV to RGB conversion</sys:String>
-	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (Ctrl+)</sys:String>
-	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (Ctrl-)</sys:String>
+	<sys:String x:Key="String/SessionControl.ScreenColorSpace">Screen Color Space</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedPixel.None">Move the cursor over the image to view pixel information.</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">Auto Adjust</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectRgbGain">Auto Adjust</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to Open Files</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Windows File Explorer</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceDataSize">Source Data Size</sys:String>
+	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total Memory Usage of Rendered Images</sys:String>
+	<sys:String x:Key="String/SessionControl.UIResponseDuration">User Interface Response Time</sys:String>
+	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">Treat as Linear Color Space</sys:String>
+	<sys:String x:Key="String/SessionControl.WhiteLevel">White Level</sys:String>
+	<sys:String x:Key="String/SessionControl.YuvToBgraConverter">YUV to RGB Conversion</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom In (Ctrl+)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom Out (Ctrl-)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomToOriginalImageSize">Zoom to 100% (Ctrl+1)</sys:String>
 
 	<!-- YuvToBgraConverter -->

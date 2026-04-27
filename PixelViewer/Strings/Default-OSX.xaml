@@ -5,12 +5,12 @@
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(⌘O) to open image file.</sys:String>
-	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to viewport (⌘0)</sys:String>
-	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open image file (⌘O)</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveImage">Save image (⌘S)</sys:String>
-	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show file in Finder</sys:String>
-	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom-in (⌘+)</sys:String>
-	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom-out (⌘-)</sys:String>
-	<sys:String x:Key="String/SessionControl.ZoomToOriginalImageSize">縮放至 100% (⌘1)</sys:String>
+	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to Viewport (⌘0)</sys:String>
+	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open Image File (⌘O)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveImage">Save Image (⌘S)</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Finder</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomIn">Zoom In (⌘+)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomOut">Zoom Out (⌘-)</sys:String>
+	<sys:String x:Key="String/SessionControl.ZoomToOriginalImageSize">Zoom to 100% (⌘1)</sys:String>
 
 </ResourceDictionary>

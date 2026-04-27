@@ -4,10 +4,10 @@
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
 	<!-- SessionControl -->
-	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(⌘O) 以开启图像文件。</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(⌘O) 以打开图像文件。</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">调整至窗口大小 (⌘0)</sys:String>
-	<sys:String x:Key="String/SessionControl.OpenSourceFile">开启图像文件 (⌘O)</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveImage">储存图像 (⌘S)</sys:String>
+	<sys:String x:Key="String/SessionControl.OpenSourceFile">打开图像文件 (⌘O)</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveImage">保存图像 (⌘S)</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在 Finder 中显示文件</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomIn">放大 (⌘+)</sys:String>
 	<sys:String x:Key="String/SessionControl.ZoomOut">缩小 (⌘-)</sys:String>

@@ -5,7 +5,7 @@
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">点击</sys:String>
-	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以开启图像文件。</sys:String>
+	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以打开图像文件。</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在文件管理器中显示文件</sys:String>
 
 </ResourceDictionary>
