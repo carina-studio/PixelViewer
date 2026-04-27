@@ -95,6 +95,8 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<AvaloniaResource Include="AppInfoBanner-Dark.png" />
+		<AvaloniaResource Include="AppInfoBanner-Light.png" />
 		<AvaloniaResource Include="ChangeList.md" />
 		<AvaloniaResource Include="ChangeList-zh-CN.md" />
 		<AvaloniaResource Include="ChangeList-zh-TW.md" />
