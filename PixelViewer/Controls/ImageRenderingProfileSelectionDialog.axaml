@@ -2,10 +2,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+		xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ImageRenderingProfileSelectionDialog"
 		Classes="Dialog"
-        Title="{DynamicResource String/ImageRenderingProfileSelectionDialog.Title}"
+        Title="{asXaml:StringResource ImageRenderingProfileSelectionDialog.Title}"
 		Width="{DynamicResource Double/ImageRenderingProfileSelectionDialog.Width}">
 
 	<DockPanel>
@@ -13,14 +15,14 @@
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
-				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].Close}" Content="{DynamicResource String/Common.Cancel}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].Close}" Content="{asXaml:StringResource Common.Cancel}"/>
 			</StackPanel>
 		</Border>
 
 		<!-- Content -->
 		<StackPanel Classes="Dialog_ContentPanel">
-			<TextBlock Classes="Dialog_TextBlock" Text="{Binding $parent[Window].Message}" TextWrapping="WrapWithOverflow"/>
+			<TextBlock Text="{Binding $parent[Window].Message}" TextWrapping="WrapWithOverflow" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 			<ComboBox Name="profileComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding $parent[Window].Profiles}">
 				<ComboBox.ItemTemplate>
 					<DataTemplate>

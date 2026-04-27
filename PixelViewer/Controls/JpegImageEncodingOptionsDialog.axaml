@@ -3,10 +3,12 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:abControls="using:CarinaStudio.Controls"
+        xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+        xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.JpegImageEncodingOptionsDialog"
 		Classes="Dialog"
-        Title="{DynamicResource String/JpegImageEncodingOptionsDialog.Title}"
+        Title="{asXaml:StringResource JpegImageEncodingOptionsDialog.Title}"
 		Width="{DynamicResource Double/JpegImageEncodingOptionsDialog.Width}">
 
 	<DockPanel>
@@ -14,18 +16,17 @@
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{DynamicResource String/Common.OK}"/>
-				<Button Classes="Dialog_ControlButton" Command="{Binding $parent[Window].Close}" Content="{DynamicResource String/Common.Cancel}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].Close}" Content="{asXaml:StringResource Common.Cancel}"/>
 			</StackPanel>
 		</Border>
 
 		<!-- Content -->
 		<StackPanel Classes="Dialog_ContentPanel">
-			<abControls:FormattedTextBlock Classes="Dialog_TextBlock_Label"
+			<abControls:FormattedTextBlock asControls:DialogElement.TextRole="LabelAboveInputControl"
 			                               Arg1="{Binding #qualityLevelSlider.Value, StringFormat={}{0:F0}}"
-			                               Format="{DynamicResource String/JpegImageEncodingOptionsDialog.QualityLevel}"/>
-			<Slider Name="qualityLevelSlider" 
-			        Classes="Dialog_Slider" 
+			                               Format="{asXaml:StringResource JpegImageEncodingOptionsDialog.QualityLevel}"/>
+			<Slider Name="qualityLevelSlider"
 			        Maximum="100" 
 			        Minimum="10" 
 			        SmallChange="1" 

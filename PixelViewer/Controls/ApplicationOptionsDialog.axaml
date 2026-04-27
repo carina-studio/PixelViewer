@@ -30,7 +30,7 @@
 		</Border>
 		
 		<!-- Navigation bar -->
-		<Border Classes="Toolbar" DockPanel.Dock="Left">
+		<Border Classes="Toolbar" BorderBrush="{DynamicResource Brush/Toolbar.Border}" BorderThickness="0,0,1,0" DockPanel.Dock="Left">
 			<asControls:ToolBarScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
 				<StackPanel>
 					
