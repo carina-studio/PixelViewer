@@ -124,25 +124,25 @@
 			<NativeMenuItem Header="{DynamicResource String/MainWindow.Windows}">
 				<NativeMenuItem.Menu>
 					<NativeMenu>
-						<NativeMenuItem Command="{Binding $self.CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" Gesture="Cmd+N"/>
+						<NativeMenuItem Command="{Binding $self.CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" Icon="{StaticResource Bitmap/Icon.Add}" Gesture="Cmd+N"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}"/>
-						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Vertical}"/>
-						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Tile}"/>
+						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}" Icon="{StaticResource Bitmap/Icon.Layout.Horizontal}"/>
+						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Vertical}" Icon="{StaticResource Bitmap/Icon.Layout.Vertical}"/>
+						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Tile}" Icon="{StaticResource Bitmap/Icon.Layout.Tile}"/>
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>
 			<NativeMenuItem Header="{DynamicResource String/MainWindow.Tabs}">
 				<NativeMenuItem.Menu>
 					<NativeMenu>
-						<NativeMenuItem Command="{Binding $self.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}"  Gesture="Cmd+T"/>
+						<NativeMenuItem Command="{Binding $self.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}" Icon="{StaticResource Bitmap/Icon.Add}" Gesture="Cmd+T"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}"/>
-						<NativeMenuItem Command="{Binding $self.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+						<NativeMenuItem Command="{Binding $self.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}" Icon="{StaticResource Bitmap/Icon.Edit.Outline}"/>
+						<NativeMenuItem Command="{Binding $self.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" Icon="{StaticResource Bitmap/Empty}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $self.HasMultipleSessions}"/>
+						<NativeMenuItem Command="{Binding $self.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" Icon="{StaticResource Bitmap/Icon.ExternalLink}" IsEnabled="{Binding $self.HasMultipleSessions}"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.CloseCurrentMainTabItem}" Header="{DynamicResource String/Common.CloseTab}" Gesture="Cmd+W"/>
+						<NativeMenuItem Command="{Binding $self.CloseCurrentMainTabItem}" Header="{DynamicResource String/Common.CloseTab}" Icon="{StaticResource Bitmap/Icon.CloseTab.Outline}" Gesture="Cmd+W"/>
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>

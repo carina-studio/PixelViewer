@@ -5,11 +5,13 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Carina.PixelViewer.Controls;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.Input;
+using CarinaStudio.AppSuite.Media;
 using CarinaStudio.Collections;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
@@ -36,6 +38,16 @@ namespace Carina.PixelViewer
 		static readonly DataFormat<byte[]> DraggingSessionFormat = DataFormat.CreateBytesApplicationFormat("DraggingSession");
 		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
 		static bool IsRefreshingAppIconOnMacOSHintDialogShown;
+		static readonly string[] NativeMenuItemIconResourceNames =
+		[
+			"Icon.Add",
+			"Icon.CloseTab.Outline",
+			"Icon.Edit.Outline",
+			"Icon.ExternalLink",
+			"Icon.Layout.Horizontal",
+			"Icon.Layout.Tile",
+			"Icon.Layout.Vertical",
+		];
 
 
 		// Fields.
@@ -58,6 +70,19 @@ namespace Carina.PixelViewer
 			this.MoveSessionToNewWorkspaceCommand = new Command<TabItem>(this.MoveSessionToNewWorkspace);
 			this.ResetSessionTitleCommand = new Command<TabItem>(this.ResetSessionTitle);
 			this.SetCustomSessionTitleCommand = new Command<TabItem>(this.SetCustomSessionTitle);
+
+			// create icons for native menu items
+			if (Platform.IsMacOS)
+			{
+				var app = this.Application;
+				var resources = this.Resources;
+				foreach (var resourceName in NativeMenuItemIconResourceNames)
+				{
+					if (app.FindResourceOrDefault<IImage>($"Image/{resourceName}") is not { } image)
+						continue;
+					resources[$"Bitmap/{resourceName}"] = image.ToNativeMenuItemIcon();
+				}
+			}
 
 			// initialize Avalonia resources
 			AvaloniaXamlLoader.Load(this);

@@ -2,11 +2,13 @@ using ASControls = CarinaStudio.AppSuite.Controls;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
+using Avalonia.Media;
 using Avalonia.Styling;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
 using CarinaStudio.AppSuite.Controls;
+using CarinaStudio.AppSuite.Media;
 using CarinaStudio.AppSuite.Product;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
@@ -31,10 +33,8 @@ namespace Carina.PixelViewer
 	class App : AppSuiteApplication
 	{
 		// Source of change list.
-		class ChangeListSource : DocumentSource
+		class ChangeListSource(App app) : DocumentSource(app)
 		{
-			public ChangeListSource(App app) : base(app)
-			{ }
 			public override IList<ApplicationCulture> SupportedCultures =>
 			[
 				ApplicationCulture.EN_US,
@@ -321,7 +321,7 @@ namespace Carina.PixelViewer
 		protected override SplashWindowParams OnPrepareSplashWindow() => base.OnPrepareSplashWindow().Also((ref SplashWindowParams it) =>
 		{
 			var isDarkMode = this.EffectiveThemeMode == ThemeMode.Dark;
-			it.AccentColor = Avalonia.Media.Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
+			it.AccentColor = Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
 			it.BackgroundImageOpacity = 0.75;
 			it.BackgroundImageUri = isDarkMode
 				? new Uri($"avares://{this.Assembly.GetName().Name}/SplashWindowBackground-Dark.png")
@@ -345,20 +345,45 @@ namespace Carina.PixelViewer
 			}
 			this.UpdateSplashWindowProgress(0.1);
 
-			// remove debug menu items
-#if !DEBUG
-			NativeMenu.GetMenu(this)?.Let(menu =>
+			// setup native menu
+			if (Platform.IsMacOS)
 			{
-				foreach (var item in menu)
+				var app = (IAvaloniaApplication)this;
+				NativeMenu.GetMenu(this)?.Let(menu =>
 				{
-					if (item is NativeMenuItem menuItem && (menuItem.CommandParameter as string) == "EditConfiguration")
+					for (var i = menu.Items.Count - 1; i >= 0; --i)
 					{
-						menu.Items.Remove(item);
-						break;
-					}
-				}
-			});
+						var item = menu.Items[i];
+						if (item is not NativeMenuItem menuItem)
+							continue;
+						switch (menuItem.CommandParameter as string)
+						{
+							case "AppInfo":
+								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Information.Outline")?.ToNativeMenuItemIcon();
+								break;
+							case "AppOptions":
+								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Settings.Outline")?.ToNativeMenuItemIcon();
+								break;
+							case "CheckForUpdate":
+								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Update.Outline")?.ToNativeMenuItemIcon();
+								break;
+							case "EditConfiguration":
+#if DEBUG
+								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Tool.Outline")?.ToNativeMenuItemIcon();
+#else
+								menu.Items.RemoveAt(i);
 #endif
+								break;
+							case "Shutdown":
+								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Exit")?.ToNativeMenuItemIcon();
+								break;
+							default:
+								menuItem.UseEmptyIcon();
+								break;
+						}
+					}
+				});
+			}
 			
 			// attach to product manager
 			this.ProductManager.Let(it =>
