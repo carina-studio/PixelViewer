@@ -3,7 +3,7 @@
 set APP_NAME=PixelViewer
 set RID_LIST=win-arm64 win-x64 win-x86
 set CONFIG=Release-Windows
-set FRAMEWORK=net8.0
+set FRAMEWORK=net10.0
 set ERRORLEVEL=0
 
 echo ********** Start building %APP_NAME% **********
@@ -18,17 +18,21 @@ IF not exist Packages (
 )
 
 REM Get current version
-dotnet run --project PackagingTool get-current-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
-if %ERRORLEVEL% neq 0 ( 
+dotnet run PackagingTool.cs -- get-current-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
+if %ERRORLEVEL% neq 0 (
     del /Q Packages\Packaging.txt
     exit
 )
 set /p CURRENT_VERSION=<Packages\Packaging.txt
-echo Version: %CURRENT_VERSION%
+dotnet run PackagingTool.cs -- get-current-informational-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
+set /p CURRENT_INFORMATIONAL_VERSION=<Packages\Packaging.txt
+set PACKAGE_VERSION=%CURRENT_VERSION%
+if not [%CURRENT_INFORMATIONAL_VERSION%] == [] set PACKAGE_VERSION=%CURRENT_INFORMATIONAL_VERSION%
+echo Version: %CURRENT_VERSION% (%PACKAGE_VERSION%)
 
 REM Get previous version
-dotnet run --project PackagingTool get-previous-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
-if %ERRORLEVEL% neq 0 ( 
+dotnet run PackagingTool.cs -- get-previous-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
+if %ERRORLEVEL% neq 0 (
     del /Q Packages\Packaging.txt
     exit
 )
@@ -68,7 +72,7 @@ REM Build packages
     )
 
     REM Generate package
-    start /Wait PowerShell -ExecutionPolicy RemoteSigned -NoLogo -Command Compress-Archive -Force -Path %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\* -DestinationPath Packages\%CURRENT_VERSION%\%APP_NAME%-%CURRENT_VERSION%-%%r.zip
+    start /Wait PowerShell -ExecutionPolicy RemoteSigned -NoLogo -Command Compress-Archive -Force -Path %APP_NAME%\bin\%CONFIG%\%FRAMEWORK%\%%r\publish\* -DestinationPath Packages\%CURRENT_VERSION%\%APP_NAME%-%PACKAGE_VERSION%-%%r.zip
     if %ERRORLEVEL% neq 0 (
         echo Failed to generate package: %ERRORLEVEL%
         del /Q Packages\Packaging.txt
@@ -78,11 +82,11 @@ REM Build packages
 
 REM Generate diff packages
 if [%PREVIOUS_VERSION%] neq [] (
-    dotnet run --project PackagingTool create-diff-packages win %PREVIOUS_VERSION% %CURRENT_VERSION%
+    dotnet run PackagingTool.cs -- create-diff-packages win %PREVIOUS_VERSION% %CURRENT_VERSION%
 )
 
 REM Generate package manifest
-REM dotnet run --project PackagingTool create-package-manifest win %APP_NAME% %CURRENT_VERSION%
+REM dotnet run PackagingTool.cs -- create-package-manifest win %APP_NAME% %CURRENT_VERSION%
 
 REM Complete
 del /Q Packages\Packaging.txt

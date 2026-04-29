@@ -1,5 +1,5 @@
 APP_NAME="PixelViewer"
-FRAMEWORK="net8.0"
+FRAMEWORK="net10.0"
 RID_LIST=("osx-x64" "osx-arm64")
 PUB_PLATFORM_LIST=("osx-x64" "osx-arm64")
 CONFIG="Release"
@@ -10,12 +10,17 @@ CERT_NAME="" # Name of certification to sign the application
 echo "********** Start building $APP_NAME **********"
 
 # Get application version
-VERSION=$(dotnet run --project PackagingTool get-current-version $APP_NAME/$APP_NAME.csproj)
+VERSION=$(dotnet run PackagingTool.cs -- get-current-version $APP_NAME/$APP_NAME.csproj)
 if [ "$?" != "0" ]; then
     echo "Unable to get version of $APP_NAME"
     exit
 fi
-echo "Version: $VERSION"
+INFORMATIONAL_VERSION=$(dotnet run PackagingTool.cs -- get-current-informational-version $APP_NAME/$APP_NAME.csproj)
+PACKAGE_VERSION=$VERSION
+if [ ! -z "$INFORMATIONAL_VERSION" ]; then
+    PACKAGE_VERSION=$INFORMATIONAL_VERSION
+fi
+echo "Version: $VERSION ($PACKAGE_VERSION)"
 
 # Create output directory
 if [[ ! -d "./Packages/$VERSION" ]]; then
@@ -80,9 +85,9 @@ for i in "${!RID_LIST[@]}"; do
     codesign --deep --force --options=runtime --timestamp --entitlements "./$APP_NAME/$APP_NAME.entitlements" -s "$CERT_NAME" "./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app"
 
     # zip .app directory
-    ditto -c -k --sequesterRsrc --keepParent "./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app" "./Packages/$VERSION/$APP_NAME-$VERSION-$PUB_PLATFORM.zip"
+    ditto -c -k --sequesterRsrc --keepParent "./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app" "./Packages/$VERSION/$APP_NAME-$PACKAGE_VERSION-$PUB_PLATFORM.zip"
 
 done
 
 # Generate package manifest
-# dotnet run --project PackagingTool create-package-manifest osx $APP_NAME $VERSION
+# dotnet run PackagingTool.cs -- create-package-manifest osx $APP_NAME $VERSION
