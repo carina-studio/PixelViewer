@@ -119,6 +119,10 @@ namespace Carina.PixelViewer
 
         /// <inheritdoc/>
         public override ApplicationOptions CreateApplicationOptionsViewModel() => new AppOptions();
+        
+        
+        /// <inheritdoc/>
+        public override ApplicationUpdater CreateApplicationUpdaterViewModel() => new AppUpdater();
 
 
         /// <inheritdoc/>
