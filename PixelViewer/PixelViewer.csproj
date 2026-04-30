@@ -4,7 +4,7 @@
 		<Version>3.1.5.811</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
-		<Copyright>©2021-2025 Carina Studio</Copyright>
+		<Copyright>©2021-2026 Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
 		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
@@ -17,7 +17,7 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>2.3.93.803</AppSuiteVersion>
+		<AppSuiteVersion>2.3.96.225</AppSuiteVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -49,7 +49,7 @@
 		<CFBundlePackageType>APPL</CFBundlePackageType>
 		<NSPrincipalClass>NSApplication</NSPrincipalClass>
     	<NSHighResolutionCapable>True</NSHighResolutionCapable>
-		<NSHumanReadableCopyright>©2021-2025 Carina Studio</NSHumanReadableCopyright>
+		<NSHumanReadableCopyright>©2021-2026 Carina Studio</NSHumanReadableCopyright>
 	</PropertyGroup>
 
 	<ItemGroup>
