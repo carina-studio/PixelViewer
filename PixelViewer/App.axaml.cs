@@ -1,4 +1,3 @@
-using ASControls = CarinaStudio.AppSuite.Controls;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using Avalonia.Markup.Xaml.Styling;
@@ -97,9 +96,7 @@ namespace Carina.PixelViewer
 		// Static fields.
 		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new("ScreenColorSpace", "");
 		static readonly SettingKey<string> LegacyYuvConversionModeKey = new("YuvConversionMode", "");
-		static readonly Uri PreviewPackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
-		static readonly Uri StablePackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
-
+		
 
 		// Constructor.
 		public App()
@@ -553,9 +550,7 @@ namespace Carina.PixelViewer
 
 
 		// URI of package manifest.
-        public override IEnumerable<Uri> PackageManifestUris => this.Settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.AcceptNonStableApplicationUpdate)
-			? new[] { PreviewPackageManifestUri, StablePackageManifestUri }
-			: new[] {StablePackageManifestUri };
+		public override IEnumerable<Uri> PackageManifestUris => Array.Empty<Uri>();
 
 
 		/// <inheritdoc/>
