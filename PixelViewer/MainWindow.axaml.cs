@@ -23,6 +23,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
 using TabItem = CarinaStudio.AppSuite.Controls.TabItem;
@@ -291,12 +292,15 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Move current session to new workspace.
 		/// </summary>
-		public void MoveCurrentSessionToNewWorkspace() =>
-			(this.mainTabControl.SelectedItem as TabItem)?.Let(this.MoveSessionToNewWorkspace);
+		public async Task MoveCurrentSessionToNewWorkspace()
+		{
+			if (this.mainTabControl.SelectedItem is TabItem tabItem)
+				await this.MoveSessionToNewWorkspace(tabItem);
+		}
 
 
 		// Move given session to new workspace.
-		async void MoveSessionToNewWorkspace(TabItem tabItem)
+		async Task MoveSessionToNewWorkspace(TabItem tabItem)
         {
 			// check state
 			if (tabItem.DataContext is not Session session)
@@ -370,10 +374,7 @@ namespace Carina.PixelViewer
 			if (workspace.Sessions.IsNotEmpty())
 			{
 				var tabIndex = workspace.ActivatedSession is not null ? this.FindMainTabItemIndex(workspace.ActivatedSession) : -1;
-				if (tabIndex > 0)
-					this.mainTabControl.SelectedIndex = tabIndex;
-				else
-					this.mainTabControl.SelectedIndex = 0;
+				this.mainTabControl.SelectedIndex = tabIndex > 0 ? tabIndex : 0;
 			}
 			else
 				workspace.CreateAndAttachSession();
@@ -587,7 +588,7 @@ namespace Carina.PixelViewer
 		protected override void OnInitialDialogsClosed()
 		{
 			base.OnInitialDialogsClosed();
-			this.ShowPixelViewerInitialDialogs();
+			_ = this.ShowPixelViewerInitialDialogs();
 		}
 
 
@@ -858,12 +859,15 @@ namespace Carina.PixelViewer
 		/// <summary>
 		/// Set custom title of current session.
 		/// </summary>
-		public void SetCurrentCustomSessionTitle() =>
-			(this.mainTabControl.SelectedItem as TabItem)?.Let(this.SetCustomSessionTitle);
+		public async Task SetCurrentCustomSessionTitle()
+		{
+			if (this.mainTabControl.SelectedItem is TabItem tabItem)
+				await this.SetCustomSessionTitle(tabItem);
+		}
 
 
 		// Set custom title of session.
-		async void SetCustomSessionTitle(TabItem tabItem)
+		async Task SetCustomSessionTitle(TabItem tabItem)
 		{
 			// check session
 			if (tabItem.DataContext is not Session session)
@@ -890,7 +894,7 @@ namespace Carina.PixelViewer
 
 
 		// Show PixelViewer specific initial dialogs.
-		async void ShowPixelViewerInitialDialogs()
+		async Task ShowPixelViewerInitialDialogs()
 		{
 			// check state
 			if (this.IsClosed || this.Application.IsShutdownStarted)

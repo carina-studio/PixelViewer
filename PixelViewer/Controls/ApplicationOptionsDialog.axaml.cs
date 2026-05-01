@@ -13,6 +13,7 @@ using CarinaStudio.Windows.Input;
 using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Carina.PixelViewer.Controls;
@@ -104,7 +105,7 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
 
 
     // Add custom color space.
-    async void AddCustomColorSpace()
+    async Task AddCustomColorSpace()
     {
         this.canAddCustomColorSpace.Update(false);
         try
@@ -112,13 +113,13 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
             // select file
             var fileName = (await this.StorageProvider.OpenFilePickerAsync(new()
             {
-                FileTypeFilter = new FilePickerFileType[]
-                {
+                FileTypeFilter =
+                [
                     new(this.Application.GetStringNonNull("FileType.Icc"))
                     {
-                        Patterns = new[] { "*.icc" }
+                        Patterns = [ "*.icc" ]
                     }
-                }
+                ]
             })).Let(it => it.Count == 1 ? it[0].TryGetLocalPath() : null);
             if (string.IsNullOrEmpty(fileName))
                 return;

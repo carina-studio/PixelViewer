@@ -17,11 +17,11 @@ using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
+using CarinaStudio.AppSuite.Input;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Controls;
 using CarinaStudio.Data.Converters;
-using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Cursor = Avalonia.Input.Cursor;
@@ -808,7 +808,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <summary>
 	/// Move to specific frame.
 	/// </summary>
-	public async void MoveToSpecificFrame()
+	public async Task MoveToSpecificFrame()
 	{
 		// check state
 		if (this.DataContext is not Session session)
@@ -1080,7 +1080,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when drag over.
 	void OnDragOver(object? sender, DragEventArgs e)
 	{
-		if (e.Data.HasFileNames())
+		if (e.DataTransfer.HasFiles())
 		{
 			e.DragEffects = DragDropEffects.Copy;
 			e.Handled = true;
@@ -1340,7 +1340,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					break;
 				case Key.O:
 				{
-					this.OpenSourceFile();
+					_ = this.OpenSourceFile();
 					e.Handled = true;
 					break;
 				}
@@ -1369,7 +1369,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					}
 					break;
 				case Key.S:
-					this.SaveImage();
+					_ = this.SaveImage();
 					e.Handled = true;
 					break;
 			}
@@ -1574,7 +1574,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 									{
 										action.Command = new Command(() =>
 										{
-											_ = this.Application.ShowApplicationOptionsDialogAsync(this.attachedWindow, ApplicationOptionsDialogSection.MaxRenderedImagesMemoryUsage.ToString());
+											_ = this.Application.ShowApplicationOptionsDialogAsync(this.attachedWindow, nameof(ApplicationOptionsDialogSection.MaxRenderedImagesMemoryUsage));
 											notification.Dismiss();
 										});
 										action.BindToResource(ASControls.NotificationAction.NameProperty, this, "String/SessionControl.ApplicationOptions");
@@ -1681,7 +1681,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <summary>
 	/// Called when test button clicked.
 	/// </summary>
-	public async void OnTestButtonClick()
+	public async Task OnTestButtonClick()
 	{
 		if (this.attachedWindow == null)
 			return;
@@ -1741,7 +1741,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Open source file.
-	async void OpenSourceFile()
+	async Task OpenSourceFile()
 	{
 		// find window
 		if (this.attachedWindow == null)
@@ -1842,7 +1842,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Save as new profile.
-	async void SaveAsNewProfile()
+	async Task SaveAsNewProfile()
 	{
 		// check state
 		if (this.DataContext is not Session session)
@@ -1895,7 +1895,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Save image to file.
-	async void SaveImage()
+	async Task SaveImage()
 	{
 		// check state
 		if (this.DataContext is not Session session)
@@ -1931,21 +1931,21 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		var app = (App)this.Application;
 		var fileName = (await this.attachedWindow.StorageProvider.SaveFilePickerAsync(new()
 		{
-			FileTypeChoices = new FilePickerFileType[]
-			{
+			FileTypeChoices =
+			[
 				new(app.GetStringNonNull("FileType.Jpeg"))
 				{
-					Patterns = new[] { "*.jpg", "*.jpeg", "*.jpe", "*.jfif" },
+					Patterns = [ "*.jpg", "*.jpeg", "*.jpe", "*.jfif" ],
 				},
 				new(app.GetStringNonNull("FileType.Png"))
 				{
-					Patterns = new[] { "*.png" },
+					Patterns = [ "*.png" ],
 				},
 				new(app.GetStringNonNull("FileType.RawBgra"))
 				{
-					Patterns = new[] { "*.bgra" },
+					Patterns = [ "*.bgra" ],
 				}
-			},
+			],
 			SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg"
 		}))?.Let(it => it.TryGetLocalPath());
 		if (string.IsNullOrEmpty(fileName))
@@ -2044,7 +2044,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	public void ShowColorSpaceManagementOptions()
 	{
 		if (this.attachedWindow != null)
-			this.Application.ShowApplicationOptionsDialogAsync(this.attachedWindow, ApplicationOptionsDialogSection.ColorSpaceManagement.ToString());
+			this.Application.ShowApplicationOptionsDialogAsync(this.attachedWindow, nameof(ApplicationOptionsDialogSection.ColorSpaceManagement));
 	}
 
 

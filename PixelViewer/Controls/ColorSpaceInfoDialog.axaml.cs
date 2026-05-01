@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using CarinaStudio;
@@ -97,7 +98,7 @@ class ColorSpaceInfoDialog : InputDialog
         });
         this.diagramTypeComboBox = this.Get<ComboBox>(nameof(diagramTypeComboBox)).Also(it =>
         {
-            it.GetObservable(ComboBox.SelectedIndexProperty).Subscribe(new Observer<int>(index =>
+            it.GetObservable(SelectingItemsControl.SelectedIndexProperty).Subscribe(new Observer<int>(index =>
             {
                 var diagramViews = new Control?[]{
                     this.chromaticityDiagram,
@@ -181,7 +182,7 @@ class ColorSpaceInfoDialog : InputDialog
     public Media.ColorSpace ColorSpace
     {
         get => this.GetValue(ColorSpaceProperty);
-        set => this.SetValue(ColorSpaceProperty, value);
+        init => this.SetValue(ColorSpaceProperty, value);
     }
 
 
