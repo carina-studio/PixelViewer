@@ -40,14 +40,16 @@ class CieChromaticityDiagram : Control
 
 
     // Static fields.
-    static readonly (Color, double, double)[] ColorCoordinates = new (Color, double, double)[] {
+    static readonly (Color, double, double)[] ColorCoordinates =
+    [
         (Color.FromArgb(0xff, 0xff, 0xff, 0x4c), 0.51808, 0.48181), // yellow, 580 nm
         (Color.FromArgb(0xff, 0xff, 0x4c, 0x4c), 0.72329, 0.27671), // red, 700 nm
         (Color.FromArgb(0xff, 0x4c, 0x4c, 0xff), 0.15225, 0.02008), // blue, 435.8 nm
         (Color.FromArgb(0xff, 0x4c, 0xff, 0xff), 0.00418, 0.59194), // cyan, 500 nm
-        (Color.FromArgb(0xff, 0x4c, 0xff, 0x4c), 0.28489, 0.71108), // green, 546.1 nm
-    };
-    static readonly (int, double, double)[] XYCoordinates = new (int, double, double)[] {
+        (Color.FromArgb(0xff, 0x4c, 0xff, 0x4c), 0.28489, 0.71108) // green, 546.1 nm
+    ];
+    static readonly (int, double, double)[] XYCoordinates =
+    [
         // With 2-degree observer (http://www.cvrl.org/)
         (390, 0.16638, 0.01830),
         (391, 0.16635, 0.01846),
@@ -489,8 +491,8 @@ class CieChromaticityDiagram : Control
         (827, 0.71439, 0.28561),
         (828, 0.71431, 0.28569),
         (829, 0.71424, 0.28576),
-        (830, 0.71417, 0.28583),
-    };
+        (830, 0.71417, 0.28583)
+    ];
     static readonly (double, double) WhitePointXY = (0.31271, 0.32902); // D65 with 2-degree observer
 
 
@@ -499,7 +501,6 @@ class CieChromaticityDiagram : Control
     readonly List<CieChromaticityGamut> attachedChromaticityGamuts = new();
     Pen? axisPen;
     readonly ObservableList<CieChromaticity> chromaticities = new();
-    readonly PolylineGeometry chromaticityGamutGeometry = new();
     readonly ObservableList<CieChromaticityGamut> chromaticityGamuts = new();
     StreamGeometry? diagramGeometry;
     IBrush? diagramBrush;
@@ -780,7 +781,8 @@ class CieChromaticityDiagram : Control
             it.GradientOrigin = new RelativePoint(wp, RelativeUnit.Absolute);
             it.GradientStops.Add(new GradientStop(Color.FromArgb(200, 255, 255, 255), 0.0));
             it.GradientStops.Add(new GradientStop(Color.FromArgb(0, 255, 255, 255), 1));
-            it.Radius = 0.4;
+            it.RadiusX = new(0.4, RelativeUnit.Relative);
+            it.RadiusY = new(0.4, RelativeUnit.Relative);
         });
         if (this.gridPen == null)
         {
@@ -813,16 +815,13 @@ class CieChromaticityDiagram : Control
                 context.DrawEllipse(this.shadowPen.Brush, null, rPoint, 4, 4);
                 context.DrawEllipse(this.shadowPen.Brush, null, gPoint, 4, 4);
                 context.DrawEllipse(this.shadowPen.Brush, null, bPoint, 4, 4);
-                this.chromaticityGamutGeometry.Points = new Points().Also(it =>
+                var gamutGeometry = new PolylineGeometry
                 {
-                    it.Add(rPoint);
-                    it.Add(gPoint);
-                    it.Add(bPoint);
-                    it.Add(rPoint);
-                });
+                    Points = { rPoint, gPoint, bPoint, rPoint },
+                };
                 this.shadowPen.Thickness = borderPen.Thickness + 2;
-                context.DrawGeometry(null, this.shadowPen, this.chromaticityGamutGeometry);
-                context.DrawGeometry(null, borderPen, this.chromaticityGamutGeometry);
+                context.DrawGeometry(null, this.shadowPen, gamutGeometry);
+                context.DrawGeometry(null, borderPen, gamutGeometry);
                 context.DrawEllipse(borderPen.Brush, null, rPoint, 3, 3);
                 context.DrawEllipse(borderPen.Brush, null, gPoint, 3, 3);
                 context.DrawEllipse(borderPen.Brush, null, bPoint, 3, 3);
