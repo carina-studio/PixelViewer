@@ -94,6 +94,7 @@
 		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">4</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width">20</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.Hint.Opacity">0.75</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.HistogramsPanel.Width">170</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.FontSize">10</sys:Double>

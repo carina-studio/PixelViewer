@@ -728,7 +728,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
 	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
 	static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new();
-	static readonly Func<double, double> ZoomingInterpolator = Interpolators.CreateCubicBezierInterpolator(0, 0.5, 0.2, 1);
+	static readonly Func<double, double> ZoomingInterpolator = Interpolators.FastDeceleration;
 
 
 	// Fields.

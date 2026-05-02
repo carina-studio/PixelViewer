@@ -21,7 +21,6 @@ using CarinaStudio.AppSuite.Input;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Controls;
-using CarinaStudio.Data.Converters;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Cursor = Avalonia.Input.Cursor;
@@ -64,14 +63,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		isEnabled
 			? 1.0
 			: IAppSuiteApplication.CurrentOrNull?.FindResourceOrDefault("Double/SessionControl.ImageFormatCategoryLabel.Opacity.Disabled", 0.5) ?? 0.5);
-	/// <summary>
-	/// <see cref="IValueConverter"/> which maps boolean to <see cref="ScrollBarVisibility.Auto"/>(True) and <see cref="ScrollBarVisibility.Disabled"/>(False).
-	/// </summary>
-	public static readonly IValueConverter BooleanToScrollBarVisibilityConverter = new BooleanToValueConverter<ScrollBarVisibility>(ScrollBarVisibility.Auto, ScrollBarVisibility.Disabled);
-
 
 	// Constants.
-	private const int AttachedScreenCheckingInterval = 500;
+	const int AttachedScreenCheckingInterval = 500;
 	const int BrightnessAdjustmentGroup = 1;
 	const int ColorAdjustmentGroup = 2;
 	const int ContrastAdjustmentGroup = 3;
@@ -103,7 +97,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 	// Fields.
 	readonly ContextMenu alignToIntegerMenu;
-	private Screen? attachedScreen;
+	Screen? attachedScreen;
 	Avalonia.Controls.Window? attachedWindow;
 	readonly ToggleButton brightnessAndContrastAdjustmentButton;
 	readonly Popup brightnessAndContrastAdjustmentPopup;
@@ -123,7 +117,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveRenderedImage = new();
 	readonly ForwardedObservableBoolean canSaveImage;
 	readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new();
-	private readonly ScheduledAction checkAttachedScreenAction;
+	readonly ScheduledAction checkAttachedScreenAction;
 	readonly ToggleButton colorAdjustmentButton;
 	readonly Popup colorAdjustmentPopup;
 	readonly Border colorAdjustmentPopupBorder;
@@ -158,10 +152,19 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction resetPointerPressedOnContrastAdjustmentUIAction;
 	readonly ScheduledAction stopUsingSmallRenderedImageAction;
 	Vector? targetImageViewportCenter;
+	// Pivot pointer position in scrollviewer-local coordinates (= viewport coords),
+	// captured when zooming starts. The animation tries to keep the same content
+	// point at this scrollviewer position throughout.
+	Vector? targetImageViewportPivot;
+	// Same pivot expressed as a fraction of the scrollviewer's content extent at
+	// capture time. Used at apply time to recover the content point that was at
+	// the pivot location.
+	Vector? targetImageViewportPivotRelative;
 	readonly ScheduledAction updateEffectiveRenderedImageAction;
 	readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
 	readonly ScheduledAction updateImageCursorAction;
 	readonly ScheduledAction updateImageFilterParamsPopupOpacityAction;
+	readonly ScheduledAction updateImageViewerScrollBarsAction;
 	readonly ScheduledAction updateImageViewerShadowMarginAction;
 	readonly ScheduledAction updateIsImageViewerScrollableAction;
 	readonly ScheduledAction updateSelectedImageDisplayPixelBoundsAction;
@@ -365,21 +368,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.imageRendererComboBox = this.Get<ComboBox>(nameof(imageRendererComboBox));
 		this.imageScrollViewer = this.Get<ScrollViewer>(nameof(this.imageScrollViewer)).Also(it =>
 		{
-			it.GetObservable(BoundsProperty).Subscribe(new Observer<Rect>(_ => this.ReportImageViewportSize()));
-			it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(new Observer<Size>(_ =>
+			it.GetObservable(BoundsProperty).Subscribe(_ => this.ReportImageViewportSize(), skipOnNextDuringSubscription: true);
+			it.GetObservable(ScrollViewer.ExtentProperty).Subscribe(this.OnImageScrollViewerExtentChanged, skipOnNextDuringSubscription: true);
+			it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(_ =>
 			{
 				this.updateIsImageViewerScrollableAction?.Schedule();
-				if (this.targetImageViewportCenter.HasValue)
-				{
-					var center = this.targetImageViewportCenter.Value;
-					this.targetImageViewportCenter = null;
-					this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
-				}
-			}));
-			it.GetObservable(ScrollViewer.ViewportProperty).Subscribe(new Observer<Size>(_ =>
-			{
-				this.updateIsImageViewerScrollableAction?.Schedule();
-			}));
+			}, skipOnNextDuringSubscription: true);
 		});
 		this.imageViewerGrid = this.Get<Control>(nameof(imageViewerGrid)).Also(it =>
 		{
@@ -566,6 +560,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.brightnessAndContrastAdjustmentPopupBorder.Opacity = (this.GetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty) || this.GetValue(IsPointerPressedOnContrastAdjustmentUIProperty)) ? 0.5 : 1;
 			this.colorAdjustmentPopupBorder.Opacity = this.GetValue(IsPointerPressedOnColorAdjustmentUIProperty) ? 0.5 : 1;
 		});
+		this.updateImageViewerScrollBarsAction = new(() =>
+		{
+			var scrollBarVisibility = this.DataContext is Session session && (!session.FitImageToViewport || session.IsZooming)
+				? ScrollBarVisibility.Auto
+				: ScrollBarVisibility.Disabled;
+			this.imageScrollViewer.HorizontalScrollBarVisibility = scrollBarVisibility;
+			this.imageScrollViewer.VerticalScrollBarVisibility = scrollBarVisibility;
+		});
 		this.updateImageViewerShadowMarginAction = new(() =>
 		{
 			var session = this.DataContext as Session;
@@ -581,7 +583,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 		this.updateSelectedImageDisplayPixelBoundsAction = new(() =>
 		{
-			if (this.DataContext is not Session session || !this.GetValue(IsPointerOverImageProperty))
+			if (this.DataContext is not Session session || !this.GetValue(IsPointerOverImageProperty) || session.IsZooming)
 			{
 				this.SetValue(SelectedImageDisplayPixelBoundsProperty, default);
 				return;
@@ -1150,21 +1152,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 
 		// select pixel on image
-		if (sender is Visual imageControl && this.DataContext is Session session)
-		{
-			var image = session.RenderedImage;
-			if (image != null)
-			{
-				var position = e.GetPosition(imageControl);
-				var imageBounds = imageControl.Bounds;
-				var relativeX = (position.X / imageBounds.Width);
-				var relativeY = (position.Y / imageBounds.Height);
-				session.SelectRenderedImagePixel((int)(image.Size.Width * relativeX), (int)(image.Size.Height * relativeY));
-			}
-			else
-				session.SelectRenderedImagePixel(-1, -1);
-			this.updateSelectedImageDisplayPixelBoundsAction.Execute();
-		}
+		this.SelectImageDisplayPixel(e);
 	}
 
 
@@ -1271,6 +1259,20 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					});
 				}
 			}).ShowDialog(this.attachedWindow);
+		}
+	}
+	
+	
+	// Called when extent of image scroll viewer changed.
+	void OnImageScrollViewerExtentChanged(Size extent)
+	{
+		this.Logger.LogTrace("Image viewer extent changed to {x:F1}x{y:F1}", extent.Width, extent.Height);
+		this.updateIsImageViewerScrollableAction.Schedule();
+		if (this.targetImageViewportCenter.HasValue)
+		{
+			var center = this.targetImageViewportCenter.Value;
+			this.targetImageViewportCenter = null;
+			this.ScrollImageScrollViewer(center, new Vector(0.5, 0.5));
 		}
 	}
 
@@ -1488,7 +1490,17 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when changing mouse wheel.
 	void OnPointerWheelChanged(object? sender, PointerWheelEventArgs e)
 	{
-		if (!this.imageScrollViewer.IsPointerOver || (e.KeyModifiers & KeyModifiers.Control) == 0)
+		if (!this.imageScrollViewer.IsPointerOver)
+			return;
+		if (this.targetImageViewportPivot.HasValue)
+		{
+			this.Logger.LogDebug("Drop viewport pivot");
+			this.targetImageViewportPivot = null;
+			this.targetImageViewportPivotRelative = null;
+		}
+		if (this.latestPointerEventArgsOnImage is not null)
+			this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
+		if ((e.KeyModifiers & KeyModifiers.Control) == 0)
 			return;
 		if (this.DataContext is not Session session || !session.IsSourceFileOpened || session.FitImageToViewport)
 			return;
@@ -1556,6 +1568,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					this.imageScrollViewer.Padding = new Thickness(-1);
 					this.imageScrollViewer.Padding = padding;
 					this.targetImageViewportCenter = new Vector(0.5, 0.5);
+					
+					// update scroll viewer
+					this.updateImageViewerScrollBarsAction.Schedule();
 					break;
 				}
 			case nameof(Session.HasRenderingError):
@@ -1603,21 +1618,37 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 				this.updateStatusBarStateAction.Schedule();
 				break;
-			case nameof(Session.ImageDisplayScale):
-                if (!session.FitImageToViewport)
-				{
-					var viewportSize = this.imageScrollViewer.Viewport;
-					var viewportOffset = this.imageScrollViewer.Offset;
-					var contentSize = this.imageScrollViewer.Extent;
-					var centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
-					var centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
-					this.targetImageViewportCenter = new Vector(centerX, centerY);
-				}
-                this.updateSelectedImageDisplayPixelBoundsAction.Execute();
-				break;
 			case nameof(Session.ImageDisplaySize):
+			{
+				var imageSize = session.ImageDisplaySize;
+				this.Logger.LogTrace("Image display size: {w:F1}x{h:F1}", imageSize.Width, imageSize.Height);
+				var viewportSize = this.imageScrollViewer.Viewport;
+				var viewportOffset = this.imageScrollViewer.Offset;
+				var contentSize = this.imageScrollViewer.Extent;
+				var centerX = double.NaN;
+				var centerY = double.NaN;
+				if (this.targetImageViewportPivot.HasValue && this.targetImageViewportPivotRelative.HasValue)
+				{
+					var targetPivot = this.targetImageViewportPivot.Value;
+					var targetPivotRelative = this.targetImageViewportPivotRelative.Value;
+					var pivotX = contentSize.Width * targetPivotRelative.X - viewportOffset.X;
+					var pivotY = contentSize.Height * targetPivotRelative.Y - viewportOffset.Y;
+					var currentCenterX = viewportOffset.X + viewportSize.Width / 2 + (pivotX - targetPivot.X);
+					var currentCenterY = viewportOffset.Y + viewportSize.Height / 2 + (pivotY - targetPivot.Y);
+					centerX = currentCenterX / contentSize.Width;
+					centerY = currentCenterY / contentSize.Height;
+				}
+				else if (!session.FitImageToViewport)
+				{
+					centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
+					centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
+				}
+				if (double.IsFinite(centerX) && double.IsFinite(centerY))
+					this.targetImageViewportCenter = new Vector(centerX, centerY);
+				this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 				this.updateEffectiveRenderedImageIntModeAction.Schedule();
 				break;
+			}
 			case nameof(Session.IsHistogramsVisible):
 				if (session.IsHistogramsVisible)
 					this.keepHistogramsVisible = true;
@@ -1646,9 +1677,32 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				break;
 			case nameof(Session.IsZooming):
 				if (session.IsZooming)
+				{
+					this.Logger.LogTrace("Start zooming, fit image to viewport: {fitToViewport}", session.FitImageToViewport);
+					var viewportSize = this.imageScrollViewer.Viewport;
+					var viewportOffset = this.imageScrollViewer.Offset;
+					var contentSize = this.imageScrollViewer.Extent;
+					var pivot = (this.latestPointerEventArgsOnImage is not null && !session.FitImageToViewport)
+						? this.latestPointerEventArgsOnImage.GetCurrentPoint(this.imageScrollViewer).Position
+						: new(viewportSize.Width / 2, viewportSize.Height / 2);
+					var pivotRelative = new Vector((pivot.X + viewportOffset.X) / contentSize.Width, (pivot.Y + viewportOffset.Y) / contentSize.Height);
+					this.targetImageViewportPivot = pivot;
+					this.targetImageViewportPivotRelative = pivotRelative;
+					this.Logger.LogTrace("Viewport pivot: ({px:F1}, {py:F1}), relative: ({prx:F3}, {pry:F3})", pivot.X, pivot.Y, pivotRelative.X, pivotRelative.Y);
 					this.StartUsingSmallRenderedImage();
-				else if (!this.stopUsingSmallRenderedImageAction.IsScheduled)
-					this.stopUsingSmallRenderedImageAction.Execute();
+				}
+				else
+				{
+					this.Logger.LogTrace("Stop zooming");
+					this.targetImageViewportPivot = null;
+					this.targetImageViewportPivotRelative = null;
+					if (!this.stopUsingSmallRenderedImageAction.IsScheduled)
+						this.stopUsingSmallRenderedImageAction.Execute();
+					if (this.latestPointerEventArgsOnImage is not null)
+						this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
+				}
+				this.updateImageViewerScrollBarsAction.Schedule();
+				this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 				break;
 			case nameof(Session.QuarterSizeRenderedImage):
 			case nameof(Session.RenderedImage):
@@ -2008,6 +2062,31 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// Bounds of selected pixel for displaying.
 	/// </summary>
 	public Rect SelectedImageDisplayPixelBounds => this.GetValue(SelectedImageDisplayPixelBoundsProperty);
+
+
+	// Select pixel on rendered image.
+	void SelectImageDisplayPixel(PointerEventArgs e)
+	{
+		if (this.DataContext is not Session session)
+			return;
+		var image = session.RenderedImage;
+		if (image is not null)
+		{
+			var position = e.GetPosition(this.image);
+			var imageBounds = this.image.Bounds;
+			if (position.X >= 0 && position.X < imageBounds.Width && position.Y >= 0 && position.Y < imageBounds.Height)
+			{
+				var relativeX = (position.X / imageBounds.Width);
+				var relativeY = (position.Y / imageBounds.Height);
+				session.SelectRenderedImagePixel((int)(image.Size.Width * relativeX), (int)(image.Size.Height * relativeY));
+			}
+			else
+				session.SelectRenderedImagePixel(-1, -1);
+		}
+		else
+			session.SelectRenderedImagePixel(-1, -1);
+		this.updateSelectedImageDisplayPixelBoundsAction.Execute();
+	}
 
 
 	/// <summary>
