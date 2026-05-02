@@ -1106,11 +1106,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		if (this.DataContext is not Session session)
 			return;
 		if (session.FitImageToViewport)
+		{
 			session.FitImageToViewport = false;
-		else if (session.ZoomInCommand.CanExecute(null))
-			session.ZoomInCommand.TryExecute();
-		else if (session.ZoomToCommand.CanExecute(1.0))
-			session.ZoomToCommand.TryExecute(1.0);
+			if (session.ZoomToCommand.CanExecute(1.0))
+				session.ZoomToCommand.TryExecute(1.0);
+		}
+		else
+			session.FitImageToViewport = true;
 	}
 
 
