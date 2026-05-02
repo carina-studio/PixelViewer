@@ -11,6 +11,8 @@ using System.Buffers;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Application = CarinaStudio.Application;
+
 // ReSharper disable AccessToDisposedClosure
 
 namespace Carina.PixelViewer.Media
@@ -57,7 +59,7 @@ namespace Carina.PixelViewer.Media
 	static class BitmapBufferExtensions
 	{
 		// Fields.
-		static readonly ILogger? Logger = App.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapBufferExtensions));
+		static readonly ILogger? Logger = Application.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapBufferExtensions));
 
 
 		/// <summary>
@@ -72,7 +74,7 @@ namespace Carina.PixelViewer.Media
 			// check parameters
 			if (resultBitmapBuffer == bitmapBuffer)
 				throw new ArgumentException("Cannot convert color space in same bitmap buffer.");
-			if (bitmapBuffer.ColorSpace != resultBitmapBuffer.ColorSpace)
+			if (!bitmapBuffer.ColorSpace.Equals(resultBitmapBuffer.ColorSpace))
 				throw new ArgumentException("Cannot convert to bitmap with different color spaces.");
 			if (resultBitmapBuffer.Format != BitmapFormat.Bgra32)
 				throw new ArgumentException("Format of result bitmap buffer is not Bgra32.");
@@ -180,7 +182,7 @@ namespace Carina.PixelViewer.Media
 					var converter = srcColorSpace.CreateConverter(targetColorSpace, useLinearSourceColorSpace, useLinearTargetColorSpace);
 
 					// copy directly
-					if (srcColorSpace == resultBitmapBuffer.ColorSpace)
+					if (srcColorSpace.Equals(resultBitmapBuffer.ColorSpace))
 					{
 						sharedBitmapBuffer.CopyTo(sharedResultBitmapBuffer);
 						return;
@@ -275,7 +277,7 @@ namespace Carina.PixelViewer.Media
 				return;
 			if (source.Format != dest.Format)
 				throw new ArgumentException("Cannot copy to bitmap with different formats.");
-			if (source.ColorSpace != dest.ColorSpace)
+			if (!source.ColorSpace.Equals(dest.ColorSpace))
 				throw new ArgumentException("Cannot copy to bitmap with different color spaces.");
 			if (source.Width != dest.Width || source.Height != dest.Height)
 				throw new ArgumentException("Cannot copy to bitmap with different dimensions.");

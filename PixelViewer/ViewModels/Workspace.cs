@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.ViewModels
 {
@@ -256,7 +257,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// Detach given <see cref="Session"/> and close it.
 		/// </summary>
 		/// <param name="session">Session to close.</param>
-		public async void DetachAndCloseSession(Session session)
+		public async Task DetachAndCloseSession(Session session)
 		{
 			// check state
 			this.VerifyAccess();
@@ -376,8 +377,8 @@ namespace Carina.PixelViewer.ViewModels
 					it.PositionChanged -= this.OnWindowPositionChanged);
 				(newValue as Window)?.Let(it =>
 				{
-					this.windowBoundsObserverToken = it.GetObservable(Window.BoundsProperty).Subscribe(this.windowBoundsObserver);
-					this.windowIsActiveObserverToken = it.GetObservable(Window.IsActiveProperty).Subscribe(this.windowIsActiveObserver);
+					this.windowBoundsObserverToken = it.GetObservable(Visual.BoundsProperty).Subscribe(this.windowBoundsObserver);
+					this.windowIsActiveObserverToken = it.GetObservable(WindowBase.IsActiveProperty).Subscribe(this.windowIsActiveObserver);
 					it.PositionChanged += this.OnWindowPositionChanged;
 				});
 				this.updateEffectiveScreenColorSpaceAction.Reschedule();

@@ -884,10 +884,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.colorSpaceConvertedImageFrame is not null 
 			    && this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
 			{
-				this.FilterImage(this.colorSpaceConvertedImageFrame);
+				_ = this.FilterImage(this.colorSpaceConvertedImageFrame);
 			}
 			else if (this.renderedImageFrame is not null)
-				this.FilterImage(this.renderedImageFrame);
+				_ = this.FilterImage(this.renderedImageFrame);
 		});
 		this.releasedCachedImagesAction = new ScheduledAction(() => this.ReleaseCachedImages());
 		this.renderImageAction = new ScheduledAction(this.RenderImage);
@@ -1048,7 +1048,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// restore state
 		if (savedState.HasValue)
-			this.RestoreState(savedState.Value);
+			_ = this.RestoreState(savedState.Value);
 		else
 		{
 			this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
@@ -2137,7 +2137,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 
 		// evaluate
-		this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((ref PixelSize it) =>
+		this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((ref it) =>
 		{
 			if (this.ImageWidth != it.Width || this.ImageHeight != it.Height)
 			{
@@ -2157,7 +2157,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Filter image.
-	async void FilterImage(ImageFrame renderedImageFrame)
+	async Task FilterImage(ImageFrame renderedImageFrame)
 	{
 		// check state
 		if (!this.IsFilteringRenderedImageNeeded)
@@ -3433,7 +3433,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.filterImageAction.Reschedule();
 		}
 		else if (property == IsHistogramsVisibleProperty)
-			this.PersistentState.SetValue<bool>(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
+			this.PersistentState.SetValue(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
 		else if (property == IsSaturationAdjustmentSupportedProperty)
 		{
 			this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && (bool)newValue.AsNonNull());
@@ -3504,7 +3504,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.updateImageDisplaySizeAction.Execute();
 		}
 		else if (property == RenderingParametersPanelSizeProperty)
-			this.PersistentState.SetValue<int>(LatestRenderingParamsPanelSize, (int)(this.RenderingParametersPanelSize + 0.5));
+			this.PersistentState.SetValue(LatestRenderingParamsPanelSize, (int)(this.RenderingParametersPanelSize + 0.5));
 		else if (property == RequestedImageDisplayScaleProperty)
 		{
 			if (!this.GetValue(FitImageToViewportProperty))
@@ -3941,7 +3941,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Render image according to current state.
-	async void RenderImage()
+	async Task RenderImage()
 	{
 		// cancel filtering
 		this.CancelFilteringImage(true);
@@ -3983,7 +3983,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.Logger.LogDebug("Evaluate dimensions of image for '{sourceFileName}'", sourceFileName);
 			this.isImageDimensionsEvaluationNeeded = false;
-			imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref PixelSize it) =>
+			imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref it) =>
 			{
 				this.SetValue(ImageWidthProperty, it.Width);
 				this.SetValue(ImageHeightProperty, it.Height);
@@ -4332,7 +4332,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsFilteringRenderedImageNeeded && imageFrameToFilter is not null)
 			{
 				this.Logger.LogDebug("Continue filtering image after rendering");
-				this.FilterImage(imageFrameToFilter);
+				_ = this.FilterImage(imageFrameToFilter);
 			}
 			else
 			{
@@ -4818,7 +4818,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Restore state.
 	/// </summary>
 	/// <param name="savedState">Root JSON element represents saved state.</param>
-	public async void RestoreState(JsonElement savedState)
+	public async Task RestoreState(JsonElement savedState)
     {
 		// check parameter
 		if (savedState.ValueKind != JsonValueKind.Object)
@@ -5284,7 +5284,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Save current parameters to profile.
-	async void SaveProfile()
+	async Task SaveProfile()
 	{
 		// check state
 		if (!this.canSaveOrDeleteProfile.Value)
@@ -5784,7 +5784,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				var pixelPtr = (byte*)baseAddress + renderedImageBuffer.GetPixelOffset(x, y);
 				return renderedImageBuffer.Format switch
 				{
-					BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also((ref Color it) =>
+					BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also((ref it) =>
 					{
 						argbR = it.R / 255.0;
 						argbG = it.G / 255.0;

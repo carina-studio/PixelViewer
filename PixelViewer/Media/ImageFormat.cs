@@ -35,7 +35,7 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// <param name="category">Category of format.</param>
 	/// <param name="name">Name.</param>
 	/// <param name="planeDescriptor">Plane descriptor.</param>
-	public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor) : this(category, name, new[] { planeDescriptor }, Array.Empty<string>())
+	public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor) : this(category, name, [ planeDescriptor ], Array.Empty<string>())
 	{ }
 
 
@@ -46,7 +46,7 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// <param name="name">Name.</param>
 	/// <param name="planeDescriptor">Plane descriptor.</param>
 	/// <param name="keywords">Keywords.</param>
-	public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, new[] { planeDescriptor }, keywords)
+	public ImageFormat(ImageFormatCategory category, string name, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, [ planeDescriptor ], keywords)
 	{ }
 
 
@@ -57,7 +57,7 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// <param name="name">Name.</param>
 	/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 	/// <param name="planeDescriptor">Plane descriptor.</param>
-	public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, hasMultiByteOrderings, new[] { planeDescriptor }, Array.Empty<string>())
+	public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor) : this(category, name, hasMultiByteOrderings, [ planeDescriptor ], Array.Empty<string>())
 	{ }
 
 
@@ -69,7 +69,7 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 	/// <param name="planeDescriptor">Plane descriptor.</param>
 	/// <param name="keywords">Keywords.</param>
-	public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, hasMultiByteOrderings, new[] { planeDescriptor }, keywords)
+	public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, ImagePlaneDescriptor planeDescriptor, IEnumerable<string> keywords) : this(category, name, hasMultiByteOrderings, [ planeDescriptor ], keywords)
 	{ }
 
 

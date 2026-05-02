@@ -1,58 +1,57 @@
 ﻿using CarinaStudio.Collections;
 using System.Collections.Generic;
 
-namespace Carina.PixelViewer.Media.ImageEncoders
+namespace Carina.PixelViewer.Media.ImageEncoders;
+
+/// <summary>
+/// Manager of <see cref="IImageEncoder"/>s.
+/// </summary>
+static class ImageEncoders
 {
-    /// <summary>
-    /// Manager of <see cref="IImageEncoder"/>s.
-    /// </summary>
-    static class ImageEncoders
+    // Fields.
+    static readonly Dictionary<FileFormat, IImageEncoder> encodersByFormat = new();
+    static readonly Dictionary<string, IImageEncoder> encodersByName = new();
+
+
+    // Static initializer.
+    static ImageEncoders()
     {
-        // Fields.
-        static readonly Dictionary<FileFormat, IImageEncoder> encodersByFormat = new();
-        static readonly Dictionary<string, IImageEncoder> encodersByName = new();
-
-
-        // Static initializer.
-        static ImageEncoders()
+        All = ListExtensions.AsReadOnly(new IImageEncoder[]
         {
-            All = ListExtensions.AsReadOnly(new IImageEncoder[]
-            {
-                new JpegImageEncoder(),
-                new PngImageEncoder(),
-                new RawBgraImageEncoder(),
-            });
-            foreach(var encoder in All)
-            {
-                encodersByFormat[encoder.Format] = encoder;
-                encodersByName[encoder.Name] = encoder;
-            }
+            new JpegImageEncoder(),
+            new PngImageEncoder(),
+            new RawBgraImageEncoder(),
+        });
+        foreach(var encoder in All)
+        {
+            encodersByFormat[encoder.Format] = encoder;
+            encodersByName[encoder.Name] = encoder;
         }
-
-
-        /// <summary>
-        /// Get all supported encoders.
-        /// </summary>
-        public static IList<IImageEncoder> All { get; }
-
-
-        /// <summary>
-        /// Try get <see cref="IImageEncoder"/> by supported format.
-        /// </summary>
-        /// <param name="format">File format.</param>
-        /// <param name="encoder">Found <see cref="IImageEncoder"/>.</param>
-        /// <returns>True if <see cref="IImageEncoder"/> found.</returns>
-        public static bool TryGetEncoderByFormat(FileFormat format, out IImageEncoder? encoder) =>
-            encodersByFormat.TryGetValue(format, out encoder);
-
-
-        /// <summary>
-        /// Try get <see cref="IImageEncoder"/> by name.
-        /// </summary>
-        /// <param name="name">Name of encoder.</param>
-        /// <param name="encoder">Found <see cref="IImageEncoder"/>.</param>
-        /// <returns>True if <see cref="IImageEncoder"/> found.</returns>
-        public static bool TryGetEncoderByName(string name, out IImageEncoder? encoder) =>
-            encodersByName.TryGetValue(name, out encoder);
     }
+
+
+    /// <summary>
+    /// Get all supported encoders.
+    /// </summary>
+    public static IList<IImageEncoder> All { get; }
+
+
+    /// <summary>
+    /// Try get <see cref="IImageEncoder"/> by supported format.
+    /// </summary>
+    /// <param name="format">File format.</param>
+    /// <param name="encoder">Found <see cref="IImageEncoder"/>.</param>
+    /// <returns>True if <see cref="IImageEncoder"/> found.</returns>
+    public static bool TryGetEncoderByFormat(FileFormat format, out IImageEncoder? encoder) =>
+        encodersByFormat.TryGetValue(format, out encoder);
+
+
+    /// <summary>
+    /// Try get <see cref="IImageEncoder"/> by name.
+    /// </summary>
+    /// <param name="name">Name of encoder.</param>
+    /// <param name="encoder">Found <see cref="IImageEncoder"/>.</param>
+    /// <returns>True if <see cref="IImageEncoder"/> found.</returns>
+    public static bool TryGetEncoderByName(string name, out IImageEncoder? encoder) =>
+        encodersByName.TryGetValue(name, out encoder);
 }

@@ -37,7 +37,7 @@ abstract class BaseImageEncoder : IImageEncoder
         var stream = await outputStreamProvider.OpenStreamAsync(StreamAccess.ReadWrite, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
         {
-            Global.RunWithoutErrorAsync(() => stream.Close());
+            Global.RunWithoutErrorAsync(stream.Close);
             throw new TaskCanceledException();
         }
 
@@ -54,7 +54,7 @@ abstract class BaseImageEncoder : IImageEncoder
         }
         finally
         {
-            Global.RunWithoutErrorAsync(() => stream.Close());
+            Global.RunWithoutErrorAsync(stream.Close);
         }
     }
 

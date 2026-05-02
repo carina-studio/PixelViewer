@@ -55,23 +55,14 @@ namespace Carina.PixelViewer.Media
 
 
 		// Stream to read data.
-		class StreamImpl : StreamWrapper
+		class StreamImpl(FileImageDataSource source, FileStream fileStream) : StreamWrapper(fileStream)
 		{
-			// Fields.
-			readonly FileImageDataSource source;
-
-			// Constructor.
-			public StreamImpl(FileImageDataSource source, FileStream fileStream) : base(fileStream)
-			{
-				this.source = source;
-			}
-
 			// Dispose.
 			protected override void Dispose(bool disposing)
 			{
 				base.Dispose(disposing);
 				if (disposing)
-					this.source.OnStreamClosed(this);
+					source.OnStreamClosed(this);
 			}
 		}
 

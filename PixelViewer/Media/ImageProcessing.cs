@@ -1,5 +1,4 @@
 ﻿using CarinaStudio.AppSuite;
-using CarinaStudio.Configuration;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;

@@ -1,6 +1,8 @@
 ﻿using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.ImageFilters;
 using Carina.PixelViewer.Media.ImageRenderers;
 using CarinaStudio;
+using CarinaStudio.AppSuite.ViewModels;
 using CarinaStudio.Configuration;
 using System;
 using System.Collections.Generic;
@@ -10,7 +12,7 @@ namespace Carina.PixelViewer.ViewModels
 	/// <summary>
 	/// View-model for application options.
 	/// </summary>
-	class AppOptions : CarinaStudio.AppSuite.ViewModels.ApplicationOptions
+	class AppOptions : ApplicationOptions
 	{
 		/// <summary>
 		/// Initialize new <see cref="AppOptions"/> instance.
@@ -28,10 +30,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Brightness transformation function.
 		/// </summary>
-		public Media.ImageFilters.BrightnessTransformationFunction BrightnessTransformationFunction
+		public BrightnessTransformationFunction BrightnessTransformationFunction
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction);
-			set => this.Settings.SetValue<Media.ImageFilters.BrightnessTransformationFunction>(SettingKeys.BrightnessTransformationFunction, value);
+			set => this.Settings.SetValue(SettingKeys.BrightnessTransformationFunction, value);
 		}
 		
 		
@@ -41,17 +43,17 @@ namespace Carina.PixelViewer.ViewModels
 		public ColorSpaceConversionTiming ColorSpaceConversionTiming
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming);
-			set => this.Settings.SetValue<ColorSpaceConversionTiming>(SettingKeys.ColorSpaceConversionTiming, value);
+			set => this.Settings.SetValue(SettingKeys.ColorSpaceConversionTiming, value);
 		}
 
 
 		/// <summary>
 		/// Contrast transformation function.
 		/// </summary>
-		public Media.ImageFilters.ContrastTransformationFunction ContrastTransformationFunction
+		public ContrastTransformationFunction ContrastTransformationFunction
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction);
-			set => this.Settings.SetValue<Media.ImageFilters.ContrastTransformationFunction>(SettingKeys.ContrastTransformationFunction, value);
+			set => this.Settings.SetValue(SettingKeys.ContrastTransformationFunction, value);
 		}
 
 
@@ -61,7 +63,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool CreateNewSessionForDragDropFile
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile);
-			set => this.Settings.SetValue<bool>(SettingKeys.CreateNewSessionForDragDropFile, value);
+			set => this.Settings.SetValue(SettingKeys.CreateNewSessionForDragDropFile, value);
 		}
 
 
@@ -71,7 +73,7 @@ namespace Carina.PixelViewer.ViewModels
 		public ByteOrdering DefaultByteOrdering
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering);
-			set => this.Settings.SetValue<ByteOrdering>(SettingKeys.DefaultByteOrdering, value);
+			set => this.Settings.SetValue(SettingKeys.DefaultByteOrdering, value);
 		}
 
 
@@ -85,7 +87,7 @@ namespace Carina.PixelViewer.ViewModels
 				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
-			set => this.Settings.SetValue<string>(SettingKeys.DefaultColorSpaceName, value.Name);
+			set => this.Settings.SetValue(SettingKeys.DefaultColorSpaceName, value.Name);
 		}
 
 
@@ -95,7 +97,7 @@ namespace Carina.PixelViewer.ViewModels
 		public AspectRatio DefaultImageDimensionsEvaluationAspectRatio
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio);
-			set => this.Settings.SetValue<AspectRatio>(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio, value);
+			set => this.Settings.SetValue(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio, value);
 		}
 
 
@@ -110,7 +112,7 @@ namespace Carina.PixelViewer.ViewModels
 					return renderer.AsNonNull();
 				return ImageRenderers.All[0];
 			}
-			set => this.Settings.SetValue<string>(SettingKeys.DefaultImageRendererFormatName, value.Format.Name);
+			set => this.Settings.SetValue(SettingKeys.DefaultImageRendererFormatName, value.Format.Name);
 		}
 
 
@@ -124,7 +126,7 @@ namespace Carina.PixelViewer.ViewModels
 				YuvToBgraConverter.TryGetByName(name, out var converter);
 				return converter;
 			});
-			set => this.Settings.SetValue<string>(SettingKeys.DefaultYuvToBgraConversion, value.Name);
+			set => this.Settings.SetValue(SettingKeys.DefaultYuvToBgraConversion, value.Name);
 		}
 
 
@@ -134,7 +136,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool EnableColorSpaceManagement
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement);
-			set => this.Settings.SetValue<bool>(SettingKeys.EnableColorSpaceManagement, value);
+			set => this.Settings.SetValue(SettingKeys.EnableColorSpaceManagement, value);
 		}
 
 
@@ -144,7 +146,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool EvaluateImageDimensionsAfterChangingRenderer
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer);
-			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer, value);
+			set => this.Settings.SetValue(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer, value);
 		}
 
 
@@ -154,7 +156,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool EvaluateImageDimensionsAfterOpeningSourceFile
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile);
-			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile, value);
+			set => this.Settings.SetValue(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile, value);
 		}
 
 
@@ -164,7 +166,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool EvaluateImageRendererByFileName
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageRendererByFileName);
-			set => this.Settings.SetValue<bool>(SettingKeys.EvaluateImageRendererByFileName, value);
+			set => this.Settings.SetValue(SettingKeys.EvaluateImageRendererByFileName, value);
 		}
 		
 		
@@ -174,7 +176,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool HideImageViewerScrollBarsAutomatically
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.HideImageViewerScrollBarsAutomatically);
-			set => this.Settings.SetValue<bool>(SettingKeys.HideImageViewerScrollBarsAutomatically, value);
+			set => this.Settings.SetValue(SettingKeys.HideImageViewerScrollBarsAutomatically, value);
 		}
 
 
@@ -190,7 +192,7 @@ namespace Carina.PixelViewer.ViewModels
 		public long MaxRenderedImagesMemoryUsageMB
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB);
-			set => this.Settings.SetValue<long>(SettingKeys.MaxRenderedImagesMemoryUsageMB, value);
+			set => this.Settings.SetValue(SettingKeys.MaxRenderedImagesMemoryUsageMB, value);
 		}
 
 
@@ -260,7 +262,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool Render32BitColorsOnly
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.Render32BitColorsOnly);
-			set => this.Settings.SetValue<bool>(SettingKeys.Render32BitColorsOnly, value);
+			set => this.Settings.SetValue(SettingKeys.Render32BitColorsOnly, value);
 		}
 
 
@@ -270,7 +272,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool ResetFilterParamsAfterOpeningSourceFile
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ResetFilterParamsAfterOpeningSourceFile);
-			set => this.Settings.SetValue<bool>(SettingKeys.ResetFilterParamsAfterOpeningSourceFile, value);
+			set => this.Settings.SetValue(SettingKeys.ResetFilterParamsAfterOpeningSourceFile, value);
 		}
 
 
@@ -280,7 +282,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool ResetImagePlaneOptionsAfterChangingImageDimensions
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions);
-			set => this.Settings.SetValue<bool>(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions, value);
+			set => this.Settings.SetValue(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions, value);
 		}
 
 
@@ -290,7 +292,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool SaveRenderedImageWithOrientation
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation);
-			set => this.Settings.SetValue<bool>(SettingKeys.SaveRenderedImageWithOrientation, value);
+			set => this.Settings.SetValue(SettingKeys.SaveRenderedImageWithOrientation, value);
 		}
 
 
@@ -304,7 +306,7 @@ namespace Carina.PixelViewer.ViewModels
 				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.ScreenColorSpaceName), out var colorSpace);
 				return colorSpace;
 			}
-			set => this.Settings.SetValue<string>(SettingKeys.ScreenColorSpaceName, value.Name);
+			set => this.Settings.SetValue(SettingKeys.ScreenColorSpaceName, value.Name);
 		}
 
 
@@ -314,7 +316,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool ShowProcessInfo
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ShowProcessInfo);
-			set => this.Settings.SetValue<bool>(SettingKeys.ShowProcessInfo, value);
+			set => this.Settings.SetValue(SettingKeys.ShowProcessInfo, value);
 		}
 
 
@@ -324,7 +326,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool ShowSelectedRenderedImagePixelArgbColor
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelArgbColor);
-			set => this.Settings.SetValue<bool>(SettingKeys.ShowSelectedRenderedImagePixelArgbColor, value);
+			set => this.Settings.SetValue(SettingKeys.ShowSelectedRenderedImagePixelArgbColor, value);
 		}
 
 
@@ -334,7 +336,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool ShowSelectedRenderedImagePixelLabColor
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelLabColor);
-			set => this.Settings.SetValue<bool>(SettingKeys.ShowSelectedRenderedImagePixelLabColor, value);
+			set => this.Settings.SetValue(SettingKeys.ShowSelectedRenderedImagePixelLabColor, value);
 		}
 
 
@@ -344,7 +346,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool ShowSelectedRenderedImagePixelXyzColor
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ShowSelectedRenderedImagePixelXyzColor);
-			set => this.Settings.SetValue<bool>(SettingKeys.ShowSelectedRenderedImagePixelXyzColor, value);
+			set => this.Settings.SetValue(SettingKeys.ShowSelectedRenderedImagePixelXyzColor, value);
 		}
 
 
@@ -354,7 +356,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool UseDefaultImageRendererAfterOpeningSourceFile
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile);
-			set => this.Settings.SetValue<bool>(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
+			set => this.Settings.SetValue(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile, value);
 		}
 
 
@@ -364,7 +366,7 @@ namespace Carina.PixelViewer.ViewModels
 		public bool UseSystemScreenColorSpace
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.UseSystemScreenColorSpace);
-			set => this.Settings.SetValue<bool>(SettingKeys.UseSystemScreenColorSpace, IsSystemScreenColorSpaceSupported && value);
+			set => this.Settings.SetValue(SettingKeys.UseSystemScreenColorSpace, IsSystemScreenColorSpaceSupported && value);
 		}
 	}
 }

@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Application = CarinaStudio.Application;
 
 namespace Carina.PixelViewer.Media;
 
@@ -61,21 +62,14 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
 
 
     // Stream to read data.
-    class StreamImpl : StreamWrapper
+    class StreamImpl(FFmpegVideoDataSource source, FileStream fileStream) : StreamWrapper(fileStream)
     {
-        // Fields.
-        readonly FFmpegVideoDataSource source;
-
-        // Constructor.
-        public StreamImpl(FFmpegVideoDataSource source, FileStream fileStream) : base(fileStream) =>
-            this.source = source;
-
         // Dispose.
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
             if (disposing)
-                this.source.OnStreamClosed(this);
+                source.OnStreamClosed(this);
         }
     }
 
@@ -106,7 +100,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         {
             try
             {
-                var directory = Path.Combine(App.Current.RootPrivateDirectoryPath, "FFmpeg");
+                var directory = Path.Combine(Application.Current.RootPrivateDirectoryPath, "FFmpeg");
                 if (System.IO.Directory.Exists(directory))
                 {
                     foreach (var frameFileName in System.IO.Directory.GetFiles(directory))
@@ -363,7 +357,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
             try
             {
                 // extract frame
-                ffmpegProcess = this.LaunchFFmpeg($"-ss {(int)position.TotalHours:D2}:{position.ToString("mm\\:ss\\.fff")} -i \"{videoFileName}\" -vframes 1 -y \"{frameFileName}\"");
+                ffmpegProcess = this.LaunchFFmpeg($"-ss {(int)position.TotalHours:D2}:{position:mm\\:ss\\.fff} -i \"{videoFileName}\" -vframes 1 -y \"{frameFileName}\"");
                 if (cancellationToken.IsCancellationRequested)
                     throw new TaskCanceledException();
                 using var reader = ffmpegProcess.StandardError;
@@ -471,7 +465,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
                 throw;
             }
             return new StreamImpl(this, fileStream);
-        });
+        }, token);
 
         // check state
         lock (this)
@@ -516,8 +510,7 @@ class FFmpegVideoDataSource : BaseShareableDisposable<FFmpegVideoDataSource>, IV
         var source = (FFmpegVideoDataSource?)null;
         try
         {
-            source = await Task.Run(() =>
-                new FFmpegVideoDataSource(app, fileName));
+            source = await Task.Run(() => new FFmpegVideoDataSource(app, fileName), cancellationToken);
             return source;
         }
         catch

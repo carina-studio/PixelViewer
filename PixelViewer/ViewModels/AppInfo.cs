@@ -40,7 +40,7 @@ class AppInfo : ApplicationInfo
 
 
     /// <inheritdoc/>
-    public override Uri? GitHubProjectUri => new("https://github.com/carina-studio/PixelViewer");
+    public override Uri GitHubProjectUri => new("https://github.com/carina-studio/PixelViewer");
 
 
     /// <inheritdoc/>

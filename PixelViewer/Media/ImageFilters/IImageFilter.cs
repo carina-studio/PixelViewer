@@ -2,44 +2,43 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Carina.PixelViewer.Media.ImageFilters
+namespace Carina.PixelViewer.Media.ImageFilters;
+
+/// <summary>
+/// Image filter.
+/// </summary>
+interface IImageFilter<in TParams> where TParams : ImageFilterParams
 {
     /// <summary>
-    /// Image filter.
+    /// Apply filter on image asynchronously.
     /// </summary>
-    interface IImageFilter<TParams> where TParams : ImageFilterParams
-    {
-        /// <summary>
-        /// Apply filter on image asynchronously.
-        /// </summary>
-        /// <param name="source">Source image.</param>
-        /// <param name="result">Result image.</param>
-        /// <param name="parameters">Parameters.</param>
-        /// <param name="cancellationToken">Cancellation token.</param>
-        /// <returns>Task of applying filter.</returns>
-        Task ApplyFilterAsync(IBitmapBuffer source, IBitmapBuffer result, TParams parameters, CancellationToken cancellationToken);
-    }
+    /// <param name="source">Source image.</param>
+    /// <param name="result">Result image.</param>
+    /// <param name="parameters">Parameters.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task of applying filter.</returns>
+    Task ApplyFilterAsync(IBitmapBuffer source, IBitmapBuffer result, TParams parameters, CancellationToken cancellationToken);
+}
 
 
+/// <summary>
+/// Parameters to filter image.
+/// </summary>
+abstract class ImageFilterParams : ICloneable
+{
     /// <summary>
-    /// Parameters to filter image.
+    /// Empty parameters.
     /// </summary>
-    abstract class ImageFilterParams : ICloneable
+    public static readonly ImageFilterParams Empty = new EmptyParams();
+
+
+    // Empty implementation.
+    class EmptyParams : ImageFilterParams
     {
-        /// <summary>
-        /// Empty parameters.
-        /// </summary>
-        public static readonly ImageFilterParams Empty = new EmptyParams();
-
-
-        // Empty implementation.
-        class EmptyParams : ImageFilterParams
-        {
-            public override object Clone() => new EmptyParams();
-        }
-
-
-        /// <inheritdoc/>
-        public abstract object Clone();
+        public override object Clone() => new EmptyParams();
     }
+
+
+    /// <inheritdoc/>
+    public abstract object Clone();
 }

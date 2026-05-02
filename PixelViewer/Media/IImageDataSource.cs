@@ -1,16 +1,15 @@
 ﻿using CarinaStudio;
 using CarinaStudio.IO;
 
-namespace Carina.PixelViewer.Media
+namespace Carina.PixelViewer.Media;
+
+/// <summary>
+/// Source of raw image data.
+/// </summary>
+interface IImageDataSource : IShareableDisposable<IImageDataSource>, IStreamProvider
 {
 	/// <summary>
-	/// Source of raw image data.
+	/// Size of data in bytes.
 	/// </summary>
-	interface IImageDataSource : IShareableDisposable<IImageDataSource>, IStreamProvider
-	{
-		/// <summary>
-		/// Size of data in bytes.
-		/// </summary>
-		long Size { get; }
-	}
+	long Size { get; }
 }

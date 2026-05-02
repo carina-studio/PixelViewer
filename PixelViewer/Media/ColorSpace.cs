@@ -210,12 +210,8 @@ namespace Carina.PixelViewer.Media
         
         
         // Implementation of Converter without conversion.
-        class IdenticalConverter : Converter
+        class IdenticalConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : Converter(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
         {
-            // Constructor.
-            public IdenticalConverter(ColorSpace srcColorSpace, bool skipSrcNumericalTransfer, ColorSpace destColorSpace, bool skipDestNumericalTransfer) : base(srcColorSpace, skipSrcNumericalTransfer, destColorSpace, skipDestNumericalTransfer)
-            { }
-            
             /// <inheritdoc/>
             public override (byte, byte, byte) Convert(byte r, byte g, byte b) =>
                 (r, g, b);
@@ -676,7 +672,7 @@ namespace Carina.PixelViewer.Media
         /// <returns>Converter.</returns>
         public Converter CreateConverter(ColorSpace dest, bool skipSrcNumericalTransfer, bool skipDestNumericalTransfer)
         {
-            if (dest == this || this.Equals(dest))
+            if (ReferenceEquals(dest, this) || this.Equals(dest))
                 return new IdenticalConverter(this, skipSrcNumericalTransfer, dest, skipDestNumericalTransfer);
             
             // Note: The performance of using SIMD it not better than default implementation on both x64 and arm64 (M1)
@@ -890,7 +886,7 @@ namespace Carina.PixelViewer.Media
                     if (colorSpace.Model != CGColorSpaceModel.RGB)
                         throw new NotSupportedException($"Unsupported color model: {colorSpace.Model}.");
                     using var iccData = colorSpace.ToIccProfile();
-                    if (iccData.Length == 0)
+                    if (iccData is null || iccData.Length == 0)
                         throw new Exception("Empty ICC profile from color space.");
                     return new MemoryStream().Use(it =>
                     {
@@ -1473,12 +1469,12 @@ namespace Carina.PixelViewer.Media
 
 
         // Quantize matrix of XYZ color space.
-        static long[] Quantize(SKColorSpaceXyz matrix) => new[]
-        {
+        static long[] Quantize(SKColorSpaceXyz matrix) =>
+        [
             (long)((double)matrix[0, 0] * QuantizationSteps + 0.5), (long)((double)matrix[1, 0] * QuantizationSteps + 0.5), (long)((double)matrix[2, 0] * QuantizationSteps + 0.5),
             (long)((double)matrix[0, 1] * QuantizationSteps + 0.5), (long)((double)matrix[1, 1] * QuantizationSteps + 0.5), (long)((double)matrix[2, 1] * QuantizationSteps + 0.5),
-            (long)((double)matrix[0, 2] * QuantizationSteps + 0.5), (long)((double)matrix[1, 2] * QuantizationSteps + 0.5), (long)((double)matrix[2, 2] * QuantizationSteps + 0.5),
-        };
+            (long)((double)matrix[0, 2] * QuantizationSteps + 0.5), (long)((double)matrix[1, 2] * QuantizationSteps + 0.5), (long)((double)matrix[2, 2] * QuantizationSteps + 0.5)
+        ];
 
 
         /// <summary>
@@ -1598,7 +1594,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="g">G.</param>
         /// <param name="b">B.</param>
         /// <returns>XYZ color.</returns>
-        public unsafe (double, double, double) RgbToXyz(byte r, byte g, byte b)
+        public (double, double, double) RgbToXyz(byte r, byte g, byte b)
         {
             var qR = (long)r << QuantizationBitsFrom8Bit;
             var qG = (long)g << QuantizationBitsFrom8Bit;
@@ -1625,7 +1621,7 @@ namespace Carina.PixelViewer.Media
         /// <param name="g">G.</param>
         /// <param name="b">B.</param>
         /// <returns>XYZ color.</returns>
-        public unsafe (double, double, double) RgbToXyz(ushort r, ushort g, ushort b)
+        public (double, double, double) RgbToXyz(ushort r, ushort g, ushort b)
         {
             var qR = (long)r << QuantizationBitsFrom16Bit;
             var qG = (long)g << QuantizationBitsFrom16Bit;

@@ -18,7 +18,7 @@ namespace Carina.PixelViewer.Media
     class BitmapHistograms
     {
         // Static fields.
-        static readonly ILogger? Logger = AppSuiteApplication.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapHistograms));
+        static readonly ILogger? Logger = Application.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapHistograms));
 
 
         // Fields.
