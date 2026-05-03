@@ -37,7 +37,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly.Description">內部仍可能使用更高位元數以處理影像。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">開啟檔案後重設濾鏡參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">儲存影像時套用目前的旋轉方向</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithTransformation">儲存影像時套用目前的旋轉方向和翻轉</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">螢幕色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">顯示選取像素的 ARGB 色彩</sys:String>
@@ -211,6 +211,8 @@
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">遞減</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">遞增</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">調整至視窗大小 (Ctrl+0)</sys:String>
+	<sys:String x:Key="String/SessionControl.FlipX">水平翻轉</sys:String>
+	<sys:String x:Key="String/SessionControl.FlipY">垂直翻轉</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">畫面資料間隔 (位元組)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">灰階濾鏡</sys:String>
 	<sys:String x:Key="String/SessionControl.GreenColorGain">綠色增益</sys:String>

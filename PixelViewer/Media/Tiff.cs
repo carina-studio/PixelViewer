@@ -47,6 +47,64 @@ static class Tiff
 
 
     /// <summary>
+    /// Convert from TIFF orientation to rotation in degrees and horizontal/vertical flip flags.
+    /// </summary>
+    /// <param name="orientation">TIFF orientation (1-8).</param>
+    /// <param name="rotation">Rotation in degrees, will be one of 0, 90, 180 and 270.</param>
+    /// <param name="flipX">True if image is mirrored horizontally.</param>
+    /// <param name="flipY">True if image is mirrored vertically.</param>
+    public static void FromTiffOrientation(int orientation, out int rotation, out bool flipX, out bool flipY)
+    {
+        // EXIF/TIFF orientation table:
+        // 1: 0°,        2: flip-X,         3: 180°,        4: flip-Y,
+        // 5: 90° CW + flip-X, 6: 90° CW,   7: 270° + flip-X, 8: 270°.
+        switch (orientation)
+        {
+            case 2:
+                rotation = 0;
+                flipX = true;
+                flipY = false;
+                break;
+            case 3:
+                rotation = 180;
+                flipX = false;
+                flipY = false;
+                break;
+            case 4:
+                rotation = 0;
+                flipX = false;
+                flipY = true;
+                break;
+            case 5:
+                rotation = 90;
+                flipX = true;
+                flipY = false;
+                break;
+            case 6:
+                rotation = 90;
+                flipX = false;
+                flipY = false;
+                break;
+            case 7:
+                rotation = 270;
+                flipX = true;
+                flipY = false;
+                break;
+            case 8:
+                rotation = 270;
+                flipX = false;
+                flipY = false;
+                break;
+            default:
+                rotation = 0;
+                flipX = false;
+                flipY = false;
+                break;
+        }
+    }
+
+
+    /// <summary>
     /// Get orientation from TIFF.
     /// </summary>
     /// <param name="stream">Stream contains TIFF.</param>
@@ -92,5 +150,66 @@ static class Tiff
         if (thumbOrientation >= 0 && fallbackToThumbnail)
             return FromTiffOrientation(thumbOrientation);
         return 0;
+    }
+
+
+    /// <summary>
+    /// Get rotation and flip transformation from TIFF.
+    /// </summary>
+    /// <param name="stream">Stream contains TIFF.</param>
+    /// <param name="rotation">Rotation in degrees, will be one of 0, 90, 180 and 270.</param>
+    /// <param name="flipX">True if image is mirrored horizontally.</param>
+    /// <param name="flipY">True if image is mirrored vertically.</param>
+    /// <param name="fallbackToThumbnail">True to fall-back to orientation of thumbnail if original orientation is unavailable.</param>
+    public static void GetTransformation(Stream stream, out int rotation, out bool flipX, out bool flipY, bool fallbackToThumbnail = true)
+    {
+        var orientation = -1;
+        var thumbOrientation = -1;
+        var entryReader = Global.RunOrDefault(() => new IfdEntryReader(stream));
+        if (entryReader is null)
+        {
+            rotation = 0;
+            flipX = false;
+            flipY = false;
+            return;
+        }
+        var isFullSizeImage = false;
+        while (entryReader.Read() && orientation < 0)
+        {
+            switch (entryReader.CurrentIfdName)
+            {
+                case IfdNames.Default:
+                case "Raw":
+                {
+                    switch (entryReader.CurrentEntryId)
+                    {
+                        case 0x00fe: // NewSubfileType
+                            if (entryReader.TryGetEntryData(out uint[]? uintData) && uintData != null)
+                                isFullSizeImage = (uintData[0] == 0);
+                            break;
+                        case 0x0112: // Orientation
+                            if (entryReader.TryGetEntryData(out ushort[]? ushortData) && ushortData != null)
+                            {
+                                if (isFullSizeImage)
+                                    orientation = ushortData[0];
+                                else if (thumbOrientation < 0)
+                                    thumbOrientation = ushortData[0];
+                            }
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+        if (orientation >= 0)
+            FromTiffOrientation(orientation, out rotation, out flipX, out flipY);
+        else if (thumbOrientation >= 0 && fallbackToThumbnail)
+            FromTiffOrientation(thumbOrientation, out rotation, out flipX, out flipY);
+        else
+        {
+            rotation = 0;
+            flipX = false;
+            flipY = false;
+        }
     }
 }

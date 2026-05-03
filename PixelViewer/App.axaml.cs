@@ -95,6 +95,7 @@ namespace Carina.PixelViewer
 
 
 		// Static fields.
+		static readonly SettingKey<bool> LegacySaveRenderedImageWithOrientationKey = new("SaveRenderedImageWithOrientation", true);
 		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new("ScreenColorSpace", "");
 		static readonly SettingKey<string> LegacyYuvConversionModeKey = new("YuvConversionMode", "");
 		static readonly Uri PreviewPackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
@@ -562,6 +563,13 @@ namespace Carina.PixelViewer
 					});
 				});
 			}
+
+			// migrate save-with-orientation gate to the broader save-with-transformation gate
+			if (oldVersion <= 8)
+			{
+				settings.SetValue(SettingKeys.SaveRenderedImageWithTransformation, settings.GetValueOrDefault(LegacySaveRenderedImageWithOrientationKey));
+				settings.ResetValue(LegacySaveRenderedImageWithOrientationKey);
+			}
 		}
 #pragma warning restore CS0612
 
@@ -598,7 +606,7 @@ namespace Carina.PixelViewer
 
 
 		// Version of settings.
-		protected override int SettingsVersion => 8;
+		protected override int SettingsVersion => 9;
 
 
 		/// <inheritdoc/>

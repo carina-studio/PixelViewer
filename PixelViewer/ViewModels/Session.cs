@@ -524,6 +524,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
 	/// <summary>
+	/// Property of <see cref="IsImageFlippedX"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsImageFlippedXProperty = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedX));
+	/// <summary>
+	/// Property of <see cref="IsImageFlippedY"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsImageFlippedYProperty = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedY));
+	/// <summary>
 	/// Property of <see cref="IsOpeningSourceFile"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsOpeningSourceFileProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSourceFile));
@@ -826,6 +834,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.ClearSourceFileCommand = new Command(this.ClearSourceFile, isSrcFileOpenedObservable);
 		this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
 		this.EvaluateImageDimensionsCommand = new Command<AspectRatio>(this.EvaluateImageDimensions, isSrcFileOpenedObservable);
+		this.FlipXCommand = new Command(this.FlipX, isSrcFileOpenedObservable);
+		this.FlipYCommand = new Command(this.FlipY, isSrcFileOpenedObservable);
 		this.MoveToFirstFrameCommand = new Command(() =>
 		{
 			if (this.canMoveToPreviousFrame.Value)
@@ -1384,7 +1394,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.SetValue(BlueColorGainProperty, profile.BlueColorGain);
 			}
 
-			// rotation
+			// rotation and flip
 			if (profile.IsFileFormat)
 			{
 				var rotation = profile.Orientation;
@@ -1394,7 +1404,9 @@ class Session : ViewModel<IAppSuiteApplication>
 					rotation -= 360;
 				rotation = (int)(rotation / 90.0 + 0.5) * 90;
 				this.SetValue(ImageDisplayRotationProperty, rotation);
-				if (this.GetValue(FitImageToViewportProperty) 
+				this.SetValue(IsImageFlippedXProperty, profile.FlipX);
+				this.SetValue(IsImageFlippedYProperty, profile.FlipY);
+				if (this.GetValue(FitImageToViewportProperty)
 					&& double.IsFinite(this.fitRenderedImageToViewportScale))
 				{
 					var scale = (rotation % 180) == 0
@@ -1792,6 +1804,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.ResetValue(ImageDisplayRotationProperty);
 			this.ResetValue(HasRenderingErrorProperty);
 			this.ResetValue(InsufficientMemoryForRenderedImageProperty);
+			this.ResetValue(IsImageFlippedXProperty);
+			this.ResetValue(IsImageFlippedYProperty);
 		}
 
 		// release cached images
@@ -2573,6 +2587,36 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Toggle horizontal flip of rendered image.
+	void FlipX()
+	{
+		if (!this.IsSourceFileOpened)
+			return;
+		this.SetValue(IsImageFlippedXProperty, !this.GetValue(IsImageFlippedXProperty));
+	}
+
+
+	/// <summary>
+	/// Command for flipping rendered image horizontally.
+	/// </summary>
+	public ICommand FlipXCommand { get; }
+
+
+	// Toggle vertical flip of rendered image.
+	void FlipY()
+	{
+		if (!this.IsSourceFileOpened)
+			return;
+		this.SetValue(IsImageFlippedYProperty, !this.GetValue(IsImageFlippedYProperty));
+	}
+
+
+	/// <summary>
+	/// Command for flipping rendered image vertically.
+	/// </summary>
+	public ICommand FlipYCommand { get; }
+
+
 	/// <summary>
 	/// Get number of frames in source file.
 	/// </summary>
@@ -3037,6 +3081,26 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		get => this.GetValue(IsHistogramsVisibleProperty);
 		set => this.SetValue(IsHistogramsVisibleProperty, value);
+	}
+
+
+	/// <summary>
+	/// Get or set whether displayed image is mirrored horizontally.
+	/// </summary>
+	public bool IsImageFlippedX
+	{
+		get => this.GetValue(IsImageFlippedXProperty);
+		set => this.SetValue(IsImageFlippedXProperty, value);
+	}
+
+
+	/// <summary>
+	/// Get or set whether displayed image is mirrored vertically.
+	/// </summary>
+	public bool IsImageFlippedY
+	{
+		get => this.GetValue(IsImageFlippedYProperty);
+		set => this.SetValue(IsImageFlippedYProperty, value);
 	}
 
 
@@ -4993,6 +5057,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		var fitToViewport = true;
 		var frameNumber = 1L;
 		var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
+		var isImageFlippedX = false;
+		var isImageFlippedY = false;
 		var isRenderingParamsPanelVisible = true;
 		var renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
 		var rotation = 0;
@@ -5005,6 +5071,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			jsonProperty.TryGetInt32(out rotation);
 		if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
 			isHistogramsVisible = jsonProperty.ValueKind != JsonValueKind.False;
+		if (savedState.TryGetProperty(nameof(IsImageFlippedX), out jsonProperty))
+			isImageFlippedX = jsonProperty.ValueKind != JsonValueKind.False;
+		if (savedState.TryGetProperty(nameof(IsImageFlippedY), out jsonProperty))
+			isImageFlippedY = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(IsRenderingParametersPanelVisible), out jsonProperty))
 			isRenderingParamsPanelVisible = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(RequestedImageDisplayScale), out jsonProperty))
@@ -5075,6 +5145,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(FrameNumberProperty, frameNumber);
 		this.SetValue(ImageDisplayRotationProperty, rotation);
 		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
+		this.SetValue(IsImageFlippedXProperty, isImageFlippedX);
+		this.SetValue(IsImageFlippedYProperty, isImageFlippedY);
 		this.SetValue(IsRenderingParametersPanelVisibleProperty, isRenderingParamsPanelVisible);
 		this.SetValue(RequestedImageDisplayScaleProperty, scale);
 		this.SetValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
@@ -5252,13 +5324,19 @@ class Session : ViewModel<IAppSuiteApplication>
 		var encoder = parameters.Encoder;
 		if (encoder is null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
-		if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
+		var applyTransformation = this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithTransformation);
+		var flipX = applyTransformation && this.GetValue(IsImageFlippedXProperty);
+		var flipY = applyTransformation && this.GetValue(IsImageFlippedYProperty);
+		if (applyTransformation)
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 		this.canSaveFilteredImage.Update(false);
 		this.SetValue(IsSavingFilteredImageProperty, true);
 		try
 		{
-			await encoder.AsNonNull().EncodeAsync(this.filteredImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
+			using IBitmapBuffer bufferToEncode = this.filteredImageFrame.AsNonNull().BitmapBuffer.Let(it => flipX || flipY
+				? it.Flip(flipX, flipY)
+				: it.Share());
+			await encoder.AsNonNull().EncodeAsync(bufferToEncode, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
 		}
@@ -5337,13 +5415,19 @@ class Session : ViewModel<IAppSuiteApplication>
 		var encoder = parameters.Encoder;
 		if (encoder is null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
-		if (this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithOrientation))
+		var applyTransformation = this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithTransformation);
+		var flipX = applyTransformation && this.GetValue(IsImageFlippedXProperty);
+		var flipY = applyTransformation && this.GetValue(IsImageFlippedYProperty);
+		if (applyTransformation)
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 		this.canSaveRenderedImage.Update(false);
 		this.SetValue(IsSavingRenderedImageProperty, true);
 		try
 		{
-			await encoder.AsNonNull().EncodeAsync(this.renderedImageFrame.AsNonNull().BitmapBuffer, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
+			using IBitmapBuffer bufferToEncode = this.renderedImageFrame.AsNonNull().BitmapBuffer.Let(it => flipX || flipY
+				? it.Flip(flipX, flipY)
+				: it.Share());
+			await encoder.AsNonNull().EncodeAsync(bufferToEncode, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
 		}
@@ -5460,6 +5544,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
 		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
 		writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
+		writer.WriteBoolean(nameof(IsImageFlippedX), this.IsImageFlippedX);
+		writer.WriteBoolean(nameof(IsImageFlippedY), this.IsImageFlippedY);
 		writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
 		writer.WriteNumber(nameof(RequestedImageDisplayScale), this.GetValue(RequestedImageDisplayScaleProperty));
 		writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);

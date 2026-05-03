@@ -37,7 +37,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly.Description">内部仍可能使用更高位数以处理图像。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">打开文件后重置滤镜参数</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">变更图像宽度后重置图层参数</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">保存图像时应用当前的旋转方向</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithTransformation">保存图像时应用当前的旋转方向和翻转</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">屏幕色彩空间</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在状态栏上显示 CPU 及内存使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">显示选取像素的 ARGB 色彩</sys:String>
@@ -215,6 +215,8 @@
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">递减</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">递增</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">调整至窗口大小 (Ctrl+0)</sys:String>
+	<sys:String x:Key="String/SessionControl.FlipX">水平翻转</sys:String>
+	<sys:String x:Key="String/SessionControl.FlipY">垂直翻转</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">帧数据间隔 (字节)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">灰度滤镜</sys:String>
 	<sys:String x:Key="String/SessionControl.GreenColorGain">绿色增益</sys:String>

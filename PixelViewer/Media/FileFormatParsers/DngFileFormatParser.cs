@@ -476,7 +476,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                             profile.DataOffset = imageDataOffset;
                             profile.Height = imageHeight;
                             profile.Width = imageWidth;
-                            profile.Orientation = Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation);
+                            Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation, out var rotation, out var flipX, out var flipY);
+                            profile.Orientation = rotation;
+                            profile.FlipX = flipX;
+                            profile.FlipY = flipY;
                         });
                     }
                     return null;
@@ -493,7 +496,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                                 profile.DataOffset = compressedThumbOffset;
                                 profile.Height = compressedThumbHeight;
                                 profile.Width = compressedThumbWidth;
-                                profile.Orientation = Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation);
+                                Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation, out var rotation, out var flipX, out var flipY);
+                                profile.Orientation = rotation;
+                                profile.FlipX = flipX;
+                                profile.FlipY = flipY;
                             });
                         }
                     }
@@ -541,7 +547,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
                 profile.BlackLevels = new uint[ImageFormat.MaxPlaneCount].Also(it => it[0] = blackLevel);
                 profile.WhiteLevels = new uint[ImageFormat.MaxPlaneCount].Also(it => it[0] = whiteLevel);
                 profile.Height = imageHeight;
-                profile.Orientation = Tiff.FromTiffOrientation(orientation);
+                Tiff.FromTiffOrientation(orientation, out var rotation, out var flipX, out var flipY);
+                profile.Orientation = rotation;
+                profile.FlipX = flipX;
+                profile.FlipY = flipY;
                 profile.PixelStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = pixelStride);
                 profile.RowStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = rowStride);
                 profile.Width = imageWidth;

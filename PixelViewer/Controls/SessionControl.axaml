@@ -227,6 +227,25 @@
 						<!-- Separator -->
 						<Separator asControls:ToolbarElement.Role="Separator"/>
 
+						<!-- Flip-X -->
+						<ToggleButton Name="flipXButton" IsChecked="{Binding IsImageFlippedX, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipX}">
+							<Panel>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipX}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipX.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							</Panel>
+						</ToggleButton>
+
+						<!-- Flip-Y -->
+						<ToggleButton Name="flipYButton" IsChecked="{Binding IsImageFlippedY, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipY}">
+							<Panel>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipY}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipY.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							</Panel>
+						</ToggleButton>
+
+						<!-- Separator -->
+						<Separator asControls:ToolbarElement.Role="Separator"/>
+
 						<!-- Histograms -->
 						<ToggleButton Name="histogramsButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !$parent[UserControl].IsHistogramsDisabled}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.Histograms}">
 							<Panel>
@@ -638,7 +657,10 @@
 									</Border>
 								</Panel>
 								<LayoutTransformControl.LayoutTransform>
-									<RotateTransform Angle="{Binding ImageDisplayRotation}"/>
+									<TransformGroup>
+										<ScaleTransform ScaleX="{Binding IsImageFlippedX, Converter={x:Static appConverters:BoolToScaleConverter.Default}}" ScaleY="{Binding IsImageFlippedY, Converter={x:Static appConverters:BoolToScaleConverter.Default}}"/>
+										<RotateTransform Angle="{Binding ImageDisplayRotation}"/>
+									</TransformGroup>
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
 						</Panel>

@@ -289,6 +289,18 @@ namespace Carina.PixelViewer.Media.Profiles
         }
 
 
+        /// <summary>
+        /// Whether the displayed image should be mirrored horizontally. The property is used for displaying only.
+        /// </summary>
+        public bool FlipX { get; set; }
+
+
+        /// <summary>
+        /// Whether the displayed image should be mirrored vertically. The property is used for displaying only.
+        /// </summary>
+        public bool FlipY { get; set; }
+
+
         // Padding size between each frame.
         public long FramePaddingSize
         {

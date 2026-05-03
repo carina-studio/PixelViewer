@@ -576,6 +576,59 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+		// Copy bitmap data with same format and size, mirroring along requested axes.
+		static unsafe void CopyToFlipped(IntPtr srcBaseAddress, BitmapFormat format, int width, int height, int srcRowStride, IntPtr destBaseAddress, int destRowStride, bool flipX, bool flipY, CancellationToken cancellationToken)
+		{
+			switch (format)
+			{
+				case BitmapFormat.Bgra32:
+					ImageProcessing.ParallelFor(0, height, (y) =>
+					{
+						if (cancellationToken.IsCancellationRequested)
+							throw new TaskCanceledException();
+						var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (y * srcRowStride));
+						var destRow = flipY ? (height - y - 1) : y;
+						if (flipX)
+						{
+							var destPixelPtr = (uint*)((byte*)destBaseAddress + (destRow * destRowStride) + ((width - 1) * sizeof(uint)));
+							for (var x = width; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
+								*destPixelPtr = *srcPixelPtr;
+						}
+						else
+						{
+							var destPixelPtr = (uint*)((byte*)destBaseAddress + (destRow * destRowStride));
+							for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+								*destPixelPtr = *srcPixelPtr;
+						}
+					});
+					break;
+				case BitmapFormat.Bgra64:
+					ImageProcessing.ParallelFor(0, height, (y) =>
+					{
+						if (cancellationToken.IsCancellationRequested)
+							throw new TaskCanceledException();
+						var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (y * srcRowStride));
+						var destRow = flipY ? (height - y - 1) : y;
+						if (flipX)
+						{
+							var destPixelPtr = (ulong*)((byte*)destBaseAddress + (destRow * destRowStride) + ((width - 1) * sizeof(ulong)));
+							for (var x = width; x > 0; --x, ++srcPixelPtr, --destPixelPtr)
+								*destPixelPtr = *srcPixelPtr;
+						}
+						else
+						{
+							var destPixelPtr = (ulong*)((byte*)destBaseAddress + (destRow * destRowStride));
+							for (var x = width; x > 0; --x, ++srcPixelPtr, ++destPixelPtr)
+								*destPixelPtr = *srcPixelPtr;
+						}
+					});
+					break;
+				default:
+					throw new NotSupportedException();
+			}
+		}
+
+
 		// Copy bitmap data to BGRA32 with quarter size.
 		static unsafe void CopyToQuarterBgra32(IntPtr srcBaseAddress, BitmapFormat srcFormat, int width, int height, int srcRowStride, IntPtr destBaseAddress, int destRowStride, CancellationToken cancellationToken)
 		{
@@ -1239,6 +1292,31 @@ namespace Carina.PixelViewer.Media
 					stopWatch.Stop();
 					Logger?.LogTrace("Take {duration} ms to convert from {width}x{height} {format} bitmap buffer to Skia bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
 				}
+			});
+		}
+
+
+		/// <summary>
+		/// Flip <see cref="IBitmapBuffer"/> along the requested axes to a new <see cref="IBitmapBuffer"/> instance.
+		/// </summary>
+		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <param name="flipX">True to mirror horizontally.</param>
+		/// <param name="flipY">True to mirror vertically.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Flipped <see cref="IBitmapBuffer"/>.</returns>
+		public static IBitmapBuffer Flip(this IBitmapBuffer bitmapBuffer, bool flipX, bool flipY, CancellationToken cancellationToken = default)
+		{
+			if (!flipX && !flipY)
+				return bitmapBuffer.Copy();
+			return new BitmapBuffer(bitmapBuffer.Format, bitmapBuffer.ColorSpace, bitmapBuffer.Width, bitmapBuffer.Height).Also(flippedBitmapBuffer =>
+			{
+				bitmapBuffer.Memory.Pin(srcBaseAddr =>
+				{
+					flippedBitmapBuffer.Memory.Pin(destBaseAddr =>
+					{
+						CopyToFlipped(srcBaseAddr, bitmapBuffer.Format, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.RowBytes, destBaseAddr, flippedBitmapBuffer.RowBytes, flipX, flipY, cancellationToken);
+					});
+				});
 			});
 		}
 

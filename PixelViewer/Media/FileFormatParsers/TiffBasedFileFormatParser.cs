@@ -170,9 +170,12 @@ abstract class TiffBasedFileFormatParser : BaseFileFormatParser
             if (colorSpace != null)
                 profile.ColorSpace = colorSpace;
             profile.Height = imageHeight;
-            profile.Orientation = Tiff.FromTiffOrientation(orientation >= 0 
-                ? orientation 
-                : (thumbOrientation >= 0 ? thumbOrientation : 0));
+            Tiff.FromTiffOrientation(orientation >= 0
+                ? orientation
+                : (thumbOrientation >= 0 ? thumbOrientation : 0), out var rotation, out var flipX, out var flipY);
+            profile.Orientation = rotation;
+            profile.FlipX = flipX;
+            profile.FlipY = flipY;
             profile.Width = imageWidth;
         });
     }

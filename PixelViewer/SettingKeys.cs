@@ -92,9 +92,9 @@ static class SettingKeys
 	/// </summary>
 	public static readonly SettingKey<bool> ResetImagePlaneOptionsAfterChangingImageDimensions = new(nameof(ResetImagePlaneOptionsAfterChangingImageDimensions), true);
 	/// <summary>
-	/// Apply orientation on saved rendered image.
+	/// Apply current rotation and flip on saved rendered image.
 	/// </summary>
-	public static readonly SettingKey<bool> SaveRenderedImageWithOrientation = new(nameof(SaveRenderedImageWithOrientation), true);
+	public static readonly SettingKey<bool> SaveRenderedImageWithTransformation = new(nameof(SaveRenderedImageWithTransformation), true);
 	/// <summary>
 	/// Name of color space of screen.
 	/// </summary>

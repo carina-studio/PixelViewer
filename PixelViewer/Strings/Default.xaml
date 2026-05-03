@@ -37,7 +37,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.Render32BitColorsOnly.Description">May still use more bits internally to process images.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetFilterParamsAfterOpeningSourceFile">Reset Filter Parameters after Opening File</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset Plane Parameters when Changing Image Width</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithOrientation">Apply Current Rotation to Saved Images</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithTransformation">Apply Current Rotation and Flip to Saved Images</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Screen Color Space</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/Memory Usage on the Status Bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB Color of Selected Pixel</sys:String>
@@ -253,6 +253,8 @@
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">Decrease</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">Increase</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to Viewport (Ctrl+0)</sys:String>
+	<sys:String x:Key="String/SessionControl.FlipX">Flip Horizontally</sys:String>
+	<sys:String x:Key="String/SessionControl.FlipY">Flip Vertically</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding Between Frames (Bytes)</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">Grayscale Filter</sys:String>
 	<sys:String x:Key="String/SessionControl.GreenColorGain">Green Gain</sys:String>

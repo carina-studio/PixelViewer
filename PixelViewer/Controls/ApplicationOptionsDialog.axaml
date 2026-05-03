@@ -476,10 +476,10 @@
 								</asControls:DialogItem>
 								<Separator asControls:DialogElement.SeparatorType="Item"/>
 
-								<!-- Apply orientation on saved images -->
+								<!-- Apply rotation and flip on saved images -->
 								<asControls:DialogItem ItemSize="Small">
-									<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.SaveRenderedImageWithOrientation}" asControls:DialogElement.TextRole="Label"/>
-									<ToggleSwitch IsChecked="{Binding SaveRenderedImageWithOrientation, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
+									<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.SaveRenderedImageWithTransformation}" asControls:DialogElement.TextRole="Label"/>
+									<ToggleSwitch IsChecked="{Binding SaveRenderedImageWithTransformation, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
 								</asControls:DialogItem>
 								<Separator asControls:DialogElement.SeparatorType="Item"/>
 

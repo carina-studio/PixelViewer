@@ -123,7 +123,10 @@ class JpegFileFormatParser : SkiaFileFormatParser
             throw new TaskCanceledException();
 
         // setup profile
-        profile.Orientation = Tiff.FromTiffOrientation(orientation);
+        Tiff.FromTiffOrientation(orientation, out var rotation, out var flipX, out var flipY);
+        profile.Orientation = rotation;
+        profile.FlipX = flipX;
+        profile.FlipY = flipY;
     }
 
 

@@ -95,7 +95,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
         // parse image
         var width = 0;
         var height = 0;
-        var orientation = 0;
+        var exifOrientation = 0;
         await Task.Run(() =>
         {
             // create image source
@@ -103,7 +103,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             if (cancellationToken.IsCancellationRequested)
                 throw new TaskCanceledException();
             var primaryImageIndex = imageSource.PrimaryImageIndex;
-            
+
             // get dimensions
             using var imageProperties = imageSource.CopyPropertiesAtIndex(primaryImageIndex);
             if (imageProperties is not null)
@@ -111,23 +111,17 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
                 if (imageProperties.TryGetValue(CGImageProperties.PixelWidth, out var widthNumber)
                     && widthNumber?.TypeDescription == nameof(CFNumber))
                 {
-                    width = CFObject.FromHandle<CFNumber>(widthNumber.Handle).ToInt32();
+                    width = CFObject.FromHandle<CFNumber>(widthNumber.Handle)!.ToInt32();
                 }
                 if (imageProperties.TryGetValue(CGImageProperties.PixelHeight, out var heightNumber)
                     && heightNumber?.TypeDescription == nameof(CFNumber))
                 {
-                    height = CFObject.FromHandle<CFNumber>(heightNumber.Handle).ToInt32();
+                    height = CFObject.FromHandle<CFNumber>(heightNumber.Handle)!.ToInt32();
                 }
                 if (imageProperties.TryGetValue(CGImageProperties.Orientation, out var orientationNumber)
                     && orientationNumber?.TypeDescription == nameof(CFNumber))
                 {
-                    orientation = CFObject.FromHandle<CFNumber>(orientationNumber.Handle).ToInt32() switch
-                    {
-                        3 or 4 => 180,
-                        5 or 8 => 270,
-                        6 or 7 => 90,
-                        _ => 0,
-                    };
+                    exifOrientation = CFObject.FromHandle<CFNumber>(orientationNumber.Handle)!.ToInt32();
                 }
             }
         }, cancellationToken);
@@ -135,12 +129,15 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
         // create profile
         if (width <= 0 || height <= 0)
             return null;
+        Tiff.FromTiffOrientation(exifOrientation, out var rotation, out var flipX, out var flipY);
         return new ImageRenderingProfile(this.FileFormat, this.imageRenderer).Also(it =>
         {
             if (colorSpace != null)
                 it.ColorSpace = colorSpace;
+            it.FlipX = flipX;
+            it.FlipY = flipY;
             it.Height = height;
-            it.Orientation = orientation;
+            it.Orientation = rotation;
             it.Width = width;
         });
     }
