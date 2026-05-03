@@ -608,7 +608,7 @@
 				</Viewbox>
 
 				<!-- Image -->
-				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="{Binding #root.HideImageViewerScrollBarsAutomatically}" Background="{x:Static Brushes.Transparent}" PointerPressed="OnImageScrollViewerPointerPressed" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
+				<ScrollViewer x:Name="imageScrollViewer" AllowAutoHide="{Binding #root.HideImageViewerScrollBarsAutomatically}" Background="{x:Static Brushes.Transparent}" Gestures.PinchEnded="OnImagePinchEnded" Gestures.Pinch="OnImagePinch" Gestures.PointerTouchPadGestureMagnify="OnImagePointerTouchPadGestureMagnify" PointerPressed="OnImageScrollViewerPointerPressed" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Disabled">
 					<Panel ClipToBounds="False" Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" UseLayoutRounding="True">
 						<Panel Name="imageContainerBorder" ClipToBounds="False" HorizontalAlignment="Center" VerticalAlignment="Center">
 							<Border Margin="0.5"> <!-- [Workaround] Prevent background being larger than image on any edge -->

@@ -6077,8 +6077,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand ZoomOutCommand { get; }
 
 
-	// Start zooming to given scale.
-	double ZoomTo(double scale, bool animate = true)
+	/// <summary>
+	/// Zoom rendered image to given scale.
+	/// </summary>
+	/// <param name="scale">Target scale. Clamped to the allowed range unless fitting to viewport.</param>
+	/// <param name="animate">Whether to animate the zoom; pass <see langword="false"/> for direct manipulation (e.g. pinch).</param>
+	/// <returns>The actually applied scale, or <see cref="double.NaN"/> if the request was rejected.</returns>
+	public double ZoomTo(double scale, bool animate = true)
     {
 		// check state
 		this.VerifyAccess();

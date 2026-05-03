@@ -2,13 +2,13 @@
  ---
 
 ## New Features
-+ 
++ Added support for pinch gesture on touchscreen and touchpad to zoom image.
 
 ## Improvement
-+ Improve UX of image viewer.
++ Improved the user experience of image viewer.
 
 ## Behavior Changes
-+ Toggle between `Fit to Viewport` and `Zoom to 100%` when double-tapping image.
++ Double-tapping image now toggles between `Fit to Viewport` and `Zoom to 100%`.
 
 ## Bug Fixing
 + Minor bug fixing.

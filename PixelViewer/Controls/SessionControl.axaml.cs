@@ -71,7 +71,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	const int ContrastAdjustmentGroup = 3;
 	const int HidePanelsByImageViewerSizeDelay = 500;
 	const int ResetPointerPressedOnFilterParamsUIDelay = 1000;
-	const int StopUsingSmallRenderedImageDelay = 1000;
+	const int StopUsingSmallRenderedImageDelay = 800;
+	const int StopUsingSmallRenderedImageDelayFast = 500;
 
 
 	// Static fields.
@@ -126,6 +127,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ContextMenu evaluateImageDimensionsMenu;
 	readonly ToggleButton fileActionsButton;
 	readonly ContextMenu fileActionsMenu;
+	// Pivot point in scrollviewer coords supplied by the active gesture handler (cursor for trackpad, focal point for pinch).
+	Vector? gesturePivotInViewport;
 	readonly ScheduledAction hidePanelsByImageViewerSizeAction;
 	readonly ToggleButton histogramsButton;
 	readonly Image image;
@@ -138,12 +141,17 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly Control imageViewerGrid;
 	ASControls.Notification? insufficientMemoryForRenderedImagesNotification;
 	bool isFirstImageViewerBoundsChanged = true;
+	// True while a gesture handler (pinch / trackpad magnify) is driving the current zoom.
+	// Read by OnSessionPropertyChanged to choose the pivot source and skip its own pivot capture/clear.
+	bool isZoomingByGesture;
 	bool keepHistogramsVisible;
 	bool keepRenderingParamsPanelVisible;
 	PointerEventArgs? latestPointerEventArgsOnImage;
 	readonly double minImageViewerSizeToHidePanels;
 	readonly ToggleButton otherActionsButton;
 	readonly ContextMenu otherActionsMenu;
+	// Image scale at the start of the current pinch gesture; non-null indicates a pinch is in progress.
+	double? pinchInitialScale;
 	readonly HashSet<Key> pressedKeys = new();
 	readonly ColumnDefinition renderingParamsPanelColumn;
 	readonly ScrollViewer renderingParamsPanelScrollViewer;
@@ -152,14 +160,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction resetPointerPressedOnContrastAdjustmentUIAction;
 	readonly ScheduledAction stopUsingSmallRenderedImageAction;
 	Vector? targetImageViewportCenter;
-	// Pivot pointer position in scrollviewer-local coordinates (= viewport coords),
-	// captured when zooming starts. The animation tries to keep the same content
-	// point at this scrollviewer position throughout.
+	// Pivot expressed as a fraction of the scrollviewer's content extent — the content point
+	// to keep anchored at targetImageViewportPivotAnchor as layout changes during a zoom.
 	Vector? targetImageViewportPivot;
-	// Same pivot expressed as a fraction of the scrollviewer's content extent at
-	// capture time. Used at apply time to recover the content point that was at
-	// the pivot location.
-	Vector? targetImageViewportPivotRelative;
+	// Viewport position (fraction 0-1) where targetImageViewportPivot should land after layout.
+	// Together they define ScrollImageScrollViewer(content=pivot, viewport=anchor) — single-shot precise pivot zoom.
+	Vector? targetImageViewportPivotAnchor;
 	readonly ScheduledAction updateEffectiveRenderedImageAction;
 	readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
 	readonly ScheduledAction updateImageCursorAction;
@@ -465,6 +471,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			if (this.useSmallRenderedImage)
 			{
+				this.Logger.LogTrace("Stop using small rendered image");
 				this.useSmallRenderedImage = false;
 				this.updateEffectiveRenderedImageAction?.Schedule();
 				this.updateEffectiveRenderedImageIntModeAction?.Schedule();
@@ -1116,6 +1123,72 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	}
 
 
+	// Called when pinching on image viewer.
+	void OnImagePinch(object? sender, PinchEventArgs e)
+	{
+		// check state
+		if (this.DataContext is not Session session || session.RenderedImage is null)
+			return;
+
+		// capture initial state on the first event of the gesture
+		if (this.pinchInitialScale is null)
+		{
+			var initialScale = session.ImageDisplayScale;
+			if (!double.IsFinite(initialScale))
+				return;
+			var contentSize = this.imageScrollViewer.Extent;
+			if (contentSize.Width <= 0 || contentSize.Height <= 0)
+				return;
+			this.gesturePivotInViewport = new Vector(e.ScaleOrigin.X, e.ScaleOrigin.Y);
+			this.pinchInitialScale = initialScale;
+		}
+
+		// use small image while gesture streams; the debounced restore fires once events stop
+		this.StartUsingSmallRenderedImage();
+		this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelayFast);
+
+		// drive zoom (pivot fields tell OnSessionPropertyChanged how to anchor)
+		this.isZoomingByGesture = true;
+		try
+		{
+			if (session.FitImageToViewport)
+				session.FitImageToViewport = false;
+
+			var newScale = this.pinchInitialScale.Value * e.Scale;
+			session.ZoomTo(newScale, animate: false);
+		}
+		finally
+		{
+			this.isZoomingByGesture = false;
+		}
+
+		// mark handled
+		e.Handled = true;
+	}
+
+
+	// Called when pinch ended on image viewer.
+	void OnImagePinchEnded(object? sender, PinchEndedEventArgs e)
+	{
+		// remember the pinched scale so subsequent zoom commands operate from here
+		if (this.pinchInitialScale is not null && this.DataContext is Session session)
+		{
+			var finalScale = session.ImageDisplayScale;
+			if (double.IsFinite(finalScale))
+				session.RequestedImageDisplayScale = finalScale;
+		}
+
+		// clear gesture state
+		this.pinchInitialScale = null;
+		this.gesturePivotInViewport = null;
+		this.targetImageViewportPivot = null;
+		this.targetImageViewportPivotAnchor = null;
+
+		// mark handled
+		e.Handled = true;
+	}
+
+
 	// Called when pointer leave from image.
 	void OnImagePointerLeave(object? sender, PointerEventArgs e)
 	{
@@ -1191,8 +1264,67 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.stopUsingSmallRenderedImageAction.Schedule();
 		this.SetValue(IsPointerPressedOnImageProperty, false);
 	}
-	
-	
+
+
+	// Called when magnify gesture on touchpad detected.
+	void OnImagePointerTouchPadGestureMagnify(object? sender, PointerDeltaEventArgs e)
+	{
+		// check state
+		if (this.DataContext is not Session session || session.RenderedImage is null)
+			return;
+
+		// extract scale delta following ULogViewer LogChart pattern
+		var delta = e.Delta;
+		var magnitude = Math.Sqrt(delta.X * delta.X + delta.Y * delta.Y);
+		if (magnitude < 0.001)
+			return;
+		var sign = Math.Sign(delta.X);
+		if (sign == 0)
+			sign = Math.Sign(delta.Y);
+		if (sign == 0)
+			return;
+
+		// validate scrollviewer state
+		var initialScale = session.ImageDisplayScale;
+		var contentSize = this.imageScrollViewer.Extent;
+		if (!double.IsFinite(initialScale) || contentSize.Width <= 0 || contentSize.Height <= 0)
+			return;
+
+		// expose the gesture pivot (current cursor position) so OnSessionPropertyChanged anchors the zoom here
+		var pivot = e.GetPosition(this.imageScrollViewer);
+		this.gesturePivotInViewport = new Vector(pivot.X, pivot.Y);
+
+		// use small image while gesture streams; the debounced restore fires once events stop
+		this.StartUsingSmallRenderedImage();
+		this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelayFast);
+
+		// drive zoom around the captured pivot
+		this.isZoomingByGesture = true;
+		try
+		{
+			if (session.FitImageToViewport)
+				session.FitImageToViewport = false;
+			else
+				this.SetupTargetImageViewportPivot();
+
+			var newScale = initialScale * (1.0 + sign * magnitude);
+			var appliedScale = session.ZoomTo(newScale, animate: false);
+			if (double.IsFinite(appliedScale))
+				session.RequestedImageDisplayScale = appliedScale;
+		}
+		finally
+		{
+			this.isZoomingByGesture = false;
+		}
+
+		// re-select pixel under cursor since the image scale changed
+		this.SelectImageDisplayPixel(e);
+
+		// mark handled
+		e.Handled = true;
+	}
+
+
 	// Called when image saving completed.
 	void OnImageSavingCompleted(object? sender, Session.ImageSavingCompletedEventArgs e)
 	{
@@ -1268,8 +1400,27 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when extent of image scroll viewer changed.
 	void OnImageScrollViewerExtentChanged(Size extent)
 	{
+		// log and update scrollability
 		this.Logger.LogTrace("Image viewer extent changed to {x:F1}x{y:F1}", extent.Width, extent.Height);
 		this.updateIsImageViewerScrollableAction.Schedule();
+
+		// apply pivot anchor (precise single-shot, also keeps animated zoom on-pivot per frame)
+		if (this.targetImageViewportPivot.HasValue && this.targetImageViewportPivotAnchor.HasValue)
+		{
+			var pivot = this.targetImageViewportPivot.Value;
+			var anchor = this.targetImageViewportPivotAnchor.Value;
+			this.targetImageViewportCenter = null;
+			this.ScrollImageScrollViewer(pivot, anchor);
+			// keep pivot fields set across animated zoom frames; clear after a one-shot apply
+			if (this.DataContext is not Session s || !s.IsZooming)
+			{
+				this.targetImageViewportPivot = null;
+				this.targetImageViewportPivotAnchor = null;
+			}
+			return;
+		}
+
+		// apply view-center fallback (e.g. fit-mode rearrange or non-pivot layout change)
 		if (this.targetImageViewportCenter.HasValue)
 		{
 			var center = this.targetImageViewportCenter.Value;
@@ -1498,7 +1649,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			this.Logger.LogDebug("Drop viewport pivot");
 			this.targetImageViewportPivot = null;
-			this.targetImageViewportPivotRelative = null;
+			this.targetImageViewportPivotAnchor = null;
 		}
 		if (this.latestPointerEventArgsOnImage is not null)
 			this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
@@ -1622,31 +1773,28 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				break;
 			case nameof(Session.ImageDisplaySize):
 			{
+				// log the new size
 				var imageSize = session.ImageDisplaySize;
 				this.Logger.LogTrace("Image display size: {w:F1}x{h:F1}", imageSize.Width, imageSize.Height);
-				var viewportSize = this.imageScrollViewer.Viewport;
-				var viewportOffset = this.imageScrollViewer.Offset;
-				var contentSize = this.imageScrollViewer.Extent;
-				var centerX = double.NaN;
-				var centerY = double.NaN;
-				if (this.targetImageViewportPivot.HasValue && this.targetImageViewportPivotRelative.HasValue)
-				{
-					var targetPivot = this.targetImageViewportPivot.Value;
-					var targetPivotRelative = this.targetImageViewportPivotRelative.Value;
-					var pivotX = contentSize.Width * targetPivotRelative.X - viewportOffset.X;
-					var pivotY = contentSize.Height * targetPivotRelative.Y - viewportOffset.Y;
-					var currentCenterX = viewportOffset.X + viewportSize.Width / 2 + (pivotX - targetPivot.X);
-					var currentCenterY = viewportOffset.Y + viewportSize.Height / 2 + (pivotY - targetPivot.Y);
-					centerX = currentCenterX / contentSize.Width;
-					centerY = currentCenterY / contentSize.Height;
-				}
+
+				// refresh pivot per frame for active zoom (cursor stable for animated zoom; updated per event for gesture)
+				if (this.targetImageViewportPivot.HasValue)
+					this.SetupTargetImageViewportPivot();
+				// no pivot path active — preserve current view center for non-zoom layout changes
 				else if (!session.FitImageToViewport)
 				{
-					centerX = (viewportOffset.X + viewportSize.Width / 2) / contentSize.Width;
-					centerY = (viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height;
+					var viewportSize = this.imageScrollViewer.Viewport;
+					var viewportOffset = this.imageScrollViewer.Offset;
+					var contentSize = this.imageScrollViewer.Extent;
+					if (contentSize.Width > 0 && contentSize.Height > 0)
+					{
+						this.targetImageViewportCenter = new Vector(
+							(viewportOffset.X + viewportSize.Width / 2) / contentSize.Width,
+							(viewportOffset.Y + viewportSize.Height / 2) / contentSize.Height);
+					}
 				}
-				if (double.IsFinite(centerX) && double.IsFinite(centerY))
-					this.targetImageViewportCenter = new Vector(centerX, centerY);
+
+				// schedule dependent updates
 				this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 				this.updateEffectiveRenderedImageIntModeAction.Schedule();
 				break;
@@ -1681,28 +1829,17 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				if (session.IsZooming)
 				{
 					this.Logger.LogTrace("Start zooming, fit image to viewport: {fitToViewport}", session.FitImageToViewport);
-					var viewportSize = this.imageScrollViewer.Viewport;
-					var viewportOffset = this.imageScrollViewer.Offset;
-					var contentSize = this.imageScrollViewer.Extent;
-					var pivot = (this.latestPointerEventArgsOnImage is not null && !session.FitImageToViewport)
-						? this.latestPointerEventArgsOnImage.GetCurrentPoint(this.imageScrollViewer).Position
-						: new(viewportSize.Width / 2, viewportSize.Height / 2);
-					var pivotRelative = new Vector((pivot.X + viewportOffset.X) / contentSize.Width, (pivot.Y + viewportOffset.Y) / contentSize.Height);
-					this.targetImageViewportPivot = pivot;
-					this.targetImageViewportPivotRelative = pivotRelative;
-					this.Logger.LogTrace("Viewport pivot: ({px:F1}, {py:F1}), relative: ({prx:F3}, {pry:F3})", pivot.X, pivot.Y, pivotRelative.X, pivotRelative.Y);
 					this.StartUsingSmallRenderedImage();
 				}
 				else
 				{
 					this.Logger.LogTrace("Stop zooming");
-					this.targetImageViewportPivot = null;
-					this.targetImageViewportPivotRelative = null;
 					if (!this.stopUsingSmallRenderedImageAction.IsScheduled)
 						this.stopUsingSmallRenderedImageAction.Execute();
 					if (this.latestPointerEventArgsOnImage is not null)
 						this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
 				}
+				this.SetupTargetImageViewportPivot();
 				this.updateImageViewerScrollBarsAction.Schedule();
 				this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 				break;
@@ -1759,8 +1896,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			if (this.attachedWindow is not CarinaStudio.Controls.Window csWindow || csWindow.IsOpened)
 				this.checkAttachedScreenAction.Schedule(AttachedScreenCheckingInterval);
 		}
-		else if (property == HeightProperty 
-		         || property == WidthProperty)
+		else if (property == HeightProperty || property == WidthProperty)
 		{
 			this.StartUsingSmallRenderedImage();
 			this.stopUsingSmallRenderedImageAction.Reschedule(StopUsingSmallRenderedImageDelay);
@@ -2089,6 +2225,47 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			session.SelectRenderedImagePixel(-1, -1);
 		this.updateSelectedImageDisplayPixelBoundsAction.Execute();
 	}
+	
+	
+	// Setup proper pivot for zooming image.
+	void SetupTargetImageViewportPivot()
+	{
+		// check state
+		if (this.DataContext is not Session session)
+			return;
+
+		// compute pivot from gesture or cursor while a zoom is in progress
+		if (session.IsZooming || this.isZoomingByGesture)
+		{
+			var viewportSize = this.imageScrollViewer.Viewport;
+			var viewportOffset = this.imageScrollViewer.Offset;
+			var contentSize = this.imageScrollViewer.Extent;
+			if (viewportSize.Width <= 0 || viewportSize.Height <= 0 || contentSize.Width <= 0 || contentSize.Height <= 0)
+				return;
+			Vector pivotInViewport;
+			if (this.isZoomingByGesture && this.gesturePivotInViewport.HasValue)
+				pivotInViewport = this.gesturePivotInViewport.Value;
+			else
+			{
+				pivotInViewport = (this.latestPointerEventArgsOnImage is not null && !session.FitImageToViewport)
+					? this.latestPointerEventArgsOnImage.GetCurrentPoint(this.imageScrollViewer).Position
+					: new(viewportSize.Width / 2, viewportSize.Height / 2);
+			}
+			var pivot = new Vector(
+				(pivotInViewport.X + viewportOffset.X) / contentSize.Width,
+				(pivotInViewport.Y + viewportOffset.Y) / contentSize.Height);
+			var anchor = new Vector(pivotInViewport.X / viewportSize.Width, pivotInViewport.Y / viewportSize.Height);
+			this.targetImageViewportPivot = pivot;
+			this.targetImageViewportPivotAnchor = anchor;
+			this.Logger.LogTrace("Update viewport pivot, content: ({px:F3}, {py:F3}), anchor: ({ax:F3}, {ay:F3})", pivot.X, pivot.Y, anchor.X, anchor.Y);
+		}
+		// no active zoom — drop any stale pivot so non-zoom layout changes don't apply it
+		else
+		{
+			this.targetImageViewportPivot = null;
+			this.targetImageViewportPivotAnchor = null;
+		}
+	}
 
 
 	/// <summary>
@@ -2206,6 +2383,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.stopUsingSmallRenderedImageAction.Cancel();
 		if (!this.useSmallRenderedImage)
 		{
+			this.Logger.LogTrace("Start using small rendered image");
 			this.useSmallRenderedImage = true;
 			this.updateEffectiveRenderedImageAction.Schedule();
 			this.updateEffectiveRenderedImageIntModeAction.Schedule();
