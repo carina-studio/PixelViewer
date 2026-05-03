@@ -162,6 +162,20 @@
 	<sys:String x:Key="String/MainWindow.Session.RenderedImagesMemoryUsage">内存使用：</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">自定义标题…</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">自定义标题</sys:String>
+	<sys:String x:Key="String/MainWindow.UsageDataCollection.Message">帮助我们改善 PixelViewer！</sys:String>
+	<sys:String x:Key="String/MainWindow.UsageDataCollection.SecondaryMessage">我们想要收集匿名的使用数据，以帮助我们了解 PixelViewer 的使用并优化。
+
+哪些将会被收集：
+  - 匿名的工作会话标识符
+  - 功能使用事件（例如应用绘制参数、保存图像、自动色彩调整）
+  - 配置指标（例如图像格式、色彩空间、滤镜调整）
+
+哪些将不会被收集：
+  - 图像内容或像素数据
+  - 文件路径及名称
+  - 任何可以识别个人的信息
+
+您随时可以在选项中改变这个设置。</sys:String>
 	<sys:String x:Key="String/MainWindow.Tabs">标签页</sys:String>
 	<sys:String x:Key="String/MainWindow.Windows">窗口</sys:String>
 

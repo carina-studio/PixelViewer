@@ -2006,6 +2006,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
     {
 		if (this.DataContext is Session session)
 		{
+			session.TrackBrightnessAndContrastAdjustmentResetEvent();
 			session.ResetBrightnessAdjustmentCommand.TryExecute();
 			session.ResetContrastAdjustmentCommand.TryExecute();
 			session.ResetHighlightAdjustmentCommand.TryExecute();
@@ -2023,6 +2024,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		if (this.DataContext is not Session session)
 			return;
+		session.TrackColorAdjustmentResetEvent();
 		session.ResetColorAdjustmentCommand.TryExecute();
 		session.ResetSaturationAdjustmentCommand.TryExecute();
 		session.ResetVibranceAdjustmentCommand.TryExecute();

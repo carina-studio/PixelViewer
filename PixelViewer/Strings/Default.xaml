@@ -199,6 +199,20 @@
 	<sys:String x:Key="String/MainWindow.Session.RenderedImagesMemoryUsage">Memory usage:</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle">Custom Title…</sys:String>
 	<sys:String x:Key="String/MainWindow.SetCustomSessionTitle.Message">Custom Title</sys:String>
+	<sys:String x:Key="String/MainWindow.UsageDataCollection.Message">Help Us Improve PixelViewer!</sys:String>
+	<sys:String x:Key="String/MainWindow.UsageDataCollection.SecondaryMessage">We'd like to collect anonymous usage data to help us understand how PixelViewer is used and improve it.
+
+What will be collected:
+  - Anonymous session identifiers
+  - Feature interaction events (e.g. applying rendering parameters, saving images, auto color adjustment)
+  - Configuration metrics (e.g. image format, color space, filter adjustments)
+
+What will NOT be collected:
+  - Image content or pixel data
+  - File paths or names
+  - Any personally identifiable information
+
+You can change this setting at any time in Options.</sys:String>
 	<sys:String x:Key="String/MainWindow.Tabs">Tabs</sys:String>
 	<sys:String x:Key="String/MainWindow.Windows">Windows</sys:String>
 	
