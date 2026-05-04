@@ -77,13 +77,15 @@ namespace Carina.PixelViewer
 			{ 
 				this.SetToCurrentCulture();
 			}
-			public override IList<ApplicationCulture> SupportedCultures => 
+			public override IList<ApplicationCulture> SupportedCultures =>
 			[
 				ApplicationCulture.EN_US,
+				ApplicationCulture.ZH_CN,
 				ApplicationCulture.ZH_TW,
 			];
 			public override Uri Uri => this.Culture switch
 			{
+				ApplicationCulture.ZH_CN => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/UserAgreement-zh-CN.md"),
 				ApplicationCulture.ZH_TW => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/UserAgreement-zh-TW.md"),
 				_ => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/UserAgreement.md"),
 			};
@@ -654,6 +656,6 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version UserAgreementVersion => new(1, 6);
+		public override Version UserAgreementVersion => new(1, 7);
 	}
 }

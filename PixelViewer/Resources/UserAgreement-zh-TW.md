@@ -1,35 +1,40 @@
 # PixelViewer 使用者協議
  ---
-+ 版本：1.6
-+ 更新時間：2024/2/1
++ 版本：1.7
++ 更新時間：2026/5/4
 
 這是 PixelViewer 的使用者協議，您應該要在使用 PixelViewer 之前詳細閱讀本協議。 使用者協議可能會在未來有所更新，您可以在 PixelViewer 網站中查看。 當您開始使用 PixelViewer 表示您同意本使用者協議。
 
 
 ## 適用範圍
-PixelViewer 為基於開放原始碼專案之軟體，以下所指 PixelViewer **僅包括** 與下列頁面所提供之可執行檔或壓縮檔內容完全相同之版本：
+PixelViewer 為 Carina Studio 之開放原始碼專案，以下所指 PixelViewer **僅包括** 與下列頁面所提供之可執行檔或壓縮檔內容完全相同之版本：
 
 + [PixelViewer 網站](https://carinastudio.azurewebsites.net/PixelViewer/)
 + [GitHub 上之 PixelViewer 專案頁面及各版本釋出頁面](https://github.com/carina-studio/PixelViewer)
 
-本使用者協議適用於您使用 PixelViewer 3.0 及下一份使用者協議所指定之版本之間 (但不包括) 的所有版本。
+若您透過原始碼自行建置 PixelViewer，您使用該建置之版本僅受 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授權之約束，不受本使用者協議之約束。
+
+本使用者協議適用於您使用 PixelViewer 2026.0 及下一份使用者協議所指定之版本之間 (但不包括) 的所有版本。
+
+
+## 偵錯模式
+PixelViewer 包含預設關閉的內建偵錯模式，您可以透過 **「關於 PixelViewer > 以偵錯模式重新啟動」** 啟用偵錯模式。
 
 
 ## 檔案存取
-除了系統檔案之外，所有 PixelViewer 所需之檔案皆存放於 PixelViewer 目錄內（若您有安裝 .NET 則亦包含 .NET 執行期間 之目錄）。當執行 PixelViewer 且未載入任何圖片時不需要額外的檔案存取，除了下列之外：
+除了系統檔案之外，所有 PixelViewer 所需之檔案皆存放於 PixelViewer 目錄內（若您有安裝 .NET 則亦包含 .NET 執行期間之目錄）。在 **macOS** 上，由於應用程式簽署之要求，應用程式資料將存放於 **Application Support** 目錄（`~/Library/Application Support/CarinaStudio/PixelViewer/`）而不是應用程式套件內。在 **Windows** 及 **Linux** 上，應用程式資料存放於應用程式目錄本身。當執行 PixelViewer 且未載入任何圖片時不需要額外的檔案存取，除了下列之外：
 
-+ 讀取 **/proc/meminfo** 以在 **Linux** 上取得記憶體資訊。
++ 讀取 **/proc/meminfo** 以在 Linux 上取得記憶體資訊。
 + 讀/寫系統之暫存目錄以存放執行期間所需資源。
 + 其餘由 .NET 或第三方程式庫之必要檔案存取。
-
 
 ### 圖片載入時之檔案存取
 + 包含原始圖片內容之檔案將以 **讀取** 模式開啟。
 
-## 圖片儲存時之檔案存取
+### 圖片儲存時之檔案存取
 + 寫入圖片內容之檔案將以 **讀寫** 模式開啟。
 
-## 自我升級時之檔案存取
+### 自我升級時之檔案存取
 + 下載的升級檔案及應用程式備份將存放於系統之暫存目錄內。
 
 其他由 PixelViewer 執行檔以外的檔案存取不受本協議之約束。
@@ -38,9 +43,20 @@ PixelViewer 為基於開放原始碼專案之軟體，以下所指 PixelViewer *
 ## 網路存取
 PixelViewer 將會在下列狀況存取網路：
 
-### 檢查應用程式更新
-PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有新的應用程式更新。
+### 網路連線測試
+PixelViewer 會連線至下列伺服器以確認網路連線狀態：
 
++ [Cloudflare](https://www.cloudflare.com/)
++ [Google DNS](https://dns.google/)
++ [OpenDNS](https://www.opendns.com/)
+
+PixelViewer 會連線至下列伺服器以確認裝置的公開 [IP 位址](https://zh.wikipedia.org/wiki/IP%E5%9C%B0%E5%9D%80)：
+
++ [https://ipv4.icanhazip.com](https://ipv4.icanhazip.com/)
++ [http://checkip.dyndns.org](http://checkip.dyndns.org/)
+
+### 檢查應用程式更新
+PixelViewer 會定期從 [GitHub](https://github.com/carina-studio/PixelViewer) 下載資訊清單以檢查是否有新的應用程式更新。
 
 ### 自我更新
 以下 4 種資料需要在更新 PixelViewer 時下載：
@@ -60,10 +76,10 @@ PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有�
 在執行 PixelViewer 時有些必要情況需要執行外部命令：
 
 + 執行 **dotnet** 以確認在裝置上安裝的 .NET 版本。
-+ 執行 **explorer** 以在 **Windows** 上開啟檔案總管。
-+ 執行 **open** 以在 **macOS** 上開啟 Finder。
-+ 執行 **defaults** 以確認在 **macOS** 上的系統語系與佈景設定。
-+ 執行 **nautilus** 或 **xdg-open** 以在 **Linux** 上開啟檔案管理器。
++ 執行 **explorer** 以在 Windows 上開啟檔案總管。
++ 執行 **open** 以在 macOS 上開啟 Finder。
++ 執行 **defaults** 以確認在 macOS 上的系統語系與佈景設定。
++ 執行 **nautilus** 或 **xdg-open** 以在 Linux 上開啟檔案管理器。
 + 執行 **gsettings** 以確認在 Linux 上的系統佈景設定。
 
 
@@ -71,13 +87,19 @@ PixelViewer 會定期從 PixelViewer 網站下載資訊清單以檢查是否有�
 除了檔案存取，PixelViewer **不會** 變更您電腦的設定。
 
 
+## 免責聲明
+PixelViewer 係以 **「現狀」** 提供，不附帶任何明示或暗示之保證，包括但不限於適售性、特定用途適用性及不侵權之保證。Carina Studio 不保證 PixelViewer 能符合您的需求，亦不保證其運作不會中斷或不發生錯誤。
+
+在適用法律允許之最大範圍內，Carina Studio 對於因使用或無法使用 PixelViewer 而產生之任何直接、間接、偶發、特殊、懲罰性或衍生性損害（包括但不限於資料遺失、利潤損失或業務中斷），概不承擔任何責任，即使已被告知可能發生此類損害亦然。
+
+
 ## 授權及著作權
 PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授權之下的開放原始碼專案。除了應用程式圖示外，所有圖示皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE)、[CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 或 [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) 授權下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks)、[SVG Repo](https://www.svgrepo.com/) 及 [Icons8](https://icons8.com/) 了解更多圖示相關資訊與授權。
- 
+
 應用程式圖示由 [Freepik](https://www.freepik.com/) 提供並發布於 [Flaticon](https://www.flaticon.com/)。
 
 內建字型 **「Noto Sans SC」** 及 **「Noto Sans TC」** 在 [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) 授權下使用及發佈。
- 
+
 載入至 PixelViewer 或由 PixelViewer 儲存之圖片的授權與著作權不受本協議之約束。您必須自行注意及負責圖片的授權與著作權。
 
 
