@@ -703,7 +703,7 @@
 							<StackPanel Orientation="Horizontal">
 								<Border BorderBrush="{DynamicResource SystemControlForegroundBaseHighBrush}" BorderThickness="1" Height="{StaticResource Double/StatusBar.Icon.Size}" Width="{StaticResource Double/StatusBar.Icon.Size}">
 									<Border.Background>
-										<SolidColorBrush Color="{Binding SelectedRenderedImagePixelColor}"/>
+										<SolidColorBrush Color="{Binding SelectedRenderedImagePixelColor.Color}"/>
 									</Border.Background>
 								</Border>
 								<Separator asControls:StatusBarElement.Role="Separator"/>
@@ -715,7 +715,7 @@
 									<LayoutTransformControl.LayoutTransform>
 										<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
 									</LayoutTransformControl.LayoutTransform>
-									<abControls:FormattedTextBlock Arg1="{Binding SelectedRenderedImagePixelColor.A}" Arg2="{Binding SelectedRenderedImagePixelColor.R}" Arg3="{Binding SelectedRenderedImagePixelColor.G}" Arg4="{Binding SelectedRenderedImagePixelColor.B}" Format="ARGB({0:D3}, {1:D3}, {2:D3}, {3:D3})" asControls:StatusBarElement.Role="Label"/>
+									<TextBlock Text="{Binding $parent[UserControl].SelectedImageDisplayPixelArgbString}" asControls:StatusBarElement.Role="Label"/>
 								</LayoutTransformControl>
 								<Separator asControls:StatusBarElement.Role="Separator"/>
 							</StackPanel>

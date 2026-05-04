@@ -39,6 +39,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">變更影像寬度後重設圖層參數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithTransformation">儲存影像時套用目前的旋轉方向和翻轉</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">螢幕色彩空間</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SelectedRenderedImagePixelArgbColorFormat">ARGB 色彩格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">在狀態列上顯示 CPU 及記憶體使用量</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">顯示選取像素的 ARGB 色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">顯示選取像素的 L*a*b* D50 色彩</sys:String>
@@ -47,6 +48,11 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">開啟檔案後重設至預設格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">優先使用系統定義的螢幕色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">若無法取得系統定義的螢幕色彩空間，將改為使用「螢幕色彩空間」。</sys:String>
+
+	<!-- ArgbColorFormat -->
+	<sys:String x:Key="String/ArgbColorFormat.Default">依來源影像位元深度</sys:String>
+	<sys:String x:Key="String/ArgbColorFormat.Fixed8Bit">8 位元 (0-255)</sys:String>
+	<sys:String x:Key="String/ArgbColorFormat.Normalized">正規化 [0.0, 1.0]</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>

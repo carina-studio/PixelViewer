@@ -241,6 +241,8 @@ namespace Carina.PixelViewer.ViewModels
 				this.OnPropertyChanged(nameof(this.SaveRenderedImageWithTransformation));
 			else if (key == SettingKeys.ScreenColorSpaceName)
 				this.OnPropertyChanged(nameof(this.ScreenColorSpace));
+			else if (key == SettingKeys.SelectedRenderedImagePixelArgbColorFormat)
+				this.OnPropertyChanged(nameof(this.SelectedRenderedImagePixelArgbColorFormat));
 			else if (key == SettingKeys.ShowProcessInfo)
 				this.OnPropertyChanged(nameof(this.ShowProcessInfo));
 			else if (key == SettingKeys.ShowSelectedRenderedImagePixelArgbColor)
@@ -307,6 +309,16 @@ namespace Carina.PixelViewer.ViewModels
 				return colorSpace;
 			}
 			set => this.Settings.SetValue(SettingKeys.ScreenColorSpaceName, value.Name);
+		}
+
+
+		/// <summary>
+		/// Format used to display ARGB color of selected pixel of rendered image.
+		/// </summary>
+		public ArgbColorFormat SelectedRenderedImagePixelArgbColorFormat
+		{
+			get => this.Settings.GetValueOrDefault(SettingKeys.SelectedRenderedImagePixelArgbColorFormat);
+			set => this.Settings.SetValue(SettingKeys.SelectedRenderedImagePixelArgbColorFormat, value);
 		}
 
 

@@ -39,6 +39,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ResetImagePlaneOptionsAfterChangingImageDimensions">Reset Plane Parameters when Changing Image Width</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.SaveRenderedImageWithTransformation">Apply Current Rotation and Flip to Saved Images</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ScreenColorSpace">Screen Color Space</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.SelectedRenderedImagePixelArgbColorFormat">ARGB Color Format</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowProcessInfo">Show CPU/Memory Usage on the Status Bar</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor">Show ARGB Color of Selected Pixel</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ShowSelectedRenderedImagePixelLabColor">Show L*a*b* D50 Color of Selected Pixel</sys:String>
@@ -47,6 +48,11 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">Reset to Default Format after Opening File</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">Prefer Using System-Defined Screen Color Space</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">Falls back to 'Screen color space' if the system-defined screen color space is unavailable.</sys:String>
+
+	<!-- ArgbColorFormat -->
+	<sys:String x:Key="String/ArgbColorFormat.Default">Source Image Bit Depth</sys:String>
+	<sys:String x:Key="String/ArgbColorFormat.Fixed8Bit">8-Bit (0-255)</sys:String>
+	<sys:String x:Key="String/ArgbColorFormat.Normalized">Normalized [0.0, 1.0]</sys:String>
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Ratio_1x1">1:1</sys:String>

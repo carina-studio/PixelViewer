@@ -273,6 +273,13 @@
 									<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.ShowSelectedRenderedImagePixelArgbColor}" asControls:DialogElement.TextRole="Label"/>
 									<ToggleSwitch IsChecked="{Binding ShowSelectedRenderedImagePixelArgbColor, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
 								</asControls:DialogItem>
+								<Separator asControls:DialogElement.SeparatorType="InnerItem"/>
+
+								<!-- ARGB color format -->
+								<asControls:DialogItem>
+									<TextBlock IsEnabled="{Binding ShowSelectedRenderedImagePixelArgbColor}" Text="{asXaml:StringResource ApplicationOptionsDialog.SelectedRenderedImagePixelArgbColorFormat}" asControls:DialogElement.TextRole="Label"/>
+									<asControls:EnumComboBox EnumType="{x:Type appMedia:ArgbColorFormat}" IsEnabled="{Binding ShowSelectedRenderedImagePixelArgbColor}" SelectedItem="{Binding SelectedRenderedImagePixelArgbColorFormat, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
+								</asControls:DialogItem>
 								<Separator asControls:DialogElement.SeparatorType="Item"/>
 
 								<!-- Show L*a*b* color -->

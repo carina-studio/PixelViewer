@@ -88,6 +88,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly StyledProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnContrastAdjustmentUI");
 	static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
 	static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
+	static readonly StyledProperty<string> SelectedImageDisplayPixelArgbStringProperty = AvaloniaProperty.Register<SessionControl, string>(nameof(SelectedImageDisplayPixelArgbString), "");
 	static readonly StyledProperty<Rect> SelectedImageDisplayPixelBoundsProperty = AvaloniaProperty.Register<SessionControl, Rect>(nameof(SelectedImageDisplayPixelBounds));
 	static readonly StyledProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
 	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
@@ -173,6 +174,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction updateImageViewerScrollBarsAction;
 	readonly ScheduledAction updateImageViewerShadowMarginAction;
 	readonly ScheduledAction updateIsImageViewerScrollableAction;
+	readonly ScheduledAction updateSelectedImageDisplayPixelArgbStringAction;
 	readonly ScheduledAction updateSelectedImageDisplayPixelBoundsAction;
 	readonly ScheduledAction updateStatusBarStateAction;
 	bool useSmallRenderedImage;
@@ -588,6 +590,43 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			var viewport = this.imageScrollViewer.Viewport;
 			this.SetValue(IsImageViewerScrollableProperty, contentSize.Width > viewport.Width || contentSize.Height > viewport.Height);
 		});
+		this.updateSelectedImageDisplayPixelArgbStringAction = new(() =>
+		{
+			if (this.DataContext is not Session session)
+			{
+				this.SetValue(SelectedImageDisplayPixelArgbStringProperty, "");
+				return;
+			}
+			var color = session.SelectedRenderedImagePixelColor;
+			var hasAlpha = session.IsAlphaChannelAvailable;
+			var prefix = hasAlpha ? "ARGB" : "RGB";
+			var format = this.Settings.GetValueOrDefault(SettingKeys.SelectedRenderedImagePixelArgbColorFormat);
+			var text = format switch
+			{
+				Media.ArgbColorFormat.Fixed8Bit => Global.Run(() =>
+				{
+					var c8 = color.Color;
+					return hasAlpha
+						? $"{prefix}({c8.A:D3}, {c8.R:D3}, {c8.G:D3}, {c8.B:D3})"
+						: $"{prefix}({c8.R:D3}, {c8.G:D3}, {c8.B:D3})";
+				}),
+				Media.ArgbColorFormat.Normalized => hasAlpha
+					? $"{prefix}({color.A / 65535.0:F4}, {color.R / 65535.0:F4}, {color.G / 65535.0:F4}, {color.B / 65535.0:F4})"
+					: $"{prefix}({color.R / 65535.0:F4}, {color.G / 65535.0:F4}, {color.B / 65535.0:F4})",
+				_ => Global.Run(() =>
+				{
+					var bits = Math.Clamp(session.SourceImageEffectiveBits, 1, 16);
+					var shift = 16 - bits;
+					var maxValue = (1 << bits) - 1;
+					var width = maxValue.ToString().Length;
+					var pad = $"D{width}";
+					return hasAlpha
+						? $"{prefix}({(color.A >> shift).ToString(pad)}, {(color.R >> shift).ToString(pad)}, {(color.G >> shift).ToString(pad)}, {(color.B >> shift).ToString(pad)})"
+						: $"{prefix}({(color.R >> shift).ToString(pad)}, {(color.G >> shift).ToString(pad)}, {(color.B >> shift).ToString(pad)})";
+				}),
+			};
+			this.SetValue(SelectedImageDisplayPixelArgbStringProperty, text);
+		});
 		this.updateSelectedImageDisplayPixelBoundsAction = new(() =>
 		{
 			if (this.DataContext is not Session session || !this.GetValue(IsPointerOverImageProperty) || session.IsZooming)
@@ -948,6 +987,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.ReportImageViewportSize();
 		this.ReportScreenPixelDensity();
 		this.updateImageViewerShadowMarginAction.Schedule();
+		this.updateSelectedImageDisplayPixelArgbStringAction.Schedule();
 		this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
 		this.updateStatusBarStateAction.Schedule();
 	}
@@ -1847,6 +1887,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			case nameof(Session.RenderedImage):
 				this.updateEffectiveRenderedImageAction.Execute();
 				break;
+			case nameof(Session.IsAlphaChannelAvailable):
+			case nameof(Session.SelectedRenderedImagePixelColor):
+			case nameof(Session.SourceImageEffectiveBits):
+				this.updateSelectedImageDisplayPixelArgbStringAction.Schedule();
+				break;
 			case nameof(Session.SelectedRenderedImagePixelPositionX):
 			case nameof(Session.SelectedRenderedImagePixelPositionY):
 				this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
@@ -1860,6 +1905,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		if (e.Key == SettingKeys.HideImageViewerScrollBarsAutomatically)
 			this.SetValue(HideImageViewerScrollBarsAutomaticallyProperty, (bool)e.Value);
+		else if (e.Key == SettingKeys.SelectedRenderedImagePixelArgbColorFormat)
+			this.updateSelectedImageDisplayPixelArgbStringAction.Schedule();
 		else if (e.Key == SettingKeys.ShowProcessInfo)
 			this.SetValue(ShowProcessInfoProperty, (bool)e.Value);
 		else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelArgbColor)
@@ -2198,6 +2245,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	}
 	
 	
+	/// <summary>
+	/// Get formatted ARGB string of the selected pixel on the rendered image. Format depends on <see cref="SettingKeys.SelectedRenderedImagePixelArgbColorFormat"/>.
+	/// </summary>
+	public string SelectedImageDisplayPixelArgbString => this.GetValue(SelectedImageDisplayPixelArgbStringProperty);
+
+
 	/// <summary>
 	/// Bounds of selected pixel for displaying.
 	/// </summary>

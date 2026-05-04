@@ -522,6 +522,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsAdjustablePixelStride3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride3));
 	/// <summary>
+	/// Property of <see cref="IsAlphaChannelAvailable"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsAlphaChannelAvailableProperty = ObservableProperty.Register<Session, bool>(nameof(IsAlphaChannelAvailable));
+	/// <summary>
 	/// Property of <see cref="IsBayerPatternSupported"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsBayerPatternSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBayerPatternSupported));
@@ -725,7 +729,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Color> SelectedRenderedImagePixelColorProperty = ObservableProperty.Register<Session, Color>(nameof(SelectedRenderedImagePixelColor));
+	public static readonly ObservableProperty<Color64> SelectedRenderedImagePixelColorProperty = ObservableProperty.Register<Session, Color64>(nameof(SelectedRenderedImagePixelColor));
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelLabColor"/>.
 	/// </summary>
@@ -758,6 +762,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="SourceFileSizeString"/>.
 	/// </summary>
 	public static readonly ObservableProperty<string?> SourceFileSizeStringProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileSizeString));
+	/// <summary>
+	/// Property of <see cref="SourceImageEffectiveBits"/>.
+	/// </summary>
+	public static readonly ObservableProperty<int> SourceImageEffectiveBitsProperty = ObservableProperty.Register<Session, int>(nameof(SourceImageEffectiveBits), 8);
 	/// <summary>
 	/// Property of <see cref="TotalRenderedImagesMemoryUsage"/>.
 	/// </summary>
@@ -1830,6 +1838,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update effective bits
 		this.effectiveBits[index] = effectiveBits;
 		this.OnEffectiveBitsChanged(index);
+		this.UpdateSourceImageEffectiveBits();
 		this.renderImageAction.Reschedule(RenderImageDelay);
 
 		// update black/white levels
@@ -3220,6 +3229,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Check whether the source image carries a meaningful alpha channel. True for ARGB-category renderers and for Compressed-category renderers whose source <see cref="FileFormat"/> is PNG, WebP, or HEIF; false otherwise.
+	/// </summary>
+	public bool IsAlphaChannelAvailable => this.GetValue(IsAlphaChannelAvailableProperty);
+
+
+	/// <summary>
 	/// Check whether <see cref="BayerPattern"/> is supported by current <see cref="ImageRenderer"/> or not.
 	/// </summary>
 	public bool IsBayerPatternSupported => this.GetValue(IsBayerPatternSupportedProperty);
@@ -3669,6 +3684,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.SetValue(IsDemosaicingSupportedProperty, isBayerPatternFormat);
 				this.SetValue(IsRgbGainSupportedProperty, isBayerPatternFormat);
 				this.SetValue(IsYuvToBgraConverterSupportedProperty, imageFormatCategory == ImageFormatCategory.YUV);
+				this.UpdateIsAlphaChannelAvailable();
 				this.isImagePlaneOptionsResetNeeded = true;
 				this.updateFilterSupportingAction.Reschedule();
 				this.renderImageAction.Reschedule();
@@ -4483,6 +4499,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.OnPixelStrideChanged(i);
 				this.OnRowStrideChanged(i);
 			}
+			this.UpdateSourceImageEffectiveBits();
 		}
 		else
 		{
@@ -6212,7 +6229,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get color of selected pixel on rendered image.
 	/// </summary>
-	public Color SelectedRenderedImagePixelColor => this.GetValue(SelectedRenderedImagePixelColorProperty);
+	public Color64 SelectedRenderedImagePixelColor => this.GetValue(SelectedRenderedImagePixelColorProperty);
 
 
 	/// <summary>
@@ -6282,11 +6299,11 @@ class Session : ViewModel<IAppSuiteApplication>
 				var pixelPtr = (byte*)baseAddress + renderedImageBuffer.GetPixelOffset(x, y);
 				return renderedImageBuffer.Format switch
 				{
-					BitmapFormat.Bgra32 => new Color(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also((ref it) =>
+					BitmapFormat.Bgra32 => new Color64(pixelPtr[3], pixelPtr[2], pixelPtr[1], pixelPtr[0]).Also((ref it) =>
 					{
-						argbR = it.R / 255.0;
-						argbG = it.G / 255.0;
-						argbB = it.B / 255.0;
+						argbR = pixelPtr[2] / 255.0;
+						argbG = pixelPtr[1] / 255.0;
+						argbB = pixelPtr[0] / 255.0;
 					}),
 					BitmapFormat.Bgra64 => Global.Run(()=>
                     {
@@ -6299,7 +6316,7 @@ class Session : ViewModel<IAppSuiteApplication>
 						argbR = red / 65535.0;
 						argbG = green / 65535.0;
 						argbB = blue / 65535.0;
-						return new Color((byte)(alpha >> 8), (byte)(red >> 8), (byte)(green >> 8), (byte)(blue >> 8));
+						return new Color64(alpha, red, green, blue);
 					}),
 					_ => default,
 				};
@@ -6355,6 +6372,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Get description of size of source image file.
 	/// </summary>
 	public string? SourceFileSizeString => this.GetValue(SourceFileSizeStringProperty);
+
+
+	/// <summary>
+	/// Get the highest effective bits-per-channel among the source image's planes. Returns 8 when no image renderer or planes are available.
+	/// </summary>
+	public int SourceImageEffectiveBits => this.GetValue(SourceImageEffectiveBitsProperty);
 
 
 	// Switch profile without applying parameters.
@@ -6439,6 +6462,48 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canZoomIn.Update(scale < (MaxRenderedImageScale - 0.001));
 			this.canZoomOut.Update(scale > (MinRenderedImageScale + 0.001));
 		}
+	}
+
+
+	// Update IsAlphaChannelAvailable based on the current renderer's category and (for Compressed) the profile's file format.
+	void UpdateIsAlphaChannelAvailable()
+	{
+		if (this.IsDisposed)
+			return;
+		var renderer = this.GetValue(ImageRendererProperty);
+		var available = renderer?.Format.Category switch
+		{
+			ImageFormatCategory.ARGB => true,
+			ImageFormatCategory.Compressed => Global.Run(() =>
+			{
+				var fileFormat = this.Profile.FileFormat;
+				return fileFormat == FileFormats.Png
+					|| fileFormat == FileFormats.WebP
+					|| fileFormat == FileFormats.Heif;
+			}),
+			_ => false,
+		};
+		this.SetValue(IsAlphaChannelAvailableProperty, available);
+	}
+
+
+	// Update SourceImageEffectiveBits to the maximum effective bits across the current image's planes.
+	void UpdateSourceImageEffectiveBits()
+	{
+		if (this.IsDisposed)
+			return;
+		var imageRenderer = this.GetValue(ImageRendererProperty);
+		var planeCount = imageRenderer?.Format.PlaneDescriptors.Count ?? 0;
+		var maxBits = 0;
+		for (var i = 0; i < planeCount; ++i)
+		{
+			var bits = this.effectiveBits[i];
+			if (bits > maxBits)
+				maxBits = bits;
+		}
+		if (maxBits <= 0)
+			maxBits = 8;
+		this.SetValue(SourceImageEffectiveBitsProperty, maxBits);
 	}
 
 

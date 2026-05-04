@@ -290,6 +290,12 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         /// <summary>
+        /// Get the file format associated with this profile, or null if the profile is not a file-format profile.
+        /// </summary>
+        public FileFormat? FileFormat => this.fileFormat;
+
+
+        /// <summary>
         /// Whether the displayed image should be mirrored horizontally. The property is used for displaying only.
         /// </summary>
         public bool FlipX { get; set; }

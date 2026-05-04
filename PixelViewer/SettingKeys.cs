@@ -100,6 +100,10 @@ static class SettingKeys
 	/// </summary>
 	public static readonly SettingKey<string> ScreenColorSpaceName = new(nameof(ScreenColorSpaceName), CarinaStudio.Platform.IsMacOS ? ColorSpace.Display_P3.Name : ColorSpace.Srgb.Name);
 	/// <summary>
+	/// Format used to display ARGB color of selected pixel of rendered image.
+	/// </summary>
+	public static readonly SettingKey<ArgbColorFormat> SelectedRenderedImagePixelArgbColorFormat = new(nameof(SelectedRenderedImagePixelArgbColorFormat), ArgbColorFormat.Default);
+	/// <summary>
 	/// Show process info on UI or not.
 	/// </summary>
 	public static readonly SettingKey<bool> ShowProcessInfo = new(nameof(ShowProcessInfo), false);
