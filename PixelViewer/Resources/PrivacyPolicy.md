@@ -1,38 +1,39 @@
-# Privacy Policy of PixelViewer
+# PixelViewer Privacy Policy
  ---
-+ Version: 1.2
-+ Update: 2022/8/8
++ Version: 1.3
++ Update: 2026/5/4
 
-This is the Privacy Policy of PixelViewer which you need to read before you using PixelViewer. The Privacy Policy may be updated in the future and you can check it on the website of PixelViewer. It means that you have agreed this Privacy Policy once you start using PixelViewer.
+This is the PixelViewer Privacy Policy which you need to read before using PixelViewer. The Privacy Policy may be updated in the future and you can check it on the PixelViewer website. It means that you have agreed to this Privacy Policy once you start using PixelViewer.
 
-## Scope of Privacy Policy
-PixelViewer is a software based-on Open Source Project. The PixelViewer mentioned after includes **ONLY** the executable files or zipped files which are exact same as the files provided by the following pages:
+## Privacy Policy Scope
+PixelViewer is an open-source project of Carina Studio under the [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license. The PixelViewer mentioned after includes **ONLY** the executable files or zipped files which are exact same as the files provided by the following pages:
++ [PixelViewer Website](https://carinastudio.azurewebsites.net/PixelViewer/)
++ [PixelViewer project and release pages on GitHub](https://github.com/carina-studio/PixelViewer)
 
-+ [Website of PixelViewer](https://carinastudio.azurewebsites.net/PixelViewer/)
-+ [Project and release pages of PixelViewer on GitHub](https://github.com/carina-studio/PixelViewer)
+If you build PixelViewer from source code, your use of that build is governed solely by the [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license, not by this Privacy Policy.
 
-This Privacy Policy will be applied when you use PixelViewer 2.7 and any future versions before the version specified in next version of Privacy Policy.
+This Privacy Policy will apply to PixelViewer 2026.0 and any future versions until the version specified in the next Privacy Policy update.
 
 ## Collecting Your Personal Data
-We **DON’T** collect the following personal data:
-
-+ User/Account name.
-+ Computer name.
+We **DON'T** collect the following personal data:
++ Name.
++ Phone number.
 + Email address.
-+ IP Address.
 + Geographical location.
 
 We **DO** collect the following data which may relate to your personal data:
-
-+ **Path/Name of files** you open in PixelViewer or save in PixelViewer.
-+ Detailed information of application crashing.
++ **File Path/Name** you open in PixelViewer or save in PixelViewer.
++ Application crash details.
++ Your **IP address**, **OS platform**, and **CPU architecture** may be shared with [GitHub](https://github.com) when PixelViewer checks for updates. Please refer to [GitHub's Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement) for how this data is handled by GitHub.
 
 ## Storing Your Personal Data
-+ **Path/Name of files** may be written to the log file inside the directory of PixelViewer in your computer.
-+ Information of application crashing will be written to the log file inside the directory of PixelViewer in your computer.
++ **File Path/Name** may be written to the log file inside the PixelViewer directory in your computer.
++ Application crash details will be written to the log file inside the PixelViewer directory in your computer.
 
 ## Using Your Personal Data
-We **DON’T** have any usage of your personal data by default. All collected data mentioned in previous section are saved in your computer and we **WON’T** send or upload these data. We may ask your help to send these data to us by yourself **ONLY** for debugging purpose (ex, application crashing). You can check these data before you sending to us or you can also reject to send these data.
++ Collected information will be used for debugging purposes (e.g., application crashes). You can check these data before sending to us, or you can also reject to send these data.
+
+Except when required by a government authority, we **WON'T** provide your personal data to people, organizations, or companies outside of Carina Studio.
 
 ## Contact Us
-If you have any concern of this Privacy Policy, please create an issue on [GitHub](https://github.com/carina-studio/PixelViewer/issues) or send e-mail to [carina.software.studio@gmail.com](mailto:carina.software.studio@gmail.com).
+If you have any concern about this Privacy Policy, please create an issue on [GitHub](https://github.com/carina-studio/PixelViewer/issues) or send e-mail to [carina.software.studio@gmail.com](mailto:carina.software.studio@gmail.com).

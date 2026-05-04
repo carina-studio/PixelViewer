@@ -102,6 +102,7 @@
 		<AvaloniaResource Include="ChangeList-zh-TW.md" />
 		<AvaloniaResource Include="PixelViewer.ico" />
 		<AvaloniaResource Include="Resources/PrivacyPolicy.md" />
+		<AvaloniaResource Include="Resources/PrivacyPolicy-zh-CN.md" />
 		<AvaloniaResource Include="Resources/PrivacyPolicy-zh-TW.md" />
 		<AvaloniaResource Include="Resources/RenderedImageBackground.png" />
 		<AvaloniaResource Include="Resources/UserAgreement.md" />

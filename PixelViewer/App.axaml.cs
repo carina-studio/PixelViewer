@@ -60,10 +60,12 @@ namespace Carina.PixelViewer
 			public override IList<ApplicationCulture> SupportedCultures =>
 			[
 				ApplicationCulture.EN_US,
-				ApplicationCulture.ZH_TW
+				ApplicationCulture.ZH_CN,
+				ApplicationCulture.ZH_TW,
 			];
 			public override Uri Uri => this.Culture switch
 			{
+				ApplicationCulture.ZH_CN => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/PrivacyPolicy-zh-CN.md"),
 				ApplicationCulture.ZH_TW => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/PrivacyPolicy-zh-TW.md"),
 				_ => new($"avares://{Assembly.GetExecutingAssembly().GetName().Name}/Resources/PrivacyPolicy.md"),
 			};
@@ -600,7 +602,7 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
-		public override Version PrivacyPolicyVersion => new(1, 2);
+		public override Version PrivacyPolicyVersion => new(1, 3);
 
 
 		// Releasing type.
