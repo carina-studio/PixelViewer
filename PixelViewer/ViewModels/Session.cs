@@ -3886,6 +3886,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		else if (property == SourceDataSizeProperty)
 			this.SetValue(HasSourceDataSizeProperty, (long)newValue.AsNonNull() > 0);
+		else if (property == SourceImageEffectiveBitsProperty)
+			this.Logger.LogTrace("Source image effective bits: {bits}", newValue);
 		else if (property == VibranceAdjustmentProperty)
 		{
 			this.SetValue(HasVibranceAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
@@ -4499,7 +4501,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.OnPixelStrideChanged(i);
 				this.OnRowStrideChanged(i);
 			}
-			this.UpdateSourceImageEffectiveBits();
 		}
 		else
 		{
@@ -4519,10 +4520,13 @@ class Session : ViewModel<IAppSuiteApplication>
 				});
 			}
 		}
+		
+		// report effective bits
+		this.UpdateSourceImageEffectiveBits();
 
 		// calculate frame count and index
 		var isRgbGainSupported = this.IsRgbGainSupported;
-		var renderingOptions = new ImageRenderingOptions()
+		var renderingOptions = new ImageRenderingOptions
 		{
 			BayerPattern = this.BayerPattern,
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
@@ -6493,16 +6497,22 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (this.IsDisposed)
 			return;
 		var imageRenderer = this.GetValue(ImageRendererProperty);
-		var planeCount = imageRenderer?.Format.PlaneDescriptors.Count ?? 0;
+		var format = imageRenderer?.Format;
 		var maxBits = 0;
-		for (var i = 0; i < planeCount; ++i)
-		{
-			var bits = this.effectiveBits[i];
-			if (bits > maxBits)
-				maxBits = bits;
-		}
-		if (maxBits <= 0)
+		if (format is null || format.Category == ImageFormatCategory.Compressed)
 			maxBits = 8;
+		else
+		{
+			var planeCount = format.PlaneDescriptors.Count;
+			for (var i = 0; i < planeCount; ++i)
+			{
+				var bits = this.effectiveBits[i];
+				if (bits > maxBits)
+					maxBits = bits;
+			}
+			if (maxBits <= 0)
+				maxBits = 8;
+		}
 		this.SetValue(SourceImageEffectiveBitsProperty, maxBits);
 	}
 
