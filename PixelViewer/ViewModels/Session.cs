@@ -1569,7 +1569,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			for (var i = imageFormat.PlaneCount - 1; i >= 0; --i)
 			{
 				var planeDescriptor = imageFormat.PlaneDescriptors[i];
-				this.ChangeEffectiveBits(i, profile.EffectiveBits[i]);
+				this.ChangeEffectiveBits(i, profile.EffectiveBits[i].Let(it =>
+				{
+					// [Workaround] Override stale persisted value when effective bits is not user-adjustable.
+					if (!planeDescriptor.IsAdjustableEffectiveBits && defaultPlaneOptions[i].EffectiveBits > 0)
+						return defaultPlaneOptions[i].EffectiveBits;
+					return it;
+				}));
 				this.ChangeBlackLevel(i, profile.BlackLevels[i]);
 				this.ChangeWhiteLevel(i, profile.WhiteLevels[i].Let(it =>
 				{

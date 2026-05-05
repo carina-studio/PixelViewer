@@ -41,11 +41,11 @@ abstract class BaseYuv420p16ImageRenderer : BaseImageRenderer
 
 
 	// Create default plane options.
-	public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new List<ImagePlaneOptions>().Also((it) =>
+	public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new List<ImagePlaneOptions>().Also(it =>
 	{
-		it.Add(new ImagePlaneOptions(2, width * 2));
-		it.Add(new ImagePlaneOptions(2, width));
-		it.Add(new ImagePlaneOptions(2, width));
+		it.Add(new ImagePlaneOptions(this.effectiveBits, 2, width * 2));
+		it.Add(new ImagePlaneOptions(this.effectiveBits, 2, width));
+		it.Add(new ImagePlaneOptions(this.effectiveBits, 2, width));
 	});
 
 
