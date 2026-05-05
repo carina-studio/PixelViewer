@@ -6,35 +6,46 @@ using CarinaStudio.AppSuite;
 using System;
 using System.Globalization;
 
-namespace Carina.PixelViewer.Data.Converters
+namespace Carina.PixelViewer.Data.Converters;
+
+/// <summary>
+/// <see cref="IValueConverter"/> to convert from <see cref="ImageFormatCategory"/> to <see cref="IBrush"/>.
+/// </summary>
+class ImageFormatCategoryToBrushConverter : IValueConverter
 {
     /// <summary>
-    /// <see cref="IValueConverter"/> to convert from <see cref="ImageFormatCategory"/> to <see cref="IBrush"/>.
+    /// Default instance for background.
     /// </summary>
-    class ImageFormatCategoryToBrushConverter : IValueConverter
+    public static readonly ImageFormatCategoryToBrushConverter Background = new("Background");
+    /// <summary>
+    /// Default instance for border.
+    /// </summary>
+    public static readonly ImageFormatCategoryToBrushConverter Border = new("Border");
+
+
+    // Fields.
+    readonly IAppSuiteApplication? app = IAppSuiteApplication.CurrentOrNull;
+    readonly string type;
+    
+    
+    // Constructor.
+    ImageFormatCategoryToBrushConverter(string type)
     {
-        /// <summary>
-        /// Default instance.
-        /// </summary>
-        public static readonly ImageFormatCategoryToBrushConverter Default = new ImageFormatCategoryToBrushConverter();
-
-
-        // Fields.
-        readonly IAppSuiteApplication? app = IAppSuiteApplication.CurrentOrNull;
-
-
-        /// <inheritdoc/>
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        {
-            if (targetType != typeof(object) && !typeof(IBrush).IsAssignableFrom(targetType))
-                return null;
-            if (value is not ImageFormatCategory category)
-                return null;
-            return app?.FindResourceOrDefault<IBrush?>($"Brush/SessionControl.ImageFormatCategoryLabel.Background.{category}");
-        }
-
-
-        /// <inheritdoc/>
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => null;
+        this.type = type;
     }
+
+
+    /// <inheritdoc/>
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (targetType != typeof(object) && !typeof(IBrush).IsAssignableFrom(targetType))
+            return null;
+        if (value is not ImageFormatCategory category)
+            return null;
+        return app?.FindResourceOrDefault<IBrush?>($"Brush/SessionControl.ImageFormatCategoryLabel.{this.type}.{category}");
+    }
+
+
+    /// <inheritdoc/>
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => null;
 }

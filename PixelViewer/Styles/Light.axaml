@@ -16,18 +16,30 @@
 		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background">#cd1e1e</Color>
 
 		<!-- SessionControl -->
-		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#004a7f</Color>
-		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#00bfbf</Color>
-		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.SystemDefined">#57007f</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#57007f</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#007f0e</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed">#cb6666</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#404040</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.RGB">#004a7f</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#00bfbf</Color>
-		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#7f000000</Color>
-		<Color x:Key="Color/SessionControl.ProfileTypeLabel.Background.FileFormat">#404040</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#b3dfff</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#e5ffff</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.SystemDefined">#f7e6ff</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.Custom">#004a7f</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile">#00bfbf</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.SystemDefined">#57007f</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background">#ffffff</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#f7e6ff</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#e6ffe9</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed">#ffe5e5</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Luminance">#dddddd</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.RGB">#b3dfff</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#dddddd</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#e5ffff</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#111111</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.ARGB">#57007f</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Bayer">#007f0e</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Compressed">#cb6666</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Luminance">#404040</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.RGB">#004a7f</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Unclassified">#111111</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.YUV">#00bfbf</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Foreground">#222222</Color>
+		<Color x:Key="Color/SessionControl.ProfileTypeLabel.Background.FileFormat">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#aaaaaa</Color>
 		
 	</Styles.Resources>

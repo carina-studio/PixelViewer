@@ -64,6 +64,10 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.Custom" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.Custom}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Background.SystemDefined}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Border.Custom" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Border.Custom}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Border.SystemDefined" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Border.SystemDefined}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Compressed" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed}"/>
@@ -72,6 +76,13 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Unclassified" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.YUV" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.YUV}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.ARGB}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.Bayer}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.Compressed" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.Compressed}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.Luminance" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.Luminance}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.RGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.RGB}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.Unclassified" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.Unclassified}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Border.YUV" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Border.YUV}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Foreground" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Foreground}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ProfileTypeLabel.Background.FileFormat" Color="{DynamicResource Color/SessionControl.ProfileTypeLabel.Background.FileFormat}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.StatusBar.Background.Error" Color="{DynamicResource Color/SessionControl.StatusBar.Background.Error}"/>
@@ -79,6 +90,10 @@
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#000000</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile">#000000</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.SystemDefined">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.Custom">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile">#000000</Color>
+		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.SystemDefined">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Compressed">#000000</Color>
@@ -87,11 +102,18 @@
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Unclassified">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.YUV">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.ARGB">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Bayer">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Compressed">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Luminance">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.RGB">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.Unclassified">#000000</Color>
+		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.YUV">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Foreground">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.ProfileTypeLabel.Background.FileFormat">#000000</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Error">#ff3232</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
-		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">4</CornerRadius>
+		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">6</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width">20</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Hint.Opacity">0.75</sys:Double>
@@ -114,7 +136,7 @@
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Padding">3</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Border">1</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">5,0,0,0</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">8,0,0,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">4,1,4,1</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
