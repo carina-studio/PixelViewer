@@ -4630,8 +4630,20 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			else
 			{
+				// log error
 				this.Logger.LogError(ex, "Error occurred while selecting rendered format for '{sourceFileName}'", sourceFileName);
 				this.imageRenderingCancellationTokenSource = null;
+
+				// drop cached frames so that the pending report does not resurrect the previous image and reset HasRenderingError
+				this.ClearFilteredImage();
+				this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
+				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+				this.canMoveToNextFrame.Update(false);
+				this.canMoveToPreviousFrame.Update(false);
+				this.canSelectColorAdjustment.Update(false);
+				this.canSelectRgbGain.Update(false);
+
+				// request reporting and update state
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 				this.SetValue(IsRenderingImageProperty, false);
 				this.SetValue(HasRenderingErrorProperty, true);
