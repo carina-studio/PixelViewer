@@ -34,9 +34,6 @@ Except for system files, all necessary files of PixelViewer are placed inside th
 ### File Access When Saving Image
 + The file which raw/encoded image data written to will be opened in **Read/Write** mode.
 
-### File Access When Self Updating
-+ Downloaded packages and backed-up application files will be placed inside the system Temporary directory.
-
 Other file access outside of the PixelViewer executable are not dominated by this User Agreement.
 
 
@@ -54,17 +51,6 @@ PixelViewer contacts with the following servers to check public [IP address](htt
 
 + [https://ipv4.icanhazip.com](https://ipv4.icanhazip.com/)
 + [http://checkip.dyndns.org](http://checkip.dyndns.org/)
-
-### Application Update Checking
-PixelViewer downloads manifest from [GitHub](https://github.com/carina-studio/PixelViewer) periodically to check whether an application update is available.
-
-### Self Updating
-There are 4 types of data will be downloaded when updating PixelViewer:
-
-+ Auto updater component manifest to check which auto updater is suitable for self updating.
-+ PixelViewer manifest to check which update package is suitable for self updating.
-+ Auto updater package.
-+ PixelViewer update package.
 
 ### Taking Memory Snapshot
 [dotMemory](https://www.jetbrains.com/dotmemory/) is the main tool for memory usage analysis by Carina Studio. When you start taking a memory snapshot for the first time in debug mode, all necessary files of [dotMemory](https://www.jetbrains.com/dotmemory/) will be downloaded into the PixelViewer directory.

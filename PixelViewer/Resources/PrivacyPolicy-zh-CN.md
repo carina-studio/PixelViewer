@@ -24,7 +24,6 @@ PixelViewer 为 Carina Studio 之开放源代码项目，采用 [MIT](https://gi
 我们 **会** 收集下列可能与您个人信息有关联之数据：
 + 您在 PixelViewer 中打开或保存的**文件名称及路径**。
 + 应用程序错误的详细信息。
-+ PixelViewer 确认是否有应用程序更新时，您的 **IP 地址**、**操作系统**及 **CPU 信息**可能会被分享至 [GitHub](https://github.com)。关于 GitHub 如何处理这些数据，请参阅 [GitHub 隐私声明](https://docs.github.com/zh/site-policy/privacy-policies/github-general-privacy-statement)。
 
 ## 个人信息的存储
 + **文件名称**可能会被存储至位于您电脑中 PixelViewer 目录内的日志文件。

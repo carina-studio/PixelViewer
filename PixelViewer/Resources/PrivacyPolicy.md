@@ -24,7 +24,6 @@ We **DON'T** collect the following personal data:
 We **DO** collect the following data which may relate to your personal data:
 + **File Path/Name** you open in PixelViewer or save in PixelViewer.
 + Application crash details.
-+ Your **IP address**, **OS platform**, and **CPU architecture** may be shared with [GitHub](https://github.com) when PixelViewer checks for updates. Please refer to [GitHub's Privacy Statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement) for how this data is handled by GitHub.
 
 ## Storing Your Personal Data
 + **File Path/Name** may be written to the log file inside the PixelViewer directory in your computer.

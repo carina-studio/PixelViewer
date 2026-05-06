@@ -34,9 +34,6 @@ PixelViewer 包含预设关闭的内建调试模式，您可以通过 **「关�
 ### 图像保存时之文件访问
 + 写入图像内容之文件将以 **读写** 模式打开。
 
-### 自我升级时之文件访问
-+ 下载的升级文件及应用程序备份将存放于系统之临时目录内。
-
 其他由 PixelViewer 可执行文件以外的文件访问不受本协议之约束。
 
 
@@ -54,17 +51,6 @@ PixelViewer 会连接至下列服务器以确认设备的公开 [IP 地址](http
 
 + [https://ipv4.icanhazip.com](https://ipv4.icanhazip.com/)
 + [http://checkip.dyndns.org](http://checkip.dyndns.org/)
-
-### 检查应用程序更新
-PixelViewer 会定期从 [GitHub](https://github.com/carina-studio/PixelViewer) 下载清单以检查是否有新的应用程序更新。
-
-### 自我更新
-以下 4 种数据需要在更新 PixelViewer 时下载：
-
-+ 自动更新程序之清单以选取适合您的自动更新程序。
-+ PixelViewer 之清单以选取适合您的升级安装包。
-+ 自动更新程序安装包。
-+ PixelViewer 升级安装包。
 
 ### 捕获内存快照
 [dotMemory](https://www.jetbrains.com/dotmemory/) 是 Carina Studio 用以分析内存使用状况的主要工具。当您第一次在调试模式中捕获内存快照时，所有 [dotMemory](https://www.jetbrains.com/dotmemory/) 所需的文件将下载至 PixelViewer 目录中。

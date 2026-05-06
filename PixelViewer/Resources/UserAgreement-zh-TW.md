@@ -34,9 +34,6 @@ PixelViewer 包含預設關閉的內建偵錯模式，您可以透過 **「關�
 ### 圖片儲存時之檔案存取
 + 寫入圖片內容之檔案將以 **讀寫** 模式開啟。
 
-### 自我升級時之檔案存取
-+ 下載的升級檔案及應用程式備份將存放於系統之暫存目錄內。
-
 其他由 PixelViewer 執行檔以外的檔案存取不受本協議之約束。
 
 
@@ -54,17 +51,6 @@ PixelViewer 會連線至下列伺服器以確認裝置的公開 [IP 位址](http
 
 + [https://ipv4.icanhazip.com](https://ipv4.icanhazip.com/)
 + [http://checkip.dyndns.org](http://checkip.dyndns.org/)
-
-### 檢查應用程式更新
-PixelViewer 會定期從 [GitHub](https://github.com/carina-studio/PixelViewer) 下載資訊清單以檢查是否有新的應用程式更新。
-
-### 自我更新
-以下 4 種資料需要在更新 PixelViewer 時下載：
-
-+ 自動更新程式之資訊清單以選取適合您的自動更新程式。
-+ PixelViewer 之資訊清單以選取適合您的升級封裝。
-+ 自動更新程式封裝。
-+ PixelViewer 升級封裝。
 
 ### 擷取記憶體快照
 [dotMemory](https://www.jetbrains.com/dotmemory/) 是 Carina Studio 用以分析記憶體使用狀況的主要工具。當您第一次在偵錯模式中擷取記憶體快照時，所有 [dotMemory](https://www.jetbrains.com/dotmemory/) 所需的檔案將下載至 PixelViewer 的目錄中。
