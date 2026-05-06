@@ -504,20 +504,6 @@
 								</asControls:DialogItem>
 								<Separator asControls:DialogElement.SeparatorType="Item"/>
 
-								<!-- Notify application update -->
-								<asControls:DialogItem ItemSize="Small">
-									<TextBlock Text="{asXaml:StringResource ApplicationOptions.NotifyApplicationUpdate}" asControls:DialogElement.TextRole="Label"/>
-									<ToggleSwitch IsChecked="{Binding NotifyApplicationUpdate, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
-								</asControls:DialogItem>
-								<Separator asControls:DialogElement.SeparatorType="Item"/>
-
-								<!-- Accept non-stable update -->
-								<asControls:DialogItem ItemSize="Small">
-									<TextBlock Text="{asXaml:StringResource ApplicationOptions.AcceptNonStableApplicationUpdate}" asControls:DialogElement.TextRole="Label"/>
-									<ToggleSwitch IsChecked="{Binding AcceptNonStableApplicationUpdate, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
-								</asControls:DialogItem>
-								<Separator asControls:DialogElement.SeparatorType="Item"/>
-								
 								<!-- Allow usage data collection -->
 								<StackPanel IsVisible="{Binding IsUsageDataCollectionAvailable}">
 									<asControls:DialogItem ItemSize="Small">

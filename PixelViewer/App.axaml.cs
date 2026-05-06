@@ -102,8 +102,6 @@ namespace Carina.PixelViewer
 		static readonly SettingKey<bool> LegacySaveRenderedImageWithOrientationKey = new("SaveRenderedImageWithOrientation", true);
 		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new("ScreenColorSpace", "");
 		static readonly SettingKey<string> LegacyYuvConversionModeKey = new("YuvConversionMode", "");
-		static readonly Uri PreviewPackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest-Preview.json");
-		static readonly Uri StablePackageManifestUri = new("https://raw.githubusercontent.com/carina-studio/PixelViewer/master/PackageManifest.json");
 
 
 		// Constructor.
@@ -264,9 +262,6 @@ namespace Carina.PixelViewer
 				case "AppOptions":
 					this.ShowApplicationOptionsDialog();
 					break;
-				case "CheckForUpdate":
-					this.CheckForApplicationUpdate();
-					break;
 				case "EditConfiguration":
 					this.ShowConfigurationEditor();
 					break;
@@ -368,9 +363,6 @@ namespace Carina.PixelViewer
 								break;
 							case "AppOptions":
 								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Settings.Outline")?.ToNativeMenuItemIcon();
-								break;
-							case "CheckForUpdate":
-								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Update.Outline")?.ToNativeMenuItemIcon();
 								break;
 							case "EditConfiguration":
 #if DEBUG
@@ -578,12 +570,6 @@ namespace Carina.PixelViewer
 #pragma warning restore CS0612
 
 
-		// URI of package manifest.
-        public override IEnumerable<Uri> PackageManifestUris => this.Settings.GetValueOrDefault(CarinaStudio.AppSuite.SettingKeys.AcceptNonStableApplicationUpdate)
-			? new[] { PreviewPackageManifestUri, StablePackageManifestUri }
-			: new[] {StablePackageManifestUri };
-        
-        
         // Parse argument.
         static int ParseArguments(string[] args, int index, IDictionary<string, object> launchOptions)
         {
