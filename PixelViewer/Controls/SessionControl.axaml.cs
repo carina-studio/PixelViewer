@@ -1179,9 +1179,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			var contentSize = this.imageScrollViewer.Extent;
 			if (contentSize.Width <= 0 || contentSize.Height <= 0)
 				return;
-			this.gesturePivotInViewport = new Vector(e.ScaleOrigin.X, e.ScaleOrigin.Y);
 			this.pinchInitialScale = initialScale;
 		}
+
+		// refresh focal point each frame so the anchor follows the user's fingers
+		this.gesturePivotInViewport = new Vector(e.ScaleOrigin.X, e.ScaleOrigin.Y);
 
 		// use small image while gesture streams; the debounced restore fires once events stop
 		this.StartUsingSmallRenderedImage();
@@ -1193,7 +1195,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			if (session.FitImageToViewport)
 				session.FitImageToViewport = false;
-
+			else
+				this.SetupTargetImageViewportPivot();
 			var newScale = this.pinchInitialScale.Value * e.Scale;
 			session.ZoomTo(newScale, animate: false);
 		}
