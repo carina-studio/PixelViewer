@@ -82,6 +82,7 @@
 
 	<!-- Trimming options -->
 	<ItemGroup>
+		<TrimmerRootAssembly Include="CarinaStudio.AppSuite.Core" />
 		<TrimmerRootAssembly Include="netstandard" />
 		<TrimmerRootAssembly Include="NLog" />
 		<TrimmerRootAssembly Include="System.Console" />
