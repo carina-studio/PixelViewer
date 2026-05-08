@@ -24,6 +24,8 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CarinaStudio.AppSuite.ViewModels;
+using System.IO;
+using System.Threading;
 
 namespace Carina.PixelViewer
 {
@@ -166,6 +168,55 @@ namespace Carina.PixelViewer
 			if (filePath != null || it.Sessions.IsEmpty())
 				it.ActivatedSession = it.CreateAndAttachSession(filePath as string);
 		});
+
+
+		/// <inheritdoc/>
+		protected override async Task OnImportApplicationDataAsync(string directory)
+		{
+			// call base
+			await base.OnImportApplicationDataAsync(directory);
+			
+			// prepare
+			if (Platform.IsMacOS && directory.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+				directory = Path.Combine(directory, "Contents", "MacOS");
+			Task ImportDirectoryAsync(string directoryName, string usage) => Task.Run(() =>
+			{
+				var srcDirectory = Path.Combine(directory, directoryName);
+				var destDirectory = Path.Combine(this.RootPrivateDirectoryPath, directoryName);
+				if (Directory.Exists(srcDirectory))
+				{
+					// backup current directory
+					this.Logger.LogWarning($"Start backing up {usage} directory");
+					var backupDestDirectory = Path.Combine(this.RootPrivateDirectoryPath, directoryName + ".Backup");
+					if (Directory.Exists(backupDestDirectory))
+						Directory.Delete(backupDestDirectory, true);
+					if (Directory.Exists(destDirectory))
+						Directory.Move(destDirectory, backupDestDirectory);
+					this.Logger.LogWarning($"Complete backing up {usage} directory");
+					
+					// import
+					this.Logger.LogWarning($"Start importing {usage}");
+					if (!Directory.Exists(destDirectory))
+						Directory.CreateDirectory(destDirectory);
+					var fileCount = 0;
+					foreach (var srcFilePath in Directory.EnumerateFiles(srcDirectory))
+					{
+						var destFilePath = Path.Combine(destDirectory, Path.GetFileName(srcFilePath));
+						File.Copy(srcFilePath, destFilePath, true);
+						++fileCount;
+					}
+					this.Logger.LogWarning($"Complete importing {usage}, {fileCount} file(s) imported");
+				}
+				else
+					this.Logger.LogDebug($"Directory of {usage} not found for importing.");
+			});
+			
+			// import rendering profiles
+			await ImportDirectoryAsync("Profiles", "rendering profiles");
+			
+			// import color spaces
+			await ImportDirectoryAsync("ColorSpaces", "color spaces");
+		}
 
 
 		// Load default strings.
@@ -568,6 +619,17 @@ namespace Carina.PixelViewer
 			}
 		}
 #pragma warning restore CS0612
+		
+		
+		///<inheritdoc/>
+		protected override async Task<bool> OnValidateApplicationDataImportAsync(string directory, CancellationToken cancellationToken)
+		{
+			if (!await base.OnValidateApplicationDataImportAsync(directory, cancellationToken))
+				return false;
+			if (Platform.IsMacOS && directory.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+				directory = Path.Combine(directory, "Contents", "MacOS");
+			return await Task.Run(() => File.Exists(Path.Combine(directory, "PixelViewer.dll")), cancellationToken);
+		}
 
 
         // Parse argument.
