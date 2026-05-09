@@ -177,8 +177,14 @@ namespace Carina.PixelViewer
 			await base.OnImportApplicationDataAsync(directory);
 			
 			// prepare
-			if (Platform.IsMacOS && directory.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
-				directory = Path.Combine(directory, "Contents", "MacOS");
+			if (Platform.IsMacOS)
+			{
+				if (directory.EndsWith(".app", StringComparison.OrdinalIgnoreCase)
+				    || directory.EndsWith(".app/", StringComparison.OrdinalIgnoreCase))
+				{
+					directory = Path.Combine(directory, "Contents", "MacOS");
+				}
+			}
 			Task ImportDirectoryAsync(string directoryName, string usage) => Task.Run(() =>
 			{
 				var srcDirectory = Path.Combine(directory, directoryName);
@@ -626,8 +632,14 @@ namespace Carina.PixelViewer
 		{
 			if (!await base.OnValidateApplicationDataImportAsync(directory, cancellationToken))
 				return false;
-			if (Platform.IsMacOS && directory.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
-				directory = Path.Combine(directory, "Contents", "MacOS");
+			if (Platform.IsMacOS)
+			{
+				if (directory.EndsWith(".app", StringComparison.OrdinalIgnoreCase)
+				    || directory.EndsWith(".app/", StringComparison.OrdinalIgnoreCase))
+				{
+					directory = Path.Combine(directory, "Contents", "MacOS");
+				}
+			}
 			return await Task.Run(() => File.Exists(Path.Combine(directory, "PixelViewer.dll")), cancellationToken);
 		}
 
