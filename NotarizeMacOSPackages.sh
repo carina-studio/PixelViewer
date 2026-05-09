@@ -36,7 +36,7 @@ for i in "${!RID_LIST[@]}"; do
     echo " "
 
     # notarize
-    xcrun notarytool submit "./Packages/$VERSION/$APP_NAME-$PACKAGE_VERSION-$PUB_PLATFORM.zip" --key-id "$KEY_ID" --apple-id "$USERNAME" --password "$PASSWORD" --team-id "$TEAM_ID"
+    xcrun notarytool submit "./Packages/$VERSION/$APP_NAME-$PACKAGE_VERSION-$PUB_PLATFORM.zip" --key-id "$KEY_ID" --apple-id "$USERNAME" --password "$PASSWORD" --team-id "$TEAM_ID" --wait
     if [ "$?" != "0" ]; then
         exit
     fi
