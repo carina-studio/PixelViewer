@@ -5,7 +5,7 @@ A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/B
 
 跨平台影像檢視器，支援讀取及繪製原始 Luminance/YUV/RGB/ARGB/Bayer 像素資料。請參閱 [網站](https://carinastudio.azurewebsites.net/PixelViewer/) 以取得更多資訊。
 
-<img alt="PixelViewer" src="https://carinastudio.azurewebsites.net/PixelViewer/Banner.png"/>
+![](https://carinastudio.azurewebsites.net/PixelViewer/Banner.png?v=2)
 
 ## 📥 Download 2026.0 Preview
 
