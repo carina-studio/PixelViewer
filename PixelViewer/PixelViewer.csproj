@@ -17,10 +17,10 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>3.0.9.506-preview</AppSuiteVersion>
+		<AppSuiteVersion>3.0.10.514-preview</AppSuiteVersion>
 		<AvaloniaVersion>11.3.13</AvaloniaVersion>
 		<AvaloniaXamlBehaviorsVersion>11.3.0.6</AvaloniaXamlBehaviorsVersion>
-		<DotNetLibVersion>10.0.4</DotNetLibVersion>
+		<DotNetLibVersion>10.0.8</DotNetLibVersion>
 		<SkiaSharpVersion>3.119.2</SkiaSharpVersion>
 	</PropertyGroup>
 	
