@@ -669,6 +669,10 @@ namespace Carina.PixelViewer
 		public override ApplicationReleasingType ReleasingType => ApplicationReleasingType.Preview;
 
 
+		/// <inheritdoc/>
+		protected override bool RestoreMainWindowsAfterSystemReboot => true;
+		
+		
 		// Version of settings.
 		protected override int SettingsVersion => 9;
 
