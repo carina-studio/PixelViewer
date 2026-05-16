@@ -10,6 +10,7 @@
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
+        Name="window"
 		Classes="Tabbed"
         Icon="/PixelViewer.ico"
 		MinHeight="{DynamicResource Double/MainWindow.MinHeight}"
@@ -28,20 +29,20 @@
 			<Grid ColumnDefinitions="*,Auto">
 				<Grid.ContextMenu>
 					<ContextMenu Placement="Bottom">
-						<MenuItem Command="{Binding $parent[Window].SetCustomSessionTitleCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
+						<MenuItem Command="{Binding #window.SetCustomSessionTitleCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}">
 							<MenuItem.Icon>
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
 							</MenuItem.Icon>
 						</MenuItem>
-						<MenuItem Command="{Binding $parent[Window].ResetSessionTitleCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+						<MenuItem Command="{Binding #window.ResetSessionTitleCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
 						<Separator/>
-						<MenuItem Command="{Binding $parent[Window].MoveSessionToNewWorkspaceCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding $parent[Window].HasMultipleSessions}">
+						<MenuItem Command="{Binding #window.MoveSessionToNewWorkspaceCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding #window.HasMultipleSessions}">
 							<MenuItem.Icon>
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.AddWindow}"/>
 							</MenuItem.Icon>
 						</MenuItem>
 						<Separator/>
-						<MenuItem Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}" InputGesture="Ctrl+W">
+						<MenuItem Command="{Binding #window.CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Header="{DynamicResource String/Common.CloseTab}" InputGesture="Ctrl+W">
 							<MenuItem.Icon>
 								<Image Classes="MenuItem_Icon" Source="{DynamicResource Image/Icon.CloseTab}"/>
 							</MenuItem.Icon>
@@ -103,7 +104,7 @@
 					</Panel>
 					<TextBlock Classes="TabItem_TextBlock" Grid.Column="1" Text="{Binding Title}"/>
 				</Grid>
-				<Button Classes="TabItem_Button" Command="{Binding $parent[Window].CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="1" ToolTip.Tip="{DynamicResource String/Common.CloseTab.WithGesture}">
+				<Button Classes="TabItem_Button" Command="{Binding #window.CloseMainTabItemCommand}" CommandParameter="{Binding $parent[TabItem]}" Grid.Column="1" ToolTip.Tip="{DynamicResource String/Common.CloseTab.WithGesture}">
 					<Button.IsVisible>
 						<MultiBinding Converter="{x:Static BoolConverters.Or}">
 							<Binding Path="IsSelected" RelativeSource="{RelativeSource AncestorType={x:Type TabItem}}"/>
@@ -124,25 +125,25 @@
 			<NativeMenuItem Header="{DynamicResource String/MainWindow.Windows}">
 				<NativeMenuItem.Menu>
 					<NativeMenu>
-						<NativeMenuItem Command="{Binding $self.CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" Icon="{StaticResource Bitmap/Icon.Add}" Gesture="Cmd+N"/>
+						<NativeMenuItem Command="{Binding #window.CreateMainWindow}" Header="{DynamicResource String/Common.CreateWindow}" Icon="{StaticResource Bitmap/Icon.Add}" Gesture="Cmd+N"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}" Icon="{StaticResource Bitmap/Icon.Layout.Horizontal}"/>
-						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Vertical}" Icon="{StaticResource Bitmap/Icon.Layout.Vertical}"/>
-						<NativeMenuItem Command="{Binding $self.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Tile}" Icon="{StaticResource Bitmap/Icon.Layout.Tile}"/>
+						<NativeMenuItem Command="{Binding #window.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Horizontal}" Icon="{StaticResource Bitmap/Icon.Layout.Horizontal}"/>
+						<NativeMenuItem Command="{Binding #window.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Vertical}" Icon="{StaticResource Bitmap/Icon.Layout.Vertical}"/>
+						<NativeMenuItem Command="{Binding #window.LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{DynamicResource String/MainWindow.LayoutMainWindows.Tile}" Icon="{StaticResource Bitmap/Icon.Layout.Tile}"/>
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>
 			<NativeMenuItem Header="{DynamicResource String/MainWindow.Tabs}">
 				<NativeMenuItem.Menu>
 					<NativeMenu>
-						<NativeMenuItem Command="{Binding $self.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}" Icon="{StaticResource Bitmap/Icon.Add}" Gesture="Cmd+T"/>
+						<NativeMenuItem Command="{Binding #window.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}" Icon="{StaticResource Bitmap/Icon.Add}" Gesture="Cmd+T"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}" Icon="{StaticResource Bitmap/Icon.Edit.Outline}"/>
-						<NativeMenuItem Command="{Binding $self.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" Icon="{StaticResource Bitmap/Empty}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+						<NativeMenuItem Command="{Binding #window.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}" Icon="{StaticResource Bitmap/Icon.Edit.Outline}"/>
+						<NativeMenuItem Command="{Binding #window.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" Icon="{StaticResource Bitmap/Empty}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" Icon="{StaticResource Bitmap/Icon.ExternalLink}" IsEnabled="{Binding $self.HasMultipleSessions}"/>
+						<NativeMenuItem Command="{Binding #window.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" Icon="{StaticResource Bitmap/Icon.ExternalLink}" IsEnabled="{Binding #window.HasMultipleSessions}"/>
 						<NativeMenuItemSeparator/>
-						<NativeMenuItem Command="{Binding $self.CloseCurrentMainTabItem}" Header="{DynamicResource String/Common.CloseTab}" Icon="{StaticResource Bitmap/Icon.CloseTab.Outline}" Gesture="Cmd+W"/>
+						<NativeMenuItem Command="{Binding #window.CloseCurrentMainTabItem}" Header="{DynamicResource String/Common.CloseTab}" Icon="{StaticResource Bitmap/Icon.CloseTab.Outline}" Gesture="Cmd+W"/>
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>
@@ -153,7 +154,7 @@
 	<!-- Styles -->
 	<Window.Styles>
 		<Style Selector="CaptionButtons">
-			<Setter Property="MaxHeight" Value="{Binding $parent[Window].ExtendClientAreaTitleBarHeightHint}"/>
+			<Setter Property="MaxHeight" Value="{Binding #window.ExtendClientAreaTitleBarHeightHint}"/>
 		</Style>
 	</Window.Styles>
 	
@@ -167,7 +168,7 @@
 				<!-- New tab -->
 				<asControls:TabItem Classes="EmptyWithSeparator">
 					<TabItem.Header>
-						<Button Classes="AddTabItem" Command="{Binding $parent[Window].CreateMainTabItem}">
+						<Button Classes="AddTabItem" Command="{Binding #window.CreateMainTabItem}">
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Add}"/>
 						</Button>
 					</TabItem.Header>
