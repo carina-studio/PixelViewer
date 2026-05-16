@@ -63,6 +63,10 @@
 		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
 	</ItemGroup>
 
+	<ItemGroup Condition="$(RuntimeIdentifier.Contains('linux'))">
+		<PackageReference Include="SkiaSharp.NativeAssets.Linux" Version="$(SkiaSharpVersion)" />
+	</ItemGroup>
+
 	<ItemGroup>
 		<PackageReference Include="Avalonia.Xaml.Interactivity" Version="$(AvaloniaXamlBehaviorsVersion)" />
 		<PackageReference Include="Avalonia.Xaml.Interactions" Version="$(AvaloniaXamlBehaviorsVersion)" />
