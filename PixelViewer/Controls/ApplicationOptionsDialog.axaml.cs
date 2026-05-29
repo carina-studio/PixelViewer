@@ -1,8 +1,12 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using CarinaStudio.AppSuite.Controls;
@@ -48,6 +52,7 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
     public ApplicationOptionsDialog()
     {
         this.AddCustomColorSpaceCommand = new Command(this.AddCustomColorSpace, this.canAddCustomColorSpace);
+        this.EditCustomColorSpaceCommand = new Command<Media.ColorSpace>(it => _ = this.EditCustomColorSpace(it));
         this.HasNavigationBar = true;
         this.RemoveCustomColorSpaceCommand = new Command<ListBoxItem>(this.RemoveCustomColorSpace);
         this.ShowColorSpaceInfoCommand = new Command<Media.ColorSpace>(this.ShowColorSpaceInfo);
@@ -67,7 +72,7 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
             it.DoubleClickOnItem += (_, e) =>
             {
                 if (e.Item is Media.ColorSpace colorSpace)
-                    this.ShowColorSpaceInfo(colorSpace);
+                    _ = this.EditCustomColorSpace(colorSpace);
             };
         });
         this.defaultColorSpaceComboBox = this.Get<ComboBox>(nameof(defaultColorSpaceComboBox));
@@ -101,6 +106,7 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
         {
             it.Click += (_, _) => this.contentScrollViewer.SmoothScrollIntoView(this.userInterfacePanel);
         });
+        this.AddHandler(KeyUpEvent, (_, e) => this.OnPreviewKeyUp(e), RoutingStrategies.Tunnel);
     }
 
 
@@ -186,6 +192,31 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
     public ICommand AddCustomColorSpaceCommand { get; }
 
 
+    // Edit custom color space.
+    async Task EditCustomColorSpace(Media.ColorSpace colorSpace)
+    {
+        if (!colorSpace.IsUserDefined)
+        {
+            this.ShowColorSpaceInfo(colorSpace);
+            return;
+        }
+        var index = Media.ColorSpace.UserDefinedColorSpaces.IndexOf(colorSpace);
+        await new ColorSpaceInfoDialog
+        {
+            ColorSpace = colorSpace,
+            IsReadOnly = false,
+        }.ShowDialog(this);
+        if (index >= 0)
+            this.SelectListBoxItem(this.customColorSpaceListBox, index);
+    }
+
+
+    /// <summary>
+    /// Command to edit custom color space.
+    /// </summary>
+    public ICommand EditCustomColorSpaceCommand { get; }
+
+
     // Initial focused section.
     public ApplicationOptionsDialogSection InitialFocusedSection { get; set; } = ApplicationOptionsDialogSection.First;
 
@@ -230,6 +261,19 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
     protected override ApplicationOptions OnCreateViewModel() => new AppOptions();
 
 
+    // Called when list box lost focus.
+    void OnListBoxLostFocus(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Avalonia.Controls.ListBox listBox)
+            return;
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (!listBox.IsSelectedItemFocused)
+                listBox.SelectedItems?.Clear();
+        });
+    }
+
+
     // Window opened.
     protected override void OnOpened(EventArgs e)
     {
@@ -254,6 +298,20 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
                 this.contentScrollViewer.ScrollIntoView(initialItem, true);
                 this.AnimateItem(initialItem);
             });
+        }
+    }
+
+
+    // Called before dispatching key up event to children.
+    new void OnPreviewKeyUp(KeyEventArgs e)
+    {
+        if (e.Key == Key.Enter
+            && (e.Source as Visual)?.FindAncestorOfType<ListBoxItem>(includeSelf: true) is { } listBoxItem
+            && listBoxItem.FindAncestorOfType<Avalonia.Controls.ListBox>() is { } listBox
+            && ReferenceEquals(listBox, this.customColorSpaceListBox)
+            && listBoxItem.DataContext is Media.ColorSpace colorSpace)
+        {
+            _ = this.EditCustomColorSpace(colorSpace);
         }
     }
 
@@ -330,6 +388,21 @@ class ApplicationOptionsDialog : BaseApplicationOptionsDialog
     /// Command to remove custom color space.
     /// </summary>
     public ICommand RemoveCustomColorSpaceCommand { get; }
+
+
+    // Select item with given index in list box.
+    void SelectListBoxItem(Avalonia.Controls.ListBox listBox, int index)
+    {
+        this.SynchronizationContext.Post(() =>
+        {
+            listBox.SelectedItems?.Clear();
+            if (index < 0 || index >= listBox.ItemCount)
+                return;
+            listBox.SelectedIndex = index;
+            listBox.ScrollIntoView(index);
+            listBox.FocusSelectedItem();
+        });
+    }
 
 
     // Show color space info.

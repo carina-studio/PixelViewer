@@ -404,7 +404,7 @@
 									<TextBlock HorizontalAlignment="Right" IsVisible="{Binding !#customColorSpaceListBox.IsVisible}" Text="{asXaml:StringResource Common.None}" asControls:DialogElement.TextRole="Default"/>
 								</asControls:DialogItem>
 								<Separator asControls:DialogElement.SeparatorType="InnerItem"/>
-								<asControls:ListBox Name="customColorSpaceListBox" asControls:DialogElement.IsDialogItemInput="True" IsVisible="{Binding $self.ItemCount}" ItemsSource="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}">
+								<asControls:ListBox Name="customColorSpaceListBox" asControls:DialogElement.IsDialogItemInput="True" IsVisible="{Binding $self.ItemCount}" ItemsSource="{x:Static appMedia:ColorSpace.UserDefinedColorSpaces}" LostFocus="OnListBoxLostFocus">
 									<asControls:ListBox.ItemTemplate>
 										<DataTemplate x:CompileBindings="True" x:DataType="appMedia:ColorSpace">
 											<Grid ColumnDefinitions="*,Auto">
@@ -412,10 +412,10 @@
 												<Border Classes="InPlaceAction_Reserved"/>
 												<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
 													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{asXaml:StringResource Common.Delete}">
-														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete}"/>
+														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete.Outline}"/>
 													</Button>
-													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{asXaml:StringResource Common.Edit}">
-														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit}"/>
+													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].EditCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{asXaml:StringResource Common.Edit}">
+														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit.Outline}"/>
 													</Button>
 												</StackPanel>
 											</Grid>
