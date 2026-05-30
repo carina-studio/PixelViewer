@@ -7,35 +7,20 @@ A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/B
 
 ![](https://carinastudio.azurewebsites.net/PixelViewer/Banner.png?v=2)
 
-## 📥 Download 2026.0 Preview
+## 📥 Download 2026.0.1
 
 ### Windows
-[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-win-x64.zip)
-[![](https://img.shields.io/badge/x86-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-win-x86.zip)
-[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-win-arm64.zip)
+[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-x64.zip)
+[![](https://img.shields.io/badge/x86-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-x86.zip)
+[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-arm64.zip)
 
 ### macOS
-[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-osx-arm64.zip)
-[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-osx-x64.zip)
+[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-osx-arm64.zip)
+[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-osx-x64.zip)
 
 ### Linux
-[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-linux-x64.zip)
-[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0/PixelViewer-2026.0-linux-arm64.zip)
-
-## 📥 Download 3.1.6.430
-
-### Windows
-[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-win-x64.zip)
-[![](https://img.shields.io/badge/x86-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-win-x86.zip)
-[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-win-arm64.zip)
-
-### macOS
-[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-osx-arm64.zip)
-[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-osx-x64.zip)
-
-### Linux
-[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-linux-x64.zip)
-[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/3.1.6.430/PixelViewer-3.1.6.430-linux-arm64.zip)
+[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-linux-x64.zip)
+[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-linux-arm64.zip)
 
 ## ⭐ Supported formats
 * Luminance
