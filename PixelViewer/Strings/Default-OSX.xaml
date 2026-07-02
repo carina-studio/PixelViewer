@@ -3,6 +3,9 @@
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 					xmlns:sys="clr-namespace:System;assembly=mscorlib">
 
+	<!-- App -->
+	<sys:String x:Key="String/App.Shutdown">Quit PixelViewer</sys:String>
+
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(⌘O) to open image file.</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to Viewport (⌘0)</sys:String>

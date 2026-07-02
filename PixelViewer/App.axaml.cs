@@ -418,21 +418,12 @@ namespace Carina.PixelViewer
 							case "AppInfo":
 								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Information.Outline")?.ToNativeMenuItemIcon();
 								break;
-							case "AppOptions":
-								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Settings.Outline")?.ToNativeMenuItemIcon();
-								break;
 							case "EditConfiguration":
-#if DEBUG
-								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Tool.Outline")?.ToNativeMenuItemIcon();
-#else
+#if !DEBUG
 								menu.Items.RemoveAt(i);
 #endif
 								break;
-							case "Shutdown":
-								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Exit")?.ToNativeMenuItemIcon();
-								break;
 							default:
-								menuItem.UseEmptyIcon();
 								break;
 						}
 					}

@@ -41,10 +41,6 @@ namespace Carina.PixelViewer
 		static bool IsRefreshingAppIconOnMacOSHintDialogShown;
 		static readonly string[] NativeMenuItemIconResourceNames =
 		[
-			"Icon.Add",
-			"Icon.CloseTab.Outline",
-			"Icon.Edit.Outline",
-			"Icon.ExternalLink",
 			"Icon.Layout.Horizontal",
 			"Icon.Layout.Tile",
 			"Icon.Layout.Vertical",
