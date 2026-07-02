@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:asInput="using:CarinaStudio.AppSuite.Input"
              x:Class="Carina.PixelViewer.App">
 
 	<!-- Resources -->
@@ -19,7 +20,7 @@
 			<NativeMenuItemSeparator/>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="AppInfo" Header="{DynamicResource String/SessionControl.ApplicationInfo}"/>
 			<NativeMenuItemSeparator/>
-			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="Shutdown" Header="{DynamicResource String/App.Shutdown}"/>
+			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="Shutdown" Header="{DynamicResource String/App.Shutdown}" Gesture="{x:Static asInput:KeyGestures.QuitApplication}"/>
 		</NativeMenu>
 	</NativeMenu.Menu>
 	
