@@ -133,17 +133,17 @@
 
 						<!-- Open file -->
 						<Button Command="{Binding $parent[UserControl].OpenSourceFileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OpenSourceFile}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
 						</Button>
 
 						<!-- Save image -->
 						<Button Command="{Binding $parent[UserControl].SaveImageCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.SaveImage}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
 						</Button>
 
 						<!-- Refresh -->
 						<Button Command="{Binding RenderImageCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Refresh}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.Refresh}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Refresh}"/>
 						</Button>
 
 						<!-- Separator -->
@@ -152,8 +152,8 @@
 						<!-- Fit to viewport -->
 						<ToggleButton IsChecked="{Binding FitImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FitRenderedImageToViewport}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen}" IsVisible="{Binding !#fitToViewportLightIcon.IsVisible}"/>
-								<Image Name="fitToViewportLightIcon" Classes="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FitToScreen}" IsVisible="{Binding !#fitToViewportLightIcon.IsVisible}"/>
+								<Image Name="fitToViewportLightIcon" asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}">
 									<Image.IsVisible>
 										<MultiBinding Converter="{x:Static BoolConverters.And}">
 											<Binding Path="IsChecked" RelativeSource="{RelativeSource AncestorType={x:Type ToggleButton}}"/>
@@ -166,12 +166,12 @@
 						
 						<!-- Zoom to 100% -->
 						<Button Command="{Binding #root.ZoomToOriginalImageSize}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ZoomToOriginalImageSize}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.OneToOne}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.OneToOne}"/>
 						</Button>
 
 						<!-- Zoom-out -->
 						<RepeatButton Name="zoomOutButton" Command="{Binding ZoomOutCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ZoomOut}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.ZoomOut}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.ZoomOut}"/>
 						</RepeatButton>
 
 						<!-- Zoom -->
@@ -188,7 +188,7 @@
 
 						<!-- Zoom-in -->
 						<RepeatButton Name="zoomInButton" Command="{Binding ZoomInCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ZoomIn}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.ZoomIn}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.ZoomIn}"/>
 						</RepeatButton>
 
 						<!-- Separator -->
@@ -196,7 +196,7 @@
 
 						<!-- Rotate-left -->
 						<Button Name="rotateLeftButton" Command="{Binding RotateLeftCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RotateLeft}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.RotateLeft}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.RotateLeft}"/>
 						</Button>
 
 						<!-- Rotation -->
@@ -213,7 +213,7 @@
 
 						<!-- Rotate-right -->
 						<Button Name="rotateRightButton" Command="{Binding RotateRightCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RotateRight}">
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.RotateRight}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.RotateRight}"/>
 						</Button>
 
 						<!-- Separator -->
@@ -222,16 +222,16 @@
 						<!-- Flip-X -->
 						<ToggleButton Name="flipXButton" IsChecked="{Binding IsImageFlippedX, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipX}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipX}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipX.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipX}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipX.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
 						</ToggleButton>
 
 						<!-- Flip-Y -->
 						<ToggleButton Name="flipYButton" IsChecked="{Binding IsImageFlippedY, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipY}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipY}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FlipY.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipY}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipY.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
 						</ToggleButton>
 
@@ -241,8 +241,8 @@
 						<!-- Histograms -->
 						<ToggleButton Name="histogramsButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !$parent[UserControl].IsHistogramsDisabled}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.Histograms}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 							</Panel>
 						</ToggleButton>
 
@@ -254,12 +254,12 @@
 
 							<!-- First frame -->
 							<Button Command="{Binding MoveToFirstFrameCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.MoveToFirstFrame}">
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FastBackward}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FastBackward}"/>
 							</Button>
 
 							<!-- Previous frame -->
 							<RepeatButton Command="{Binding MoveToPreviousFrameCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.MoveToPreviousFrame}">
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 							</RepeatButton>
 
 							<!-- Frame -->
@@ -279,12 +279,12 @@
 
 							<!-- Next frame -->
 							<RepeatButton Command="{Binding MoveToNextFrameCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.MoveToNextFrame}">
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 							</RepeatButton>
 
 							<!-- Last frame -->
 							<Button Command="{Binding MoveToLastFrameCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.MoveToLastFrame}">
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.FastForward}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FastForward}"/>
 							</Button>
 
 						</StackPanel>
@@ -295,8 +295,8 @@
 						<!-- Brightness and contrast adjustment -->
 						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment}">
 							<Panel>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast.Active}">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Contrast.Active}">
 									<Image.IsVisible>
 										<MultiBinding Converter="{x:Static aConverters:BoolConverters.Or}">
 											<Binding Path="HasBrightnessAdjustment"/>
@@ -306,7 +306,7 @@
 										</MultiBinding>
 									</Image.IsVisible>
 								</Image>
-								<Image Classes="Icon" Source="{StaticResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Contrast.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								<Popup Name="brightnessAndContrastAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="brightnessAndContrastAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
 										<Border.Transitions>
@@ -382,8 +382,8 @@
 						<ToggleButton Name="colorAdjustmentButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ColorAdjustment}">
 							<Panel>
 								<Panel IsVisible="{Binding !#activeColorAdjustmentButtonIcon.IsVisible}">
-									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Outline}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Outline.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Color.Outline}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Color.Outline.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								</Panel>
 								<Panel Name="activeColorAdjustmentButtonIcon">
 									<Panel.IsVisible>
@@ -393,8 +393,8 @@
 											<Binding Path="HasVibranceAdjustment"/>
 										</MultiBinding>
 									</Panel.IsVisible>
-									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Active}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-									<Image Classes="Icon" Source="{StaticResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Color.Active}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Color.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 								</Panel>
 								<Popup Name="colorAdjustmentPopup" Classes="SessionControl_FilterParamsPopup">
 									<Border Name="colorAdjustmentPopupBorder" Classes="SessionControl_FilterParamsPopup">
@@ -493,22 +493,22 @@
 
 					<!-- Test -->
 					<Button Name="testButton" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False" asControls:ToolbarElement.Role="Button">
-						<Image Classes="Icon" Source="{StaticResource Image/Icon.Lab}"/>
+						<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Lab}"/>
 					</Button>
 
 					<!-- Rendering params panel -->
 					<ToggleButton IsChecked="{Binding IsRenderingParametersPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderingParametersPanel}">
 						<Panel>
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.Panel.Right}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.Panel.Right.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Panel.Right}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Panel.Right.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 
 					<!-- Other actions -->
 					<ToggleButton Name="otherActionsButton" Command="{Binding $parent[UserControl].ShowOtherActions}" IsVisible="{x:Static c:Platform.IsNotMacOS}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OtherActions}">
 						<Panel>
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image Classes="Icon" Source="{StaticResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 

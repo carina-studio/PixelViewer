@@ -35,50 +35,50 @@
 				<StackPanel>
 					
 					<!-- User interface -->
-					<ToggleButton Name="userInterfacePanelButton" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource ApplicationOptions.UserInterface}">
+					<ToggleButton Name="userInterfacePanelButton" asControls:ToolbarElement.Role="Button" ToolTip.ShowDelay="0" ToolTip.Tip="{asXaml:StringResource ApplicationOptions.UserInterface}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Outline}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Outline.Light}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Outline}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.UserInterface.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
 					<!-- Image format -->
-					<ToggleButton Name="imageFormatPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.ImageFormat}">
+					<ToggleButton Name="imageFormatPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.ShowDelay="0" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.ImageFormat}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Outline}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Outline.Light}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Outline}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Image.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
 					<!-- Image dimensions evaluation -->
-					<ToggleButton Name="imageDimensionsEvaluationPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.ImageDimensionsEvaluation}">
+					<ToggleButton Name="imageDimensionsEvaluationPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.ShowDelay="0" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.ImageDimensionsEvaluation}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Dimensions}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Dimensions.Light}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Dimensions}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Dimensions.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
 					<!-- Colors -->
-					<ToggleButton Name="colorsPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.Colors}">
+					<ToggleButton Name="colorsPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.ShowDelay="0" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.Colors}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Outline}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Outline.Light}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Outline}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Color.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
 					<!-- Image filter -->
-					<ToggleButton Name="imageFilterPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.ImageFilter}">
+					<ToggleButton Name="imageFilterPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.ShowDelay="0" ToolTip.Tip="{asXaml:StringResource ApplicationOptionsDialog.ImageFilter}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.ImageFilter}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.ImageFilter.Light}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.ImageFilter}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.ImageFilter.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
 					<!-- Other -->
-					<ToggleButton Name="othersPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource ApplicationOptions.Others}">
+					<ToggleButton Name="othersPanelButton" asControls:ToolbarElement.Role="Button" ToolTip.ShowDelay="0" ToolTip.Tip="{asXaml:StringResource ApplicationOptions.Others}">
 						<Panel>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Outline}"/>
-							<Image Classes="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Outline.Light}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Outline}"/>
+							<Image asControls:ToolbarElement.Role="Icon" IsVisible="{ReflectionBinding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.Tool.Outline.Light}"/>
 						</Panel>
 					</ToggleButton>
 					
