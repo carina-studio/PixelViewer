@@ -17,11 +17,11 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release;Debug-Windows;Release-Windows</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>3.0.12.521</AppSuiteVersion>
-		<AvaloniaVersion>11.3.13</AvaloniaVersion>
+		<AppSuiteVersion>3.1.4.627-preview</AppSuiteVersion>
+		<AvaloniaVersion>11.3.17</AvaloniaVersion>
 		<AvaloniaXamlBehaviorsVersion>11.3.0.6</AvaloniaXamlBehaviorsVersion>
-		<DotNetLibVersion>10.0.8</DotNetLibVersion>
-		<SkiaSharpVersion>3.119.2</SkiaSharpVersion>
+		<DotNetLibVersion>10.0.9</DotNetLibVersion>
+		<SkiaSharpVersion>3.119.4</SkiaSharpVersion>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
@@ -74,7 +74,7 @@
 		<PackageReference Include="CarinaStudio.AppSuite.Fonts" Version="$(AppSuiteVersion)" />
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
-		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.13.0" />
+		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.14.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 		<PackageReference Include="SkiaSharp" Version="$(SkiaSharpVersion)" />
 		<PackageReference Include="SkiaSharp.HarfBuzz" Version="$(SkiaSharpVersion)" />
