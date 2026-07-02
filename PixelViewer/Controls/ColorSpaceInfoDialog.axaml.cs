@@ -25,8 +25,8 @@ class ColorSpaceInfoDialog : InputDialog
     // Static fields.
     static readonly StyledProperty<Media.ColorSpace> ColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace>(nameof(ColorSpace), Media.ColorSpace.Default);
     static readonly StyledProperty<bool> IsReadOnlyProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, bool>(nameof(IsReadOnly), false);
-    static readonly StyledProperty<Media.ColorSpace?> ReferenceColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace?>("ReferenceColorSpace", null);
-    static readonly StyledProperty<IList<Media.ColorSpace>> ReferenceColorSpacesProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, IList<Media.ColorSpace>>("ReferenceColorSpaces", Array.Empty<Media.ColorSpace>());
+    static readonly StyledProperty<Media.ColorSpace?> ReferenceColorSpaceProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, Media.ColorSpace?>(nameof(ReferenceColorSpace), null);
+    static readonly StyledProperty<IList<Media.ColorSpace>> ReferenceColorSpacesProperty = AvaloniaProperty.Register<ColorSpaceInfoDialog, IList<Media.ColorSpace>>(nameof(ReferenceColorSpaces), Array.Empty<Media.ColorSpace>());
 
 
     // Fields.
@@ -330,4 +330,16 @@ class ColorSpaceInfoDialog : InputDialog
     // Validate input
     protected override bool OnValidateInput() =>
         base.OnValidateInput() && (!this.IsReadOnly || !string.IsNullOrWhiteSpace(this.nameTextBox.Text));
+
+
+    // Reference color space selected for comparison.
+    public Media.ColorSpace? ReferenceColorSpace
+    {
+        get => this.GetValue(ReferenceColorSpaceProperty);
+        set => this.SetValue(ReferenceColorSpaceProperty, value);
+    }
+
+
+    // Available reference color spaces for comparison.
+    public IList<Media.ColorSpace> ReferenceColorSpaces => this.GetValue(ReferenceColorSpacesProperty);
 }

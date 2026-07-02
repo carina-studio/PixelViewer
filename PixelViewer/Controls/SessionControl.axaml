@@ -53,18 +53,18 @@
 
 		<!-- File actions -->
 		<ContextMenu x:Key="fileActionsMenu" Placement="Top">
-			<MenuItem Command="{Binding $parent[UserControl].CopyFileName}" Header="{asXaml:StringResource SessionControl.CopyFileName}">
+			<MenuItem Command="{Binding #root.CopyFileName}" Header="{asXaml:StringResource SessionControl.CopyFileName}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Copy.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
-			<MenuItem Command="{Binding $parent[UserControl].CopyFilePath}" Header="{asXaml:StringResource SessionControl.CopyFilePath}">
+			<MenuItem Command="{Binding #root.CopyFilePath}" Header="{asXaml:StringResource SessionControl.CopyFilePath}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Copy.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
-			<MenuItem Command="{Binding $parent[UserControl].ShowSourceFileInFileExplorer}" Header="{asXaml:StringResource SessionControl.ShowFileInExplorer}" IsEnabled="{x:Static c:Platform.IsOpeningFileManagerSupported}">
+			<MenuItem Command="{Binding #root.ShowSourceFileInFileExplorer}" Header="{asXaml:StringResource SessionControl.ShowFileInExplorer}" IsEnabled="{x:Static c:Platform.IsOpeningFileManagerSupported}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.FileManager.Outline}"/>
 				</MenuItem.Icon>
@@ -73,12 +73,12 @@
 
 		<!-- Other actions -->
 		<ContextMenu x:Key="otherActionsMenu" Placement="Bottom">
-			<MenuItem Command="{Binding $parent[UserControl].Application.ShowApplicationOptionsDialog}" Header="{asXaml:StringResource SessionControl.ApplicationOptions}">
+			<MenuItem Command="{Binding #root.Application.ShowApplicationOptionsDialog}" Header="{asXaml:StringResource SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Settings.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
-			<MenuItem Name="editConfigMenuItem" Command="{Binding $parent[UserControl].Application.ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False">
+			<MenuItem Name="editConfigMenuItem" Command="{Binding #root.Application.ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Tool.Outline}"/>
 				</MenuItem.Icon>
@@ -106,7 +106,7 @@
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
-			<MenuItem Command="{Binding $parent[UserControl].Application.ShowApplicationInfoDialog}" Header="{asXaml:StringResource SessionControl.ApplicationInfo}">
+			<MenuItem Command="{Binding #root.Application.ShowApplicationInfoDialog}" Header="{asXaml:StringResource SessionControl.ApplicationInfo}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Information.Outline}"/>
 				</MenuItem.Icon>
@@ -132,12 +132,12 @@
 					<StackPanel Background="{x:Static Brushes.Transparent}" Orientation="Horizontal">
 
 						<!-- Open file -->
-						<Button Command="{Binding $parent[UserControl].OpenSourceFileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OpenSourceFile}">
+						<Button Command="{Binding #root.OpenSourceFileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OpenSourceFile}">
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
 						</Button>
 
 						<!-- Save image -->
-						<Button Command="{Binding $parent[UserControl].SaveImageCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.SaveImage}">
+						<Button Command="{Binding #root.SaveImageCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.SaveImage}">
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
 						</Button>
 
@@ -239,7 +239,7 @@
 						<Separator asControls:ToolbarElement.Role="Separator"/>
 
 						<!-- Histograms -->
-						<ToggleButton Name="histogramsButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !$parent[UserControl].IsHistogramsDisabled}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.Histograms}">
+						<ToggleButton Name="histogramsButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !#root.IsHistogramsDisabled}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.Histograms}">
 							<Panel>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -263,7 +263,7 @@
 							</RepeatButton>
 
 							<!-- Frame -->
-							<Button Command="{Binding $parent[UserControl].MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.MoveToSpecificFrame}" Width="NaN">
+							<Button Command="{Binding #root.MoveToSpecificFrame}" IsEnabled="{Binding HasMultipleFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.MoveToSpecificFrame}" Width="NaN">
 								<Panel>
 									<TextBlock Opacity="0" asControls:ToolbarElement.Role="Label" Text="000 / 000"/>
 									<TextBlock HorizontalAlignment="Center" asControls:ToolbarElement.Role="Label">
@@ -293,7 +293,7 @@
 						<Separator asControls:ToolbarElement.Role="Separator"/>
 
 						<!-- Brightness and contrast adjustment -->
-						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Command="{Binding $parent[UserControl].OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment}">
+						<ToggleButton Name="brightnessAndContrastAdjustmentButton" Command="{Binding #root.OpenBrightnessAndContrastAdjustmentPopup}" IsEnabled="{Binding IsBrightnessAdjustmentSupported}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment}">
 							<Panel>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Contrast}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Contrast.Active}">
@@ -316,18 +316,18 @@
 										</Border.Transitions>
 										<DockPanel>
 											<Border DockPanel.Dock="Bottom" Padding="{StaticResource Thickness/Dialog.ControlButtonsPanel.Padding}">
-												<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[UserControl].ResetBrightnessAndContrastAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}" HorizontalAlignment="Center"/>
+												<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #root.ResetBrightnessAndContrastAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}" HorizontalAlignment="Center"/>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
 
 												<!-- Brightness -->
 												<abControls:FormattedTextBlock Arg1="{Binding BrightnessAdjustment, StringFormat={}{0:+0.00;-0.00} EV}" Format="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment.Label.Brightness}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="brightnessAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #brightnessAdjustmentSlider}">
+													<RepeatButton Name="brightnessAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #brightnessAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="brightnessAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="brightnessAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #brightnessAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="brightnessAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #brightnessAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -336,11 +336,11 @@
 												<!-- Contrast -->
 												<abControls:FormattedTextBlock Arg1="{Binding ContrastAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment.Label.Contrast}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="contrastAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #contrastAdjustmentSlider}">
+													<RepeatButton Name="contrastAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #contrastAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="contrastAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #contrastAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="contrastAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #contrastAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -349,11 +349,11 @@
 												<!-- Highlight -->
 												<abControls:FormattedTextBlock Arg1="{Binding HighlightAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment.Label.Highlight}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="highlightAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #highlightAdjustmentSlider}">
+													<RepeatButton Name="highlightAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #highlightAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="highlightAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="highlightAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #highlightAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="highlightAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #highlightAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -362,11 +362,11 @@
 												<!-- Shadow -->
 												<abControls:FormattedTextBlock Arg1="{Binding ShadowAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.BrightnessAndContrastAdjustment.Label.Shadow}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="shadowAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #shadowAdjustmentSlider}">
+													<RepeatButton Name="shadowAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #shadowAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="shadowAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="shadowAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #shadowAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="shadowAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #shadowAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -379,7 +379,7 @@
 						</ToggleButton>
 
 						<!-- Color adjustment -->
-						<ToggleButton Name="colorAdjustmentButton" Command="{Binding $parent[UserControl].OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ColorAdjustment}">
+						<ToggleButton Name="colorAdjustmentButton" Command="{Binding #root.OpenColorAdjustmentPopup}" IsEnabled="{Binding IsColorAdjustmentSupported}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ColorAdjustment}">
 							<Panel>
 								<Panel IsVisible="{Binding !#activeColorAdjustmentButtonIcon.IsVisible}">
 									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Color.Outline}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
@@ -407,7 +407,7 @@
 											<Border DockPanel.Dock="Bottom" Padding="{StaticResource Thickness/Dialog.ControlButtonsPanel.Padding}">
 												<StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
 													<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding SelectColorAdjustmentCommand}" Content="{asXaml:StringResource SessionControl.SelectColorAdjustment}"/>
-													<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[UserControl].ResetColorAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}"/>
+													<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #root.ResetColorAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}"/>
 												</StackPanel>
 											</Border>
 											<StackPanel Classes="Dialog_ContentPanel">
@@ -415,11 +415,11 @@
 												<!-- Red -->
 												<abControls:FormattedTextBlock Arg1="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Red}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="redColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}">
+													<RepeatButton Name="redColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="redColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="redColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -428,11 +428,11 @@
 												<!-- Green -->
 												<abControls:FormattedTextBlock Arg1="{Binding GreenColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Green}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="greenColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}">
+													<RepeatButton Name="greenColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="greenColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="greenColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -441,11 +441,11 @@
 												<!-- Blue -->
 												<abControls:FormattedTextBlock Arg1="{Binding BlueColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Blue}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="blueColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}">
+													<RepeatButton Name="blueColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="blueColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="blueColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -454,11 +454,11 @@
 												<!-- Saturation -->
 												<abControls:FormattedTextBlock Arg1="{Binding SaturationAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Saturation}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="saturationAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}">
+													<RepeatButton Name="saturationAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="saturationAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="saturationAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -467,11 +467,11 @@
 												<!-- Vibrance -->
 												<abControls:FormattedTextBlock Arg1="{Binding VibranceAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Vibrance}" HorizontalAlignment="Center" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 												<Grid ColumnDefinitions="Auto,*,Auto">
-													<RepeatButton Name="vibranceAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding $parent[UserControl].DecreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}">
+													<RepeatButton Name="vibranceAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 													</RepeatButton>
 													<Slider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
-													<RepeatButton Name="vibranceAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding $parent[UserControl].IncreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}" Grid.Column="2">
+													<RepeatButton Name="vibranceAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}" Grid.Column="2">
 														<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 													</RepeatButton>
 												</Grid>
@@ -492,7 +492,7 @@
 				<StackPanel Orientation="Horizontal">
 
 					<!-- Test -->
-					<Button Name="testButton" Command="{Binding $parent[UserControl].OnTestButtonClick}" IsVisible="False" asControls:ToolbarElement.Role="Button">
+					<Button Name="testButton" Command="{Binding #root.OnTestButtonClick}" IsVisible="False" asControls:ToolbarElement.Role="Button">
 						<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Lab}"/>
 					</Button>
 
@@ -505,7 +505,7 @@
 					</ToggleButton>
 
 					<!-- Other actions -->
-					<ToggleButton Name="otherActionsButton" Command="{Binding $parent[UserControl].ShowOtherActions}" IsVisible="{x:Static c:Platform.IsNotMacOS}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OtherActions}">
+					<ToggleButton Name="otherActionsButton" Command="{Binding #root.ShowOtherActions}" IsVisible="{x:Static c:Platform.IsNotMacOS}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OtherActions}">
 						<Panel>
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.More}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.More.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -638,7 +638,7 @@
 							</Border>
 							<LayoutTransformControl ClipToBounds="False">
 								<Panel ClipToBounds="False">
-									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding $parent[UserControl].EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
+									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding #root.EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
 									<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" 
 									        BorderThickness="1" 
 									        CornerRadius="2" 
@@ -719,18 +719,18 @@
 							</StackPanel>
 
 							<!-- ARGB Color -->
-							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
+							<StackPanel IsVisible="{Binding #root.ShowSelectedRenderedImagePixelArgbColor}" Orientation="Horizontal">
 								<LayoutTransformControl>
 									<LayoutTransformControl.LayoutTransform>
 										<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
 									</LayoutTransformControl.LayoutTransform>
-									<TextBlock Text="{Binding $parent[UserControl].SelectedImageDisplayPixelArgbString}" asControls:StatusBarElement.Role="Label"/>
+									<TextBlock Text="{Binding #root.SelectedImageDisplayPixelArgbString}" asControls:StatusBarElement.Role="Label"/>
 								</LayoutTransformControl>
 								<Separator asControls:StatusBarElement.Role="Separator"/>
 							</StackPanel>
 
 							<!-- CIELAB Color -->
-							<StackPanel IsVisible="{Binding $parent[UserControl].ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
+							<StackPanel IsVisible="{Binding #root.ShowSelectedRenderedImagePixelLabColor}" Orientation="Horizontal">
 								<LayoutTransformControl>
 									<LayoutTransformControl.LayoutTransform>
 										<ScaleTransform ScaleX="{StaticResource Double/SessionControl.PixelInformation.ScaleX}"/>
@@ -862,7 +862,7 @@
 						<!-- Color space -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ColorSpace}"/>
 						<Panel>
-							<abControls:LinkTextBlock Command="{Binding $parent[UserControl].ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{asXaml:StringResource SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
+							<abControls:LinkTextBlock Command="{Binding #root.ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{asXaml:StringResource SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
 							<StackPanel IsVisible="{Binding IsColorSpaceManagementEnabled}">
 								<Grid ColumnDefinitions="*,Auto">
 									<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding ColorSpaces}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" VerticalAlignment="Center">
@@ -909,7 +909,7 @@
 											</DataTemplate>
 										</ComboBox.ItemTemplate>
 									</ComboBox>
-									<Button Classes="BrowseButton" Command="{Binding $parent[UserControl].ShowColorSpaceInfo}" Grid.Column="1" ToolTip.Tip="{asXaml:StringResource Common.Details}" VerticalAlignment="Center">
+									<Button Classes="BrowseButton" Command="{Binding #root.ShowColorSpaceInfo}" Grid.Column="1" ToolTip.Tip="{asXaml:StringResource Common.Details}" VerticalAlignment="Center">
 										<Image Classes="BrowseButtonIcon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
 									</Button>
 								</Grid>
@@ -965,7 +965,7 @@
 						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
 						<ToggleButton Name="evaluateImageDimensionsButton" 
 						              Classes="SessionControl_OptionsPanel_ToggleButton" 
-						              Command="{Binding $parent[UserControl].ShowEvaluateImageDimensionsMenuCommand}" 
+						              Command="{Binding #root.ShowEvaluateImageDimensionsMenuCommand}" 
 						              IsVisible="{Binding !IsCompressedImageFormat}">
 							<Grid ColumnDefinitions="*,Auto">
 								<TextBlock Classes="Button_Text" Text="{asXaml:StringResource SessionControl.EvaluateImageDimensions}"/>
@@ -1111,7 +1111,7 @@
 						<Separator asControls:DialogElement.SeparatorType="Small"/>
 
 						<!-- Save as new profile -->
-						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding $parent[UserControl].SaveAsNewProfileCommand}" Content="{asXaml:StringResource SessionControl.SaveAsNewProfile}"/>
+						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding #root.SaveAsNewProfileCommand}" Content="{asXaml:StringResource SessionControl.SaveAsNewProfile}"/>
 						<Separator asControls:DialogElement.SeparatorType="Small"/>
 
 						<!-- Delete profile -->
@@ -1138,13 +1138,13 @@
 			<Border Background="{x:Null}" Classes="StatusBar">
 
 				<ia:Interaction.Behaviors>
-					<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Inactive">
+					<iaCore:DataTriggerBehavior Binding="{Binding #root.StatusBarState}" Value="Inactive">
 						<iaCore:ChangePropertyAction PropertyName="Background" Value="{StaticResource Brush/SessionControl.StatusBar.Background.Inactive}"/>
 					</iaCore:DataTriggerBehavior>
-					<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Error">
+					<iaCore:DataTriggerBehavior Binding="{Binding #root.StatusBarState}" Value="Error">
 						<iaCore:ChangePropertyAction PropertyName="Background" Value="{StaticResource Brush/SessionControl.StatusBar.Background.Error}"/>
 					</iaCore:DataTriggerBehavior>
-					<iaCore:DataTriggerBehavior Binding="{Binding $parent[UserControl].StatusBarState}" Value="Active">
+					<iaCore:DataTriggerBehavior Binding="{Binding #root.StatusBarState}" Value="Active">
 						<iaCore:ChangePropertyAction PropertyName="Background" Value="{StaticResource Brush/StatusBar.Background}"/>
 					</iaCore:DataTriggerBehavior>
 				</ia:Interaction.Behaviors>
@@ -1160,7 +1160,7 @@
 						<!-- File actions -->
 						<StackPanel Orientation="Horizontal">
 							<TextBlock IsVisible="{Binding !IsSourceFileOpened}" asControls:StatusBarElement.Role="Label" Text="{asXaml:StringResource SessionControl.NoSourceFileOpened}"/>
-							<ToggleButton Name="fileActionsButton" Command="{Binding $parent[UserControl].ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}" asControls:StatusBarElement.Role="Button">
+							<ToggleButton Name="fileActionsButton" Command="{Binding #root.ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}" asControls:StatusBarElement.Role="Button">
 								<StackPanel Orientation="Horizontal">
 									<Image asControls:StatusBarElement.Role="IconWithLabel">
 										<DrawingImage>
@@ -1197,7 +1197,7 @@
 						</StackPanel>
 
 						<!-- Screen color space -->
-						<Button Command="{Binding $parent[UserControl].ShowScreenColorSpaceInfo}" IsVisible="{Binding IsColorSpaceManagementEnabled}" asControls:StatusBarElement.Role="Button" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.ScreenColorSpace}">
+						<Button Command="{Binding #root.ShowScreenColorSpaceInfo}" IsVisible="{Binding IsColorSpaceManagementEnabled}" asControls:StatusBarElement.Role="Button" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.ScreenColorSpace}">
 							<StackPanel Orientation="Horizontal">
 								<Image asControls:StatusBarElement.Role="IconWithLabel">
 									<DrawingImage>
@@ -1251,7 +1251,7 @@
 						</StackPanel>
 
 						<!-- Process info -->
-						<StackPanel IsVisible="{Binding $parent[UserControl].ShowProcessInfo}" Orientation="Horizontal">
+						<StackPanel IsVisible="{Binding #root.ShowProcessInfo}" Orientation="Horizontal">
 							
 							<!-- UI response duration -->
 							<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=IsDebugMode}" Orientation="Horizontal">

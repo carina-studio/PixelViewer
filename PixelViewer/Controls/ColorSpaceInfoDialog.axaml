@@ -6,11 +6,14 @@
 		xmlns:aConverters="using:Avalonia.Data.Converters"
 		xmlns:appControls="using:Carina.PixelViewer.Controls"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
+		xmlns:appMedia="using:Carina.PixelViewer.Media"
         xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
         xmlns:asMedia="using:CarinaStudio.AppSuite.Media"
         xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ColorSpaceInfoDialog"
+		Name="dialog"
+		x:CompileBindings="True"
 		Classes="Dialog"
         MinHeight="{DynamicResource Double/ColorSpaceInfoDialog.MinHeight}"
         MinWidth="{DynamicResource Double/ColorSpaceInfoDialog.MinWidth}"
@@ -22,8 +25,8 @@
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].Close}" Content="{asXaml:StringResource Common.Cancel}" IsVisible="{Binding !$parent[Window].IsReadOnly}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.Close}" Content="{asXaml:StringResource Common.Cancel}" IsVisible="{Binding !#dialog.IsReadOnly}"/>
 			</StackPanel>
 		</Border>
 
@@ -42,9 +45,9 @@
 									<TextBlock Text="{asXaml:StringResource ColorSpaceInfoDialog.ReferenceColorSpace}" asControls:DialogElement.TextRole="Label"/>
 									<TextBlock Text="{asXaml:StringResource ColorSpaceInfoDialog.ReferenceColorSpace.Description}" asControls:DialogElement.TextRole="DescriptionBelowLabel"/>
 								</StackPanel>
-								<ComboBox asControls:DialogElement.IsDialogItemInput="True" ItemsSource="{Binding $parent[Window].ReferenceColorSpaces}" SelectedItem="{Binding $parent[Window].ReferenceColorSpace, Mode=TwoWay}">
+								<ComboBox asControls:DialogElement.IsDialogItemInput="True" ItemsSource="{Binding #dialog.ReferenceColorSpaces}" SelectedItem="{Binding #dialog.ReferenceColorSpace, Mode=TwoWay}">
 									<ComboBox.ItemTemplate>
-										<DataTemplate>
+										<DataTemplate x:DataType="appMedia:ColorSpace">
 											<Grid ColumnDefinitions="*,Auto">
 												<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
 												<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" BorderBrush="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Border}" BorderThickness="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" Grid.Column="1" IsVisible="{Binding IsSystemDefined}" Margin="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" Padding="{DynamicResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" VerticalAlignment="Center">
@@ -120,7 +123,7 @@
 					<Border Classes="Dialog_ItemsGroup_Container">
 						<asControls:DialogItem ItemSize="Small">
 							<TextBlock Text="{asXaml:StringResource ColorSpaceInfoDialog.Name}" asControls:DialogElement.TextRole="Label"/>
-							<TextBox Name="nameTextBox" asControls:DialogElement.IsDialogItemInput="True" IsReadOnly="{Binding $parent[Window].IsReadOnly}" MaxLength="1024"/>
+							<TextBox Name="nameTextBox" asControls:DialogElement.IsDialogItemInput="True" IsReadOnly="{Binding #dialog.IsReadOnly}" MaxLength="1024"/>
 						</asControls:DialogItem>
 					</Border>
 					<Separator asControls:DialogElement.SeparatorType="Large"/>
@@ -164,8 +167,8 @@
 							<asControls:DialogItem ItemSize="Small">
 								<SelectableTextBlock Name="linearizationDescriptionTextBlock" Classes="Dialog_TextBlock" TextWrapping="Wrap"/>
 							</asControls:DialogItem>
-							<Separator asControls:DialogElement.SeparatorType="InnerItem" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
-							<abControls:LinkTextBlock HorizontalAlignment="Left" IsVisible="{Binding $parent[Window].ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Text="{asXaml:StringResource Common.KnowMoreAbout}" asControls:DialogElement.TextRole="Default" Uri="{Binding $parent[Window].ColorSpace.Uri}"/>
+							<Separator asControls:DialogElement.SeparatorType="InnerItem" IsVisible="{Binding #dialog.ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+							<abControls:LinkTextBlock HorizontalAlignment="Left" IsVisible="{Binding #dialog.ColorSpace.Uri, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" Text="{asXaml:StringResource Common.KnowMoreAbout}" asControls:DialogElement.TextRole="Default" Uri="{Binding #dialog.ColorSpace.Uri}"/>
 
 						</StackPanel>
 					</Border>

@@ -2,10 +2,13 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:appProfiles="using:Carina.PixelViewer.Media.Profiles"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 		xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ImageRenderingProfileSelectionDialog"
+		Name="dialog"
+		x:CompileBindings="True"
 		Classes="Dialog"
         Title="{asXaml:StringResource ImageRenderingProfileSelectionDialog.Title}"
 		Width="{DynamicResource Double/ImageRenderingProfileSelectionDialog.Width}">
@@ -15,17 +18,17 @@
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].Close}" Content="{asXaml:StringResource Common.Cancel}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.Close}" Content="{asXaml:StringResource Common.Cancel}"/>
 			</StackPanel>
 		</Border>
 
 		<!-- Content -->
 		<StackPanel Classes="Dialog_ContentPanel">
-			<TextBlock Text="{Binding $parent[Window].Message}" TextWrapping="WrapWithOverflow" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
-			<ComboBox Name="profileComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding $parent[Window].Profiles}">
+			<TextBlock Text="{Binding #dialog.Message}" TextWrapping="WrapWithOverflow" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
+			<ComboBox Name="profileComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding #dialog.Profiles}">
 				<ComboBox.ItemTemplate>
-					<DataTemplate>
+					<DataTemplate x:DataType="appProfiles:ImageRenderingProfile">
 						<TextBlock Text="{Binding Name}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
 					</DataTemplate>
 				</ComboBox.ItemTemplate>

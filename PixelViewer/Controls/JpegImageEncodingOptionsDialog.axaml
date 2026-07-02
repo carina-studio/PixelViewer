@@ -7,6 +7,8 @@
         xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.JpegImageEncodingOptionsDialog"
+		Name="dialog"
+		x:CompileBindings="True"
 		Classes="Dialog"
         Title="{asXaml:StringResource JpegImageEncodingOptionsDialog.Title}"
 		Width="{DynamicResource Double/JpegImageEncodingOptionsDialog.Width}">
@@ -16,8 +18,8 @@
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding $parent[Window].Close}" Content="{asXaml:StringResource Common.Cancel}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.Close}" Content="{asXaml:StringResource Common.Cancel}"/>
 			</StackPanel>
 		</Border>
 

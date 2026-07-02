@@ -17,6 +17,7 @@
         xmlns:cs="using:CarinaStudio"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.ApplicationOptionsDialog"
+        Name="dialog"
         x:CompileBindings="True"
         x:DataType="appViewModels:AppOptions">
 
@@ -25,7 +26,7 @@
 		<!-- Control buttons -->
 		<Border Classes="Dialog_ControlButtonsPanel" BoxShadow="{StaticResource BoxShadows/None}" DockPanel.Dock="Bottom">
 			<StackPanel Classes="Dialog_ControlButtonsPanel">
-				<Button asControls:DialogElement.ButtonRole="Control" Command="{ReflectionBinding $parent[Window].GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{ReflectionBinding #dialog.GenerateResultCommand}" Content="{asXaml:StringResource Common.OK}"/>
 			</StackPanel>
 		</Border>
 		
@@ -332,7 +333,7 @@
 								<asControls:DialogItem>
 									<WrapPanel VerticalAlignment="Center">
 										<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.DefaultColorSpace}" asControls:DialogElement.TextRole="Label"/>
-										<Button asControls:DialogElement.ButtonRole="ShowInformation" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}">
+										<Button asControls:DialogElement.ButtonRole="ShowInformation" Command="{ReflectionBinding #dialog.ShowColorSpaceInfoCommand}" CommandParameter="{Binding #defaultColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}">
 											<ToolTip.Tip>
 												<cs:FormattedString Arg1="{ReflectionBinding #defaultColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Format="{asXaml:StringResource ApplicationOptionsDialog.ColorSpaceDetails}"/>
 											</ToolTip.Tip>
@@ -361,7 +362,7 @@
 								<asControls:DialogItem>
 									<WrapPanel VerticalAlignment="Center">
 										<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.ScreenColorSpace}" asControls:DialogElement.TextRole="Label"/>
-										<Button asControls:DialogElement.ButtonRole="ShowInformation" Command="{ReflectionBinding $parent[Window].ShowColorSpaceInfoCommand}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}">
+										<Button asControls:DialogElement.ButtonRole="ShowInformation" Command="{ReflectionBinding #dialog.ShowColorSpaceInfoCommand}" CommandParameter="{Binding #screenColorSpaceComboBox.SelectedItem}" IsEnabled="{Binding EnableColorSpaceManagement}">
 											<ToolTip.Tip>
 												<cs:FormattedString Arg1="{ReflectionBinding #screenColorSpaceComboBox.SelectedItem, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" Format="{asXaml:StringResource ApplicationOptionsDialog.ColorSpaceDetails}"/>
 											</ToolTip.Tip>
@@ -411,10 +412,10 @@
 												<TextBlock Text="{Binding CustomName}" TextTrimming="CharacterEllipsis"/>
 												<Border Classes="InPlaceAction_Reserved"/>
 												<StackPanel Grid.Column="1" IsVisible="{Binding $parent[ListBoxItem].IsPointerOver}" Orientation="Horizontal">
-													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{asXaml:StringResource Common.Delete}">
+													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding #dialog.RemoveCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem]}" ToolTip.Tip="{asXaml:StringResource Common.Delete}">
 														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Delete.Outline}"/>
 													</Button>
-													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding $parent[Window].EditCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{asXaml:StringResource Common.Edit}">
+													<Button Classes="InPlaceAction_Button" Command="{ReflectionBinding #dialog.EditCustomColorSpaceCommand}" CommandParameter="{Binding $parent[ListBoxItem].DataContext}" ToolTip.Tip="{asXaml:StringResource Common.Edit}">
 														<Image Classes="InPlaceAction_Icon" Source="{DynamicResource Image/Icon.Edit.Outline}"/>
 													</Button>
 												</StackPanel>
@@ -423,7 +424,7 @@
 									</asControls:ListBox.ItemTemplate>
 								</asControls:ListBox>
 								<Separator IsVisible="{Binding #customColorSpaceListBox.IsVisible}" asControls:DialogElement.SeparatorType="Small"/>
-								<Button Command="{ReflectionBinding $parent[Window].AddCustomColorSpaceCommand}" Content="{asXaml:StringResource Common.Add.WithDialog}" asControls:DialogElement.IsDialogItemInput="True"/>
+								<Button Command="{ReflectionBinding #dialog.AddCustomColorSpaceCommand}" Content="{asXaml:StringResource Common.Add.WithDialog}" asControls:DialogElement.IsDialogItemInput="True"/>
 								<Separator asControls:DialogElement.SeparatorType="Item"/>
 								
 								<!-- Timing of conversion -->
@@ -475,7 +476,7 @@
 							<StackPanel>
 
 								<!-- Create new tab for drag-and-drop file -->
-								<StackPanel IsVisible="{ReflectionBinding $parent[Window].IsDragAndDropSupported}">
+								<StackPanel IsVisible="{ReflectionBinding #dialog.IsDragAndDropSupported}">
 									<asControls:DialogItem ItemSize="Small">
 										<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.CreateNewSessionForDragDropFile}" asControls:DialogElement.TextRole="Label"/>
 										<ToggleSwitch IsChecked="{Binding CreateNewSessionForDragDropFile, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
@@ -523,7 +524,7 @@
 								</asControls:DialogItem>
 
 								<!-- Log output target port -->
-								<StackPanel IsVisible="{ReflectionBinding $parent[Window].Application.IsDebugMode}">
+								<StackPanel IsVisible="{ReflectionBinding #dialog.Application.IsDebugMode}">
 									<Separator asControls:DialogElement.SeparatorType="Item"/>
 									<asControls:DialogItem ItemSize="Small">
 										<TextBlock Text="{asXaml:StringResource ApplicationOptions.LogOutputTargetPort}" asControls:DialogElement.TextRole="Label"/>
