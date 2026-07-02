@@ -173,8 +173,11 @@
 				</StackPanel>
 			</ScrollViewer>
 
+			<!-- Shadows -->
+			<Border Grid.ColumnSpan="2" HorizontalAlignment="Stretch" asControls:ControlShadow.Position="Top" asControls:ControlShadow.Source="ControlButtonsPanel" VerticalAlignment="Bottom"/>
+
 		</Grid>
-		
+
 	</DockPanel>
 	
 </Window>

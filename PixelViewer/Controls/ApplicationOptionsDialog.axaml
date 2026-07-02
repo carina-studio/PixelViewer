@@ -537,7 +537,11 @@
 					
 				</StackPanel>
 			</ScrollViewer>
-			<Border BoxShadow="{DynamicResource BoxShadows/Shadow.Inner.Light}" IsHitTestVisible="False" Margin="0,-100,-100,0"/>
+
+			<!-- Shadows -->
+			<Border HorizontalAlignment="Left" asControls:ControlShadow.Position="Right" asControls:ControlShadow.Source="Toolbar" VerticalAlignment="Stretch"/>
+			<Border HorizontalAlignment="Stretch" asControls:ControlShadow.Position="Top" asControls:ControlShadow.Source="ControlButtonsPanel" VerticalAlignment="Bottom"/>
+
 		</Panel>
 		
 	</DockPanel>
