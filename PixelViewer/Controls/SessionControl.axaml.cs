@@ -658,7 +658,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					return StatusBarState.Inactive;
 				if (session.HasRenderingError || session.InsufficientMemoryForRenderedImage)
 					return StatusBarState.Error;
-				if (session.IsSourceFileOpened)
+				if (session.IsSourceOpened)
 					return StatusBarState.Active;
 				return StatusBarState.Inactive;
 			}));
@@ -677,7 +677,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// </summary>
 	public void CopyFileName()
 	{
-		if (this.DataContext is not Session session || !session.IsSourceFileOpened)
+		if (this.DataContext is not Session session || !session.IsSourceOpened)
 			return;
 		session.SourceFileName?.Let(it =>
 		{
@@ -691,7 +691,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// </summary>
 	public void CopyFilePath()
 	{
-		if (this.DataContext is not Session session || !session.IsSourceFileOpened)
+		if (this.DataContext is not Session session || !session.IsSourceOpened)
 			return;
 		session.SourceFileName?.Let(it =>
 		{
@@ -973,7 +973,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.canSaveAsNewProfile.Bind(session.SaveAsNewProfileCommand, "");
 		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
 		this.canSaveRenderedImage.Bind(session.SaveRenderedImageCommand, new Session.ImageSavingParams());
-		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceFileOpened);
+		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
 
 		// setup histograms panel
 		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 1 : 3);
@@ -1698,7 +1698,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
 		if ((e.KeyModifiers & KeyModifiers.Control) == 0)
 			return;
-		if (this.DataContext is not Session session || !session.IsSourceFileOpened || session.FitImageToViewport)
+		if (this.DataContext is not Session session || !session.IsSourceOpened || session.FitImageToViewport)
 			return;
 		var zoomed = false;
 		if (e.Delta.Y > 0)
@@ -1864,8 +1864,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					Grid.SetColumnSpan(this.imageViewerGrid, 3);
 				this.updateImageViewerShadowMarginAction.Schedule();
 				break;
-			case nameof(Session.IsSourceFileOpened):
-				this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceFileOpened);
+			case nameof(Session.IsSourceOpened):
+				this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
 				this.updateStatusBarStateAction.Schedule();
 				break;
 			case nameof(Session.IsZooming):

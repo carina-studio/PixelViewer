@@ -72,7 +72,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				// open file
 				var filePath = this.GenerateSourceFile();
 				session.OpenSourceFileCommand.Execute(filePath);
-				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), true, 1000), "Cannot open source file.");
+				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsSourceOpened), true, 1000), "Cannot open source file.");
 
 				// wait for first rendering
 				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsRenderingImage), false, 10000), "Unable to complete first rendering.");
@@ -93,7 +93,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// close file
 				session.CloseSourceFileCommand.Execute(null);
-				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), false, 1000), "Cannot close source file.");
+				Assert.IsTrue(await session.WaitForPropertyAsync(nameof(Session.IsSourceOpened), false, 1000), "Cannot close source file.");
 				Assert.IsNull(session.RenderedImage, "Rendered image is still there after closing source file.");
 				File.Delete(filePath);
 			});
@@ -114,14 +114,14 @@ namespace Carina.PixelViewer.Test.ViewModels
 				// open file 1
 				var filePath1 = this.GenerateSourceFile();
 				Assert.IsTrue(openCommand.CanExecute(filePath1), "Source file opening should be able to be executed.");
-				Assert.IsFalse(session.IsSourceFileOpened, $"{nameof(Session.IsSourceFileOpened)} should false.");
+				Assert.IsFalse(session.IsSourceOpened, $"{nameof(Session.IsSourceOpened)} should false.");
 				openCommand.Execute(filePath1);
 				Assert.IsFalse(openCommand.CanExecute(filePath1), "Source file opening should not be able to be executed.");
-				Assert.IsFalse(session.IsSourceFileOpened, $"{nameof(Session.IsSourceFileOpened)} should false.");
+				Assert.IsFalse(session.IsSourceOpened, $"{nameof(Session.IsSourceOpened)} should false.");
 
 				// wait for opening
-				var waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), true, 1000);
-				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceFileOpened)} should be true.");
+				var waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceOpened), true, 1000);
+				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceOpened)} should be true.");
 				Assert.AreEqual(filePath1, session.SourceFileName, "Source file name is different from set one.");
 				Assert.IsTrue(openCommand.CanExecute(null), "Source file opening should be able to be executed.");
 				Assert.IsTrue(closeCommand.CanExecute(null), "Source file closing should be able to be executed.");
@@ -131,11 +131,11 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.IsTrue(openCommand.CanExecute(filePath2), "Source file opening should be able to be executed.");
 				openCommand.Execute(filePath2);
 				Assert.IsFalse(openCommand.CanExecute(filePath2), "Source file opening should not be able to be executed.");
-				Assert.IsFalse(session.IsSourceFileOpened, $"{nameof(Session.IsSourceFileOpened)} should false.");
+				Assert.IsFalse(session.IsSourceOpened, $"{nameof(Session.IsSourceOpened)} should false.");
 
 				// wait for opening
-				waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), true, 1000);
-				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceFileOpened)} should be true.");
+				waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceOpened), true, 1000);
+				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceOpened)} should be true.");
 				Assert.AreEqual(filePath2, session.SourceFileName, "Source file name is different from set one.");
 				Assert.IsTrue(openCommand.CanExecute(null), "Source file opening should be able to be executed.");
 				Assert.IsTrue(closeCommand.CanExecute(null), "Source file closing should be able to be executed.");
@@ -149,8 +149,8 @@ namespace Carina.PixelViewer.Test.ViewModels
 				// wait for closing
 				waitingResult = await this.WaitForCommandState(closeCommand, false, null, 1000);
 				Assert.IsTrue(waitingResult, "Source file closing should be able to be executed.");
-				waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceFileOpened), false, 1000);
-				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceFileOpened)} should be false.");
+				waitingResult = await session.WaitForPropertyAsync(nameof(Session.IsSourceOpened), false, 1000);
+				Assert.IsTrue(waitingResult, $"{nameof(Session.IsSourceOpened)} should be false.");
 				Assert.IsTrue(openCommand.CanExecute(null), "Source file opening should be able to be executed.");
 
 				// delete file 2 to make sure that file has been unlocked

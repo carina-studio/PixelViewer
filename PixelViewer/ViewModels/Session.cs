@@ -594,9 +594,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsImageFlippedYProperty = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedY));
 	/// <summary>
-	/// Property of <see cref="IsOpeningSourceFile"/>.
+	/// Property of <see cref="IsOpeningSource"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsOpeningSourceFileProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSourceFile));
+	public static readonly ObservableProperty<bool> IsOpeningSourceProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSource));
 	/// <summary>
 	/// Property of <see cref="IsProcessingImage"/>.
 	/// </summary>
@@ -638,9 +638,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsShadowAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsShadowAdjustmentSupported));
 	/// <summary>
-	/// Property of <see cref="IsSourceFileOpened"/>.
+	/// Property of <see cref="IsSourceOpened"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsSourceFileOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceFileOpened));
+	public static readonly ObservableProperty<bool> IsSourceOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceOpened));
 	/// <summary>
 	/// Property of <see cref="IsVibranceAdjustmentSupported"/>.
 	/// </summary>
@@ -759,9 +759,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<string?> SourceFileNameProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileName));
 	/// <summary>
-	/// Property of <see cref="SourceFileSizeString"/>.
+	/// Property of <see cref="SourceSizeString"/>.
 	/// </summary>
-	public static readonly ObservableProperty<string?> SourceFileSizeStringProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileSizeString));
+	public static readonly ObservableProperty<string?> SourceSizeStringProperty = ObservableProperty.Register<Session, string?>(nameof(SourceSizeString));
 	/// <summary>
 	/// Property of <see cref="SourceImageEffectiveBits"/>.
 	/// </summary>
@@ -822,7 +822,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly MutableObservableBoolean canApplyProfile = new();
 	readonly MutableObservableBoolean canMoveToNextFrame = new();
 	readonly MutableObservableBoolean canMoveToPreviousFrame = new();
-	readonly MutableObservableBoolean canOpenSourceFile = new(true);
+	readonly MutableObservableBoolean canOpenSource = new(true);
 	readonly MutableObservableBoolean canResetBrightnessAdjustment = new();
 	readonly MutableObservableBoolean canResetColorAdjustment = new();
 	readonly MutableObservableBoolean canResetContrastAdjustment = new();
@@ -913,14 +913,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	public Session(IAppSuiteApplication app, JsonElement? savedState) : base(app)
 	{
 		// create commands
-		var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceFileOpenedProperty);
+		var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceOpenedProperty);
 		this.AlignImageHeightCommand = new Command<int>(this.AlignImageHeight, isSrcFileOpenedObservable);
 		this.AlignImageWidthCommand = new Command<int>(this.AlignImageWidth, isSrcFileOpenedObservable);
 		this.AlignRowStride1Command = new Command<int>(this.AlignRowStride1, isSrcFileOpenedObservable);
 		this.AlignRowStride2Command = new Command<int>(this.AlignRowStride2, isSrcFileOpenedObservable);
 		this.AlignRowStride3Command = new Command<int>(this.AlignRowStride3, isSrcFileOpenedObservable);
 		this.ApplyProfileCommand = new Command(this.ApplyProfile, this.canApplyProfile);
-		this.ClearSourceFileCommand = new Command(this.ClearSourceFile, isSrcFileOpenedObservable);
+		this.ClearSourceCommand = new Command(this.ClearSource, isSrcFileOpenedObservable);
 		this.DeleteProfileCommand = new Command(this.DeleteProfile, this.canSaveOrDeleteProfile);
 		this.EvaluateImageDimensionsCommand = new Command<AspectRatio>(this.EvaluateImageDimensions, isSrcFileOpenedObservable);
 		this.FlipXCommand = new Command(this.FlipX, isSrcFileOpenedObservable);
@@ -945,12 +945,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.canMoveToPreviousFrame.Value)
 				--this.FrameNumber;
 		}, this.canMoveToPreviousFrame);
-		this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSourceFile);
+		this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSource);
 		this.RenderImageCommand = new Command(() => 
 		{
 			this.ClearRenderedImage();
 			this.renderImageAction?.Reschedule();
-		}, this.GetValueAsObservable(IsSourceFileOpenedProperty));
+		}, this.GetValueAsObservable(IsSourceOpenedProperty));
 		this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
 		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 		this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
@@ -992,7 +992,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.renderImageAction = new ScheduledAction(this.RenderImage);
 		this.trackFilteringParamsAppliedAction = new(() =>
 		{
-			if (!this.GetValue(IsSourceFileOpenedProperty))
+			if (!this.GetValue(IsSourceOpenedProperty))
 				return;
 			if (!this.GetValue(IsFilteringRenderedImageNeededProperty))
 				return;
@@ -1075,7 +1075,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		});
 		this.trackRenderingParamsAppliedAction = new(() =>
 		{
-			if (!this.GetValue(IsSourceFileOpenedProperty))
+			if (!this.GetValue(IsSourceOpenedProperty))
 				return;
 			var imageRenderer = this.GetValue(ImageRendererProperty);
 			if (imageRenderer is null || !ImageRenderers.All.Contains(imageRenderer))
@@ -1105,7 +1105,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.IsDisposed)
 				return;
-			if (!this.IsSourceFileOpened)
+			if (!this.IsSourceOpened)
 			{
 				this.SetValue(IsBrightnessAdjustmentSupportedProperty, false);
 				this.SetValue(IsColorAdjustmentSupportedProperty, false);
@@ -1196,7 +1196,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsDisposed)
 				return;
 			this.SetValue(IsProcessingImageProperty, this.IsFilteringRenderedImage
-				|| this.IsOpeningSourceFile
+				|| this.IsOpeningSource
 				|| this.IsRenderingImage
 				|| this.IsSavingImage);
 		});
@@ -1949,15 +1949,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Close and clear current source file.
-	void ClearSourceFile()
+	// Close and clear the current source.
+	void ClearSource()
 	{
-		// close source file
-		this.CloseSourceFile(false);
+		// close source
+		this.CloseSource(false);
 
 		// update state
 		this.SetValue(SourceFileNameProperty, null);
-		this.SetValue(SourceFileSizeStringProperty, null);
+		this.SetValue(SourceSizeStringProperty, null);
 		
 		// reset scaling
 		this.FitImageToViewport = true;
@@ -1969,13 +1969,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	
 	
 	/// <summary>
-	/// Command for clear opened source file.
+	/// Command for clearing the opened source.
 	/// </summary>
-	public ICommand ClearSourceFileCommand { get; }
+	public ICommand ClearSourceCommand { get; }
 
 
-	// Close current source file.
-	void CloseSourceFile(bool disposing)
+	// Close current source.
+	void CloseSource(bool disposing)
 	{
 		// flush pending rendering-params and filtering-params tracking
 		this.trackRenderingParamsAppliedAction.ExecuteIfScheduled();
@@ -2010,7 +2010,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(HistogramsProperty, null);
 			this.SetValue(QuarterSizeRenderedImageProperty, null);
 			this.SetValue(RenderedImageProperty, null);
-			this.SetValue(IsSourceFileOpenedProperty, false);
+			this.SetValue(IsSourceOpenedProperty, false);
 			this.SetValue(LuminanceHistogramGeometryProperty, null);
 			this.canMoveToNextFrame.Update(false);
 			this.canMoveToPreviousFrame.Update(false);
@@ -2104,6 +2104,40 @@ class Session : ViewModel<IAppSuiteApplication>
 			return result;
 		result = string.CompareOrdinal(x.Name, y.Name);
 		return result != 0 ? result : x.GetHashCode() - y.GetHashCode();
+	}
+
+
+	// Complete opening image data source: update state, apply the given profile, then start rendering.
+	void CompleteOpeningSource(IImageDataSource source, Action applyProfile)
+	{
+		// update state
+		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProperty));
+		this.SetValue(DataOffsetProperty, 0L);
+		this.SetValue(FrameNumberProperty, 1);
+		this.SetValue(FramePaddingSizeProperty, 0L);
+		this.SetValue(IsOpeningSourceProperty, false);
+		this.SetValue(IsSourceOpenedProperty, true);
+		this.canOpenSource.Update(true);
+		this.SetValue(SourceSizeStringProperty, source.Size.ToFileSizeString());
+		this.UpdateCanSaveDeleteProfile();
+
+		// apply profile
+		applyProfile();
+
+		// render image
+		if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.Type == ImageRenderingProfileType.Default)
+		{
+			this.isImageDimensionsEvaluationNeeded = true;
+			this.isImagePlaneOptionsResetNeeded = true;
+		}
+		this.isFirstImageRenderingForSource = true;
+		if (this.IsActivated)
+			this.renderImageAction.Reschedule();
+		else
+			this.renderImageAction.Cancel();
+
+		// update zooming state
+		this.UpdateCanZoomInOut();
 	}
 
 
@@ -2311,7 +2345,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// close source file
 		if (disposing)
-			this.CloseSourceFile(true);
+			this.CloseSource(true);
 		
 		// detach from application
 		this.Application.PropertyChanged -= this.OnApplicationPropertyChanged;
@@ -2833,7 +2867,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Toggle horizontal flip of rendered image.
 	void FlipX()
 	{
-		if (!this.IsSourceFileOpened)
+		if (!this.IsSourceOpened)
 			return;
 		this.SetValue(IsImageFlippedXProperty, !this.GetValue(IsImageFlippedXProperty));
 	}
@@ -2848,7 +2882,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Toggle vertical flip of rendered image.
 	void FlipY()
 	{
-		if (!this.IsSourceFileOpened)
+		if (!this.IsSourceOpened)
 			return;
 		this.SetValue(IsImageFlippedYProperty, !this.GetValue(IsImageFlippedYProperty));
 	}
@@ -2874,7 +2908,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		get => this.GetValue(FrameNumberProperty);
 		set
 		{
-			if (this.GetValue(IsSourceFileOpenedProperty) && value != this.GetValue(FrameNumberProperty))
+			if (this.GetValue(IsSourceOpenedProperty) && value != this.GetValue(FrameNumberProperty))
 				++this.frameNavigationCount;
 			this.SetValue(FrameNumberProperty, value);
 		}
@@ -3361,7 +3395,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Check whether source file is being opened or not.
 	/// </summary>
-	public bool IsOpeningSourceFile => this.GetValue(IsOpeningSourceFileProperty);
+	public bool IsOpeningSource => this.GetValue(IsOpeningSourceProperty);
 
 
 	/// <summary>
@@ -3431,7 +3465,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Check whether source image file has been opened or not.
 	/// </summary>
-	public bool IsSourceFileOpened => this.GetValue(IsSourceFileOpenedProperty);
+	public bool IsSourceOpened => this.GetValue(IsSourceOpenedProperty);
 
 
 	/// <summary>
@@ -3580,7 +3614,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetColorAdjustment.Update(this.HasColorAdjustment && this.IsColorAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == BlueColorGainProperty
@@ -3599,7 +3633,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == ByteOrderingProperty)
@@ -3612,7 +3646,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.IsColorSpaceManagementEnabled)
 				this.renderImageAction.Reschedule();
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == ContrastAdjustmentProperty)
@@ -3621,7 +3655,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == CustomTitleProperty)
@@ -3641,7 +3675,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		else if (property == FitImageToViewportProperty)
 		{
 			var fitToViewport = (bool)newValue.AsNonNull();
-			this.canZoomTo.Update(!fitToViewport && this.IsSourceFileOpened);
+			this.canZoomTo.Update(!fitToViewport && this.IsSourceOpened);
 			this.UpdateCanZoomInOut();
 			if (!fitToViewport)
 				this.ZoomTo(this.GetValue(RequestedImageDisplayScaleProperty));
@@ -3661,7 +3695,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if ((bool)newValue!)
 				this.trackRenderingParamsAppliedAction.Cancel();
-			else if (this.GetValue(IsSourceFileOpenedProperty))
+			else if (this.GetValue(IsSourceOpenedProperty))
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == HighlightAdjustmentProperty)
@@ -3670,7 +3704,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetHighlightAdjustment.Update(this.HasHighlightAdjustment && this.IsHighlightAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == HistogramsProperty)
@@ -3732,7 +3766,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.renderImageAction.Reschedule();
 			else
 				this.ClearRenderedImage();
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == IsContrastAdjustmentSupportedProperty)
@@ -3757,7 +3791,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 		}
 		else if (property == IsFilteringRenderedImageProperty
-			|| property == IsOpeningSourceFileProperty
+			|| property == IsOpeningSourceProperty
 			|| property == IsRenderingImageProperty)
 		{
 			this.updateIsProcessingImageAction.Schedule();
@@ -3767,7 +3801,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule();
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == IsHighlightAdjustmentSupportedProperty)
@@ -3796,9 +3830,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsSourceFileOpenedProperty)
+		else if (property == IsSourceOpenedProperty)
 		{
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.updateFilterSupportingAction.Schedule();
 			else
 			{
@@ -3822,12 +3856,12 @@ class Session : ViewModel<IAppSuiteApplication>
 				if (this.IsColorSpaceManagementEnabled)
 					this.renderImageAction.Reschedule();
 			}
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == ProfileProperty)
 		{
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 			else
 				this.trackRenderingParamsAppliedAction.Cancel();
@@ -3878,7 +3912,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && this.IsSaturationAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == ShadowAdjustmentProperty)
@@ -3887,7 +3921,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == SourceDataSizeProperty)
@@ -3900,7 +3934,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == YuvToBgraConverterProperty)
@@ -3910,7 +3944,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.SetValue(ColorSpaceProperty, ((YuvToBgraConverter)newValue.AsNonNull()).ColorSpace);
 				this.renderImageAction.Reschedule();
 			}
-			if (this.IsSourceFileOpened)
+			if (this.IsSourceOpened)
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
     }
@@ -4033,7 +4067,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// check state
 		if (fileName is null)
 			return;
-		if (!this.canOpenSourceFile.Value)
+		if (!this.canOpenSource.Value)
 		{
 			this.Logger.LogError("Cannot open '{fileName}' in current state", fileName);
 			return;
@@ -4047,11 +4081,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 
 		// close current source file
-		this.CloseSourceFile(false);
+		this.CloseSource(false);
 
 		// update state
-		this.canOpenSourceFile.Update(false);
-		this.SetValue(IsOpeningSourceFileProperty, true);
+		this.canOpenSource.Update(false);
+		this.SetValue(IsOpeningSourceProperty, true);
 		this.SetValue(SourceFileNameProperty, fileName);
 
 		// update title
@@ -4082,9 +4116,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			// reset state
 			this.SetValue(SourceFileNameProperty, null);
-			this.SetValue(IsSourceFileOpenedProperty, false);
-			this.SetValue(IsOpeningSourceFileProperty, false);
-			this.canOpenSourceFile.Update(true);
+			this.SetValue(IsSourceOpenedProperty, false);
+			this.SetValue(IsOpeningSourceProperty, false);
+			this.canOpenSource.Update(true);
 			this.canZoomTo.Update(false);
 
 			// update title
@@ -4124,54 +4158,32 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 		}
 
-		// update state
-		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProperty));
-		this.SetValue(DataOffsetProperty, 0L);
-		this.SetValue(FrameNumberProperty, 1);
-		this.SetValue(FramePaddingSizeProperty, 0L);
-		this.SetValue(IsOpeningSourceFileProperty, false);
-		this.SetValue(IsSourceFileOpenedProperty, true);
-		this.canOpenSourceFile.Update(true);
-		this.SetValue(SourceFileSizeStringProperty, imageDataSource.Size.ToFileSizeString());
-		this.UpdateCanSaveDeleteProfile();
-
-		// use profile of file format or reset to default renderer
-		if (this.fileFormatProfile is not null)
-			this.Profile = this.fileFormatProfile;
-		else if (evaluatedImageRenderer is not null)
+		// complete opening
+		this.CompleteOpeningSource(imageDataSource, () =>
 		{
-			this.SetValue(ImageRendererProperty, evaluatedImageRenderer);
-			if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
-				this.isImageDimensionsEvaluationNeeded = true;
-			this.isImagePlaneOptionsResetNeeded = true;
-		}
-		else if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
-		{
-			this.Logger.LogWarning("Use default image renderer after opening source '{fileName}'", fileName);
-			var defaultImageRenderer = this.SelectDefaultImageRenderer();
-			if (this.ImageRenderer != defaultImageRenderer)
+			// use profile of file format or reset to default renderer
+			if (this.fileFormatProfile is not null)
+				this.Profile = this.fileFormatProfile;
+			else if (evaluatedImageRenderer is not null)
 			{
-				this.SetValue(ImageRendererProperty, defaultImageRenderer);
+				this.SetValue(ImageRendererProperty, evaluatedImageRenderer);
 				if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 					this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
 			}
-		}
-
-		// render image
-		if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.Type == ImageRenderingProfileType.Default)
-		{
-			this.isImageDimensionsEvaluationNeeded = true;
-			this.isImagePlaneOptionsResetNeeded = true;
-		}
-		this.isFirstImageRenderingForSource = true;
-		if (this.IsActivated)
-			this.renderImageAction.Reschedule();
-		else
-			this.renderImageAction.Cancel();
-
-		// update zooming state
-		this.UpdateCanZoomInOut();
+			else if (this.Settings.GetValueOrDefault(SettingKeys.UseDefaultImageRendererAfterOpeningSourceFile))
+			{
+				this.Logger.LogWarning("Use default image renderer after opening source '{fileName}'", fileName);
+				var defaultImageRenderer = this.SelectDefaultImageRenderer();
+				if (this.ImageRenderer != defaultImageRenderer)
+				{
+					this.SetValue(ImageRendererProperty, defaultImageRenderer);
+					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
+						this.isImageDimensionsEvaluationNeeded = true;
+					this.isImagePlaneOptionsResetNeeded = true;
+				}
+			}
+		});
 	}
 
 
@@ -5524,7 +5536,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (fileName is not null)
 		{
 			await this.OpenSourceFile(fileName);
-			if (!this.IsSourceFileOpened)
+			if (!this.IsSourceOpened)
 				this.Logger.LogError("Unable to restore source file '{fileName}'", fileName);
 		}
 
@@ -5595,7 +5607,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Rotate rendered image counter-clockwise.
 	void RotateLeft()
 	{
-		if (!this.IsSourceFileOpened)
+		if (!this.IsSourceOpened)
 			return;
 		var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
 		{
@@ -5627,7 +5639,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Rotate rendered image clockwise.
 	void RotateRight()
 	{
-		if (!this.IsSourceFileOpened)
+		if (!this.IsSourceOpened)
 			return;
 		var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
 		{
@@ -6097,7 +6109,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// track auto color adjustment
 		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		if (this.GetValue(IsSourceFileOpenedProperty))
+		if (this.GetValue(IsSourceOpenedProperty))
 		{
 			var properties = this.PrepareUsageTrackingProperties();
 			this.Application.UsageManager.TrackEvent(UsageEvents.AutoColorAdjustmentApplied, properties);
@@ -6393,7 +6405,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get description of size of source image file.
 	/// </summary>
-	public string? SourceFileSizeString => this.GetValue(SourceFileSizeStringProperty);
+	public string? SourceSizeString => this.GetValue(SourceSizeStringProperty);
 
 
 	/// <summary>
@@ -6428,7 +6440,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	public void TrackBrightnessAndContrastAdjustmentResetEvent()
 	{
 		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		if (this.GetValue(IsSourceFileOpenedProperty))
+		if (this.GetValue(IsSourceOpenedProperty))
 		{
 			var properties = this.PrepareUsageTrackingProperties();
 			this.Application.UsageManager.TrackEvent(UsageEvents.BrightnessAndContrastAdjustmentReset, properties);
@@ -6442,7 +6454,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	public void TrackColorAdjustmentResetEvent()
 	{
 		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		if (this.GetValue(IsSourceFileOpenedProperty))
+		if (this.GetValue(IsSourceOpenedProperty))
 		{
 			var properties = this.PrepareUsageTrackingProperties();
 			this.Application.UsageManager.TrackEvent(UsageEvents.ColorAdjustmentReset, properties);
@@ -6455,7 +6467,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (this.IsDisposed)
 			return;
-		if (!this.IsSourceFileOpened)
+		if (!this.IsSourceOpened)
 		{
 			this.canSaveAsNewProfile.Update(false);
 			this.canSaveOrDeleteProfile.Update(false);
@@ -6473,7 +6485,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (this.IsDisposed)
 			return;
-		if (this.GetValue(FitImageToViewportProperty) || !this.IsSourceFileOpened)
+		if (this.GetValue(FitImageToViewportProperty) || !this.IsSourceOpened)
 		{
 			this.canZoomIn.Update(false);
 			this.canZoomOut.Update(false);

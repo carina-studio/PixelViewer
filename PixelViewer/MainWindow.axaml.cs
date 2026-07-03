@@ -211,7 +211,7 @@ namespace Carina.PixelViewer
 				    && workspace.Sessions[0] == session
 				    && !this.HasMultipleMainWindows)
 				{
-					if (!session.IsSourceFileOpened || session.ClearSourceFileCommand.TryExecute())
+					if (!session.IsSourceOpened || session.ClearSourceCommand.TryExecute())
 						return;
 				}
 				workspace.DetachAndCloseSession(session);

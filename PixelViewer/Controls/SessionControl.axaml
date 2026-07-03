@@ -150,7 +150,7 @@
 						<Separator asControls:ToolbarElement.Role="Separator"/>
 
 						<!-- Fit to viewport -->
-						<ToggleButton IsChecked="{Binding FitImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FitRenderedImageToViewport}">
+						<ToggleButton IsChecked="{Binding FitImageToViewport, Mode=TwoWay}" IsEnabled="{Binding IsSourceOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FitRenderedImageToViewport}">
 							<Panel>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FitToScreen}" IsVisible="{Binding !#fitToViewportLightIcon.IsVisible}"/>
 								<Image Name="fitToViewportLightIcon" asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FitToScreen.Light}">
@@ -165,7 +165,7 @@
 						</ToggleButton>
 						
 						<!-- Zoom to 100% -->
-						<Button Command="{Binding #root.ZoomToOriginalImageSize}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ZoomToOriginalImageSize}">
+						<Button Command="{Binding #root.ZoomToOriginalImageSize}" IsEnabled="{Binding IsSourceOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.ZoomToOriginalImageSize}">
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.OneToOne}"/>
 						</Button>
 
@@ -220,7 +220,7 @@
 						<Separator asControls:ToolbarElement.Role="Separator"/>
 
 						<!-- Flip-X -->
-						<ToggleButton Name="flipXButton" IsChecked="{Binding IsImageFlippedX, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipX}">
+						<ToggleButton Name="flipXButton" IsChecked="{Binding IsImageFlippedX, Mode=TwoWay}" IsEnabled="{Binding IsSourceOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipX}">
 							<Panel>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipX}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipX.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -228,7 +228,7 @@
 						</ToggleButton>
 
 						<!-- Flip-Y -->
-						<ToggleButton Name="flipYButton" IsChecked="{Binding IsImageFlippedY, Mode=TwoWay}" IsEnabled="{Binding IsSourceFileOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipY}">
+						<ToggleButton Name="flipYButton" IsChecked="{Binding IsImageFlippedY, Mode=TwoWay}" IsEnabled="{Binding IsSourceOpened}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FlipY}">
 							<Panel>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipY}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FlipY.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -581,8 +581,8 @@
 					<Panel Opacity="{StaticResource Double/SessionControl.Hint.Opacity}">
 
 						<!-- Drag-drop hint -->
-						<Border IsVisible="{Binding !IsOpeningSourceFile}">
-							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceFileOpened}" Orientation="Horizontal" VerticalAlignment="Center">
+						<Border IsVisible="{Binding !IsOpeningSource}">
+							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceOpened}" Orientation="Horizontal" VerticalAlignment="Center">
 								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.DragDropHint.Section1}"/>
 								<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
 								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.DragDropHint.Section2}"/>
@@ -590,7 +590,7 @@
 						</Border>
 
 						<!-- Opening file hint -->
-						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSourceFile}" Orientation="Horizontal" VerticalAlignment="Center">
+						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSource}" Orientation="Horizontal" VerticalAlignment="Center">
 							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
 							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.OpeningSourceFile}"/>
 						</StackPanel>
@@ -764,7 +764,7 @@
 			<!-- Rendering parameters panel -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3" IsVisible="{Binding IsRenderingParametersPanelVisible}">
 				<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
-					<StackPanel IsEnabled="{Binding IsSourceFileOpened}" Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
+					<StackPanel IsEnabled="{Binding IsSourceOpened}" Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
 
 						<!-- Styles -->
 						<StackPanel.Styles>
@@ -1159,15 +1159,15 @@
 
 						<!-- File actions -->
 						<StackPanel Orientation="Horizontal">
-							<TextBlock IsVisible="{Binding !IsSourceFileOpened}" asControls:StatusBarElement.Role="Label" Text="{asXaml:StringResource SessionControl.NoSourceFileOpened}"/>
-							<ToggleButton Name="fileActionsButton" Command="{Binding #root.ShowFileActions}" IsVisible="{Binding IsSourceFileOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}" asControls:StatusBarElement.Role="Button">
+							<TextBlock IsVisible="{Binding !IsSourceOpened}" asControls:StatusBarElement.Role="Label" Text="{asXaml:StringResource SessionControl.NoSourceFileOpened}"/>
+							<ToggleButton Name="fileActionsButton" Command="{Binding #root.ShowFileActions}" IsVisible="{Binding IsSourceOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}" asControls:StatusBarElement.Role="Button">
 								<StackPanel Orientation="Horizontal">
 									<Image asControls:StatusBarElement.Role="IconWithLabel">
 										<DrawingImage>
 											<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.File.Outline}"/>
 										</DrawingImage>
 									</Image>
-									<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding SourceFileSizeString}"/>
+									<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding SourceSizeString}"/>
 									<Image asControls:StatusBarElement.Role="DropDownIcon">
 										<DrawingImage>
 											<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.DropDown.Up}"/>

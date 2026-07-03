@@ -96,8 +96,8 @@
 						</StackPanel>
 					</ToolTip.Tip>
 					<Panel Classes="TabItem_Icon">
-						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceFileOpened}"/>
-						<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceFileOpened}">
+						<Image Classes="Icon" Source="{DynamicResource Image/Icon.Tab}" IsVisible="{Binding !IsSourceOpened}"/>
+						<Panel IsEnabled="{Binding !IsHibernated}" IsVisible="{Binding IsSourceOpened}">
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image}" IsVisible="{Binding InsufficientMemoryForRenderedImage}"/>
 							<Image Classes="Icon" Source="{DynamicResource Image/Icon.Image.Active}" IsVisible="{Binding !InsufficientMemoryForRenderedImage}"/>
 						</Panel>
