@@ -5531,6 +5531,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		// load other state
 		if (savedState.TryGetProperty(nameof(CustomTitle), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
 			this.SetValue(CustomTitleProperty, jsonProperty.GetString());
+		
+		// restore visibility of histograms before opening the source (opening the source may block for a while)
+		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
 
 		// open source file
 		if (fileName is not null)
@@ -5585,7 +5588,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(FitImageToViewportProperty, fitToViewport);
 		this.SetValue(FrameNumberProperty, frameNumber);
 		this.SetValue(ImageDisplayRotationProperty, rotation);
-		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
 		this.SetValue(IsImageFlippedXProperty, isImageFlippedX);
 		this.SetValue(IsImageFlippedYProperty, isImageFlippedY);
 		this.SetValue(IsRenderingParametersPanelVisibleProperty, isRenderingParamsPanelVisible);

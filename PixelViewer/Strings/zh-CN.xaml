@@ -262,7 +262,7 @@
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至帧…</sys:String>
 	<sys:String x:Key="String/SessionControl.NoImageRendered">没有绘制的图像。</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">没有图像文件开启</sys:String>
-	<sys:String x:Key="String/SessionControl.OpeningSourceFile">正在打开图像文件…</sys:String>
+	<sys:String x:Key="String/SessionControl.OpeningSource">正在打开图像…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">打开图像文件 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">其他动作</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (字节)</sys:String>

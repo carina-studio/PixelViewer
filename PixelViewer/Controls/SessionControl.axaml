@@ -592,7 +592,7 @@
 						<!-- Opening file hint -->
 						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSource}" Orientation="Horizontal" VerticalAlignment="Center">
 							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
-							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.OpeningSourceFile}"/>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.OpeningSource}"/>
 						</StackPanel>
 
 						<!-- Rendering error -->

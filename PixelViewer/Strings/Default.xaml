@@ -300,7 +300,7 @@ You can change this setting at any time in Options.</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">Move to Frame…</sys:String>
 	<sys:String x:Key="String/SessionControl.NoImageRendered">No image rendered.</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No Image File Opened</sys:String>
-	<sys:String x:Key="String/SessionControl.OpeningSourceFile">Opening image file…</sys:String>
+	<sys:String x:Key="String/SessionControl.OpeningSource">Opening image…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open Image File (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">Other Actions</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-Stride (Bytes)</sys:String>
