@@ -27,7 +27,7 @@ static class FileFormatParsers
     {
         lock (typeof(FileFormatParsers))
         {
-            if (logger != null)
+            if (logger is not null)
                 throw new InvalidOperationException();
             logger = app.LoggerFactory.CreateLogger(nameof(FileFormatParsers));
         }
@@ -65,7 +65,7 @@ static class FileFormatParsers
                     {
                         logger?.LogTrace("Use {name} to parse '{fileName}'", parser.GetType().Name, fileSource.FileName);
                         var profile = await parser.ParseImageRenderingProfileAsync(source, cancellationToken);
-                        if (profile != null)
+                        if (profile is not null)
                             return profile;
                         logger?.LogTrace("'{fileName}' is not a {fileFormat} file", fileSource.FileName, parser.FileFormat);
                     }
@@ -107,12 +107,13 @@ static class FileFormatParsers
                 try
                 {
                     logger?.LogTrace("Use {name} to parse", parser.GetType().Name);
-                    return await parser.ParseImageRenderingProfileAsync(source, cancellationToken);
+                    var profile = await parser.ParseImageRenderingProfileAsync(source, cancellationToken);
+                    if (profile is not null)
+                        return profile;
                 }
                 catch
                 {
-                    if (cancellationToken.IsCancellationRequested)
-                        throw new TaskCanceledException();
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
                 finally
                 {
