@@ -19,6 +19,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		{ }
 
 
+		/// <inheritdoc/>
+		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => [ new(8, 4, width * 4) ];
+
+
 		// Render.
 		protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{

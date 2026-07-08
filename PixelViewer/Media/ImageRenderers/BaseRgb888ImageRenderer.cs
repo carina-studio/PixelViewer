@@ -20,14 +20,14 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
 		// Create default plane options.
-		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new List<ImagePlaneOptions>().Also((it) =>
+		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height)
 		{
 			var rowStride = (width * 3);
 			var remaining = (rowStride % 4);
 			if (remaining > 0)
 				rowStride += (4 - remaining);
-			it.Add(new ImagePlaneOptions(3, rowStride));
-		});
+			return [ new(8, 3, rowStride) ];
+		}
 
 
 		// Render.
