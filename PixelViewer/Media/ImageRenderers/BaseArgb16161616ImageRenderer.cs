@@ -36,9 +36,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
 			// prepare packing function
-			var extractComponentFunc = renderingOptions.ByteOrdering == ByteOrdering.LittleEndian
-				? new Func<byte, byte, ushort>((b1, b2) => (ushort)((b2 << 8) | b1))
-				: (b1, b2) => (ushort)((b1 << 8) | b2);
+			var extractComponentFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, planeOptions[0].EffectiveBits);
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
@@ -104,7 +102,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Abgr16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Abgr16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_16161616", true, new ImagePlaneDescriptor(8), new[]{ "ABGR16161616", "ABGR_16161616", "ABGR64" }))
+		public Abgr16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ABGR_16161616", true, new ImagePlaneDescriptor(8, 9, 16), [ "ABGR16161616", "ABGR_16161616", "ABGR64" ]))
 		{ }
 
 
@@ -127,7 +125,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Argb16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Argb16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ARGB_16161616", true, new ImagePlaneDescriptor(8), new[]{ "ARGB16161616", "ARGB_16161616", "ARGB64" }))
+		public Argb16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "ARGB_16161616", true, new ImagePlaneDescriptor(8, 9, 16), [ "ARGB16161616", "ARGB_16161616", "ARGB64" ]))
 		{ }
 
 
@@ -150,7 +148,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Bgra16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Bgra16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "BGRA_16161616", true, new ImagePlaneDescriptor(8), new[]{ "BGRA16161616", "BGRA_16161616", "BGRA64" }))
+		public Bgra16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "BGRA_16161616", true, new ImagePlaneDescriptor(8, 9, 16), [ "BGRA16161616", "BGRA_16161616", "BGRA64" ]))
 		{ }
 
 
@@ -173,7 +171,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="Rgba16161616ImageRenderer"/> instance.
 		/// </summary>
-		public Rgba16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "RGBA_16161616", true, new ImagePlaneDescriptor(8), new[]{ "RGBA16161616", "RGBA_16161616", "RGBA64" }))
+		public Rgba16161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.ARGB, "RGBA_16161616", true, new ImagePlaneDescriptor(8, 9, 16), [ "RGBA16161616", "RGBA_16161616", "RGBA64" ]))
 		{ }
 
 
