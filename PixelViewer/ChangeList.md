@@ -6,6 +6,7 @@
 
 ## Improvement
 + Added support for specifying the effective bits of images with `ABGR_16161616`, `ARGB_16161616`, `BGRA_16161616` and `RGBA_16161616` formats.
++ Improved the performance of saving images in PNG format.
 
 ## Behavior Changes
 + 
