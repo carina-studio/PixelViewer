@@ -1160,7 +1160,7 @@
 						<!-- File actions -->
 						<StackPanel Orientation="Horizontal">
 							<TextBlock IsVisible="{Binding !IsSourceOpened}" asControls:StatusBarElement.Role="Label" Text="{asXaml:StringResource SessionControl.NoSourceFileOpened}"/>
-							<ToggleButton Name="fileActionsButton" Command="{Binding #root.ShowFileActions}" IsVisible="{Binding IsSourceOpened}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}" asControls:StatusBarElement.Role="Button">
+							<ToggleButton Name="fileActionsButton" Command="{Binding #root.ShowFileActions}" IsVisible="{Binding SourceFileName, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}" MaxWidth="{StaticResource Double/SessionControl.StatusBar.FileActions.MaxWidth}" asControls:StatusBarElement.Role="Button">
 								<StackPanel Orientation="Horizontal">
 									<Image asControls:StatusBarElement.Role="IconWithLabel">
 										<DrawingImage>
@@ -1175,7 +1175,10 @@
 									</Image>
 								</StackPanel>
 							</ToggleButton>
-							<Separator asControls:StatusBarElement.Role="Separator"/>
+							<Separator IsVisible="{asXaml:OrBindings
+								{Binding !IsSourceOpened},
+								{Binding SourceFileName, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}
+							}" asControls:StatusBarElement.Role="Separator"/>
 						</StackPanel>
 
 						<!-- Source data size -->
