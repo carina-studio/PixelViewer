@@ -2,7 +2,7 @@
 
 set APP_NAME=PixelViewer
 set RID_LIST=win-arm64 win-x64 win-x86
-set CONFIG=Release-Windows
+set CONFIG=Release
 set FRAMEWORK=net10.0
 set ERRORLEVEL=0
 

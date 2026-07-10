@@ -1048,60 +1048,6 @@ namespace Carina.PixelViewer.Media
 		}
 
 
-#if WINDOWS
-		/// <summary>
-		/// Create <see cref="System.Drawing.Bitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
-		/// </summary>
-		/// <param name="buffer"><see cref="IBitmapBuffer"/>.</param>
-		/// <param name="orientation">Orientation.</param>
-		/// <param name="cancellationToken">Cancellation token.</param>/// 
-		/// <returns><see cref="System.Drawing.Bitmap"/>.</returns>
-		public static unsafe System.Drawing.Bitmap CreateSystemDrawingBitmap(this IBitmapBuffer buffer, int orientation, CancellationToken cancellationToken)
-		{
-			return buffer.Memory.Pin((srcBaseAddr) =>
-			{
-				var srcWidth = buffer.Width;
-				var srcHeight = buffer.Height;
-				var srcRowStride = buffer.RowBytes;
-				switch (orientation)
-				{
-					case 0:
-						return new System.Drawing.Bitmap(srcWidth, srcHeight, srcRowStride, buffer.Format.ToSystemDrawingPixelFormat(), srcBaseAddr);
-					case 90:
-					case 270:
-						return new System.Drawing.Bitmap(srcHeight, srcWidth, buffer.Format.ToSystemDrawingPixelFormat()).Also(bitmap =>
-						{
-							var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
-							try
-							{
-								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation, cancellationToken);
-							}
-							finally
-							{
-								bitmap.UnlockBits(bitmapData);
-							}
-						});
-					case 180:
-						return new System.Drawing.Bitmap(srcWidth, srcHeight, buffer.Format.ToSystemDrawingPixelFormat()).Also(bitmap =>
-						{
-							var bitmapData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, bitmap.PixelFormat);
-							try
-							{
-								CopyTo(srcBaseAddr, buffer.Format, srcWidth, srcHeight, srcRowStride, bitmapData.Scan0, bitmapData.Stride, orientation, cancellationToken);
-							}
-							finally
-							{
-								bitmap.UnlockBits(bitmapData);
-							}
-						});
-					default:
-						throw new ArgumentException();
-				}
-			});
-		}
-#endif
-
-
 		/// <summary>
 		/// Create <see cref="IBitmap"/> with quarter size which copied data from this <see cref="IBitmapBuffer"/>.
 		/// </summary>

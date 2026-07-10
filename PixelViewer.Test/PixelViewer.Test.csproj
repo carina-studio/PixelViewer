@@ -5,15 +5,11 @@
 		<Nullable>enable</Nullable>
 		<RootNamespace>Carina.PixelViewer.Test</RootNamespace>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<Configurations>Debug;Release;MSStore-Debug;MSStore-Release;Debug-Windows;Release-Windows</Configurations>
+		<Configurations>Debug;Release;MSStore-Debug;MSStore-Release</Configurations>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
 		<TargetFramework>net7.0</TargetFramework>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug-Windows|AnyCPU'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
@@ -22,10 +18,6 @@
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 		<TargetFramework>net7.0</TargetFramework>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-Windows|AnyCPU'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
 	</PropertyGroup>
 
 	<ItemGroup>
