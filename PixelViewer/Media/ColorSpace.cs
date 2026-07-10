@@ -822,11 +822,11 @@ namespace Carina.PixelViewer.Media
                             if (Win32.WcsGetUsePerUserProfiles(displayDevice.DeviceKey, Win32.CLASS.MONITOR, out var usePerUserProfiles) && usePerUserProfiles)
                                 colorProfileScope = Win32.WCS_PROFILE_MANAGEMENT_SCOPE.CURRENT_USER;
 
-                            // get color profile name
-                            if (!Win32.WcsGetDefaultColorProfileSize(colorProfileScope, displayDevice.DeviceKey, Win32.COLORPROFILETYPE.ICC, Win32.COLORPROFILESUBTYPE.RGB_WORKING_SPACE, 0, out var colorProfileNameSize))
+                            // get color profile name (CPST_NONE gets the profile associated with the monitor; CPST_RGB_WORKING_SPACE would return the device-independent working space which is sRGB by default)
+                            if (!Win32.WcsGetDefaultColorProfileSize(colorProfileScope, displayDevice.DeviceKey, Win32.COLORPROFILETYPE.ICC, Win32.COLORPROFILESUBTYPE.NONE, 0, out var colorProfileNameSize))
                                 throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get size of name of color profile.");
                             var colorProfileName = new StringBuilder((int)colorProfileNameSize);
-                            if (!Win32.WcsGetDefaultColorProfile(colorProfileScope, displayDevice.DeviceKey, Win32.COLORPROFILETYPE.ICC, Win32.COLORPROFILESUBTYPE.RGB_WORKING_SPACE, 0, colorProfileNameSize, colorProfileName))
+                            if (!Win32.WcsGetDefaultColorProfile(colorProfileScope, displayDevice.DeviceKey, Win32.COLORPROFILETYPE.ICC, Win32.COLORPROFILESUBTYPE.NONE, 0, colorProfileNameSize, colorProfileName))
                                 throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to get name of color profile.");
 
                             // get color directory
@@ -1160,10 +1160,8 @@ namespace Carina.PixelViewer.Media
             if (stream.Read(profile, 128, profile.Length - 128) < profile.Length - 128)
                 throw new ArgumentException("Invalid ICC profile.");
             
-            // parse profile
+            // parse profile (SKColorSpace.CreateIcc returns null for matrix profiles whose tone curves are tabulated and cannot be reduced to a parametric transfer function; such profiles are reconstructed manually below)
             var skiaColorSpace = SKColorSpace.CreateIcc(profile);
-            if (skiaColorSpace == null)
-                throw new ArgumentException("Unsupported ICC profile.");
             
             // prepare data reading functions
             /*
@@ -1178,9 +1176,13 @@ namespace Carina.PixelViewer.Media
             }
             */
             
-            // get white point and name defined in profile
+            // get white point, name, and (for the manual fall-back) RGB colorants and tone curve defined in profile
             var iccName = (string?)null;
             var whitePoint = ((double, double, double)?)null;
+            var redColorant = ((double, double, double)?)null;
+            var greenColorant = ((double, double, double)?)null;
+            var blueColorant = ((double, double, double)?)null;
+            var redTransferFunc = (SKColorSpaceTransferFn?)null;
             var offset = 132;
             for (var i = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(128)); i > 0; --i, offset += 12)
             {
@@ -1272,6 +1274,26 @@ namespace Carina.PixelViewer.Media
                         }
                         */
                         break;
+
+                    case 0x7258595Au: // 'rXYZ' red colorant
+                        if (skiaColorSpace is null)
+                            redColorant = ReadXyzTag(profile, offset, profileSize);
+                        break;
+
+                    case 0x6758595Au: // 'gXYZ' green colorant
+                        if (skiaColorSpace is null)
+                            greenColorant = ReadXyzTag(profile, offset, profileSize);
+                        break;
+
+                    case 0x6258595Au: // 'bXYZ' blue colorant
+                        if (skiaColorSpace is null)
+                            blueColorant = ReadXyzTag(profile, offset, profileSize);
+                        break;
+
+                    case 0x72545243u: // 'rTRC' red tone reproduction curve
+                        if (skiaColorSpace is null)
+                            redTransferFunc = ReadTransferFuncTag(profile, offset, profileSize);
+                        break;
                 }
             }
             if (iccName == null && fileName != null)
@@ -1286,11 +1308,106 @@ namespace Carina.PixelViewer.Media
             }
             */
 
-            // create color space
-            var hasTransferFunc = skiaColorSpace.GetNumericalTransferFunction(out var transferFunc);
-            if (!hasTransferFunc)
-                transferFunc = SKColorSpaceTransferFn.Linear;
-            return new ColorSpace(source, GenerateRandomName(), iccName, transferFunc, skiaColorSpace.ToColorSpaceXyz(), whitePoint, null);
+            // create color space from the Skia-parsed profile, or reconstruct it from the RGB colorants and tone curve when Skia cannot represent the profile
+            SKColorSpaceXyz matrixToXyz;
+            SKColorSpaceTransferFn transferFunc;
+            if (skiaColorSpace is not null)
+            {
+                if (!skiaColorSpace.GetNumericalTransferFunction(out transferFunc))
+                    transferFunc = SKColorSpaceTransferFn.Linear;
+                matrixToXyz = skiaColorSpace.ToColorSpaceXyz();
+            }
+            else if (redColorant.HasValue && greenColorant.HasValue && blueColorant.HasValue)
+            {
+                var r = redColorant.Value;
+                var g = greenColorant.Value;
+                var b = blueColorant.Value;
+                matrixToXyz = new SKColorSpaceXyz(
+                [
+                    (float)r.Item1, (float)g.Item1, (float)b.Item1,
+                    (float)r.Item2, (float)g.Item2, (float)b.Item2,
+                    (float)r.Item3, (float)g.Item3, (float)b.Item3,
+                ]);
+                transferFunc = redTransferFunc ?? SKColorSpaceTransferFn.TwoDotTwo;
+            }
+            else
+                throw new ArgumentException("Unsupported ICC profile.");
+            return new ColorSpace(source, GenerateRandomName(), iccName, transferFunc, matrixToXyz, whitePoint, null);
+
+            // read an XYZ colorant tag as its (X, Y, Z) in the connection space.
+            static (double, double, double)? ReadXyzTag(byte[] profile, int tagOffset, uint profileSize)
+            {
+                var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(tagOffset + 4));
+                var dataSize = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(tagOffset + 8));
+                if (dataOffset < 0 || dataOffset + dataSize > profileSize || dataSize < 20)
+                    return null;
+                if (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset)) != 0x58595A20u) // 'XYZ '
+                    return null;
+                return (
+                    BinaryPrimitives.ReadInt32BigEndian(profile.AsSpan(dataOffset + 8)) / 65536.0,
+                    BinaryPrimitives.ReadInt32BigEndian(profile.AsSpan(dataOffset + 12)) / 65536.0,
+                    BinaryPrimitives.ReadInt32BigEndian(profile.AsSpan(dataOffset + 16)) / 65536.0);
+            }
+
+            // read a tone reproduction curve tag and approximate it as a parametric transfer function (device value to linear), or null when it cannot be parsed.
+            static SKColorSpaceTransferFn? ReadTransferFuncTag(byte[] profile, int tagOffset, uint profileSize)
+            {
+                var dataOffset = (int)BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(tagOffset + 4));
+                var dataSize = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(tagOffset + 8));
+                if (dataOffset < 0 || dataOffset + dataSize > profileSize || dataSize < 12)
+                    return null;
+                switch (BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset)))
+                {
+                    case 0x63757276u: // 'curv'
+                        {
+                            // a table maps device value (i / (count - 1)) to linear value; count 0 is linear and count 1 is a u8Fixed8 gamma
+                            var count = BinaryPrimitives.ReadUInt32BigEndian(profile.AsSpan(dataOffset + 8));
+                            if (count == 0)
+                                return SKColorSpaceTransferFn.Linear;
+                            if (count > (dataSize - 12) / 2)
+                                return null;
+                            if (count == 1)
+                                return CreateGammaTransferFunc(BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan(dataOffset + 12)) / 256.0);
+
+                            // fit a single gamma to the table by least squares in log-log space
+                            var sumXx = 0.0;
+                            var sumXy = 0.0;
+                            for (var i = 1u; i < count; ++i)
+                            {
+                                var x = Math.Log(i / (double)(count - 1));
+                                var y = BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan((int)(dataOffset + 12 + i * 2))) / 65535.0;
+                                if (y <= 0)
+                                    continue;
+                                sumXx += x * x;
+                                sumXy += x * Math.Log(y);
+                            }
+                            return sumXx > 0 ? CreateGammaTransferFunc(sumXy / sumXx) : null;
+                        }
+                    case 0x70617261u: // 'para'
+                        {
+                            // parameters follow the ICC parametricCurveType definition, selected by the function type
+                            var funcType = BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan(dataOffset + 8));
+                            var paramCount = funcType switch { 0 => 1, 1 => 3, 2 => 4, 3 => 5, 4 => 7, _ => -1 };
+                            if (paramCount < 0 || 12 + paramCount * 4 > dataSize)
+                                return null;
+                            double P(int index) => BinaryPrimitives.ReadInt32BigEndian(profile.AsSpan(dataOffset + 12 + index * 4)) / 65536.0;
+                            return funcType switch
+                            {
+                                0 => CreateGammaTransferFunc(P(0)),
+                                1 => P(1) != 0 ? new SKColorSpaceTransferFn { G = (float)P(0), A = (float)P(1), B = (float)P(2), C = 0f, D = (float)(-P(2) / P(1)), E = 0f, F = 0f } : null,
+                                2 => P(1) != 0 ? new SKColorSpaceTransferFn { G = (float)P(0), A = (float)P(1), B = (float)P(2), C = 0f, D = (float)(-P(2) / P(1)), E = (float)P(3), F = (float)P(3) } : null,
+                                3 => new SKColorSpaceTransferFn { G = (float)P(0), A = (float)P(1), B = (float)P(2), C = (float)P(3), D = (float)P(4), E = 0f, F = 0f },
+                                _ => new SKColorSpaceTransferFn { G = (float)P(0), A = (float)P(1), B = (float)P(2), C = (float)P(3), D = (float)P(4), E = (float)P(5), F = (float)P(6) },
+                            };
+                        }
+                    default:
+                        return null;
+                }
+            }
+
+            // create a pure-gamma parametric transfer function (device value to linear).
+            static SKColorSpaceTransferFn CreateGammaTransferFunc(double gamma) =>
+                new() { G = (float)gamma, A = 1f, B = 0f, C = 0f, D = 0f, E = 0f, F = 0f };
         }
 
 
