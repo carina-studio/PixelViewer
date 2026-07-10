@@ -1395,7 +1395,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 							})
 						};
 					}
-					notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Success.Colored");
+					notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Success.Colored.Gradient");
 					notification.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
 					{
 						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingSucceeded");
@@ -1404,7 +1404,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 				else
 				{
-					notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Error.Colored");
+					notification.BindToResource(ASControls.Notification.IconProperty, this, "Image/Icon.Error.Colored.Gradient");
 					notification.Bind(ASControls.Notification.MessageProperty, new FormattedString().Also(it =>
 					{
 						it.BindToResource(FormattedString.FormatProperty, this, "String/SessionControl.ImageSavingFailed");
