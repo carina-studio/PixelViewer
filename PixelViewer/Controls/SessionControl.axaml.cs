@@ -2213,12 +2213,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				return;
 			parameters.Options = jpegOptions.Value;
 		}
-		else if (fileFormat == Media.FileFormats.Tiff)
-		{
-			var tiffOptions = parameters.Options;
-			tiffOptions.PreferUncompressedPixels = true;
-			parameters.Options = tiffOptions;
-		}
 		parameters.FileName = fileName;
 
 		// find encoder

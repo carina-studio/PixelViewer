@@ -4,7 +4,7 @@
 ## New Features
 + Added support for shutting down the application by keyboard shortcut (`Ctrl+Q` on Windows/Linux, `⌘Q` on macOS).
 + Added support for opening TIFF images.
-+ Added support for saving an image as uncompressed TIFF.
++ Added support for saving an image as TIFF.
 
 ## Improvement
 + Added support for specifying the effective bits of images with `ABGR_16161616`, `ARGB_16161616`, `BGRA_16161616` and `RGBA_16161616` formats.
