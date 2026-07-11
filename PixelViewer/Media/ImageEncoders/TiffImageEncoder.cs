@@ -3,17 +3,20 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Buffers.Binary;
 using System.IO;
+using System.IO.Compression;
 using System.Text;
 using System.Threading;
 
 namespace Carina.PixelViewer.Media.ImageEncoders;
 
 /// <summary>
-/// <see cref="IImageEncoder"/> to encode image in <see cref="FileFormats.Tiff"/> without compression.
+/// <see cref="IImageEncoder"/> to encode image in <see cref="FileFormats.Tiff"/>, with or without compression.
 /// </summary>
 class TiffImageEncoder : BaseImageEncoder
 {
     // Constants.
+    const ushort CompressionDeflate = 8;
+    const ushort CompressionUncompressed = 1;
     const ushort TiffTypeAscii = 2;
     const ushort TiffTypeLong = 4;
     const ushort TiffTypeShort = 3;
@@ -29,6 +32,61 @@ class TiffImageEncoder : BaseImageEncoder
     /// </summary>
     public TiffImageEncoder() : base("Tiff", FileFormats.Tiff)
     { }
+
+
+    // Convert the source BGRA bitmap buffer to an RGBA single strip and Deflate-compress it.
+    static byte[] CompressPixels(IBitmapBuffer bitmapBuffer, int rowStride, int bytesPerSample, CancellationToken cancellationToken)
+    {
+        var width = bitmapBuffer.Width;
+        var height = bitmapBuffer.Height;
+        using var compressedStream = new MemoryStream();
+        // a fast Deflate level keeps the encode responsive; it still shrinks the strip enough to matter for the clipboard, and callers that need the exact pixels use uncompressed pixels instead
+        using (var deflaterStream = new ZLibStream(compressedStream, CompressionLevel.Fastest, leaveOpen: true))
+        {
+            var srcSpan = bitmapBuffer.Memory.Span;
+            var srcRowStride = bitmapBuffer.RowBytes;
+            var rowBuffer = new byte[rowStride];
+            for (var y = 0; y < height; ++y)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ConvertBgraRowToRgba(srcSpan.Slice(y * srcRowStride, srcRowStride), rowBuffer, width, bytesPerSample);
+                deflaterStream.Write(rowBuffer, 0, rowStride);
+            }
+        }
+        return compressedStream.ToArray();
+    }
+
+
+    // Convert one row of BGRA pixels to RGBA (swapping the B and R channels) into the given buffer.
+    static void ConvertBgraRowToRgba(ReadOnlySpan<byte> srcRow, byte[] rowBuffer, int width, int bytesPerSample)
+    {
+        if (bytesPerSample == 1)
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                var s = x * 4;
+                rowBuffer[s] = srcRow[s + 2];
+                rowBuffer[s + 1] = srcRow[s + 1];
+                rowBuffer[s + 2] = srcRow[s];
+                rowBuffer[s + 3] = srcRow[s + 3];
+            }
+        }
+        else
+        {
+            for (var x = 0; x < width; ++x)
+            {
+                var s = x * 8;
+                rowBuffer[s] = srcRow[s + 4];
+                rowBuffer[s + 1] = srcRow[s + 5];
+                rowBuffer[s + 2] = srcRow[s + 2];
+                rowBuffer[s + 3] = srcRow[s + 3];
+                rowBuffer[s + 4] = srcRow[s];
+                rowBuffer[s + 5] = srcRow[s + 1];
+                rowBuffer[s + 6] = srcRow[s + 6];
+                rowBuffer[s + 7] = srcRow[s + 7];
+            }
+        }
+    }
 
 
     // Encode.
@@ -50,12 +108,20 @@ class TiffImageEncoder : BaseImageEncoder
             }
         }
 
-        // compute the layout of the little-endian TIFF file (header, single strip of pixels, out-of-line values, IFD)
+        // prepare the single pixel strip, Deflate-compressing it unless the caller prefers uncompressed pixels
         var width = bitmapBuffer.Width;
         var height = bitmapBuffer.Height;
         var bytesPerSample = bitmapBuffer.Format == BitmapFormat.Bgra64 ? 2 : 1;
         var rowStride = width * 4 * bytesPerSample;
-        var pixelDataSize = (long)rowStride * height;
+        var compress = !options.PreferUncompressedPixels;
+        var compressedPixels = compress
+            ? CompressPixels(bitmapBuffer, rowStride, bytesPerSample, cancellationToken)
+            : null;
+        var pixelDataSize = compressedPixels is not null
+            ? compressedPixels.Length
+            : (long)rowStride * height;
+
+        // compute the layout of the little-endian TIFF file (header, single strip of pixels, out-of-line values, IFD)
         var pixelDataOffset = 8L;
         var bitsPerSampleOffset = pixelDataOffset + pixelDataSize;
         var sampleFormatOffset = bitsPerSampleOffset + 8;
@@ -74,41 +140,20 @@ class TiffImageEncoder : BaseImageEncoder
         WriteUInt16(42);
         WriteUInt32((uint)ifdOffset);
 
-        // write the pixel data as RGBA strips, swapping B and R channels from the source BGRA buffer
-        var srcSpan = bitmapBuffer.Memory.Span;
-        var srcRowStride = bitmapBuffer.RowBytes;
-        var rowBuffer = new byte[rowStride];
-        for (var y = 0; y < height; ++y)
+        // write the pixel data as a single strip (the pre-compressed buffer, or the raw RGBA rows when uncompressed)
+        if (compressedPixels is not null)
+            stream.Write(compressedPixels, 0, compressedPixels.Length);
+        else
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            var srcRow = srcSpan.Slice(y * srcRowStride, srcRowStride);
-            if (bytesPerSample == 1)
+            var srcSpan = bitmapBuffer.Memory.Span;
+            var srcRowStride = bitmapBuffer.RowBytes;
+            var rowBuffer = new byte[rowStride];
+            for (var y = 0; y < height; ++y)
             {
-                for (var x = 0; x < width; ++x)
-                {
-                    var s = x * 4;
-                    rowBuffer[s] = srcRow[s + 2];
-                    rowBuffer[s + 1] = srcRow[s + 1];
-                    rowBuffer[s + 2] = srcRow[s];
-                    rowBuffer[s + 3] = srcRow[s + 3];
-                }
+                cancellationToken.ThrowIfCancellationRequested();
+                ConvertBgraRowToRgba(srcSpan.Slice(y * srcRowStride, srcRowStride), rowBuffer, width, bytesPerSample);
+                stream.Write(rowBuffer, 0, rowStride);
             }
-            else
-            {
-                for (var x = 0; x < width; ++x)
-                {
-                    var s = x * 8;
-                    rowBuffer[s] = srcRow[s + 4];
-                    rowBuffer[s + 1] = srcRow[s + 5];
-                    rowBuffer[s + 2] = srcRow[s + 2];
-                    rowBuffer[s + 3] = srcRow[s + 3];
-                    rowBuffer[s + 4] = srcRow[s];
-                    rowBuffer[s + 5] = srcRow[s + 1];
-                    rowBuffer[s + 6] = srcRow[s + 6];
-                    rowBuffer[s + 7] = srcRow[s + 7];
-                }
-            }
-            stream.Write(rowBuffer, 0, rowStride);
         }
 
         // write the out-of-line field values (bits per sample, sample format, software name, ICC profile)
@@ -131,7 +176,7 @@ class TiffImageEncoder : BaseImageEncoder
         WriteEntry(0x0100, TiffTypeLong, 1, (uint)width);
         WriteEntry(0x0101, TiffTypeLong, 1, (uint)height);
         WriteEntry(0x0102, TiffTypeShort, 4, (uint)bitsPerSampleOffset);
-        WriteEntry(0x0103, TiffTypeShort, 1, 1);
+        WriteEntry(0x0103, TiffTypeShort, 1, (uint)(compress ? CompressionDeflate : CompressionUncompressed));
         WriteEntry(0x0106, TiffTypeShort, 1, 2);
         WriteEntry(0x0111, TiffTypeLong, 1, (uint)pixelDataOffset);
         WriteEntry(0x0112, TiffTypeShort, 1, (uint)Tiff.ToTiffOrientation(options.Orientation));

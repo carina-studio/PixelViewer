@@ -51,6 +51,12 @@ struct ImageEncodingOptions
 
 
     /// <summary>
+    /// Prefer encoding pixels without compression when the format supports both compressed and uncompressed pixels (e.g. TIFF).
+    /// </summary>
+    public bool PreferUncompressedPixels { get; set; }
+
+
+    /// <summary>
     /// Quality level for encoding. Range is [1, 100].
     /// </summary>
     // ReSharper disable once PropertyCanBeMadeInitOnly.Global

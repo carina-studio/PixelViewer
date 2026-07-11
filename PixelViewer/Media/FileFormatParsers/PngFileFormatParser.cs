@@ -1,12 +1,12 @@
 using Carina.PixelViewer.Media.ImageRenderers;
 using CarinaStudio.Collections;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using SkiaSharp;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.IO;
+using System.IO.Compression;
 
 namespace Carina.PixelViewer.Media.FileFormatParsers;
 
@@ -50,10 +50,7 @@ class PngFileFormatParser : SkiaFileFormatParser
     /// <inheritdoc/>
     protected override byte[] OnReadIccProfileToMemory(Stream stream)
     {
-        using var compressedStream = new InflaterInputStream(stream)
-        {
-            IsStreamOwner = false,
-        };
+        using var compressedStream = new ZLibStream(stream, CompressionMode.Decompress, leaveOpen: true);
         var data = new List<byte>(256);
         var buffer = new byte[256];
         var count = compressedStream.Read(buffer, 0, buffer.Length);

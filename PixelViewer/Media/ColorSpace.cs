@@ -5,7 +5,6 @@ using CarinaStudio.Collections;
 using CarinaStudio.MacOS.CoreGraphics;
 using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
-using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using System;
@@ -13,6 +12,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -1974,7 +1974,7 @@ namespace Carina.PixelViewer.Media
                 return false;
 
             // inflate the profile directly to the output stream, reporting whether any data was actually written
-            using var inflaterStream = new InflaterInputStream(pngStream) { IsStreamOwner = false };
+            using var inflaterStream = new ZLibStream(pngStream, CompressionMode.Decompress, leaveOpen: true);
             var firstByte = inflaterStream.ReadByte();
             if (firstByte < 0)
                 return false;
