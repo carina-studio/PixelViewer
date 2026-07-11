@@ -82,6 +82,7 @@ static class ImageRenderers
 			//new NefImageRenderer(),
 			new PngImageRenderer(),
 			new WebPImageRenderer(),
+			new TiffImageRenderer(),
 		]);
 	}).AsReadOnly();
 

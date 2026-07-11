@@ -142,6 +142,7 @@
 	<sys:String x:Key="String/FileType.Nef">Nikon Electronic Format (NEF)</sys:String>
 	<sys:String x:Key="String/FileType.Png">PNG Image</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">Raw 32/64-bit BGRA Pixels</sys:String>
+	<sys:String x:Key="String/FileType.Tiff">TIFF Image</sys:String>
 	<sys:String x:Key="String/FileType.Yuv4Mpeg2">YUV4MPEG2</sys:String>
 	<sys:String x:Key="String/FileType.WebP">WebP Image</sys:String>
 
@@ -170,6 +171,7 @@
 	<sys:String x:Key="String/ImageFormat.P410">P410 (10-bit YUV444sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P412">P412 (12-bit YUV444sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.P416">P416 (16-bit YUV444sp)</sys:String>
+	<sys:String x:Key="String/ImageFormat.TIFF">TIFF</sys:String>
 	<sys:String x:Key="String/ImageFormat.UYVY">UYVY (YUV422)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10-bit YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16-bit YUV420p)</sys:String>

@@ -1,5 +1,4 @@
 ﻿using CarinaStudio;
-using CarinaStudio.Collections;
 using CarinaStudio.IO;
 using System;
 using System.Collections.Generic;
@@ -19,13 +18,14 @@ static class FileFormats
     static volatile FileFormat? cr2;
     static volatile FileFormat? dng;
     static readonly ISet<FileFormat> emptyFormats = new HashSet<FileFormat>().AsReadOnly();
-    static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new Dictionary<string, ISet<FileFormat>>(PathEqualityComparer.Default);
-    static readonly Dictionary<string, FileFormat> formatsById = new Dictionary<string, FileFormat>();
+    static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new(PathEqualityComparer.Default);
+    static readonly Dictionary<string, FileFormat> formatsById = new();
     static volatile FileFormat? heif;
     static volatile FileFormat? jpeg;
     static volatile FileFormat? nef;
     static volatile FileFormat? png;
     static volatile FileFormat? rawBgra;
+    static volatile FileFormat? tiff;
     static volatile FileFormat? yuv4mpeg2;
     static volatile FileFormat? webP;
     
@@ -78,17 +78,18 @@ static class FileFormats
                 throw new InvalidOperationException();
             FileFormats.app = app;
         }
-        arw = Register(new FileFormat(app, "Arw", new[] { ".arw" }));
-        bmp = Register(new FileFormat(app, "Bmp", new[] { ".bmp" }));
-        cr2 = Register(new FileFormat(app, "Cr2", new[] { ".cr2" }));
-        dng = Register(new FileFormat(app, "Dng", new[] { ".dng" }));
-        heif = Register(new FileFormat(app, "Heif", new[] { ".heif", ".heic" }));
-        jpeg = Register(new FileFormat(app, "Jpeg", new[] { ".jpg", ".jpeg", ".jpe", ".jfif" }));
-        nef = Register(new FileFormat(app, "Nef", new[] { ".nef" }));
-        png = Register(new FileFormat(app, "Png", new[] { ".png" }));
-        rawBgra = Register(new FileFormat(app, "RawBgra", new[] { ".bgra" }));
-        yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", new[] { ".y4m" }));
-        webP = Register(new FileFormat(app, "WebP", new[] { ".webp" }));
+        arw = Register(new FileFormat(app, "Arw", [ ".arw" ]));
+        bmp = Register(new FileFormat(app, "Bmp", [ ".bmp" ]));
+        cr2 = Register(new FileFormat(app, "Cr2", [ ".cr2" ]));
+        dng = Register(new FileFormat(app, "Dng", [ ".dng" ]));
+        heif = Register(new FileFormat(app, "Heif", [ ".heif", ".heic" ]));
+        jpeg = Register(new FileFormat(app, "Jpeg", [ ".jpg", ".jpeg", ".jpe", ".jfif" ]));
+        nef = Register(new FileFormat(app, "Nef", [ ".nef" ]));
+        png = Register(new FileFormat(app, "Png", [ ".png" ]));
+        rawBgra = Register(new FileFormat(app, "RawBgra", [ ".bgra" ]));
+        tiff = Register(new FileFormat(app, "Tiff", [ ".tif", ".tiff" ]));
+        yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", [ ".y4m" ]));
+        webP = Register(new FileFormat(app, "WebP", [ ".webp" ]));
     }
 
 
@@ -114,6 +115,12 @@ static class FileFormats
     /// Raw BGRA data.
     /// </summary>
     public static FileFormat RawBgra => rawBgra ?? throw new InvalidOperationException("File format is not ready yet.");
+
+
+    /// <summary>
+    /// Tag Image File Format (TIFF).
+    /// </summary>
+    public static FileFormat Tiff => tiff ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
     // Register format.

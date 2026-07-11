@@ -6515,7 +6515,8 @@ class Session : ViewModel<IAppSuiteApplication>
 				var fileFormat = this.Profile.FileFormat;
 				return fileFormat == FileFormats.Png
 					|| fileFormat == FileFormats.WebP
-					|| fileFormat == FileFormats.Heif;
+					|| fileFormat == FileFormats.Heif
+					|| fileFormat == FileFormats.Tiff;
 			}),
 			_ => false,
 		};

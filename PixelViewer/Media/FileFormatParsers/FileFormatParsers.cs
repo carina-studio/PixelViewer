@@ -38,6 +38,7 @@ static class FileFormatParsers
             new HeifFileFormatParser().Let(it => parsers[it.FileFormat] = it);
         new JpegFileFormatParser().Let(it => parsers[it.FileFormat] = it);
         new PngFileFormatParser().Let(it => parsers[it.FileFormat] = it);
+        new TiffFileFormatParser().Let(it => parsers[it.FileFormat] = it);
         new Yuv4Mpeg2FileFormatParser().Let(it => parsers[it.FileFormat] = it);
         new WebPFileFormatParser().Let(it => parsers[it.FileFormat] = it);
     }

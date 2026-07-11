@@ -120,6 +120,7 @@
 	<sys:String x:Key="String/FileType.Nef">Nikon 原始图像格式 (NEF)</sys:String>
 	<sys:String x:Key="String/FileType.Png">便携式网络图形 (PNG)</sys:String>
 	<sys:String x:Key="String/FileType.RawBgra">原始 32/64 位 BGRA 像素</sys:String>
+	<sys:String x:Key="String/FileType.Tiff">TIFF 图像</sys:String>
 	<sys:String x:Key="String/FileType.WebP">WebP 图像</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->

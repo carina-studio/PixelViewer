@@ -283,3 +283,21 @@ class HeifImageRenderer : MagickCompressedImageRenderer
     protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
         HeifFileFormatParser.CheckFileHeader(imageStream);
 }
+
+
+/// <summary>
+/// <see cref="IImageRenderer"/> for TIFF format.
+/// </summary>
+class TiffImageRenderer : MagickCompressedImageRenderer
+{
+    /// <summary>
+    /// Initialize new <see cref="TiffImageRenderer"/> instance.
+    /// </summary>
+    public TiffImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "TIFF", new ImagePlaneDescriptor(0), new[] { "TIFF" }), new[] { MagickFormat.Tiff, MagickFormat.Tif, MagickFormat.Tiff64 })
+    { }
+
+
+    /// <inheritdoc/>
+    protected override bool OnCheckFileHeader(IImageDataSource source, Stream imageStream) =>
+        Tiff.CheckFileHeader(imageStream, out _);
+}
