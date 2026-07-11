@@ -5,6 +5,7 @@ using CarinaStudio.Collections;
 using CarinaStudio.MacOS.CoreGraphics;
 using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
+using ICSharpCode.SharpZipLib.Zip.Compression.Streams;
 using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using System;
@@ -1944,6 +1945,42 @@ namespace Carina.PixelViewer.Media
             }
             colorSpace = Default;
             return false;
+        }
+
+
+        /// <summary>
+        /// Try saving this color space as an ICC profile to the given stream.
+        /// </summary>
+        /// <param name="stream"><see cref="Stream"/> to write the ICC profile to.</param>
+        /// <returns>True if the ICC profile was written to <paramref name="stream"/>.</returns>
+        /// <remarks>
+        /// The profile is obtained by encoding a 1x1 image with this color space to PNG and extracting the embedded 'iCCP' chunk. False is returned without writing anything when the color space has no distinct ICC representation (i.e. it resolves to sRGB, for which the PNG encoder emits an 'sRGB' chunk instead).
+        /// </remarks>
+        public bool TrySaveAsIccProfile(Stream stream)
+        {
+            // encode a 1x1 image with this color space to PNG so that Skia embeds the ICC profile in an 'iCCP' chunk
+            var skiaImageInfo = new SKImageInfo(1, 1, SKColorType.Bgra8888, SKAlphaType.Unpremul)
+            {
+                ColorSpace = this.ToSkiaColorSpace(),
+            };
+            using var skiaBitmap = new SKBitmap(skiaImageInfo);
+            using var pngData = skiaBitmap.Encode(SKEncodedImageFormat.Png, 100);
+            if (pngData is null)
+                throw new Exception("Failed to encode image for extracting ICC profile.");
+
+            // seek to the compressed ICC profile in the 'iCCP' chunk
+            using var pngStream = pngData.AsStream();
+            if (!FileFormatParsers.PngFileFormatParser.SeekToIccProfile(pngStream))
+                return false;
+
+            // inflate the profile directly to the output stream, reporting whether any data was actually written
+            using var inflaterStream = new InflaterInputStream(pngStream) { IsStreamOwner = false };
+            var firstByte = inflaterStream.ReadByte();
+            if (firstByte < 0)
+                return false;
+            stream.WriteByte((byte)firstByte);
+            inflaterStream.CopyTo(stream);
+            return true;
         }
 
 

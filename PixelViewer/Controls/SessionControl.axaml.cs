@@ -2188,6 +2188,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				new(app.GetStringNonNull("FileType.RawBgra"))
 				{
 					Patterns = [ "*.bgra" ],
+				},
+				new(app.GetStringNonNull("FileType.Tiff"))
+				{
+					Patterns = [ "*.tif", "*.tiff" ],
 				}
 			],
 			SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg"

@@ -21,6 +21,7 @@ static class ImageEncoders
             new JpegImageEncoder(),
             new PngImageEncoder(),
             new RawBgraImageEncoder(),
+            new TiffImageEncoder(),
         });
         foreach(var encoder in All)
         {

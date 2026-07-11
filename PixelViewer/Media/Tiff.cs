@@ -212,4 +212,18 @@ static class Tiff
             flipY = false;
         }
     }
+
+
+    /// <summary>
+    /// Convert from rotation in degrees to TIFF orientation.
+    /// </summary>
+    /// <param name="rotation">Rotation in degrees, which will be normalized into the range [0, 360).</param>
+    /// <returns>TIFF orientation, the value will be one of 1, 3, 6 and 8.</returns>
+    public static int ToTiffOrientation(int rotation) => (((rotation % 360) + 360) % 360) switch
+    {
+        90 => 6,
+        180 => 3,
+        270 => 8,
+        _ => 1,
+    };
 }
