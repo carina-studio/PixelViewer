@@ -1,5 +1,4 @@
-﻿using CarinaStudio;
-using CarinaStudio.IO;
+﻿using CarinaStudio.IO;
 using CarinaStudio.Threading.Tasks;
 using System;
 using System.IO;
@@ -37,7 +36,14 @@ abstract class BaseImageEncoder : IImageEncoder
         var stream = await outputStreamProvider.OpenStreamAsync(StreamAccess.ReadWrite, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
         {
-            Global.RunWithoutErrorAsync(stream.Close);
+            await Task.Run(() =>
+            {
+                try
+                {
+                    stream.Close();
+                }
+                catch { /* best effort */ }
+            }, CancellationToken.None);
             throw new TaskCanceledException();
         }
 
@@ -54,7 +60,14 @@ abstract class BaseImageEncoder : IImageEncoder
         }
         finally
         {
-            Global.RunWithoutErrorAsync(stream.Close);
+            await Task.Run(() =>
+            {
+                try
+                {
+                    stream.Close();
+                }
+                catch { /* best effort */ }
+            }, CancellationToken.None);
         }
     }
 
