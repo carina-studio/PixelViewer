@@ -118,7 +118,6 @@
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Hint.Opacity">0.75</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
-		<sys:Double x:Key="Double/SessionControl.HistogramsPanel.Width">170</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.FontSize">10</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.Opacity.Disabled">0.5</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
@@ -134,7 +133,7 @@
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Decrease">0,0,5,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Increase">5,0,0,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Padding">3</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">18,10,18,10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Border">1</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">8,0,0,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Padding">4,1,4,1</Thickness>
@@ -142,7 +141,7 @@
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">5,10,10,10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">13,10,18,10</Thickness>
 		
 	</Styles.Resources>
 

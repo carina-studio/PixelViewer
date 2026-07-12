@@ -280,6 +280,10 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Maximum width of panel of histograms in pixels.
+	/// </summary>
+	public const double MaxHistogramsPanelSize = 400;
+	/// <summary>
 	/// Maximum scaling ratio of rendered image.
 	/// </summary>
 	public const double MaxRenderedImageScale = 20.0;
@@ -287,6 +291,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Maximum size of panel of rendering parameters in pixels.
 	/// </summary>
 	public const double MaxRenderingParametersPanelSize = 400;
+	/// <summary>
+	/// Minimum width of panel of histograms in pixels.
+	/// </summary>
+	public const double MinHistogramsPanelSize = 150;
 	/// <summary>
 	/// Minimum scaling ratio of rendered image.
 	/// </summary>
@@ -453,6 +461,19 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="HighlightAdjustment"/>.
 	/// </summary>
 	public static readonly ObservableProperty<double> HighlightAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(HighlightAdjustment), 0, validate: double.IsFinite);
+	/// <summary>
+	/// Property of <see cref="HistogramsPanelSize"/>.
+	/// </summary>
+	public static readonly ObservableProperty<double> HistogramsPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(HistogramsPanelSize), 170,
+		coerce: (_, it) =>
+		{
+			if (it >= MaxHistogramsPanelSize)
+				return MaxHistogramsPanelSize;
+			if (it <= MinHistogramsPanelSize)
+				return MinHistogramsPanelSize;
+			return it;
+		},
+		validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="Histograms"/>.
 	/// </summary>
@@ -804,6 +825,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 	// Static fields.
 	static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
+	static readonly SettingKey<int> LatestHistogramsPanelSize = new("Session.LatestHistogramsPanelSize", (int)(HistogramsPanelSizeProperty.DefaultValue + 0.5));
 	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
 	static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new();
 	static readonly Func<double, double> ZoomingInterpolator = Interpolators.FastDeceleration;
@@ -1261,6 +1283,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			_ = this.RestoreState(savedState.Value);
 		else
 		{
+			this.SetValue(HistogramsPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestHistogramsPanelSize));
 			this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
 			this.SetValue(RenderingParametersPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
 		}
@@ -3149,6 +3172,16 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Get or set width of panel of histograms in pixels.
+	/// </summary>
+	public double HistogramsPanelSize
+	{
+		get => this.GetValue(HistogramsPanelSizeProperty);
+		set => this.SetValue(HistogramsPanelSizeProperty, value);
+	}
+
+
+	/// <summary>
 	/// Get rotation for displaying rendered image.
 	/// </summary>
 	public double ImageDisplayRotation => this.GetValue(ImageDisplayRotationProperty);
@@ -3707,6 +3740,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsSourceOpened)
 				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
+		else if (property == HistogramsPanelSizeProperty)
+			this.PersistentState.SetValue(LatestHistogramsPanelSize, (int)(this.HistogramsPanelSize + 0.5));
 		else if (property == HistogramsProperty)
 			this.SetValue(HasHistogramsProperty, newValue is not null);
 		else if (property == ImageRendererProperty)
@@ -5497,6 +5532,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// load displaying parameters
 		var fitToViewport = true;
 		var frameNumber = 1L;
+		var histogramsPanelSize = HistogramsPanelSizeProperty.DefaultValue;
 		var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
 		var isImageFlippedX = false;
 		var isImageFlippedY = false;
@@ -5520,6 +5556,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			isRenderingParamsPanelVisible = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(RequestedImageDisplayScale), out jsonProperty))
 			jsonProperty.TryGetDouble(out scale);
+		if (savedState.TryGetProperty(nameof(HistogramsPanelSize), out jsonProperty)
+			&& jsonProperty.TryGetDouble(out histogramsPanelSize))
+		{
+			histogramsPanelSize = this.CoerceValue(HistogramsPanelSizeProperty, histogramsPanelSize);
+			if (!HistogramsPanelSizeProperty.ValidationFunction(histogramsPanelSize))
+				histogramsPanelSize = HistogramsPanelSizeProperty.DefaultValue;
+		}
 		if (savedState.TryGetProperty(nameof(RenderingParametersPanelSize), out jsonProperty)
 			&& jsonProperty.TryGetDouble(out renderingParamsPanelSize))
 		{
@@ -5532,7 +5575,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (savedState.TryGetProperty(nameof(CustomTitle), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
 			this.SetValue(CustomTitleProperty, jsonProperty.GetString());
 		
-		// restore visibility of histograms before opening the source (opening the source may block for a while)
+		// restore size and visibility of histograms before opening the source (opening the source may block for a while)
+		this.SetValue(HistogramsPanelSizeProperty, histogramsPanelSize);
 		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
 
 		// open source file
@@ -5590,9 +5634,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(ImageDisplayRotationProperty, rotation);
 		this.SetValue(IsImageFlippedXProperty, isImageFlippedX);
 		this.SetValue(IsImageFlippedYProperty, isImageFlippedY);
+		this.SetValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
 		this.SetValue(IsRenderingParametersPanelVisibleProperty, isRenderingParamsPanelVisible);
 		this.SetValue(RequestedImageDisplayScaleProperty, scale);
-		this.SetValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
 
 		this.Logger.LogWarning("State restored");
 
@@ -5999,6 +6043,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// displaying parameters
 		writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProperty));
 		writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
+		writer.WriteNumber(nameof(HistogramsPanelSize), this.HistogramsPanelSize);
 		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
 		writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
 		writer.WriteBoolean(nameof(IsImageFlippedX), this.IsImageFlippedX);

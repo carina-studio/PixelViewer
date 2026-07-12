@@ -132,6 +132,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	Vector? gesturePivotInViewport;
 	readonly ScheduledAction hidePanelsByImageViewerSizeAction;
 	readonly ToggleButton histogramsButton;
+	readonly ColumnDefinition histogramsPanelColumn;
 	readonly Image image;
 	readonly Panel imageContainerBorder;
 	StandardCursorType imageCursorType = StandardCursorType.Arrow;
@@ -414,11 +415,21 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 		SetupFilterParamsSliderAndButtons("redColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("saturationAdjustment", ColorAdjustmentGroup);
-		this.renderingParamsPanelColumn = this.Get<Grid>("workingAreaGrid").ColumnDefinitions.Last().Also(column =>
+		var workingAreaColumnDefs = this.Get<Grid>("workingAreaGrid").ColumnDefinitions;
+		this.histogramsPanelColumn = workingAreaColumnDefs.First().Also(column =>
 		{
-			column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>((_) =>
+			column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>(_ =>
 			{
-				(this.DataContext as Session)?.Let(it => it.RenderingParametersPanelSize = column.Width.Value);
+				if (this.DataContext is Session session && session.IsHistogramsVisible)
+					session.HistogramsPanelSize = column.Width.Value;
+			}));
+		});
+		this.renderingParamsPanelColumn = workingAreaColumnDefs.Last().Also(column =>
+		{
+			column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>(_ =>
+			{
+				if (this.DataContext is Session session && session.IsRenderingParametersPanelVisible)
+					session.RenderingParametersPanelSize = column.Width.Value;
 			}));
 		});
 		this.renderingParamsPanelScrollViewer = this.Get<ScrollViewer>(nameof(renderingParamsPanelScrollViewer));
@@ -975,9 +986,28 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.canSaveRenderedImage.Bind(session.SaveRenderedImageCommand, new Session.ImageSavingParams());
 		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
 
-		// setup histograms panel
+		// setup panels
 		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 1 : 3);
-		this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
+		if (session.IsRenderingParametersPanelVisible)
+		{
+			this.renderingParamsPanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
+			this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
+		}
+		else
+		{
+			this.renderingParamsPanelColumn.MinWidth = 0;
+			this.renderingParamsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
+		}
+		if (session.IsHistogramsVisible)
+		{
+			this.histogramsPanelColumn.MinWidth = Session.MinHistogramsPanelSize;
+			this.histogramsPanelColumn.Width = new GridLength(session.HistogramsPanelSize, GridUnitType.Pixel);
+		}
+		else
+		{
+			this.histogramsPanelColumn.MinWidth = 0;
+			this.histogramsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
+		}
 
 		// update rendered image
 		this.updateEffectiveRenderedImageAction.Schedule();
@@ -1145,6 +1175,16 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		_ = this.DropDataAsync(e.DataTransfer, e.KeyModifiers);
 		e.Handled = true;
 	}
+
+
+	// Called when complete dragging splitter of histograms panel.
+	void OnHistogramsPanelSplitterDragCompleted(object? sender, VectorEventArgs e) =>
+		this.stopUsingSmallRenderedImageAction.Schedule();
+
+
+	// Called when start dragging splitter of histograms panel.
+	void OnHistogramsPanelSplitterDragStarted(object? sender, VectorEventArgs e) =>
+		this.StartUsingSmallRenderedImage();
 
 
 	// Called when double tap on image.
@@ -1844,7 +1884,16 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			}
 			case nameof(Session.IsHistogramsVisible):
 				if (session.IsHistogramsVisible)
+				{
 					this.keepHistogramsVisible = true;
+					this.histogramsPanelColumn.MinWidth = Session.MinHistogramsPanelSize;
+					this.histogramsPanelColumn.Width = new GridLength(session.HistogramsPanelSize, GridUnitType.Pixel);
+				}
+				else
+				{
+					this.histogramsPanelColumn.MinWidth = 0;
+					this.histogramsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
+				}
 				this.updateImageViewerShadowMarginAction.Schedule();
 				break;
 			case nameof(Session.IsRenderingImage):
@@ -1859,9 +1908,15 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				{
 					Grid.SetColumnSpan(this.imageViewerGrid, 1);
 					this.keepRenderingParamsPanelVisible = true;
+					this.renderingParamsPanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
+					this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
 				}
 				else
+				{
 					Grid.SetColumnSpan(this.imageViewerGrid, 3);
+					this.renderingParamsPanelColumn.MinWidth = 0;
+					this.renderingParamsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
+				}
 				this.updateImageViewerShadowMarginAction.Schedule();
 				break;
 			case nameof(Session.IsSourceOpened):

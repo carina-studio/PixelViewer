@@ -499,8 +499,8 @@
 					<!-- Rendering params panel -->
 					<ToggleButton IsChecked="{Binding IsRenderingParametersPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderingParametersPanel}">
 						<Panel>
-							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Panel.Right}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Panel.Right.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
 						</Panel>
 					</ToggleButton>
 
@@ -523,19 +523,18 @@
 
 			<!-- Columns -->
 			<Grid.ColumnDefinitions>
+				<ColumnDefinition MaxWidth="{x:Static appViewModels:Session.MaxHistogramsPanelSize}" Width="0"/>
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="Auto"/>
-				<ColumnDefinition MaxWidth="{x:Static appViewModels:Session.MaxRenderingParametersPanelSize}" MinWidth="{x:Static appViewModels:Session.MinRenderingParametersPanelSize}" Width="0"/>
+				<ColumnDefinition MaxWidth="{x:Static appViewModels:Session.MaxRenderingParametersPanelSize}" Width="0"/>
 			</Grid.ColumnDefinitions>
 
 			<!-- Histograms -->
-			<Border Background="{DynamicResource Brush/WorkingArea.Background}"/>
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" 
-			        BorderBrush="{DynamicResource Brush/WorkingArea.Panel.Border}"
-			        BorderThickness="0,0,1,0"
-			        IsVisible="{Binding IsHistogramsVisible}" 
-			        Width="{StaticResource Double/SessionControl.HistogramsPanel.Width}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Background}" Grid.ColumnSpan="2"/>
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}"
+			        Grid.ColumnSpan="2"
+			        IsVisible="{Binding IsHistogramsVisible}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{StaticResource Thickness/SessionControl.HistogramsPanel.Padding}">
 
@@ -570,10 +569,20 @@
 				</ScrollViewer>
 			</Border>
 
+			<!-- Splitter -->
+			<GridSplitter Background="{x:Static Brushes.Transparent}"
+			              BorderBrush="{DynamicResource Brush/WorkingArea.Panel.Border}"
+			              BorderThickness="0,0,1,0"
+			              Classes="GridSplitter_Vertical"
+			              DragCompleted="OnHistogramsPanelSplitterDragCompleted"
+			              DragStarted="OnHistogramsPanelSplitterDragStarted"
+			              Grid.Column="1"
+			              IsVisible="{Binding IsHistogramsVisible}"/>
+
 			<!-- Image viewer -->
-			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}" 
-			      DragDrop.AllowDrop="True" 
-			      Grid.Column="1" 
+			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}"
+			      DragDrop.AllowDrop="True"
+			      Grid.Column="2"
 			      RowDefinitions="*,Auto">
 
 				<!-- Hint -->
@@ -755,14 +764,14 @@
 			</Grid>
 			
 			<!-- Shadow -->
-			<Border BoxShadow="{DynamicResource BoxShadows/Shadow.Inner.Light}" 
-			        Grid.Column="1"
+			<Border BoxShadow="{DynamicResource BoxShadows/Shadow.Inner.Light}"
+			        Grid.Column="2"
 			        Grid.ColumnSpan="{Binding #imageViewerGrid.(Grid.ColumnSpan)}"
 			        IsHitTestVisible="false"
 			        Margin="{ReflectionBinding #root.ImageViewerShadowsMargin}"/>
 
 			<!-- Rendering parameters panel -->
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="3" IsVisible="{Binding IsRenderingParametersPanelVisible}">
+			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="4" IsVisible="{Binding IsRenderingParametersPanelVisible}">
 				<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
 					<StackPanel IsEnabled="{Binding IsSourceOpened}" Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
 
@@ -1127,8 +1136,8 @@
 			              BorderThickness="1,0,0,0"
 			              Classes="GridSplitter_Vertical" 
 			              DragCompleted="OnOptionsPanelSplitterDragCompleted" 
-			              DragStarted="OnOptionsPanelSplitterDragStarted" 
-			              Grid.Column="2" 
+			              DragStarted="OnOptionsPanelSplitterDragStarted"
+			              Grid.Column="3"
 			              IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
 			
 		</Grid>
