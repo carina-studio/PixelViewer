@@ -548,22 +548,41 @@
 
 						<!-- Luminance -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Luminance}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
 						<!-- Red -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Red}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
 						<!-- Green -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Green}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
 						<!-- Blue -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Blue}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
+						<Separator asControls:DialogElement.SeparatorType="Default"/>
+
+						<!-- Markers -->
+						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Markers}"/>
+						<Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" HorizontalAlignment="Stretch">
+							
+							<!-- Styles -->
+							<Grid.Styles>
+								<Style Selector="Line">
+									<Setter Property="Stretch" Value="Fill"/>
+									<Setter Property="VerticalAlignment" Value="Center"/>
+								</Style>
+							</Grid.Styles>
+							
+							<!-- Mean -->
+							<CheckBox Content="{asXaml:StringResource SessionControl.Histogram.Marker.Mean}" IsChecked="{Binding IsHistogramMeanMarkerVisible, Mode=TwoWay}"/>
+							<Line Grid.Column="1" EndPoint="24,0" StartPoint="0,0" Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}" StrokeDashArray="3,1.5" StrokeThickness="1"/>
+							
+						</Grid>
 						
 					</StackPanel>
 				</ScrollViewer>

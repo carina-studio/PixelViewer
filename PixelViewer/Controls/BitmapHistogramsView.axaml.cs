@@ -1,4 +1,4 @@
-using Avalonia;
+﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
 using Avalonia.Markup.Xaml;
@@ -41,9 +41,25 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     /// </summary>
     public static readonly StyledProperty<bool> IsLuminanceHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsLuminanceHistogramVisible), false);
     /// <summary>
+    /// Property of <see cref="IsMeanMarkerVisible"/>.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsMeanMarkerVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsMeanMarkerVisible), true);
+    /// <summary>
+    /// Property of <see cref="IsMedianMarkerVisible"/>.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsMedianMarkerVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsMedianMarkerVisible), false);
+    /// <summary>
+    /// Property of <see cref="IsMinMaxMarkerVisible"/>.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsMinMaxMarkerVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsMinMaxMarkerVisible), false);
+    /// <summary>
     /// Property of <see cref="IsRedHistogramVisible"/>.
     /// </summary>
     public static readonly StyledProperty<bool> IsRedHistogramVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsRedHistogramVisible), false);
+    /// <summary>
+    /// Property of <see cref="IsShadowHighlightMarkerVisible"/>.
+    /// </summary>
+    public static readonly StyledProperty<bool> IsShadowHighlightMarkerVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsShadowHighlightMarkerVisible), false);
     /// <summary>
     /// Property of <see cref="LuminanceHistogramBrush"/>.
     /// </summary>
@@ -52,10 +68,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     /// Property of <see cref="RedHistogramBrush"/>.
     /// </summary>
     public static readonly StyledProperty<IBrush?> RedHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(RedHistogramBrush));
-    
-    
+
+
     // Constants.
-    const double DefaultMeanOfBlueOffset = -999;
+    const double DefaultMarkerOffset = -999;
 
 
     // Static fields.
@@ -63,14 +79,34 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     static readonly StyledProperty<double> BlueHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(BlueHistogramScaleY), 0);
     static readonly StyledProperty<IImage?> GreenHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(GreenHistogramImage));
     static readonly StyledProperty<double> GreenHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(GreenHistogramScaleY), 0);
+    static readonly StyledProperty<double> HighlightOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(HighlightOfBlueOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> HighlightOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(HighlightOfGreenOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> HighlightOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(HighlightOfLuminanceOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> HighlightOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(HighlightOfRedOffset), DefaultMarkerOffset);
     static readonly StyledProperty<IImage?> LuminanceHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(LuminanceHistogramImage));
     static readonly StyledProperty<double> LuminanceHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(LuminanceHistogramScaleY), 0);
-    static readonly StyledProperty<double> MeanOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfBlueOffset), DefaultMeanOfBlueOffset);
-    static readonly StyledProperty<double> MeanOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfGreenOffset), DefaultMeanOfBlueOffset);
-    static readonly StyledProperty<double> MeanOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfLuminanceOffset), DefaultMeanOfBlueOffset);
-    static readonly StyledProperty<double> MeanOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfRedOffset), DefaultMeanOfBlueOffset);
+    static readonly StyledProperty<double> MaxOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MaxOfBlueOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MaxOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MaxOfGreenOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MaxOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MaxOfLuminanceOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MaxOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MaxOfRedOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MeanOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfBlueOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MeanOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfGreenOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MeanOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfLuminanceOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MeanOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MeanOfRedOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MedianOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MedianOfBlueOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MedianOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MedianOfGreenOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MedianOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MedianOfLuminanceOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MedianOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MedianOfRedOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MinOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfBlueOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MinOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfGreenOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MinOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfLuminanceOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> MinOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfRedOffset), DefaultMarkerOffset);
     static readonly StyledProperty<IImage?> RedHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(RedHistogramImage));
     static readonly StyledProperty<double> RedHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RedHistogramScaleY), 0);
+    static readonly StyledProperty<double> ShadowOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(ShadowOfBlueOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> ShadowOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(ShadowOfGreenOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> ShadowOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(ShadowOfLuminanceOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> ShadowOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(ShadowOfRedOffset), DefaultMarkerOffset);
 
 
     // Fields.
@@ -80,7 +116,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     int maxRedValue;
     readonly ScheduledAction updateHistogramImagesAction;
     readonly ScheduledAction updateHistogramScalesAction;
-    readonly ScheduledAction updateMeanOfColorsAction;
+    readonly ScheduledAction updateMarkerOffsetsAction;
 
 
     /// <summary>
@@ -125,24 +161,65 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
             this.SetValue(BlueHistogramScaleYProperty, this.IsBlueHistogramVisible ? this.maxBlueValue / maxValue : 0);
             this.SetValue(LuminanceHistogramScaleYProperty, this.IsLuminanceHistogramVisible ? this.maxLuminanceValue / maxValue : 0);
         });
-        this.updateMeanOfColorsAction = new(() =>
+        this.updateMarkerOffsetsAction = new(() =>
         {
             var width = this.Bounds.Width;
             if (width <= 0)
                 return;
             if (this.DataContext is BitmapHistograms histograms)
             {
-                this.SetValue(MeanOfBlueOffsetProperty, width * histograms.MeanOfBlue / histograms.ColorCount);
-                this.SetValue(MeanOfGreenOffsetProperty, width * histograms.MeanOfGreen / histograms.ColorCount);
-                this.SetValue(MeanOfLuminanceOffsetProperty, width * histograms.MeanOfLuminance / histograms.ColorCount);
-                this.SetValue(MeanOfRedOffsetProperty, width * histograms.MeanOfRed / histograms.ColorCount);
+                var colorCount = histograms.ColorCount;
+                this.SetValue(MeanOfBlueOffsetProperty, width * histograms.MeanOfBlue / colorCount);
+                this.SetValue(MeanOfGreenOffsetProperty, width * histograms.MeanOfGreen / colorCount);
+                this.SetValue(MeanOfLuminanceOffsetProperty, width * histograms.MeanOfLuminance / colorCount);
+                this.SetValue(MeanOfRedOffsetProperty, width * histograms.MeanOfRed / colorCount);
+                this.SetValue(MedianOfBlueOffsetProperty, width * histograms.MedianOfBlue / colorCount);
+                this.SetValue(MedianOfGreenOffsetProperty, width * histograms.MedianOfGreen / colorCount);
+                this.SetValue(MedianOfLuminanceOffsetProperty, width * histograms.MedianOfLuminance / colorCount);
+                this.SetValue(MedianOfRedOffsetProperty, width * histograms.MedianOfRed / colorCount);
+                this.SetValue(MinOfBlueOffsetProperty, width * histograms.MinOfBlue / colorCount);
+                this.SetValue(MinOfGreenOffsetProperty, width * histograms.MinOfGreen / colorCount);
+                this.SetValue(MinOfLuminanceOffsetProperty, width * histograms.MinOfLuminance / colorCount);
+                this.SetValue(MinOfRedOffsetProperty, width * histograms.MinOfRed / colorCount);
+                this.SetValue(MaxOfBlueOffsetProperty, width * histograms.MaxOfBlue / colorCount);
+                this.SetValue(MaxOfGreenOffsetProperty, width * histograms.MaxOfGreen / colorCount);
+                this.SetValue(MaxOfLuminanceOffsetProperty, width * histograms.MaxOfLuminance / colorCount);
+                this.SetValue(MaxOfRedOffsetProperty, width * histograms.MaxOfRed / colorCount);
+                this.SetValue(ShadowOfBlueOffsetProperty, width * histograms.ShadowOfBlue / colorCount);
+                this.SetValue(ShadowOfGreenOffsetProperty, width * histograms.ShadowOfGreen / colorCount);
+                this.SetValue(ShadowOfLuminanceOffsetProperty, width * histograms.ShadowOfLuminance / colorCount);
+                this.SetValue(ShadowOfRedOffsetProperty, width * histograms.ShadowOfRed / colorCount);
+                this.SetValue(HighlightOfBlueOffsetProperty, width * histograms.HighlightOfBlue / colorCount);
+                this.SetValue(HighlightOfGreenOffsetProperty, width * histograms.HighlightOfGreen / colorCount);
+                this.SetValue(HighlightOfLuminanceOffsetProperty, width * histograms.HighlightOfLuminance / colorCount);
+                this.SetValue(HighlightOfRedOffsetProperty, width * histograms.HighlightOfRed / colorCount);
             }
             else
             {
-                this.SetValue(MeanOfBlueOffsetProperty, DefaultMeanOfBlueOffset);
-                this.SetValue(MeanOfGreenOffsetProperty, DefaultMeanOfBlueOffset);
-                this.SetValue(MeanOfLuminanceOffsetProperty, DefaultMeanOfBlueOffset);
-                this.SetValue(MeanOfRedOffsetProperty, DefaultMeanOfBlueOffset);
+                this.SetValue(MeanOfBlueOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MeanOfGreenOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MeanOfLuminanceOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MeanOfRedOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MedianOfBlueOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MedianOfGreenOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MedianOfLuminanceOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MedianOfRedOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MinOfBlueOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MinOfGreenOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MinOfLuminanceOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MinOfRedOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MaxOfBlueOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MaxOfGreenOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MaxOfLuminanceOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(MaxOfRedOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(ShadowOfBlueOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(ShadowOfGreenOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(ShadowOfLuminanceOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(ShadowOfRedOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(HighlightOfBlueOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(HighlightOfGreenOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(HighlightOfLuminanceOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(HighlightOfRedOffsetProperty, DefaultMarkerOffset);
             }
         });
     }
@@ -198,7 +275,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         {
             for (var i = dataCount - 1; i >= 0; --i)
                 pathBuilder.AppendFormat(" L {0},{1}", i, dataCount - (histogram[i] / (double)max * dataCount));
-            
+
         }
         pathBuilder.Append(" Z");
         try
@@ -238,6 +315,22 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     double GreenHistogramScaleY => this.GetValue(GreenHistogramScaleYProperty);
 
 
+    // Pixel offset of highlight of blue.
+    double HighlightOfBlueOffset => this.GetValue(HighlightOfBlueOffsetProperty);
+
+
+    // Pixel offset of highlight of green.
+    double HighlightOfGreenOffset => this.GetValue(HighlightOfGreenOffsetProperty);
+
+
+    // Pixel offset of highlight of luminance.
+    double HighlightOfLuminanceOffset => this.GetValue(HighlightOfLuminanceOffsetProperty);
+
+
+    // Pixel offset of highlight of red.
+    double HighlightOfRedOffset => this.GetValue(HighlightOfRedOffsetProperty);
+
+
     // Initialize.
     private void InitializeComponent() => AvaloniaXamlLoader.Load(this);
 
@@ -273,12 +366,52 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 
 
     /// <summary>
+    /// Get or set whether the mean marker is visible or not.
+    /// </summary>
+    public bool IsMeanMarkerVisible
+    {
+        get => this.GetValue(IsMeanMarkerVisibleProperty);
+        set => this.SetValue(IsMeanMarkerVisibleProperty, value);
+    }
+
+
+    /// <summary>
+    /// Get or set whether the median marker is visible or not.
+    /// </summary>
+    public bool IsMedianMarkerVisible
+    {
+        get => this.GetValue(IsMedianMarkerVisibleProperty);
+        set => this.SetValue(IsMedianMarkerVisibleProperty, value);
+    }
+
+
+    /// <summary>
+    /// Get or set whether the minimum/maximum markers are visible or not.
+    /// </summary>
+    public bool IsMinMaxMarkerVisible
+    {
+        get => this.GetValue(IsMinMaxMarkerVisibleProperty);
+        set => this.SetValue(IsMinMaxMarkerVisibleProperty, value);
+    }
+
+
+    /// <summary>
     /// Get or set whether histogram of red channel is visible or not.
     /// </summary>
     public bool IsRedHistogramVisible
     {
         get => this.GetValue(IsRedHistogramVisibleProperty);
         set => this.SetValue(IsRedHistogramVisibleProperty, value);
+    }
+
+
+    /// <summary>
+    /// Get or set whether the shadow/highlight markers are visible or not.
+    /// </summary>
+    public bool IsShadowHighlightMarkerVisible
+    {
+        get => this.GetValue(IsShadowHighlightMarkerVisibleProperty);
+        set => this.SetValue(IsShadowHighlightMarkerVisibleProperty, value);
     }
 
 
@@ -300,20 +433,68 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     double LuminanceHistogramScaleY => this.GetValue(LuminanceHistogramScaleYProperty);
 
 
+    // Pixel offset of maximum of blue.
+    double MaxOfBlueOffset => this.GetValue(MaxOfBlueOffsetProperty);
+
+
+    // Pixel offset of maximum of green.
+    double MaxOfGreenOffset => this.GetValue(MaxOfGreenOffsetProperty);
+
+
+    // Pixel offset of maximum of luminance.
+    double MaxOfLuminanceOffset => this.GetValue(MaxOfLuminanceOffsetProperty);
+
+
+    // Pixel offset of maximum of red.
+    double MaxOfRedOffset => this.GetValue(MaxOfRedOffsetProperty);
+
+
     // Pixel offset of mean of blue.
     double MeanOfBlueOffset => this.GetValue(MeanOfBlueOffsetProperty);
-    
-    
+
+
     // Pixel offset of mean of green.
     double MeanOfGreenOffset => this.GetValue(MeanOfGreenOffsetProperty);
-    
-    
+
+
     // Pixel offset of mean of luminance.
     double MeanOfLuminanceOffset => this.GetValue(MeanOfLuminanceOffsetProperty);
-    
-    
+
+
     // Pixel offset of mean of red.
     double MeanOfRedOffset => this.GetValue(MeanOfRedOffsetProperty);
+
+
+    // Pixel offset of median of blue.
+    double MedianOfBlueOffset => this.GetValue(MedianOfBlueOffsetProperty);
+
+
+    // Pixel offset of median of green.
+    double MedianOfGreenOffset => this.GetValue(MedianOfGreenOffsetProperty);
+
+
+    // Pixel offset of median of luminance.
+    double MedianOfLuminanceOffset => this.GetValue(MedianOfLuminanceOffsetProperty);
+
+
+    // Pixel offset of median of red.
+    double MedianOfRedOffset => this.GetValue(MedianOfRedOffsetProperty);
+
+
+    // Pixel offset of minimum of blue.
+    double MinOfBlueOffset => this.GetValue(MinOfBlueOffsetProperty);
+
+
+    // Pixel offset of minimum of green.
+    double MinOfGreenOffset => this.GetValue(MinOfGreenOffsetProperty);
+
+
+    // Pixel offset of minimum of luminance.
+    double MinOfLuminanceOffset => this.GetValue(MinOfLuminanceOffsetProperty);
+
+
+    // Pixel offset of minimum of red.
+    double MinOfRedOffset => this.GetValue(MinOfRedOffsetProperty);
 
 
     /// <inheritdoc/>
@@ -332,7 +513,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         {
             (change.OldValue as BitmapHistograms)?.Let(this.DetachFromBitmapHistograms);
             (change.NewValue as BitmapHistograms)?.Let(this.AttachToBitmapHistograms);
-            this.updateMeanOfColorsAction.Schedule();
+            this.updateMarkerOffsetsAction.Schedule();
         }
         else if (property == IsBlueHistogramVisibleProperty
             || property == IsGreenHistogramVisibleProperty
@@ -348,7 +529,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     protected override void OnSizeChanged(SizeChangedEventArgs e)
     {
         base.OnSizeChanged(e);
-        this.updateMeanOfColorsAction.Schedule();
+        this.updateMarkerOffsetsAction.Schedule();
     }
 
 
@@ -368,4 +549,20 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 
     // Display scale of red histogram.
     double RedHistogramScaleY => this.GetValue(RedHistogramScaleYProperty);
+
+
+    // Pixel offset of shadow of blue.
+    double ShadowOfBlueOffset => this.GetValue(ShadowOfBlueOffsetProperty);
+
+
+    // Pixel offset of shadow of green.
+    double ShadowOfGreenOffset => this.GetValue(ShadowOfGreenOffsetProperty);
+
+
+    // Pixel offset of shadow of luminance.
+    double ShadowOfLuminanceOffset => this.GetValue(ShadowOfLuminanceOffsetProperty);
+
+
+    // Pixel offset of shadow of red.
+    double ShadowOfRedOffset => this.GetValue(ShadowOfRedOffsetProperty);
 }

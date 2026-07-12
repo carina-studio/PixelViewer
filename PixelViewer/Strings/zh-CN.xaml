@@ -244,6 +244,8 @@
 	<sys:String x:Key="String/SessionControl.Histogram.Blue">蓝色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Green">绿色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Luminance">亮度</sys:String>
+	<sys:String x:Key="String/SessionControl.Histogram.Marker.Mean">平均值</sys:String>
+	<sys:String x:Key="String/SessionControl.Histogram.Markers">标记</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Red">红色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histograms">色阶分布图</sys:String>
 	<sys:String x:Key="String/SessionControl.ImageDimensions">尺寸 (像素)</sys:String>

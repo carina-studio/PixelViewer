@@ -603,6 +603,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsHighlightAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsHighlightAdjustmentSupported));
 	/// <summary>
+	/// Property of <see cref="IsHistogramMeanMarkerVisible"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsHistogramMeanMarkerVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramMeanMarkerVisible), true);
+	/// <summary>
 	/// Property of <see cref="IsHistogramsVisible"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
@@ -824,6 +828,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Static fields.
+	static readonly SettingKey<bool> IsInitHistogramMeanMarkerVisible = new("Session.IsInitHistogramMeanMarkerVisible", true);
 	static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
 	static readonly SettingKey<int> LatestHistogramsPanelSize = new("Session.LatestHistogramsPanelSize", (int)(HistogramsPanelSizeProperty.DefaultValue + 0.5));
 	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
@@ -1284,6 +1289,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		else
 		{
 			this.SetValue(HistogramsPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestHistogramsPanelSize));
+			this.SetValue(IsHistogramMeanMarkerVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible));
 			this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
 			this.SetValue(RenderingParametersPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
 		}
@@ -3396,6 +3402,16 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Get or set whether the mean marker of histograms is visible or not.
+	/// </summary>
+	public bool IsHistogramMeanMarkerVisible
+	{
+		get => this.GetValue(IsHistogramMeanMarkerVisibleProperty);
+		set => this.SetValue(IsHistogramMeanMarkerVisibleProperty, value);
+	}
+
+
+	/// <summary>
 	/// Get or set whether histograms of image is visible or not
 	/// </summary>
 	public bool IsHistogramsVisible
@@ -3845,6 +3861,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
+		else if (property == IsHistogramMeanMarkerVisibleProperty)
+			this.PersistentState.SetValue(IsInitHistogramMeanMarkerVisible, (bool)newValue.AsNonNull());
 		else if (property == IsHistogramsVisibleProperty)
 			this.PersistentState.SetValue(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
 		else if (property == IsSaturationAdjustmentSupportedProperty)
@@ -5533,6 +5551,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var fitToViewport = true;
 		var frameNumber = 1L;
 		var histogramsPanelSize = HistogramsPanelSizeProperty.DefaultValue;
+		var isHistogramMeanMarkerVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible);
 		var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
 		var isImageFlippedX = false;
 		var isImageFlippedY = false;
@@ -5546,6 +5565,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			frameNumber = Math.Max(1, frameNumber);
 		if (savedState.TryGetProperty(nameof(ImageDisplayRotation), out jsonProperty))
 			jsonProperty.TryGetInt32(out rotation);
+		if (savedState.TryGetProperty(nameof(IsHistogramMeanMarkerVisible), out jsonProperty))
+			isHistogramMeanMarkerVisible = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
 			isHistogramsVisible = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(IsImageFlippedX), out jsonProperty))
@@ -5577,6 +5598,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		
 		// restore size and visibility of histograms before opening the source (opening the source may block for a while)
 		this.SetValue(HistogramsPanelSizeProperty, histogramsPanelSize);
+		this.SetValue(IsHistogramMeanMarkerVisibleProperty, isHistogramMeanMarkerVisible);
 		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
 
 		// open source file
@@ -6045,6 +6067,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
 		writer.WriteNumber(nameof(HistogramsPanelSize), this.HistogramsPanelSize);
 		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
+		writer.WriteBoolean(nameof(IsHistogramMeanMarkerVisible), this.IsHistogramMeanMarkerVisible);
 		writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
 		writer.WriteBoolean(nameof(IsImageFlippedX), this.IsImageFlippedX);
 		writer.WriteBoolean(nameof(IsImageFlippedY), this.IsImageFlippedY);
