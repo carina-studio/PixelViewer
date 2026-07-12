@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+		xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Carina.PixelViewer.Controls.MultiFileOpenModeDialog"
+		Name="dialog"
+		Classes="Dialog"
+        Title="{asXaml:StringResource MultiFileOpenModeDialog.Title}"
+		Width="480">
+
+	<DockPanel>
+
+		<!-- Control buttons -->
+		<Border Classes="Dialog_ControlButtonsPanel">
+			<StackPanel Classes="Dialog_ControlButtonsPanel">
+				<Button asControls:DialogElement.ButtonRole="Control" Click="OnIndependentButtonClick" Content="{asXaml:StringResource MultiFileOpenModeDialog.Independent}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Click="OnSequenceButtonClick" Content="{asXaml:StringResource MultiFileOpenModeDialog.Sequence}"/>
+				<Button asControls:DialogElement.ButtonRole="Control" Command="{Binding #dialog.Close}" Content="{asXaml:StringResource Common.Cancel}"/>
+			</StackPanel>
+		</Border>
+
+		<!-- Content -->
+		<Grid Classes="Dialog_ContentPanel">
+			<TextBlock Text="{asXaml:StringResource MultiFileOpenModeDialog.Message}" TextWrapping="Wrap"/>
+		</Grid>
+
+	</DockPanel>
+
+</Window>

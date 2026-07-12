@@ -149,6 +149,12 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to Frame</sys:String>
 
+	<!-- MultiFileOpenModeDialog -->
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Title">Open Multiple Files</sys:String>
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Message">You selected multiple files. How do you want to open them?</sys:String>
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Independent">View Independently</sys:String>
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Sequence">Play as Sequence</sys:String>
+
 	<!-- ImageFormat -->
 	<sys:String x:Key="String/ImageFormat.Android_YUV_420_888">YUV_420_888 (Android)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer Pattern (8-bit)</sys:String>
@@ -303,6 +309,9 @@ You can change this setting at any time in Options.</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">Move to Next Frame (Page Down)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">Move to Previous Frame (Page Up)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">Move to Frame…</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePlaybackRateFps">Playback Frame Rate (frames per second)</sys:String>
+	<sys:String x:Key="String/SessionControl.LoopFramePlayback">Loop Playback</sys:String>
+	<sys:String x:Key="String/SessionControl.PlayFrames">Play / Pause Frame Sequence</sys:String>
 	<sys:String x:Key="String/SessionControl.NoImageRendered">No image rendered.</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">No Image File Opened</sys:String>
 	<sys:String x:Key="String/SessionControl.OpeningSource">Opening image…</sys:String>
