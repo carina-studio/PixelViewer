@@ -752,58 +752,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		if (this.attachedWindow == null)
 			return false;
 
-		// check file count
-		if (fileNames.Count > 8)
-		{
-			await new ASControls.MessageDialog()
-			{
-				Icon = ASControls.MessageDialogIcon.Warning,
-				Message = this.GetResourceObservable("String/SessionControl.MaxDragDropFileCountReached"),
-			}.ShowDialog(this.attachedWindow);
-			return false;
-		}
-
-		// open files
-		if (fileNames.Count > 1)
-		{
-			// select profile
-			var profile = await new ImageRenderingProfileSelectionDialog().Also(it =>
-			{
-				it.Bind(ImageRenderingProfileSelectionDialog.MessageProperty, this.GetResourceObservable("String/SessionControl.SelectProfileToOpenFiles"));
-			}).ShowDialog<ImageRenderingProfile?>(this.attachedWindow);
-			if (profile == null)
-				return false;
-
-			// get workspace
-			if (this.DataContext is not Session session || session.Owner is not Workspace workspace)
-				return false;
-
-			// create sessions
-			var index = workspace.Sessions.IndexOf(session);
-			if (index >= 0)
-				++index;
-			else
-				index = workspace.Sessions.Count;
-			foreach (var fileName in fileNames)
-			{
-				if (session.SourceFileName != null)
-					workspace.CreateAndAttachSession(index++, fileName, profile);
-				else
-				{
-					session.OpenSourceFileCommand.TryExecute(fileName);
-					session.Profile = profile;
-				}
-			}
-		}
-		else if (this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile)
-				&& this.DataContext is Session session
-				&& session.SourceFileName != null
-				&& session.Owner is Workspace workspace)
-		{
-			workspace.CreateAndAttachSession(fileNames[0]);
-		}
-		else
-			this.OpenSourceFile(fileNames[0]);
+		// open files (prompt for open mode when multiple files are dropped)
+		await this.OpenFilesAsync(fileNames, preferNewSessionForSingleFile: true);
 		return true;
 	}
 
@@ -2047,14 +1997,103 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		}
 
-		// select file
-		var fileName = (await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new())).Let(it => 
-			it.Count == 1 ? it[0].TryGetLocalPath() : null);
-		if (fileName == null)
+		// select files
+		var files = await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new() { AllowMultiple = true });
+		var fileNames = new List<string>(files.Count);
+		foreach (var file in files)
+		{
+			var fileName = file.TryGetLocalPath();
+			if (!string.IsNullOrEmpty(fileName))
+				fileNames.Add(fileName);
+		}
+		if (fileNames.Count == 0)
 			return;
 
-		// open file
-		this.OpenSourceFile(fileName);
+		// open files
+		await this.OpenFilesAsync(fileNames, preferNewSessionForSingleFile: false);
+	}
+
+
+	// Open the given files. When multiple files are selected the user is asked whether to view them
+	// independently (one session per file) or play them as a single frame sequence.
+	async Task OpenFilesAsync(IList<string> fileNames, bool preferNewSessionForSingleFile)
+	{
+		// check state
+		if (fileNames.Count == 0 || this.attachedWindow == null)
+			return;
+		if (this.DataContext is not Session session)
+		{
+			Logger.LogError("No session to open files");
+			return;
+		}
+
+		// single file
+		if (fileNames.Count == 1)
+		{
+			if (preferNewSessionForSingleFile
+				&& this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile)
+				&& session.SourceFileName != null
+				&& session.Owner is Workspace singleFileWorkspace)
+			{
+				singleFileWorkspace.CreateAndAttachSession(fileNames[0]);
+			}
+			else
+				this.OpenSourceFile(fileNames[0]);
+			return;
+		}
+
+		// ask how to open multiple files
+		var mode = await new MultiFileOpenModeDialog().ShowDialog<MultiFileOpenMode?>(this.attachedWindow);
+		if (mode == null)
+			return;
+
+		// play as a single frame sequence
+		if (mode == MultiFileOpenMode.Sequence)
+		{
+			if (session.SourceFileName != null && session.Owner is Workspace sequenceWorkspace)
+			{
+				var index = sequenceWorkspace.Sessions.IndexOf(session);
+				var newSession = sequenceWorkspace.CreateAndAttachSession(index >= 0 ? index + 1 : sequenceWorkspace.Sessions.Count);
+				newSession.OpenSourceFilesCommand.TryExecute(fileNames);
+			}
+			else
+				session.OpenSourceFilesCommand.TryExecute(fileNames);
+			return;
+		}
+
+		// view independently: one session per file
+		if (fileNames.Count > 8)
+		{
+			await new ASControls.MessageDialog()
+			{
+				Icon = ASControls.MessageDialogIcon.Warning,
+				Message = this.GetResourceObservable("String/SessionControl.MaxDragDropFileCountReached"),
+			}.ShowDialog(this.attachedWindow);
+			return;
+		}
+		var profile = await new ImageRenderingProfileSelectionDialog().Also(it =>
+		{
+			it.Bind(ImageRenderingProfileSelectionDialog.MessageProperty, this.GetResourceObservable("String/SessionControl.SelectProfileToOpenFiles"));
+		}).ShowDialog<ImageRenderingProfile?>(this.attachedWindow);
+		if (profile == null)
+			return;
+		if (session.Owner is not Workspace workspace)
+			return;
+		var independentIndex = workspace.Sessions.IndexOf(session);
+		if (independentIndex >= 0)
+			++independentIndex;
+		else
+			independentIndex = workspace.Sessions.Count;
+		foreach (var fileName in fileNames)
+		{
+			if (session.SourceFileName != null)
+				workspace.CreateAndAttachSession(independentIndex++, fileName, profile);
+			else
+			{
+				session.OpenSourceFileCommand.TryExecute(fileName);
+				session.Profile = profile;
+			}
+		}
 	}
 	void OpenSourceFile(string fileName)
 	{

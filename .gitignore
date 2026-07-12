@@ -15,3 +15,7 @@ PixelViewer.sln.DotSettings.user
 /PixelViewer/Properties/PublishProfiles/*.user
 /Packages
 /PixelViewer/Properties/launchSettings.json
+
+# Local development helpers and test data (not part of the project)
+/test_data
+/run-pixelviewer.cmd

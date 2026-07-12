@@ -126,6 +126,12 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至画面</sys:String>
 
+	<!-- MultiFileOpenModeDialog -->
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Title">打开多个文件</sys:String>
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Message">您选择了多个文件，想要如何打开？</sys:String>
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Independent">独立查看</sys:String>
+	<sys:String x:Key="String/MultiFileOpenModeDialog.Sequence">作为序列播放</sys:String>
+
 	<!-- ImageFormat -->
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer 排列 (8 位)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位，MIPI)</sys:String>
@@ -264,6 +270,9 @@
 	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一帧 (Page Down)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一帧 (Page Up)</sys:String>
 	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至帧…</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePlaybackRateFps">播放帧率（帧/秒）</sys:String>
+	<sys:String x:Key="String/SessionControl.LoopFramePlayback">循环播放</sys:String>
+	<sys:String x:Key="String/SessionControl.PlayFrames">播放 / 暂停帧序列</sys:String>
 	<sys:String x:Key="String/SessionControl.NoImageRendered">没有绘制的图像。</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">没有图像文件开启</sys:String>
 	<sys:String x:Key="String/SessionControl.OpeningSource">正在打开图像…</sys:String>

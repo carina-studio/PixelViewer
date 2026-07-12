@@ -293,6 +293,28 @@
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FastForward}"/>
 							</Button>
 
+							<!-- Play/pause frame sequence -->
+							<Button Command="{Binding PlayFramesCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.PlayFrames}">
+								<Panel>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Play}" IsVisible="{Binding !IsPlayingFrames}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Pause}" IsVisible="{Binding IsPlayingFrames}"/>
+								</Panel>
+							</Button>
+
+							<!-- Loop frame playback -->
+							<ToggleButton IsChecked="{Binding IsFramePlaybackLooping, Mode=TwoWay}" IsEnabled="{Binding HasMultipleFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.LoopFramePlayback}">
+								<Panel>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Loop}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Loop.Active}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								</Panel>
+							</ToggleButton>
+
+							<!-- Playback frame rate -->
+							<StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{asXaml:StringResource SessionControl.FramePlaybackRateFps}">
+								<abControls:IntegerTextBox Minimum="1" Maximum="120" IsNullValueAllowed="False" Value="{Binding FramePlaybackRateFps, Mode=TwoWay}" VerticalAlignment="Center" Width="60"/>
+								<TextBlock Text="fps" VerticalAlignment="Center" Margin="4,0,0,0"/>
+							</StackPanel>
+
 						</StackPanel>
 
 						<!-- Separator -->

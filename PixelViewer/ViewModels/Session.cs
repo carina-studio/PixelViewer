@@ -376,6 +376,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
 	/// <summary>
+	/// Property of <see cref="FramePlaybackRateFps"/>.
+	/// </summary>
+	public static readonly ObservableProperty<int> FramePlaybackRateFpsProperty = ObservableProperty.Register<Session, int>(nameof(FramePlaybackRateFps), 30, coerce: (_, it) => Math.Max(MinFramePlaybackRateFps, Math.Min(MaxFramePlaybackRateFps, it)));
+	/// <summary>
 	/// Property of <see cref="GreenColorAdjustment"/>.
 	/// </summary>
 	public static readonly ObservableProperty<double> GreenColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorAdjustment), 0, validate: double.IsFinite);
@@ -625,6 +629,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsOpeningSourceProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSource));
 	/// <summary>
+	/// Property of <see cref="IsFramePlaybackLooping"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsFramePlaybackLoopingProperty = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackLooping), true);
+	/// <summary>
+	/// Property of <see cref="IsPlayingFrames"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsPlayingFramesProperty = ObservableProperty.Register<Session, bool>(nameof(IsPlayingFrames));
+	/// <summary>
 	/// Property of <see cref="IsProcessingImage"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsProcessingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsProcessingImage));
@@ -821,6 +833,15 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Constants.
+	/// <summary>
+	/// Maximum frame rate (frames per second) for frame sequence playback.
+	/// </summary>
+	public const int MaxFramePlaybackRateFps = 120;
+	/// <summary>
+	/// Minimum frame rate (frames per second) for frame sequence playback.
+	/// </summary>
+	public const int MinFramePlaybackRateFps = 1;
+	const int FramePlaybackRenderWaitDelay = 10;
 	const int ReleaseCachedImagesDelay = 3000;
 	const int RenderImageDelay = 500;
 	const int TrackFilteringParamsAppliedEventDelay = 5000;
@@ -852,6 +873,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly MutableObservableBoolean canMoveToNextFrame = new();
 	readonly MutableObservableBoolean canMoveToPreviousFrame = new();
 	readonly MutableObservableBoolean canOpenSource = new(true);
+	readonly MutableObservableBoolean canPlayFrames = new();
 	readonly MutableObservableBoolean canResetBrightnessAdjustment = new();
 	readonly MutableObservableBoolean canResetColorAdjustment = new();
 	readonly MutableObservableBoolean canResetContrastAdjustment = new();
@@ -912,6 +934,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	bool isImageDimensionsEvaluationNeeded = true;
 	bool isImagePlaneOptionsResetNeeded = true;
 	readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
+	readonly ScheduledAction playFrameAction;
 	readonly SortedObservableList<ImageRenderingProfile> profiles = new(CompareProfiles);
 	readonly ScheduledAction releasedCachedImagesAction;
 	ImageFrame? renderedImageFrame;
@@ -956,25 +979,31 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.FlipYCommand = new Command(this.FlipY, isSrcFileOpenedObservable);
 		this.MoveToFirstFrameCommand = new Command(() =>
 		{
+			this.StopPlayingFrames();
 			if (this.canMoveToPreviousFrame.Value)
 				this.FrameNumber = 1;
 		}, this.canMoveToPreviousFrame);
 		this.MoveToLastFrameCommand = new Command(() =>
 		{
+			this.StopPlayingFrames();
 			if (this.canMoveToNextFrame.Value)
 				this.FrameNumber = this.FrameCount;
 		}, this.canMoveToNextFrame);
 		this.MoveToNextFrameCommand = new Command(() =>
 		{
+			this.StopPlayingFrames();
 			if (this.canMoveToNextFrame.Value)
 				++this.FrameNumber;
 		}, this.canMoveToNextFrame);
 		this.MoveToPreviousFrameCommand = new Command(() =>
 		{
+			this.StopPlayingFrames();
 			if (this.canMoveToPreviousFrame.Value)
 				--this.FrameNumber;
 		}, this.canMoveToPreviousFrame);
 		this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSource);
+		this.OpenSourceFilesCommand = new Command<IList<string>>(fileNames => _ = this.OpenSourceFiles(fileNames), this.canOpenSource);
+		this.PlayFramesCommand = new Command(this.TogglePlayingFrames, this.canPlayFrames);
 		this.RenderImageCommand = new Command(() => 
 		{
 			this.ClearRenderedImage();
@@ -1019,6 +1048,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		});
 		this.releasedCachedImagesAction = new ScheduledAction(() => this.ReleaseCachedImages());
 		this.renderImageAction = new ScheduledAction(this.RenderImage);
+		this.playFrameAction = new ScheduledAction(this.PlayNextFrame);
 		this.trackFilteringParamsAppliedAction = new(() =>
 		{
 			if (!this.GetValue(IsSourceOpenedProperty))
@@ -1281,6 +1311,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsColorSpaceManagementEnabledProperty, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
 		if (ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
 			this.SetValue(ColorSpaceProperty, colorSpace);
+
+		// restore frame playback preferences
+		this.SetValue(FramePlaybackRateFpsProperty, this.Settings.GetValueOrDefault(SettingKeys.FramePlaybackRateFps));
+		this.SetValue(IsFramePlaybackLoopingProperty, this.Settings.GetValueOrDefault(SettingKeys.FramePlaybackLooping));
 
 		// setup title
 		this.UpdateTitle();
@@ -2038,6 +2072,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Close current source.
 	void CloseSource(bool disposing)
 	{
+		// stop frame playback
+		this.StopPlayingFrames();
+
 		// flush pending rendering-params and filtering-params tracking
 		this.trackRenderingParamsAppliedAction.ExecuteIfScheduled();
 		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
@@ -2355,6 +2392,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		// deactivate
 		this.Logger.LogDebug("Deactivate");
 		this.SetValue(IsActivatedProperty, false);
+
+		// stop frame playback while the session is not active
+		this.StopPlayingFrames();
 
 		// hibernate directly
 		if (!this.HasRenderedImage)
@@ -2965,6 +3005,43 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Calculate the frame number to move to when playing a frame sequence.
+	/// </summary>
+	/// <param name="currentFrameNumber">Current 1-based frame number.</param>
+	/// <param name="frameCount">Total number of frames.</param>
+	/// <param name="looping">Whether playback loops back to the first frame after the last one.</param>
+	/// <returns>Next 1-based frame number, or null if playback should stop.</returns>
+	internal static long? GetNextFrameNumber(long currentFrameNumber, long frameCount, bool looping)
+	{
+		if (frameCount <= 1)
+			return null;
+		if (currentFrameNumber < frameCount)
+			return currentFrameNumber < 1 ? 1 : currentFrameNumber + 1;
+		return looping ? 1 : null;
+	}
+
+
+	// Clamp the frame number into [1, frameCount], applying the correction to the property and cancelling
+	// the redundant re-render it would otherwise trigger. Returns the coerced frame number.
+	long CoerceFrameNumberToRange(long frameNumber, long frameCount)
+	{
+		if (frameNumber < 1)
+		{
+			frameNumber = 1;
+			this.SetValue(FrameNumberProperty, 1);
+			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
+		}
+		else if (frameNumber > frameCount)
+		{
+			frameNumber = frameCount;
+			this.SetValue(FrameNumberProperty, frameCount);
+			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
+		}
+		return frameNumber;
+	}
+
+
+	/// <summary>
 	/// Get of set index of frame to render.
 	/// </summary>
 	public long FrameNumber
@@ -2987,6 +3064,32 @@ class Session : ViewModel<IAppSuiteApplication>
 		get => this.GetValue(FramePaddingSizeProperty);
 		set => this.SetValue(FramePaddingSizeProperty, value);
 	}
+
+
+	/// <summary>
+	/// Get or set the target frame rate (frames per second) used when playing the frame sequence.
+	/// </summary>
+	public int FramePlaybackRateFps
+	{
+		get => this.GetValue(FramePlaybackRateFpsProperty);
+		set => this.SetValue(FramePlaybackRateFpsProperty, value);
+	}
+
+
+	/// <summary>
+	/// Get or set whether frame sequence playback loops back to the first frame after the last one.
+	/// </summary>
+	public bool IsFramePlaybackLooping
+	{
+		get => this.GetValue(IsFramePlaybackLoopingProperty);
+		set => this.SetValue(IsFramePlaybackLoopingProperty, value);
+	}
+
+
+	/// <summary>
+	/// Check whether the frame sequence is currently being played or not.
+	/// </summary>
+	public bool IsPlayingFrames => this.GetValue(IsPlayingFramesProperty);
 
 
 	/// <summary>
@@ -3787,7 +3890,14 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.updateImageDisplaySizeAction.Execute();
 		}
 		else if (property == FrameCountProperty)
+		{
 			this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
+			this.UpdateCanPlayFrames();
+		}
+		else if (property == FramePlaybackRateFpsProperty)
+			this.Settings.SetValue<int>(SettingKeys.FramePlaybackRateFps, (int)newValue.AsNonNull());
+		else if (property == IsFramePlaybackLoopingProperty)
+			this.Settings.SetValue<bool>(SettingKeys.FramePlaybackLooping, (bool)newValue.AsNonNull());
 		else if (property == HasRenderingErrorProperty)
 		{
 			if ((bool)newValue!)
@@ -3933,6 +4043,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.updateFilterSupportingAction.Execute();
 			}
 			this.UpdateCanZoomInOut();
+			this.UpdateCanPlayFrames();
 		}
 		else if (property == IsVibranceAdjustmentSupportedProperty)
 		{
@@ -4156,9 +4267,58 @@ class Session : ViewModel<IAppSuiteApplication>
     // Open given file as image data source.
     async Task OpenSourceFile(string? fileName)
 	{
-		// check state
 		if (fileName is null)
 			return;
+		await this.OpenSourceCore(fileName, () => Task.Run<IImageDataSource?>(() =>
+		{
+			try
+			{
+				this.Logger.LogDebug("Create source for '{fileName}'", fileName);
+				return new FileImageDataSource(this.Application, fileName);
+			}
+			catch (Exception ex)
+			{
+				this.Logger.LogError(ex, "Unable to create source for '{fileName}'", fileName);
+				return null;
+			}
+		}));
+	}
+
+
+	/// <summary>
+	/// Open multiple files as a single frame sequence which can be viewed frame-by-frame or played like a video.
+	/// </summary>
+	/// <param name="fileNames">Names of files, one per frame.</param>
+	public async Task OpenSourceFiles(IList<string>? fileNames)
+	{
+		if (fileNames is null || fileNames.Count == 0)
+			return;
+		if (fileNames.Count == 1)
+		{
+			await this.OpenSourceFile(fileNames[0]);
+			return;
+		}
+		var sortedFiles = FileSequenceImageDataSource.SortFiles(fileNames);
+		await this.OpenSourceCore(sortedFiles[0], () => Task.Run<IImageDataSource?>(() =>
+		{
+			try
+			{
+				this.Logger.LogDebug("Create frame sequence source of {count} file(s)", sortedFiles.Length);
+				return new FileSequenceImageDataSource(sortedFiles);
+			}
+			catch (Exception ex)
+			{
+				this.Logger.LogError(ex, "Unable to create frame sequence source");
+				return null;
+			}
+		}));
+	}
+
+
+	// Open image data source produced by the given factory and complete the opening flow.
+	async Task OpenSourceCore(string fileName, Func<Task<IImageDataSource?>> createDataSource)
+	{
+		// check state
 		if (!this.canOpenSource.Value)
 		{
 			this.Logger.LogError("Cannot open '{fileName}' in current state", fileName);
@@ -4184,19 +4344,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.UpdateTitle();
 
 		// create image data source
-		var imageDataSource = await Task.Run<IImageDataSource?>(() =>
-		{
-			try
-			{
-				this.Logger.LogDebug("Create source for '{fileName}'", fileName);
-				return new FileImageDataSource(this.Application, fileName);
-			}
-			catch (Exception ex)
-			{
-				this.Logger.LogError(ex, "Unable to create source for '{fileName}'", fileName);
-				return null;
-			}
-		});
+		var imageDataSource = await createDataSource();
 		if (this.IsDisposed)
 		{
 			this.Logger.LogWarning("Source for '{fileName}' created after disposing", fileName);
@@ -4284,6 +4432,93 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public ICommand OpenSourceFileCommand { get; }
 
+
+	/// <summary>
+	/// Command for opening multiple files as a single frame sequence. The parameter is <see cref="IList{String}"/>.
+	/// </summary>
+	public ICommand OpenSourceFilesCommand { get; }
+
+
+	/// <summary>
+	/// Command to start or stop playing the frame sequence. Only available when the image has multiple frames.
+	/// </summary>
+	public ICommand PlayFramesCommand { get; }
+
+
+	// Advance to the next frame during playback, keeping the target frame rate without dropping frames.
+	void PlayNextFrame()
+	{
+		// stop if playback is no longer valid
+		if (!this.GetValue(IsPlayingFramesProperty))
+			return;
+		if (!this.canPlayFrames.Value)
+		{
+			this.StopPlayingFrames();
+			return;
+		}
+
+		// wait for the current frame to finish rendering so that no frame is skipped
+		if (this.GetValue(IsRenderingImageProperty))
+		{
+			this.playFrameAction.Schedule(FramePlaybackRenderWaitDelay);
+			return;
+		}
+
+		// move to the next frame or stop at the end
+		var nextFrameNumber = GetNextFrameNumber(this.GetValue(FrameNumberProperty), this.GetValue(FrameCountProperty), this.GetValue(IsFramePlaybackLoopingProperty));
+		if (nextFrameNumber is null)
+		{
+			this.StopPlayingFrames();
+			return;
+		}
+		this.SetValue(FrameNumberProperty, nextFrameNumber.Value);
+
+		// schedule the next frame according to the target frame rate
+		var interval = Math.Max(1, 1000 / Math.Max(MinFramePlaybackRateFps, this.GetValue(FramePlaybackRateFpsProperty)));
+		this.playFrameAction.Schedule(interval);
+	}
+
+
+	// Start playing the frame sequence.
+	void StartPlayingFrames()
+	{
+		this.VerifyAccess();
+		this.VerifyDisposed();
+		if (!this.canPlayFrames.Value || this.GetValue(IsPlayingFramesProperty))
+			return;
+		this.SetValue(IsPlayingFramesProperty, true);
+		this.playFrameAction.Schedule();
+	}
+
+
+	// Stop playing the frame sequence.
+	void StopPlayingFrames()
+	{
+		if (!this.GetValue(IsPlayingFramesProperty))
+			return;
+		this.playFrameAction.Cancel();
+		this.SetValue(IsPlayingFramesProperty, false);
+	}
+
+
+	// Toggle between playing and stopping the frame sequence.
+	void TogglePlayingFrames()
+	{
+		if (this.GetValue(IsPlayingFramesProperty))
+			this.StopPlayingFrames();
+		else
+			this.StartPlayingFrames();
+	}
+
+
+	// Update whether the frame sequence can be played and stop playback when it cannot.
+	void UpdateCanPlayFrames()
+	{
+		var canPlay = this.GetValue(IsSourceOpenedProperty) && this.GetValue(HasMultipleFramesProperty);
+		this.canPlayFrames.Update(canPlay);
+		if (!canPlay)
+			this.StopPlayingFrames();
+	}
 
 	/// <summary>
 	/// Get or set pixel stride of 1st image plane.
@@ -4649,36 +4884,36 @@ class Session : ViewModel<IAppSuiteApplication>
 		};
 		var frameNumber = this.FrameNumber;
 		var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
-		try
+		if (imageDataSource is IMultiFrameImageDataSource multiFrameSource)
 		{
-			var totalDataSize = imageDataSource.Size - this.DataOffset;
-			var frameCount = frameDataSize > 0
-				? (totalDataSize <= frameDataSize)
-					? 1
-					: 1 + (totalDataSize - frameDataSize) / (frameDataSize + this.FramePaddingSize)
-				: 1;
-			if (frameNumber < 1)
-			{
-				frameNumber = 1;
-				this.SetValue(FrameNumberProperty, 1);
-				this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
-			}
-			else if (frameNumber > frameCount)
-			{
-				frameNumber = frameCount;
-				this.SetValue(FrameNumberProperty, frameCount);
-				this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
-			}
+			// frame sequence: each file is a whole frame, so frame count is the number of files
+			var frameCount = (long)multiFrameSource.FrameCount;
+			frameNumber = this.CoerceFrameNumberToRange(frameNumber, frameCount);
+			multiFrameSource.SelectFrame((int)(frameNumber - 1));
 			this.SetValue(FrameCountProperty, frameCount);
 		}
-		catch (Exception ex)
+		else
 		{
-			this.Logger.LogError(ex, "Unable to update frame count and index of '{sourceFileName}'", this.SourceFileName);
-			this.SetValue(HasRenderingErrorProperty, true);
-			this.ClearRenderedImage();
-			return;
+			try
+			{
+				var totalDataSize = imageDataSource.Size - this.DataOffset;
+				var frameCount = frameDataSize > 0
+					? (totalDataSize <= frameDataSize)
+						? 1
+						: 1 + (totalDataSize - frameDataSize) / (frameDataSize + this.FramePaddingSize)
+					: 1;
+				frameNumber = this.CoerceFrameNumberToRange(frameNumber, frameCount);
+				this.SetValue(FrameCountProperty, frameCount);
+			}
+			catch (Exception ex)
+			{
+				this.Logger.LogError(ex, "Unable to update frame count and index of '{sourceFileName}'", this.SourceFileName);
+				this.SetValue(HasRenderingErrorProperty, true);
+				this.ClearRenderedImage();
+				return;
+			}
+			renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
 		}
-		renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
 
 		// update state
 		this.canSaveRenderedImage.Update(false);
@@ -4690,6 +4925,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		// check whether rendering is needed or not
 		var isRenderingNeeded = this.renderedImageFrame?.Let(it =>
 		{
+			if (it.FrameNumber != frameNumber)
+				return true;
 			if (it.ImageRenderer != imageRenderer)
 				return true;
 			if (it.BitmapBuffer.Width != this.ImageWidth || it.BitmapBuffer.Height != this.ImageHeight)

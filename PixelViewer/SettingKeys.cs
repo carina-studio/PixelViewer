@@ -72,6 +72,14 @@ static class SettingKeys
 	/// </summary>
 	public static readonly SettingKey<bool> EvaluateImageRendererByFileName = new(nameof(EvaluateImageRendererByFileName), true);
 	/// <summary>
+	/// Whether frame sequence playback loops back to the first frame after the last one.
+	/// </summary>
+	public static readonly SettingKey<bool> FramePlaybackLooping = new(nameof(FramePlaybackLooping), true);
+	/// <summary>
+	/// Target frame rate (frames per second) for frame sequence playback.
+	/// </summary>
+	public static readonly SettingKey<int> FramePlaybackRateFps = new(nameof(FramePlaybackRateFps), 30);
+	/// <summary>
 	/// Hide scroll bars of image viewer automatically.
 	/// </summary>
 	public static readonly SettingKey<bool> HideImageViewerScrollBarsAutomatically = new(nameof(HideImageViewerScrollBarsAutomatically), true);
