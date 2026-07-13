@@ -31,272 +31,208 @@
 			</Panel.Styles>
 
 			<!-- Red -->
-			<Image IsVisible="{Binding #root.IsRedHistogramVisible}" Source="{Binding #root.RedHistogramImage}">
-				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding #root.RedHistogramScaleY}"/>
-				</Image.RenderTransform>
-			</Image>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsRedHistogramVisible},
-						         {Binding #root.IsMeanMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
-			      StrokeDashArray="3,1.5">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MeanOfRedOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsRedHistogramVisible},
-						         {Binding #root.IsMedianMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
-			      StrokeDashArray="1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MedianOfRedOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsRedHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MinOfRedOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsRedHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MaxOfRedOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsRedHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.ShadowOfRedOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsRedHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.HighlightOfRedOffset}"/>
-				</Line.RenderTransform>
-			</Line>
+			<Panel IsVisible="{Binding #root.IsRedHistogramVisible}">
+				<Image Source="{Binding #root.RedHistogramImage}">
+					<Image.RenderTransform>
+						<ScaleTransform ScaleY="{Binding #root.RedHistogramScaleY}"/>
+					</Image.RenderTransform>
+				</Image>
+				<Line IsVisible="{Binding #root.IsMeanMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
+				      StrokeDashArray="3,1.5">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MeanOfRedOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMedianMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MedianOfRedOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MinOfRedOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MaxOfRedOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.ShadowOfRedOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfRed}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.HighlightOfRedOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+			</Panel>
 
 			<!-- Green -->
-			<Image IsVisible="{Binding #root.IsGreenHistogramVisible}" Source="{Binding #root.GreenHistogramImage}">
-				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding #root.GreenHistogramScaleY}"/>
-				</Image.RenderTransform>
-			</Image>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsGreenHistogramVisible},
-						         {Binding #root.IsMeanMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
-			      StrokeDashArray="3,1.5">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MeanOfGreenOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsGreenHistogramVisible},
-						         {Binding #root.IsMedianMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
-			      StrokeDashArray="1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MedianOfGreenOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsGreenHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MinOfGreenOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsGreenHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MaxOfGreenOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsGreenHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.ShadowOfGreenOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsGreenHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.HighlightOfGreenOffset}"/>
-				</Line.RenderTransform>
-			</Line>
+			<Panel IsVisible="{Binding #root.IsGreenHistogramVisible}">
+				<Image Source="{Binding #root.GreenHistogramImage}">
+					<Image.RenderTransform>
+						<ScaleTransform ScaleY="{Binding #root.GreenHistogramScaleY}"/>
+					</Image.RenderTransform>
+				</Image>
+				<Line IsVisible="{Binding #root.IsMeanMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
+				      StrokeDashArray="3,1.5">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MeanOfGreenOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMedianMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MedianOfGreenOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MinOfGreenOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MaxOfGreenOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.ShadowOfGreenOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfGreen}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.HighlightOfGreenOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+			</Panel>
 
 			<!-- Blue -->
-			<Image IsVisible="{Binding #root.IsBlueHistogramVisible}" Source="{Binding #root.BlueHistogramImage}">
-				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding #root.BlueHistogramScaleY}"/>
-				</Image.RenderTransform>
-			</Image>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsBlueHistogramVisible},
-						         {Binding #root.IsMeanMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
-			      StrokeDashArray="3,1.5">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MeanOfBlueOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsBlueHistogramVisible},
-						         {Binding #root.IsMedianMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
-			      StrokeDashArray="1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MedianOfBlueOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsBlueHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MinOfBlueOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsBlueHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MaxOfBlueOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsBlueHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.ShadowOfBlueOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsBlueHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.HighlightOfBlueOffset}"/>
-				</Line.RenderTransform>
-			</Line>
+			<Panel IsVisible="{Binding #root.IsBlueHistogramVisible}">
+				<Image Source="{Binding #root.BlueHistogramImage}">
+					<Image.RenderTransform>
+						<ScaleTransform ScaleY="{Binding #root.BlueHistogramScaleY}"/>
+					</Image.RenderTransform>
+				</Image>
+				<Line IsVisible="{Binding #root.IsMeanMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
+				      StrokeDashArray="3,1.5">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MeanOfBlueOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMedianMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MedianOfBlueOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MinOfBlueOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MaxOfBlueOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.ShadowOfBlueOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfBlue}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.HighlightOfBlueOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+			</Panel>
 
 			<!-- Luminance -->
-			<Image IsVisible="{Binding #root.IsLuminanceHistogramVisible}" Source="{Binding #root.LuminanceHistogramImage}">
-				<Image.RenderTransform>
-					<ScaleTransform ScaleY="{Binding #root.LuminanceHistogramScaleY}"/>
-				</Image.RenderTransform>
-			</Image>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsLuminanceHistogramVisible},
-						         {Binding #root.IsMeanMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
-			      StrokeDashArray="3,1.5">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MeanOfLuminanceOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsLuminanceHistogramVisible},
-						         {Binding #root.IsMedianMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
-			      StrokeDashArray="1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MedianOfLuminanceOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsLuminanceHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MinOfLuminanceOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsLuminanceHistogramVisible},
-						         {Binding #root.IsMinMaxMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
-			      StrokeDashArray="5,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.MaxOfLuminanceOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsLuminanceHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.ShadowOfLuminanceOffset}"/>
-				</Line.RenderTransform>
-			</Line>
-			<Line IsVisible="{asXaml:AndBindings
-						         {Binding #root.IsLuminanceHistogramVisible},
-						         {Binding #root.IsShadowHighlightMarkerVisible}
-						     }"
-			      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
-			      StrokeDashArray="4,2,1,2">
-				<Line.RenderTransform>
-					<TranslateTransform X="{Binding #root.HighlightOfLuminanceOffset}"/>
-				</Line.RenderTransform>
-			</Line>
+			<Panel IsVisible="{Binding #root.IsLuminanceHistogramVisible}">
+				<Image Source="{Binding #root.LuminanceHistogramImage}">
+					<Image.RenderTransform>
+						<ScaleTransform ScaleY="{Binding #root.LuminanceHistogramScaleY}"/>
+					</Image.RenderTransform>
+				</Image>
+				<Line IsVisible="{Binding #root.IsMeanMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
+				      StrokeDashArray="3,1.5">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MeanOfLuminanceOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMedianMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MedianOfLuminanceOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MinOfLuminanceOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsMinMaxMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
+				      StrokeDashArray="5,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.MaxOfLuminanceOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.ShadowOfLuminanceOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+				<Line IsVisible="{Binding #root.IsShadowHighlightMarkerVisible}"
+				      Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}"
+				      StrokeDashArray="1,2">
+					<Line.RenderTransform>
+						<TranslateTransform X="{Binding #root.HighlightOfLuminanceOffset}"/>
+					</Line.RenderTransform>
+				</Line>
+			</Panel>
 
 		</Panel>
 

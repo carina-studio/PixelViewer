@@ -163,36 +163,38 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         });
         this.updateMarkerOffsetsAction = new(() =>
         {
-            var width = this.Bounds.Width;
+            var borderThickness = this.BorderThickness;
+            var padding = this.Padding;
+            var width = this.Bounds.Width - borderThickness.Left - borderThickness.Right - padding.Left - padding.Right;
             if (width <= 0)
                 return;
             if (this.DataContext is BitmapHistograms histograms)
             {
-                var colorCount = histograms.ColorCount;
-                this.SetValue(MeanOfBlueOffsetProperty, width * histograms.MeanOfBlue / colorCount);
-                this.SetValue(MeanOfGreenOffsetProperty, width * histograms.MeanOfGreen / colorCount);
-                this.SetValue(MeanOfLuminanceOffsetProperty, width * histograms.MeanOfLuminance / colorCount);
-                this.SetValue(MeanOfRedOffsetProperty, width * histograms.MeanOfRed / colorCount);
-                this.SetValue(MedianOfBlueOffsetProperty, width * histograms.MedianOfBlue / colorCount);
-                this.SetValue(MedianOfGreenOffsetProperty, width * histograms.MedianOfGreen / colorCount);
-                this.SetValue(MedianOfLuminanceOffsetProperty, width * histograms.MedianOfLuminance / colorCount);
-                this.SetValue(MedianOfRedOffsetProperty, width * histograms.MedianOfRed / colorCount);
-                this.SetValue(MinOfBlueOffsetProperty, width * histograms.MinOfBlue / colorCount);
-                this.SetValue(MinOfGreenOffsetProperty, width * histograms.MinOfGreen / colorCount);
-                this.SetValue(MinOfLuminanceOffsetProperty, width * histograms.MinOfLuminance / colorCount);
-                this.SetValue(MinOfRedOffsetProperty, width * histograms.MinOfRed / colorCount);
-                this.SetValue(MaxOfBlueOffsetProperty, width * histograms.MaxOfBlue / colorCount);
-                this.SetValue(MaxOfGreenOffsetProperty, width * histograms.MaxOfGreen / colorCount);
-                this.SetValue(MaxOfLuminanceOffsetProperty, width * histograms.MaxOfLuminance / colorCount);
-                this.SetValue(MaxOfRedOffsetProperty, width * histograms.MaxOfRed / colorCount);
-                this.SetValue(ShadowOfBlueOffsetProperty, width * histograms.ShadowOfBlue / colorCount);
-                this.SetValue(ShadowOfGreenOffsetProperty, width * histograms.ShadowOfGreen / colorCount);
-                this.SetValue(ShadowOfLuminanceOffsetProperty, width * histograms.ShadowOfLuminance / colorCount);
-                this.SetValue(ShadowOfRedOffsetProperty, width * histograms.ShadowOfRed / colorCount);
-                this.SetValue(HighlightOfBlueOffsetProperty, width * histograms.HighlightOfBlue / colorCount);
-                this.SetValue(HighlightOfGreenOffsetProperty, width * histograms.HighlightOfGreen / colorCount);
-                this.SetValue(HighlightOfLuminanceOffsetProperty, width * histograms.HighlightOfLuminance / colorCount);
-                this.SetValue(HighlightOfRedOffsetProperty, width * histograms.HighlightOfRed / colorCount);
+                var maxColorValue = histograms.ColorCount - 1;
+                this.SetValue(MeanOfBlueOffsetProperty, width * histograms.MeanOfBlue / maxColorValue);
+                this.SetValue(MeanOfGreenOffsetProperty, width * histograms.MeanOfGreen / maxColorValue);
+                this.SetValue(MeanOfLuminanceOffsetProperty, width * histograms.MeanOfLuminance / maxColorValue);
+                this.SetValue(MeanOfRedOffsetProperty, width * histograms.MeanOfRed / maxColorValue);
+                this.SetValue(MedianOfBlueOffsetProperty, width * histograms.MedianOfBlue / maxColorValue);
+                this.SetValue(MedianOfGreenOffsetProperty, width * histograms.MedianOfGreen / maxColorValue);
+                this.SetValue(MedianOfLuminanceOffsetProperty, width * histograms.MedianOfLuminance / maxColorValue);
+                this.SetValue(MedianOfRedOffsetProperty, width * histograms.MedianOfRed / maxColorValue);
+                this.SetValue(MinOfBlueOffsetProperty, width * histograms.MinOfBlue / maxColorValue);
+                this.SetValue(MinOfGreenOffsetProperty, width * histograms.MinOfGreen / maxColorValue);
+                this.SetValue(MinOfLuminanceOffsetProperty, width * histograms.MinOfLuminance / maxColorValue);
+                this.SetValue(MinOfRedOffsetProperty, width * histograms.MinOfRed / maxColorValue);
+                this.SetValue(MaxOfBlueOffsetProperty, width * histograms.MaxOfBlue / maxColorValue);
+                this.SetValue(MaxOfGreenOffsetProperty, width * histograms.MaxOfGreen / maxColorValue);
+                this.SetValue(MaxOfLuminanceOffsetProperty, width * histograms.MaxOfLuminance / maxColorValue);
+                this.SetValue(MaxOfRedOffsetProperty, width * histograms.MaxOfRed / maxColorValue);
+                this.SetValue(ShadowOfBlueOffsetProperty, width * histograms.ShadowOfBlue / maxColorValue);
+                this.SetValue(ShadowOfGreenOffsetProperty, width * histograms.ShadowOfGreen / maxColorValue);
+                this.SetValue(ShadowOfLuminanceOffsetProperty, width * histograms.ShadowOfLuminance / maxColorValue);
+                this.SetValue(ShadowOfRedOffsetProperty, width * histograms.ShadowOfRed / maxColorValue);
+                this.SetValue(HighlightOfBlueOffsetProperty, width * histograms.HighlightOfBlue / maxColorValue);
+                this.SetValue(HighlightOfGreenOffsetProperty, width * histograms.HighlightOfGreen / maxColorValue);
+                this.SetValue(HighlightOfLuminanceOffsetProperty, width * histograms.HighlightOfLuminance / maxColorValue);
+                this.SetValue(HighlightOfRedOffsetProperty, width * histograms.HighlightOfRed / maxColorValue);
             }
             else
             {
@@ -508,6 +510,11 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
             || property == RedHistogramBrushProperty)
         {
             this.updateHistogramImagesAction.Schedule();
+        }
+        else if (property == BorderThicknessProperty
+            || property == PaddingProperty)
+        {
+            this.updateMarkerOffsetsAction.Schedule();
         }
         else if (property == DataContextProperty)
         {

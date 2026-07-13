@@ -533,7 +533,6 @@
 			<!-- Histograms -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Background}" Grid.ColumnSpan="2"/>
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}"
-			        Grid.ColumnSpan="2"
 			        IsVisible="{Binding IsHistogramsVisible}">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<StackPanel Margin="{StaticResource Thickness/SessionControl.HistogramsPanel.Padding}">
@@ -568,7 +567,7 @@
 
 						<!-- Markers -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Markers}"/>
-						<Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" HorizontalAlignment="Stretch">
+						<Grid ColumnDefinitions="*,Auto" ColumnSpacing="10" HorizontalAlignment="Stretch" RowDefinitions="Auto">
 							
 							<!-- Styles -->
 							<Grid.Styles>
@@ -579,7 +578,9 @@
 							</Grid.Styles>
 							
 							<!-- Mean -->
-							<CheckBox Content="{asXaml:StringResource SessionControl.Histogram.Marker.Mean}" IsChecked="{Binding IsHistogramMeanMarkerVisible, Mode=TwoWay}"/>
+							<CheckBox Classes="Dialog_CheckBox" IsChecked="{Binding IsHistogramMeanMarkerVisible, Mode=TwoWay}">
+								<TextBlock Text="{asXaml:StringResource SessionControl.Histogram.Marker.Mean}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+							</CheckBox>
 							<Line Grid.Column="1" EndPoint="24,0" StartPoint="0,0" Stroke="{DynamicResource Brush/BitmapHistogramsView.MeanOfLuminance}" StrokeDashArray="3,1.5" StrokeThickness="1"/>
 							
 						</Grid>
@@ -591,17 +592,18 @@
 			<!-- Splitter -->
 			<GridSplitter Background="{x:Static Brushes.Transparent}"
 			              BorderBrush="{DynamicResource Brush/WorkingArea.Panel.Border}"
-			              BorderThickness="0,0,1,0"
+			              BorderThickness="1,0,0,0"
 			              Classes="GridSplitter_Vertical"
 			              DragCompleted="OnHistogramsPanelSplitterDragCompleted"
 			              DragStarted="OnHistogramsPanelSplitterDragStarted"
 			              Grid.Column="1"
-			              IsVisible="{Binding IsHistogramsVisible}"/>
+			              IsVisible="{Binding IsHistogramsVisible}"
+			              ZIndex="1"/>
 
 			<!-- Image viewer -->
 			<Grid Name="imageViewerGrid" Background="{DynamicResource Brush/WorkingArea.Background}"
 			      DragDrop.AllowDrop="True"
-			      Grid.Column="2"
+			      Grid.Column="1"
 			      RowDefinitions="*,Auto">
 
 				<!-- Hint -->
@@ -784,7 +786,7 @@
 			
 			<!-- Shadow -->
 			<Border BoxShadow="{DynamicResource BoxShadows/Shadow.Inner.Light}"
-			        Grid.Column="2"
+			        Grid.Column="1"
 			        Grid.ColumnSpan="{Binding #imageViewerGrid.(Grid.ColumnSpan)}"
 			        IsHitTestVisible="false"
 			        Margin="{ReflectionBinding #root.ImageViewerShadowsMargin}"/>

@@ -987,7 +987,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
 
 		// setup panels
-		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 1 : 3);
+		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 2 : 4);
 		if (session.IsRenderingParametersPanelVisible)
 		{
 			this.renderingParamsPanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
@@ -1906,14 +1906,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			case nameof(Session.IsRenderingParametersPanelVisible):
 				if (session.IsRenderingParametersPanelVisible)
 				{
-					Grid.SetColumnSpan(this.imageViewerGrid, 1);
+					Grid.SetColumnSpan(this.imageViewerGrid, 2);
 					this.keepRenderingParamsPanelVisible = true;
 					this.renderingParamsPanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
 					this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
 				}
 				else
 				{
-					Grid.SetColumnSpan(this.imageViewerGrid, 3);
+					Grid.SetColumnSpan(this.imageViewerGrid, 4);
 					this.renderingParamsPanelColumn.MinWidth = 0;
 					this.renderingParamsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
 				}
