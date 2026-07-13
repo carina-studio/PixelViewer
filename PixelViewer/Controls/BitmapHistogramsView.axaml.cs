@@ -5,6 +5,7 @@ using Avalonia.Markup.Xaml;
 using Carina.PixelViewer.Media;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
+using CarinaStudio.Collections;
 using CarinaStudio.Controls;
 using CarinaStudio.Threading;
 using Microsoft.Extensions.Logging;
@@ -21,9 +22,17 @@ namespace Carina.PixelViewer.Controls;
 class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 {
     /// <summary>
+    /// Property of <see cref="BlueHistogramBorderBrush"/>.
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> BlueHistogramBorderBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(BlueHistogramBorderBrush));
+    /// <summary>
     /// Property of <see cref="BlueHistogramBrush"/>.
     /// </summary>
     public static readonly StyledProperty<IBrush?> BlueHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(BlueHistogramBrush));
+    /// <summary>
+    /// Property of <see cref="GreenHistogramBorderBrush"/>.
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> GreenHistogramBorderBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(GreenHistogramBorderBrush));
     /// <summary>
     /// Property of <see cref="GreenHistogramBrush"/>.
     /// </summary>
@@ -61,9 +70,17 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     /// </summary>
     public static readonly StyledProperty<bool> IsShadowHighlightMarkerVisibleProperty = AvaloniaProperty.Register<BitmapHistogramsView, bool>(nameof(IsShadowHighlightMarkerVisible), false);
     /// <summary>
+    /// Property of <see cref="LuminanceHistogramBorderBrush"/>.
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> LuminanceHistogramBorderBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(LuminanceHistogramBorderBrush));
+    /// <summary>
     /// Property of <see cref="LuminanceHistogramBrush"/>.
     /// </summary>
     public static readonly StyledProperty<IBrush?> LuminanceHistogramBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(LuminanceHistogramBrush));
+    /// <summary>
+    /// Property of <see cref="RedHistogramBorderBrush"/>.
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> RedHistogramBorderBrushProperty = AvaloniaProperty.Register<BitmapHistogramsView, IBrush?>(nameof(RedHistogramBorderBrush));
     /// <summary>
     /// Property of <see cref="RedHistogramBrush"/>.
     /// </summary>
@@ -101,6 +118,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     static readonly StyledProperty<double> MinOfGreenOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfGreenOffset), DefaultMarkerOffset);
     static readonly StyledProperty<double> MinOfLuminanceOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfLuminanceOffset), DefaultMarkerOffset);
     static readonly StyledProperty<double> MinOfRedOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(MinOfRedOffset), DefaultMarkerOffset);
+    static readonly StyledProperty<double> RangeOfBlueProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RangeOfBlue), 0);
+    static readonly StyledProperty<double> RangeOfGreenProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RangeOfGreen), 0);
+    static readonly StyledProperty<double> RangeOfLuminanceProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RangeOfLuminance), 0);
+    static readonly StyledProperty<double> RangeOfRedProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RangeOfRed), 0);
     static readonly StyledProperty<IImage?> RedHistogramImageProperty = AvaloniaProperty.Register<BitmapHistogramsView, IImage?>(nameof(RedHistogramImage));
     static readonly StyledProperty<double> RedHistogramScaleYProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(RedHistogramScaleY), 0);
     static readonly StyledProperty<double> ShadowOfBlueOffsetProperty = AvaloniaProperty.Register<BitmapHistogramsView, double>(nameof(ShadowOfBlueOffset), DefaultMarkerOffset);
@@ -133,10 +154,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         {
             if (this.DataContext is BitmapHistograms histograms)
             {
-                this.SetValue(RedHistogramImageProperty, this.GenerateHistogramImage(histograms.Red, this.maxRedValue, this.RedHistogramBrush));
-                this.SetValue(GreenHistogramImageProperty, this.GenerateHistogramImage(histograms.Green, this.maxGreenValue, this.GreenHistogramBrush));
-                this.SetValue(BlueHistogramImageProperty, this.GenerateHistogramImage(histograms.Blue, this.maxBlueValue, this.BlueHistogramBrush));
-                this.SetValue(LuminanceHistogramImageProperty, this.GenerateHistogramImage(histograms.Luminance, this.maxLuminanceValue, this.LuminanceHistogramBrush));
+                this.SetValue(RedHistogramImageProperty, this.GenerateHistogramImage(histograms.Red, this.maxRedValue, this.RedHistogramBrush, this.RedHistogramBorderBrush));
+                this.SetValue(GreenHistogramImageProperty, this.GenerateHistogramImage(histograms.Green, this.maxGreenValue, this.GreenHistogramBrush, this.GreenHistogramBorderBrush));
+                this.SetValue(BlueHistogramImageProperty, this.GenerateHistogramImage(histograms.Blue, this.maxBlueValue, this.BlueHistogramBrush, this.BlueHistogramBorderBrush));
+                this.SetValue(LuminanceHistogramImageProperty, this.GenerateHistogramImage(histograms.Luminance, this.maxLuminanceValue, this.LuminanceHistogramBrush, this.LuminanceHistogramBorderBrush));
             }
             else
             {
@@ -171,6 +192,14 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
             if (this.DataContext is BitmapHistograms histograms)
             {
                 var maxColorValue = histograms.ColorCount - 1;
+                var minBlueOffset = width * histograms.MinOfBlue / maxColorValue;
+                var maxBlueOffset = width * histograms.MaxOfBlue / maxColorValue;
+                var minGreenOffset = width * histograms.MinOfGreen / maxColorValue;
+                var maxGreenOffset = width * histograms.MaxOfGreen / maxColorValue;
+                var minLuminanceOffset = width * histograms.MinOfLuminance / maxColorValue;
+                var maxLuminanceOffset = width * histograms.MaxOfLuminance / maxColorValue;
+                var minRedOffset = width * histograms.MinOfRed / maxColorValue;
+                var maxRedOffset = width * histograms.MaxOfRed / maxColorValue;
                 this.SetValue(MeanOfBlueOffsetProperty, width * histograms.MeanOfBlue / maxColorValue);
                 this.SetValue(MeanOfGreenOffsetProperty, width * histograms.MeanOfGreen / maxColorValue);
                 this.SetValue(MeanOfLuminanceOffsetProperty, width * histograms.MeanOfLuminance / maxColorValue);
@@ -179,14 +208,14 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
                 this.SetValue(MedianOfGreenOffsetProperty, width * histograms.MedianOfGreen / maxColorValue);
                 this.SetValue(MedianOfLuminanceOffsetProperty, width * histograms.MedianOfLuminance / maxColorValue);
                 this.SetValue(MedianOfRedOffsetProperty, width * histograms.MedianOfRed / maxColorValue);
-                this.SetValue(MinOfBlueOffsetProperty, width * histograms.MinOfBlue / maxColorValue);
-                this.SetValue(MinOfGreenOffsetProperty, width * histograms.MinOfGreen / maxColorValue);
-                this.SetValue(MinOfLuminanceOffsetProperty, width * histograms.MinOfLuminance / maxColorValue);
-                this.SetValue(MinOfRedOffsetProperty, width * histograms.MinOfRed / maxColorValue);
-                this.SetValue(MaxOfBlueOffsetProperty, width * histograms.MaxOfBlue / maxColorValue);
-                this.SetValue(MaxOfGreenOffsetProperty, width * histograms.MaxOfGreen / maxColorValue);
-                this.SetValue(MaxOfLuminanceOffsetProperty, width * histograms.MaxOfLuminance / maxColorValue);
-                this.SetValue(MaxOfRedOffsetProperty, width * histograms.MaxOfRed / maxColorValue);
+                this.SetValue(MinOfBlueOffsetProperty, minBlueOffset);
+                this.SetValue(MinOfGreenOffsetProperty, minGreenOffset);
+                this.SetValue(MinOfLuminanceOffsetProperty, minLuminanceOffset);
+                this.SetValue(MinOfRedOffsetProperty, minRedOffset);
+                this.SetValue(MaxOfBlueOffsetProperty, maxBlueOffset);
+                this.SetValue(MaxOfGreenOffsetProperty, maxGreenOffset);
+                this.SetValue(MaxOfLuminanceOffsetProperty, maxLuminanceOffset);
+                this.SetValue(MaxOfRedOffsetProperty, maxRedOffset);
                 this.SetValue(ShadowOfBlueOffsetProperty, width * histograms.ShadowOfBlue / maxColorValue);
                 this.SetValue(ShadowOfGreenOffsetProperty, width * histograms.ShadowOfGreen / maxColorValue);
                 this.SetValue(ShadowOfLuminanceOffsetProperty, width * histograms.ShadowOfLuminance / maxColorValue);
@@ -195,6 +224,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
                 this.SetValue(HighlightOfGreenOffsetProperty, width * histograms.HighlightOfGreen / maxColorValue);
                 this.SetValue(HighlightOfLuminanceOffsetProperty, width * histograms.HighlightOfLuminance / maxColorValue);
                 this.SetValue(HighlightOfRedOffsetProperty, width * histograms.HighlightOfRed / maxColorValue);
+                this.SetValue(RangeOfBlueProperty, maxBlueOffset - minBlueOffset);
+                this.SetValue(RangeOfGreenProperty, maxGreenOffset - minGreenOffset);
+                this.SetValue(RangeOfLuminanceProperty, maxLuminanceOffset - minLuminanceOffset);
+                this.SetValue(RangeOfRedProperty, maxRedOffset - minRedOffset);
             }
             else
             {
@@ -222,6 +255,10 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
                 this.SetValue(HighlightOfGreenOffsetProperty, DefaultMarkerOffset);
                 this.SetValue(HighlightOfLuminanceOffsetProperty, DefaultMarkerOffset);
                 this.SetValue(HighlightOfRedOffsetProperty, DefaultMarkerOffset);
+                this.SetValue(RangeOfBlueProperty, 0);
+                this.SetValue(RangeOfGreenProperty, 0);
+                this.SetValue(RangeOfLuminanceProperty, 0);
+                this.SetValue(RangeOfRedProperty, 0);
             }
         });
     }
@@ -242,6 +279,16 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     }
 
 
+    /// <summary>
+    /// Get or set border brush for histogram of blue channel.
+    /// </summary>
+    public IBrush? BlueHistogramBorderBrush
+    {
+        get => this.GetValue(BlueHistogramBorderBrushProperty);
+        set => this.SetValue(BlueHistogramBorderBrushProperty, value);
+    }
+    
+    
     /// <summary>
     /// Get or set brush for histogram of blue channel.
     /// </summary>
@@ -269,36 +316,102 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 
 
     // Generate image for histogram.
-    IImage? GenerateHistogramImage(IList<int> histogram, int max, IBrush? brush)
+    IImage? GenerateHistogramImage(IList<int> histogram, int max, IBrush? background, IBrush? border)
     {
         var dataCount = histogram.Count;
-        var pathBuilder = new StringBuilder($"M 0,{dataCount} L {dataCount - 1},{dataCount}");
+        var fillPathBuilder = new StringBuilder($"M {dataCount - 1},{dataCount}");
+        var borderDrawingList = border is not null
+            ? new List<Drawing>()
+            : null;
         if (max > 0)
         {
+            var borderPathBuilder = new StringBuilder();
+            var borderThickness = 1.0;
+            IPen? borderPen = null;
             for (var i = dataCount - 1; i >= 0; --i)
-                pathBuilder.AppendFormat(" L {0},{1}", i, dataCount - (histogram[i] / (double)max * dataCount));
-
+            {
+                var n = histogram[i];
+                var x = i;
+                var y = dataCount - (n / (double)max * dataCount);
+                fillPathBuilder.AppendFormat(" L {0},{1}", x, y);
+                if (borderDrawingList is not null)
+                {
+                    if (n > 0)
+                    {
+                        if (borderPathBuilder.Length <= 0)
+                            borderPathBuilder.AppendFormat("M {0},{1}", x, dataCount);
+                        borderPathBuilder.AppendFormat(" L {0},{1}", x, y);
+                    }
+                    else if (borderPathBuilder.Length > 0)
+                    {
+                        borderPathBuilder.AppendFormat(" L {0},{1}", x, dataCount);
+                        borderPen ??= new Pen { Brush = border, Thickness = borderThickness };
+                        borderDrawingList.Add(new GeometryDrawing
+                        {
+                            Pen = borderPen,
+                            Geometry = StreamGeometry.Parse(borderPathBuilder.ToString())
+                        });
+                        borderPathBuilder.Clear();
+                    }
+                }
+            }
+            if (borderDrawingList is not null && borderPathBuilder.Length > 0)
+            {
+                borderPathBuilder.AppendFormat(" L {0},{1}", 0, dataCount);
+                borderPen ??= new Pen { Brush = border, Thickness = borderThickness };
+                borderDrawingList.Add(new GeometryDrawing
+                {
+                    Pen = borderPen,
+                    Geometry = StreamGeometry.Parse(borderPathBuilder.ToString())
+                });
+            }
         }
-        pathBuilder.Append(" Z");
+        fillPathBuilder.Append($" L 0,{dataCount} Z");
         try
         {
+            if (borderDrawingList.IsNotEmpty())
+            {
+                var drawingList = new DrawingCollection
+                {
+                    new GeometryDrawing
+                    {
+                        Brush = background,
+                        Geometry = StreamGeometry.Parse(fillPathBuilder.ToString())
+                    }
+                };
+                drawingList.AddRange(borderDrawingList);
+                return new DrawingImage
+                {
+                    Drawing = new DrawingGroup { Children = drawingList }
+                };
+            }
             return new DrawingImage
             {
                 Drawing = new GeometryDrawing
                 {
-                    Brush = brush,
-                    Geometry = StreamGeometry.Parse(pathBuilder.ToString()),
+                    Brush = background,
+                    Geometry = StreamGeometry.Parse(fillPathBuilder.ToString()),
                 },
             };
         }
         catch (Exception ex)
         {
-            this.Logger.LogError(ex, "Failed to generate geometry of histogram. data count: {dataCount}, max: {max}, path: '{pathBuilder}'", dataCount, max, pathBuilder);
+            this.Logger.LogError(ex, "Failed to generate geometry of histogram. data count: {dataCount}, max: {max}, path: '{pathBuilder}'", dataCount, max, fillPathBuilder);
             return null;
         }
     }
 
 
+    /// <summary>
+    /// Get or set border brush for histogram of green channel.
+    /// </summary>
+    public IBrush? GreenHistogramBorderBrush
+    {
+        get => this.GetValue(GreenHistogramBorderBrushProperty);
+        set => this.SetValue(GreenHistogramBorderBrushProperty, value);
+    }
+    
+    
     /// <summary>
     /// Get or set brush for histogram of green channel.
     /// </summary>
@@ -418,6 +531,16 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 
 
     /// <summary>
+    /// Get or set border brush for histogram of luminance.
+    /// </summary>
+    public IBrush? LuminanceHistogramBorderBrush
+    {
+        get => this.GetValue(LuminanceHistogramBorderBrushProperty);
+        set => this.SetValue(LuminanceHistogramBorderBrushProperty, value);
+    }
+    
+    
+    /// <summary>
     /// Get or set brush for histogram of luminance.
     /// </summary>
     public IBrush? LuminanceHistogramBrush
@@ -504,9 +627,13 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     {
         base.OnPropertyChanged(change);
         var property = change.Property;
-        if (property == BlueHistogramBrushProperty
+        if (property == BlueHistogramBorderBrushProperty 
+            || property == BlueHistogramBrushProperty
+            || property == GreenHistogramBorderBrushProperty
             || property == GreenHistogramBrushProperty
+            || property == LuminanceHistogramBorderBrushProperty
             || property == LuminanceHistogramBrushProperty
+            || property == RedHistogramBorderBrushProperty
             || property == RedHistogramBrushProperty)
         {
             this.updateHistogramImagesAction.Schedule();
@@ -537,6 +664,32 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     {
         base.OnSizeChanged(e);
         this.updateMarkerOffsetsAction.Schedule();
+    }
+    
+    
+    // Width of the range between minimum and maximum of blue in pixels.
+    double RangeOfBlue => this.GetValue(RangeOfBlueProperty);
+
+
+    // Width of the range between minimum and maximum of green in pixels.
+    double RangeOfGreen => this.GetValue(RangeOfGreenProperty);
+
+
+    // Width of the range between minimum and maximum of luminance in pixels.
+    double RangeOfLuminance => this.GetValue(RangeOfLuminanceProperty);
+
+
+    // Width of the range between minimum and maximum of red in pixels.
+    double RangeOfRed => this.GetValue(RangeOfRedProperty);
+    
+    
+    /// <summary>
+    /// Get or set border brush for histogram of red channel.
+    /// </summary>
+    public IBrush? RedHistogramBorderBrush
+    {
+        get => this.GetValue(RedHistogramBorderBrushProperty);
+        set => this.SetValue(RedHistogramBorderBrushProperty, value);
     }
 
 

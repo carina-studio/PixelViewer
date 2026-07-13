@@ -10,24 +10,58 @@
 		<Color x:Key="Color/Accent">#50b29b</Color>
 
 		<!-- BitmapHistogramsView -->
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Background}"/>
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Background}"/>
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Background}"/>
+		<LinearGradientBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Background" EndPoint="100%,100%" StartPoint="0%,100%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Background.Start}" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.BlueHistogram.Border" Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Border}"/>
+		<LinearGradientBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Background" EndPoint="100%,100%" StartPoint="0%,100%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Background.Start}" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.GreenHistogram.Border" Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Border}"/>
+		<LinearGradientBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Background" EndPoint="100%,100%" StartPoint="0%,100%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Background.Start}" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.LuminanceHistogram.Border" Color="{DynamicResource Color/BitmapHistogramsView.LuminanceHistogram.Border}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfBlue" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfBlue}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfGreen" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfGreen}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfLuminance" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfLuminance}"/>
 		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MeanOfRed" Color="{DynamicResource Color/BitmapHistogramsView.MeanOfRed}"/>
-		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Background" Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Background}"/>
-		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background">#3f3fff</Color>
-		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background">#32cc32</Color>
-		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background">#bfbfbf</Color>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.MinMax.Background" Color="{DynamicResource Color/BitmapHistogramsView.MinMax.Background}"/>
+		<LinearGradientBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Background" EndPoint="100%,100%" StartPoint="0%,100%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Background.Start}" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<SolidColorBrush x:Key="Brush/BitmapHistogramsView.RedHistogram.Border" Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Border}"/>
+		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background.End">#3f3fff</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.BlueHistogram.Background.Start" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start"/>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.BlueHistogram.Border" ResourceKey="Color/BitmapHistogramsView.BlueHistogram.Background.End"/>
+		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background.End">#32cc32</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.GreenHistogram.Background.Start" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start"/>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.GreenHistogram.Border" ResourceKey="Color/BitmapHistogramsView.GreenHistogram.Background.End"/>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background.End">#bfbfbf</Color>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start">#5fbfbfbf</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Border" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.End"/>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfBlue">#80b0ff</Color>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfGreen">#99ff99</Color>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfLuminance">#ffffff</Color>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfRed">#ff9a9a</Color>
-		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background">#ff3f3f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MinMax.Background">#555555</Color>
+		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background.End">#ff3f3f</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.RedHistogram.Background.Start" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start"/>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.RedHistogram.Border" ResourceKey="Color/BitmapHistogramsView.RedHistogram.Background.End"/>
 		<Thickness x:Key="Thickness/BitmapHistogramsView.Border">1</Thickness>
-		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,1,5,0</Thickness>
+		<Thickness x:Key="Thickness/BitmapHistogramsView.Padding">5,0,5,0</Thickness>
 
 		<!-- ColorSpaceInfoDialog -->
 		<sys:Double x:Key="Double/ColorSpaceInfoDialog.MinHeight">500</sys:Double>
@@ -118,6 +152,7 @@
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Hint.Opacity">0.75</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.Histogram.RangeBar.Height">5</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.FontSize">10</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageFormatCategoryLabel.Opacity.Disabled">0.5</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageProgressBar.Height">2</sys:Double>
@@ -133,6 +168,7 @@
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Decrease">0,0,5,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Increase">5,0,0,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Padding">3</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.Histogram.RangeBar.Margin">6,3,6,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.HistogramsPanel.Padding">18,10,18,10</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Border">1</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageFormatCategoryLabel.Margin">8,0,0,0</Thickness>

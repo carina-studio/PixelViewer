@@ -6,14 +6,23 @@
 	<Styles.Resources>
 		
 		<!-- BitmapHistogramsView -->
-		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background">#1717e6</Color>
-		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background">#10a610</Color>
-		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background">#7f7f7f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.BlueHistogram.Background.End">#1717e6</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.BlueHistogram.Background.Start" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start"/>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.BlueHistogram.Border" ResourceKey="Color/BitmapHistogramsView.BlueHistogram.Background.End"/>
+		<Color x:Key="Color/BitmapHistogramsView.GreenHistogram.Background.End">#10a610</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.GreenHistogram.Background.Start" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start"/>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.GreenHistogram.Border" ResourceKey="Color/BitmapHistogramsView.GreenHistogram.Background.End"/>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background.End">#7f7f7f</Color>
+		<Color x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start">#5f7f7f7f</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.LuminanceHistogram.Border" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.End"/>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfBlue">#0a0a66</Color>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfGreen">#084d08</Color>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfLuminance">#333333</Color>
 		<Color x:Key="Color/BitmapHistogramsView.MeanOfRed">#801313</Color>
-		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background">#cd1e1e</Color>
+		<Color x:Key="Color/BitmapHistogramsView.MinMax.Background">#cccccc</Color>
+		<Color x:Key="Color/BitmapHistogramsView.RedHistogram.Background.End">#cd1e1e</Color>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.RedHistogram.Background.Start" ResourceKey="Color/BitmapHistogramsView.LuminanceHistogram.Background.Start"/>
+		<StaticResourceExtension x:Key="Color/BitmapHistogramsView.RedHistogram.Border" ResourceKey="Color/BitmapHistogramsView.RedHistogram.Background.End"/>
 
 		<!-- SessionControl -->
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Background.Custom">#b3dfff</Color>
