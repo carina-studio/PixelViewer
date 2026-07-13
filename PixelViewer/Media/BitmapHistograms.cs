@@ -126,7 +126,7 @@ namespace Carina.PixelViewer.Media
         /// Create <see cref="BitmapHistograms"/> asynchronously.
         /// </summary>
         /// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
-        /// <param name="effectiveBits">Effective bits of each color component of the source image, must be in range of [1, 16].</param>
+        /// <param name="effectiveBits">Effective bits of each color component of the source image. Only used for 16-bit bitmap and is clamped to the range of [1, 16].</param>
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>Task of histogram creation.</returns>
         public static Task<BitmapHistograms> CreateAsync(IBitmapBuffer bitmapBuffer, int effectiveBits, CancellationToken cancellationToken) => bitmapBuffer.Format switch
@@ -225,11 +225,8 @@ namespace Carina.PixelViewer.Media
         // Create histograms from BGRA_64 bitmap.
         static async Task<BitmapHistograms> CreateFromBgra64Async(IBitmapBuffer bitmapBuffer, int effectiveBits, CancellationToken cancellationToken)
         {
-            // validate effective bits
-            ArgumentOutOfRangeException.ThrowIfLessThan(effectiveBits, 1);
-            ArgumentOutOfRangeException.ThrowIfGreaterThan(effectiveBits, 16);
-
             // create histograms with color count based-on effective bits
+            effectiveBits = Math.Clamp(effectiveBits, 1, 16);
             var colorCount = 1 << effectiveBits;
             var shiftCount = 16 - effectiveBits;
             bitmapBuffer = bitmapBuffer.Share();
