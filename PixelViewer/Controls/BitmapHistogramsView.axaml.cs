@@ -89,6 +89,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 
     // Constants.
     const double DefaultMarkerOffset = -999;
+    const int DisplayColorCount = 256;
 
 
     // Static fields.
@@ -131,6 +132,11 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
 
 
     // Fields.
+    int[] displayBlueHistogram = [];
+    int[] displayGreenHistogram = [];
+    int[] displayLuminanceHistogram = [];
+    int displayMaximum;
+    int[] displayRedHistogram = [];
     int maxBlueValue;
     int maxGreenValue;
     int maxLuminanceValue;
@@ -152,12 +158,12 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
         // create actions
         this.updateHistogramImagesAction = new(() =>
         {
-            if (this.DataContext is BitmapHistograms histograms)
+            if (this.DataContext is BitmapHistograms)
             {
-                this.SetValue(RedHistogramImageProperty, this.GenerateHistogramImage(histograms.Red, this.maxRedValue, this.RedHistogramBrush, this.RedHistogramBorderBrush));
-                this.SetValue(GreenHistogramImageProperty, this.GenerateHistogramImage(histograms.Green, this.maxGreenValue, this.GreenHistogramBrush, this.GreenHistogramBorderBrush));
-                this.SetValue(BlueHistogramImageProperty, this.GenerateHistogramImage(histograms.Blue, this.maxBlueValue, this.BlueHistogramBrush, this.BlueHistogramBorderBrush));
-                this.SetValue(LuminanceHistogramImageProperty, this.GenerateHistogramImage(histograms.Luminance, this.maxLuminanceValue, this.LuminanceHistogramBrush, this.LuminanceHistogramBorderBrush));
+                this.SetValue(RedHistogramImageProperty, this.GenerateHistogramImage(this.displayRedHistogram, this.maxRedValue, this.RedHistogramBrush, this.RedHistogramBorderBrush));
+                this.SetValue(GreenHistogramImageProperty, this.GenerateHistogramImage(this.displayGreenHistogram, this.maxGreenValue, this.GreenHistogramBrush, this.GreenHistogramBorderBrush));
+                this.SetValue(BlueHistogramImageProperty, this.GenerateHistogramImage(this.displayBlueHistogram, this.maxBlueValue, this.BlueHistogramBrush, this.BlueHistogramBorderBrush));
+                this.SetValue(LuminanceHistogramImageProperty, this.GenerateHistogramImage(this.displayLuminanceHistogram, this.maxLuminanceValue, this.LuminanceHistogramBrush, this.LuminanceHistogramBorderBrush));
             }
             else
             {
@@ -174,7 +180,7 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
                 return;
 
             // check visibility
-            var maxValue = Math.Min(histograms.EffectivePixelCount / 16.0, histograms.Maximum);
+            var maxValue = Math.Min(histograms.EffectivePixelCount / 16.0, this.displayMaximum);
 
             // update scales
             this.SetValue(RedHistogramScaleYProperty, this.IsRedHistogramVisible ? this.maxRedValue / maxValue : 0);
@@ -267,11 +273,21 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     // Attach to histograms.
     void AttachToBitmapHistograms(BitmapHistograms histograms)
     {
+        // downsample histograms to display resolution
+        var colorCount = histograms.ColorCount;
+        var displayCount = Math.Min(colorCount, DisplayColorCount);
+        var groupSize = colorCount / displayCount;
+        this.displayRedHistogram = DownsampleHistogram(histograms.Red, this.displayRedHistogram, displayCount, groupSize);
+        this.displayGreenHistogram = DownsampleHistogram(histograms.Green, this.displayGreenHistogram, displayCount, groupSize);
+        this.displayBlueHistogram = DownsampleHistogram(histograms.Blue, this.displayBlueHistogram, displayCount, groupSize);
+        this.displayLuminanceHistogram = DownsampleHistogram(histograms.Luminance, this.displayLuminanceHistogram, displayCount, groupSize);
+        this.maxRedValue = this.displayRedHistogram.Max();
+        this.maxGreenValue = this.displayGreenHistogram.Max();
+        this.maxBlueValue = this.displayBlueHistogram.Max();
+        this.maxLuminanceValue = this.displayLuminanceHistogram.Max();
+        this.displayMaximum = Math.Max(Math.Max(this.maxRedValue, this.maxGreenValue), Math.Max(this.maxBlueValue, this.maxLuminanceValue));
+
         // create images
-        this.maxRedValue = histograms.Red.Max();
-        this.maxGreenValue = histograms.Green.Max();
-        this.maxBlueValue = histograms.Blue.Max();
-        this.maxLuminanceValue = histograms.Luminance.Max();
         this.updateHistogramImagesAction.Schedule();
 
         // update display scales
@@ -312,6 +328,30 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     {
         // clear images
         this.updateHistogramImagesAction.Schedule();
+    }
+
+
+    // Downsample the given histogram into the specified number of display bins by summing each group of source bins, reusing the given buffer when its length already matches.
+    static int[] DownsampleHistogram(IList<int> histogram, int[] buffer, int displayCount, int groupSize)
+    {
+        var result = buffer.Length == displayCount ? buffer : new int[displayCount];
+        if (groupSize <= 1)
+        {
+            for (var i = displayCount - 1; i >= 0; --i)
+                result[i] = histogram[i];
+        }
+        else
+        {
+            for (var i = displayCount - 1; i >= 0; --i)
+            {
+                var sum = 0;
+                var baseIndex = i * groupSize;
+                for (var j = groupSize - 1; j >= 0; --j)
+                    sum += histogram[baseIndex + j];
+                result[i] = sum;
+            }
+        }
+        return result;
     }
 
 

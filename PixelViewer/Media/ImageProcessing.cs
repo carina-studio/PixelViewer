@@ -572,6 +572,37 @@ namespace Carina.PixelViewer.Media
 		}
 
 
+		/// <summary>
+		/// Perform parallel for-loop for image processing with thread-local state.
+		/// </summary>
+		/// <typeparam name="TLocal">Type of thread-local state.</typeparam>
+		/// <param name="fromInclusive">Inclusive number which loop starts from.</param>
+		/// <param name="toExclusive">Exclusive number which loop ends to.</param>
+		/// <param name="localInit">Function to create thread-local state before running the loop body on a worker.</param>
+		/// <param name="body">Body of loop which returns the updated thread-local state.</param>
+		/// <param name="localFinally">Action to perform on each thread-local state after the loop completes on a worker.</param>
+		public static void ParallelFor<TLocal>(int fromInclusive, int toExclusive, Func<TLocal> localInit, Func<int, TLocal, TLocal> body, Action<TLocal> localFinally)
+		{
+			try
+			{
+				Parallel.For(fromInclusive, toExclusive, new ParallelOptions { MaxDegreeOfParallelism = MaxDegreeOfParallelism }, localInit, (i, _, local) => body(i, local), localFinally);
+			}
+			catch (AggregateException ex)
+			{
+				var actualEx = default(Exception);
+				foreach (var innerEx in ex.InnerExceptions)
+				{
+					if (innerEx is OperationCanceledException)
+						throw new TaskCanceledException();
+					actualEx ??= innerEx;
+				}
+				if (actualEx is not null)
+					throw actualEx;
+				throw;
+			}
+		}
+
+
 		// Convert from RGB24 to Luminance based-on ITU-R BT.709.
 		static byte Rgb24ToLuminanceBT709(byte r, byte g, byte b)
 		{

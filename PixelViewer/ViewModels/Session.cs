@@ -2267,7 +2267,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// generate histogram
 		try
 		{
-			colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, cancellationToken);
+			colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
 		}
 		catch (TaskCanceledException)
 		{
@@ -2808,7 +2808,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// generate histograms
 		try
 		{
-			sourceImageFrame.AsNonNull().Histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.AsNonNull().BitmapBuffer, cancellationTokenSource.Token);
+			sourceImageFrame.AsNonNull().Histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.AsNonNull().BitmapBuffer, this.SourceImageEffectiveBits, cancellationTokenSource.Token);
 		}
 		catch (Exception ex)
 		{
@@ -4795,7 +4795,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			try
 			{
 				if (renderedImageFrame is not null)
-					renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, cancellationTokenSource.Token);
+					renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
 			{
