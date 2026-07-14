@@ -1834,6 +1834,18 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Generate the ICC profile which represents this color space.
+        /// </summary>
+        /// <returns>Byte array of the generated ICC profile.</returns>
+        public byte[] SaveAsIccProfile()
+        {
+            using var stream = new MemoryStream();
+            this.SaveAsIccProfile(stream);
+            return stream.ToArray();
+        }
+
+
+        /// <summary>
         /// Save this color space as an ICC profile to the given stream.
         /// </summary>
         /// <param name="stream"><see cref="Stream"/> to write the ICC profile to.</param>

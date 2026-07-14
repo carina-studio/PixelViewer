@@ -67,6 +67,7 @@
 		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.14.0" />
 		<PackageReference Include="SkiaSharp" Version="$(SkiaSharpVersion)" />
 		<PackageReference Include="SkiaSharp.HarfBuzz" Version="$(SkiaSharpVersion)" />
+		<PackageReference Include="System.IO.Hashing" Version="$(DotNetLibVersion)" />
 	</ItemGroup>
 
 	<!-- Trimming options -->

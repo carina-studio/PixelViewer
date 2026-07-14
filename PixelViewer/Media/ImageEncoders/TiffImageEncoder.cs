@@ -23,10 +23,6 @@ class TiffImageEncoder : BaseImageEncoder
     const ushort TiffTypeUndefined = 7;
 
 
-    // Static fields.
-    static readonly ILogger? Logger = Application.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(TiffImageEncoder));
-
-
     /// <summary>
     /// Initialize new <see cref="TiffImageEncoder"/> instance.
     /// </summary>
@@ -98,9 +94,7 @@ class TiffImageEncoder : BaseImageEncoder
         {
             try
             {
-                using var iccStream = new MemoryStream();
-                options.ColorSpace.SaveAsIccProfile(iccStream);
-                iccProfile = iccStream.ToArray();
+                iccProfile = options.ColorSpace.SaveAsIccProfile();
             }
             catch (Exception ex)
             {

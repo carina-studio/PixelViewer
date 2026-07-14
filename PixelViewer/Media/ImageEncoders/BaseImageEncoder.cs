@@ -1,5 +1,7 @@
-﻿using CarinaStudio.IO;
+﻿using CarinaStudio;
+using CarinaStudio.IO;
 using CarinaStudio.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Threading;
@@ -74,6 +76,19 @@ abstract class BaseImageEncoder : IImageEncoder
 
     /// <inheritdoc/>
     public FileFormat Format { get; }
+
+
+    /// <summary>
+    /// Get the <see cref="ILogger"/> of the encoder.
+    /// </summary>
+    protected ILogger? Logger
+    {
+        get
+        {
+            field ??= Application.CurrentOrNull?.LoggerFactory.CreateLogger(this.GetType().Name);
+            return field;
+        }
+    }
 
 
     /// <inheritdoc/>

@@ -83,10 +83,10 @@ class JpegFileFormatParser : SkiaFileFormatParser
                         return;
                     }
                     var entryReader = new IfdEntryReader(new MemoryStream(segmentDataBuffer).Also(it => it.Position = 6));
-                    ushort[]? ushortData;
-                    uint[]? uintData;
                     while (entryReader.Read())
                     {
+                        ushort[]? ushortData;
+                        uint[]? uintData;
                         switch (entryReader.CurrentIfdName)
                         {
                             case IfdNames.Default:
@@ -127,6 +127,26 @@ class JpegFileFormatParser : SkiaFileFormatParser
         profile.Orientation = rotation;
         profile.FlipX = flipX;
         profile.FlipY = flipY;
+    }
+
+
+    /// <inheritdoc/>
+    protected override byte[]? OnReadIccProfileToMemory(Stream stream)
+    {
+        // read the profile size from the ICC profile header (the stream is positioned at the start of the profile by SeekToIccProfile, which accepts single-segment profiles only)
+        var header = new byte[4];
+        if (stream.Read(header, 0, 4) < 4)
+            return null;
+        var profileSize = BinaryPrimitives.ReadUInt32BigEndian(header);
+        if (profileSize < 128 || profileSize >= 1L << 20)
+            return null;
+
+        // read the whole profile (embedded as a single APP2 segment)
+        var profile = new byte[profileSize];
+        header.CopyTo(profile.AsSpan());
+        return stream.Read(profile, 4, (int)profileSize - 4) == (int)profileSize - 4
+            ? profile
+            : null;
     }
 
 

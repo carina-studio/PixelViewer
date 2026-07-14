@@ -25,7 +25,7 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
     /// </summary>
     /// <param name="format">Format supported by this instance.</param>
     /// <param name="encodedFormat">Format defined by Skia.</param>      
-    protected SkiaCompressedFormatImageRenderer(ImageFormat format, SKEncodedImageFormat encodedFormat) : this(format, new[] { encodedFormat })
+    protected SkiaCompressedFormatImageRenderer(ImageFormat format, SKEncodedImageFormat encodedFormat) : this(format, [ encodedFormat ])
     { }
 
 
@@ -100,6 +100,8 @@ abstract class SkiaCompressedFormatImageRenderer : CompressedFormatImageRenderer
             BitmapFormat.Bgra64 => SKColorType.RgbaF16,
             _ => throw new NotSupportedException($"Unknown bitmap buffer format: {bitmapBuffer.Format}"),
         };
+        if (bitmapBuffer.Format == BitmapFormat.Bgra32) // decode the 8-bit output without color management (raw pixels) so that the color space carried by the profile is applied by the application, not silently baked in by Skia; the high-bit-depth path keeps the source color space because its float output depends on it
+            imageInfo.ColorSpace = null;
         using var bitmap = SKBitmap.Decode(codec, imageInfo);
         if (bitmap == null)
             throw new ArgumentException("Failed to decode.");
@@ -198,7 +200,7 @@ class JpegImageRenderer : SkiaCompressedFormatImageRenderer
     /// <summary>
     /// Initialize new <see cref="JpegImageRenderer"/> instance.
     /// </summary>
-    public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), new[] { "JPEG" }), new[] { SKEncodedImageFormat.Dng, SKEncodedImageFormat.Jpeg })
+    public JpegImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "JPEG", new ImagePlaneDescriptor(0), [ "JPEG" ]), [ SKEncodedImageFormat.Dng, SKEncodedImageFormat.Jpeg ])
     { }
 
 
@@ -216,7 +218,7 @@ class PngImageRenderer : SkiaCompressedFormatImageRenderer
     /// <summary>
     /// Initialize new <see cref="PngImageRenderer"/> instance.
     /// </summary>
-    public PngImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "PNG", new ImagePlaneDescriptor(0), new[] { "PNG" }), SKEncodedImageFormat.Png)
+    public PngImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "PNG", new ImagePlaneDescriptor(0), [ "PNG" ]), SKEncodedImageFormat.Png)
     { }
 
 
@@ -234,7 +236,7 @@ class WebPImageRenderer : SkiaCompressedFormatImageRenderer
     /// <summary>
     /// Initialize new <see cref="WebPImageRenderer"/> instance.
     /// </summary>
-    public WebPImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "WebP", new ImagePlaneDescriptor(0), new[] { "WebP" }), SKEncodedImageFormat.Webp)
+    public WebPImageRenderer() : base(new ImageFormat(ImageFormatCategory.Compressed, "WebP", new ImagePlaneDescriptor(0), [ "WebP" ]), SKEncodedImageFormat.Webp)
     { }
 
 
