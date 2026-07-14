@@ -12,7 +12,6 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -414,12 +413,13 @@ namespace Carina.PixelViewer.Media
                 E = 0.0f, 
                 F = 0.0f
             },
+            // primaries Bradford-adapted from the D65 white point to the D50 profile connection space
             new SKColorSpaceXyz(
-                0.3935f, 0.3653f, 0.1917f,
-                0.2124f, 0.7011f, 0.0866f,
-                0.0187f, 0.1119f, 0.9584f
-            ), 
-            D65, 
+                0.4162f, 0.3932f, 0.1548f,
+                0.2217f, 0.7033f, 0.0751f,
+                0.0136f, 0.0913f, 0.7204f
+            ),
+            D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
 
         /// <summary>
@@ -439,12 +439,13 @@ namespace Carina.PixelViewer.Media
                 E = 0.0f, 
                 F = 0.0f
             },
+            // primaries Bradford-adapted from the D65 white point to the D50 profile connection space
             new SKColorSpaceXyz(
-                0.4306f, 0.3415f, 0.1784f,
-                0.2220f, 0.7067f, 0.0713f,
-                0.0202f, 0.1296f, 0.9393f
+                0.4553f, 0.3675f, 0.1415f,
+                0.2323f, 0.7079f, 0.0599f,
+                0.0146f, 0.1050f, 0.7059f
             ),
-            D65, 
+            D65,
             new Uri("https://en.wikipedia.org/wiki/Rec._601"));
 
         /// <summary>
@@ -530,8 +531,8 @@ namespace Carina.PixelViewer.Media
         readonly long[] matrixToXyz;
         readonly SKColorSpaceTransferFn numericalTransferFuncFromLinear;
         readonly SKColorSpaceTransferFn numericalTransferFuncToLinear;
-        volatile unsafe long* numericalTransferTableFromLinear;
-        volatile unsafe long* numericalTransferTableToLinear;
+        unsafe volatile long* numericalTransferTableFromLinear;
+        unsafe volatile long* numericalTransferTableToLinear;
         readonly SKColorSpaceXyz skiaColorSpaceXyz;
 
 
@@ -610,6 +611,34 @@ namespace Carina.PixelViewer.Media
                 return true;
             }
             return false;
+        }
+
+
+        // Check whether two color spaces are equivalent within the tolerance needed to absorb the fixed-point rounding of ICC profile encoding.
+        static bool AreEquivalentColorSpaces(ColorSpace x, ColorSpace y)
+        {
+            // compare the RGB to XYZ matrices element by element
+            const double matrixTolerance = 0.001;
+            var matrixX = x.skiaColorSpaceXyz;
+            var matrixY = y.skiaColorSpaceXyz;
+            for (var i = 0; i < 3; ++i)
+            {
+                for (var j = 0; j < 3; ++j)
+                {
+                    if (Math.Abs(matrixX[i, j] - matrixY[i, j]) > matrixTolerance)
+                        return false;
+                }
+            }
+
+            // compare the transfer functions by sampling from non-linear to linear
+            const double transferTolerance = 0.005;
+            for (var i = 0; i <= 32; ++i)
+            {
+                var input = i / 32.0;
+                if (Math.Abs(x.NumericalTransferToLinear(input) - y.NumericalTransferToLinear(input)) > transferTolerance)
+                    return false;
+            }
+            return true;
         }
 
 
@@ -1370,6 +1399,12 @@ namespace Carina.PixelViewer.Media
                             if (count == 1)
                                 return CreateGammaTransferFunc(BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan(dataOffset + 12)) / 256.0);
 
+                            // recover the exact transfer function of a standard HDR curve that was sampled into a table, because HLG and PQ cannot be expressed as an ICC parametric curve
+                            if (IsSampledTransferOf(profile, dataOffset, count, BT_2100_PQ))
+                                return SKColorSpaceTransferFn.Pq;
+                            if (IsSampledTransferOf(profile, dataOffset, count, BT_2100_HLG))
+                                return SKColorSpaceTransferFn.Hlg;
+
                             // fit a single gamma to the table by least squares in log-log space
                             var sumXx = 0.0;
                             var sumXy = 0.0;
@@ -1409,6 +1444,18 @@ namespace Carina.PixelViewer.Media
             // create a pure-gamma parametric transfer function (device value to linear).
             static SKColorSpaceTransferFn CreateGammaTransferFunc(double gamma) =>
                 new() { G = (float)gamma, A = 1f, B = 0f, C = 0f, D = 0f, E = 0f, F = 0f };
+
+            // check whether a 'curv' look-up table (device value to linear) matches the transfer function of the given color space within tolerance.
+            static bool IsSampledTransferOf(byte[] profile, int dataOffset, uint count, ColorSpace colorSpace)
+            {
+                for (var i = 0u; i < count; ++i)
+                {
+                    var sampled = BinaryPrimitives.ReadUInt16BigEndian(profile.AsSpan((int)(dataOffset + 12 + i * 2))) / 65535.0;
+                    if (Math.Abs(sampled - colorSpace.NumericalTransferToLinear(i / (double)(count - 1))) > 0.01)
+                        return false;
+                }
+                return true;
+            }
         }
 
 
@@ -1787,6 +1834,157 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Save this color space as an ICC profile to the given stream.
+        /// </summary>
+        /// <param name="stream"><see cref="Stream"/> to write the ICC profile to.</param>
+        /// <remarks>The profile is generated from the parameters of this color space as a standard ICC v2 RGB matrix/TRC display profile.</remarks>
+        public void SaveAsIccProfile(Stream stream)
+        {
+            // build the data block of each tag (the three tone reproduction curves share a single block)
+            var xyz = this.skiaColorSpaceXyz;
+            var descData = CreateTextDescriptionData(this.CustomName ?? this.Name);
+            var wtptData = CreateXyzTypeData(D50.Item1, D50.Item2, D50.Item3);
+            var rXyzData = CreateXyzTypeData(xyz[0, 0], xyz[0, 1], xyz[0, 2]);
+            var gXyzData = CreateXyzTypeData(xyz[1, 0], xyz[1, 1], xyz[1, 2]);
+            var bXyzData = CreateXyzTypeData(xyz[2, 0], xyz[2, 1], xyz[2, 2]);
+            var trcData = CreateTransferCurveData();
+            var cprtData = CreateTextData("Generated by PixelViewer.");
+
+            // lay out the data blocks after the header and tag table, aligning the start of each to a 4-byte boundary
+            byte[][] dataBlocks = [ descData, wtptData, rXyzData, gXyzData, bXyzData, trcData, cprtData ];
+            const int tagCount = 9;
+            var offsets = new int[dataBlocks.Length];
+            var offset = 128 + 4 + tagCount * 12;
+            for (var i = 0; i < dataBlocks.Length; ++i)
+            {
+                offset = (offset + 3) & ~3;
+                offsets[i] = offset;
+                offset += dataBlocks[i].Length;
+            }
+            var profileSize = offset;
+
+            // map each of the 9 tags to its data block (rTRC/gTRC/bTRC all reuse the shared curve block)
+            (uint Signature, int Offset, int Size)[] tags =
+            [
+                (0x64657363u, offsets[0], descData.Length), // 'desc'
+                (0x77747074u, offsets[1], wtptData.Length), // 'wtpt'
+                (0x7258595Au, offsets[2], rXyzData.Length), // 'rXYZ'
+                (0x6758595Au, offsets[3], gXyzData.Length), // 'gXYZ'
+                (0x6258595Au, offsets[4], bXyzData.Length), // 'bXYZ'
+                (0x72545243u, offsets[5], trcData.Length),  // 'rTRC'
+                (0x67545243u, offsets[5], trcData.Length),  // 'gTRC'
+                (0x62545243u, offsets[5], trcData.Length),  // 'bTRC'
+                (0x63707274u, offsets[6], cprtData.Length), // 'cprt'
+            ];
+
+            // write the header
+            var profile = new byte[profileSize];
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(0), (uint)profileSize);
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(8), 0x02400000u); // profile version 2.4
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(12), 0x6D6E7472u); // device class 'mntr'
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(16), 0x52474220u); // data color space 'RGB '
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(20), 0x58595A20u); // profile connection space 'XYZ '
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(36), 0x61637370u); // profile file signature 'acsp'
+            BinaryPrimitives.WriteInt32BigEndian(profile.AsSpan(68), (int)Math.Round(D50.Item1 * 65536.0)); // PCS illuminant X (D50)
+            BinaryPrimitives.WriteInt32BigEndian(profile.AsSpan(72), (int)Math.Round(D50.Item2 * 65536.0)); // PCS illuminant Y (D50)
+            BinaryPrimitives.WriteInt32BigEndian(profile.AsSpan(76), (int)Math.Round(D50.Item3 * 65536.0)); // PCS illuminant Z (D50)
+
+            // write the tag table
+            BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(128), tagCount);
+            var tagEntryOffset = 132;
+            foreach (var (signature, tagOffset, tagSize) in tags)
+            {
+                BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(tagEntryOffset), signature);
+                BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(tagEntryOffset + 4), (uint)tagOffset);
+                BinaryPrimitives.WriteUInt32BigEndian(profile.AsSpan(tagEntryOffset + 8), (uint)tagSize);
+                tagEntryOffset += 12;
+            }
+
+            // write the data blocks
+            for (var i = 0; i < dataBlocks.Length; ++i)
+                dataBlocks[i].CopyTo(profile.AsSpan(offsets[i]));
+
+            // write the profile to the stream
+            stream.Write(profile, 0, profile.Length);
+
+            // build the data of an 'XYZ ' type tag from an XYZ value.
+            static byte[] CreateXyzTypeData(double x, double y, double z)
+            {
+                var data = new byte[20];
+                BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0), 0x58595A20u); // 'XYZ '
+                BinaryPrimitives.WriteInt32BigEndian(data.AsSpan(8), (int)Math.Round(x * 65536.0));
+                BinaryPrimitives.WriteInt32BigEndian(data.AsSpan(12), (int)Math.Round(y * 65536.0));
+                BinaryPrimitives.WriteInt32BigEndian(data.AsSpan(16), (int)Math.Round(z * 65536.0));
+                return data;
+            }
+
+            // build the data of a 'text' type tag from an ASCII string.
+            static byte[] CreateTextData(string text)
+            {
+                var asciiBytes = Encoding.ASCII.GetBytes(text);
+                var data = new byte[8 + asciiBytes.Length + 1];
+                BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0), 0x74657874u); // 'text'
+                asciiBytes.CopyTo(data.AsSpan(8));
+                return data;
+            }
+
+            // build the data of a 'desc' (text description) type tag from a description string.
+            static byte[] CreateTextDescriptionData(string text)
+            {
+                var asciiBytes = Encoding.ASCII.GetBytes(text);
+                var asciiCount = asciiBytes.Length + 1;
+                var data = new byte[12 + asciiCount + 78];
+                BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0), 0x64657363u); // 'desc'
+                BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(8), (uint)asciiCount);
+                asciiBytes.CopyTo(data.AsSpan(12));
+                return data;
+            }
+
+            // build the tone reproduction curve tag ('para' for a parametric transfer function, 'curv' for a linear or sampled one) of this color space.
+            byte[] CreateTransferCurveData()
+            {
+                // use an identity 'curv' for a linear color space
+                if (this.IsLinear || !this.hasTransferFunc)
+                {
+                    var data = new byte[12];
+                    BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0), 0x63757276u); // 'curv'
+                    return data;
+                }
+
+                // sample HLG/PQ transfer functions into a 'curv' look-up table because they cannot be expressed as an ICC parametric curve
+                var transferFunc = this.numericalTransferFuncToLinear;
+                if (transferFunc.G < 0)
+                {
+                    const int lutSize = 1024;
+                    var data = new byte[12 + lutSize * 2];
+                    BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(0), 0x63757276u); // 'curv'
+                    BinaryPrimitives.WriteUInt32BigEndian(data.AsSpan(8), lutSize);
+                    for (var i = 0; i < lutSize; ++i)
+                    {
+                        var linear = this.NumericalTransferToLinear((double)i / (lutSize - 1));
+                        var quantized = (int)Math.Round(linear * 65535.0);
+                        if (quantized < 0)
+                            quantized = 0;
+                        else if (quantized > 65535)
+                            quantized = 65535;
+                        BinaryPrimitives.WriteUInt16BigEndian(data.AsSpan(12 + i * 2), (ushort)quantized);
+                    }
+                    return data;
+                }
+
+                // write a parametric 'para' curve (function type 4) directly from the transfer function
+                var paraData = new byte[12 + 7 * 4];
+                BinaryPrimitives.WriteUInt32BigEndian(paraData.AsSpan(0), 0x70617261u); // 'para'
+                BinaryPrimitives.WriteUInt16BigEndian(paraData.AsSpan(8), 4); // function type 4
+                float[] parameters = [ transferFunc.G, transferFunc.A, transferFunc.B, transferFunc.C, transferFunc.D, transferFunc.E, transferFunc.F ];
+                for (var i = 0; i < parameters.Length; ++i)
+                    BinaryPrimitives.WriteInt32BigEndian(paraData.AsSpan(12 + i * 4), (int)Math.Round(parameters[i] * 65536.0));
+                return paraData;
+            }
+        }
+
+
+        /// <summary>
         /// Save color space to file.
         /// </summary>
         /// <param name="fileName">File name.</param>
@@ -1889,8 +2087,7 @@ namespace Carina.PixelViewer.Media
             }
             foreach (var candidate in builtInColorSpaces.Values)
             {
-                if (candidate.numericalTransferFuncToLinear.Equals(reference.numericalTransferFuncToLinear)
-                    && candidate.skiaColorSpaceXyz.Equals(reference.skiaColorSpaceXyz))
+                if (AreEquivalentColorSpaces(candidate, reference))
                 {
                     colorSpace = candidate;
                     return true;
@@ -1945,42 +2142,6 @@ namespace Carina.PixelViewer.Media
             }
             colorSpace = Default;
             return false;
-        }
-
-
-        /// <summary>
-        /// Try saving this color space as an ICC profile to the given stream.
-        /// </summary>
-        /// <param name="stream"><see cref="Stream"/> to write the ICC profile to.</param>
-        /// <returns>True if the ICC profile was written to <paramref name="stream"/>.</returns>
-        /// <remarks>
-        /// The profile is obtained by encoding a 1x1 image with this color space to PNG and extracting the embedded 'iCCP' chunk. False is returned without writing anything when the color space has no distinct ICC representation (i.e. it resolves to sRGB, for which the PNG encoder emits an 'sRGB' chunk instead).
-        /// </remarks>
-        public bool TrySaveAsIccProfile(Stream stream)
-        {
-            // encode a 1x1 image with this color space to PNG so that Skia embeds the ICC profile in an 'iCCP' chunk
-            var skiaImageInfo = new SKImageInfo(1, 1, SKColorType.Bgra8888, SKAlphaType.Unpremul)
-            {
-                ColorSpace = this.ToSkiaColorSpace(),
-            };
-            using var skiaBitmap = new SKBitmap(skiaImageInfo);
-            using var pngData = skiaBitmap.Encode(SKEncodedImageFormat.Png, 100);
-            if (pngData is null)
-                throw new Exception("Failed to encode image for extracting ICC profile.");
-
-            // seek to the compressed ICC profile in the 'iCCP' chunk
-            using var pngStream = pngData.AsStream();
-            if (!FileFormatParsers.PngFileFormatParser.SeekToIccProfile(pngStream))
-                return false;
-
-            // inflate the profile directly to the output stream, reporting whether any data was actually written
-            using var inflaterStream = new ZLibStream(pngStream, CompressionMode.Decompress, leaveOpen: true);
-            var firstByte = inflaterStream.ReadByte();
-            if (firstByte < 0)
-                return false;
-            stream.WriteByte((byte)firstByte);
-            inflaterStream.CopyTo(stream);
-            return true;
         }
 
 

@@ -99,12 +99,12 @@ class TiffImageEncoder : BaseImageEncoder
             try
             {
                 using var iccStream = new MemoryStream();
-                if (options.ColorSpace.TrySaveAsIccProfile(iccStream))
-                    iccProfile = iccStream.ToArray();
+                options.ColorSpace.SaveAsIccProfile(iccStream);
+                iccProfile = iccStream.ToArray();
             }
             catch (Exception ex)
             {
-                Logger?.LogWarning(ex, "Failed to extract ICC profile from color space '{name}' for TIFF", options.ColorSpace.Name);
+                Logger?.LogWarning(ex, "Failed to generate ICC profile from color space '{name}' for TIFF", options.ColorSpace.Name);
             }
         }
 

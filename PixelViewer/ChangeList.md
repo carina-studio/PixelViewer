@@ -19,4 +19,5 @@
 + Fixed the incorrect color value range of the selected pixel shown for images with RGB/ARGB formats such as `BGRA_8888` and `RGB_565`.
 + Fixed the failure to detect the image file format when it cannot be identified from the file name (e.g. a file with an incorrect extension).
 + Fixed the failure to load some ICC color profiles which caused the screen color space of certain wide-gamut displays to be incorrectly detected as sRGB.
++ Fixed the incorrect colors of images which use the `BT.601 (525-line, SDTV)` or `BT.601 (625-line, SDTV)` color space caused by an incorrect white point.
 + Minor bug fixing.

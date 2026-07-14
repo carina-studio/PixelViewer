@@ -1,4 +1,6 @@
-﻿using Avalonia;
+//#define SKIP_MAPPING_EMBEDDED_COLOR_SPACE_TO_BUILT_IN
+
+using Avalonia;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
@@ -1565,10 +1567,14 @@ class Session : ViewModel<IAppSuiteApplication>
 				colorSpace = profile.ColorSpace;
 				if (colorSpace.IsEmbedded)
 				{
+#if SKIP_MAPPING_EMBEDDED_COLOR_SPACE_TO_BUILT_IN
+					this.colorSpaces.Add(colorSpace);
+#else
 					if (ColorSpace.TryGetBuiltInColorSpace(colorSpace, out var builtInColorSpace))
 						colorSpace = builtInColorSpace;
 					else
 						this.colorSpaces.Add(colorSpace);
+#endif
 				}
 			}
 			this.SetValue(ColorSpaceProperty, colorSpace);
