@@ -849,7 +849,7 @@
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
 									<Grid ColumnDefinitions="*,Auto">
-										<TextBlock Text="{Binding Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+										<TextBlock Text="{Binding Format.DisplayName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
 										<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Background}}" 
 										        BorderBrush="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Border}}" 
 										        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 

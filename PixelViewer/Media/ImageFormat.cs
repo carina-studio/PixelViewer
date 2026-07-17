@@ -29,6 +29,24 @@ class ImageFormat : IEquatable<ImageFormat>
 	static readonly Dictionary<string, ImageFormat> formatsByName = new();
 
 
+	// Fields.
+	readonly string? displayName;
+
+
+	/// <summary>
+	/// Initialize new <see cref="ImageFormat"/> instance which is defined by user.
+	/// </summary>
+	/// <param name="id">Identifier of format, which is also its <see cref="Name"/>.</param>
+	/// <param name="displayName">Name of format for displaying to user.</param>
+	/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
+	/// <param name="planeDescriptors">Plane descriptors.</param>
+	/// <remarks>The identifier is stable across renaming, so it is the value persisted by profiles and sessions to refer to the format. A user-defined format registers no keyword, it never takes part in detecting format by file name.</remarks>
+	public ImageFormat(string id, string displayName, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors) : this(ImageFormatCategory.UserDefined, id, hasMultiByteOrderings, planeDescriptors, [])
+	{
+		this.displayName = displayName;
+	}
+
+
 	/// <summary>
 	/// Initialize new <see cref="ImageFormat"/> instance.
 	/// </summary>
@@ -115,11 +133,16 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// <param name="keywords">Keywords.</param>
 	public ImageFormat(ImageFormatCategory category, string name, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors, IEnumerable<string> keywords)
 	{
+		// check parameters
 		if (planeDescriptors.IsEmpty())
 			throw new ArgumentException("Empty image plane descriptor.");
+
+		// register format, the name must be unique so editing a user-defined format needs to unregister the previous one carrying the same identifier first
 		formatsByName.Add(name, this);
 		foreach (var keyword in keywords)
 			formatsByKeyword.Add(keyword, this);
+
+		// setup properties
 		this.Category = category;
 		this.Name = name;
 		this.HasMultipleByteOrderings = hasMultiByteOrderings;
@@ -136,6 +159,21 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// Get category of format.
 	/// </summary>
 	public ImageFormatCategory Category { get; }
+
+
+	/// <summary>
+	/// Get name of format for displaying to user.
+	/// </summary>
+	/// <remarks>The name given by user is returned for a user-defined format, whose <see cref="Name"/> is an identifier which is meaningless to user. The name defined in string resource is returned for a built-in format, or its <see cref="Name"/> if no string resource is defined for it.</remarks>
+	public string DisplayName
+	{
+		get
+		{
+			if (this.Category == ImageFormatCategory.UserDefined)
+				return this.displayName ?? this.Name;
+			return Application.CurrentOrNull?.GetStringNonNull($"ImageFormat.{this.Name}", this.Name) ?? this.Name;
+		}
+	}
 
 
 	/// <summary>
@@ -194,6 +232,26 @@ class ImageFormat : IEquatable<ImageFormat>
 		formatsByName.TryGetValue(name, out format);
 
 
+	/// <summary>
+	/// Unregister the given user-defined format so that it can no longer be found by its name.
+	/// </summary>
+	/// <param name="format">User-defined format to unregister.</param>
+	/// <returns>True if the format has been unregistered.</returns>
+	/// <remarks>A built-in format cannot be unregistered. The registration is only dropped if it still refers to <paramref name="format"/>, so unregistering a format twice is a no-op. A user-defined format registers no keyword, so there is no keyword to drop.</remarks>
+	public static bool Unregister(ImageFormat format)
+	{
+		// reject built-in format
+		if (format.Category != ImageFormatCategory.UserDefined)
+			return false;
+
+		// unregister from name
+		if (!formatsByName.TryGetValue(format.Name, out var registeredFormat) || !ReferenceEquals(registeredFormat, format))
+			return false;
+		formatsByName.Remove(format.Name);
+		return true;
+	}
+
+
 	// Implementations.
 	public bool Equals(ImageFormat? other)
 	{
@@ -249,4 +307,8 @@ enum ImageFormatCategory
 	/// Bayer.
 	/// </summary>
 	Bayer,
+	/// <summary>
+	/// Defined by user.
+	/// </summary>
+	UserDefined,
 }

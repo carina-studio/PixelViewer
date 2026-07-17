@@ -456,6 +456,9 @@ namespace Carina.PixelViewer
 			await Media.ColorSpace.InitializeAsync(this);
 			this.UpdateSplashWindowProgress(0.6);
 
+			// initialize image renderers, must be done before initializing image rendering profiles which resolve their renderers by name
+			await Media.ImageRenderers.ImageRenderers.InitializeAsync(this);
+
 			// initialize image rendering profiles
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
 			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);

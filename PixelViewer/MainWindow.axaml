@@ -4,7 +4,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:abConverters="using:CarinaStudio.Data.Converters"
 		xmlns:aConverters="using:Avalonia.Data.Converters"
-		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
         xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
@@ -81,7 +80,7 @@
 											</TextBlock.Text>
 										</TextBlock>
 										<Separator Classes="Dialog_Separator_Small"/>
-										<TextBlock Classes="ToolTipText" Text="{Binding ImageRenderer.Format, Converter={x:Static appConverters:ImageFormatConverter.Default}}"/>
+										<TextBlock Classes="ToolTipText" Text="{Binding ImageRenderer.Format.DisplayName}"/>
 									</StackPanel>
 									<StackPanel Orientation="Horizontal">
 										<TextBlock Classes="ToolTipText" Text="{DynamicResource String/MainWindow.Session.RenderedImagesMemoryUsage}"/>

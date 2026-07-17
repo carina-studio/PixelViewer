@@ -3,6 +3,7 @@ using Avalonia.Media.Imaging;
 using CarinaStudio;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,7 +14,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 /// <summary>
 /// Object to render image into <see cref="Bitmap"/>.
 /// </summary>
-interface IImageRenderer
+interface IImageRenderer : INotifyPropertyChanged
 {
 	/// <summary>
 	/// Create default rendering options for each plane.
@@ -46,7 +47,15 @@ interface IImageRenderer
 	/// <summary>
 	/// Format supported by this renderer.
 	/// </summary>
+	/// <remarks>A user-defined format is replaced by a new instance when the user edits it, <see cref="INotifyPropertyChanged.PropertyChanged"/> is raised in that case.</remarks>
 	ImageFormat Format { get; }
+
+
+	/// <summary>
+	/// Check whether this renderer is a built-in renderer or not.
+	/// </summary>
+	/// <remarks>The format of a built-in renderer is fixed, only the format of a non-built-in renderer can be changed by user.</remarks>
+	bool IsBuiltIn { get; }
 
 
 	/// <summary>

@@ -151,6 +151,7 @@
 	<sys:String x:Key="String/ImageFormatCategory.Compressed">压缩</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.Luminance">明度/灰度</sys:String>
 	<sys:String x:Key="String/ImageFormatCategory.Unclassified">未分类</sys:String>
+	<StaticResourceExtension x:Key="String/ImageFormatCategory.UserDefined" ResourceKey="String/Common.Custom"/>
 
 	<!-- ImageRenderingProfile -->
 	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;无&gt;</sys:String>

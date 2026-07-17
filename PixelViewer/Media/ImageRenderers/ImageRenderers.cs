@@ -1,17 +1,20 @@
 ﻿using CarinaStudio;
+using CarinaStudio.AppSuite;
+using CarinaStudio.Collections;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.ImageRenderers;
 
 /// <summary>
 /// Class to hold all available <see cref="IImageRenderer"/>s.
 /// </summary>
-static class ImageRenderers
+static partial class ImageRenderers
 {
-	/// <summary>
-	/// Get all available <see cref="IImageRenderer"/>s.
-	/// </summary>
-	public static IList<IImageRenderer> All { get; } = new List<IImageRenderer>().Also(it =>
+	// Static fields.
+	static readonly ObservableList<IImageRenderer> all = new ObservableList<IImageRenderer>().Also(it =>
 	{
 		it.AddRange([
 			new L8ImageRenderer(),
@@ -84,7 +87,54 @@ static class ImageRenderers
 			new WebPImageRenderer(),
 			new TiffImageRenderer(),
 		]);
-	}).AsReadOnly();
+	});
+	static volatile IAppSuiteApplication? app;
+	static volatile ILogger? logger;
+
+
+	/// <summary>
+	/// Add the given <see cref="IImageRenderer"/> to <see cref="All"/>.
+	/// </summary>
+	/// <param name="renderer"><see cref="IImageRenderer"/> to add.</param>
+	/// <remarks><see cref="All"/> is bound by UI directly, so this method must be called on UI thread.</remarks>
+	internal static void Add(IImageRenderer renderer) =>
+		all.Add(renderer);
+
+
+	/// <summary>
+	/// Get all available <see cref="IImageRenderer"/>s.
+	/// </summary>
+	public static IList<IImageRenderer> All { get; } = ListExtensions.AsReadOnly(all);
+
+
+	/// <summary>
+	/// Initialize.
+	/// </summary>
+	/// <param name="app">Application.</param>
+	/// <returns>Task of initialization.</returns>
+	/// <remarks>Built-in renderers are registered when <see cref="All"/> is first accessed, so this method only sets up the shared state that runtime-managed renderers rely on. It must be called once, before any runtime renderer is added.</remarks>
+	public static Task InitializeAsync(IAppSuiteApplication app)
+	{
+		// check state
+		if (ImageRenderers.app is not null)
+			throw new InvalidOperationException("Image renderers have already been initialized.");
+
+		// setup application and logger
+		ImageRenderers.app = app;
+		logger = app.LoggerFactory.CreateLogger(nameof(ImageRenderers));
+		logger.LogDebug("Initialize");
+		return Task.CompletedTask;
+	}
+
+
+	/// <summary>
+	/// Remove the given <see cref="IImageRenderer"/> from <see cref="All"/>.
+	/// </summary>
+	/// <param name="renderer"><see cref="IImageRenderer"/> to remove.</param>
+	/// <returns>True if the renderer has been removed.</returns>
+	/// <remarks><see cref="All"/> is bound by UI directly, so this method must be called on UI thread.</remarks>
+	internal static bool Remove(IImageRenderer renderer) =>
+		all.Remove(renderer);
 
 
 	/// <summary>
@@ -114,6 +164,7 @@ static class ImageRenderers
 	/// <param name="formatName">Name of format supported by <see cref="IImageRenderer"/>.</param>
 	/// <param name="renderer">Found <see cref="IImageRenderer"/>, or null if no <see cref="IImageRenderer"/> supports given format.</param>
 	/// <returns>True if <see cref="IImageRenderer"/> found.</returns>
+	/// <remarks>The name of a user-defined format is its identifier, which is stable across renaming, so a name persisted before the user renamed the format still resolves to its renderer.</remarks>
 	public static bool TryFindByFormatName(string formatName, out IImageRenderer? renderer)
 	{
 		foreach (var candidate in All)

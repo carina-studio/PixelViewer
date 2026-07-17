@@ -5,6 +5,7 @@ using CarinaStudio.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -21,14 +22,40 @@ abstract class BaseImageRenderer : IImageRenderer
 	static readonly TaskFactory RenderingTaskFactory = new(new FixedThreadsTaskScheduler(Math.Min(2, Environment.ProcessorCount)));
 
 
+	// Fields.
+	volatile ImageFormat format;
+
+
 	/// <summary>
 	/// Initialize new <see cref="BaseImageRenderer"/> instance.
 	/// </summary>
 	/// <param name="format">Format supported by this instance.</param>
 	protected BaseImageRenderer(ImageFormat format)
 	{
-		this.Format = format;
+		this.format = format;
 		this.Logger = IAppSuiteApplication.Current.LoggerFactory.CreateLogger(this.GetType().Name);
+	}
+
+
+	/// <summary>
+	/// Change the format supported by this renderer.
+	/// </summary>
+	/// <param name="format">New format, which is expected to carry the same identifier as the current one.</param>
+	/// <exception cref="InvalidOperationException">The renderer is a built-in renderer, whose format is fixed.</exception>
+	/// <remarks><see cref="ImageFormat"/> is immutable, so a renderer which owns a user-defined format calls this method to swap in a new instance after the user edits the format. Keeping the identifier is what allows the references persisted by profiles and sessions to still be resolved. Because the name of a format must be unique, the caller unregisters the current format (<see cref="ImageFormat.Unregister"/>) before constructing <paramref name="format"/> with the same identifier, so this method only swaps the reference and does not touch the registration.</remarks>
+	protected void ChangeFormat(ImageFormat format)
+	{
+		// reject built-in renderer whose format is fixed
+		if (this.IsBuiltIn)
+			throw new InvalidOperationException("Cannot change the format supported by a built-in renderer.");
+		if (ReferenceEquals(this.format, format))
+			return;
+
+		// swap the format, the field is volatile because rendering reads it on background thread
+		this.format = format;
+
+		// notify
+		this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Format)));
 	}
 
 
@@ -318,5 +345,7 @@ abstract class BaseImageRenderer : IImageRenderer
 	public abstract IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height);
 	public abstract int EvaluatePixelCount(IImageDataSource source);
 	public abstract long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions);
-	public ImageFormat Format { get; }
+	public ImageFormat Format => this.format;
+	public bool IsBuiltIn => this.format.Category != ImageFormatCategory.UserDefined;
+	public event PropertyChangedEventHandler? PropertyChanged;
 }
