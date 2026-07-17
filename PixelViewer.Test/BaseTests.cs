@@ -2,6 +2,7 @@
 using NLog;
 using NUnit.Framework;
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -126,6 +127,25 @@ namespace Carina.PixelViewer.Test
 
 			// check final value
 			return command.CanExecute(parameter) == canExecute;
+		}
+
+
+		/// <summary>
+		/// Wait for value of given property of an object to become the target value.
+		/// </summary>
+		/// <param name="obj">Object which owns the property.</param>
+		/// <param name="propertyName">Name of property.</param>
+		/// <param name="targetValue">Target value.</param>
+		/// <param name="timeoutMillis">Timeout in milliseconds.</param>
+		/// <returns>True if value of property has become the target value before the timeout.</returns>
+		protected Task<bool> WaitForPropertyAsync(INotifyPropertyChanged obj, string propertyName, object? targetValue, int timeoutMillis)
+		{
+			// CarinaStudio.Tests.NotifyPropertyChangedExtensions.WaitForPropertyAsync is obsolete, but it is the only
+			// helper providing the timeout + boolean-result contract these tests rely on; the suggested replacement
+			// (WaitForPropertyChangeAsync) offers neither, so keep using it behind this single wrapper.
+#pragma warning disable CS0618
+			return CarinaStudio.Tests.NotifyPropertyChangedExtensions.WaitForPropertyAsync(obj, propertyName, targetValue, timeoutMillis, CancellationToken.None);
+#pragma warning restore CS0618
 		}
 	}
 }

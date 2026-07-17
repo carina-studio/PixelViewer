@@ -1,9 +1,9 @@
 ﻿using Carina.PixelViewer.Media;
-using Carina.PixelViewer.Platform;
 using CarinaStudio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Test.Media
 {
@@ -92,7 +92,11 @@ namespace Carina.PixelViewer.Test.Media
 
 
 		// Validate instance.
-		protected override unsafe void ValidateInstance(T instance) => this.ValidateInstance(instance, false);
+		protected override Task ValidateInstanceAsync(T instance)
+		{
+			this.ValidateInstance(instance, false);
+			return Task.CompletedTask;
+		}
 
 
 		/// <summary>
@@ -107,7 +111,7 @@ namespace Carina.PixelViewer.Test.Media
 			var width = instance.Width;
 			var height = instance.Height;
 			var minRowStride = bpp * width;
-			Assert.GreaterOrEqual(instance.RowBytes, minRowStride, $"Insufficient row-stride: {instance.RowBytes}, size: {width}x{height}, bpp: {bpp}.");
+			Assert.That(instance.RowBytes, Is.GreaterThanOrEqualTo(minRowStride), $"Insufficient row-stride: {instance.RowBytes}, size: {width}x{height}, bpp: {bpp}.");
 
 			// access data
 			instance.Memory.Pin((address) =>

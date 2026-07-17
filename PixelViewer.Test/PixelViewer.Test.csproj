@@ -2,29 +2,16 @@
 
 	<PropertyGroup>
 		<IsPackable>false</IsPackable>
-		<Nullable>enable</Nullable>
 		<RootNamespace>Carina.PixelViewer.Test</RootNamespace>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<Configurations>Debug;Release;MSStore-Debug;MSStore-Release</Configurations>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-		<TargetFramework>net7.0</TargetFramework>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MSStore-Debug|AnyCPU'">
-		<TargetFramework>net7.0-windows10.0.17763.0</TargetFramework>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<TargetFramework>net7.0</TargetFramework>
+		<Configurations>Debug;Release</Configurations>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="0.34.1.117" />
-		<PackageReference Include="NUnit" Version="3.13.3" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.2.0" />
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
+		<PackageReference Include="CarinaStudio.AppBase.Tests" Version="2.3.2.621" />
+		<PackageReference Include="CarinaStudio.AppSuite.Core.Tests" Version="$(AppSuiteVersion)" />
+		<PackageReference Include="NUnit" Version="4.6.1" />
+		<PackageReference Include="NUnit3TestAdapter" Version="6.2.0" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
 	</ItemGroup>
 
 	<ItemGroup>

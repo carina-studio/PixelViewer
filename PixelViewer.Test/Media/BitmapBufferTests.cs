@@ -10,6 +10,6 @@ namespace Carina.PixelViewer.Test.Media
 	class BitmapBufferTests : BaseBitmapBufferTests<BitmapBuffer>
 	{
 		// Create instance.
-		protected override BitmapBuffer CreateInstance(BitmapFormat format, int width, int height) => new BitmapBuffer(format, width, height);
+		protected override BitmapBuffer CreateInstance(BitmapFormat format, int width, int height) => new BitmapBuffer(format, ColorSpace.Default, width, height);
 	}
 }

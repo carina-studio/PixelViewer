@@ -13,11 +13,12 @@ namespace Carina.PixelViewer.Test.Media
 		// Create instance.
 		protected override FileImageDataSource CreateInstance(byte[] data)
 		{
-			return new FileImageDataSource(this.CreateCacheFile().Use((stream) =>
+			var fileName = this.CreateCacheFile().Use((stream) =>
 			{
 				stream.Write(data);
 				return stream.Name;
-			}));
+			});
+			return new FileImageDataSource(this.Application, fileName);
 		}
 	}
 }

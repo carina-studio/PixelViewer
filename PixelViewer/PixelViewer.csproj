@@ -6,7 +6,6 @@
 		<Company>Carina Studio</Company>
 		<Copyright>©2021-$([System.DateTime]::Now.Year) Carina Studio</Copyright>
 		<OutputType>WinExe</OutputType>
-		<Nullable>enable</Nullable>
 		<BuiltInComInteropSupport>true</BuiltInComInteropSupport>
 		<TrimMode>partial</TrimMode>
 		<RootNamespace>Carina.PixelViewer</RootNamespace>
@@ -17,21 +16,6 @@
 		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 		<Configurations>Debug;Release</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
-		<AppSuiteVersion>3.1.5.716</AppSuiteVersion>
-		<AvaloniaVersion>11.3.18</AvaloniaVersion>
-		<AvaloniaXamlBehaviorsVersion>11.3.0.6</AvaloniaXamlBehaviorsVersion>
-		<DotNetLibVersion>10.0.9</DotNetLibVersion>
-		<SkiaSharpVersion>3.119.4</SkiaSharpVersion>
-	</PropertyGroup>
-	
-	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
-		<TargetFramework>net10.0</TargetFramework>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
-		<DefineConstants>DEBUG</DefineConstants>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)'=='Release'">
-		<TargetFramework>net10.0</TargetFramework>
-		<RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
 	</PropertyGroup>
 
 	<PropertyGroup>

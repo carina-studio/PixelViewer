@@ -1,5 +1,6 @@
-﻿using CarinaStudio;
+using CarinaStudio;
 using NUnit.Framework;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Test
 {
@@ -19,38 +20,39 @@ namespace Carina.PixelViewer.Test
 		/// Called to validate whether given instance is valid or not.
 		/// </summary>
 		/// <param name="instance">Instance to be checked.</param>
-		protected abstract void ValidateInstance(T instance);
+		/// <returns>Task of validation.</returns>
+		protected abstract Task ValidateInstanceAsync(T instance);
 
 
 		/// <summary>
 		/// Test for instance sharing.
 		/// </summary>
 		[Test]
-		public virtual void TestInstanceSharing()
+		public virtual void TestInstanceSharing() => this.TestOnApplicationThread(async () =>
 		{
 			// create base instance
 			using var baseInstance = this.CreateInstance();
-			this.ValidateInstance(baseInstance);
+			await this.ValidateInstanceAsync(baseInstance);
 
 			// share instance
 			using (var sharedInstance = baseInstance.Share())
 			{
-				Assert.AreNotSame(baseInstance, sharedInstance, "Shared instance should not be same as base one.");
-				this.ValidateInstance(sharedInstance);
+				Assert.That(sharedInstance, Is.Not.SameAs(baseInstance), "Shared instance should not be same as base one.");
+				await this.ValidateInstanceAsync(sharedInstance);
 			}
-			this.ValidateInstance(baseInstance);
+			await this.ValidateInstanceAsync(baseInstance);
 
 			// share instance and dispose base one
 			using (var sharedInstance = baseInstance.Share())
 			{
 				// check shared instance
-				Assert.AreNotSame(baseInstance, sharedInstance, "Shared instance should not be same as base one.");
-				this.ValidateInstance(sharedInstance);
+				Assert.That(sharedInstance, Is.Not.SameAs(baseInstance), "Shared instance should not be same as base one.");
+				await this.ValidateInstanceAsync(sharedInstance);
 
 				// dispose base one
 				baseInstance.Dispose();
-				this.ValidateInstance(sharedInstance);
+				await this.ValidateInstanceAsync(sharedInstance);
 			}
-		}
+		});
 	}
 }

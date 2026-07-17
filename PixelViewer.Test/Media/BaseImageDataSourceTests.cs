@@ -1,8 +1,9 @@
-﻿using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media;
 using CarinaStudio;
+using CarinaStudio.IO;
 using NUnit.Framework;
-using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Test.Media
 {
@@ -52,7 +53,7 @@ namespace Carina.PixelViewer.Test.Media
 		/// Test for instance creation.
 		/// </summary>
 		[Test]
-		public void TestInstanceCreation()
+		public void TestInstanceCreation() => this.TestOnApplicationThread(async () =>
 		{
 			for (var i = 10; i > 0; --i)
 			{
@@ -62,52 +63,45 @@ namespace Carina.PixelViewer.Test.Media
 
 				// check size
 				var size = data.Length;
-				Assert.AreEqual(size, source.Size, "Size of created source is not same as expected.");
+				Assert.That(source.Size, Is.EqualTo(size), "Size of created source is not same as expected.");
 
 				// check data
-				using var stream = source.Open();
+				using var stream = await source.OpenStreamAsync(StreamAccess.Read);
 				var readData = new byte[size];
-				var readDataSize = 0;
-				var readCount = stream.Read(readData, 0, size);
-				while (readCount > 0 && readDataSize < size)
-				{
-					readDataSize += readCount;
-					stream.Read(readData, readDataSize, size - readDataSize);
-				}
-				Assert.AreEqual(size, readDataSize, "Size of accessible data should not be less than expected.");
+				stream.ReadExactly(readData, 0, size);
 				for (var j = size - 1; j >= 0; --j)
-					Assert.AreEqual(data[j], readData[j], $"Data[{j}] read from source is different from expected.");
+					Assert.That(readData[j], Is.EqualTo(data[j]), $"Data[{j}] read from source is different from expected.");
 			}
-		}
+		});
 
 
 		// Validate instance.
-		protected override void ValidateInstance(T instance)
+		protected override async Task ValidateInstanceAsync(T instance)
 		{
 			// check size
 			var size = instance.Size;
-			Assert.GreaterOrEqual(size, 0, "Size of data should not be negative.");
+			Assert.That(size, Is.GreaterThanOrEqualTo(0), "Size of data should not be negative.");
 
 			// access data
-			using var stream = instance.Open();
+			using var stream = await instance.OpenStreamAsync(StreamAccess.Read);
 			var buffer = new byte[1024];
 			if (stream.CanSeek && size > buffer.Length)
 			{
 				// read head of data
 				var readCount = stream.Read(buffer, 0, buffer.Length);
-				Assert.AreEqual(readCount, buffer.Length, "Cannot access head of data.");
+				Assert.That(readCount, Is.EqualTo(buffer.Length), "Cannot access head of data.");
 
 				// read tail of data
 				var position = (size - buffer.Length);
-				Assert.AreEqual(position, stream.Seek(position, SeekOrigin.Begin), "Cannot seek in opened stream.");
+				Assert.That(stream.Seek(position, SeekOrigin.Begin), Is.EqualTo(position), "Cannot seek in opened stream.");
 				readCount = stream.Read(buffer, 0, buffer.Length);
-				Assert.AreEqual(readCount, buffer.Length, "Cannot access tail of data.");
+				Assert.That(readCount, Is.EqualTo(buffer.Length), "Cannot access tail of data.");
 
 				// read middle of data
 				position = (size / 2) - (buffer.Length / 2) - 1;
-				Assert.AreEqual(position, stream.Seek(position, SeekOrigin.Begin), "Cannot seek in opened stream.");
+				Assert.That(stream.Seek(position, SeekOrigin.Begin), Is.EqualTo(position), "Cannot seek in opened stream.");
 				readCount = stream.Read(buffer, 0, buffer.Length);
-				Assert.AreEqual(readCount, buffer.Length, "Cannot access middle of data.");
+				Assert.That(readCount, Is.EqualTo(buffer.Length), "Cannot access middle of data.");
 			}
 			else
 			{
@@ -118,7 +112,7 @@ namespace Carina.PixelViewer.Test.Media
 					readDataSize += readCount;
 					readCount = stream.Read(buffer, 0, buffer.Length);
 				}
-				Assert.GreaterOrEqual(readDataSize, size, "Size of accessible data should not be less than reported size.");
+				Assert.That(readDataSize, Is.GreaterThanOrEqualTo(size), "Size of accessible data should not be less than reported size.");
 			}
 		}
 	}
