@@ -1,19 +1,18 @@
 ﻿using System;
 
-namespace Carina.PixelViewer
+namespace Carina.PixelViewer;
+
+/// <summary>
+/// Byte ordering.
+/// </summary>
+public enum ByteOrdering
 {
     /// <summary>
-    /// Byte ordering.
+    /// Big-Endian.
     /// </summary>
-    enum ByteOrdering
-    {
-        /// <summary>
-        /// Big-Endian.
-        /// </summary>
-        BigEndian,
-        /// <summary>
-        /// Little-Endian.
-        /// </summary>
-        LittleEndian,
-    }
+    BigEndian,
+    /// <summary>
+    /// Little-Endian.
+    /// </summary>
+    LittleEndian,
 }
