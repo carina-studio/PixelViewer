@@ -138,27 +138,6 @@ static partial class ImageRenderers
 
 
 	/// <summary>
-	/// Try finding specific <see cref="IImageRenderer"/> by the format supported by it.
-	/// </summary>
-	/// <param name="format">Format supported by <see cref="IImageRenderer"/>.</param>
-	/// <param name="renderer">Found <see cref="IImageRenderer"/>, or null if no <see cref="IImageRenderer"/> supports given format.</param>
-	/// <returns>True if <see cref="IImageRenderer"/> found.</returns>
-	public static bool TryFindByFormat(ImageFormat format, out IImageRenderer? renderer)
-	{
-		foreach (var candidate in All)
-		{
-			if (candidate.Format.Equals(format))
-			{
-				renderer = candidate;
-				return true;
-			}
-		}
-		renderer = null;
-		return false;
-	}
-
-
-	/// <summary>
 	/// Try finding specific <see cref="IImageRenderer"/> by the name of format supported by it.
 	/// </summary>
 	/// <param name="formatName">Name of format supported by <see cref="IImageRenderer"/>.</param>
