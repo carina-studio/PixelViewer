@@ -1527,6 +1527,32 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Apply values which are derived from format of given image renderer.
+	void ApplyImageRendererFormat(IImageRenderer imageRenderer)
+	{
+		// evaluate dimensions if needed
+		if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
+			this.isImageDimensionsEvaluationNeeded = true;
+
+		// setup values according to format and renderer
+		var imageFormatCategory = imageRenderer.Format.Category;
+		var isBayerPatternFormat = imageFormatCategory == ImageFormatCategory.Bayer;
+		this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
+		this.SetValue(IsBayerPatternSupportedProperty, isBayerPatternFormat);
+		this.SetValue(IsCompressedImageFormatProperty, imageFormatCategory == ImageFormatCategory.Compressed);
+		this.SetValue(IsDemosaicingSupportedProperty, isBayerPatternFormat);
+		this.SetValue(IsRgbGainSupportedProperty, isBayerPatternFormat);
+		this.SetValue(IsYuvToBgraConverterSupportedProperty, imageFormatCategory == ImageFormatCategory.YUV);
+		this.UpdateIsAlphaChannelAvailable();
+
+		// reset plane options and restart rendering
+		this.isImagePlaneOptionsResetNeeded = true;
+		this.updateFilterSupportingAction.Reschedule();
+		this.renderImageAction.Reschedule();
+		this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
+	}
+
+
 	// Apply parameters defined in current profile.
 	void ApplyProfile()
 	{
@@ -2385,6 +2411,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		// detach from application
 		this.Application.PropertyChanged -= this.OnApplicationPropertyChanged;
 
+		// detach from image renderer
+		this.GetValue(ImageRendererProperty)?.Let(it => it.PropertyChanged -= this.OnImageRendererPropertyChanged);
+
 		// detach from profiles
 		((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged -= this.OnUserDefinedProfilesChanged;
 		foreach (var profile in this.profiles)
@@ -2966,7 +2995,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <returns>Name for new profile.</returns>
 	public string GenerateNameForNewProfile()
 	{
-		var name = $"{this.ImageWidth}x{this.ImageHeight} [{this.ImageRenderer.Format.Name}]";
+		var name = $"{this.ImageWidth}x{this.ImageHeight} [{this.ImageRenderer.Format.DisplayName}]";
 		if (ImageRenderingProfiles.ValidateNewUserDefinedProfileName(name))
 			return name;
 		for (var i = 1; i <= 1000; ++i)
@@ -3622,6 +3651,19 @@ class Session : ViewModel<IAppSuiteApplication>
 	});
 
 
+	// Called when property of current image renderer changed.
+	void OnImageRendererPropertyChanged(object? sender, PropertyChangedEventArgs e)
+	{
+		// ignore event from renderer which is no longer the current one
+		if (sender is not IImageRenderer imageRenderer || !ReferenceEquals(imageRenderer, this.GetValue(ImageRendererProperty)))
+			return;
+
+		// apply swapped format
+		if (e.PropertyName == nameof(IImageRenderer.Format))
+			this.ApplyImageRendererFormat(imageRenderer);
+	}
+
+
 	// Called when owner changed.
 	protected override void OnOwnerChanged(ViewModel? prevOwner, ViewModel? newOwner)
 	{
@@ -3768,24 +3810,15 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(HasHistogramsProperty, newValue is not null);
 		else if (property == ImageRendererProperty)
 		{
+			// detach from previous renderer, its format may be swapped when user edits it
+			(oldValue as IImageRenderer)?.Let(it => it.PropertyChanged -= this.OnImageRendererPropertyChanged);
+
+			// attach to new renderer and apply its format
 			if (ImageRenderers.All.Contains(newValue))
 			{
-				if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
-					this.isImageDimensionsEvaluationNeeded = true;
 				var imageRenderer = (IImageRenderer)newValue.AsNonNull();
-				var imageFormatCategory = imageRenderer.Format.Category;
-				var isBayerPatternFormat = imageFormatCategory == ImageFormatCategory.Bayer;
-				this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
-				this.SetValue(IsBayerPatternSupportedProperty, isBayerPatternFormat);
-				this.SetValue(IsCompressedImageFormatProperty, imageFormatCategory == ImageFormatCategory.Compressed);
-				this.SetValue(IsDemosaicingSupportedProperty, isBayerPatternFormat);
-				this.SetValue(IsRgbGainSupportedProperty, isBayerPatternFormat);
-				this.SetValue(IsYuvToBgraConverterSupportedProperty, imageFormatCategory == ImageFormatCategory.YUV);
-				this.UpdateIsAlphaChannelAvailable();
-				this.isImagePlaneOptionsResetNeeded = true;
-				this.updateFilterSupportingAction.Reschedule();
-				this.renderImageAction.Reschedule();
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
+				imageRenderer.PropertyChanged += this.OnImageRendererPropertyChanged;
+				this.ApplyImageRendererFormat(imageRenderer);
 			}
 			else
 			{
