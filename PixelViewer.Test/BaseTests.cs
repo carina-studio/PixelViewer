@@ -13,7 +13,7 @@ namespace Carina.PixelViewer.Test
 	/// <summary>
 	/// Base class for test fixture.
 	/// </summary>
-	abstract class BaseTests : CarinaStudio.AppSuite.ApplicationBasedTests
+	abstract class BaseTests : CarinaStudio.AppSuite.ApplicationBasedTests<CarinaStudio.AppSuite.IAppSuiteApplication>
 	{
 		// Fields.
 		volatile string? cacheDirectory;

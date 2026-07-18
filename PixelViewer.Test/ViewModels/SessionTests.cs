@@ -2,9 +2,10 @@ using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
-using CarinaStudio.Tests;
 using NUnit.Framework;
+using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Test.ViewModels
 {
@@ -12,11 +13,11 @@ namespace Carina.PixelViewer.Test.ViewModels
 	/// Tests of <see cref="Session"/>.
 	/// </summary>
 	[TestFixture]
-	[Ignore("Requires a real Application.Current, which MockAppSuiteApplication does not provide. Re-enable once AppSuite exposes IAppSuiteApplication.FallbackCurrent for the mock (planned in AppSuiteBase).")]
 	class SessionTests : BaseTests
 	{
 		// Fields.
 		Session? session;
+		IDisposable? sessionActivationToken;
 
 
 		/// <summary>
@@ -33,8 +34,9 @@ namespace Carina.PixelViewer.Test.ViewModels
 				await ColorSpace.InitializeAsync(this.Application);
 				await ImageRenderingProfiles.InitializeAsync(this.Application);
 
-				// create session for testing
+				// create session for testing and activate it so image rendering is performed
 				this.session = new Session(this.Application, null);
+				this.sessionActivationToken = this.session.Activate();
 			});
 		}
 
@@ -47,6 +49,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 		{
 			this.TestOnApplicationThread(() =>
 			{
+				this.sessionActivationToken?.Dispose();
 				this.session?.Dispose();
 			});
 		}
@@ -61,6 +64,15 @@ namespace Carina.PixelViewer.Test.ViewModels
 			using var stream = this.CreateCacheFile();
 			stream.Write(data);
 			return stream.Name;
+		}
+
+
+		// Wait for the rendering triggered by opening a file or changing the renderer to complete.
+		// Rendering is scheduled with a delay, so wait for it to start before waiting for it to finish.
+		async Task<bool> WaitForRenderingAsync(Session session)
+		{
+			await this.WaitForPropertyAsync(session, nameof(Session.IsRenderingImage), true, 5000);
+			return await this.WaitForPropertyAsync(session, nameof(Session.IsRenderingImage), false, 10000);
 		}
 
 
@@ -80,15 +92,19 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.That(await this.WaitForPropertyAsync(session,nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 
 				// wait for first rendering
-				Assert.That(await this.WaitForPropertyAsync(session,nameof(Session.IsRenderingImage), false, 10000), Is.True, "Unable to complete first rendering.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				Assert.That(session.RenderedImage, Is.Not.Null, "No rendered image for first rendering.");
 
 				// change renderers
 				foreach (var imageRenderer in ImageRenderers.All)
 				{
+					// skip renderers of compressed formats, which cannot render arbitrary raw data
+					if (imageRenderer.Format.Category == ImageFormatCategory.Compressed)
+						continue;
+
 					session.ImageRenderer = imageRenderer;
 					var planeDescriptors = imageRenderer.Format.PlaneDescriptors;
-					Assert.That(await this.WaitForPropertyAsync(session,nameof(Session.IsRenderingImage), false, 10000), Is.True, $"Unable to complete rendering by {imageRenderer}.");
+					Assert.That(await this.WaitForRenderingAsync(session), Is.True, $"Unable to complete rendering by {imageRenderer}.");
 					Assert.That(session.RenderedImage, Is.Not.Null, $"No rendered image for rendering by {imageRenderer}.");
 					Assert.That(session.ImagePlaneCount, Is.EqualTo(planeDescriptors.Count), "Reported image plane count is incorrect.");
 					Assert.That(session.HasImagePlane1, Is.EqualTo(planeDescriptors.Count >= 1), $"{nameof(Session.HasImagePlane1)} is incorrect.");

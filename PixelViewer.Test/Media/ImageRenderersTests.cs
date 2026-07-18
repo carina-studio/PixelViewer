@@ -14,7 +14,6 @@ namespace Carina.PixelViewer.Test.Media;
 /// Tests of <see cref="ImageRenderers"/>.
 /// </summary>
 [TestFixture]
-[Ignore("Constructing the built-in renderers requires a real IAppSuiteApplication.Current, which MockAppSuiteApplication does not provide. Re-enable once AppSuite exposes IAppSuiteApplication.FallbackCurrent for the mock (planned in AppSuiteBase).")]
 class ImageRenderersTests : BaseTests
 {
 	// Implementation of IImageRenderer which renders nothing, only used to test the registry.
