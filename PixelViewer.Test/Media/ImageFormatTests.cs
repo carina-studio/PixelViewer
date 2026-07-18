@@ -97,6 +97,31 @@ class ImageFormatTests
 
 
 	/// <summary>
+	/// Test for unregistering a format whose identifier has been taken over by a new instance.
+	/// </summary>
+	[Test]
+	public void UnregisteringSupersededFormatTest()
+	{
+		// release the identifier and let a new instance take it over, which is what editing a user-defined format does
+		var id = Guid.NewGuid().ToString();
+		var format = CreateUserDefinedFormat(id, "Before Editing");
+		Assert.That(ImageFormat.Unregister(format), Is.True);
+		var editedFormat = CreateUserDefinedFormat(id, "After Editing");
+		try
+		{
+			// check that unregistering the superseded instance reports no removal and keeps the registration of its successor
+			Assert.That(ImageFormat.Unregister(format), Is.False);
+			Assert.That(ImageFormat.TryGetByName(id, out var foundFormat), Is.True);
+			Assert.That(foundFormat, Is.SameAs(editedFormat));
+		}
+		finally
+		{
+			ImageFormat.Unregister(editedFormat);
+		}
+	}
+
+
+	/// <summary>
 	/// Test for unregistering built-in format.
 	/// </summary>
 	[Test]
