@@ -146,6 +146,13 @@
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>
+			<NativeMenuItem Header="{DynamicResource String/SessionControl.Tools}">
+				<NativeMenuItem.Menu>
+					<NativeMenu>
+						<NativeMenuItem Command="{Binding #window.Application.ShowConfigurationEditor}" CommandParameter="EditConfiguration" Header="Edit Configurations…"/>
+					</NativeMenu>
+				</NativeMenuItem.Menu>
+			</NativeMenuItem>
 		</NativeMenu>
 
 	</Window.Resources>

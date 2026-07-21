@@ -78,11 +78,6 @@
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Settings.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
-			<MenuItem Name="editConfigMenuItem" Command="{Binding #root.Application.ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False">
-				<MenuItem.Icon>
-					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Tool.Outline}"/>
-				</MenuItem.Icon>
-			</MenuItem>
 			<Separator/>
 			<MenuItem Command="{Binding $parent[Window].CreateMainWindow}" Header="{asXaml:StringResource Common.CreateWindow}" InputGesture="Ctrl+N">
 				<MenuItem.Icon>
@@ -104,6 +99,17 @@
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Tile}"/>
 				</MenuItem.Icon>
+			</MenuItem>
+			<Separator/>
+			<MenuItem Name="toolsMenuItem" Header="{asXaml:StringResource SessionControl.Tools}" IsVisible="False">
+				<MenuItem.Icon>
+					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Tool.Outline}"/>
+				</MenuItem.Icon>
+				<MenuItem Name="editConfigMenuItem" Command="{Binding #root.Application.ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False">
+					<MenuItem.Icon>
+						<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Tool.Outline}"/>
+					</MenuItem.Icon>
+				</MenuItem>
 			</MenuItem>
 			<Separator/>
 			<MenuItem Command="{Binding #root.Application.ShowApplicationInfoDialog}" Header="{asXaml:StringResource SessionControl.ApplicationInfo}">

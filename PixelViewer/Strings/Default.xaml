@@ -332,6 +332,7 @@ You can change this setting at any time in Options.</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to Open Files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Source Data Size</sys:String>
+	<sys:String x:Key="String/SessionControl.Tools">Tools</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total Memory Usage of Rendered Images</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">User Interface Response Time</sys:String>
 	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">Treat as Linear Color Space</sys:String>

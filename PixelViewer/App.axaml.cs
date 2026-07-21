@@ -319,9 +319,6 @@ namespace Carina.PixelViewer
 				case "AppOptions":
 					this.ShowApplicationOptionsDialog();
 					break;
-				case "EditConfiguration":
-					this.ShowConfigurationEditor();
-					break;
 				case "Shutdown":
 					this.Shutdown();
 					break;
@@ -417,11 +414,6 @@ namespace Carina.PixelViewer
 						{
 							case "AppInfo":
 								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Information.Outline")?.ToNativeMenuItemIcon();
-								break;
-							case "EditConfiguration":
-#if !DEBUG
-								menu.Items.RemoveAt(i);
-#endif
 								break;
 							default:
 								break;

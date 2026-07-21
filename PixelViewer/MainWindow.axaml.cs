@@ -85,6 +85,31 @@ namespace Carina.PixelViewer
 			AvaloniaXamlLoader.Load(this);
 			if (Platform.IsMacOS)
 				NativeMenu.SetMenu(this, (NativeMenu)this.Resources["nativeMenu"].AsNonNull());
+#if !DEBUG
+			// Edit Configurations is a development tool, remove it from the Tools menu in release builds
+			if (Platform.IsMacOS)
+			{
+				NativeMenu.GetMenu(this)?.Let(menu =>
+				{
+					for (var i = menu.Items.Count - 1; i >= 0; --i)
+					{
+						if (menu.Items[i] is not NativeMenuItem { Menu: { } subMenu })
+							continue;
+						var isEditConfigurationRemoved = false;
+						for (var j = subMenu.Items.Count - 1; j >= 0; --j)
+						{
+							if (subMenu.Items[j] is NativeMenuItem { CommandParameter: "EditConfiguration" })
+							{
+								subMenu.Items.RemoveAt(j);
+								isEditConfigurationRemoved = true;
+							}
+						}
+						if (isEditConfigurationRemoved && subMenu.Items.Count == 0)
+							menu.Items.RemoveAt(i);
+					}
+				});
+			}
+#endif
 
 			// setup controls
 			var baseBorder = this.Get<Border>("baseBorder").Also(it =>

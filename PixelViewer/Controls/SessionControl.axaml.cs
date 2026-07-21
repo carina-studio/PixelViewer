@@ -401,13 +401,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.otherActionsMenu = ((ContextMenu)this.Resources[nameof(otherActionsMenu)].AsNonNull()).Also(it =>
 		{
 #if DEBUG
-			foreach (var item in it.Items)
+			var toolsMenuItem = it.Items.OfType<MenuItem>().FirstOrDefault(item => item.Name == "toolsMenuItem");
+			if (toolsMenuItem is not null)
 			{
-				if (item is MenuItem menuItem && menuItem.Name == "editConfigMenuItem")
-				{
-					menuItem.IsVisible = true;
-					break;
-				}
+				toolsMenuItem.IsVisible = true;
+				var editConfigMenuItem = toolsMenuItem.Items.OfType<MenuItem>().FirstOrDefault(item => item.Name == "editConfigMenuItem");
+				if (editConfigMenuItem is not null)
+					editConfigMenuItem.IsVisible = true;
 			}
 #endif
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);

@@ -293,6 +293,7 @@
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">打开文件所使用的配置</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在 Windows 资源管理器中显示文件</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">源数据大小</sys:String>
+	<sys:String x:Key="String/SessionControl.Tools">工具</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">图像绘制内存使用总量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">用户界面响应时间</sys:String>
 	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">视为线性色彩空间</sys:String>

@@ -289,6 +289,7 @@
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">開啟檔案所使用的組態</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案總管中顯示檔案</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
+	<sys:String x:Key="String/SessionControl.Tools">工具</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用者介面回應時間</sys:String>
 	<sys:String x:Key="String/SessionControl.UseLinearColorSpace">視為線性色彩空間</sys:String>
