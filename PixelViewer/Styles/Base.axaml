@@ -180,6 +180,7 @@
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Button.Margin">-1,0,-1,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">13,10,18,10</Thickness>
 		
@@ -231,6 +232,7 @@
 	<Style Selector="Button.SessionControl_OptionsPanel_Button">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.OptionsPanel.Button.Margin}"/>
 	</Style>
 	<Style Selector="Expander.SessionControl_OptionsPanel_Expander">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
@@ -288,6 +290,7 @@
 	<Style Selector="ToggleButton.SessionControl_OptionsPanel_ToggleButton">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
+		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.OptionsPanel.Button.Margin}"/>
 	</Style>
 	
 </Styles>
