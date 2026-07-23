@@ -11,6 +11,7 @@
 + Added support for specifying the effective bits of images with `ABGR_16161616`, `ARGB_16161616`, `BGRA_16161616` and `RGBA_16161616` formats.
 + Improved the performance of saving images in PNG format.
 + Added support for adjusting the width of the panel of histograms.
++ The application no longer needs to be restarted when the Chinese environment changes after modifying the `Language` option.
 
 ## Behavior Changes
 + 
@@ -21,4 +22,5 @@
 + Fixed the failure to load some ICC color profiles which caused the screen color space of certain wide-gamut displays to be incorrectly detected as `sRGB`.
 + Fixed the incorrect colors of images which use the `BT.601 (525-line, SDTV)` or `BT.601 (625-line, SDTV)` color space caused by an incorrect white point.
 + Fixed the color space of an image being incorrectly encoded when saving it as JPEG or PNG, and incorrectly decoded when reopening it, for color spaces such as `BT.2100 (HLG transfer, HDR-TV)` and `BT.2100 (PQ transfer, HDR-TV)`.
++ Fixed the failure to use `Noto Sans` in the Chinese environment.
 + Minor bug fixing.
