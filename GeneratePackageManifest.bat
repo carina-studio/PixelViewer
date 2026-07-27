@@ -1,7 +1,6 @@
 @echo off
 
 set APP_NAME=PixelViewer
-set ERRORLEVEL=0
 
 echo ********** Start generating package manifest of %APP_NAME% **********
 

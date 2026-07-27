@@ -1,13 +1,115 @@
+#!/bin/bash
+
 APP_NAME="PixelViewer"
 FRAMEWORK="net10.0"
-RID_LIST=("osx-x64" "osx-arm64")
-PUB_PLATFORM_LIST=("osx-x64" "osx-arm64")
+DEFAULT_RID_LIST=("osx-x64" "osx-arm64")
+DEFAULT_PUB_PLATFORM_LIST=("osx-x64" "osx-arm64")
+RID_LIST=()
+PUB_PLATFORM_LIST=()
 CONFIG="Release"
 TRIM_ASSEMBLIES="true"
 READY_TO_RUN="false"
 CERT_NAME="" # Name of certification to sign the application
+SIGN_PACKAGE="true"
+RUN_TESTS="true"
+
+# Print usage of this script.
+print_usage() {
+    echo "Usage: BuildMacOSPackages.sh [options]"
+    echo " "
+    echo "Options:"
+    echo "  -h, --help        Print this help message and exit."
+    echo "  --config <name>   Build configuration to use. (Default: $CONFIG)"
+    echo "  --rid <rid>       Runtime identifier to build package for, can be specified multiple times."
+    echo "                    Supported: ${DEFAULT_RID_LIST[*]}. (Default: all of them)"
+    echo "  --no-sign         Do not sign the built application."
+    echo "  --no-trim         Do not trim assemblies while publishing the application."
+    echo "  --no-tests        Do not run test cases before building packages."
+}
+
+# Parse arguments
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            print_usage
+            exit 0
+            ;;
+        --config)
+            if [ -z "$2" ]; then
+                echo "Missing value of '--config'"
+                exit 1
+            fi
+            CONFIG="$2"
+            shift 2
+            ;;
+        --rid)
+            if [ -z "$2" ]; then
+                echo "Missing value of '--rid'"
+                exit 1
+            fi
+            RID_INDEX=-1
+            for i in "${!DEFAULT_RID_LIST[@]}"; do
+                if [ "${DEFAULT_RID_LIST[$i]}" = "$2" ]; then
+                    RID_INDEX=$i
+                    break
+                fi
+            done
+            if [ "$RID_INDEX" = "-1" ]; then
+                echo "Unsupported runtime identifier: $2"
+                echo "Supported runtime identifiers: ${DEFAULT_RID_LIST[*]}"
+                exit 1
+            fi
+            IS_RID_SELECTED="false"
+            for SELECTED_RID in "${RID_LIST[@]}"; do
+                if [ "$SELECTED_RID" = "$2" ]; then
+                    IS_RID_SELECTED="true"
+                    break
+                fi
+            done
+            if [ "$IS_RID_SELECTED" = "false" ]; then
+                RID_LIST+=("${DEFAULT_RID_LIST[$RID_INDEX]}")
+                PUB_PLATFORM_LIST+=("${DEFAULT_PUB_PLATFORM_LIST[$RID_INDEX]}")
+            fi
+            shift 2
+            ;;
+        --no-sign)
+            SIGN_PACKAGE="false"
+            shift
+            ;;
+        --no-trim)
+            TRIM_ASSEMBLIES="false"
+            shift
+            ;;
+        --no-tests)
+            RUN_TESTS="false"
+            shift
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            echo " "
+            print_usage
+            exit 1
+            ;;
+    esac
+done
+
+# Select all runtime identifiers if none of them was specified
+if [ ${#RID_LIST[@]} -eq 0 ]; then
+    RID_LIST=("${DEFAULT_RID_LIST[@]}")
+    PUB_PLATFORM_LIST=("${DEFAULT_PUB_PLATFORM_LIST[@]}")
+fi
 
 echo "********** Start building $APP_NAME **********"
+
+# Run test cases
+if [ "$RUN_TESTS" = "true" ]; then
+    echo "Run test cases"
+    dotnet test $APP_NAME.Test -c $CONFIG
+    if [ "$?" != "0" ]; then
+        echo "Test cases failed"
+        exit
+    fi
+fi
 
 # Get application version
 VERSION=$(dotnet run PackagingTool.cs -- get-current-version $APP_NAME/$APP_NAME.csproj)
@@ -36,7 +138,7 @@ for i in "${!RID_LIST[@]}"; do
     RID=${RID_LIST[$i]}
     PUB_PLATFORM=${PUB_PLATFORM_LIST[$i]}
 
-    echo " " 
+    echo " "
     echo "[$PUB_PLATFORM ($RID)]"
     echo " "
 
@@ -47,7 +149,7 @@ for i in "${!RID_LIST[@]}"; do
     if [ "$?" != "0" ]; then
         exit
     fi
-    
+
     # build
     dotnet publish $APP_NAME -c $CONFIG -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=$TRIM_ASSEMBLIES -p:RuntimeIdentifier=$RID -p:PublishReadyToRun=$READY_TO_RUN
     dotnet msbuild $APP_NAME -t:BundleApp -property:Configuration=$CONFIG -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=$TRIM_ASSEMBLIES -p:RuntimeIdentifier=$RID -p:PublishReadyToRun=$READY_TO_RUN
@@ -81,8 +183,12 @@ for i in "${!RID_LIST[@]}"; do
     rm ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/MacOS/*.pdb
 
     # sign application
-    echo "Sign package 'Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app'"
-    codesign --deep --force --options=runtime --timestamp --entitlements "./$APP_NAME/$APP_NAME.entitlements" -s "$CERT_NAME" "./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app"
+    if [ "$SIGN_PACKAGE" = "true" ]; then
+        echo "Sign package 'Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app'"
+        codesign --deep --force --options=runtime --timestamp --entitlements "./$APP_NAME/$APP_NAME.entitlements" -s "$CERT_NAME" "./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app"
+    else
+        echo "Skip signing package 'Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app'"
+    fi
 
     # zip .app directory
     ditto -c -k --sequesterRsrc --keepParent "./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app" "./Packages/$VERSION/$APP_NAME-$PACKAGE_VERSION-$PUB_PLATFORM.zip"
