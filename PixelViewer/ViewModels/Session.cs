@@ -1,4 +1,4 @@
-//#define SKIP_MAPPING_EMBEDDED_COLOR_SPACE_TO_BUILT_IN
+﻿//#define SKIP_MAPPING_EMBEDDED_COLOR_SPACE_TO_BUILT_IN
 
 using Avalonia;
 using Avalonia.Media;
@@ -925,6 +925,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	int frameNavigationCount;
 	bool hasPendingImageFiltering;
 	bool hasPendingImageRendering;
+	IImageDataSource? frameImageDataSource;
 	IImageDataSource? imageDataSource;
 	CancellationTokenSource? imageFilteringCancellationTokenSource;
 	CancellationTokenSource? imageRenderingCancellationTokenSource;
@@ -2162,6 +2163,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// dispose image data source
 		var imageDataSource = this.imageDataSource;
 		var sourceFileName = this.SourceFileName;
+		this.frameImageDataSource = this.frameImageDataSource.DisposeAndReturnNull();
 		this.imageDataSource = null;
 		if (imageDataSource is not null)
 		{
@@ -2508,12 +2510,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Evaluate image dimensions.
 	void EvaluateImageDimensions(AspectRatio aspectRatio)
 	{
-		// check state
-		if (this.imageDataSource is null)
+		// check state, dimensions are evaluated by data of single frame
+		var imageDataSource = this.frameImageDataSource ?? this.imageDataSource;
+		if (imageDataSource is null or IMultiFrameImageDataSource)
 			return;
 
 		// evaluate
-		this.ImageRenderer.EvaluateDimensions(this.imageDataSource, aspectRatio)?.Also((ref it) =>
+		this.ImageRenderer.EvaluateDimensions(imageDataSource, aspectRatio)?.Also((ref it) =>
 		{
 			if (this.ImageWidth != it.Width || this.ImageHeight != it.Height)
 			{
@@ -4304,7 +4307,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			try
 			{
 				this.Logger.LogDebug("Create frame sequence source of {count} file(s)", sortedFiles.Length);
-				return new FileSequenceImageDataSource(sortedFiles);
+				return new FileSequenceImageDataSource(this.Application, sortedFiles);
 			}
 			catch (Exception ex)
 			{
@@ -4369,17 +4372,22 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		this.imageDataSource = imageDataSource;
 
-		// parse file format
+		// parse file format, format is parsed from data of the first frame
+		var formatParsingSource = (IImageDataSource?)null;
 		try
 		{
-			this.fileFormatProfile = await Media.FileFormatParsers.FileFormatParsers.ParseImageRenderingProfileAsync(imageDataSource, new CancellationToken());
+			if (imageDataSource is IMultiFrameImageDataSource multiFrameImageDataSource)
+				formatParsingSource = await multiFrameImageDataSource.GetFrameAsync(0, CancellationToken.None);
+			this.fileFormatProfile = await Media.FileFormatParsers.FileFormatParsers.ParseImageRenderingProfileAsync(formatParsingSource ?? imageDataSource, CancellationToken.None);
 			if (this.fileFormatProfile is not null)
 				this.profiles.Add(this.fileFormatProfile);
 		}
-		// ReSharper disable EmptyGeneralCatchClause
 		catch
-		{ }
-		// ReSharper restore EmptyGeneralCatchClause
+		{ /* best effort */ }
+		finally
+		{
+			formatParsingSource?.Dispose();
+		}
 
 		// select image renderer by file name
 		var evaluatedImageRenderer = (IImageRenderer?)null;
@@ -4762,12 +4770,46 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.isFirstImageRenderingForSource = false;
 		this.hasPendingImageRendering = false;
 
+		// get source which provides data of frame to render
+		var cancellationTokenSource = new CancellationTokenSource();
+		this.imageRenderingCancellationTokenSource = cancellationTokenSource;
+		var frameNumber = this.FrameNumber;
+		var renderingImageDataSource = imageDataSource;
+		if (imageDataSource is IMultiFrameImageDataSource multiFrameImageDataSource)
+		{
+			// frames are provided by the source itself, one source for each frame
+			var frameCount = (long)multiFrameImageDataSource.FrameCount;
+			frameNumber = this.CoerceFrameNumberToRange(frameNumber, frameCount);
+			this.SetValue(FrameCountProperty, frameCount);
+			this.frameImageDataSource = this.frameImageDataSource.DisposeAndReturnNull();
+			try
+			{
+				this.frameImageDataSource = await multiFrameImageDataSource.GetFrameAsync((int)(frameNumber - 1), cancellationTokenSource.Token);
+			}
+			catch (Exception ex)
+			{
+				this.imageRenderingCancellationTokenSource = null;
+				if (ex is OperationCanceledException)
+					this.Logger.LogWarning("Getting source of frame {frameNumber} of '{sourceFileName}' has been cancelled", frameNumber, sourceFileName);
+				else
+				{
+					this.Logger.LogError(ex, "Unable to get source of frame {frameNumber} of '{sourceFileName}'", frameNumber, sourceFileName);
+					this.SetValue(HasRenderingErrorProperty, true);
+					this.ClearRenderedImage();
+				}
+				return;
+			}
+			if (this.IsDisposed)
+				return;
+			renderingImageDataSource = this.frameImageDataSource;
+		}
+
 		// evaluate dimensions
 		if (this.isImageDimensionsEvaluationNeeded)
 		{
 			this.Logger.LogDebug("Evaluate dimensions of image for '{sourceFileName}'", sourceFileName);
 			this.isImageDimensionsEvaluationNeeded = false;
-			imageRenderer.EvaluateDimensions(imageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref it) =>
+			imageRenderer.EvaluateDimensions(renderingImageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref it) =>
 			{
 				this.SetValue(ImageWidthProperty, it.Width);
 				this.SetValue(ImageHeightProperty, it.Height);
@@ -4869,7 +4911,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// report effective bits
 		this.UpdateSourceImageEffectiveBits();
 
-		// calculate frame count and index
+		// prepare rendering options and calculate frame count of packed frames
 		var isRgbGainSupported = this.IsRgbGainSupported;
 		var renderingOptions = new ImageRenderingOptions
 		{
@@ -4882,18 +4924,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
 			YuvToBgraConverter = this.YuvToBgraConverter,
 		};
-		var frameNumber = this.FrameNumber;
 		var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
-		if (imageDataSource is IMultiFrameImageDataSource multiFrameSource)
+		if (imageDataSource is not IMultiFrameImageDataSource)
 		{
-			// frame sequence: each file is a whole frame, so frame count is the number of files
-			var frameCount = (long)multiFrameSource.FrameCount;
-			frameNumber = this.CoerceFrameNumberToRange(frameNumber, frameCount);
-			multiFrameSource.SelectFrame((int)(frameNumber - 1));
-			this.SetValue(FrameCountProperty, frameCount);
-		}
-		else
-		{
+			// frames are packed in data of source, locate the frame by its offset in data
 			try
 			{
 				var totalDataSize = imageDataSource.Size - this.DataOffset;
@@ -4907,6 +4941,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			catch (Exception ex)
 			{
+				this.imageRenderingCancellationTokenSource = null;
 				this.Logger.LogError(ex, "Unable to update frame count and index of '{sourceFileName}'", this.SourceFileName);
 				this.SetValue(HasRenderingErrorProperty, true);
 				this.ClearRenderedImage();
@@ -4945,12 +4980,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		}) ?? true;
 		
 		// select rendered format
-		var cancellationTokenSource = new CancellationTokenSource();
-		this.imageRenderingCancellationTokenSource = cancellationTokenSource;
 		BitmapFormat renderedFormat;
 		try
 		{
-			renderedFormat = await imageRenderer.SelectRenderedFormatAsync(imageDataSource, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+			renderedFormat = await imageRenderer.SelectRenderedFormatAsync(renderingImageDataSource, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 			this.Logger.LogTrace("Select {format} as rendered format", renderedFormat);
 		}
 		catch (Exception ex)
@@ -5039,7 +5072,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (isRenderingNeeded && renderedImageFrame is not null)
 			{
 				renderStopwatch = Stopwatch.StartNew();
-				renderedImageFrame.RenderingResult = await imageRenderer.RenderAsync(imageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				renderedImageFrame.RenderingResult = await imageRenderer.RenderAsync(renderingImageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 				renderStopwatch.Stop();
 				renderedImageFrame.ImageRenderer = imageRenderer;
 				renderedImageFrame.RenderingOptions = renderingOptions;

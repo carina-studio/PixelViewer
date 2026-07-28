@@ -1,27 +1,27 @@
 using CarinaStudio.IO;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace Carina.PixelViewer.Media
+namespace Carina.PixelViewer.Media;
+
+/// <summary>
+/// <see cref="IImageDataSource"/> which consists of multiple frames, data of each frame is provided by its own <see cref="IImageDataSource"/>.
+/// </summary>
+/// <remarks>The source provides no data by itself, <see cref="IStreamProvider.OpenStreamAsync"/> throws <see cref="InvalidOperationException"/> and <see cref="IImageDataSource.Size"/> reports the total size of all frames.</remarks>
+interface IMultiFrameImageDataSource : IImageDataSource
 {
 	/// <summary>
-	/// <see cref="IImageDataSource"/> which is composed of multiple frames, each frame being served independently.
+	/// Get number of frames contained in the source.
 	/// </summary>
-	interface IMultiFrameImageDataSource : IImageDataSource
-	{
-		/// <summary>
-		/// Get the file name of the currently selected frame.
-		/// </summary>
-		string CurrentFileName { get; }
+	int FrameCount { get; }
 
-		/// <summary>
-		/// Get number of frames contained in the source.
-		/// </summary>
-		int FrameCount { get; }
 
-		/// <summary>
-		/// Select the frame whose data will be served by <see cref="IImageDataSource.Size"/> and
-		/// <see cref="IStreamProvider.OpenStreamAsync"/>.
-		/// </summary>
-		/// <param name="frameIndex">0-based index of frame to select.</param>
-		void SelectFrame(int frameIndex);
-	}
+	/// <summary>
+	/// Get source which provides data of the given frame.
+	/// </summary>
+	/// <param name="frameIndex">0-based index of frame.</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Task of getting source of data of the frame. The source should be disposed by caller.</returns>
+	Task<IImageDataSource> GetFrameAsync(int frameIndex, CancellationToken cancellationToken);
 }
