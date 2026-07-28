@@ -376,9 +376,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
 	/// <summary>
-	/// Property of <see cref="FramePlaybackRateFps"/>.
+	/// Property of <see cref="FramePlaybackRate"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> FramePlaybackRateFpsProperty = ObservableProperty.Register<Session, int>(nameof(FramePlaybackRateFps), 30, coerce: (_, it) => Math.Max(MinFramePlaybackRateFps, Math.Min(MaxFramePlaybackRateFps, it)));
+	public static readonly ObservableProperty<int> FramePlaybackRateProperty = ObservableProperty.Register<Session, int>(nameof(FramePlaybackRate), 30, coerce: (_, it) => Math.Max(MinFramePlaybackRate, Math.Min(MaxFramePlaybackRate, it)));
 	/// <summary>
 	/// Property of <see cref="GreenColorAdjustment"/>.
 	/// </summary>
@@ -633,6 +633,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsFramePlaybackLoopingProperty = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackLooping), true);
 	/// <summary>
+	/// Property of <see cref="IsFramePlaybackRateUnlimited"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsFramePlaybackRateUnlimitedProperty = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackRateUnlimited));
+	/// <summary>
 	/// Property of <see cref="IsPlayingFrames"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsPlayingFramesProperty = ObservableProperty.Register<Session, bool>(nameof(IsPlayingFrames));
@@ -836,12 +840,11 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Maximum frame rate (frames per second) for frame sequence playback.
 	/// </summary>
-	public const int MaxFramePlaybackRateFps = 120;
+	public const int MaxFramePlaybackRate = 60;
 	/// <summary>
 	/// Minimum frame rate (frames per second) for frame sequence playback.
 	/// </summary>
-	public const int MinFramePlaybackRateFps = 1;
-	const int FramePlaybackRenderWaitDelay = 10;
+	public const int MinFramePlaybackRate = 1;
 	const int ReleaseCachedImagesDelay = 3000;
 	const int RenderImageDelay = 500;
 	const int TrackFilteringParamsAppliedEventDelay = 5000;
@@ -851,8 +854,11 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Static fields.
+	static readonly SettingKey<bool> IsInitFramePlaybackLooping = new("Session.IsInitFramePlaybackLooping", true);
+	static readonly SettingKey<bool> IsInitFramePlaybackRateUnlimited = new("Session.IsInitFramePlaybackRateUnlimited", false);
 	static readonly SettingKey<bool> IsInitHistogramMeanMarkerVisible = new("Session.IsInitHistogramMeanMarkerVisible", true);
 	static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
+	static readonly SettingKey<int> LatestFramePlaybackRate = new("Session.LatestFramePlaybackRate", FramePlaybackRateProperty.DefaultValue);
 	static readonly SettingKey<int> LatestHistogramsPanelSize = new("Session.LatestHistogramsPanelSize", (int)(HistogramsPanelSizeProperty.DefaultValue + 0.5));
 	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
 	static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new();
@@ -926,6 +932,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	bool hasPendingImageFiltering;
 	bool hasPendingImageRendering;
 	IImageDataSource? frameImageDataSource;
+	long framePlaybackBaseFrameNumber;
+	double framePlaybackBaseTime;
+	long framePlaybackNextFrameNumber;
+	readonly Stopwatch framePlaybackStopwatch = new();
 	IImageDataSource? imageDataSource;
 	CancellationTokenSource? imageFilteringCancellationTokenSource;
 	CancellationTokenSource? imageRenderingCancellationTokenSource;
@@ -980,25 +990,21 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.FlipYCommand = new Command(this.FlipY, isSrcFileOpenedObservable);
 		this.MoveToFirstFrameCommand = new Command(() =>
 		{
-			this.StopPlayingFrames();
 			if (this.canMoveToPreviousFrame.Value)
 				this.FrameNumber = 1;
 		}, this.canMoveToPreviousFrame);
 		this.MoveToLastFrameCommand = new Command(() =>
 		{
-			this.StopPlayingFrames();
 			if (this.canMoveToNextFrame.Value)
 				this.FrameNumber = this.FrameCount;
 		}, this.canMoveToNextFrame);
 		this.MoveToNextFrameCommand = new Command(() =>
 		{
-			this.StopPlayingFrames();
 			if (this.canMoveToNextFrame.Value)
 				++this.FrameNumber;
 		}, this.canMoveToNextFrame);
 		this.MoveToPreviousFrameCommand = new Command(() =>
 		{
-			this.StopPlayingFrames();
 			if (this.canMoveToPreviousFrame.Value)
 				--this.FrameNumber;
 		}, this.canMoveToPreviousFrame);
@@ -1313,10 +1319,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
 			this.SetValue(ColorSpaceProperty, colorSpace);
 
-		// restore frame playback preferences
-		this.SetValue(FramePlaybackRateFpsProperty, this.Settings.GetValueOrDefault(SettingKeys.FramePlaybackRateFps));
-		this.SetValue(IsFramePlaybackLoopingProperty, this.Settings.GetValueOrDefault(SettingKeys.FramePlaybackLooping));
-
 		// setup title
 		this.UpdateTitle();
 
@@ -1325,7 +1327,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			_ = this.RestoreState(savedState.Value);
 		else
 		{
+			this.SetValue(FramePlaybackRateProperty, this.PersistentState.GetValueOrDefault(LatestFramePlaybackRate));
 			this.SetValue(HistogramsPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestHistogramsPanelSize));
+			this.SetValue(IsFramePlaybackLoopingProperty, this.PersistentState.GetValueOrDefault(IsInitFramePlaybackLooping));
+			this.SetValue(IsFramePlaybackRateUnlimitedProperty, this.PersistentState.GetValueOrDefault(IsInitFramePlaybackRateUnlimited));
 			this.SetValue(IsHistogramMeanMarkerVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible));
 			this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
 			this.SetValue(RenderingParametersPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
@@ -3007,23 +3012,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	public long FrameCount => this.GetValue(FrameCountProperty);
 
 
-	/// <summary>
-	/// Calculate the frame number to move to when playing a frame sequence.
-	/// </summary>
-	/// <param name="currentFrameNumber">Current 1-based frame number.</param>
-	/// <param name="frameCount">Total number of frames.</param>
-	/// <param name="looping">Whether playback loops back to the first frame after the last one.</param>
-	/// <returns>Next 1-based frame number, or null if playback should stop.</returns>
-	internal static long? GetNextFrameNumber(long currentFrameNumber, long frameCount, bool looping)
-	{
-		if (frameCount <= 1)
-			return null;
-		if (currentFrameNumber < frameCount)
-			return currentFrameNumber < 1 ? 1 : currentFrameNumber + 1;
-		return looping ? 1 : null;
-	}
-
-
 	// Clamp the frame number into [1, frameCount], applying the correction to the property and cancelling
 	// the redundant re-render it would otherwise trigger. Returns the coerced frame number.
 	long CoerceFrameNumberToRange(long frameNumber, long frameCount)
@@ -3052,6 +3040,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		get => this.GetValue(FrameNumberProperty);
 		set
 		{
+			this.StopPlayingFrames(); // moving to frame explicitly stops playback
 			if (this.GetValue(IsSourceOpenedProperty) && value != this.GetValue(FrameNumberProperty))
 				++this.frameNavigationCount;
 			this.SetValue(FrameNumberProperty, value);
@@ -3072,10 +3061,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get or set the target frame rate (frames per second) used when playing the frame sequence.
 	/// </summary>
-	public int FramePlaybackRateFps
+	public int FramePlaybackRate
 	{
-		get => this.GetValue(FramePlaybackRateFpsProperty);
-		set => this.SetValue(FramePlaybackRateFpsProperty, value);
+		get => this.GetValue(FramePlaybackRateProperty);
+		set => this.SetValue(FramePlaybackRateProperty, value);
 	}
 
 
@@ -3086,6 +3075,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		get => this.GetValue(IsFramePlaybackLoopingProperty);
 		set => this.SetValue(IsFramePlaybackLoopingProperty, value);
+	}
+
+
+	/// <summary>
+	/// Get or set whether frames are played as fast as possible, ignoring <see cref="FramePlaybackRate"/>.
+	/// </summary>
+	public bool IsFramePlaybackRateUnlimited
+	{
+		get => this.GetValue(IsFramePlaybackRateUnlimitedProperty);
+		set => this.SetValue(IsFramePlaybackRateUnlimitedProperty, value);
 	}
 
 
@@ -3897,10 +3896,18 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
 			this.UpdateCanPlayFrames();
 		}
-		else if (property == FramePlaybackRateFpsProperty)
-			this.Settings.SetValue<int>(SettingKeys.FramePlaybackRateFps, (int)newValue.AsNonNull());
+		else if (property == FramePlaybackRateProperty)
+		{
+			this.PersistentState.SetValue(LatestFramePlaybackRate, (int)newValue.AsNonNull());
+			this.RestartFramePlaybackTimeline();
+		}
 		else if (property == IsFramePlaybackLoopingProperty)
-			this.Settings.SetValue<bool>(SettingKeys.FramePlaybackLooping, (bool)newValue.AsNonNull());
+			this.PersistentState.SetValue(IsInitFramePlaybackLooping, (bool)newValue.AsNonNull());
+		else if (property == IsFramePlaybackRateUnlimitedProperty)
+		{
+			this.PersistentState.SetValue(IsInitFramePlaybackRateUnlimited, (bool)newValue.AsNonNull());
+			this.RestartFramePlaybackTimeline();
+		}
 		else if (property == HasRenderingErrorProperty)
 		{
 			if ((bool)newValue!)
@@ -3998,6 +4005,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			|| property == IsRenderingImageProperty)
 		{
 			this.updateIsProcessingImageAction.Schedule();
+			if (property == IsRenderingImageProperty && !(bool)newValue.AsNonNull())
+				this.ScheduleNextFrameForPlayback(); // rendering of current frame completed, playback moves to next frame
 		}
 		else if (property == IsGrayscaleFilterEnabledProperty
 			|| property == IsGrayscaleFilterSupportedProperty)
@@ -4453,11 +4462,37 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand PlayFramesCommand { get; }
 
 
-	// Advance to the next frame during playback, keeping the target frame rate without dropping frames.
+	// Move to the frame which was selected for playback.
 	void PlayNextFrame()
 	{
-		// stop if playback is no longer valid
+		// check state
 		if (!this.GetValue(IsPlayingFramesProperty))
+			return;
+
+		// move to the selected frame, render the current frame again if all frames were dropped in this round
+		if (this.GetValue(FrameNumberProperty) == this.framePlaybackNextFrameNumber)
+			this.renderImageAction.Reschedule();
+		else
+			this.SetValue(FrameNumberProperty, this.framePlaybackNextFrameNumber);
+	}
+
+
+	// Anchor the playback timeline to the frame being displayed so that the current frame rate takes effect immediately.
+	void RestartFramePlaybackTimeline()
+	{
+		if (!this.GetValue(IsPlayingFramesProperty))
+			return;
+		this.framePlaybackBaseFrameNumber = this.GetValue(FrameNumberProperty);
+		this.framePlaybackBaseTime = this.framePlaybackStopwatch.Elapsed.TotalMilliseconds;
+		this.ScheduleNextFrameForPlayback();
+	}
+
+
+	// Select the frame to be rendered next and schedule moving to it.
+	void ScheduleNextFrameForPlayback()
+	{
+		// check state
+		if (!this.GetValue(IsPlayingFramesProperty) || this.hasPendingImageRendering)
 			return;
 		if (!this.canPlayFrames.Value)
 		{
@@ -4465,25 +4500,69 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
-		// wait for the current frame to finish rendering so that no frame is skipped
-		if (this.GetValue(IsRenderingImageProperty))
-		{
-			this.playFrameAction.Schedule(FramePlaybackRenderWaitDelay);
-			return;
-		}
-
-		// move to the next frame or stop at the end
-		var nextFrameNumber = GetNextFrameNumber(this.GetValue(FrameNumberProperty), this.GetValue(FrameCountProperty), this.GetValue(IsFramePlaybackLoopingProperty));
-		if (nextFrameNumber is null)
+		// select the frame to be rendered next
+		var frameInterval = this.GetValue(IsFramePlaybackRateUnlimitedProperty)
+			? 0.0
+			: 1000.0 / this.GetValue(FramePlaybackRateProperty);
+		var nextFrame = SelectNextFrameForPlayback(this.framePlaybackBaseFrameNumber, this.framePlaybackBaseTime, this.framePlaybackStopwatch.Elapsed.TotalMilliseconds, frameInterval, this.GetValue(FrameCountProperty), this.GetValue(IsFramePlaybackLoopingProperty));
+		if (nextFrame is null)
 		{
 			this.StopPlayingFrames();
 			return;
 		}
-		this.SetValue(FrameNumberProperty, nextFrameNumber.Value);
 
-		// schedule the next frame according to the target frame rate
-		var interval = Math.Max(1, 1000 / Math.Max(MinFramePlaybackRateFps, this.GetValue(FramePlaybackRateFpsProperty)));
-		this.playFrameAction.Schedule(interval);
+		// anchor the timeline to the selected frame so that the next selection moves forward from it
+		this.framePlaybackBaseFrameNumber = nextFrame.Value.FrameNumber;
+		this.framePlaybackBaseTime = nextFrame.Value.PresentTime;
+
+		// schedule moving to the frame at the time it should be presented
+		this.framePlaybackNextFrameNumber = nextFrame.Value.FrameNumber;
+		this.playFrameAction.Reschedule(nextFrame.Value.Delay);
+	}
+
+
+	/// <summary>
+	/// Select the frame to be rendered next when playing frames.
+	/// </summary>
+	/// <param name="baseFrameNumber">1-based number of the frame which the playback timeline is anchored to.</param>
+	/// <param name="baseTime">Time when the anchored frame was presented, in milliseconds.</param>
+	/// <param name="currentTime">Current time in milliseconds.</param>
+	/// <param name="frameInterval">Interval between frames in milliseconds, or 0 to play frames as fast as possible.</param>
+	/// <param name="frameCount">Total number of frames.</param>
+	/// <param name="looping">Whether playback loops back to the first frame after the last one.</param>
+	/// <returns>Number of the frame to be rendered next, the delay before moving to it and the time it should be presented at, or null if playback should stop.</returns>
+	/// <remarks>Frames are dropped when rendering is unable to catch up with the given frame interval, so that playback keeps the timeline instead of falling behind. The returned time should be used as the base time of the next selection, so that the timeline does not drift.</remarks>
+	internal static (long FrameNumber, int Delay, double PresentTime)? SelectNextFrameForPlayback(long baseFrameNumber, double baseTime, double currentTime, double frameInterval, long frameCount, bool looping)
+	{
+		// check state
+		if (frameCount <= 1)
+			return null;
+		if (baseFrameNumber < 1)
+			baseFrameNumber = 1;
+
+		// select the frame which should be presented next, frames are dropped if rendering took more than one interval
+		var frameOffset = 1L;
+		if (frameInterval > 0)
+		{
+			var elapsedFrameCount = (long)((currentTime - baseTime) / frameInterval);
+			if (elapsedFrameCount > 0)
+				frameOffset += elapsedFrameCount;
+		}
+		var frameNumber = baseFrameNumber + frameOffset;
+
+		// stop or loop back after the last frame
+		if (frameNumber > frameCount)
+		{
+			if (!looping)
+				return null;
+			frameNumber = ((frameNumber - 1) % frameCount) + 1;
+		}
+
+		// calculate the time the frame should be presented at and the delay before presenting it
+		var presentTime = frameInterval > 0
+			? baseTime + (frameOffset * frameInterval)
+			: currentTime;
+		return (frameNumber, (int)Math.Max(0, presentTime - currentTime), presentTime);
 	}
 
 
@@ -4495,16 +4574,22 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (!this.canPlayFrames.Value || this.GetValue(IsPlayingFramesProperty))
 			return;
 		this.SetValue(IsPlayingFramesProperty, true);
-		this.playFrameAction.Schedule();
+		this.framePlaybackBaseFrameNumber = this.GetValue(FrameNumberProperty);
+		this.framePlaybackBaseTime = 0;
+		this.framePlaybackStopwatch.Restart();
+		this.ScheduleNextFrameForPlayback();
 	}
 
 
-	// Stop playing the frame sequence.
-	void StopPlayingFrames()
+	/// <summary>
+	/// Stop playing the frame sequence.
+	/// </summary>
+	public void StopPlayingFrames()
 	{
 		if (!this.GetValue(IsPlayingFramesProperty))
 			return;
 		this.playFrameAction.Cancel();
+		this.framePlaybackStopwatch.Stop();
 		this.SetValue(IsPlayingFramesProperty, false);
 	}
 
@@ -4741,9 +4826,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		// cancel rendering
 		var cancelled = this.CancelRenderingImage();
 
-		// clear selected pixel
-		this.SelectRenderedImagePixel(-1, -1);
-
 		// get state
 		var imageDataSource = this.imageDataSource;
 		if (imageDataSource is null)
@@ -4950,8 +5032,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
 		}
 
-		// update state
-		this.canSaveRenderedImage.Update(false);
+		// update state, image rendered before can still be saved while rendering the next one
+		this.canSaveRenderedImage.Update(this.renderedImageFrame is not null && !this.IsSavingRenderedImage);
 		this.SetValue(IsRenderingImageProperty, true);
 
         // check color space
@@ -5859,7 +5941,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		// load displaying parameters
 		var fitToViewport = true;
 		var frameNumber = 1L;
+		var framePlaybackRate = this.PersistentState.GetValueOrDefault(LatestFramePlaybackRate);
 		var histogramsPanelSize = HistogramsPanelSizeProperty.DefaultValue;
+		var isFramePlaybackLooping = this.PersistentState.GetValueOrDefault(IsInitFramePlaybackLooping);
+		var isFramePlaybackRateUnlimited = this.PersistentState.GetValueOrDefault(IsInitFramePlaybackRateUnlimited);
 		var isHistogramMeanMarkerVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible);
 		var isHistogramsVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible);
 		var isImageFlippedX = false;
@@ -5874,6 +5959,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			frameNumber = Math.Max(1, frameNumber);
 		if (savedState.TryGetProperty(nameof(ImageDisplayRotation), out jsonProperty))
 			jsonProperty.TryGetInt32(out rotation);
+		if (savedState.TryGetProperty(nameof(FramePlaybackRate), out jsonProperty))
+			jsonProperty.TryGetInt32(out framePlaybackRate);
+		if (savedState.TryGetProperty(nameof(IsFramePlaybackLooping), out jsonProperty))
+			isFramePlaybackLooping = jsonProperty.ValueKind != JsonValueKind.False;
+		if (savedState.TryGetProperty(nameof(IsFramePlaybackRateUnlimited), out jsonProperty))
+			isFramePlaybackRateUnlimited = jsonProperty.ValueKind == JsonValueKind.True;
 		if (savedState.TryGetProperty(nameof(IsHistogramMeanMarkerVisible), out jsonProperty))
 			isHistogramMeanMarkerVisible = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(IsHistogramsVisible), out jsonProperty))
@@ -5909,6 +6000,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(HistogramsPanelSizeProperty, histogramsPanelSize);
 		this.SetValue(IsHistogramMeanMarkerVisibleProperty, isHistogramMeanMarkerVisible);
 		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
+
+		// restore parameters of frame playback
+		this.SetValue(FramePlaybackRateProperty, framePlaybackRate);
+		this.SetValue(IsFramePlaybackLoopingProperty, isFramePlaybackLooping);
+		this.SetValue(IsFramePlaybackRateUnlimitedProperty, isFramePlaybackRateUnlimited);
 
 		// open source file
 		if (fileName is not null)
@@ -6228,7 +6324,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			return false;
 		if (!this.canSaveRenderedImage.Value)
 			return false;
-		
+		var renderedImageFrame = this.renderedImageFrame;
+		if (renderedImageFrame is null)
+		{
+			this.Logger.LogError("No rendered image to save");
+			return false;
+		}
+
 		// select color space
 		var options = parameters.Options;
 		if (!this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement))
@@ -6250,7 +6352,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var properties = this.PrepareRenderedImageSavedTrackingProperties(parameters, false, applyTransformation);
 		try
 		{
-			using IBitmapBuffer bufferToEncode = this.renderedImageFrame.AsNonNull().BitmapBuffer.Let(it => flipX || flipY
+			using IBitmapBuffer bufferToEncode = renderedImageFrame.BitmapBuffer.Let(it => flipX || flipY
 				? it.Flip(flipX, flipY)
 				: it.Share());
 			var encodingStopwatch = Stopwatch.StartNew();
@@ -6271,8 +6373,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		finally
 		{
-			this.canSaveRenderedImage.Update(!this.IsRenderingImage);
 			this.SetValue(IsSavingRenderedImageProperty, false);
+			this.canSaveRenderedImage.Update(this.renderedImageFrame is not null);
 		}
 	}
 
@@ -6374,8 +6476,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		// displaying parameters
 		writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProperty));
 		writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
+		writer.WriteNumber(nameof(FramePlaybackRate), this.FramePlaybackRate);
 		writer.WriteNumber(nameof(HistogramsPanelSize), this.HistogramsPanelSize);
 		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
+		writer.WriteBoolean(nameof(IsFramePlaybackLooping), this.IsFramePlaybackLooping);
+		writer.WriteBoolean(nameof(IsFramePlaybackRateUnlimited), this.IsFramePlaybackRateUnlimited);
 		writer.WriteBoolean(nameof(IsHistogramMeanMarkerVisible), this.IsHistogramMeanMarkerVisible);
 		writer.WriteBoolean(nameof(IsHistogramsVisible), this.IsHistogramsVisible);
 		writer.WriteBoolean(nameof(IsImageFlippedX), this.IsImageFlippedX);

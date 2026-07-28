@@ -293,27 +293,100 @@
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.FastForward}"/>
 							</Button>
 
-							<!-- Play/pause frame sequence -->
+							<!-- Play/Pause frame sequence -->
 							<Button Command="{Binding PlayFramesCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.PlayFrames}">
 								<Panel>
-									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Play}" IsVisible="{Binding !IsPlayingFrames}"/>
-									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Pause}" IsVisible="{Binding IsPlayingFrames}"/>
+									<Panel IsVisible="{Binding !IsPlayingFrames}">
+										<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.PlayMedia.Outline}" IsVisible="{Binding !$parent[Button].IsEffectivelyEnabled}"/>
+										<Image asControls:ToolbarElement.Role="Icon" IsVisible="{Binding $parent[Button].IsEffectivelyEnabled}">
+											<DrawingImage>
+												<GeometryDrawing Brush="{DynamicResource Brush/Icon.OK}" Geometry="{DynamicResource Geometry/Icon.PlayMedia.Outline}"/>
+											</DrawingImage>
+										</Image>
+									</Panel>
+									<Image asControls:ToolbarElement.Role="Icon" IsVisible="{Binding IsPlayingFrames}">
+										<DrawingImage>
+											<GeometryDrawing Brush="{DynamicResource Brush/Icon.Warning}" Geometry="{DynamicResource Geometry/Icon.PauseMedia.Outline}"/>
+										</DrawingImage>
+									</Image>
 								</Panel>
 							</Button>
 
-							<!-- Loop frame playback -->
-							<ToggleButton IsChecked="{Binding IsFramePlaybackLooping, Mode=TwoWay}" IsEnabled="{Binding HasMultipleFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.LoopFramePlayback}">
+							<!-- Frame playback options -->
+							<ToggleButton Name="framePlaybackOptionsButton" Command="{Binding #root.OpenFramePlaybackOptionsPopup}" IsEnabled="{Binding HasMultipleFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FramePlaybackOptions}" Width="NaN">
 								<Panel>
-									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Loop}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Loop.Active}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+									<TextBlock Opacity="0" asControls:ToolbarElement.Role="Label" Text="{asXaml:StringResource SessionControl.FramePlaybackRate.Unlimited}"/>
+									<abControls:FormattedTextBlock Arg1="{Binding FramePlaybackRate}" Format="{asXaml:StringResource SessionControl.FramePlaybackRate.Label}" HorizontalAlignment="Center" IsVisible="{Binding !IsFramePlaybackRateUnlimited}" asControls:ToolbarElement.Role="Label"/>
+									<TextBlock HorizontalAlignment="Center" IsVisible="{Binding IsFramePlaybackRateUnlimited}" Text="{asXaml:StringResource SessionControl.FramePlaybackRate.Unlimited}" asControls:ToolbarElement.Role="Label"/>
+									<Popup Name="framePlaybackOptionsPopup" Classes="SessionControl_FilterParamsPopup" Width="{StaticResource Double/SessionControl.FramePlaybackOptionsPopup.Width}">
+										<Border Name="framePlaybackOptionsPopupBorder" Classes="SessionControl_FilterParamsPopup" Padding="{StaticResource Thickness/Dialog.ItemsGroup.Padding}">
+											<StackPanel>
+
+												<!-- Playback frame rate -->
+												<asControls:DialogItem ItemSize="Small">
+													<TextBlock Text="{asXaml:StringResource SessionControl.FramePlaybackRate}" asControls:DialogElement.TextRole="Label"/>
+													<Slider asControls:DialogElement.IsDialogItemInput="True"
+													        IsEnabled="{Binding !IsFramePlaybackRateUnlimited}" 
+													        IsSnapToTickEnabled="False" 
+													        Maximum="{Binding Source={x:Static appViewModels:Session.MaxFramePlaybackRate}}" 
+													        Minimum="{Binding Source={x:Static appViewModels:Session.MinFramePlaybackRate}}" 
+													        SmallChange="1"
+													        TickPlacement="None"
+													        Value="{Binding FramePlaybackRate, Mode=TwoWay}"
+													        VerticalAlignment="Center">
+														<Slider.Resources>
+															<sys:Double x:Key="SliderHorizontalHeight">0</sys:Double>
+														</Slider.Resources>
+													</Slider>
+												</asControls:DialogItem>
+												<Separator asControls:DialogElement.SeparatorType="InnerItem"/>
+												<UniformGrid Columns="5" ColumnSpacing="{StaticResource Double/Dialog.Separator.Width.Small}" IsEnabled="{Binding !IsFramePlaybackRateUnlimited}">
+													<Button Command="{Binding #root.SetFramePlaybackRateCommand}" Content="{Binding $self.CommandParameter}" HorizontalAlignment="Stretch" asControls:DialogElement.IsDialogItemInput="True">
+														<Button.CommandParameter>
+															<sys:Int32>24</sys:Int32>
+														</Button.CommandParameter>
+													</Button>
+													<Button Command="{Binding #root.SetFramePlaybackRateCommand}" Content="{Binding $self.CommandParameter}" HorizontalAlignment="Stretch" asControls:DialogElement.IsDialogItemInput="True">
+														<Button.CommandParameter>
+															<sys:Int32>25</sys:Int32>
+														</Button.CommandParameter>
+													</Button>
+													<Button Command="{Binding #root.SetFramePlaybackRateCommand}" Content="{Binding $self.CommandParameter}" HorizontalAlignment="Stretch" asControls:DialogElement.IsDialogItemInput="True">
+														<Button.CommandParameter>
+															<sys:Int32>30</sys:Int32>
+														</Button.CommandParameter>
+													</Button>
+													<Button Command="{Binding #root.SetFramePlaybackRateCommand}" Content="{Binding $self.CommandParameter}" HorizontalAlignment="Stretch" asControls:DialogElement.IsDialogItemInput="True">
+														<Button.CommandParameter>
+															<sys:Int32>50</sys:Int32>
+														</Button.CommandParameter>
+													</Button>
+													<Button Command="{Binding #root.SetFramePlaybackRateCommand}" Content="{Binding $self.CommandParameter}" HorizontalAlignment="Stretch" asControls:DialogElement.IsDialogItemInput="True">
+														<Button.CommandParameter>
+															<sys:Int32>60</sys:Int32>
+														</Button.CommandParameter>
+													</Button>
+												</UniformGrid>
+												<Separator asControls:DialogElement.SeparatorType="Item"/>
+
+												<!-- Play as fast as possible -->
+												<asControls:DialogItem ItemSize="Small">
+													<TextBlock Text="{asXaml:StringResource SessionControl.FramePlaybackRateUnlimited}" asControls:DialogElement.TextRole="Label"/>
+													<ToggleSwitch IsChecked="{Binding IsFramePlaybackRateUnlimited, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
+												</asControls:DialogItem>
+												<Separator asControls:DialogElement.SeparatorType="Item"/>
+
+												<!-- Loop playback -->
+												<asControls:DialogItem ItemSize="Small">
+													<TextBlock Text="{asXaml:StringResource SessionControl.LoopFramePlayback}" asControls:DialogElement.TextRole="Label"/>
+													<ToggleSwitch IsChecked="{Binding IsFramePlaybackLooping, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
+												</asControls:DialogItem>
+
+											</StackPanel>
+										</Border>
+									</Popup>
 								</Panel>
 							</ToggleButton>
-
-							<!-- Playback frame rate -->
-							<StackPanel Orientation="Horizontal" VerticalAlignment="Center" IsEnabled="{Binding HasMultipleFrames}" ToolTip.Tip="{asXaml:StringResource SessionControl.FramePlaybackRateFps}">
-								<abControls:IntegerTextBox Minimum="1" Maximum="120" IsNullValueAllowed="False" Value="{Binding FramePlaybackRateFps, Mode=TwoWay}" VerticalAlignment="Center" Width="60"/>
-								<TextBlock Text="fps" VerticalAlignment="Center" Margin="4,0,0,0"/>
-							</StackPanel>
 
 						</StackPanel>
 

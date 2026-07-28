@@ -124,7 +124,7 @@
 	<sys:String x:Key="String/FileType.WebP">WebP 影像</sys:String>
 
 	<!-- FrameNumberSelectionDialog -->
-	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至畫面</sys:String>
+	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至畫格</sys:String>
 
 	<!-- MultiFileOpenModeDialog -->
 	<sys:String x:Key="String/MultiFileOpenModeDialog.Title">開啟多個檔案</sys:String>
@@ -241,7 +241,11 @@
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">調整至視窗大小 (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FlipX">水平翻轉</sys:String>
 	<sys:String x:Key="String/SessionControl.FlipY">垂直翻轉</sys:String>
-	<sys:String x:Key="String/SessionControl.FramePaddingSize">畫面資料間隔 (位元組)</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePaddingSize">畫格資料間隔 (位元組)</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePlaybackOptions">畫格播放選項</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePlaybackRate">畫格速率</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePlaybackRate.Unlimited">最高 fps</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePlaybackRateUnlimited">不限制畫格速率</sys:String>
 	<sys:String x:Key="String/SessionControl.GrayscaleFilter">灰階濾鏡</sys:String>
 	<sys:String x:Key="String/SessionControl.GreenColorGain">綠色增益</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Blue">藍色</sys:String>
@@ -260,21 +264,20 @@
 	<sys:String x:Key="String/SessionControl.ImageSavingSucceeded">影像已儲存至 '{0}'。</sys:String>
 	<sys:String x:Key="String/SessionControl.InputNameOfProfile">組態名稱</sys:String>
 	<sys:String x:Key="String/SessionControl.InsufficientMemoryForRenderedImage">記憶體不足以繪製影像。您可以嘗試在應用程式選項中調高記憶體使用上限。</sys:String>
-	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">一次最多可拖放 8 個檔案。</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一張畫面 (Home)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最後一張畫面 (End)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一張畫面 (Page Down)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一張畫面 (Page Up)</sys:String>
-	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至畫面…</sys:String>
-	<sys:String x:Key="String/SessionControl.FramePlaybackRateFps">播放影格率（影格/秒）</sys:String>
 	<sys:String x:Key="String/SessionControl.LoopFramePlayback">循環播放</sys:String>
-	<sys:String x:Key="String/SessionControl.PlayFrames">播放 / 暫停畫面序列</sys:String>
+	<sys:String x:Key="String/SessionControl.MaxDragDropFileCountReached">一次最多可拖放 8 個檔案。</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToFirstFrame">移至第一張畫格 (Home)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToLastFrame">移至最後一張畫格 (End)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToNextFrame">移至下一張畫格 (Page Down)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToPreviousFrame">移至上一張畫格 (Page Up)</sys:String>
+	<sys:String x:Key="String/SessionControl.MoveToSpecificFrame">移至畫格…</sys:String>
 	<sys:String x:Key="String/SessionControl.NoImageRendered">沒有繪製的影像。</sys:String>
 	<sys:String x:Key="String/SessionControl.NoSourceFileOpened">沒有影像檔案開啟</sys:String>
 	<sys:String x:Key="String/SessionControl.OpeningSource">正在開啟影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">開啟影像檔案 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">其他動作</sys:String>
 	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (位元組)</sys:String>
+	<sys:String x:Key="String/SessionControl.PlayFrames">播放/暫停畫格</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">處理程序的私有記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">組態</sys:String>
 	<sys:String x:Key="String/SessionControl.ProfileTypeLabel.FileFormat">檔案格式</sys:String>

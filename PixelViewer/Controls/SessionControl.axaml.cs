@@ -128,6 +128,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ContextMenu evaluateImageDimensionsMenu;
 	readonly ToggleButton fileActionsButton;
 	readonly ContextMenu fileActionsMenu;
+	readonly ToggleButton framePlaybackOptionsButton;
+	readonly Popup framePlaybackOptionsPopup;
 	// Pivot point in scrollviewer coords supplied by the active gesture handler (cursor for trackpad, focal point for pinch).
 	Vector? gesturePivotInViewport;
 	readonly ScheduledAction hidePanelsByImageViewerSizeAction;
@@ -211,6 +213,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAndVibranceAdjustment);
 		this.SaveAsNewProfileCommand = new Command(this.SaveAsNewProfile, this.canSaveAsNewProfile);
 		this.SaveImageCommand = new Command(this.SaveImage, this.canSaveImage);
+		this.SetFramePlaybackRateCommand = new Command<int>(this.SetFramePlaybackRate);
 		this.ShowEvaluateImageDimensionsMenuCommand = new Command(() =>
 		{
 			if (this.evaluateImageDimensionsMenu == null)
@@ -361,6 +364,22 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
+		});
+		this.framePlaybackOptionsButton = this.Get<ToggleButton>(nameof(framePlaybackOptionsButton));
+		this.framePlaybackOptionsPopup = this.Get<Popup>(nameof(framePlaybackOptionsPopup)).Also(it =>
+		{
+			it.PlacementTarget = this.framePlaybackOptionsButton;
+			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.framePlaybackOptionsButton.IsChecked = false);
+			it.Opened += (_, _) => this.SynchronizationContext.Post(() =>
+			{
+				this.framePlaybackOptionsButton.IsChecked = true;
+				this.SynchronizationContext.PostDelayed(() =>
+					ToolTip.SetIsOpen(this.framePlaybackOptionsButton, false),
+					100);
+			});
+
+			// [Workaround] Prevent handling pointer event by parent button
+			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 		});
 		SetupFilterParamsSliderAndButtons("greenColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("highlightAdjustment", BrightnessAdjustmentGroup);
@@ -640,7 +659,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		});
 		this.updateSelectedImageDisplayPixelBoundsAction = new(() =>
 		{
-			if (this.DataContext is not Session session || !this.GetValue(IsPointerOverImageProperty) || session.IsZooming)
+			if (this.DataContext is not Session session || !this.GetValue(IsPointerOverImageProperty) || session.IsZooming || !session.HasSelectedRenderedImagePixel)
 			{
 				this.SetValue(SelectedImageDisplayPixelBoundsProperty, default);
 				return;
@@ -1894,6 +1913,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			case nameof(Session.QuarterSizeRenderedImage):
 			case nameof(Session.RenderedImage):
 				this.updateEffectiveRenderedImageAction.Execute();
+				if (this.latestPointerEventArgsOnImage is not null) // select pixel of new image which is pointed by pointer
+					this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
 				break;
 			case nameof(Session.IsAlphaChannelAvailable):
 			case nameof(Session.SelectedRenderedImagePixelColor):
@@ -1983,8 +2004,15 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <summary>
 	/// Open color adjustment UI.
 	/// </summary>
-	public void OpenColorAdjustmentPopup() => 
+	public void OpenColorAdjustmentPopup() =>
 		this.colorAdjustmentPopup.Open();
+
+
+	/// <summary>
+	/// Open frame playback options UI.
+	/// </summary>
+	public void OpenFramePlaybackOptionsPopup() =>
+		this.framePlaybackOptionsPopup.Open();
 
 
 	// Open source file.
@@ -2249,6 +2277,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		}
 
+		// stop playing frames to keep the image being saved same as the image user sees
+		session.StopPlayingFrames();
+
 		// select image to save
 		var saveFilteredImage = false;
 		if (session.IsFilteringRenderedImageNeeded)
@@ -2381,8 +2412,24 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			session.SelectRenderedImagePixel(-1, -1);
 		this.updateSelectedImageDisplayPixelBoundsAction.Execute();
 	}
-	
-	
+
+
+	// Set frame rate of playing frames to the given value.
+	void SetFramePlaybackRate(int frameRate)
+	{
+		if (this.DataContext is not Session session)
+			return;
+		session.IsFramePlaybackRateUnlimited = false; // selecting a frame rate explicitly means playing with limited frame rate
+		session.FramePlaybackRate = frameRate;
+	}
+
+
+	/// <summary>
+	/// <see cref="ICommand"/> to set frame rate of playing frames. The parameter is <see cref="int"/>.
+	/// </summary>
+	public ICommand SetFramePlaybackRateCommand { get; }
+
+
 	// Setup proper pivot for zooming image.
 	void SetupTargetImageViewportPivot()
 	{
