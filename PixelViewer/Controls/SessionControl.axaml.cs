@@ -2071,12 +2071,25 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// ask how to open multiple files
-		var mode = await new MultiFileOpenModeDialog().ShowDialog<MultiFileOpenMode?>(this.attachedWindow);
-		if (mode == null)
-			return;
+		var app = this.Application;
+		var mode = await new ASControls.MessageDialog
+		{
+			Buttons = ASControls.MessageDialogButtons.YesNoCancel,
+			CustomNoText = app.GetObservableString("SessionControl.SelectMultiFileOpenMode.Default"),
+			CustomYesText = app.GetObservableString("SessionControl.SelectMultiFileOpenMode.FrameSequence"),
+			Icon = ASControls.MessageDialogIcon.Question,
+			Message = new FormattedString().Also(it =>
+			{
+				it.Arg1 = fileNames.Count;
+				it.Bind(FormattedString.FormatProperty, app.GetObservableString("SessionControl.SelectMultiFileOpenMode"));
+			}),
+			Title = app.GetObservableString("SessionControl.SelectMultiFileOpenMode.Title"),
+		}.ShowDialog(this.attachedWindow);
+		if (mode is not (ASControls.MessageDialogResult.Yes or ASControls.MessageDialogResult.No))
+			return; // cancelled, or dialog closed without selecting a mode
 
 		// play as a single frame sequence
-		if (mode == MultiFileOpenMode.Sequence)
+		if (mode == ASControls.MessageDialogResult.Yes)
 		{
 			if (session.SourceFileName != null && session.Owner is Workspace sequenceWorkspace)
 			{

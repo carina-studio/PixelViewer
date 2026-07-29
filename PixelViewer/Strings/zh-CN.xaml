@@ -126,12 +126,6 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">移至画面</sys:String>
 
-	<!-- MultiFileOpenModeDialog -->
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Title">打开多个文件</sys:String>
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Message">您选择了多个文件，想要如何打开？</sys:String>
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Independent">独立查看</sys:String>
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Sequence">作为序列播放</sys:String>
-
 	<!-- ImageFormat -->
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer 排列 (8 位)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_10_MIPI">Bayer 排列 (10 位，MIPI)</sys:String>
@@ -301,6 +295,10 @@
 	<sys:String x:Key="String/SessionControl.ScreenColorSpace">屏幕色彩空间</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">在图片上移动鼠标以查看像素信息。</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">自动调整</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode">您选择了 {0} 个文件，想要如何打开？</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">分别查看</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">帧序列</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Title">打开多个文件</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectRgbGain">自动调整</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">打开文件所使用的配置</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在 Windows 资源管理器中显示文件</sys:String>

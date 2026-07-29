@@ -149,12 +149,6 @@
 	<!-- FrameNumberSelectionDialog -->
 	<sys:String x:Key="String/FrameNumberSelectionDialog.Title">Move to Frame</sys:String>
 
-	<!-- MultiFileOpenModeDialog -->
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Title">Open Multiple Files</sys:String>
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Message">You selected multiple files. How do you want to open them?</sys:String>
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Independent">View Independently</sys:String>
-	<sys:String x:Key="String/MultiFileOpenModeDialog.Sequence">Play as Sequence</sys:String>
-
 	<!-- ImageFormat -->
 	<sys:String x:Key="String/ImageFormat.Android_YUV_420_888">YUV_420_888 (Android)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Bayer_Pattern_8">Bayer Pattern (8-bit)</sys:String>
@@ -341,6 +335,10 @@ You can change this setting at any time in Options.</sys:String>
 	<sys:String x:Key="String/SessionControl.ScreenColorSpace">Screen Color Space</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">Move the cursor over the image to view pixel information.</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">Auto Adjust</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode">You selected {0} files. How do you want to open them?</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">View Separately</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">Frame Sequence</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Title">Open Multiple Files</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectRgbGain">Auto Adjust</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to Open Files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Windows File Explorer</sys:String>
