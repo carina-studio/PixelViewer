@@ -32,7 +32,7 @@ namespace Carina.PixelViewer.Test
 		[OneTimeTearDown]
 		public void ClearCacheDirectory()
 		{
-			this.cacheDirectory?.Let((it) => Directory.Delete(it, true));
+			this.cacheDirectory?.Let(it => Directory.Delete(it, true));
 		}
 
 
@@ -74,6 +74,20 @@ namespace Carina.PixelViewer.Test
 
 
 		/// <summary>
+		/// Initialize the sub-systems which are shared by tests. Initializing them again does nothing,
+		/// so every fixture which needs them can call this method without checking whether another fixture already did.
+		/// </summary>
+		/// <remarks>The method must be called on the application thread.</remarks>
+		protected async Task InitializeSubSystemsAsync()
+		{
+			Carina.PixelViewer.Media.FileFormats.Initialize(this.Application);
+			Carina.PixelViewer.Media.FileFormatParsers.FileFormatParsers.Initialize(this.Application);
+			await Carina.PixelViewer.Media.ColorSpace.InitializeAsync(this.Application);
+			await Carina.PixelViewer.Media.Profiles.ImageRenderingProfiles.InitializeAsync(this.Application);
+		}
+
+
+		/// <summary>
 		/// Logger.
 		/// </summary>
 		protected ILogger Logger { get; } = LogManager.GetCurrentClassLogger();
@@ -105,7 +119,7 @@ namespace Carina.PixelViewer.Test
 
 			// wait for state change
 			var cancellationTokenSource = new CancellationTokenSource();
-			var eventHandler = new EventHandler((_, e) =>
+			var eventHandler = new EventHandler((_, _) =>
 			{
 				if (command.CanExecute(parameter) == canExecute)
 					cancellationTokenSource.Cancel();
@@ -117,7 +131,7 @@ namespace Carina.PixelViewer.Test
 			}
 			catch (TaskCanceledException)
 			{
-				await Task.Delay(1); // delay to make sure that other properties changed by source are completed
+				await Task.Delay(1, CancellationToken.None); // delay to make sure that other properties changed by source are completed
 				return true;
 			}
 			finally

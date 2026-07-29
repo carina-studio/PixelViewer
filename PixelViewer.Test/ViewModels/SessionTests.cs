@@ -1,10 +1,13 @@
 using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.ImageEncoders;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
+using CarinaStudio;
 using NUnit.Framework;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Test.ViewModels
@@ -21,6 +24,24 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 
 		/// <summary>
+		/// Close the source opened by the completed test. The <see cref="Session"/> instance is shared by all tests in the
+		/// fixture, so a test which fails before closing its source must not leave the source opened for the next test.
+		/// </summary>
+		[TearDown]
+		public void CloseSource()
+		{
+			this.TestOnApplicationThread(async () =>
+			{
+				var session = this.session;
+				if (session is null || !session.IsSourceOpened)
+					return;
+				session.ClearSourceCommand.Execute(null);
+				await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+			});
+		}
+
+
+		/// <summary>
 		/// Create <see cref="Session"/> instance for testing.
 		/// </summary>
 		[OneTimeSetUp]
@@ -29,10 +50,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			this.TestOnApplicationThread(async () =>
 			{
 				// initialize the sub-systems required to construct and run a session
-				FileFormats.Initialize(this.Application);
-				Carina.PixelViewer.Media.FileFormatParsers.FileFormatParsers.Initialize(this.Application);
-				await ColorSpace.InitializeAsync(this.Application);
-				await ImageRenderingProfiles.InitializeAsync(this.Application);
+				await this.InitializeSubSystemsAsync();
 
 				// create session for testing and activate it so image rendering is performed
 				this.session = new Session(this.Application, null);
@@ -52,6 +70,41 @@ namespace Carina.PixelViewer.Test.ViewModels
 				this.sessionActivationToken?.Dispose();
 				this.session?.Dispose();
 			});
+		}
+
+
+		// Generate image file with the given name, file format and dimensions in cache directory.
+		async Task<string> GenerateImageFileAsync(string fileName, FileFormat fileFormat, int width, int height)
+		{
+			// get directory to place the file, name of file needs to be controlled to keep the order of frames stable
+			string directoryPath;
+			using (var stream = this.CreateCacheFile())
+				directoryPath = Path.GetDirectoryName(stream.Name).AsNonNull();
+
+			// encode image with the given dimensions
+			ImageEncoders.TryGetEncoderByFormat(fileFormat, out var encoder);
+			using var bitmapBuffer = new BitmapBuffer(BitmapFormat.Bgra32, ColorSpace.Default, width, height);
+			var filePath = Path.Combine(directoryPath, fileName);
+			await encoder.AsNonNull().EncodeAsync(bitmapBuffer, new CarinaStudio.IO.FileStreamProvider(filePath), new ImageEncodingOptions { QualityLevel = 90 }, CancellationToken.None);
+			return filePath;
+		}
+
+
+		// Generate file with the given name filled with random data in cache directory, its file format is unidentifiable.
+		string GenerateRawDataFile(string fileName)
+		{
+			// get directory to place the file, name of file needs to be controlled to keep the order of frames stable
+			string directoryPath;
+			using (var stream = this.CreateCacheFile())
+				directoryPath = Path.GetDirectoryName(stream.Name).AsNonNull();
+
+			// fill file with random data
+			var data = new byte[Random.Next(1 << 10, 1 << 16)];
+			for (var i = data.Length - 1; i >= 0; --i)
+				data[i] = (byte)Random.Next(0, 256);
+			var filePath = Path.Combine(directoryPath, fileName);
+			File.WriteAllBytes(filePath, data);
+			return filePath;
 		}
 
 
@@ -122,6 +175,50 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 
 		/// <summary>
+		/// Test for moving to another frame of frame sequence when the current frame cannot be rendered.
+		/// </summary>
+		[Test]
+		public void TestMovingToUnrenderableFrameOfSequence()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// generate frames, file format of the 2nd frame is unidentifiable so it cannot be rendered by renderer of PNG
+				var frameFilePaths = new string[]
+				{
+					await this.GenerateImageFileAsync("unrenderable_1.png", FileFormats.Png, 64, 48),
+					this.GenerateRawDataFile("unrenderable_2.dat"),
+					await this.GenerateImageFileAsync("unrenderable_3.png", FileFormats.Png, 64, 48),
+				};
+
+				// open files as frame sequence
+				session.OpenSourceFilesCommand.Execute(frameFilePaths);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open files as frame sequence.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 1st frame.");
+				Assert.That(session.FrameCount, Is.EqualTo(3L), "Number of frames should be number of files.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the 1st frame.");
+
+				// move to the frame which cannot be rendered
+				session.FrameNumber = 2;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 2nd frame.");
+				Assert.That(session.HasRenderingError, Is.True, "The frame with unidentifiable file format should not be rendered.");
+				Assert.That(session.MoveToNextFrameCommand.CanExecute(null), Is.True, "Should be able to move to the next frame even if the current frame cannot be rendered.");
+				Assert.That(session.MoveToPreviousFrameCommand.CanExecute(null), Is.True, "Should be able to move to the previous frame even if the current frame cannot be rendered.");
+
+				// move to the next frame and check that it can still be rendered
+				session.MoveToNextFrameCommand.Execute(null);
+				Assert.That(session.FrameNumber, Is.EqualTo(3L), "Should have moved to the 3rd frame.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 3rd frame.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the frame after the frame which cannot be rendered.");
+
+				// close files
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close frame sequence.");
+			});
+		}
+
+
+		/// <summary>
 		/// Test for opening and closing source image file.
 		/// </summary>
 		[Test]
@@ -176,6 +273,55 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// delete file 2 to make sure that file has been unlocked
 				File.Delete(filePath2);
+			});
+		}
+
+
+		/// <summary>
+		/// Test for rendering frames of frame sequence which consists of files with different file formats.
+		/// </summary>
+		[Test]
+		public void TestRenderingMixedFormatFrameSequence()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// generate frames with different file formats and dimensions
+				var frameFilePaths = new string[]
+				{
+					await this.GenerateImageFileAsync("mixed_1.png", FileFormats.Png, 64, 48),
+					await this.GenerateImageFileAsync("mixed_2.jpg", FileFormats.Jpeg, 32, 24),
+				};
+
+				// open files as frame sequence, renderer and dimensions are selected by file format of the 1st frame
+				session.OpenSourceFilesCommand.Execute(frameFilePaths);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open files as frame sequence.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 1st frame.");
+				Assert.That(session.FrameCount, Is.EqualTo(2L), "Number of frames should be number of files.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the 1st frame.");
+				Assert.That(session.ImageWidth, Is.EqualTo(64), "Width should be selected by file format of the 1st frame.");
+				Assert.That(session.ImageHeight, Is.EqualTo(48), "Height should be selected by file format of the 1st frame.");
+				var frame1ImageRenderer = session.ImageRenderer;
+
+				// move to the frame with another file format
+				session.FrameNumber = 2;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 2nd frame.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the frame with another file format.");
+				Assert.That(session.ImageRenderer, Is.Not.SameAs(frame1ImageRenderer), "Renderer should be selected by file format of the 2nd frame.");
+				Assert.That(session.ImageWidth, Is.EqualTo(32), "Width should be selected by file format of the 2nd frame.");
+				Assert.That(session.ImageHeight, Is.EqualTo(24), "Height should be selected by file format of the 2nd frame.");
+
+				// move back to the 1st frame
+				session.FrameNumber = 1;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering after moving back to the 1st frame.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the 1st frame again.");
+				Assert.That(session.ImageRenderer, Is.SameAs(frame1ImageRenderer), "Renderer should be selected by file format of the 1st frame again.");
+				Assert.That(session.ImageWidth, Is.EqualTo(64), "Width should be selected by file format of the 1st frame again.");
+				Assert.That(session.ImageHeight, Is.EqualTo(48), "Height should be selected by file format of the 1st frame again.");
+
+				// close files
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close frame sequence.");
 			});
 		}
 	}

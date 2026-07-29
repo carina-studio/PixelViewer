@@ -973,11 +973,16 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="app">Application.</param>
         /// <returns>Task of initialization.</returns>
+        /// <remarks>Calling the method again by the same application is allowed and does nothing.</remarks>
         public static async Task InitializeAsync(IAppSuiteApplication app)
         {
             // check state
-            if (ColorSpace.app != null)
-                throw new InvalidOperationException();
+            if (ColorSpace.app is not null)
+            {
+                if (ColorSpace.app != app)
+                    throw new InvalidOperationException("Color space has been initialized by another application.");
+                return;
+            }
             app.VerifyAccess();
 
             // attach to application

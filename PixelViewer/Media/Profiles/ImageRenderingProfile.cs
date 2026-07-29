@@ -1,6 +1,6 @@
 ﻿using CarinaStudio;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
-using CarinaStudio.Configuration;
 using CarinaStudio.IO;
 using CarinaStudio.Threading;
 using CarinaStudio.Threading.Tasks;
@@ -67,7 +67,7 @@ namespace Carina.PixelViewer.Media.Profiles
         {
             this.name = name;
             this.renderer = renderer;
-            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
+            YuvToBgraConverter.TryGetByName(IAppSuiteApplication.CurrentOrNull?.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
         }
         public ImageRenderingProfile(FileFormat format, ImageRenderers.IImageRenderer renderer) : this(ImageRenderingProfileType.FileFormat)
         {
@@ -75,7 +75,7 @@ namespace Carina.PixelViewer.Media.Profiles
             this.fileFormat.PropertyChanged += this.OnFileFormatPropertyChanged;
             this.name = format.Name;
             this.renderer = renderer;
-            YuvToBgraConverter.TryGetByName(App.CurrentOrNull?.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
+            YuvToBgraConverter.TryGetByName(IAppSuiteApplication.CurrentOrNull?.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion) ?? "", out this.yuvToBgraConverter);
         }
         ImageRenderingProfile(ImageRenderingProfileType type)
         {
@@ -341,6 +341,43 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.greenColorGain = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GreenColorGain)));
             }
+        }
+
+
+        /// <summary>
+        /// Check whether the given profile defines the same parameters to render image as this profile or not.
+        /// </summary>
+        /// <param name="profile">Profile to be checked.</param>
+        /// <returns>True if image is rendered in the same way by both profiles.</returns>
+        /// <remarks>Parameters which are not applied to render image, such as <see cref="Name"/>, are not compared.
+        /// The method is not <see cref="object.Equals(object?)"/> because profiles with different names are still
+        /// different profiles, and profiles are mutable so they cannot provide a stable hash code of their parameters.</remarks>
+        public bool HasSameRenderingParameters(ImageRenderingProfile profile)
+        {
+            if (this == profile)
+                return true;
+            return this.Renderer == profile.Renderer
+                && this.Width == profile.Width
+                && this.Height == profile.Height
+                && this.DataOffset == profile.DataOffset
+                && this.FramePaddingSize == profile.FramePaddingSize
+                && this.BayerPattern == profile.BayerPattern
+                && this.ByteOrdering == profile.ByteOrdering
+                && this.Demosaicing == profile.Demosaicing
+                && this.ColorSpace.Equals(profile.ColorSpace)
+                && this.UseLinearColorSpace == profile.UseLinearColorSpace
+                && this.YuvToBgraConverter == profile.YuvToBgraConverter
+                && Math.Abs(this.RedColorGain - profile.RedColorGain) <= 0.0001
+                && Math.Abs(this.GreenColorGain - profile.GreenColorGain) <= 0.0001
+                && Math.Abs(this.BlueColorGain - profile.BlueColorGain) <= 0.0001
+                && this.Orientation == profile.Orientation
+                && this.FlipX == profile.FlipX
+                && this.FlipY == profile.FlipY
+                && this.EffectiveBits.SequenceEqual(profile.EffectiveBits)
+                && this.BlackLevels.SequenceEqual(profile.BlackLevels)
+                && this.WhiteLevels.SequenceEqual(profile.WhiteLevels)
+                && this.PixelStrides.SequenceEqual(profile.PixelStrides)
+                && this.RowStrides.SequenceEqual(profile.RowStrides);
         }
 
 

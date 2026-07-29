@@ -16,6 +16,7 @@ namespace Carina.PixelViewer.Media.FileFormatParsers;
 static class FileFormatParsers
 {
     // Fields.
+    static IApplication? app;
     static volatile ILogger? logger;
     static readonly Dictionary<FileFormat, IFileFormatParser> parsers = new Dictionary<FileFormat, IFileFormatParser>();
 
@@ -23,12 +24,19 @@ static class FileFormatParsers
     /// <summary>
     /// Initialize.
     /// </summary>
+    /// <param name="app">Application.</param>
+    /// <remarks>Calling the method again by the same application is allowed and does nothing.</remarks>
     public static void Initialize(IApplication app)
     {
         lock (typeof(FileFormatParsers))
         {
-            if (logger is not null)
-                throw new InvalidOperationException();
+            if (FileFormatParsers.app is not null)
+            {
+                if (FileFormatParsers.app != app)
+                    throw new InvalidOperationException("File format parsers have been initialized by another application.");
+                return;
+            }
+            FileFormatParsers.app = app;
             logger = app.LoggerFactory.CreateLogger(nameof(FileFormatParsers));
         }
         new DngFileFormatParser().Let(it => parsers[it.FileFormat] = it);

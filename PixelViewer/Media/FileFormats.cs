@@ -70,12 +70,17 @@ static class FileFormats
     /// Initialize.
     /// </summary>
     /// <param name="app">Application.</param>
+    /// <remarks>Calling the method again by the same application is allowed and does nothing.</remarks>
     public static void Initialize(IApplication app)
     {
         lock (typeof(FileFormats))
         {
-            if (FileFormats.app != null)
-                throw new InvalidOperationException();
+            if (FileFormats.app is not null)
+            {
+                if (FileFormats.app != app)
+                    throw new InvalidOperationException("File formats have been initialized by another application.");
+                return;
+            }
             FileFormats.app = app;
         }
         arw = Register(new FileFormat(app, "Arw", [ ".arw" ]));

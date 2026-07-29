@@ -49,14 +49,18 @@ static class ImageRenderingProfiles
     }
 
 
-    // Initialize.
+    // Initialize. Calling the method again by the same application is allowed and does nothing.
     public static async Task InitializeAsync(IApplication app)
     {
         // check state
         lock (typeof(ImageRenderingProfiles))
         {
-            if (ImageRenderingProfiles.app != null)
-                throw new InvalidOperationException("Unexpected initialization.");
+            if (ImageRenderingProfiles.app is not null)
+            {
+                if (ImageRenderingProfiles.app != app)
+                    throw new InvalidOperationException("Profiles have been initialized by another application.");
+                return;
+            }
             ImageRenderingProfiles.app = app;
         }
 

@@ -4566,6 +4566,21 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Start the rendering which is pending because of cancelling the previous rendering.
+	void StartPendingImageRendering()
+	{
+		if (!this.hasPendingImageRendering)
+			return;
+		if (this.IsActivated)
+		{
+			this.Logger.LogWarning("Start next rendering");
+			this.renderImageAction.Schedule();
+		}
+		else
+			this.hasPendingImageRendering = false;
+	}
+
+
 	// Start playing the frame sequence.
 	void StartPlayingFrames()
 	{
@@ -4604,6 +4619,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Update whether moving to previous/next frame is available or not.
+	void UpdateCanMoveToFrames(long frameNumber, bool isFrameRendered)
+	{
+		// each frame of multi-frame source is rendered by its own source, keep moving to another frame available so that the frame which cannot be rendered can be skipped
+		var canMove = isFrameRendered || this.imageDataSource is IMultiFrameImageDataSource;
+		this.canMoveToNextFrame.Update(canMove && frameNumber < this.GetValue(FrameCountProperty));
+		this.canMoveToPreviousFrame.Update(canMove && frameNumber > 1);
+	}
+
+
 	// Update whether the frame sequence can be played and stop playback when it cannot.
 	void UpdateCanPlayFrames()
 	{
@@ -4612,6 +4637,51 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (!canPlay)
 			this.StopPlayingFrames();
 	}
+
+
+	// Replace the profile generated for file format by the profile generated for file format of the given frame, so that each frame of frame sequence is rendered according to its own file format.
+	async Task UpdateFileFormatProfileAsync(IImageDataSource frameImageDataSource, long frameNumber, CancellationToken cancellationToken)
+	{
+		// parse file format of frame
+		var currentProfile = this.fileFormatProfile.AsNonNull();
+		var frameProfile = (ImageRenderingProfile?)null;
+		try
+		{
+			frameProfile = await Media.FileFormatParsers.FileFormatParsers.ParseImageRenderingProfileAsync(frameImageDataSource, cancellationToken);
+		}
+		catch (Exception ex)
+		{
+			if (ex is OperationCanceledException)
+				throw;
+			this.Logger.LogWarning(ex, "Unable to parse file format of frame {frameNumber}", frameNumber);
+		}
+		if (this.IsDisposed)
+			return;
+
+		// keep the current profile if file format of frame is unidentifiable, rendering the frame may fail if its format is actually different
+		if (frameProfile is null)
+		{
+			this.Logger.LogWarning("Unable to identify file format of frame {frameNumber}, render it by renderer of {format}", frameNumber, currentProfile.Renderer.Format.Name);
+			return;
+		}
+
+		// keep the current profile if frame is rendered in the same way
+		if (currentProfile.HasSameRenderingParameters(frameProfile))
+		{
+			frameProfile.Dispose();
+			return;
+		}
+
+		// replace the profile generated for file format and apply it to the rendering which is in progress
+		this.Logger.LogDebug("Render frame {frameNumber} by profile of {format} instead of {currentFormat}", frameNumber, frameProfile.Renderer.Format.Name, currentProfile.Renderer.Format.Name);
+		this.fileFormatProfile = frameProfile;
+		this.profiles.Add(frameProfile);
+		this.SetValue(ProfileProperty, frameProfile); // parameters of profile are applied by ApplyProfile()
+		this.profiles.Remove(currentProfile);
+		currentProfile.Dispose();
+		this.renderImageAction.Cancel(); // prevent re-rendering caused by change of parameters
+	}
+
 
 	/// <summary>
 	/// Get or set pixel stride of 1st image plane.
@@ -4830,7 +4900,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		var imageDataSource = this.imageDataSource;
 		if (imageDataSource is null)
 			return;
-		var imageRenderer = this.ImageRenderer;
 		var sourceFileName = this.SourceFileName;
 
 		// render later
@@ -4867,24 +4936,40 @@ class Session : ViewModel<IAppSuiteApplication>
 			try
 			{
 				this.frameImageDataSource = await multiFrameImageDataSource.GetFrameAsync((int)(frameNumber - 1), cancellationTokenSource.Token);
+				if (this.IsDisposed)
+					return;
+				renderingImageDataSource = this.frameImageDataSource;
+
+				// renderer and rendering parameters are selected by file format of each frame if they were selected by file format of source
+				if (this.fileFormatProfile is not null && this.Profile == this.fileFormatProfile)
+					await this.UpdateFileFormatProfileAsync(renderingImageDataSource, frameNumber, cancellationTokenSource.Token);
 			}
 			catch (Exception ex)
 			{
 				this.imageRenderingCancellationTokenSource = null;
 				if (ex is OperationCanceledException)
-					this.Logger.LogWarning("Getting source of frame {frameNumber} of '{sourceFileName}' has been cancelled", frameNumber, sourceFileName);
+				{
+					this.Logger.LogWarning("Preparing frame {frameNumber} of '{sourceFileName}' has been cancelled", frameNumber, sourceFileName);
+					this.StartPendingImageRendering();
+				}
 				else
 				{
 					this.Logger.LogError(ex, "Unable to get source of frame {frameNumber} of '{sourceFileName}'", frameNumber, sourceFileName);
 					this.SetValue(HasRenderingErrorProperty, true);
 					this.ClearRenderedImage();
+					this.UpdateCanMoveToFrames(frameNumber, false);
+					this.ScheduleNextFrameForPlayback(); // playback moves to the next frame instead of stopping at the frame which cannot be rendered
 				}
 				return;
 			}
 			if (this.IsDisposed)
 				return;
-			renderingImageDataSource = this.frameImageDataSource;
+
+			// messages of rendering refer to the file of the frame being rendered instead of the first file of source
+			if (renderingImageDataSource is FileImageDataSource frameFileImageDataSource)
+				sourceFileName = frameFileImageDataSource.FileName;
 		}
+		var imageRenderer = this.ImageRenderer;
 
 		// evaluate dimensions
 		if (this.isImageDimensionsEvaluationNeeded)
@@ -5073,16 +5158,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (ex is TaskCanceledException)
 			{
 				this.Logger.LogWarning("Image rendering for '{sourceFileName}' has been cancelled", sourceFileName);
-				if (this.hasPendingImageRendering)
-				{
-					if (this.IsActivated)
-					{
-						this.Logger.LogWarning("Start next rendering");
-						this.renderImageAction.Schedule();
-					}
-					else
-						this.hasPendingImageRendering = false;
-				}
+				this.StartPendingImageRendering();
 			}
 			else
 			{
@@ -5094,8 +5170,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.ClearFilteredImage();
 				this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-				this.canMoveToNextFrame.Update(false);
-				this.canMoveToPreviousFrame.Update(false);
+				this.UpdateCanMoveToFrames(frameNumber, false);
 				this.canSelectColorAdjustment.Update(false);
 				this.canSelectRgbGain.Update(false);
 
@@ -5125,16 +5200,8 @@ class Session : ViewModel<IAppSuiteApplication>
 					this.Hibernate();
 				}
 			}
-			else if (this.hasPendingImageRendering)
-			{
-				if (this.IsActivated)
-				{
-					this.Logger.LogWarning("Start next rendering");
-					this.renderImageAction.Schedule();
-				}
-				else
-					this.hasPendingImageRendering = false;
-			}
+			else
+				this.StartPendingImageRendering();
 			renderedImageFrame?.Dispose();
 			return;
 		}
@@ -5204,16 +5271,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				colorSpaceConvertedImageFrame?.Dispose();
 				renderedImageFrame?.Dispose();
             });
-			if (this.hasPendingImageRendering)
-			{
-				if (this.IsActivated)
-				{
-					this.Logger.LogWarning("Start next rendering");
-					this.renderImageAction.Schedule();
-				}
-				else
-					this.hasPendingImageRendering = false;
-			}
+			this.StartPendingImageRendering();
 			return;
 		}
 		this.imageRenderingCancellationTokenSource = null;
@@ -5238,8 +5296,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			this.ResetValue(HasRenderingErrorProperty);
 			this.SetValue(SourceDataSizeProperty, frameDataSize);
-			this.canMoveToNextFrame.Update(frameNumber < this.FrameCount);
-			this.canMoveToPreviousFrame.Update(frameNumber > 1);
+			this.UpdateCanMoveToFrames(frameNumber, true);
 			this.canSelectColorAdjustment.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.Histograms is not null);
 			this.canSelectRgbGain.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.RenderingResult.Let(it =>
 				it.HasMeanOfRgb || it.HasWeightedMeanOfRgb) ?? false);
@@ -5283,8 +5340,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 			this.SetValue(HasRenderingErrorProperty, true);
-			this.canMoveToNextFrame.Update(false);
-			this.canMoveToPreviousFrame.Update(false);
+			this.UpdateCanMoveToFrames(frameNumber, false);
 			this.canSelectColorAdjustment.Update(false);
 			this.canSelectRgbGain.Update(false);
 			Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
