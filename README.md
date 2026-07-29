@@ -7,6 +7,9 @@ A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/B
 
 ![](https://carinastudio.azurewebsites.net/PixelViewer/Banner.png?v=2)
 
+## ⚠️ NOTICE
+If you are upgrading from `3.x` to `2026+` on macOS, please download the application bundle manually and place it alongside the existing `3.x` bundle *(instead of replacing it)*. This allows `2026+` to import your application data from the `3.x` bundle on first launch.
+
 ## 📥 Download 2026.0.1
 
 ### Windows
