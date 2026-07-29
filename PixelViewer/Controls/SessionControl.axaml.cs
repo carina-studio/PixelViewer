@@ -71,11 +71,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	const int ContrastAdjustmentGroup = 3;
 	const int HidePanelsByImageViewerSizeDelay = 500;
 	const int ResetPointerPressedOnFilterParamsUIDelay = 1000;
+	const int ShowProgressBarDelay = 100;
 	const int StopUsingSmallRenderedImageDelay = 800;
 	const int StopUsingSmallRenderedImageDelayFast = 500;
 
 
 	// Static fields.
+	static readonly StyledProperty<bool> CanShowProgressBarProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(CanShowProgressBar));
 	static readonly StyledProperty<IImage?> EffectiveRenderedImageProperty = AvaloniaProperty.Register<SessionControl, IImage?>(nameof(EffectiveRenderedImage));
 	static readonly StyledProperty<BitmapInterpolationMode> EffectiveRenderedImageInterpolationModeProperty = AvaloniaProperty.Register<SessionControl, BitmapInterpolationMode>(nameof(EffectiveRenderedImageInterpolationMode), BitmapInterpolationMode.None);
 	static readonly StyledProperty<bool> HideImageViewerScrollBarsAutomaticallyProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(HideImageViewerScrollBarsAutomatically), true);
@@ -162,6 +164,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction resetPointerPressedOnBrightnessAdjustmentUIAction;
 	readonly ScheduledAction resetPointerPressedOnColorAdjustmentUIAction;
 	readonly ScheduledAction resetPointerPressedOnContrastAdjustmentUIAction;
+	readonly ScheduledAction showProgressBarAction;
 	readonly ScheduledAction stopUsingSmallRenderedImageAction;
 	Vector? targetImageViewportCenter;
 	// Pivot expressed as a fraction of the scrollviewer's content extent — the content point
@@ -499,6 +502,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.SetValue(IsPointerPressedOnColorAdjustmentUIProperty, false));
 		this.resetPointerPressedOnContrastAdjustmentUIAction = new(() =>
 			this.SetValue(IsPointerPressedOnContrastAdjustmentUIProperty, false));
+		this.showProgressBarAction = new(() =>
+			this.SetValue(CanShowProgressBarProperty, true));
 		this.stopUsingSmallRenderedImageAction = new(() =>
 		{
 			if (this.useSmallRenderedImage)
@@ -703,6 +708,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Whether the progress bar of image processing can be shown or not.
+	/// </summary>
+	/// <remarks>Showing is delayed after image processing started, so that short processing such as rendering each frame
+	/// when playing frames doesn't make the progress bar flash. Hiding is performed immediately.</remarks>
+	public bool CanShowProgressBar => this.GetValue(CanShowProgressBarProperty);
+
+
+	/// <summary>
 	/// Copy file name.
 	/// </summary>
 	public void CopyFileName()
@@ -772,7 +785,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return false;
 
 		// open files (prompt for open mode when multiple files are dropped)
-		await this.OpenFilesAsync(fileNames, preferNewSessionForSingleFile: true);
+		await this.OpenFilesAsync(fileNames, preferNewSession: true);
 		return true;
 	}
 
@@ -954,6 +967,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
 		this.canSaveRenderedImage.Bind(session.SaveRenderedImageCommand, new Session.ImageSavingParams());
 		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
+		this.UpdateCanShowProgressBar();
 
 		// setup panels
 		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 2 : 4);
@@ -1063,6 +1077,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	    this.canSaveFilteredImage.Unbind();
 	    this.canSaveRenderedImage.Unbind();
 	    this.canShowEvaluateImageDimensionsMenu.Update(false);
+	    this.showProgressBarAction.Cancel(); // no pending showing of progress bar is carried to the next session
+	    this.SetValue(CanShowProgressBarProperty, false);
 	    this.updateEffectiveRenderedImageAction.Execute();
 	    
 	    // dismiss notification
@@ -1865,6 +1881,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 				this.updateImageViewerShadowMarginAction.Schedule();
 				break;
+			case nameof(Session.IsProcessingImage):
+				this.UpdateCanShowProgressBar();
+				break;
 			case nameof(Session.IsRenderingImage):
 				if (session.IsRenderingImage && this.insufficientMemoryForRenderedImagesNotification is not null)
 				{
@@ -2038,13 +2057,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 
 		// open files
-		await this.OpenFilesAsync(fileNames, preferNewSessionForSingleFile: false);
+		await this.OpenFilesAsync(fileNames, preferNewSession: false);
 	}
 
 
 	// Open the given files. When multiple files are selected the user is asked whether to view them
-	// independently (one session per file) or play them as a single frame sequence.
-	async Task OpenFilesAsync(IList<string> fileNames, bool preferNewSessionForSingleFile)
+	// independently (one session per file) or play them as a single frame sequence. The files replace the
+	// source of the current session unless a new session is preferred, such as opening files by dragging and dropping.
+	async Task OpenFilesAsync(IList<string> fileNames, bool preferNewSession)
 	{
 		// check state
 		if (fileNames.Count == 0 || this.attachedWindow == null)
@@ -2058,9 +2078,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// single file
 		if (fileNames.Count == 1)
 		{
-			if (preferNewSessionForSingleFile
+			if (preferNewSession
 				&& this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile)
-				&& session.SourceFileName != null
+				&& session.IsSourceOpened
 				&& session.Owner is Workspace singleFileWorkspace)
 			{
 				singleFileWorkspace.CreateAndAttachSession(fileNames[0]);
@@ -2091,7 +2111,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// play as a single frame sequence
 		if (mode == ASControls.MessageDialogResult.Yes)
 		{
-			if (session.SourceFileName != null && session.Owner is Workspace sequenceWorkspace)
+			if (preferNewSession
+				&& this.Settings.GetValueOrDefault(SettingKeys.CreateNewSessionForDragDropFile)
+				&& session.IsSourceOpened
+				&& session.Owner is Workspace sequenceWorkspace)
 			{
 				var index = sequenceWorkspace.Sessions.IndexOf(session);
 				var newSession = sequenceWorkspace.CreateAndAttachSession(index >= 0 ? index + 1 : sequenceWorkspace.Sessions.Count);
@@ -2125,14 +2148,17 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			++independentIndex;
 		else
 			independentIndex = workspace.Sessions.Count;
+		// state of session is updated asynchronously after opening the file, so the current session is tracked by the local state instead
+		var isCurrentSessionUsed = session.IsSourceOpened;
 		foreach (var fileName in fileNames)
 		{
-			if (session.SourceFileName != null)
+			if (isCurrentSessionUsed)
 				workspace.CreateAndAttachSession(independentIndex++, fileName, profile);
 			else
 			{
 				session.OpenSourceFileCommand.TryExecute(fileName);
 				session.Profile = profile;
+				isCurrentSessionUsed = true;
 			}
 		}
 	}
@@ -2611,6 +2637,23 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// Status bar state.
 	/// </summary>
 	public StatusBarState StatusBarState => this.GetValue(StatusBarStateProperty);
+
+
+	// Update whether the progress bar of image processing can be shown or not.
+	void UpdateCanShowProgressBar()
+	{
+		if (this.DataContext is Session session && session.IsProcessingImage)
+		{
+			// delay showing so that short processing, such as rendering each frame when playing frames, doesn't make the progress bar flash
+			if (!this.GetValue(CanShowProgressBarProperty))
+				this.showProgressBarAction.Schedule(ShowProgressBarDelay);
+		}
+		else
+		{
+			this.showProgressBarAction.Cancel();
+			this.SetValue(CanShowProgressBarProperty, false);
+		}
+	}
 
 
 	/// <summary>

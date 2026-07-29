@@ -37,6 +37,14 @@ namespace Carina.PixelViewer.Test
 
 
 		/// <summary>
+		/// Create the application for testing, which provides the string resources of the real application.
+		/// </summary>
+		/// <returns>Application for testing.</returns>
+		protected override CarinaStudio.AppSuite.IAppSuiteApplication CreateMockApplication() =>
+			CarinaStudio.AppSuite.MockAppSuiteApplication.Initialize(() => new TestApplication());
+
+
+		/// <summary>
 		/// Create file in cache directory and open it.
 		/// </summary>
 		/// <returns><see cref="Stream"/> of create file.</returns>

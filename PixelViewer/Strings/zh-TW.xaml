@@ -189,6 +189,8 @@
 
 	<!-- Session -->
 	<sys:String x:Key="String/Session.EmptyTitle">空白分頁</sys:String>
+	<sys:String x:Key="String/Session.FrameSequence">畫格序列 ({0})</sys:String>
+	<sys:String x:Key="String/Session.MultipleFiles">{0} 個檔案</sys:String>
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.AlignToInteger">對齊整數</sys:String>

@@ -232,6 +232,8 @@ You can change this setting at any time in Options.</sys:String>
 
 	<!-- Session -->
 	<sys:String x:Key="String/Session.EmptyTitle">Empty Tab</sys:String>
+	<sys:String x:Key="String/Session.FrameSequence">Frame Sequence ({0})</sys:String>
+	<sys:String x:Key="String/Session.MultipleFiles">{0} Files</sys:String>
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.AlignToInteger">Align to Integer</sys:String>

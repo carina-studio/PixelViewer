@@ -2056,8 +2056,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// close source
 		this.CloseSource(false);
 
-		// update state
-		this.SetValue(SourceFileNameProperty, null);
+		// update state, name of source file is cleared by CloseSource()
 		this.SetValue(SourceSizeStringProperty, null);
 		
 		// reset scaling
@@ -2170,6 +2169,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		var sourceFileName = this.SourceFileName;
 		this.frameImageDataSource = this.frameImageDataSource.DisposeAndReturnNull();
 		this.imageDataSource = null;
+		if (!disposing)
+		{
+			// name of source file describes the source which has been closed, so it is cleared along with the source
+			this.SetValue(SourceFileNameProperty, null);
+			this.UpdateTitle(); // title is selected by source, so it is updated after the source has been detached
+		}
 		if (imageDataSource is not null)
 		{
 			_ = Task.Run(() =>
@@ -4350,10 +4355,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update state
 		this.canOpenSource.Update(false);
 		this.SetValue(IsOpeningSourceProperty, true);
-		this.SetValue(SourceFileNameProperty, fileName);
-
-		// update title
-		this.UpdateTitle();
 
 		// create image data source
 		var imageDataSource = await createDataSource();
@@ -4364,7 +4365,9 @@ class Session : ViewModel<IAppSuiteApplication>
 				_ = Task.Run(imageDataSource.Dispose);
 			return;
 		}
-		if (imageDataSource is null)
+		if (imageDataSource is FileImageDataSource)
+			this.SetValue(SourceFileNameProperty, fileName);
+		else if (imageDataSource is null)
 		{
 			// reset state
 			this.SetValue(SourceFileNameProperty, null);
@@ -4380,6 +4383,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 		this.imageDataSource = imageDataSource;
+		
+		// update title
+		this.UpdateTitle();
 
 		// parse file format, format is parsed from data of the first frame
 		var formatParsingSource = (IImageDataSource?)null;
@@ -7099,7 +7105,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		var title = this.CustomTitle
 		            ?? (this.SourceFileName is not null
 			            ? Path.GetFileName(this.SourceFileName)
-			            : this.Application.GetString("Session.EmptyTitle"));
+			            : this.imageDataSource switch
+			            {
+				            IFileSequenceImageDataSource fileSequenceImageDataSource => this.Application.GetFormattedString("Session.MultipleFiles", fileSequenceImageDataSource.FrameCount),
+				            IMultiFrameImageDataSource multiFrameImageDataSource => this.Application.GetFormattedString("Session.FrameSequence", multiFrameImageDataSource.FrameCount),
+				            _ => this.Application.GetString("Session.EmptyTitle")
+			            });
 
 		// update property
 		if (this.Title != title)

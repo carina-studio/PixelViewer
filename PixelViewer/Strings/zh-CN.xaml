@@ -193,6 +193,8 @@
 
 	<!-- Session -->
 	<sys:String x:Key="String/Session.EmptyTitle">空白标签页</sys:String>
+	<sys:String x:Key="String/Session.FrameSequence">帧序列 ({0})</sys:String>
+	<sys:String x:Key="String/Session.MultipleFiles">{0} 个文件</sys:String>
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.AlignToInteger">对齐整数</sys:String>

@@ -148,7 +148,7 @@
 						</Button>
 
 						<!-- Refresh -->
-						<Button Command="{Binding RenderImageCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Refresh}">
+						<Button Command="{Binding RenderImageCommand}" IsEnabled="{Binding !IsPlayingFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Refresh}">
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Refresh}"/>
 						</Button>
 
@@ -617,7 +617,7 @@
 				
 			</Border>
 		</Grid>
-		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding IsProcessingImage}" MaxHeight="{StaticResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{StaticResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
+		<ProgressBar Background="{x:Null}" CornerRadius="0" IsIndeterminate="True" IsVisible="{Binding #root.CanShowProgressBar}" MaxHeight="{StaticResource Double/SessionControl.ImageProgressBar.Height}" MinHeight="{StaticResource Double/SessionControl.ImageProgressBar.Height}" VerticalAlignment="Bottom"/>
 
 		<!-- Viewer -->
 		<Grid Name="workingAreaGrid" Grid.Row="1">
@@ -1374,8 +1374,12 @@
 							<TextBlock asControls:StatusBarElement.Role="Label" Text="{asXaml:StringResource SessionControl.FilteringRenderedImage}"/>
 						</StackPanel>
 
-						<!-- Rendering image -->
-						<StackPanel IsVisible="{Binding IsRenderingImage}" Orientation="Horizontal">
+						<!-- Rendering image, hidden when playing frames to prevent it from flashing -->
+						<StackPanel IsVisible="{asXaml:AndBindings
+						                           {Binding IsRenderingImage},
+						                           {Binding !IsPlayingFrames}
+						                       }" 
+						            Orientation="Horizontal">
 							<Separator asControls:StatusBarElement.Role="Separator"/>
 							<Image asControls:StatusBarElement.Role="IconWithLabel">
 								<DrawingImage>
