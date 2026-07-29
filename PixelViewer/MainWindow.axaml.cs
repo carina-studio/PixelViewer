@@ -35,6 +35,10 @@ namespace Carina.PixelViewer
 	/// </summary>
 	class MainWindow : MainWindow<Workspace>, INotificationPresenter
 	{
+		// Constants.
+		const int ShowTaskbarIconProgressDelay = 100;
+
+
 		// Static fields.
 		static readonly DataFormat<byte[]> DraggingSessionFormat = DataFormat.CreateBytesApplicationFormat("DraggingSession");
 		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
@@ -49,11 +53,13 @@ namespace Carina.PixelViewer
 
 		// Fields.
 		Session? attachedActivatedSession;
+		bool canShowTaskbarIconProgress;
 		bool isPerformingContentRelayout;
 		readonly AsTabControl mainTabControl;
 		readonly ObservableList<TabItem> mainTabItems = new();
 		readonly NotificationPresenter notificationPresenter;
 		readonly ScheduledAction relayoutContentAction;
+		readonly ScheduledAction showTaskbarIconProgressAction;
 		readonly ScheduledAction updateTitleBarAction;
 
 
@@ -142,6 +148,11 @@ namespace Carina.PixelViewer
 				this.isPerformingContentRelayout = true;
 				baseBorder.Padding = new Thickness(0, 0, 0, -1);
 			});
+			this.showTaskbarIconProgressAction = new(() =>
+			{
+				this.canShowTaskbarIconProgress = true;
+				this.updateTitleBarAction!.Execute();
+			});
 			this.updateTitleBarAction = new(() =>
 			{
 				if (this.IsClosed)
@@ -154,11 +165,8 @@ namespace Carina.PixelViewer
 				{
 					this.TaskbarIconProgressState = TaskbarIconProgressState.Error;
 				}
-				else if (session.IsRenderingImage
-					|| session.IsSavingRenderedImage)
-				{
+				else if (session.IsProcessingImage && this.canShowTaskbarIconProgress)
 					this.TaskbarIconProgressState = TaskbarIconProgressState.Indeterminate;
-				}
 				else
 					this.TaskbarIconProgressState = TaskbarIconProgressState.None;
 			});
@@ -211,7 +219,7 @@ namespace Carina.PixelViewer
 			this.DetachFromActivatedSession();
 			this.attachedActivatedSession = session;
 			session.PropertyChanged += this.OnActivatedSessionPropertyChanged;
-			this.updateTitleBarAction.Schedule();
+			this.UpdateCanShowTaskbarIconProgress();
 		}
 
 
@@ -270,7 +278,8 @@ namespace Carina.PixelViewer
 			if (this.attachedActivatedSession is null)
 				return;
 			this.attachedActivatedSession.PropertyChanged -= this.OnActivatedSessionPropertyChanged;
-			this.updateTitleBarAction.Schedule();
+			this.attachedActivatedSession = null;
+			this.UpdateCanShowTaskbarIconProgress();
         }
 
 
@@ -365,9 +374,10 @@ namespace Carina.PixelViewer
             {
 				case nameof(Session.HasRenderingError):
 				case nameof(Session.InsufficientMemoryForRenderedImage):
-				case nameof(Session.IsRenderingImage):
-				case nameof(Session.IsSavingRenderedImage):
 					this.updateTitleBarAction.Schedule();
+					break;
+				case nameof(Session.IsProcessingImage):
+					this.UpdateCanShowTaskbarIconProgress();
 					break;
             }
 		}
@@ -940,6 +950,26 @@ namespace Carina.PixelViewer
 				if (result == MessageDialogResult.Yes)
 					Platform.OpenLink("https://carinastudio.azurewebsites.net/PixelViewer/InstallAndUpgrade#Upgrade");
 			}
+		}
+		
+		
+		// Update whether the progress of taskbar icon can be shown or not.
+		void UpdateCanShowTaskbarIconProgress()
+		{
+			// showing is delayed so that short processing, such as rendering each frame when playing frames, doesn't make the progress flash, hiding is performed immediately
+			if (this.attachedActivatedSession?.IsProcessingImage == true)
+			{
+				if (!this.canShowTaskbarIconProgress)
+					this.showTaskbarIconProgressAction.Schedule(ShowTaskbarIconProgressDelay);
+			}
+			else
+			{
+				this.showTaskbarIconProgressAction.Cancel();
+				this.canShowTaskbarIconProgress = false;
+			}
+
+			// update state of taskbar icon
+			this.updateTitleBarAction.Schedule();
 		}
 	}
 }
