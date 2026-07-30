@@ -2293,60 +2293,45 @@ class Session : ViewModel<IAppSuiteApplication>
 					if (cancellationToken.IsCancellationRequested)
 					{
 						this.Logger.LogWarning("Color space conversion has been cancelled");
-						throw new TaskCanceledException();
+						cancellationToken.ThrowIfCancellationRequested();
 					}
 					this.Logger.LogError("Unable to allocate image frame for color space conversion");
 					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 					return null;
 				}
 			}
-			if (cancellationToken.IsCancellationRequested)
-			{
-				this.Logger.LogWarning("Color space conversion has been cancelled");
-				if (!isReusingImageFrame)
-					colorSpaceConvertedImageFrame.Dispose();
-				throw new TaskCanceledException();
-			}
 
-			// convert color space
-			this.Logger.LogTrace("Convert color space from {s} to {d}", srcColorSpace, destColorSpace);
+			// convert the frame, release it unless it is handed over to the caller
+			var isImageFrameHandedOver = false;
 			try
 			{
+				// give up if the conversion has been cancelled before it starts
+				cancellationToken.ThrowIfCancellationRequested();
+
+				// convert color space
+				this.Logger.LogTrace("Convert color space from {s} to {d}", srcColorSpace, destColorSpace);
 				await src.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.UseLinearColorSpace, false, cancellationToken);
-			}
-			catch (TaskCanceledException)
-			{
-				this.Logger.LogWarning("Color space conversion has been cancelled");
-				throw;
-			}
-			catch
-			{
-				if (!isReusingImageFrame)
-					colorSpaceConvertedImageFrame.Dispose();
-				throw;
-			}
-			colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
+				colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
 
-			// generate histogram
-			try
-			{
+				// generate histogram
 				colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
+
+				// complete
+				this.Logger.LogTrace("Color space converted");
+				isImageFrameHandedOver = true;
+				return colorSpaceConvertedImageFrame;
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				this.Logger.LogWarning("Color space conversion has been cancelled");
 				throw;
 			}
-			catch
+			finally
 			{
-				if (!isReusingImageFrame)
+				// the frame allocated by this conversion is owned by it until the caller takes it, the frame reused from the session is owned by the session
+				if (!isImageFrameHandedOver && !isReusingImageFrame)
 					colorSpaceConvertedImageFrame.Dispose();
-				throw;
 			}
-
-			// complete
-			this.Logger.LogTrace("Color space converted");
-			return colorSpaceConvertedImageFrame;
 		}
 		finally
 		{
@@ -5476,7 +5461,8 @@ class Session : ViewModel<IAppSuiteApplication>
 				}
 				catch (Exception ex)
 				{
-					if (ex is TaskCanceledException)
+					// the conversion reports cancellation by OperationCanceledException, TaskCanceledException derives from it
+					if (ex is OperationCanceledException)
 					{
 						this.Logger.LogWarning("Color space conversion has been cancelled before reporting rendered image");
 						return;

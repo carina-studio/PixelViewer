@@ -148,7 +148,14 @@
 						</Button>
 
 						<!-- Refresh -->
-						<Button Command="{Binding RenderImageCommand}" IsEnabled="{Binding !IsPlayingFrames}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Refresh}">
+						<Button Command="{Binding RenderImageCommand}" 
+						        IsEnabled="{asXaml:AndBindings
+						                       {Binding !IsFilteringRenderedImage},
+						                       {Binding !IsPlayingFrames},
+						                       {Binding !IsRenderingImage}
+						                   }" 
+						        asControls:ToolbarElement.Role="Button" 
+						        ToolTip.Tip="{asXaml:StringResource Common.Refresh}">
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Refresh}"/>
 						</Button>
 
