@@ -63,7 +63,7 @@ abstract class BaseImageRenderer : IImageRenderer
 		this.format = format;
 
 		// notify
-		this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Format)));
+		this.OnPropertyChanged(nameof(Format));
 	}
 
 
@@ -293,6 +293,14 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// Logger.
 	/// </summary>
 	protected ILogger Logger { get; }
+
+
+	/// <summary>
+	/// Raise <see cref="PropertyChanged"/> event.
+	/// </summary>
+	/// <param name="propertyName">Name of changed property.</param>
+	protected void OnPropertyChanged(string propertyName) =>
+		this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
 
 	/// <summary>
