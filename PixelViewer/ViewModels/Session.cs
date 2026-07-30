@@ -929,7 +929,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	double fitRenderedImageToViewportScale = double.NaN;
 	double fitRenderedImageToViewportScaleSwapped = double.NaN;
 	int frameNavigationCount;
-	bool hasPendingImageFiltering;
 	bool hasPendingImageRendering;
 	IImageDataSource? frameImageDataSource;
 	long framePlaybackBaseFrameNumber;
@@ -938,10 +937,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly Stopwatch framePlaybackStopwatch = new();
 	IImageDataSource? imageDataSource;
 	CancellationTokenSource? imageFilteringCancellationTokenSource;
+	TaskCompletionSource? imageFilteringCompletionSource;
+	int imageFilteringRequestId;
 	CancellationTokenSource? imageRenderingCancellationTokenSource;
+	TaskCompletionSource? imageRenderingCompletionSource;
+	int imageRenderingRequestId;
 	CancellationTokenSource? imageReportingCancellationTokenSource;
 	DoubleAnimator? imageScalingAnimator;
-	bool isFirstImageRenderingForSource = true;
 	bool isImageDimensionsEvaluationNeeded = true;
 	bool isImagePlaneOptionsResetNeeded = true;
 	readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
@@ -1011,11 +1013,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSource);
 		this.OpenSourceFilesCommand = new Command<IList<string>>(fileNames => _ = this.OpenSourceFiles(fileNames), this.canOpenSource);
 		this.PlayFramesCommand = new Command(this.TogglePlayingFrames, this.canPlayFrames);
-		this.RenderImageCommand = new Command(() => 
-		{
-			this.ClearRenderedImage();
-			this.renderImageAction?.Reschedule();
-		}, this.GetValueAsObservable(IsSourceOpenedProperty));
+		this.RenderImageCommand = new Command(() => _ = this.ClearAndRenderImageAsync(), this.GetValueAsObservable(IsSourceOpenedProperty));
 		this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
 		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 		this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
@@ -1043,18 +1041,9 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// setup operations
 		this.effectiveScreenColorSpaceObserver = new(_ => this.OnScreenColorSpaceChanged());
-		this.filterImageAction = new ScheduledAction(() =>
-		{
-			if (this.colorSpaceConvertedImageFrame is not null 
-			    && this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
-			{
-				_ = this.FilterImage(this.colorSpaceConvertedImageFrame);
-			}
-			else if (this.renderedImageFrame is not null)
-				_ = this.FilterImage(this.renderedImageFrame);
-		});
+		this.filterImageAction = new ScheduledAction(() => _ = this.FilterImage());
 		this.releasedCachedImagesAction = new ScheduledAction(() => this.ReleaseCachedImages());
-		this.renderImageAction = new ScheduledAction(this.RenderImage);
+		this.renderImageAction = new ScheduledAction(this.RenderImage, true);
 		this.playFrameAction = new ScheduledAction(this.PlayNextFrame);
 		this.trackFilteringParamsAppliedAction = new(() =>
 		{
@@ -1461,6 +1450,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				if (ex is OutOfMemoryException)
 				{
+					// the cached images are kept only to avoid reallocation, releasing them first keeps the image being displayed
+					// until there is really nothing else to release, dropping it makes the image flicker while filtering continuously
+					if (this.ReleaseCachedImages())
+					{
+						this.Logger.LogWarning("Unable to request memory usage for filtered image, release cached images");
+						continue;
+					}
 					if (this.filteredImageFrame is not null)
 					{
 						this.Logger.LogWarning("Unable to request memory usage for filtered image, dispose current images");
@@ -1512,6 +1508,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				if (ex is OutOfMemoryException)
 				{
+					// the cached images are kept only to avoid reallocation, releasing them first keeps the image being displayed
+					// until there is really nothing else to release, dropping it makes the image flicker while rendering continuously
+					if (this.ReleaseCachedImages())
+					{
+						this.Logger.LogWarning("Unable to request memory usage for rendered image, release cached images");
+						continue;
+					}
 					if (this.renderedImageFrame is not null)
 					{
 						this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current images");
@@ -1839,35 +1842,27 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Cancel filtering image.
-	bool CancelFilteringImage(bool cancelPendingRendering = false)
+	// Cancel filtering image and wait for the completion of the filtering being cancelled.
+	Task CancelFilteringImageAsync()
 	{
 		// cancel
 		this.filterImageAction.Cancel();
-		if (this.imageFilteringCancellationTokenSource is null)
-			return false;
-		this.Logger.LogWarning("Cancel filtering image for source '{sourceFileName}'", this.SourceFileName);
-		this.imageFilteringCancellationTokenSource.Cancel();
-		if (this.imageFilteringCancellationTokenSource == this.imageReportingCancellationTokenSource)
+		if (this.imageFilteringCancellationTokenSource is not null)
 		{
-			this.Logger.LogWarning("Cancel reporting rendered image by cancelling filtering image");
-			this.imageReportingCancellationTokenSource = null;
-		}
-		this.imageFilteringCancellationTokenSource = null;
-		if (this.GetValue(IsConvertingColorSpaceProperty))
-		{
-			this.Logger.LogWarning("Cancel color space conversion for filtering image");
-			this.ResetValue(IsConvertingColorSpaceProperty);
+			this.Logger.LogWarning("Cancel filtering image for source '{sourceFileName}'", this.SourceFileName);
+			this.imageFilteringCancellationTokenSource.Cancel();
+			if (this.imageFilteringCancellationTokenSource == this.imageReportingCancellationTokenSource)
+			{
+				this.Logger.LogWarning("Cancel reporting rendered image by cancelling filtering image");
+				this.imageReportingCancellationTokenSource = null;
+			}
+			this.imageFilteringCancellationTokenSource = null;
+			if (this.GetValue(IsConvertingColorSpaceProperty))
+				this.Logger.LogWarning("Cancel color space conversion for filtering image"); // the state is reset by ConvertColorSpaceAsync() when the conversion unwinds
 		}
 
-		// update state
-		if (!this.IsDisposed)
-			this.SetValue(IsFilteringRenderedImageProperty, false);
-		if (cancelPendingRendering)
-			this.hasPendingImageFiltering = false;
-
-		// complete
-		return true;
+		// wait for the completion of the filtering being cancelled, the filtering is still in progress until it reaches its next cancellation check
+		return this.WaitForImageFilteringCompletionAsync();
 	}
 	
 	
@@ -1880,43 +1875,34 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.imageReportingCancellationTokenSource.Cancel();
 		this.imageReportingCancellationTokenSource = null;
 		if (this.GetValue(IsConvertingColorSpaceProperty))
-		{
-			this.Logger.LogWarning("Cancel color space conversion for reporting rendered image");
-			this.ResetValue(IsConvertingColorSpaceProperty);
-		}
+			this.Logger.LogWarning("Cancel color space conversion for reporting rendered image"); // the state is reset by ConvertColorSpaceAsync() when the conversion unwinds
 		return true;
 	}
 
 
-	// Cancel rendering image.
-	bool CancelRenderingImage(bool cancelPendingRendering = false)
+	// Cancel rendering image and wait for the completion of the rendering being cancelled.
+	Task CancelRenderingImageAsync(bool cancelPendingRendering = false)
 	{
 		// cancel
 		this.renderImageAction.Cancel();
-		if (this.imageRenderingCancellationTokenSource is null)
-			return false;
-		this.Logger.LogWarning("Cancel rendering image for source '{sourceFileName}'", this.SourceFileName);
-		this.imageRenderingCancellationTokenSource.Cancel();
-		if (this.imageRenderingCancellationTokenSource == this.imageReportingCancellationTokenSource)
-		{
-			this.Logger.LogWarning("Cancel reporting rendered image by cancelling rendering image");
-			this.imageReportingCancellationTokenSource = null;
-		}
-		this.imageRenderingCancellationTokenSource = null;
-		if (this.GetValue(IsConvertingColorSpaceProperty))
-		{
-			this.Logger.LogWarning("Cancel color space conversion for rendering image");
-			this.ResetValue(IsConvertingColorSpaceProperty);
-		}
-
-		// update state
-		if (!this.IsDisposed)
-			this.SetValue(IsRenderingImageProperty, false);
 		if (cancelPendingRendering)
 			this.hasPendingImageRendering = false;
+		if (this.imageRenderingCancellationTokenSource is not null)
+		{
+			this.Logger.LogWarning("Cancel rendering image for source '{sourceFileName}'", this.SourceFileName);
+			this.imageRenderingCancellationTokenSource.Cancel();
+			if (this.imageRenderingCancellationTokenSource == this.imageReportingCancellationTokenSource)
+			{
+				this.Logger.LogWarning("Cancel reporting rendered image by cancelling rendering image");
+				this.imageReportingCancellationTokenSource = null;
+			}
+			this.imageRenderingCancellationTokenSource = null;
+			if (this.GetValue(IsConvertingColorSpaceProperty))
+				this.Logger.LogWarning("Cancel color space conversion for rendering image"); // the state is reset by ConvertColorSpaceAsync() when the conversion unwinds
+		}
 
-		// complete
-		return true;
+		// wait for the completion of the rendering being cancelled, the rendering is still in progress until it reaches its next cancellation check
+		return this.WaitForImageRenderingCompletionAsync();
 	}
 
 
@@ -2004,49 +1990,48 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.OnWhiteLevelChanged(index);
 		this.renderImageAction.Reschedule(RenderImageDelay);
 	}
+	
+	
+	// Clear the rendered image and render it again, which is what requesting rendering explicitly does.
+	async Task ClearAndRenderImageAsync()
+	{
+		// clear the rendered image, the images are released only after the rendering being cancelled completes
+		await this.ClearRenderedImageAsync();
+
+		// render again
+		if (!this.IsDisposed)
+			this.renderImageAction.Reschedule();
+	}
 
 
 	// Clear filtered image.
-	bool ClearFilteredImage()
+	async Task ClearFilteredImageAsync()
 	{
-		// cancel filtering
-		this.CancelFilteringImage(true);
+		// cancel filtering and wait for the completion of the filtering being cancelled
+		await this.CancelFilteringImageAsync();
 
-		// clear images
-		if (!this.IsFilteringRenderedImage && this.filteredImageFrame is not null)
-		{
-			this.SetValue(HistogramsProperty, null);
-			this.SetValue(QuarterSizeRenderedImageProperty, null);
-			this.SetValue(RenderedImageProperty, null);
-			foreach (var cachedFrame in this.cachedFilteredImageFrames)
-				cachedFrame.Dispose();
-			this.cachedFilteredImageFrames.Clear();
-			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
-		}
-		return true;
+		// keep the images if a new filtering has taken over them while waiting
+		if (this.IsDisposed || this.imageFilteringCompletionSource is not null)
+			return;
+
+		// release the images
+		this.DisposeFilteredImage();
 	}
 
 
 	// Clear rendered image.
-	void ClearRenderedImage()
+	async Task ClearRenderedImageAsync()
 	{
-		// clear filtered image
-		this.ClearFilteredImage();
+		// clear filtered image, then cancel rendering and wait for the completion of the rendering being cancelled
+		await this.ClearFilteredImageAsync();
+		await this.CancelRenderingImageAsync(true);
 
-		// cancel rendering
-		this.CancelRenderingImage(true);
+		// keep the images if a new rendering has taken over them while waiting
+		if (this.IsDisposed || this.imageRenderingCompletionSource is not null)
+			return;
 
-		// clear images
-		if (!this.IsRenderingImage && this.renderedImageFrame is not null)
-		{
-			this.SetValue(HistogramsProperty, null);
-			this.SetValue(QuarterSizeRenderedImageProperty, null);
-			this.SetValue(RenderedImageProperty, null);
-			this.canSelectColorAdjustment.Update(false);
-			this.canSelectRgbGain.Update(false);
-			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-			this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
-		}
+		// release the images
+		this.DisposeRenderedImage();
 	}
 
 
@@ -2146,9 +2131,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.canZoomTo.Update(false);
 		this.UpdateCanZoomInOut();
 
-		// cancel rendering image
-		this.CancelFilteringImage(true);
-		this.CancelRenderingImage(true);
+		// cancel rendering image, the frames have been released above so there is no need to wait for the cancellation to complete
+		_ = this.CancelFilteringImageAsync();
+		_ = this.CancelRenderingImageAsync(true);
 		this.CancelReportingRenderedImage();
 
 		// remove profile generated for file format
@@ -2240,7 +2225,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.isImageDimensionsEvaluationNeeded = true;
 			this.isImagePlaneOptionsResetNeeded = true;
 		}
-		this.isFirstImageRenderingForSource = true;
 		if (this.IsActivated)
 			this.renderImageAction.Reschedule();
 		else
@@ -2283,89 +2267,92 @@ class Session : ViewModel<IAppSuiteApplication>
 			return null;
 		}
 
-		// update state
+		// update state, the state is kept until the conversion completes or unwinds so that it is not reported as completed while it is still being cancelled
 		this.SetValue(IsConvertingColorSpaceProperty, true);
-		
-		// allocate frame
-		var isReusingImageFrame = false;
-		var colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame;
-		if (colorSpaceConvertedImageFrame is not null
-		    && colorSpaceConvertedImageFrame.BitmapBuffer.Width == src.BitmapBuffer.Width
-		    && colorSpaceConvertedImageFrame.BitmapBuffer.Height == src.BitmapBuffer.Height
-		    && colorSpaceConvertedImageFrame.BitmapBuffer.Format == src.BitmapBuffer.Format)
+		try
 		{
-			if (this.Application.IsDebugMode)
-				this.Logger.LogDebug("Reuse color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
-			isReusingImageFrame = true;
-		}
-		else
-		{
-			if (this.Application.IsDebugMode)
-				this.Logger.LogWarning("Allocate color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
-			colorSpaceConvertedImageFrame = await this.AllocateRenderedImageFrame(src.FrameNumber, src.BitmapBuffer.Format, destColorSpace, src.BitmapBuffer.Width, src.BitmapBuffer.Height);
-			if (colorSpaceConvertedImageFrame is null)
+			// allocate frame
+			var isReusingImageFrame = false;
+			var colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame;
+			if (colorSpaceConvertedImageFrame is not null
+			    && colorSpaceConvertedImageFrame.BitmapBuffer.Width == src.BitmapBuffer.Width
+			    && colorSpaceConvertedImageFrame.BitmapBuffer.Height == src.BitmapBuffer.Height
+			    && colorSpaceConvertedImageFrame.BitmapBuffer.Format == src.BitmapBuffer.Format)
 			{
-				if (cancellationToken.IsCancellationRequested)
-				{
-					this.Logger.LogWarning("Color space conversion has been cancelled");
-					throw new TaskCanceledException();
-				}
-				this.Logger.LogError("Unable to allocate image frame for color space conversion");
-				this.ResetValue(IsConvertingColorSpaceProperty);
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-				return null;
+				if (this.Application.IsDebugMode)
+					this.Logger.LogDebug("Reuse color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+				isReusingImageFrame = true;
 			}
+			else
+			{
+				if (this.Application.IsDebugMode)
+					this.Logger.LogWarning("Allocate color space converted image frame, size: {width}x{height}", src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+				colorSpaceConvertedImageFrame = await this.AllocateRenderedImageFrame(src.FrameNumber, src.BitmapBuffer.Format, destColorSpace, src.BitmapBuffer.Width, src.BitmapBuffer.Height);
+				if (colorSpaceConvertedImageFrame is null)
+				{
+					if (cancellationToken.IsCancellationRequested)
+					{
+						this.Logger.LogWarning("Color space conversion has been cancelled");
+						throw new TaskCanceledException();
+					}
+					this.Logger.LogError("Unable to allocate image frame for color space conversion");
+					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					return null;
+				}
+			}
+			if (cancellationToken.IsCancellationRequested)
+			{
+				this.Logger.LogWarning("Color space conversion has been cancelled");
+				if (!isReusingImageFrame)
+					colorSpaceConvertedImageFrame.Dispose();
+				throw new TaskCanceledException();
+			}
+
+			// convert color space
+			this.Logger.LogTrace("Convert color space from {s} to {d}", srcColorSpace, destColorSpace);
+			try
+			{
+				await src.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.UseLinearColorSpace, false, cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				this.Logger.LogWarning("Color space conversion has been cancelled");
+				throw;
+			}
+			catch
+			{
+				if (!isReusingImageFrame)
+					colorSpaceConvertedImageFrame.Dispose();
+				throw;
+			}
+			colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
+
+			// generate histogram
+			try
+			{
+				colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
+			}
+			catch (TaskCanceledException)
+			{
+				this.Logger.LogWarning("Color space conversion has been cancelled");
+				throw;
+			}
+			catch
+			{
+				if (!isReusingImageFrame)
+					colorSpaceConvertedImageFrame.Dispose();
+				throw;
+			}
+
+			// complete
+			this.Logger.LogTrace("Color space converted");
+			return colorSpaceConvertedImageFrame;
 		}
-		if (cancellationToken.IsCancellationRequested)
+		finally
 		{
-			this.Logger.LogWarning("Color space conversion has been cancelled");
-			if (!isReusingImageFrame)
-				colorSpaceConvertedImageFrame.Dispose();
-			throw new TaskCanceledException();
-		}
-		
-		// convert color space
-		this.Logger.LogTrace("Convert color space from {s} to {d}", srcColorSpace, destColorSpace);
-		try
-		{
-			await src.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.UseLinearColorSpace, false, cancellationToken);
-		}
-		catch (TaskCanceledException)
-		{
-			this.Logger.LogWarning("Color space conversion has been cancelled");
-			throw;
-		}
-		catch 
-		{
-			if (!isReusingImageFrame)
-				colorSpaceConvertedImageFrame.Dispose();
-			if (!cancellationToken.IsCancellationRequested)
+			if (!this.IsDisposed)
 				this.ResetValue(IsConvertingColorSpaceProperty);
-			throw;
 		}
-		colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
-		
-		// generate histogram
-		try
-		{
-			colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
-		}
-		catch (TaskCanceledException)
-		{
-			this.Logger.LogWarning("Color space conversion has been cancelled");
-			throw;
-		}
-		catch 
-		{
-			if (!isReusingImageFrame)
-				colorSpaceConvertedImageFrame.Dispose();
-			if (!cancellationToken.IsCancellationRequested)
-				this.ResetValue(IsConvertingColorSpaceProperty);
-			throw;
-		}
-		this.Logger.LogTrace("Color space converted");
-		this.ResetValue(IsConvertingColorSpaceProperty);
-		return colorSpaceConvertedImageFrame;
 	}
 
 
@@ -2408,11 +2395,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		// stop frame playback while the session is not active
 		this.StopPlayingFrames();
 
-		// hibernate directly
+		// hibernate directly, the hibernation completes after the rendering being cancelled completes so it is not waited for here
 		if (!this.HasRenderedImage)
 		{
 			this.Logger.LogWarning("No rendered image before deactivation, hibernate the session");
-			this.Hibernate();
+			_ = this.HibernateAsync();
 		}
 	}
 
@@ -2487,6 +2474,42 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Release the filtered image and the frames cached for filtering. The caller needs to make sure that no filtering is in progress.
+	void DisposeFilteredImage()
+	{
+		// check state
+		if (this.filteredImageFrame is null)
+			return;
+
+		// release the images
+		this.SetValue(HistogramsProperty, null);
+		this.SetValue(QuarterSizeRenderedImageProperty, null);
+		this.SetValue(RenderedImageProperty, null);
+		foreach (var cachedFrame in this.cachedFilteredImageFrames)
+			cachedFrame.Dispose();
+		this.cachedFilteredImageFrames.Clear();
+		this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+	}
+
+
+	// Release the rendered image and the frame converted from it. The caller needs to make sure that no rendering is in progress.
+	void DisposeRenderedImage()
+	{
+		// check state
+		if (this.renderedImageFrame is null)
+			return;
+
+		// release the images
+		this.SetValue(HistogramsProperty, null);
+		this.SetValue(QuarterSizeRenderedImageProperty, null);
+		this.SetValue(RenderedImageProperty, null);
+		this.canSelectColorAdjustment.Update(false);
+		this.canSelectRgbGain.Update(false);
+		this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+		this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
+	}
+
+
 	/// <summary>
 	/// Get or set effective bits on 1st image plane.
 	/// </summary>
@@ -2546,21 +2569,51 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Filter image.
-	async Task FilterImage(ImageFrame renderedImageFrame)
+	async Task FilterImage()
 	{
 		// check state
 		if (!this.IsFilteringRenderedImageNeeded)
 			return;
 
-		// cancel current filtering
-		if (this.CancelFilteringImage(true))
+		// cancel current filtering and wait for the completion of the filtering being cancelled
+		var requestId = ++this.imageFilteringRequestId;
+		await this.CancelFilteringImageAsync();
+		if (this.IsDisposed)
+			return;
+		if (requestId != this.imageFilteringRequestId)
 		{
-			this.Logger.LogWarning("Continue filtering when current filtering completed");
-			hasPendingImageFiltering = true;
+			this.Logger.LogWarning("Give up filtering image, a newer filtering has been requested while waiting for the cancellation");
 			return;
 		}
-		this.hasPendingImageFiltering = false;
 
+		// check state again, the state may have been changed while waiting for the cancellation
+		if (!this.IsFilteringRenderedImageNeeded)
+			return;
+		var renderedImageFrame = this.SelectImageFrameToFilter();
+		if (renderedImageFrame is null)
+			return;
+
+		// filter, then release whoever is waiting for the completion of this filtering
+		var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		this.imageFilteringCompletionSource = completionSource;
+		this.SetValue(IsFilteringRenderedImageProperty, true);
+		try
+		{
+			await this.FilterImageCore(renderedImageFrame);
+		}
+		finally
+		{
+			this.imageFilteringCompletionSource = null;
+			if (!this.IsDisposed)
+				this.SetValue(IsFilteringRenderedImageProperty, false);
+			completionSource.TrySetResult();
+		}
+	}
+
+
+	// Filter image according to current state, after the state has been checked by FilterImage().
+	async Task FilterImageCore(ImageFrame renderedImageFrame)
+	{
 		// log
 		if (this.Application.IsDebugMode)
 			this.Logger.LogTrace("Start filtering image");
@@ -2569,7 +2622,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		CancellationTokenSource cancellationTokenSource = new();
 		this.imageFilteringCancellationTokenSource = cancellationTokenSource;
 		this.canSaveFilteredImage.Update(false);
-		this.SetValue(IsFilteringRenderedImageProperty, true);
 
 		// check filters needed
 		var filterCount = 0;
@@ -2643,17 +2695,11 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageFilteringCancellationTokenSource = null;
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-				this.SetValue(IsFilteringRenderedImageProperty, false);
 				if (!this.IsActivated && !this.IsHibernated)
 				{
 					this.Logger.LogWarning("Unable to allocate filtered image frame after deactivation, hibernate the session");
-					this.Hibernate();
+					_ = this.HibernateAsync(); // the images are released after this filtering completes, waiting for it here would wait for this filtering itself
 				}
-			}
-			else if (this.hasPendingImageFiltering)
-			{
-				this.Logger.LogWarning("Filtering image has been cancelled, start next filtering");
-				this.filterImageAction.Schedule();
 			}
 			else
 				this.Logger.LogWarning("Filtering image has been cancelled");
@@ -2683,12 +2729,6 @@ class Session : ViewModel<IAppSuiteApplication>
 					this.imageFilteringCancellationTokenSource = null;
 					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
 					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-					this.SetValue(IsFilteringRenderedImageProperty, false);
-				}
-				else if (this.hasPendingImageFiltering)
-				{
-					this.Logger.LogWarning("Filtering image has been cancelled, start next filtering");
-					this.filterImageAction.Schedule();
 				}
 				else
 					this.Logger.LogWarning("Filtering image has been cancelled");
@@ -2881,12 +2921,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageFilteringCancellationTokenSource = null;
 				this.SetValue(HasRenderingErrorProperty, true);
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-				this.SetValue(IsFilteringRenderedImageProperty, false);
-			}
-			else if (this.hasPendingImageFiltering)
-			{
-				this.Logger.LogDebug("Filtering has been cancelled, start next filtering");
-				this.filterImageAction.Schedule();
 			}
 			else if (this.Application.IsDebugMode)
 				this.Logger.LogWarning("Filtering has been cancelled");
@@ -2912,12 +2946,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.cachedFilteredImageFrames.Add(filteredImageFrame1);
 			if (filteredImageFrame2 is not null)
 				this.cachedFilteredImageFrames.Add(filteredImageFrame2);
-			if (this.hasPendingImageFiltering)
-			{
-				this.Logger.LogDebug("Start next filtering");
-				this.filterImageAction.Schedule();
-			}
-			else if (this.Application.IsDebugMode)
+			if (this.Application.IsDebugMode)
 				this.Logger.LogWarning("Filtering cancelled");
 			return;
 		}
@@ -2967,7 +2996,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				return;
 		}
 		this.imageFilteringCancellationTokenSource = null;
-		this.SetValue(IsFilteringRenderedImageProperty, false);
 	}
 
 
@@ -3252,29 +3280,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	public bool HasVibranceAdjustment => this.GetValue(HasVibranceAdjustmentProperty);
 
 
-	// Hibernate.
-	bool Hibernate()
-    {
-		// check state
-		if (this.IsDisposed || this.IsActivated)
-			return false;
-		if (this.IsHibernated)
-			return true;
-
-		this.Logger.LogWarning("Hibernate");
-
-		// update state
-		this.SetValue(IsHibernatedProperty, true);
-
-		// clear images
-		this.CancelReportingRenderedImage();
-		this.ClearRenderedImage();
-
-		// complete
-		return true;
-    }
-
-
 	// Hibernate another session.
 	async Task<bool> HibernateAnotherSessionAsync()
 	{
@@ -3293,17 +3298,56 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (sessionToClearRenderedImage is not null)
 		{
 			this.Logger.LogWarning("Hibernate {sessionToClearRenderedImage}", sessionToClearRenderedImage);
-			if (sessionToClearRenderedImage.Hibernate())
-			{
-				await Task.Delay(1000);
+			if (await sessionToClearRenderedImage.HibernateAsync()) // the images of the session are released before it completes, so no extra waiting is needed for the memory to be reclaimed
 				return true;
-			}
 			this.Logger.LogError("Failed to hibernate {sessionToClearRenderedImage}", sessionToClearRenderedImage);
 			return false;
 		}
 		this.Logger.LogWarning("No deactivated session to hibernate");
 		return false;
 	}
+
+
+	// Hibernate.
+	async Task<bool> HibernateAsync()
+    {
+		// check state
+		if (this.IsDisposed || this.IsActivated)
+			return false;
+		if (this.IsHibernated)
+			return true;
+
+		// cancel reporting, filtering and rendering, then wait for the completion of what is being cancelled
+		this.CancelReportingRenderedImage();
+		await this.CancelFilteringImageAsync();
+		await this.CancelRenderingImageAsync(true);
+
+		// give up if the session has been activated or disposed while waiting, the images belong to the activated session again
+		if (this.IsDisposed)
+			return false;
+		if (this.IsActivated)
+		{
+			this.Logger.LogWarning("Give up hibernation, the session has been activated");
+			return false;
+		}
+		if (this.imageFilteringCompletionSource is not null || this.imageRenderingCompletionSource is not null)
+		{
+			this.Logger.LogWarning("Give up hibernation, a new rendering has been started");
+			return false;
+		}
+		if (this.IsHibernated)
+			return true;
+
+		this.Logger.LogWarning("Hibernate");
+
+		// update state and release the images
+		this.SetValue(IsHibernatedProperty, true);
+		this.DisposeFilteredImage();
+		this.DisposeRenderedImage();
+
+		// complete
+		return true;
+    }
 
 
 	/// <summary>
@@ -3980,7 +4024,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsActivated)
 				this.renderImageAction.Reschedule();
 			else
-				this.ClearRenderedImage();
+				_ = this.ClearRenderedImageAsync();
 			if (this.IsSourceOpened)
 				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
@@ -3996,7 +4040,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.filterImageAction.Schedule();
 			else
 			{
-				this.CancelFilteringImage();
+				_ = this.CancelFilteringImageAsync();
 				this.SynchronizationContext.Post(async () =>
 				{
 					using var cancellationTokenSource = new CancellationTokenSource();
@@ -4226,7 +4270,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsActivated)
 				this.filterImageAction.Reschedule();
 			else
-				this.ClearFilteredImage();
+				_ = this.ClearFilteredImageAsync();
 		}
 		else if (key == SettingKeys.ColorSpaceConversionTiming 
 		         || key == SettingKeys.Render32BitColorsOnly)
@@ -4572,21 +4616,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Start the rendering which is pending because of cancelling the previous rendering.
-	void StartPendingImageRendering()
-	{
-		if (!this.hasPendingImageRendering)
-			return;
-		if (this.IsActivated)
-		{
-			this.Logger.LogWarning("Start next rendering");
-			this.renderImageAction.Schedule();
-		}
-		else
-			this.hasPendingImageRendering = false;
-	}
-
-
 	// Start playing the frame sequence.
 	void StartPlayingFrames()
 	{
@@ -4896,36 +4925,63 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Render image according to current state.
 	async Task RenderImage()
 	{
-		// cancel filtering
-		this.CancelFilteringImage(true);
-
-		// cancel rendering
-		var cancelled = this.CancelRenderingImage();
-
-		// get state
-		var imageDataSource = this.imageDataSource;
-		if (imageDataSource is null)
+		// cancel current filtering and rendering, then wait for the completion of what is being cancelled
+		var requestId = ++this.imageRenderingRequestId;
+		this.hasPendingImageRendering = true;
+		await this.CancelFilteringImageAsync();
+		await this.CancelRenderingImageAsync();
+		if (this.IsDisposed)
 			return;
-		var sourceFileName = this.SourceFileName;
-
-		// render later
-		if (!this.isFirstImageRenderingForSource && cancelled)
+		if (requestId != this.imageRenderingRequestId)
 		{
-			this.Logger.LogWarning("Rendering image, start next rendering after cancellation completed");
-			this.hasPendingImageRendering = true;
+			this.Logger.LogWarning("Give up rendering image, a newer rendering has been requested while waiting for the cancellation");
 			return;
 		}
+
+		// check state
+		if (this.imageDataSource is null)
+			return;
 		if (!this.IsActivated && !this.HasRenderedImage)
 		{
 			if (!this.IsHibernated)
 			{
 				this.Logger.LogWarning("No image rendered before deactivation, hibernate the session");
-				this.Hibernate();
+				await this.HibernateAsync();
 			}
 			return;
 		}
-		this.isFirstImageRenderingForSource = false;
 		this.hasPendingImageRendering = false;
+
+		// render, then release whoever is waiting for the completion of this rendering
+		var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		this.imageRenderingCompletionSource = completionSource;
+		this.SetValue(IsRenderingImageProperty, true);
+		try
+		{
+			await this.RenderImageCore();
+		}
+		finally
+		{
+			this.imageRenderingCompletionSource = null;
+			if (!this.IsDisposed)
+				this.SetValue(IsRenderingImageProperty, false);
+			completionSource.TrySetResult();
+		}
+	}
+
+
+	/// <summary>
+	/// Command to request rendering image.
+	/// </summary>
+	public ICommand RenderImageCommand { get; }
+
+
+	// Render image according to current state, after the state has been checked by RenderImage().
+	async Task RenderImageCore()
+	{
+		// get state
+		var imageDataSource = this.imageDataSource.AsNonNull();
+		var sourceFileName = this.SourceFileName;
 
 		// get source which provides data of frame to render
 		var cancellationTokenSource = new CancellationTokenSource();
@@ -4954,15 +5010,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				this.imageRenderingCancellationTokenSource = null;
 				if (ex is OperationCanceledException)
-				{
 					this.Logger.LogWarning("Preparing frame {frameNumber} of '{sourceFileName}' has been cancelled", frameNumber, sourceFileName);
-					this.StartPendingImageRendering();
-				}
 				else
 				{
 					this.Logger.LogError(ex, "Unable to get source of frame {frameNumber} of '{sourceFileName}'", frameNumber, sourceFileName);
 					this.SetValue(HasRenderingErrorProperty, true);
-					this.ClearRenderedImage();
+					this.DisposeFilteredImage();
+					this.DisposeRenderedImage();
 					this.UpdateCanMoveToFrames(frameNumber, false);
 					this.ScheduleNextFrameForPlayback(); // playback moves to the next frame instead of stopping at the frame which cannot be rendered
 				}
@@ -5117,7 +5171,8 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageRenderingCancellationTokenSource = null;
 				this.Logger.LogError(ex, "Unable to update frame count and index of '{sourceFileName}'", this.SourceFileName);
 				this.SetValue(HasRenderingErrorProperty, true);
-				this.ClearRenderedImage();
+				this.DisposeFilteredImage();
+				this.DisposeRenderedImage();
 				return;
 			}
 			renderingOptions.DataOffset += ((frameDataSize + this.FramePaddingSize) * (frameNumber - 1));
@@ -5125,7 +5180,6 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// update state, image rendered before can still be saved while rendering the next one
 		this.canSaveRenderedImage.Update(this.renderedImageFrame is not null && !this.IsSavingRenderedImage);
-		this.SetValue(IsRenderingImageProperty, true);
 
         // check color space
         var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
@@ -5162,10 +5216,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		catch (Exception ex)
 		{
 			if (ex is TaskCanceledException)
-			{
 				this.Logger.LogWarning("Image rendering for '{sourceFileName}' has been cancelled", sourceFileName);
-				this.StartPendingImageRendering();
-			}
 			else
 			{
 				// log error
@@ -5173,7 +5224,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageRenderingCancellationTokenSource = null;
 
 				// drop cached frames so that the pending report does not resurrect the previous image and reset HasRenderingError
-				this.ClearFilteredImage();
+				this.DisposeFilteredImage();
 				this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 				this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 				this.UpdateCanMoveToFrames(frameNumber, false);
@@ -5182,7 +5233,6 @@ class Session : ViewModel<IAppSuiteApplication>
 
 				// request reporting and update state
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-				this.SetValue(IsRenderingImageProperty, false);
 				this.SetValue(HasRenderingErrorProperty, true);
 			}
 			return;
@@ -5199,15 +5249,12 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageRenderingCancellationTokenSource = null;
 				this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-				this.SetValue(IsRenderingImageProperty, false);
 				if (!this.IsActivated && !this.IsHibernated)
 				{
 					this.Logger.LogWarning("Unable to allocate rendered image frame after deactivation, hibernate the session");
-					this.Hibernate();
+					_ = this.HibernateAsync(); // the images are released after this rendering completes, waiting for it here would wait for this rendering itself
 				}
 			}
-			else
-				this.StartPendingImageRendering();
 			renderedImageFrame?.Dispose();
 			return;
 		}
@@ -5277,7 +5324,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				colorSpaceConvertedImageFrame?.Dispose();
 				renderedImageFrame?.Dispose();
             });
-			this.StartPendingImageRendering();
 			return;
 		}
 		this.imageRenderingCancellationTokenSource = null;
@@ -5312,13 +5358,10 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.RecordRenderingSample(this.ImageWidth, this.ImageHeight, renderStopwatch.ElapsedMilliseconds, imageRenderer.Format.Name);
 
 			// filter image or report now
-			var imageFrameToFilter = isColorSpaceConversionNeeded
-				? colorSpaceConvertedImageFrame
-				: this.renderedImageFrame;
-			if (this.IsFilteringRenderedImageNeeded && imageFrameToFilter is not null)
+			if (this.IsFilteringRenderedImageNeeded && this.SelectImageFrameToFilter() is not null)
 			{
 				this.Logger.LogDebug("Continue filtering image after rendering");
-				_ = this.FilterImage(imageFrameToFilter);
+				_ = this.FilterImage();
 			}
 			else
 			{
@@ -5338,7 +5381,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.Logger.LogError(exception, "Error occurred while rendering image for '{sourceFileName}'", sourceFileName);
 
 			// clear filtered image
-			this.ClearFilteredImage();
+			this.DisposeFilteredImage();
 
 			// update state
 			colorSpaceConvertedImageFrame?.Dispose();
@@ -5351,15 +5394,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canSelectRgbGain.Update(false);
 			Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 		}
-		this.SetValue(IsConvertingColorSpaceProperty, false);
-		this.SetValue(IsRenderingImageProperty, false);
 	}
-
-
-	/// <summary>
-	/// Command to request rendering image.
-	/// </summary>
-	public ICommand RenderImageCommand { get; }
 
 
 	/// <summary>
@@ -5493,8 +5528,17 @@ class Session : ViewModel<IAppSuiteApplication>
 				memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
 				while (memoryUsageToken is null)
 				{
+					// the cached images are kept only to avoid reallocation, releasing them first keeps the image being displayed until
+					// there is really nothing else to release, dropping it also drops the bitmap which the next reporting would reuse
+					if (this.ReleaseCachedImages())
+					{
+						this.Logger.LogWarning("Unable to request memory usage for Avalonia Bitmap, release cached images");
+						memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
+						continue;
+					}
 					if (this.RenderedImage is not null)
 					{
+						this.Logger.LogWarning("Unable to request memory usage for Avalonia Bitmap, drop the image being displayed");
 						this.SetValue(QuarterSizeRenderedImageProperty, null);
 						this.SetValue(RenderedImageProperty, null);
 						memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
@@ -5636,8 +5680,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(QuarterSizeRenderedImageProperty, quarterSizeBitmap);
 			this.SetValue(RenderedImageProperty, bitmap);
 		}
-		else
+		else if (!this.IsFilteringRenderedImageNeeded || this.RenderedImage is null)
 		{
+			// there is nothing to report, the image reported before is kept when the frame is missing only because the filtering
+			// which generates it has not completed yet, clearing it would make the image flicker while filtering continuously
 			this.canSaveFilteredImage.Update(false);
 			this.canSaveRenderedImage.Update(false);
 			this.canSelectColorAdjustment.Update(false);
@@ -6695,6 +6741,18 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand SelectColorAdjustmentCommand { get; }
 
 
+	// Select the image frame which the filters should be applied on, according to the timing of color space conversion.
+	ImageFrame? SelectImageFrameToFilter()
+	{
+		if (this.colorSpaceConvertedImageFrame is not null
+		    && this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
+		{
+			return this.colorSpaceConvertedImageFrame;
+		}
+		return this.renderedImageFrame;
+	}
+
+
 	// Perform auto RGB gain selection.
 	void SelectRgbGain()
 	{
@@ -7140,6 +7198,16 @@ class Session : ViewModel<IAppSuiteApplication>
 		get => this.GetValue(VibranceAdjustmentProperty);
 		set => this.SetValue(VibranceAdjustmentProperty, value);
 	}
+	
+	
+	// Wait for the completion of the image filtering which is in progress.
+	Task WaitForImageFilteringCompletionAsync() =>
+		this.imageFilteringCompletionSource?.Task ?? Task.CompletedTask;
+
+
+	// Wait for the completion of the image rendering which is in progress.
+	Task WaitForImageRenderingCompletionAsync() =>
+		this.imageRenderingCompletionSource?.Task ?? Task.CompletedTask;
 
 
 	/// <summary>

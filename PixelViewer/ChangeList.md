@@ -15,6 +15,7 @@
 + Added support for saving the rendered image while the next image is being rendered.
 + Added support for adjusting the width of the panel of histograms.
 + The application no longer needs to be restarted when the Chinese environment changes after modifying the `Language` option.
++ Prevented the displayed image from being cleared when the memory usage of rendered images reaches the limit.
 
 ## Behavior Changes
 + 
@@ -26,4 +27,5 @@
 + Fixed the incorrect colors of images which use the `BT.601 (525-line, SDTV)` or `BT.601 (625-line, SDTV)` color space caused by an incorrect white point.
 + Fixed the color space of an image being incorrectly encoded when saving it as JPEG or PNG, and incorrectly decoded when reopening it, for color spaces such as `BT.2100 (HLG transfer, HDR-TV)` and `BT.2100 (PQ transfer, HDR-TV)`.
 + Fixed the failure to use `Noto Sans` in the Chinese environment.
++ Fixed the image not being rendered when requesting rendering again before the current rendering completes.
 + Minor bug fixing.

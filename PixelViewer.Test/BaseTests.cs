@@ -3,6 +3,7 @@ using NLog;
 using NUnit.Framework;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -153,6 +154,27 @@ namespace Carina.PixelViewer.Test
 
 
 		/// <summary>
+		/// Wait for the given condition to be met.
+		/// </summary>
+		/// <param name="condition">Condition to check.</param>
+		/// <param name="timeoutMillis">Timeout in milliseconds.</param>
+		/// <returns>True if the condition has been met before the timeout.</returns>
+		/// <remarks>Use this instead of <see cref="WaitForPropertyAsync"/> when the state to wait for is a combination of properties, or when a property may be changed back before it is observed.</remarks>
+		protected static async Task<bool> WaitForConditionAsync(Func<bool> condition, int timeoutMillis)
+		{
+			var stopwatch = Stopwatch.StartNew();
+			while (true)
+			{
+				if (condition())
+					return true;
+				if (stopwatch.ElapsedMilliseconds >= timeoutMillis)
+					return false;
+				await Task.Delay(50, CancellationToken.None);
+			}
+		}
+
+
+		/// <summary>
 		/// Wait for value of given property of an object to become the target value.
 		/// </summary>
 		/// <param name="obj">Object which owns the property.</param>
@@ -168,6 +190,20 @@ namespace Carina.PixelViewer.Test
 #pragma warning disable CS0618
 			return CarinaStudio.Tests.NotifyPropertyChangedExtensions.WaitForPropertyAsync(obj, propertyName, targetValue, timeoutMillis, CancellationToken.None);
 #pragma warning restore CS0618
+		}
+
+
+		/// <summary>
+		/// Wait for the given task to complete.
+		/// </summary>
+		/// <param name="task">Task to wait for.</param>
+		/// <param name="timeoutMillis">Timeout in milliseconds.</param>
+		/// <returns>True if the task has completed before the timeout.</returns>
+		/// <remarks>The result is reported instead of a <see cref="TimeoutException"/> so that the caller can assert on it, blocking asserts such as <see cref="Assert.ThrowsAsync(Type, AsyncTestDelegate)"/> hang when they are used on the application thread.</remarks>
+		protected static async Task<bool> WaitForTaskAsync(Task task, int timeoutMillis)
+		{
+			var completedTask = await Task.WhenAny(task, Task.Delay(timeoutMillis, CancellationToken.None));
+			return completedTask == task;
 		}
 	}
 }

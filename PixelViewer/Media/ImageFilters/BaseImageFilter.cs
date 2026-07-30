@@ -1,4 +1,6 @@
-﻿using CarinaStudio;
+﻿//#define SIMULATE_SLOW_IMAGE_FILTERING
+
+using CarinaStudio;
 using CarinaStudio.AppSuite;
 using Microsoft.Extensions.Logging;
 using System;
@@ -13,6 +15,12 @@ namespace Carina.PixelViewer.Media.ImageFilters;
 /// </summary>
 abstract class BaseImageFilter<TParams> : IImageFilter<TParams> where TParams : ImageFilterParams
 {
+#if SIMULATE_SLOW_IMAGE_FILTERING
+    // Constants.
+    const int SimulatedMinFilteringDuration = 1000;
+#endif
+
+
     /// <summary>
 	/// Initialize new <see cref="BaseImageFilter{TParams}"/> instance.
 	/// </summary>
@@ -33,6 +41,11 @@ abstract class BaseImageFilter<TParams> : IImageFilter<TParams> where TParams : 
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
 
+#if SIMULATE_SLOW_IMAGE_FILTERING
+        // start measuring the duration of filtering to simulate slow filtering
+        var simulationStopwatch = Stopwatch.StartNew();
+#endif
+
         // apply filter
         parameters = (TParams)parameters.Clone();
         using var sharedSource = source.Share();
@@ -52,6 +65,18 @@ abstract class BaseImageFilter<TParams> : IImageFilter<TParams> where TParams : 
             if (ex is TaskCanceledException || !cancellationToken.IsCancellationRequested)
                 throw;
         }
+
+#if SIMULATE_SLOW_IMAGE_FILTERING
+        // simulate slow filtering, the delay observes the cancellation token so that a simulated filtering can still be cancelled
+        var simulationDelay = SimulatedMinFilteringDuration - (int)simulationStopwatch.ElapsedMilliseconds;
+        if (simulationDelay > 0)
+        {
+            this.Logger.LogWarning("Simulate slow filtering, delay: {delay} ms", simulationDelay);
+            await Task.Delay(simulationDelay, cancellationToken);
+        }
+#endif
+
+        // check cancellation
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
     }

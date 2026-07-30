@@ -1,4 +1,6 @@
-﻿using CarinaStudio;
+﻿//#define SIMULATE_SLOW_IMAGE_RENDERING
+
+using CarinaStudio;
 using CarinaStudio.AppSuite;
 using CarinaStudio.IO;
 using CarinaStudio.Threading.Tasks;
@@ -18,6 +20,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 /// </summary>
 abstract class BaseImageRenderer : IImageRenderer
 {
+#if SIMULATE_SLOW_IMAGE_RENDERING
+	// Constants.
+	const int SimulatedMinRenderingDuration = 1000;
+#endif
+
+
 	// Static fields.
 	static readonly TaskFactory RenderingTaskFactory = new(new FixedThreadsTaskScheduler(Math.Min(2, Environment.ProcessorCount)));
 
@@ -307,6 +315,11 @@ abstract class BaseImageRenderer : IImageRenderer
 		using var sharedSource = source.Share();
 		using var sharedBitmapBuffer = bitmapBuffer.Share();
 
+#if SIMULATE_SLOW_IMAGE_RENDERING
+		// start measuring the duration of rendering to simulate slow rendering
+		var simulationStopwatch = Stopwatch.StartNew();
+#endif
+
 		// open stream
 		var stream = await sharedSource.OpenStreamAsync(StreamAccess.Read);
 		if (cancellationToken.IsCancellationRequested)
@@ -316,9 +329,10 @@ abstract class BaseImageRenderer : IImageRenderer
 		}
 
 		// render
+		ImageRenderingResult result;
 		try
         {
-			return await RenderingTaskFactory.StartNew(() =>
+			result = await RenderingTaskFactory.StartNew(() =>
 			{
 				if (renderingOptions.DataOffset > 0)
 					stream.Seek(renderingOptions.DataOffset, SeekOrigin.Begin);
@@ -333,6 +347,19 @@ abstract class BaseImageRenderer : IImageRenderer
         {
 			Global.RunWithoutErrorAsync(stream.Dispose);
 		}
+
+#if SIMULATE_SLOW_IMAGE_RENDERING
+		// simulate slow rendering, the delay observes the cancellation token so that a simulated rendering can still be cancelled
+		var simulationDelay = SimulatedMinRenderingDuration - (int)simulationStopwatch.ElapsedMilliseconds;
+		if (simulationDelay > 0)
+		{
+			this.Logger.LogWarning("Simulate slow rendering, delay: {delay} ms", simulationDelay);
+			await Task.Delay(simulationDelay, cancellationToken);
+		}
+#endif
+
+		// complete
+		return result;
 	}
 
 
