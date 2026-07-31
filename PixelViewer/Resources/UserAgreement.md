@@ -1,7 +1,7 @@
 # PixelViewer User Agreement
  ---
-+ Version: 1.7
-+ Update: 2026/5/4
++ Version: 1.8
++ Update: 2026/7/31
 
 This is the PixelViewer User Agreement which you need to read before using PixelViewer. The User Agreement may be updated in the future and you can check it on the PixelViewer website. It means that you have agreed to this User Agreement once you start using PixelViewer.
 
@@ -14,7 +14,7 @@ PixelViewer is an open-source project of Carina Studio. The PixelViewer mentione
 
 If you build PixelViewer from source code, your use of that build is governed solely by the [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license, not by this User Agreement.
 
-This User Agreement will apply to PixelViewer 2026.0 and any future versions until the version specified in the next User Agreement update.
+This User Agreement will apply to PixelViewer 2026.1 and any future versions until the version specified in the next User Agreement update.
 
 
 ## Debug Mode
@@ -80,9 +80,7 @@ To the fullest extent permitted by applicable law, in no event shall Carina Stud
 
 
 ## License and Copyright
-PixelViewer is an open-source project of Carina Studio under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license. All icons except for application icon are distributed under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE), [CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) or [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) license. Please refer to [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks), [SVG Repo](https://www.svgrepo.com/), [Icons8](https://icons8.com/), [Google Fonts Icons](https://fonts.google.com/icons), [Phosphor Icons](https://phosphoricons.com/) and [Tabler Icons](https://tabler.io/icons) for more information of icons and their licenses.
-
-Application icon is made by [Freepik](https://www.freepik.com/) from [Flaticon](https://www.flaticon.com/).
+PixelViewer is an open-source project of Carina Studio under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license. All icons are distributed under [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE), [CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) or [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) license. Please refer to [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks), [SVG Repo](https://www.svgrepo.com/), [Icons8](https://icons8.com/), [Google Fonts Icons](https://fonts.google.com/icons), [Phosphor Icons](https://phosphoricons.com/) and [Tabler Icons](https://tabler.io/icons) for more information of icons and their licenses.
 
 Built-in fonts **'Noto Sans SC'** and **'Noto Sans TC'** are distributed under [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL).
 

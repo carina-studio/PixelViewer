@@ -1,7 +1,7 @@
 # PixelViewer 用户协议
  ---
-+ 版本：1.7
-+ 更新时间：2026/5/4
++ 版本：1.8
++ 更新时间：2026/7/31
 
 这是 PixelViewer 的用户协议，您应该要在使用 PixelViewer 之前详细阅读本协议。 用户协议可能会在未来有所更新，您可以在 PixelViewer 网站中查看。 当您开始使用 PixelViewer 表示您同意本用户协议。
 
@@ -14,7 +14,7 @@ PixelViewer 为 Carina Studio 之开放源代码项目，以下所指 PixelViewe
 
 若您通过源代码自行构建 PixelViewer，您使用该构建之版本仅受 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权之约束，不受本用户协议之约束。
 
-本用户协议适用于您使用 PixelViewer 2026.0 及下一份用户协议所指定之版本之间 (但不包括) 的所有版本。
+本用户协议适用于您使用 PixelViewer 2026.1 及下一份用户协议所指定之版本之间 (但不包括) 的所有版本。
 
 
 ## 调试模式
@@ -80,9 +80,7 @@ PixelViewer 系以 **「现状」** 提供，不附带任何明示或暗示之�
 
 
 ## 授权及版权
-PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权之下的开放源代码项目。除了应用程序图标外，所有图标皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE)、[CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 或 [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) 授权下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks)、[SVG Repo](https://www.svgrepo.com/)、[Icons8](https://icons8.com/)、[Google Fonts Icons](https://fonts.google.com/icons)、[Phosphor Icons](https://phosphoricons.com/) 及 [Tabler Icons](https://tabler.io/icons) 了解更多图标相关信息与授权。
-
-应用程序图标由 [Freepik](https://www.freepik.com/) 提供并发布于 [Flaticon](https://www.flaticon.com/)。
+PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权之下的开放源代码项目。所有图标皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE)、[CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 或 [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) 授权下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks)、[SVG Repo](https://www.svgrepo.com/)、[Icons8](https://icons8.com/)、[Google Fonts Icons](https://fonts.google.com/icons)、[Phosphor Icons](https://phosphoricons.com/) 及 [Tabler Icons](https://tabler.io/icons) 了解更多图标相关信息与授权。
 
 内建字体 **「Noto Sans SC」** 及 **「Noto Sans TC」** 在 [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) 授权下使用及发布。
 
