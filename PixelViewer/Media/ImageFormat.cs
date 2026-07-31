@@ -13,6 +13,10 @@ namespace Carina.PixelViewer.Media;
 class ImageFormat : IEquatable<ImageFormat>
 {
 	/// <summary>
+	/// Maximum length of name of user-defined format for displaying to user.
+	/// </summary>
+	public const int MaxDisplayNameLength = 1024;
+	/// <summary>
 	/// Maximum number of planes defined for each format.
 	/// </summary>
 	public const int MaxPlaneCount = 4;
@@ -37,13 +41,13 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// Initialize new <see cref="ImageFormat"/> instance which is defined by user.
 	/// </summary>
 	/// <param name="id">Identifier of format, which is also its <see cref="Name"/>.</param>
-	/// <param name="displayName">Name of format for displaying to user.</param>
+	/// <param name="displayName">Name of format for displaying to user. It will be trimmed if its length exceeds <see cref="MaxDisplayNameLength"/>.</param>
 	/// <param name="hasMultiByteOrderings">Whether multiple byte orderings are supported by this format or not.</param>
 	/// <param name="planeDescriptors">Plane descriptors.</param>
 	/// <remarks>The identifier is stable across renaming, so it is the value persisted by profiles and sessions to refer to the format. A user-defined format registers no keyword, it never takes part in detecting format by file name.</remarks>
 	public ImageFormat(string id, string displayName, bool hasMultiByteOrderings, IList<ImagePlaneDescriptor> planeDescriptors) : this(ImageFormatCategory.UserDefined, id, hasMultiByteOrderings, planeDescriptors, [])
 	{
-		this.displayName = displayName;
+		this.displayName = TrimDisplayName(displayName);
 	}
 
 
@@ -198,6 +202,27 @@ class ImageFormat : IEquatable<ImageFormat>
 	/// Get number of planes of this format.
 	/// </summary>
 	public int PlaneCount => this.PlaneDescriptors.Count;
+
+
+	/// <summary>
+	/// Trim the given name for displaying to user so that its length doesn't exceed the given maximum length.
+	/// </summary>
+	/// <param name="displayName">Name to trim.</param>
+	/// <param name="maxLength">Maximum length of name. <see cref="MaxDisplayNameLength"/> in default.</param>
+	/// <returns>The trimmed name, or the given name if it is short enough.</returns>
+	/// <remarks>A name which is too long is trimmed instead of being rejected, because it can only come from an edited or crafted file and the format itself is still usable.</remarks>
+	internal static string TrimDisplayName(string displayName, int maxLength = MaxDisplayNameLength)
+	{
+		// no need to trim
+		if (displayName.Length <= maxLength)
+			return displayName;
+
+		// keep a surrogate pair complete, trimming in the middle of one generates an unpaired surrogate
+		var length = char.IsHighSurrogate(displayName[maxLength - 1])
+			? maxLength - 1
+			: maxLength;
+		return displayName[..length];
+	}
 
 
 	/// <summary>

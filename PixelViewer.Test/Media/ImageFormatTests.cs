@@ -1,6 +1,7 @@
 using Carina.PixelViewer.Media;
 using NUnit.Framework;
 using System;
+using System.Linq;
 
 namespace Carina.PixelViewer.Test.Media;
 
@@ -37,6 +38,52 @@ class ImageFormatTests
 		// check that a built-in format with no string resource falls back to its name, no application is available in this fixture
 		var builtInFormat = new ImageFormat(ImageFormatCategory.Luminance, $"Built-In {id}", [ new ImagePlaneDescriptor(1) ]);
 		Assert.That(builtInFormat.DisplayName, Is.EqualTo(builtInFormat.Name));
+	}
+
+
+	/// <summary>
+	/// Test for trimming the name for displaying to user which is too long.
+	/// </summary>
+	[Test]
+	public void TrimmingDisplayNameTest()
+	{
+		// check that a name which is short enough is kept as-is
+		var id = Guid.NewGuid().ToString();
+		var name = new string('a', ImageFormat.MaxDisplayNameLength);
+		var format = CreateUserDefinedFormat(id, name);
+		try
+		{
+			Assert.That(format.DisplayName, Is.EqualTo(name));
+		}
+		finally
+		{
+			ImageFormat.Unregister(format);
+		}
+
+		// check that a name which is too long is trimmed instead of being rejected
+		id = Guid.NewGuid().ToString();
+		format = CreateUserDefinedFormat(id, new string('a', ImageFormat.MaxDisplayNameLength + 100));
+		try
+		{
+			Assert.That(format.DisplayName.Length, Is.EqualTo(ImageFormat.MaxDisplayNameLength));
+		}
+		finally
+		{
+			ImageFormat.Unregister(format);
+		}
+
+		// check that trimming never splits a surrogate pair, the emoji starts right at the last position which is kept
+		id = Guid.NewGuid().ToString();
+		format = CreateUserDefinedFormat(id, $"{new string('a', ImageFormat.MaxDisplayNameLength - 1)}\U0001F600bbbb");
+		try
+		{
+			Assert.That(format.DisplayName.Length, Is.EqualTo(ImageFormat.MaxDisplayNameLength - 1));
+			Assert.That(format.DisplayName.Any(char.IsSurrogate), Is.False);
+		}
+		finally
+		{
+			ImageFormat.Unregister(format);
+		}
 	}
 
 
