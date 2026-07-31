@@ -946,6 +946,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	DoubleAnimator? imageScalingAnimator;
 	bool isImageDimensionsEvaluationNeeded = true;
 	bool isImagePlaneOptionsResetNeeded = true;
+	bool isImageRenderingForced;
 	readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 	readonly ScheduledAction playFrameAction;
 	readonly SortedObservableList<ImageRenderingProfile> profiles = new(CompareProfiles);
@@ -2111,6 +2112,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 		this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
 		this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
+		this.isImageRenderingForced = false;
 		if (!disposing)
 		{
 			this.ResetValue(ImageDisplayRotationProperty);
@@ -3798,8 +3800,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 
 		// apply swapped format
-		if (e.PropertyName == nameof(IImageRenderer.Format))
-			this.ApplyImageRendererFormat(imageRenderer);
+		switch (e.PropertyName)
+		{
+			case nameof(IImageRenderer.Format):
+				this.isImageRenderingForced = true;
+				this.ApplyImageRendererFormat(imageRenderer);
+				break;
+		}
 	}
 
 
@@ -5169,8 +5176,8 @@ class Session : ViewModel<IAppSuiteApplication>
         // check color space
         var renderedColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
 
-		// check whether rendering is needed or not
-		var isRenderingNeeded = this.renderedImageFrame?.Let(it =>
+		// check whether rendering is needed or not, rendering by an edited renderer is forced because the parameters below cannot tell that the image it generates has changed
+		var isRenderingNeeded = this.isImageRenderingForced || (this.renderedImageFrame?.Let(it =>
 		{
 			if (it.FrameNumber != frameNumber)
 				return true;
@@ -5189,7 +5196,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					return true;
             }
 			return false;
-		}) ?? true;
+		}) ?? true);
 		
 		// select rendered format
 		BitmapFormat renderedFormat;
@@ -5328,6 +5335,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			if (renderedImageFrame is not null)
 			{
+				this.isImageRenderingForced = false;
 				this.renderedImageFrame?.Dispose();
 				this.renderedImageFrame = renderedImageFrame;
 			}
