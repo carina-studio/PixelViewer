@@ -10,15 +10,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 /// <summary>
 /// Implementation of <see cref="IImageRenderer"/> which renders image with 14-bit Bayer Filter MIPI RAW.
 /// </summary>
-class BayerPattern14MipiImageRenderer : BayerPatternImageRenderer
+class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_14_MIPI", true, new ImagePlaneDescriptor(0, 14, 14, true), [ "MIPI14", "RAW14" ]))
 {
-    /// <summary>
-    /// Initialize new <see cref="BayerPattern12MipiImageRenderer"/> instance.
-    /// </summary>
-    public BayerPattern14MipiImageRenderer() : base(new ImageFormat(ImageFormatCategory.Bayer, "Bayer_Pattern_14_MIPI", true, new ImagePlaneDescriptor(0, 14, 14, true), new[]{ "MIPI14", "RAW14" }))
-    { }
-    
-    
     /// <inheritdoc/>
     public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => new List<ImagePlaneOptions>().Also(it =>
     {
@@ -51,7 +44,7 @@ class BayerPattern14MipiImageRenderer : BayerPatternImageRenderer
     
     
     /// <inheritdoc/>
-	protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int, int, int> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
+	protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 	{
 		// get parameters
 		var width = bitmapBuffer.Width & 0x7ffffffc;
@@ -137,7 +130,7 @@ class BayerPattern14MipiImageRenderer : BayerPatternImageRenderer
 							
 							// 1st pixel
 							var b2 = (byte)((extraBits >> 18) & 0x3f);
-							var colorComponent = colorComponentSelector(x, y);
+							var colorComponent = (int)colorComponentSelector(x, y);
 							var color = bitsCombinationFunc(packedPixelsPtr[0], b2);
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
@@ -158,7 +151,7 @@ class BayerPattern14MipiImageRenderer : BayerPatternImageRenderer
 
 							// 2nd pixel
 							b2 = (byte)((extraBits >> 12) & 0x3f);
-							colorComponent = colorComponentSelector(x, y);
+							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[1], b2);
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
@@ -179,7 +172,7 @@ class BayerPattern14MipiImageRenderer : BayerPatternImageRenderer
 							
 							// 3rd pixel
 							b2 = (byte)((extraBits >> 6) & 0x3f);
-							colorComponent = colorComponentSelector(x, y);
+							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[2], b2);
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
@@ -200,7 +193,7 @@ class BayerPattern14MipiImageRenderer : BayerPatternImageRenderer
 							
 							// 4th pixel
 							b2 = (byte)(extraBits & 0x3f);
-							colorComponent = colorComponentSelector(x, y);
+							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[3], b2);
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];

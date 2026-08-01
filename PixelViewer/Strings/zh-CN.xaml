@@ -109,6 +109,9 @@
 	<sys:String x:Key="String/ContrastTransformationFunction.Linear">线性转换</sys:String>
 	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange 插值法</sys:String>
 
+	<!-- DemosaicingAlgorithm -->
+	<sys:String x:Key="String/DemosaicingAlgorithm.Bilinear">双线性</sys:String>
+
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">所有文件</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows 位图</sys:String>

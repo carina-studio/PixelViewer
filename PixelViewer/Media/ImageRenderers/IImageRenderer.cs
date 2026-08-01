@@ -1,5 +1,6 @@
 ﻿using Avalonia;
 using Avalonia.Media.Imaging;
+using Carina.PixelViewer.Media.Demosaicing;
 using CarinaStudio;
 using System;
 using System.Collections.Generic;
@@ -325,9 +326,9 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
-	/// Whether demosaicing is needed to be performed or not.
+	/// Algorithm to perform demosaicing, or Null if demosaicing is not needed.
 	/// </summary>
-	public bool Demosaicing { get; set; }
+	public DemosaicingAlgorithm? Demosaicing { get; set; }
 
 
 	/// <inheritdoc/>

@@ -5,6 +5,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.Demosaicing;
 using Carina.PixelViewer.Media.ImageEncoders;
 using Carina.PixelViewer.Media.ImageFilters;
 using Carina.PixelViewer.Media.ImageRenderers;
@@ -5138,7 +5139,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 			ByteOrdering = this.ByteOrdering,
 			DataOffset = this.DataOffset,
-			Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing),
+			Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing) ? DemosaicingAlgorithms.Default : null,
 			GreenGain = isRgbGainSupported ? this.GreenColorGain : 1.0,
 			RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
 			YuvToBgraConverter = this.YuvToBgraConverter,

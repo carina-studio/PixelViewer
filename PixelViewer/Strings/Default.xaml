@@ -131,6 +131,9 @@
 	<sys:String x:Key="String/ContrastTransformationFunction.Linear">Linear Transformation</sys:String>
 	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange Interpolation</sys:String>
 
+	<!-- DemosaicingAlgorithm -->
+	<sys:String x:Key="String/DemosaicingAlgorithm.Bilinear">Bilinear</sys:String>
+
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All Files</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows Bitmap</sys:String>
