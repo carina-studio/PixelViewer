@@ -171,6 +171,27 @@ static class ImageRenderingProfiles
     }
 
 
+    // Save all user-defined profiles to files.
+    public static async Task SaveUserDefinedProfilesAsync()
+    {
+        // check state
+        app.AsNonNull().VerifyAccess();
+
+        // save profiles, keep saving the rest of profiles when one of them failed
+        foreach (var profile in userDefinedProfiles.ToArray())
+        {
+            try
+            {
+                await profile.SaveAsync();
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError(ex, "Failed to save user-defined profile '{name}'", profile.Name);
+            }
+        }
+    }
+
+
     // Check whether given name of profile is valid or not.
     public static bool ValidateNewUserDefinedProfileName(string name) => userDefinedProfiles.FirstOrDefault(it => it.Type == ImageRenderingProfileType.UserDefined && it.Name == name) == null;
 
