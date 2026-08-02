@@ -122,6 +122,11 @@ namespace Carina.PixelViewer
 
 
 		/// <inheritdoc/>
+		public override bool CheckApplicationCultureSupport(ApplicationCulture culture) =>
+			culture != ApplicationCulture.JA_JP && base.CheckApplicationCultureSupport(culture);
+
+
+		/// <inheritdoc/>
         public override ApplicationInfo CreateApplicationInfoViewModel() => new AppInfo();
 
 
