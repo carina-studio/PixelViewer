@@ -357,9 +357,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<long> DataOffsetProperty = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
 	/// <summary>
-	/// Property of <see cref="Demosaicing"/>.
+	/// Property of <see cref="DemosaicingAlgorithm"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> DemosaicingProperty = ObservableProperty.Register<Session, bool>(nameof(Demosaicing), true);
+	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProperty = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), DemosaicingAlgorithms.Default);
 	/// <summary>
 	/// Property of <see cref="FitImageToViewport"/>.
 	/// </summary>
@@ -1652,7 +1652,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(UseLinearColorSpaceProperty, profile.UseLinearColorSpace);
 
 			// demosaicing
-			this.SetValue(DemosaicingProperty, profile.Demosaicing);
+			this.SetValue(DemosaicingAlgorithmProperty, profile.DemosaicingAlgorithm ?? DemosaicingAlgorithms.Bypass);
 
 			// dimensions
 			this.SetValue(ImageWidthProperty, profile.Width);
@@ -2421,10 +2421,22 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get or set whether demosaicing is needed to be performed or not.
 	/// </summary>
+	/// <remarks>The property is the on/off view of <see cref="DemosaicingAlgorithm"/>, setting it to true selects <see cref="DemosaicingAlgorithms.Default"/>.</remarks>
 	public bool Demosaicing
 	{
-		get => this.GetValue(DemosaicingProperty);
-		set => this.SetValue(DemosaicingProperty, value);
+		get => this.DemosaicingAlgorithm != DemosaicingAlgorithms.Bypass;
+		set => this.SetValue(DemosaicingAlgorithmProperty, value ? DemosaicingAlgorithms.Default : DemosaicingAlgorithms.Bypass);
+	}
+
+
+	/// <summary>
+	/// Get or set <see cref="DemosaicingAlgorithm"/> to perform demosaicing.
+	/// </summary>
+	/// <remarks><see cref="DemosaicingAlgorithms.Bypass"/> means that demosaicing will not be performed.</remarks>
+	public DemosaicingAlgorithm DemosaicingAlgorithm
+	{
+		get => this.GetValue(DemosaicingAlgorithmProperty);
+		set => this.SetValue(DemosaicingAlgorithmProperty, value);
 	}
 
 
@@ -3911,8 +3923,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.renderImageAction.Reschedule();
 		}
-		else if (property == DemosaicingProperty)
+		else if (property == DemosaicingAlgorithmProperty)
 		{
+			// notify the change of on/off state of demosaicing
+			this.OnPropertyChanged(nameof(this.Demosaicing));
+
+			// re-render the image
 			if (this.IsDemosaicingSupported)
 				this.renderImageAction.Reschedule();
 		}
@@ -5139,7 +5155,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 			ByteOrdering = this.ByteOrdering,
 			DataOffset = this.DataOffset,
-			Demosaicing = (this.IsDemosaicingSupported && this.Demosaicing) ? DemosaicingAlgorithms.Default : null,
+			Demosaicing = (this.IsDemosaicingSupported && this.DemosaicingAlgorithm != DemosaicingAlgorithms.Bypass) ? this.DemosaicingAlgorithm : null,
 			GreenGain = isRgbGainSupported ? this.GreenColorGain : 1.0,
 			RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
 			YuvToBgraConverter = this.YuvToBgraConverter,
@@ -5915,7 +5931,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var yuvToBgraConverter = this.YuvToBgraConverter;
 		var colorSpace = ColorSpace.Default;
 		var useLinearColorSpace = false;
-		var demosaicing = true;
+		var demosaicingAlgorithm = DemosaicingAlgorithms.Default;
 		var width = 1;
 		var height = 1;
 		var effectiveBits = new int[this.effectiveBits.Length];
@@ -5939,8 +5955,14 @@ class Session : ViewModel<IAppSuiteApplication>
 			ColorSpace.TryGetColorSpace(jsonProperty.GetString().AsNonNull(), out colorSpace);
 		if (savedState.TryGetProperty(nameof(UseLinearColorSpace), out jsonProperty))
 			useLinearColorSpace = jsonProperty.ValueKind == JsonValueKind.True;
-		if (savedState.TryGetProperty(nameof(Demosaicing), out jsonProperty))
-			demosaicing = jsonProperty.ValueKind != JsonValueKind.False;
+		if (savedState.TryGetProperty(nameof(DemosaicingAlgorithm), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
+		{
+			var demosaicingAlgorithmId = jsonProperty.GetString();
+			if (!DemosaicingAlgorithms.TryGetById(demosaicingAlgorithmId, out demosaicingAlgorithm))
+				this.Logger.LogWarning("Unknown demosaicing algorithm to restore, id: {id}", demosaicingAlgorithmId);
+		}
+		else if (savedState.TryGetProperty("Demosaicing", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.False)
+			demosaicingAlgorithm = DemosaicingAlgorithms.Bypass;
 		if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
 			jsonProperty.TryGetInt32(out width);
 		if (savedState.TryGetProperty(nameof(ImageHeight), out jsonProperty))
@@ -6130,7 +6152,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(YuvToBgraConverterProperty, yuvToBgraConverter);
 		this.SetValue(ColorSpaceProperty, colorSpace);
 		this.SetValue(UseLinearColorSpaceProperty, useLinearColorSpace);
-		this.SetValue(DemosaicingProperty, demosaicing);
+		this.SetValue(DemosaicingAlgorithmProperty, demosaicingAlgorithm);
 		this.SetValue(ImageWidthProperty, width);
 		this.SetValue(ImageHeightProperty, height);
 		for (var i = effectiveBits.Length - 1; i >= 0; --i)
@@ -6522,7 +6544,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteString(nameof(ColorSpace), this.ColorSpace.Name);
 		if (this.UseLinearColorSpace)
 			writer.WriteBoolean(nameof(UseLinearColorSpace), true);
-		writer.WriteBoolean(nameof(Demosaicing), this.Demosaicing);
+		writer.WriteString(nameof(DemosaicingAlgorithm), this.DemosaicingAlgorithm.Id);
 		writer.WriteNumber(nameof(ImageWidth), this.ImageWidth);
 		writer.WriteNumber(nameof(ImageHeight), this.ImageHeight);
 		writer.WritePropertyName("EffectiveBits");
@@ -7245,8 +7267,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		profile.BayerPattern = this.BayerPattern;
 		profile.YuvToBgraConverter = this.YuvToBgraConverter;
 		if (this.IsColorSpaceManagementEnabled)
+		{
 			profile.ColorSpace = this.ColorSpace;
-		profile.Demosaicing = this.Demosaicing;
+			profile.UseLinearColorSpace = this.UseLinearColorSpace;
+		}
+		profile.DemosaicingAlgorithm = this.DemosaicingAlgorithm;
 		profile.Width = this.ImageWidth;
 		profile.Height = this.ImageHeight;
 		profile.EffectiveBits = this.effectiveBits;

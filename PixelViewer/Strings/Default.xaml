@@ -133,6 +133,7 @@
 
 	<!-- DemosaicingAlgorithm -->
 	<sys:String x:Key="String/DemosaicingAlgorithm.Bilinear">Bilinear</sys:String>
+	<sys:String x:Key="String/DemosaicingAlgorithm.Bypass">None</sys:String>
 
 	<!-- FileType -->
 	<sys:String x:Key="String/FileType.All">All Files</sys:String>

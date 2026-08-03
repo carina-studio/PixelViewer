@@ -28,4 +28,5 @@
 + Fixed the color space of an image being incorrectly encoded when saving it as JPEG or PNG, and incorrectly decoded when reopening it, for color spaces such as `BT.2100 (HLG transfer, HDR-TV)` and `BT.2100 (PQ transfer, HDR-TV)`.
 + Fixed the failure to use `Noto Sans` in the Chinese environment.
 + Fixed the image not being rendered when requesting rendering again before the current rendering completes.
++ Fixed the `Treat as Linear Color Space` option being turned off automatically after saving the rendering profile.
 + Minor bug fixing.

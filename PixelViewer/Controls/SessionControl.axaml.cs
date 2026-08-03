@@ -184,6 +184,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction updateSelectedImageDisplayPixelBoundsAction;
 	readonly ScheduledAction updateStatusBarStateAction;
 	bool useSmallRenderedImage;
+	readonly ComboBox yuvToBgraConverterComboBox;
 
 
 	/// <summary>
@@ -460,6 +461,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.Get<Button>("testButton").IsVisible = true;
 #endif
 		SetupFilterParamsSliderAndButtons("vibranceAdjustment", ColorAdjustmentGroup);
+		this.yuvToBgraConverterComboBox = this.Get<ComboBox>(nameof(yuvToBgraConverterComboBox));
 
 		// load resources
 		this.minImageViewerSizeToHidePanels = this.Application.FindResourceOrDefault<double>("Double/SessionControl.ImageViewer.MinSizeToHidePanels");
@@ -902,9 +904,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Application string resources updated.
 	void OnApplicationStringsUpdated(object? sender, EventArgs e)
 	{
-		var imageRendererTemplate = this.imageRendererComboBox.ItemTemplate;
-		this.imageRendererComboBox.ItemTemplate = null;
-		this.imageRendererComboBox.ItemTemplate = imageRendererTemplate;
+		// refresh names shown by combo boxes, the names are resolved from string resources without change notification
+		RefreshComboBoxContent(this.colorSpaceComboBox);
+		RefreshComboBoxContent(this.imageRendererComboBox);
+		RefreshComboBoxContent(this.yuvToBgraConverterComboBox);
 	}
 	
 	
@@ -1022,13 +1025,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Called when custom name of color space changed.
-    void OnColorSpaceCustomNameChanged(object? sender, Media.ColorSpaceEventArgs e)
-    {
-        // [Workaround] Force refreshing content of ComboBox
-        var template = this.colorSpaceComboBox.ItemTemplate;
-        this.colorSpaceComboBox.ItemTemplate = null;
-        this.colorSpaceComboBox.ItemTemplate = template;
-    }
+    void OnColorSpaceCustomNameChanged(object? sender, Media.ColorSpaceEventArgs e) =>
+        RefreshComboBoxContent(this.colorSpaceComboBox);
 
 
     // Called when detached from logical tree.
@@ -2186,6 +2184,15 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <see cref="ICommand"/> to open source file.
 	/// </summary>
 	public ICommand OpenSourceFileCommand { get; }
+
+
+	// [Workaround] Force refreshing content shown by given combo box, including the content of its selection box.
+	static void RefreshComboBoxContent(ComboBox comboBox)
+	{
+		var template = comboBox.ItemTemplate;
+		comboBox.ItemTemplate = null;
+		comboBox.ItemTemplate = template;
+	}
 
 
 	// Report viewport of image to Session.

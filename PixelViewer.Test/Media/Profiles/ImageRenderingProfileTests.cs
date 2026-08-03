@@ -1,4 +1,5 @@
 using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.Demosaicing;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using NUnit.Framework;
@@ -31,7 +32,7 @@ class ImageRenderingProfileTests : BaseTests
 		(nameof(ImageRenderingProfile.ByteOrdering), profile => profile.ByteOrdering = profile.ByteOrdering == ByteOrdering.BigEndian ? ByteOrdering.LittleEndian : ByteOrdering.BigEndian),
 		(nameof(ImageRenderingProfile.ColorSpace), profile => profile.ColorSpace = profile.ColorSpace.Equals(ColorSpace.Srgb) ? ColorSpace.AdobeRGB_1998 : ColorSpace.Srgb),
 		(nameof(ImageRenderingProfile.DataOffset), profile => profile.DataOffset += 1),
-		(nameof(ImageRenderingProfile.Demosaicing), profile => profile.Demosaicing = !profile.Demosaicing),
+		(nameof(ImageRenderingProfile.DemosaicingAlgorithm), profile => profile.DemosaicingAlgorithm = profile.DemosaicingAlgorithm is null ? DemosaicingAlgorithms.Bilinear : DemosaicingAlgorithms.Bypass),
 		(nameof(ImageRenderingProfile.EffectiveBits), profile => profile.EffectiveBits = IncreaseFirstElement(profile.EffectiveBits)),
 		(nameof(ImageRenderingProfile.FlipX), profile => profile.FlipX = !profile.FlipX),
 		(nameof(ImageRenderingProfile.FlipY), profile => profile.FlipY = !profile.FlipY),
