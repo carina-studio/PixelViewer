@@ -359,7 +359,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="DemosaicingAlgorithm"/>.
 	/// </summary>
-	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProperty = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), DemosaicingAlgorithms.Default);
+	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProperty = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), Media.Demosaicing.DemosaicingAlgorithms.Default, coerce: (session, it) => it.IsBayerPatternSupported(session.BayerPattern) ? it : SelectDefaultDemosaicingAlgorithm(session.BayerPattern));
 	/// <summary>
 	/// Property of <see cref="FitImageToViewport"/>.
 	/// </summary>
@@ -915,6 +915,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return 1;
 		return string.CompareOrdinal(lhs.Name, rhs.Name);
 	});
+	readonly ObservableList<DemosaicingAlgorithm> demosaicingAlgorithms = new();
 	readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
 	readonly Observer<ColorSpace> effectiveScreenColorSpaceObserver;
 	IDisposable? effectiveScreenColorSpaceObserverToken;
@@ -1302,6 +1303,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		(ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
 			it.CollectionChanged += this.OnAllColorSpacesChanged);
 
+		// attach to demosaicing algorithms
+		this.DemosaicingAlgorithms = ListExtensions.AsReadOnly(this.demosaicingAlgorithms);
+		this.UpdateDemosaicingAlgorithms();
+		(Media.Demosaicing.DemosaicingAlgorithms.All as INotifyCollectionChanged)?.Let(it =>
+			it.CollectionChanged += this.OnAllDemosaicingAlgorithmsChanged);
+
 		// select default YUV to RGB converter
 		if (YuvToBgraConverter.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion), out var converter))
 			this.SetValue(YuvToBgraConverterProperty, converter);
@@ -1653,7 +1660,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(UseLinearColorSpaceProperty, profile.UseLinearColorSpace);
 
 			// demosaicing
-			this.SetValue(DemosaicingAlgorithmProperty, profile.DemosaicingAlgorithm ?? DemosaicingAlgorithms.Bypass);
+			this.SetValue(DemosaicingAlgorithmProperty, profile.DemosaicingAlgorithm ?? Media.Demosaicing.DemosaicingAlgorithms.Bypass);
 
 			// dimensions
 			this.SetValue(ImageWidthProperty, profile.Width);
@@ -2448,23 +2455,30 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get or set whether demosaicing is needed to be performed or not.
 	/// </summary>
-	/// <remarks>The property is the on/off view of <see cref="DemosaicingAlgorithm"/>, setting it to true selects <see cref="DemosaicingAlgorithms.Default"/>.</remarks>
+	/// <remarks>The property is the on/off view of <see cref="DemosaicingAlgorithm"/>, setting it to true selects <see cref="Media.Demosaicing.DemosaicingAlgorithms.Default"/>.</remarks>
 	public bool Demosaicing
 	{
-		get => this.DemosaicingAlgorithm != DemosaicingAlgorithms.Bypass;
-		set => this.SetValue(DemosaicingAlgorithmProperty, value ? DemosaicingAlgorithms.Default : DemosaicingAlgorithms.Bypass);
+		get => this.DemosaicingAlgorithm != Media.Demosaicing.DemosaicingAlgorithms.Bypass;
+		set => this.SetValue(DemosaicingAlgorithmProperty, value ? Media.Demosaicing.DemosaicingAlgorithms.Default : Media.Demosaicing.DemosaicingAlgorithms.Bypass);
 	}
 
 
 	/// <summary>
 	/// Get or set <see cref="DemosaicingAlgorithm"/> to perform demosaicing.
 	/// </summary>
-	/// <remarks><see cref="DemosaicingAlgorithms.Bypass"/> means that demosaicing will not be performed.</remarks>
+	/// <remarks><see cref="Media.Demosaicing.DemosaicingAlgorithms.Bypass"/> means that demosaicing will not be performed.</remarks>
 	public DemosaicingAlgorithm DemosaicingAlgorithm
 	{
 		get => this.GetValue(DemosaicingAlgorithmProperty);
 		set => this.SetValue(DemosaicingAlgorithmProperty, value);
 	}
+
+
+	/// <summary>
+	/// Get list of <see cref="DemosaicingAlgorithm"/>s which support the current <see cref="BayerPattern"/>.
+	/// </summary>
+	/// <remarks>The list is the subset of <see cref="Media.Demosaicing.DemosaicingAlgorithms.All"/> to be selected by user, an algorithm which doesn't support the pattern is excluded instead of falling back to another behavior silently.</remarks>
+	public IList<DemosaicingAlgorithm> DemosaicingAlgorithms { get; }
 
 
 	// Dispose.
@@ -2488,6 +2502,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		// detach from color spaces
 		(ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
 			it.CollectionChanged -= this.OnAllColorSpacesChanged);
+
+		// detach from demosaicing algorithms
+		(Media.Demosaicing.DemosaicingAlgorithms.All as INotifyCollectionChanged)?.Let(it =>
+			it.CollectionChanged -= this.OnAllDemosaicingAlgorithmsChanged);
 
 		// detach from shared rendered images memory usage
 		this.sharedRenderedImagesMemoryUsageObserverToken.Dispose();
@@ -3797,6 +3815,11 @@ class Session : ViewModel<IAppSuiteApplication>
 				break;
 		}
 	}
+
+
+	// Called when list of all demosaicing algorithms changed.
+	void OnAllDemosaicingAlgorithmsChanged(object? sender, NotifyCollectionChangedEventArgs e) =>
+		this.UpdateDemosaicingAlgorithms();
 	
 	
 	// Called when property of application changed.
@@ -3887,6 +3910,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		base.OnPropertyChanged(property, oldValue, newValue);
 		if (property == BayerPatternProperty)
 		{
+			this.UpdateDemosaicingAlgorithms();
 			if (this.IsBayerPatternSupported)
 				this.renderImageAction.Reschedule();
 		}
@@ -5190,7 +5214,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 			ByteOrdering = this.ByteOrdering,
 			DataOffset = this.DataOffset,
-			Demosaicing = (this.IsDemosaicingSupported && this.DemosaicingAlgorithm != DemosaicingAlgorithms.Bypass) ? this.DemosaicingAlgorithm : null,
+			Demosaicing = (this.IsDemosaicingSupported && this.DemosaicingAlgorithm != Media.Demosaicing.DemosaicingAlgorithms.Bypass) ? this.DemosaicingAlgorithm : null,
 			GreenGain = isRgbGainSupported ? this.GreenColorGain : 1.0,
 			RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
 			YuvToBgraConverter = this.YuvToBgraConverter,
@@ -6025,7 +6049,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var yuvToBgraConverter = this.YuvToBgraConverter;
 		var colorSpace = ColorSpace.Default;
 		var useLinearColorSpace = false;
-		var demosaicingAlgorithm = DemosaicingAlgorithms.Default;
+		var demosaicingAlgorithm = Media.Demosaicing.DemosaicingAlgorithms.Default;
 		var width = 1;
 		var height = 1;
 		var effectiveBits = new int[this.effectiveBits.Length];
@@ -6052,11 +6076,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (savedState.TryGetProperty(nameof(DemosaicingAlgorithm), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
 		{
 			var demosaicingAlgorithmId = jsonProperty.GetString();
-			if (!DemosaicingAlgorithms.TryGetById(demosaicingAlgorithmId, out demosaicingAlgorithm))
+			if (!Media.Demosaicing.DemosaicingAlgorithms.TryGetById(demosaicingAlgorithmId, out demosaicingAlgorithm))
 				this.Logger.LogWarning("Unknown demosaicing algorithm to restore, id: {id}", demosaicingAlgorithmId);
 		}
 		else if (savedState.TryGetProperty("Demosaicing", out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.False)
-			demosaicingAlgorithm = DemosaicingAlgorithms.Bypass;
+			demosaicingAlgorithm = Media.Demosaicing.DemosaicingAlgorithms.Bypass;
 		if (savedState.TryGetProperty(nameof(ImageWidth), out jsonProperty))
 			jsonProperty.TryGetInt32(out width);
 		if (savedState.TryGetProperty(nameof(ImageHeight), out jsonProperty))
@@ -6852,6 +6876,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand SelectColorAdjustmentCommand { get; }
 
 
+	// Select the default algorithm to replace the one which doesn't support the given bayer pattern. Bypass is the last resort because it supports every pattern by definition.
+	static DemosaicingAlgorithm SelectDefaultDemosaicingAlgorithm(BayerPattern bayerPattern)
+	{
+		var algorithm = Media.Demosaicing.DemosaicingAlgorithms.Default;
+		if (algorithm.IsBayerPatternSupported(bayerPattern))
+			return algorithm;
+		return Media.Demosaicing.DemosaicingAlgorithms.Bypass;
+	}
+
+
 	// Select the image frame which the filters should be applied on, according to the timing of color space conversion.
 	ImageFrame? SelectImageFrameToFilter()
 	{
@@ -7210,6 +7244,38 @@ class Session : ViewModel<IAppSuiteApplication>
 			var scale = this.GetValue(RequestedImageDisplayScaleProperty);
 			this.canZoomIn.Update(scale < (MaxRenderedImageScale - 0.001));
 			this.canZoomOut.Update(scale > (MinRenderedImageScale + 0.001));
+		}
+	}
+
+
+	// Update the list of demosaicing algorithms which support the current bayer pattern.
+	void UpdateDemosaicingAlgorithms()
+	{
+		// select another algorithm before the selected one is removed from the list, otherwise the selection of the combo box is reset to null
+		var bayerPattern = this.BayerPattern;
+		if (!this.DemosaicingAlgorithm.IsBayerPatternSupported(bayerPattern))
+			this.SetValue(DemosaicingAlgorithmProperty, SelectDefaultDemosaicingAlgorithm(bayerPattern));
+
+		// remove the algorithms which are unsupported or unregistered
+		var allAlgorithms = Media.Demosaicing.DemosaicingAlgorithms.All;
+		for (var i = this.demosaicingAlgorithms.Count - 1; i >= 0; --i)
+		{
+			var algorithm = this.demosaicingAlgorithms[i];
+			if (!algorithm.IsBayerPatternSupported(bayerPattern) || !allAlgorithms.Contains(algorithm))
+				this.demosaicingAlgorithms.RemoveAt(i);
+		}
+
+		// insert the algorithms which are supported, the order of the registry is kept so that Bypass is still the first algorithm
+		var index = 0;
+		foreach (var algorithm in allAlgorithms)
+		{
+			if (!algorithm.IsBayerPatternSupported(bayerPattern))
+				continue;
+			if (index >= this.demosaicingAlgorithms.Count)
+				this.demosaicingAlgorithms.Add(algorithm);
+			else if (this.demosaicingAlgorithms[index] != algorithm)
+				this.demosaicingAlgorithms.Insert(index, algorithm);
+			++index;
 		}
 	}
 

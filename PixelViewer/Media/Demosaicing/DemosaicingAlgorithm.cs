@@ -42,6 +42,15 @@ abstract class DemosaicingAlgorithm(string id)
 
 
 	/// <summary>
+	/// Check whether the given pattern of Bayer Filter is supported by the algorithm or not.
+	/// </summary>
+	/// <param name="pattern">Pattern of Bayer Filter.</param>
+	/// <returns>True if the pattern is supported by the algorithm.</returns>
+	/// <remarks>The algorithm is excluded from <see cref="Carina.PixelViewer.ViewModels.Session.DemosaicingAlgorithms"/> for an unsupported pattern, so it cannot be selected by user at all instead of falling back to another behavior silently.</remarks>
+	public virtual bool IsBayerPatternSupported(BayerPattern pattern) => true;
+
+
+	/// <summary>
 	/// Check whether performing demosaicing with the same <see cref="IBitmapBuffer"/> as both source and destination is supported by the algorithm or not.
 	/// </summary>
 	/// <remarks>An extra buffer is allocated for the algorithm which doesn't support in-place demosaicing, so the algorithm should support it as long as interpolating a color component never needs a color component interpolated before.</remarks>
