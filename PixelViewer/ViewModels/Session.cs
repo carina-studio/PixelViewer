@@ -876,6 +876,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	WriteableBitmap? cachedAvaRenderedImage;
 	IDisposable? cachedAvaRenderedImageMemoryUsageToken;
 	readonly List<ImageFrame> cachedFilteredImageFrames = new(2);
+	ImageFrame? cachedMosaicImageFrame;
 	readonly MutableObservableBoolean canApplyProfile = new();
 	readonly MutableObservableBoolean canMoveToNextFrame = new();
 	readonly MutableObservableBoolean canMoveToPreviousFrame = new();
@@ -2418,6 +2419,32 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand DeleteProfileCommand { get; }
 
 
+	// Perform demosaicing on the image rendered with bayer filter pattern. The destination buffer is the same buffer as the source one if in-place demosaicing is supported by the algorithm.
+	async Task DemosaicImageAsync(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+	{
+		// check state
+		if (srcBuffer.Format != destBuffer.Format || srcBuffer.Width != destBuffer.Width || srcBuffer.Height != destBuffer.Height)
+			throw new ArgumentException("Format or dimensions of source and destination buffers of demosaicing are different.");
+		if (srcBuffer.IsBufferSharedWith(destBuffer) && !algorithm.IsInPlaceDemosaicingSupported)
+			throw new ArgumentException($"In-place demosaicing is not supported by '{algorithm.Id}'.");
+
+		// prepare
+		var bayerPattern = renderingOptions.BayerPattern;
+		var colorComponentSelector = bayerPattern.CreateColorComponentSelector();
+		var stopwatch = Stopwatch.StartNew();
+
+		// perform demosaicing
+		using var sharedSrcBuffer = srcBuffer.Share();
+		using var sharedDestBuffer = destBuffer.Share();
+		await Task.Run(() => algorithm.Demosaic(sharedSrcBuffer, sharedDestBuffer, bayerPattern, colorComponentSelector, renderingOptions, cancellationToken), cancellationToken);
+		cancellationToken.ThrowIfCancellationRequested();
+
+		// complete
+		stopwatch.Stop();
+		this.Logger.LogTrace("Demosaic: {algorithm} [ok], time: {duration} ms", algorithm.Id, stopwatch.ElapsedMilliseconds);
+	}
+
+
 	/// <summary>
 	/// Get or set whether demosaicing is needed to be performed or not.
 	/// </summary>
@@ -2495,6 +2522,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Release the rendered image and the frame converted from it. The caller needs to make sure that no rendering is in progress.
 	void DisposeRenderedImage()
 	{
+		// release the frame cached for demosaicing, it is released even if no rendered image is kept because nothing else can reach it
+		this.cachedMosaicImageFrame = this.cachedMosaicImageFrame.DisposeAndReturnNull();
+
 		// check state
 		if (this.renderedImageFrame is null)
 			return;
@@ -4903,6 +4933,11 @@ class Session : ViewModel<IAppSuiteApplication>
 				frame.Dispose();
 			this.cachedFilteredImageFrames.Clear();
 		}
+		if (this.cachedMosaicImageFrame is not null)
+		{
+			released = true;
+			this.cachedMosaicImageFrame = this.cachedMosaicImageFrame.DisposeAndReturnNull();
+		}
 		this.releasedCachedImagesAction.Cancel();
 		return released;
 	}
@@ -5247,11 +5282,48 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
+		// release the cached mosaic image which cannot be used by this rendering
+		var demosaicingAlgorithm = renderingOptions.Demosaicing;
+		var isMosaicImageNeeded = demosaicingAlgorithm is not null && !demosaicingAlgorithm.IsInPlaceDemosaicingSupported;
+		if (this.cachedMosaicImageFrame is not null)
+		{
+			var cachedMosaicBitmapBuffer = this.cachedMosaicImageFrame.BitmapBuffer;
+			if (!isMosaicImageNeeded
+			    || cachedMosaicBitmapBuffer.Width != this.ImageWidth
+			    || cachedMosaicBitmapBuffer.Height != this.ImageHeight
+			    || cachedMosaicBitmapBuffer.Format != renderedFormat)
+			{
+				if (this.Application.IsDebugMode)
+					this.Logger.LogTrace("Released cached mosaic image frame, size: {width}x{height}", cachedMosaicBitmapBuffer.Width, cachedMosaicBitmapBuffer.Height);
+				this.cachedMosaicImageFrame = this.cachedMosaicImageFrame.DisposeAndReturnNull();
+			}
+		}
+
 		// create rendered image
 		if (this.Application.IsDebugMode && isRenderingNeeded)
 			this.Logger.LogWarning("Allocate rendered image frame, size: {width}x{height}", this.ImageWidth, this.ImageHeight);
 		var renderedImageFrame = isRenderingNeeded ? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight) : null;
-		if (isRenderingNeeded && renderedImageFrame is null)
+
+		// create the image to keep the mosaic if demosaicing cannot be performed in-place, the cached frame is taken out of the cache so that releasing the cached images while rendering cannot dispose the frame being rendered into
+		var mosaicImageFrame = (ImageFrame?)null;
+		if (isRenderingNeeded && isMosaicImageNeeded && renderedImageFrame is not null)
+		{
+			mosaicImageFrame = this.cachedMosaicImageFrame;
+			if (mosaicImageFrame is not null)
+			{
+				this.cachedMosaicImageFrame = null;
+				mosaicImageFrame.BitmapBuffer.UpdateColorSpace(renderedColorSpace);
+				if (this.Application.IsDebugMode)
+					this.Logger.LogTrace("Use cached mosaic image frame");
+			}
+			else
+			{
+				if (this.Application.IsDebugMode)
+					this.Logger.LogWarning("Allocate mosaic image frame for demosaicing, size: {width}x{height}", this.ImageWidth, this.ImageHeight);
+				mosaicImageFrame = await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
+			}
+		}
+		if (isRenderingNeeded && (renderedImageFrame is null || (isMosaicImageNeeded && mosaicImageFrame is null)))
 		{
 			if (!cancellationTokenSource.IsCancellationRequested)
 			{
@@ -5264,6 +5336,7 @@ class Session : ViewModel<IAppSuiteApplication>
 					_ = this.HibernateAsync(); // the images are released after this rendering completes, waiting for it here would wait for this rendering itself
 				}
 			}
+			mosaicImageFrame?.Dispose();
 			renderedImageFrame?.Dispose();
 			return;
 		}
@@ -5282,8 +5355,16 @@ class Session : ViewModel<IAppSuiteApplication>
 			// render
 			if (isRenderingNeeded && renderedImageFrame is not null)
 			{
+				// render image, the mosaic image receives the rendered image if demosaicing needs another buffer to put its result into
+				var renderingImageFrame = mosaicImageFrame ?? renderedImageFrame;
 				renderStopwatch = Stopwatch.StartNew();
-				renderedImageFrame.RenderingResult = await imageRenderer.RenderAsync(renderingImageDataSource, renderedImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+				renderedImageFrame.RenderingResult = await imageRenderer.RenderAsync(renderingImageDataSource, renderingImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
+
+				// perform demosaicing, its duration is counted as part of rendering because it was performed by the image renderer before
+				if (demosaicingAlgorithm is not null)
+					await this.DemosaicImageAsync(demosaicingAlgorithm, renderingImageFrame.BitmapBuffer, renderedImageFrame.BitmapBuffer, renderingOptions, cancellationTokenSource.Token);
+
+				// update state of rendered image
 				renderStopwatch.Stop();
 				renderedImageFrame.ImageRenderer = imageRenderer;
 				renderedImageFrame.RenderingOptions = renderingOptions;
@@ -5307,6 +5388,19 @@ class Session : ViewModel<IAppSuiteApplication>
 		catch (Exception ex)
 		{
 			exception = ex;
+		}
+
+		// cache the mosaic image for the next rendering, its content is not needed anymore because the demosaiced image is kept by the rendered image
+		if (mosaicImageFrame is not null)
+		{
+			if (this.IsHibernated || !this.IsActivated)
+				mosaicImageFrame.Dispose();
+			else
+			{
+				if (this.cachedMosaicImageFrame != mosaicImageFrame)
+					this.cachedMosaicImageFrame?.Dispose();
+				this.cachedMosaicImageFrame = mosaicImageFrame;
+			}
 		}
 
 		// generate histograms

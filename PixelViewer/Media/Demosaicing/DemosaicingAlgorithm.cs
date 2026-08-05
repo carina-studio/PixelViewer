@@ -15,13 +15,15 @@ abstract class DemosaicingAlgorithm(string id)
 	/// <summary>
 	/// Perform demosaicing on the given image.
 	/// </summary>
-	/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/> which contains the image rendered with Bayer Filter pattern, the missing color components of its pixels are interpolated in place.</param>
+	/// <param name="srcBuffer"><see cref="IBitmapBuffer"/> which contains the image rendered with Bayer Filter pattern, each of its pixels provides one color component only.</param>
+	/// <param name="destBuffer"><see cref="IBitmapBuffer"/> to receive the image with all color components of its pixels.</param>
 	/// <param name="bayerPattern">Pattern of Bayer Filter which the image is rendered with.</param>
 	/// <param name="colorComponentSelector">Function which accepts horizontal and vertical position of pixel, and returns the color component provided by the pixel.</param>
 	/// <param name="renderingOptions">Rendering options which the image is rendered with.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <remarks>Both buffers are guaranteed to have the same format and dimensions by the caller. <paramref name="destBuffer"/> shares its buffer with <paramref name="srcBuffer"/>, which can be checked by <see cref="IBitmapBuffer.IsBufferSharedWith"/>, only if <see cref="IsInPlaceDemosaicingSupported"/> is true. Every pixel of <paramref name="destBuffer"/> should be filled by the algorithm, including the color component provided by the pixel itself, because the buffer may be a newly allocated one.</remarks>
 	[CalledOnBackgroundThread]
-	public abstract void Demosaic(IBitmapBuffer bitmapBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken);
+	public abstract void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken);
 
 
 	/// <summary>
@@ -37,6 +39,13 @@ abstract class DemosaicingAlgorithm(string id)
 	/// </summary>
 	/// <remarks>The identifier is the value persisted to refer to the algorithm, it is stable across renaming of a user-defined algorithm.</remarks>
 	public string Id { get; } = id;
+
+
+	/// <summary>
+	/// Check whether performing demosaicing with the same <see cref="IBitmapBuffer"/> as both source and destination is supported by the algorithm or not.
+	/// </summary>
+	/// <remarks>An extra buffer is allocated for the algorithm which doesn't support in-place demosaicing, so the algorithm should support it as long as interpolating a color component never needs a color component interpolated before.</remarks>
+	public abstract bool IsInPlaceDemosaicingSupported { get; }
 
 
 	/// <inheritdoc/>

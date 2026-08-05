@@ -41,6 +41,15 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Check whether the internal buffer is shared with the given <see cref="IBitmapBuffer"/> or not.
+		/// </summary>
+		/// <param name="buffer"><see cref="IBitmapBuffer"/> to check.</param>
+		/// <returns>True if the internal buffer is shared with <paramref name="buffer"/>.</returns>
+		/// <remarks>True is also returned if <paramref name="buffer"/> is the same instance. None of the instances should be disposed before calling the method.</remarks>
+		bool IsBufferSharedWith(IBitmapBuffer buffer);
+
+
+		/// <summary>
 		/// Bytes per row.
 		/// </summary>
 		int RowBytes { get; }
@@ -273,7 +282,7 @@ namespace Carina.PixelViewer.Media
 		/// <param name="dest">Destination <see cref="IBitmapBuffer"/>.</param>
 		public static unsafe void CopyTo(this IBitmapBuffer source, IBitmapBuffer dest)
 		{
-			if (source == dest)
+			if (source.IsBufferSharedWith(dest))
 				return;
 			if (source.Format != dest.Format)
 				throw new ArgumentException("Cannot copy to bitmap with different formats.");

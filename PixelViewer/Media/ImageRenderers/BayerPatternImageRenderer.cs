@@ -1,8 +1,5 @@
-﻿using CarinaStudio;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,29 +85,12 @@ abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
 			throw new ArgumentException($"Invalid size: {width}x{height}.");
 
 		// select color pattern
-		var bayerPattern = renderingOptions.BayerPattern;
-		var colorComponentSelector = bayerPattern.CreateColorComponentSelector();
+		var colorComponentSelector = renderingOptions.BayerPattern.CreateColorComponentSelector();
 
-		// render
+		// render, demosaicing is performed by the caller because it may need another buffer to receive the result
 		var result = this.OnRender(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken);
 		if (cancellationToken.IsCancellationRequested)
 			throw new TaskCanceledException();
-
-		// demosaicing
-		var demosaicingAlgorithm = renderingOptions.Demosaicing;
-		if (demosaicingAlgorithm is null)
-			return result;
-		var stopwatch = new Stopwatch().Also(it => it.Start());
-		try
-		{
-			demosaicingAlgorithm.Demosaic(bitmapBuffer, bayerPattern, colorComponentSelector, renderingOptions, cancellationToken);
-			if (!cancellationToken.IsCancellationRequested)
-				this.Logger.LogTrace("Demosaic: {algorithm} [ok], time: {duration} ms", demosaicingAlgorithm.Id, stopwatch.ElapsedMilliseconds);
-		}
-		finally
-		{
-			stopwatch.Stop();
-		}
 
 		// complete
 		return result;

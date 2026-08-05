@@ -81,6 +81,8 @@ namespace Carina.PixelViewer.Media
 			base.Dispose(disposing);
 		}
 		public int Height => this.GetResourceHolder<HolderImpl>().Height;
+		public bool IsBufferSharedWith(IBitmapBuffer buffer) =>
+			buffer is BitmapBuffer bitmapBuffer && this.GetResourceHolder<HolderImpl>() == bitmapBuffer.GetResourceHolder<HolderImpl>();
 		IBitmapBuffer IShareableDisposable<IBitmapBuffer>.Share() => this.Share();
 		public Memory<byte> Memory => this.memory.GetValueOrDefault();
 		public int RowBytes => this.GetResourceHolder<HolderImpl>().RowBytes;

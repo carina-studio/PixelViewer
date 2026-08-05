@@ -34,7 +34,7 @@ abstract class BaseImageFilter<TParams> : IImageFilter<TParams> where TParams : 
     public async Task ApplyFilterAsync(IBitmapBuffer source, IBitmapBuffer result, TParams parameters, CancellationToken cancellationToken)
     {
         // check parameters
-        if (source == result)
+        if (source.IsBufferSharedWith(result))
             throw new ArgumentException("Source and result image are same.");
         if (source.Width != result.Width || source.Height != result.Height)
             throw new ArgumentException("Dimension of images are different.");
