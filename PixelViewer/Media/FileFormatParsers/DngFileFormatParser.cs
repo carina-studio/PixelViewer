@@ -59,7 +59,17 @@ class DngFileFormatParser : BaseFileFormatParser
         var imageWidth = 0;
         var imageHeight = 0;
         var orientation = 0;
+        var analogBalance = (double[]?)null;
         var asShotNeutral = (double[]?)null;
+        var calibrationIlluminant1 = 0;
+        var calibrationIlluminant2 = 0;
+        var cameraCalibration1 = (double[]?)null;
+        var cameraCalibration2 = (double[]?)null;
+        var colorMatrix1 = (double[]?)null;
+        var colorMatrix2 = (double[]?)null;
+        var forwardMatrix1 = (double[]?)null;
+        var forwardMatrix2 = (double[]?)null;
+        var uniqueCameraModel = (string?)null;
         var blackLevel = 0u;
         var whiteLevel = 0u;
         var effectiveBits = 0;
@@ -235,6 +245,10 @@ class DngFileFormatParser : BaseFileFormatParser
                                         entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + offset, "Raw");
                                 }
                                 break;
+                            case 0xc614: // UniqueCameraModel, it is defined in the IFD of main image
+                                if (entryReader.TryGetEntryData(out string? stringData) && !string.IsNullOrWhiteSpace(stringData))
+                                    uniqueCameraModel = stringData;
+                                break;
                             case 0xc617: // CFALayout
                                 if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData))
                                     cfaLayout = ushortData[0];
@@ -312,6 +326,21 @@ class DngFileFormatParser : BaseFileFormatParser
                                     }
                                 }
                                 break;
+                            case 0xc621: // ColorMatrix1, it and the tags below are defined in the IFD of main image
+                                entryReader.TryGetEntryData(out colorMatrix1);
+                                break;
+                            case 0xc622: // ColorMatrix2
+                                entryReader.TryGetEntryData(out colorMatrix2);
+                                break;
+                            case 0xc623: // CameraCalibration1
+                                entryReader.TryGetEntryData(out cameraCalibration1);
+                                break;
+                            case 0xc624: // CameraCalibration2
+                                entryReader.TryGetEntryData(out cameraCalibration2);
+                                break;
+                            case 0xc627: // AnalogBalance
+                                entryReader.TryGetEntryData(out analogBalance);
+                                break;
                             case 0xc628: // AsShotNeutral, it is defined in the IFD of main image instead of the IFD of full-size image
                                 if (entryReader.TryGetEntryData(out doubleData)
                                     && doubleData.Length >= 3
@@ -320,6 +349,14 @@ class DngFileFormatParser : BaseFileFormatParser
                                     asShotNeutral = doubleData;
                                     this.Logger.LogTrace("As-shot neutral: {r}, {g}, {b}", doubleData[0], doubleData[1], doubleData[2]);
                                 }
+                                break;
+                            case 0xc65a: // CalibrationIlluminant1
+                                if (entryReader.TryGetEntryData(out ushortData))
+                                    calibrationIlluminant1 = ushortData[0];
+                                break;
+                            case 0xc65b: // CalibrationIlluminant2
+                                if (entryReader.TryGetEntryData(out ushortData))
+                                    calibrationIlluminant2 = ushortData[0];
                                 break;
                             case 0xc68d: // ActiveArea
                                 if (isFullSizeImage)
@@ -341,6 +378,12 @@ class DngFileFormatParser : BaseFileFormatParser
                             case 0xc68f: // AsShotICCProfile
                                 break;
                             case 0xc691: // CurrentICCProfile
+                                break;
+                            case 0xc714: // ForwardMatrix1
+                                entryReader.TryGetEntryData(out forwardMatrix1);
+                                break;
+                            case 0xc715: // ForwardMatrix2
+                                entryReader.TryGetEntryData(out forwardMatrix2);
                                 break;
                             case 0x828e: // CFAPattern
                                 if (isFullSizeImage)
@@ -572,6 +615,20 @@ class DngFileFormatParser : BaseFileFormatParser
                 profile.RedColorGain = Math.Round(greenNeutral / asShotNeutral[0], 4);
                 profile.GreenColorGain = 1.0;
                 profile.BlueColorGain = Math.Round(greenNeutral / asShotNeutral[2], 4);
+            }
+
+            // convert the color characterization of the camera into the color space of the image, the gains applied
+            // above are part of its input so they are passed to keep the color space consistent with them
+            if (DngCameraProfile.TryCreate(asShotNeutral, analogBalance, colorMatrix1, colorMatrix2, forwardMatrix1, forwardMatrix2, cameraCalibration1, cameraCalibration2, calibrationIlluminant1, calibrationIlluminant2, out var cameraProfile))
+            {
+                var cameraColorSpace = cameraProfile!.CreateColorSpace(uniqueCameraModel, profile.RedColorGain, profile.GreenColorGain, profile.BlueColorGain);
+                if (cameraColorSpace is not null)
+                {
+                    profile.ColorSpace = cameraColorSpace;
+                    this.Logger.LogTrace("Color space of camera: {colorSpace}", cameraColorSpace);
+                }
+                else
+                    this.Logger.LogWarning("Unable to convert color characterization of camera into color space");
             }
         });
     }

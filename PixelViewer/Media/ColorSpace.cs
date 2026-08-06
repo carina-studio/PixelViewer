@@ -757,6 +757,23 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Create <see cref="ColorSpace"/> instance from the matrix which converts RGB to CIE XYZ with D50 white point.
+        /// </summary>
+        /// <param name="source">Source of color space.</param>
+        /// <param name="customName">Custom name.</param>
+        /// <param name="matrixToXyz">Matrix which converts RGB to CIE XYZ with D50 white point.</param>
+        /// <param name="transferFunc">Transfer function of the color space.</param>
+        /// <param name="whitePoint">XYZ of white point.</param>
+        /// <returns><see cref="ColorSpace"/>.</returns>
+        public static ColorSpace FromMatrixToXyz(ColorSpaceSource source, string? customName, SKColorSpaceXyz matrixToXyz, SKColorSpaceTransferFn transferFunc, (double, double, double)? whitePoint)
+        {
+            if (source == ColorSpaceSource.BuiltIn)
+                throw new ArgumentException();
+            return new ColorSpace(source, GenerateRandomName(), customName, transferFunc, matrixToXyz, whitePoint, null);
+        }
+
+
+        /// <summary>
         /// Create <see cref="ColorSpace"/> instance from <see cref="SKColorSpace"/>.
         /// </summary>
         /// <param name="source">Source of color space.</param>
