@@ -21,7 +21,7 @@ abstract class DemosaicingAlgorithm(string id)
 	/// <param name="colorComponentSelector">Function which accepts horizontal and vertical position of pixel, and returns the color component provided by the pixel.</param>
 	/// <param name="renderingOptions">Rendering options which the image is rendered with.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
-	/// <remarks>Both buffers are guaranteed to have the same format and dimensions by the caller. <paramref name="destBuffer"/> shares its buffer with <paramref name="srcBuffer"/>, which can be checked by <see cref="IBitmapBuffer.IsBufferSharedWith"/>, only if <see cref="IsInPlaceDemosaicingSupported"/> is true. Every pixel of <paramref name="destBuffer"/> should be filled by the algorithm, including the color component provided by the pixel itself, because the buffer may be a newly allocated one.</remarks>
+	/// <remarks>Both buffers are guaranteed to have the same format and dimensions by the caller. <paramref name="destBuffer"/> shares its buffer with <paramref name="srcBuffer"/>, which can be checked by <see cref="IBitmapBuffer.IsBufferSharedWith"/>, only if <see cref="IsInPlaceDemosaicingSupported"/> is true for <paramref name="bayerPattern"/>. Every pixel of <paramref name="destBuffer"/> should be filled by the algorithm, including the color component provided by the pixel itself, because the buffer may be a newly allocated one.</remarks>
 	[CalledOnBackgroundThread]
 	public abstract void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken);
 
@@ -51,10 +51,12 @@ abstract class DemosaicingAlgorithm(string id)
 
 
 	/// <summary>
-	/// Check whether performing demosaicing with the same <see cref="IBitmapBuffer"/> as both source and destination is supported by the algorithm or not.
+	/// Check whether performing demosaicing with the same <see cref="IBitmapBuffer"/> as both source and destination is supported by the algorithm for the given pattern of Bayer Filter or not.
 	/// </summary>
-	/// <remarks>An extra buffer is allocated for the algorithm which doesn't support in-place demosaicing, so the algorithm should support it as long as interpolating a color component never needs a color component interpolated before.</remarks>
-	public abstract bool IsInPlaceDemosaicingSupported { get; }
+	/// <param name="pattern">Pattern of Bayer Filter.</param>
+	/// <returns>True if demosaicing the image with the pattern in-place is supported by the algorithm.</returns>
+	/// <remarks>An extra buffer is allocated for the algorithm which doesn't support in-place demosaicing, so the algorithm should support it as long as interpolating a color component never needs a color component interpolated before. The answer is allowed to differ between patterns because an algorithm may need to pre-process the mosaic of one pattern while it can interpolate another directly. It is meaningful only for a pattern which <see cref="IsBayerPatternSupported"/> accepts, the caller never demosaics an image with an unsupported pattern.</remarks>
+	public abstract bool IsInPlaceDemosaicingSupported(BayerPattern pattern);
 
 
 	/// <inheritdoc/>

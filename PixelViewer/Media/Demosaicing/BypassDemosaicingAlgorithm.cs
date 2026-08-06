@@ -22,5 +22,5 @@ class BypassDemosaicingAlgorithm() : DemosaicingAlgorithm("Bypass")
 
 
 	/// <inheritdoc/>
-	public override bool IsInPlaceDemosaicingSupported => true;
+	public override bool IsInPlaceDemosaicingSupported(BayerPattern pattern) => true;
 }

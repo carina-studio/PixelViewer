@@ -839,5 +839,5 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 
 
 	/// <inheritdoc/>
-	public override bool IsInPlaceDemosaicingSupported => true;
+	public override bool IsInPlaceDemosaicingSupported(BayerPattern pattern) => true;
 }

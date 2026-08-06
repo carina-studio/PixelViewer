@@ -2432,7 +2432,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// check state
 		if (srcBuffer.Format != destBuffer.Format || srcBuffer.Width != destBuffer.Width || srcBuffer.Height != destBuffer.Height)
 			throw new ArgumentException("Format or dimensions of source and destination buffers of demosaicing are different.");
-		if (srcBuffer.IsBufferSharedWith(destBuffer) && !algorithm.IsInPlaceDemosaicingSupported)
+		if (srcBuffer.IsBufferSharedWith(destBuffer) && !algorithm.IsInPlaceDemosaicingSupported(renderingOptions.BayerPattern))
 			throw new ArgumentException($"In-place demosaicing is not supported by '{algorithm.Id}'.");
 
 		// prepare
@@ -5308,7 +5308,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// release the cached mosaic image which cannot be used by this rendering
 		var demosaicingAlgorithm = renderingOptions.Demosaicing;
-		var isMosaicImageNeeded = demosaicingAlgorithm is not null && !demosaicingAlgorithm.IsInPlaceDemosaicingSupported;
+		var isMosaicImageNeeded = demosaicingAlgorithm is not null && !demosaicingAlgorithm.IsInPlaceDemosaicingSupported(renderingOptions.BayerPattern);
 		if (this.cachedMosaicImageFrame is not null)
 		{
 			var cachedMosaicBitmapBuffer = this.cachedMosaicImageFrame.BitmapBuffer;

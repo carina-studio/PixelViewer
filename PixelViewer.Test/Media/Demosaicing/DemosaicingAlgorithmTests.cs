@@ -84,8 +84,8 @@ class DemosaicingAlgorithmTests : BaseTests
 	// Assert that demosaicing in place produces the same result as demosaicing into another buffer.
 	static void AssertInPlaceDemosaicingConsistent(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
 	{
-		// the algorithm is never asked to work in place unless it supports doing so
-		if (!algorithm.IsInPlaceDemosaicingSupported)
+		// the algorithm is never asked to work in place unless it supports doing so for the pattern
+		if (!algorithm.IsInPlaceDemosaicingSupported(bayerPattern))
 			return;
 
 		// demosaic with separate source and destination buffers
