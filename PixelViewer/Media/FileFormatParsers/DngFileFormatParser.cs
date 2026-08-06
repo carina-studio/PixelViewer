@@ -24,8 +24,8 @@ class DngFileFormatParser : BaseFileFormatParser
     
     
     // Static fields.
-    static readonly IList<Tuple<byte[], BayerPattern>> CfaPatternToBayerPatternMap = new Tuple<byte[], BayerPattern>[]
-    {
+    static readonly IList<Tuple<byte[], BayerPattern>> CfaPatternToBayerPatternMap =
+    [
         new([ 2, 1, 1, 0 ], BayerPattern.BGGR_2x2),
         new([ 1, 2, 0, 1 ], BayerPattern.GBRG_2x2),
         new([ 1, 0, 2, 1 ], BayerPattern.GRBG_2x2),
@@ -34,7 +34,7 @@ class DngFileFormatParser : BaseFileFormatParser
         new([ 1, 1, 2, 2, 1, 1, 2, 2, 0, 0, 1, 1, 0, 0, 1, 1 ], BayerPattern.GBRG_4x4),
         new([ 1, 1, 0, 0, 1, 1, 0, 0, 2, 2, 1, 1, 2, 2, 1, 1 ], BayerPattern.GRBG_4x4),
         new([ 0, 0, 1, 1, 0, 0, 1, 1, 1, 1, 2, 2, 1, 1, 2, 2 ], BayerPattern.RGGB_4x4),
-    };
+    ];
 
 
     /// <summary>
@@ -59,6 +59,7 @@ class DngFileFormatParser : BaseFileFormatParser
         var imageWidth = 0;
         var imageHeight = 0;
         var orientation = 0;
+        var asShotNeutral = (double[]?)null;
         var blackLevel = 0u;
         var whiteLevel = 0u;
         var effectiveBits = 0;
@@ -89,6 +90,7 @@ class DngFileFormatParser : BaseFileFormatParser
             var rowsPerStrip = (uint[]?)null;
             var stripOffsets = (uint[]?)null;
             var stripByteCounts = (uint[]?)null;
+            double[]? doubleData;
             ushort[]? ushortData;
             uint[]? uintData;
             var thumbWidth = 0;
@@ -107,11 +109,11 @@ class DngFileFormatParser : BaseFileFormatParser
                         switch (entryReader.CurrentEntryId)
                         {
                             case 0x00fe: // NewSubfileType
-                                if (entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                if (entryReader.TryGetEntryData(out uintData))
                                     isFullSizeImage = (uintData[0] == 0);
                                 break;
                             case 0x0100: // ImageWidth
-                                if (entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                if (entryReader.TryGetEntryData(out uintData))
                                 {
                                     if (isFullSizeImage)
                                     {
@@ -126,7 +128,7 @@ class DngFileFormatParser : BaseFileFormatParser
                                 }
                                 break;
                             case 0x0101: // ImageLength
-                                if (entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                if (entryReader.TryGetEntryData(out uintData))
                                 {
                                     if (isFullSizeImage)
                                     {
@@ -141,7 +143,7 @@ class DngFileFormatParser : BaseFileFormatParser
                                 }
                                 break;
                             case 0x0102: // BitsPerSample
-                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData))
                                 {
                                     effectiveBits = ushortData[0];
                                     pixelStride = (effectiveBits >> 3);
@@ -150,7 +152,7 @@ class DngFileFormatParser : BaseFileFormatParser
                                 }
                                 break;
                             case 0x0103: // Compression, should be 1 (Uncompressed data) for full-size image
-                                if (entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                if (entryReader.TryGetEntryData(out ushortData))
                                 {
                                     if (isFullSizeImage)
                                     {
@@ -162,7 +164,7 @@ class DngFileFormatParser : BaseFileFormatParser
                                 }
                                 break;
                             case 0x0106: // PhotometricInterpretation
-                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData))
                                     photometricInterpolation = ushortData[0];
                                 break;
                             case 0x0111: // StripOffsets
@@ -172,7 +174,7 @@ class DngFileFormatParser : BaseFileFormatParser
                                     entryReader.TryGetEntryData(out thumbStripOffsets);
                                 break;
                             case 0x0112: // Orientation
-                                if (entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                if (entryReader.TryGetEntryData(out ushortData))
                                 {
                                     if (isFullSizeImage)
                                         orientation = ushortData[0];
@@ -196,7 +198,7 @@ class DngFileFormatParser : BaseFileFormatParser
                                     // select this compressed thumbnail if it is the largest one
                                     if (thumbWidth > compressedThumbWidth && thumbHeight > compressedThumbHeight
                                         && thumbStripOffsets != null && thumbStripOffsets.Length == 1
-                                        && thumbStripByteCounts != null && thumbStripByteCounts.Length == 1)
+                                        && thumbStripByteCounts.Length == 1)
                                     {
                                         hasCompressedThumb = true;
                                         compressedThumbWidth = thumbWidth;
@@ -208,15 +210,15 @@ class DngFileFormatParser : BaseFileFormatParser
                                 }
                                 break;
                             case 0x0142: // TileWidth, should be same as image width
-                                if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null && uintData[0] != (uint)imageWidth)
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData[0] != (uint)imageWidth)
                                     compression = 0;
                                 break;
                             case 0x0143: // TileLength, should be same as image height
-                                if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null && uintData[0] != (uint)imageHeight)
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData[0] != (uint)imageHeight)
                                     compression = 0;
                                 break;
                             case 0x0144: // TileOffsets, only single tile is supported
-                                if (isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out uintData))
                                 {
                                     if (uintData.Length == 1)
                                         imageDataOffset = (entryReader.InitialStreamPosition + uintData[0]);
@@ -227,30 +229,35 @@ class DngFileFormatParser : BaseFileFormatParser
                             case 0x0145: // TileByteCounts
                                 break;
                             case 0x014a: // SubIFDs
-                                if (!isFullSizeImage && entryReader.TryGetEntryData(out uintData) && uintData != null)
+                                if (!isFullSizeImage && entryReader.TryGetEntryData(out uintData))
                                 {
                                     foreach (var offset in uintData)
                                         entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + offset, "Raw");
                                 }
                                 break;
                             case 0xc617: // CFALayout
-                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData != null)
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData))
                                     cfaLayout = ushortData[0];
                                 break;
                             case 0xc61a: // BlackLevel
                                 if (isFullSizeImage)
                                 {
                                     if (entryReader.CurrentEntryType == IfdEntryType.UInt16 
-                                        && entryReader.TryGetEntryData(out ushortData)
-                                        && ushortData != null)
+                                        && entryReader.TryGetEntryData(out ushortData))
                                     {
                                         blackLevel = ushortData[0];
                                     }
                                     else if (entryReader.CurrentEntryType == IfdEntryType.UInt32
-                                        && entryReader.TryGetEntryData(out uintData)
-                                        && uintData != null)
+                                        && entryReader.TryGetEntryData(out uintData))
                                     {
                                         blackLevel = uintData[0];
+                                    }
+                                    else if (entryReader.TryGetEntryData(out doubleData)
+                                        && doubleData.IsNotEmpty()
+                                        && double.IsFinite(doubleData[0])
+                                        && doubleData[0] > 0)
+                                    {
+                                        blackLevel = (uint)(doubleData[0] + 0.5);
                                     }
                                 }
                                 break;
@@ -258,14 +265,12 @@ class DngFileFormatParser : BaseFileFormatParser
                                 if (isFullSizeImage)
                                 {
                                     if (entryReader.CurrentEntryType == IfdEntryType.UInt16 
-                                        && entryReader.TryGetEntryData(out ushortData)
-                                        && ushortData != null)
+                                        && entryReader.TryGetEntryData(out ushortData))
                                     {
                                         whiteLevel = ushortData[0];
                                     }
                                     else if (entryReader.CurrentEntryType == IfdEntryType.UInt32
-                                        && entryReader.TryGetEntryData(out uintData)
-                                        && uintData != null)
+                                        && entryReader.TryGetEntryData(out uintData))
                                     {
                                         whiteLevel = uintData[0];
                                     }
@@ -291,7 +296,6 @@ class DngFileFormatParser : BaseFileFormatParser
                                 {
                                     if (entryReader.CurrentEntryType == IfdEntryType.UInt16
                                         && entryReader.TryGetEntryData(out ushortData)
-                                        && ushortData != null
                                         && ushortData.Length >= 2)
                                     {
                                         imageWidth = Math.Min(imageWidth, ushortData[0]);
@@ -300,7 +304,6 @@ class DngFileFormatParser : BaseFileFormatParser
                                     }
                                     else if (entryReader.CurrentEntryType == IfdEntryType.UInt32
                                              && entryReader.TryGetEntryData(out uintData)
-                                             && uintData != null
                                              && uintData.Length >= 2)
                                     {
                                         imageWidth = Math.Min(imageWidth, (int)uintData[0]);
@@ -309,19 +312,26 @@ class DngFileFormatParser : BaseFileFormatParser
                                     }
                                 }
                                 break;
+                            case 0xc628: // AsShotNeutral, it is defined in the IFD of main image instead of the IFD of full-size image
+                                if (entryReader.TryGetEntryData(out doubleData)
+                                    && doubleData.Length >= 3
+                                    && doubleData.Take(3).All(it => double.IsFinite(it) && it > 0))
+                                {
+                                    asShotNeutral = doubleData;
+                                    this.Logger.LogTrace("As-shot neutral: {r}, {g}, {b}", doubleData[0], doubleData[1], doubleData[2]);
+                                }
+                                break;
                             case 0xc68d: // ActiveArea
                                 if (isFullSizeImage)
                                 {
                                     if (entryReader.CurrentEntryType == IfdEntryType.UInt16
                                         && entryReader.TryGetEntryData(out ushortData)
-                                        && ushortData != null
                                         && ushortData.Length >= 4)
                                     {
                                         activeArea = [ ushortData[1], ushortData[0], ushortData[3], ushortData[2] ];
                                     }
                                     else if (entryReader.CurrentEntryType == IfdEntryType.UInt32
                                         && entryReader.TryGetEntryData(out uintData)
-                                        && uintData != null
                                         && uintData.Length >= 4)
                                     {
                                         activeArea = [ (int)uintData[1], (int)uintData[0], (int)uintData[3], (int)uintData[2] ];
@@ -554,6 +564,15 @@ class DngFileFormatParser : BaseFileFormatParser
             profile.PixelStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = pixelStride);
             profile.RowStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = rowStride);
             profile.Width = imageWidth;
+
+            // apply white balance defined by as-shot neutral, the gains are normalized to make gain of green be 1
+            if (asShotNeutral is not null)
+            {
+                var greenNeutral = asShotNeutral[1];
+                profile.RedColorGain = Math.Round(greenNeutral / asShotNeutral[0], 4);
+                profile.GreenColorGain = 1.0;
+                profile.BlueColorGain = Math.Round(greenNeutral / asShotNeutral[2], 4);
+            }
         });
     }
 }

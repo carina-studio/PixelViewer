@@ -365,7 +365,7 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		if (gain < MinRgbGain)
 			return MinRgbGain;
 		if (gain > MaxRgbGain)
-			return MinRgbGain;
+			return MaxRgbGain;
 		return gain;
 	}
 

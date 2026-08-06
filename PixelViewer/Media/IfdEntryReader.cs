@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
@@ -228,7 +229,7 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData(out byte[]? data)
+        public bool TryGetEntryData([NotNullWhen(true)] out byte[]? data)
         {
             // check state
             if (this.CurrentEntryId == 0)
@@ -275,9 +276,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public unsafe bool TryGetEntryData(out sbyte[]? data)
+        public unsafe bool TryGetEntryData([NotNullWhen(true)] out sbyte[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null)
+            if (!this.TryGetEntryData(out byte[]? bytes))
             {
                 data = null;
                 return false;
@@ -297,9 +298,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData(out string? data)
+        public bool TryGetEntryData([NotNullWhen(true)] out string? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null)
+            if (!this.TryGetEntryData(out byte[]? bytes))
             {
                 data = null;
                 return false;
@@ -317,9 +318,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData(out short[]? data)
+        public bool TryGetEntryData([NotNullWhen(true)] out short[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null || bytes.Length < sizeof(short))
+            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(short))
             {
                 data = null;
                 return false;
@@ -336,9 +337,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData(out ushort[]? data)
+        public bool TryGetEntryData([NotNullWhen(true)] out ushort[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null || bytes.Length < sizeof(ushort))
+            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(ushort))
             {
                 data = null;
                 return false;
@@ -355,9 +356,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData(out int[]? data)
+        public bool TryGetEntryData([NotNullWhen(true)] out int[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null || bytes.Length < sizeof(int))
+            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(int))
             {
                 data = null;
                 return false;
@@ -374,9 +375,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData(out uint[]? data)
+        public bool TryGetEntryData([NotNullWhen(true)] out uint[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null || bytes.Length < sizeof(uint))
+            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(uint))
             {
                 data = null;
                 return false;
@@ -393,9 +394,9 @@ namespace Carina.PixelViewer.Media
         /// </summary>
         /// <param name="data">Read data.</param>
         /// <returns>True if data read successfully.</returns>
-        public unsafe bool TryGetEntryData(out float[]? data)
+        public unsafe bool TryGetEntryData([NotNullWhen(true)] out float[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null || bytes.Length < sizeof(float))
+            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(float))
             {
                 data = null;
                 return false;
@@ -413,20 +414,46 @@ namespace Carina.PixelViewer.Media
         /// <summary>
         /// Try reading data of entry.
         /// </summary>
-        /// <param name="data">Read data.</param>
+        /// <param name="data">Read data. The value is <see cref="double.NaN"/> if the denominator of a rational number is zero.</param>
         /// <returns>True if data read successfully.</returns>
-        public unsafe bool TryGetEntryData(out double[]? data)
+        /// <remarks>Only <see cref="IfdEntryType.Double"/>, <see cref="IfdEntryType.Rational"/> and <see cref="IfdEntryType.URational"/> entries can be read by this method.</remarks>
+        public unsafe bool TryGetEntryData([NotNullWhen(true)] out double[]? data)
         {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes == null || bytes.Length < sizeof(double))
+            // check type of entry
+            var entryType = this.CurrentEntryType;
+            if (entryType != IfdEntryType.Double && entryType != IfdEntryType.Rational && entryType != IfdEntryType.URational)
             {
                 data = null;
                 return false;
             }
+
+            // read raw data
+            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(double))
+            {
+                data = null;
+                return false;
+            }
+
+            // convert each element, a rational number is represented by a pair of numerator and denominator
             data = new double[bytes.Length >> 3];
             for (int i = data.Length - 1, offset = i << 3; i >= 0; --i, offset -= sizeof(double))
             {
-                var ulongValue = this.parseUInt64(bytes, offset);
-                data[i] = *(double*)&ulongValue;
+                if (entryType == IfdEntryType.Double)
+                {
+                    var ulongValue = this.parseUInt64(bytes, offset);
+                    data[i] = *(double*)&ulongValue;
+                }
+                else
+                {
+                    var numerator = this.parseUInt32(bytes, offset);
+                    var denominator = this.parseUInt32(bytes, offset + sizeof(uint));
+                    if (denominator == 0)
+                        data[i] = double.NaN;
+                    else if (entryType == IfdEntryType.Rational)
+                        data[i] = (int)numerator / (double)(int)denominator;
+                    else
+                        data[i] = numerator / (double)denominator;
+                }
             }
             return true;
         }
