@@ -397,6 +397,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasColorAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasColorAdjustment));
 	/// <summary>
+	/// Property of <see cref="HasColorTables"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> HasColorTablesProperty = ObservableProperty.Register<Session, bool>(nameof(HasColorTables));
+	/// <summary>
 	/// Property of <see cref="HasContrastAdjustment"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasContrastAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasContrastAdjustment));
@@ -868,9 +872,11 @@ class Session : ViewModel<IAppSuiteApplication>
 
 	// Fields.
 	readonly List<ActivationToken> activationTokens = new();
+	ColorTable? alphaColorTable;
 	IDisposable? avaQuarterSizeRenderedImageMemoryUsageToken;
 	IDisposable? avaRenderedImageMemoryUsageToken;
 	readonly uint[] blackLevels = new uint[ImageFormat.MaxPlaneCount];
+	ColorTable? blueColorTable;
 	WriteableBitmap? cachedAvaQuarterSizeRenderedImage;
 	IDisposable? cachedAvaQuarterSizeRenderedImageMemoryUsageToken;
 	WriteableBitmap? cachedAvaRenderedImage;
@@ -915,6 +921,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return 1;
 		return string.CompareOrdinal(lhs.Name, rhs.Name);
 	});
+	int colorTableBitDepth;
 	readonly ObservableList<DemosaicingAlgorithm> demosaicingAlgorithms = new();
 	readonly int[] effectiveBits = new int[ImageFormat.MaxPlaneCount];
 	readonly Observer<ColorSpace> effectiveScreenColorSpaceObserver;
@@ -938,6 +945,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	double framePlaybackBaseTime;
 	long framePlaybackNextFrameNumber;
 	readonly Stopwatch framePlaybackStopwatch = new();
+	ColorTable? greenColorTable;
 	IImageDataSource? imageDataSource;
 	CancellationTokenSource? imageFilteringCancellationTokenSource;
 	TaskCompletionSource? imageFilteringCompletionSource;
@@ -953,6 +961,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly int[] pixelStrides = new int[ImageFormat.MaxPlaneCount];
 	readonly ScheduledAction playFrameAction;
 	readonly SortedObservableList<ImageRenderingProfile> profiles = new(CompareProfiles);
+	ColorTable? redColorTable;
 	readonly ScheduledAction releasedCachedImagesAction;
 	ImageFrame? renderedImageFrame;
 	readonly ScheduledAction renderImageAction;
@@ -1596,6 +1605,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsDemosaicingSupportedProperty, isBayerPatternFormat);
 		this.SetValue(IsRgbGainSupportedProperty, isBayerPatternFormat);
 		this.SetValue(IsYuvToBgraConverterSupportedProperty, imageFormatCategory == ImageFormatCategory.YUV);
+		this.UpdateHasColorTables();
 		this.UpdateIsAlphaChannelAvailable();
 
 		// reset plane options and restart rendering
@@ -1665,6 +1675,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			// dimensions
 			this.SetValue(ImageWidthProperty, profile.Width);
 			this.SetValue(ImageHeightProperty, profile.Height);
+
+			// color tables, they need to be applied before the plane options because they decide the effective bits of every plane
+			this.ChangeColorTables(profile.RedColorTable, profile.GreenColorTable, profile.BlueColorTable, profile.AlphaColorTable);
 
 			// plane options
 			var imageFormat = this.ImageRenderer.Format;
@@ -1744,6 +1757,11 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.isImageDimensionsEvaluationNeeded = false;
 				this.isImagePlaneOptionsResetNeeded = false;
 			}
+		}
+		else
+		{
+			// the default profile carries no color table, the effective bits become adjustable by user again
+			this.ChangeColorTables(null, null, null, null);
 		}
 	}
 
@@ -1929,15 +1947,56 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Change the color tables applied to the rendering. The session shares the given tables so that they keep being alive after their provider is released.
+	void ChangeColorTables(ColorTable? redColorTable, ColorTable? greenColorTable, ColorTable? blueColorTable, ColorTable? alphaColorTable)
+	{
+		// check state
+		this.VerifyAccess();
+		this.VerifyDisposed();
+		if (this.alphaColorTable.IsSameAs(alphaColorTable)
+			&& this.blueColorTable.IsSameAs(blueColorTable)
+			&& this.greenColorTable.IsSameAs(greenColorTable)
+			&& this.redColorTable.IsSameAs(redColorTable))
+		{
+			return;
+		}
+
+		// replace the tables, the previous tables are released after the new ones are shared in case they share the same colors
+		var prevAlphaColorTable = this.alphaColorTable;
+		var prevBlueColorTable = this.blueColorTable;
+		var prevGreenColorTable = this.greenColorTable;
+		var prevRedColorTable = this.redColorTable;
+		this.alphaColorTable = alphaColorTable?.Share();
+		this.blueColorTable = blueColorTable?.Share();
+		this.greenColorTable = greenColorTable?.Share();
+		this.redColorTable = redColorTable?.Share();
+		prevAlphaColorTable?.Dispose();
+		prevBlueColorTable?.Dispose();
+		prevGreenColorTable?.Dispose();
+		prevRedColorTable?.Dispose();
+
+		// the colors of all tables are rendered into the same image, so the deepest table decides the color depth of the rendered image
+		var colorTableBitDepth = Math.Max(this.alphaColorTable?.ColorBitDepth ?? 0, this.blueColorTable?.ColorBitDepth ?? 0);
+		colorTableBitDepth = Math.Max(colorTableBitDepth, this.greenColorTable?.ColorBitDepth ?? 0);
+		colorTableBitDepth = Math.Max(colorTableBitDepth, this.redColorTable?.ColorBitDepth ?? 0);
+		this.colorTableBitDepth = colorTableBitDepth;
+
+		// update state, the rendering also needs to be updated when only the tables are changed
+		this.UpdateHasColorTables();
+		this.renderImageAction.Reschedule(RenderImageDelay);
+	}
+
+
 	// Change effective bits of given image plane.
 	void ChangeEffectiveBits(int index, int effectiveBits)
 	{
 		// check state
 		this.VerifyAccess();
 		this.VerifyDisposed();
+		effectiveBits = this.CoerceEffectiveBitsToColorTables(effectiveBits);
 		if (this.effectiveBits[index] == effectiveBits)
 			return;
-		
+
 		// update effective bits
 		this.effectiveBits[index] = effectiveBits;
 		this.OnEffectiveBitsChanged(index);
@@ -2179,6 +2238,32 @@ class Session : ViewModel<IAppSuiteApplication>
 				imageDataSource.Dispose();
 			});
 		}
+	}
+	
+	
+	// Replace the effective bits of an image plane by the color depth of the color tables when the tables are applied.
+	// The tables define the colors to be rendered, so the value set by user has no effect on the rendering and reporting it would be misleading.
+	int CoerceEffectiveBitsToColorTables(int effectiveBits) =>
+		this.GetValue(HasColorTablesProperty) ? this.colorTableBitDepth : effectiveBits;
+
+
+	// Clamp the frame number into [1, frameCount], applying the correction to the property and cancelling
+	// the redundant re-render it would otherwise trigger. Returns the coerced frame number.
+	long CoerceFrameNumberToRange(long frameNumber, long frameCount)
+	{
+		if (frameNumber < 1)
+		{
+			frameNumber = 1;
+			this.SetValue(FrameNumberProperty, 1);
+			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
+		}
+		else if (frameNumber > frameCount)
+		{
+			frameNumber = frameCount;
+			this.SetValue(FrameNumberProperty, frameCount);
+			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
+		}
+		return frameNumber;
 	}
 
 
@@ -2506,6 +2591,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		// detach from demosaicing algorithms
 		(Media.Demosaicing.DemosaicingAlgorithms.All as INotifyCollectionChanged)?.Let(it =>
 			it.CollectionChanged -= this.OnAllDemosaicingAlgorithmsChanged);
+
+		// release color tables
+		this.alphaColorTable = this.alphaColorTable.DisposeAndReturnNull();
+		this.blueColorTable = this.blueColorTable.DisposeAndReturnNull();
+		this.greenColorTable = this.greenColorTable.DisposeAndReturnNull();
+		this.redColorTable = this.redColorTable.DisposeAndReturnNull();
 
 		// detach from shared rendered images memory usage
 		this.sharedRenderedImagesMemoryUsageObserverToken.Dispose();
@@ -3093,26 +3184,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	public long FrameCount => this.GetValue(FrameCountProperty);
 
 
-	// Clamp the frame number into [1, frameCount], applying the correction to the property and cancelling
-	// the redundant re-render it would otherwise trigger. Returns the coerced frame number.
-	long CoerceFrameNumberToRange(long frameNumber, long frameCount)
-	{
-		if (frameNumber < 1)
-		{
-			frameNumber = 1;
-			this.SetValue(FrameNumberProperty, 1);
-			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
-		}
-		else if (frameNumber > frameCount)
-		{
-			frameNumber = frameCount;
-			this.SetValue(FrameNumberProperty, frameCount);
-			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
-		}
-		return frameNumber;
-	}
-
-
 	/// <summary>
 	/// Get of set index of frame to render.
 	/// </summary>
@@ -3224,6 +3295,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Check whether at least one of <see cref="RedColorAdjustment"/>, <see cref="GreenColorAdjustment"/>, <see cref="BlueColorAdjustment"/> is non-zero or not.
 	/// </summary>
 	public bool HasColorAdjustment => this.GetValue(HasColorAdjustmentProperty);
+
+
+	/// <summary>
+	/// Check whether at least one color table is applied to the current rendering or not.
+	/// </summary>
+	/// <remarks>The color tables define the colors to be rendered, so the effective bits of image planes are decided by the tables instead of the value set by user.</remarks>
+	public bool HasColorTables => this.GetValue(HasColorTablesProperty);
 
 
 	/// <summary>
@@ -5164,7 +5242,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			for (var i = planeOptionsList.Count - 1; i >= 0; --i)
 			{
 				var planeOptions = planeOptionsList[i];
-				this.effectiveBits[i] = planeOptions.EffectiveBits;
+				this.effectiveBits[i] = this.CoerceEffectiveBitsToColorTables(planeOptions.EffectiveBits);
 				if (planeOptions.BlackLevel.HasValue && planeOptions.WhiteLevel.HasValue)
 				{
 					this.blackLevels[i] = planeOptions.BlackLevel.GetValueOrDefault();
@@ -5173,7 +5251,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				else
 				{
 					this.blackLevels[i] = 0;
-					this.whiteLevels[i] = (uint)(1 << planeOptions.EffectiveBits) - 1;
+					this.whiteLevels[i] = (uint)(1 << this.effectiveBits[i]) - 1;
 				}
 				this.pixelStrides[i] = planeOptions.PixelStride;
 				this.rowStrides[i] = planeOptions.RowStride;
@@ -5207,15 +5285,20 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.UpdateSourceImageEffectiveBits();
 
 		// prepare rendering options and calculate frame count of packed frames
+		var isColorTableSupported = imageRenderer.IsColorTableSupported;
 		var isRgbGainSupported = this.IsRgbGainSupported;
 		var renderingOptions = new ImageRenderingOptions
 		{
+			AlphaColorTable = isColorTableSupported ? this.alphaColorTable : null,
 			BayerPattern = this.BayerPattern,
+			BlueColorTable = isColorTableSupported ? this.blueColorTable : null,
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 			ByteOrdering = this.ByteOrdering,
 			DataOffset = this.DataOffset,
 			Demosaicing = (this.IsDemosaicingSupported && this.DemosaicingAlgorithm != Media.Demosaicing.DemosaicingAlgorithms.Bypass) ? this.DemosaicingAlgorithm : null,
+			GreenColorTable = isColorTableSupported ? this.greenColorTable : null,
 			GreenGain = isRgbGainSupported ? this.GreenColorGain : 1.0,
+			RedColorTable = isColorTableSupported ? this.redColorTable : null,
 			RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
 			YuvToBgraConverter = this.YuvToBgraConverter,
 		};
@@ -7280,6 +7363,20 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Update HasColorTables according to the tables held by the session and whether the current renderer applies them or not.
+	void UpdateHasColorTables()
+	{
+		if (this.IsDisposed)
+			return;
+		var hasColorTables = this.GetValue(ImageRendererProperty)?.IsColorTableSupported is true
+			&& (this.alphaColorTable is not null
+				|| this.blueColorTable is not null
+				|| this.greenColorTable is not null
+				|| this.redColorTable is not null);
+		this.SetValue(HasColorTablesProperty, hasColorTables);
+	}
+
+
 	// Update IsAlphaChannelAvailable based on the current renderer's category and (for Compressed) the profile's file format.
 	void UpdateIsAlphaChannelAvailable()
 	{
@@ -7445,6 +7542,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			profile.GreenColorGain = this.GreenColorGain;
 			profile.BlueColorGain = this.BlueColorGain;
 		}
+		profile.RedColorTable = this.redColorTable;
+		profile.GreenColorTable = this.greenColorTable;
+		profile.BlueColorTable = this.blueColorTable;
+		profile.AlphaColorTable = this.alphaColorTable;
 	}
 
 

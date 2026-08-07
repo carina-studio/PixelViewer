@@ -35,6 +35,13 @@ class ColorTableTests : BaseTests
 			// an independent table with identical colors is a different table
 			using var equivalentColorTable = CreateColorTable(256, 14, i => (uint)(i * i));
 			Assert.That(colorTable.IsContentSharedWith(equivalentColorTable), Is.False);
+
+			// the extension reports the same result, and treats a pair of missing tables as the same
+			Assert.That(colorTable.IsSameAs(sharedColorTable));
+			Assert.That(colorTable.IsSameAs(equivalentColorTable), Is.False);
+			Assert.That(((ColorTable?)null).IsSameAs(null));
+			Assert.That(((ColorTable?)null).IsSameAs(colorTable), Is.False);
+			Assert.That(colorTable.IsSameAs(null), Is.False);
 		});
 	}
 

@@ -14,7 +14,7 @@ This file provides guidance to AI coding agents when working with code in this r
 - `[ThreadSafe]` attributes mark thread-safe members explicitly.
 
 ### File and Type Organization
-- One type per file; file name matches the type name exactly.
+- One type per file; file name matches the type name exactly. **A class which exists only to hold extension members for another type is the exception.** When the extended type `T` is defined in this project, its `TExtensions` class is **preferred** to live at the bottom of `T.cs`, below `T` itself, rather than in a file of its own — as `BitmapFormatExtensions` does in `BitmapFormat.cs`, `ImageRendererExtensions` in `IImageRenderer.cs`, and `ColorTableExtensions` in `ColorTable.cs`. An extension class for a type this project does not define (a framework or library type) has no such file to join, so it keeps its own. `BayerPatternExtensions.cs` predates the rule and has not been moved yet.
 - Namespace matches the folder path: `Carina.PixelViewer.<Subfolder>`.
 - Inner types within a class/file are ordered **alphabetically** by name.
 - `extension` blocks (C# 14 extension members) are placed **first** in the containing class, before all other members; they are not sorted with the members listed below. Members inside an `extension` block are ordered alphabetically.

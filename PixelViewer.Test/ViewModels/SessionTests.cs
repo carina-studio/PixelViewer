@@ -41,6 +41,17 @@ namespace Carina.PixelViewer.Test.ViewModels
 		}
 
 
+		// Create a color table which maps each 8-bit value of a color channel to a 14-bit color.
+		static ColorTable CreateColorTable()
+		{
+			var colorTable = new ColorTable(256, 14);
+			var colors = colorTable.Memory.Span;
+			for (var i = colors.Length - 1; i >= 0; --i)
+				colors[i] = (uint)(i * 64);
+			return colorTable;
+		}
+
+
 		/// <summary>
 		/// Create <see cref="Session"/> instance for testing.
 		/// </summary>
@@ -126,6 +137,75 @@ namespace Carina.PixelViewer.Test.ViewModels
 		{
 			await this.WaitForPropertyAsync(session, nameof(Session.IsRenderingImage), true, 5000);
 			return await this.WaitForPropertyAsync(session, nameof(Session.IsRenderingImage), false, 10000);
+		}
+
+
+		/// <summary>
+		/// Test for applying the color tables carried by a profile to the rendering.
+		/// </summary>
+		[Test]
+		public void TestApplyingColorTables()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// open file, its format is unidentifiable so the default profile is kept
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				Assert.That(session.HasColorTables, Is.False, "No color table should be applied before applying the profile.");
+
+				// prepare a profile which carries 14-bit color tables and a white level which is meaningful in the color domain of the tables only
+				ImageRenderers.TryFindByFormatName("Bayer_Pattern_8", out var renderer);
+				Assert.That(renderer, Is.Not.Null);
+				Assert.That(renderer!.IsColorTableSupported, Is.True, "The renderer selected for testing should support color tables.");
+				using var redColorTable = CreateColorTable();
+				using var greenColorTable = CreateColorTable();
+				using var blueColorTable = CreateColorTable();
+				using var profile = new ImageRenderingProfile("Color Tables", renderer).Setup(it =>
+				{
+					it.Width = 16;
+					it.Height = 16;
+					it.EffectiveBits = [ 8, 0, 0, 0 ];
+					it.BlackLevels = [ 0, 0, 0, 0 ];
+					it.WhiteLevels = [ 12000, 0, 0, 0 ];
+					it.PixelStrides = [ 1, 0, 0, 0 ];
+					it.RowStrides = [ 16, 0, 0, 0 ];
+					it.RedColorTable = redColorTable;
+					it.GreenColorTable = greenColorTable;
+					it.BlueColorTable = blueColorTable;
+				});
+
+				// apply the profile and check that the tables decide the effective bits without wiping the white level carried by the profile
+				session.Profile = profile;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering with color tables.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering with color tables failed.");
+				Assert.That(session.HasColorTables, Is.True, $"{nameof(Session.HasColorTables)} should be set once the profile carrying the tables is applied.");
+				Assert.That(session.EffectiveBits1, Is.EqualTo(14), "Effective bits should be coerced to the color depth of the tables.");
+				Assert.That(session.SourceImageEffectiveBits, Is.EqualTo(14), $"{nameof(Session.SourceImageEffectiveBits)} should follow the color depth of the tables.");
+				Assert.That(session.WhiteLevel1, Is.EqualTo(12000u), "White level carried by the profile should survive the coercion of effective bits.");
+
+				// the effective bits set by user are ignored while the tables are applied
+				session.EffectiveBits1 = 8;
+				Assert.That(session.EffectiveBits1, Is.EqualTo(14), "Effective bits should not be changeable while the color tables are applied.");
+
+				// the tables are dropped when the renderer which applies them is replaced
+				ImageRenderers.TryFindByFormatName("L8", out var luminanceRenderer);
+				Assert.That(luminanceRenderer, Is.Not.Null);
+				Assert.That(luminanceRenderer!.IsColorTableSupported, Is.False, "The renderer selected for testing should not support color tables.");
+				session.ImageRenderer = luminanceRenderer;
+				Assert.That(session.HasColorTables, Is.False, $"{nameof(Session.HasColorTables)} should be cleared when the renderer does not apply the tables.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering without color tables.");
+				session.EffectiveBits1 = 6;
+				Assert.That(session.EffectiveBits1, Is.EqualTo(6), "Effective bits should be changeable again once the tables are not applied.");
+
+				// close file
+				session.Profile = ImageRenderingProfile.Default;
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
+				File.Delete(filePath);
+			});
 		}
 
 

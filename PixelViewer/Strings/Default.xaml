@@ -277,6 +277,7 @@ You can change this setting at any time in Options.</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) to open image file.</sys:String>
 	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">A profile named '{0}' already exists.</sys:String>
 	<sys:String x:Key="String/SessionControl.EffectiveBits">Effective Bits</sys:String>
+	<sys:String x:Key="String/SessionControl.EffectiveBits.DisabledByColorTable">Disabled because of applying color table.</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate Automatically</sys:String>
 	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">Applying filters…</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">Decrease</sys:String>

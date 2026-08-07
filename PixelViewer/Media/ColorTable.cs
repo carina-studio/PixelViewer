@@ -214,3 +214,28 @@ class ColorTable : BaseShareableDisposable<ColorTable>, IMemoryOwner<uint>
         jsonWriter.WriteEndObject();
     }
 }
+
+
+/// <summary>
+/// Extensions for <see cref="ColorTable"/>.
+/// </summary>
+static class ColorTableExtensions
+{
+    extension(ColorTable? colorTable)
+    {
+        /// <summary>
+        /// Check whether the given <see cref="ColorTable"/> defines the same colors as this one or not.
+        /// </summary>
+        /// <param name="anotherColorTable"><see cref="ColorTable"/> to check.</param>
+        /// <returns>True if both of them are null, or both of them share the same colors.</returns>
+        /// <remarks>None of the instances should be disposed before calling the method.</remarks>
+        public bool IsSameAs(ColorTable? anotherColorTable)
+        {
+            if (colorTable is null)
+                return anotherColorTable is null;
+            if (anotherColorTable is null)
+                return false;
+            return colorTable.IsContentSharedWith(anotherColorTable);
+        }
+    }
+}

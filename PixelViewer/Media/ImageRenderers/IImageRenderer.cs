@@ -316,18 +316,6 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	public ColorTable? AlphaColorTable { get; set; }
 
 
-	// Check whether the given color tables refer to the same table or not. Reference equality is not used because
-	// sharing a table produces a new instance which refers to the same colors.
-	static bool AreSameColorTables(ColorTable? x, ColorTable? y)
-	{
-		if (x is null)
-			return y is null;
-		if (y is null)
-			return false;
-		return x.IsContentSharedWith(y);
-	}
-
-
 	/// <summary>
 	/// Pattern of Bayer Filter.
 	/// </summary>
@@ -367,16 +355,16 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 	/// <inheritdoc/>
 	public bool Equals(ImageRenderingOptions options) =>
-		AreSameColorTables(this.AlphaColorTable, options.AlphaColorTable)
+		this.AlphaColorTable.IsSameAs(options.AlphaColorTable)
 		&& this.BayerPattern == options.BayerPattern
-		&& AreSameColorTables(this.BlueColorTable, options.BlueColorTable)
+		&& this.BlueColorTable.IsSameAs(options.BlueColorTable)
 		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001
 		&& this.ByteOrdering == options.ByteOrdering
 		&& this.DataOffset == options.DataOffset
 		&& this.Demosaicing == options.Demosaicing
-		&& AreSameColorTables(this.GreenColorTable, options.GreenColorTable)
+		&& this.GreenColorTable.IsSameAs(options.GreenColorTable)
 		&& Math.Abs(this.GreenGain - options.GreenGain) <= 0.001
-		&& AreSameColorTables(this.RedColorTable, options.RedColorTable)
+		&& this.RedColorTable.IsSameAs(options.RedColorTable)
 		&& Math.Abs(this.RedGain - options.RedGain) <= 0.001
 		&& this.YuvToBgraConverter == options.YuvToBgraConverter;
 

@@ -107,7 +107,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyAccess();
                 this.VerifyDisposed();
                 this.VerifyDefault();
-                if (AreSameColorTables(this.alphaColorTable, value))
+                if (this.alphaColorTable.IsSameAs(value))
                     return;
 
                 // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
@@ -115,18 +115,6 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.alphaColorTable = value?.Share();
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AlphaColorTable)));
             }
-        }
-
-
-        // Check whether the given color tables refer to the same table or not. Reference equality is not used because
-        // sharing a table produces a new instance which refers to the same colors.
-        static bool AreSameColorTables(ColorTable? x, ColorTable? y)
-        {
-            if (x is null)
-                return y is null;
-            if (y is null)
-                return false;
-            return x.IsContentSharedWith(y);
         }
 
 
@@ -197,7 +185,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyAccess();
                 this.VerifyDisposed();
                 this.VerifyDefault();
-                if (AreSameColorTables(this.blueColorTable, value))
+                if (this.blueColorTable.IsSameAs(value))
                     return;
 
                 // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
@@ -418,7 +406,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyAccess();
                 this.VerifyDisposed();
                 this.VerifyDefault();
-                if (AreSameColorTables(this.greenColorTable, value))
+                if (this.greenColorTable.IsSameAs(value))
                     return;
 
                 // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
@@ -455,10 +443,10 @@ namespace Carina.PixelViewer.Media.Profiles
                 && Math.Abs(this.RedColorGain - profile.RedColorGain) <= 0.0001
                 && Math.Abs(this.GreenColorGain - profile.GreenColorGain) <= 0.0001
                 && Math.Abs(this.BlueColorGain - profile.BlueColorGain) <= 0.0001
-                && AreSameColorTables(this.alphaColorTable, profile.alphaColorTable)
-                && AreSameColorTables(this.blueColorTable, profile.blueColorTable)
-                && AreSameColorTables(this.greenColorTable, profile.greenColorTable)
-                && AreSameColorTables(this.redColorTable, profile.redColorTable)
+                && this.alphaColorTable.IsSameAs(profile.alphaColorTable)
+                && this.blueColorTable.IsSameAs(profile.blueColorTable)
+                && this.greenColorTable.IsSameAs(profile.greenColorTable)
+                && this.redColorTable.IsSameAs(profile.redColorTable)
                 && this.Orientation == profile.Orientation
                 && this.FlipX == profile.FlipX
                 && this.FlipY == profile.FlipY
@@ -919,7 +907,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyAccess();
                 this.VerifyDisposed();
                 this.VerifyDefault();
-                if (AreSameColorTables(this.redColorTable, value))
+                if (this.redColorTable.IsSameAs(value))
                     return;
 
                 // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
