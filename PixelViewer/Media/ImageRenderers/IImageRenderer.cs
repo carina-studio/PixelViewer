@@ -60,6 +60,14 @@ interface IImageRenderer : INotifyPropertyChanged
 
 
 	/// <summary>
+	/// Check whether the color tables in <see cref="ImageRenderingOptions"/> are applied by this renderer or not.
+	/// </summary>
+	/// <remarks>The color tables are ignored by a renderer which reports False, so the effective bits of the image
+	/// should keep being applied by the caller in that case.</remarks>
+	bool IsColorTableSupported { get; }
+
+
+	/// <summary>
 	/// Start rendering.
 	/// </summary>
 	/// <param name="source"><see cref="IImageDataSource"/>.</param>
@@ -302,9 +310,35 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Table which maps the value of alpha channel of source image to the color to be rendered, or Null if the values are rendered directly.
+	/// </summary>
+	/// <remarks>The instance is borrowed from the caller, the renderer should share it before rendering the image.</remarks>
+	public ColorTable? AlphaColorTable { get; set; }
+
+
+	// Check whether the given color tables refer to the same table or not. Reference equality is not used because
+	// sharing a table produces a new instance which refers to the same colors.
+	static bool AreSameColorTables(ColorTable? x, ColorTable? y)
+	{
+		if (x is null)
+			return y is null;
+		if (y is null)
+			return false;
+		return x.IsContentSharedWith(y);
+	}
+
+
+	/// <summary>
 	/// Pattern of Bayer Filter.
 	/// </summary>
 	public BayerPattern BayerPattern { get; set; }
+
+
+	/// <summary>
+	/// Table which maps the value of blue channel of source image to the color to be rendered, or Null if the values are rendered directly.
+	/// </summary>
+	/// <remarks>The instance is borrowed from the caller, the renderer should share it before rendering the image.</remarks>
+	public ColorTable? BlueColorTable { get; set; }
 
 
 	/// <summary>
@@ -333,12 +367,16 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 	/// <inheritdoc/>
 	public bool Equals(ImageRenderingOptions options) =>
-		this.BayerPattern == options.BayerPattern
+		AreSameColorTables(this.AlphaColorTable, options.AlphaColorTable)
+		&& this.BayerPattern == options.BayerPattern
+		&& AreSameColorTables(this.BlueColorTable, options.BlueColorTable)
 		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001
 		&& this.ByteOrdering == options.ByteOrdering
 		&& this.DataOffset == options.DataOffset
 		&& this.Demosaicing == options.Demosaicing
+		&& AreSameColorTables(this.GreenColorTable, options.GreenColorTable)
 		&& Math.Abs(this.GreenGain - options.GreenGain) <= 0.001
+		&& AreSameColorTables(this.RedColorTable, options.RedColorTable)
 		&& Math.Abs(this.RedGain - options.RedGain) <= 0.001
 		&& this.YuvToBgraConverter == options.YuvToBgraConverter;
 
@@ -371,9 +409,25 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Table which maps the value of green channel of source image to the color to be rendered, or Null if the values are rendered directly.
+	/// </summary>
+	/// <remarks>The instance is borrowed from the caller, the renderer should share it before rendering the image.</remarks>
+	public ColorTable? GreenColorTable { get; set; }
+
+
+	/// <summary>
 	/// Gain of green color when rendering.
 	/// </summary>
 	public double GreenGain { get; set; }
+
+
+	/// <summary>
+	/// Check whether at least one color table is defined to map the values of color channels or not.
+	/// </summary>
+	public bool HasColorTables => this.AlphaColorTable is not null
+		|| this.BlueColorTable is not null
+		|| this.GreenColorTable is not null
+		|| this.RedColorTable is not null;
 
 
 	/// <summary>
@@ -388,6 +442,13 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	/// </summary>
 	public static bool operator !=(ImageRenderingOptions x, ImageRenderingOptions y) =>
 		!x.Equals(y);
+
+
+	/// <summary>
+	/// Table which maps the value of red channel of source image to the color to be rendered, or Null if the values are rendered directly.
+	/// </summary>
+	/// <remarks>The instance is borrowed from the caller, the renderer should share it before rendering the image.</remarks>
+	public ColorTable? RedColorTable { get; set; }
 
 
 	/// <summary>

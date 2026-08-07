@@ -232,6 +232,73 @@ abstract class BaseImageRenderer : IImageRenderer
 
 
 	/// <summary>
+	/// Create the mapping from the value of a color channel of source image to the 8-bit color to be rendered through the given color table.
+	/// </summary>
+	/// <param name="colorTable">Color table to map the value of color channel.</param>
+	/// <param name="blackLevel">Black level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <param name="whiteLevel">White level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <returns>Mapping from the value of color channel to the 8-bit color.</returns>
+	/// <remarks>The length of the mapping is <see cref="ColorTable.Count"/>, so rendering an image which refers to a
+	/// color out of the range of the table fails while the image is being rendered.</remarks>
+	protected static byte[] CreateColorTableTo8BitColorMapping(ColorTable colorTable, uint blackLevel, uint whiteLevel)
+	{
+		// check parameters
+		if (blackLevel >= whiteLevel)
+			throw new ArgumentOutOfRangeException(nameof(blackLevel));
+
+		// map each color in the table into the range defined by the black and white levels
+		var colors = colorTable.Memory.Span;
+		var mapping = new byte[colorTable.Count];
+		var scale = 255.0 / (whiteLevel - blackLevel);
+		for (var i = mapping.Length - 1; i >= 0; --i)
+		{
+			var color = colors[i];
+			if (color <= blackLevel)
+				mapping[i] = 0;
+			else if (color >= whiteLevel)
+				mapping[i] = 255;
+			else
+				mapping[i] = (byte)((color - blackLevel) * scale + 0.5);
+		}
+		return mapping;
+	}
+
+
+	/// <summary>
+	/// Create the mapping from the value of a color channel of source image to the 16-bit color to be rendered through the given color table.
+	/// </summary>
+	/// <param name="colorTable">Color table to map the value of color channel.</param>
+	/// <param name="blackLevel">Black level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <param name="whiteLevel">White level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <returns>Mapping from the value of color channel to the 16-bit color.</returns>
+	/// <remarks>The length of the mapping is <see cref="ColorTable.Count"/>, so rendering an image which refers to a
+	/// color out of the range of the table fails while the image is being rendered.</remarks>
+	protected static ushort[] CreateColorTableTo16BitColorMapping(ColorTable colorTable, uint blackLevel, uint whiteLevel)
+	{
+		// check parameters
+		if (blackLevel >= whiteLevel)
+			throw new ArgumentOutOfRangeException(nameof(blackLevel));
+
+		// map each color in the table into the range defined by the black and white levels, the color table is
+		// applied before the levels so the levels are values in the color space of the table instead of indexes of it
+		var colors = colorTable.Memory.Span;
+		var mapping = new ushort[colorTable.Count];
+		var scale = 65535.0 / (whiteLevel - blackLevel);
+		for (var i = mapping.Length - 1; i >= 0; --i)
+		{
+			var color = colors[i];
+			if (color <= blackLevel)
+				mapping[i] = 0;
+			else if (color >= whiteLevel)
+				mapping[i] = 65535;
+			else
+				mapping[i] = (ushort)((color - blackLevel) * scale + 0.5);
+		}
+		return mapping;
+	}
+
+
+	/// <summary>
 	/// Create function to extract from [1, 8]-bit data to 8-bit data.
 	/// </summary>
 	/// <param name="effectiveBits">Effective bits, range is [1, 8].</param>
@@ -319,9 +386,19 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <inheritdoc/>
 	public async Task<ImageRenderingResult> RenderAsync(IImageDataSource source, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 	{
-		// share resources
+		// share resources, the color tables are borrowed from the caller so they are shared before the first await to
+		// keep them alive even if the caller releases them while the image is being rendered. the options are a value
+		// copy of the caller's, so replacing the tables in them keeps the tables held by the caller untouched
 		using var sharedSource = source.Share();
 		using var sharedBitmapBuffer = bitmapBuffer.Share();
+		using var sharedAlphaColorTable = renderingOptions.AlphaColorTable?.Share();
+		using var sharedBlueColorTable = renderingOptions.BlueColorTable?.Share();
+		using var sharedGreenColorTable = renderingOptions.GreenColorTable?.Share();
+		using var sharedRedColorTable = renderingOptions.RedColorTable?.Share();
+		renderingOptions.AlphaColorTable = sharedAlphaColorTable;
+		renderingOptions.BlueColorTable = sharedBlueColorTable;
+		renderingOptions.GreenColorTable = sharedGreenColorTable;
+		renderingOptions.RedColorTable = sharedRedColorTable;
 
 #if SIMULATE_SLOW_IMAGE_RENDERING
 		// start measuring the duration of rendering to simulate slow rendering
@@ -374,6 +451,26 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <inheritdoc/>
 	public virtual Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
 		Task.FromResult(BitmapFormat.Bgra32);
+	
+	
+	/// <summary>
+	/// Select the format of rendered image according to the color tables to be applied.
+	/// </summary>
+	/// <param name="renderingOptions">Rendering options which carry the color tables.</param>
+	/// <param name="defaultFormat">Format to be used if no color table needs more than 8-bit color.</param>
+	/// <returns>Format of rendered image.</returns>
+	/// <remarks>The tables are read without being shared. The method completes synchronously, so the caller which
+	/// provided them keeps them alive throughout it.</remarks>
+	protected static BitmapFormat SelectRenderedFormatByColorTables(ImageRenderingOptions renderingOptions, BitmapFormat defaultFormat)
+	{
+		// a color which needs more than 8 bits can only be rendered by a 64-bit bitmap
+		if (defaultFormat == BitmapFormat.Bgra64)
+			return defaultFormat;
+		var colorBitDepth = Math.Max(renderingOptions.AlphaColorTable?.ColorBitDepth ?? 0, renderingOptions.BlueColorTable?.ColorBitDepth ?? 0);
+		colorBitDepth = Math.Max(colorBitDepth, renderingOptions.GreenColorTable?.ColorBitDepth ?? 0);
+		colorBitDepth = Math.Max(colorBitDepth, renderingOptions.RedColorTable?.ColorBitDepth ?? 0);
+		return colorBitDepth > 8 ? BitmapFormat.Bgra64 : defaultFormat;
+	}
 
 
 	// Implementations.
@@ -382,5 +479,6 @@ abstract class BaseImageRenderer : IImageRenderer
 	public abstract long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions);
 	public ImageFormat Format => this.format;
 	public bool IsBuiltIn => this.format.Category != ImageFormatCategory.UserDefined;
+	public virtual bool IsColorTableSupported => false;
 	public event PropertyChangedEventHandler? PropertyChanged;
 }

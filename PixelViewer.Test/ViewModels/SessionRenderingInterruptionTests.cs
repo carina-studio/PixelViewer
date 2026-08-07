@@ -51,6 +51,7 @@ class SessionRenderingInterruptionTests : BaseTests
 
 		/// <inheritdoc/>
 		public bool IsBuiltIn => true;
+		public bool IsColorTableSupported => false;
 
 		// Height of the image rendered by the latest completed rendering.
 		public int LastRenderedHeight { get; private set; }

@@ -87,8 +87,11 @@ abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
 		// select color pattern
 		var colorComponentSelector = renderingOptions.BayerPattern.CreateColorComponentSelector();
 
-		// render, demosaicing is performed by the caller because it may need another buffer to receive the result
-		var result = this.OnRender(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken);
+		// render, demosaicing is performed by the caller because it may need another buffer to receive the result.
+		// the color tables replace the effective bits of the image, so they are rendered by their own method
+		var result = this.IsColorTableSupported && renderingOptions.HasColorTables
+			? this.OnRenderWithColorTables(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken)
+			: this.OnRender(source, imageStream, bitmapBuffer, colorComponentSelector, renderingOptions, planeOptions, cancellationToken);
 		if (cancellationToken.IsCancellationRequested)
 			throw new TaskCanceledException();
 
@@ -109,6 +112,23 @@ abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
 	/// <param name="cancellationToken">Cancellation token.</param>
 	/// <returns>Result of rendering.</returns>
 	protected abstract ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken);
+
+
+	/// <summary>
+	/// Called to render image by mapping the values of color channels through the color tables.
+	/// </summary>
+	/// <param name="source">Source of image data.</param>
+	/// <param name="imageStream">Stream to read image data.</param>
+	/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/> to put rendered bayer pattern image.</param>
+	/// <param name="colorComponentSelector">Function to select color component for given pixel position.</param>
+	/// <param name="renderingOptions">Rendering options which carry at least one color table.</param>
+	/// <param name="planeOptions">Plane options.</param>
+	/// <param name="cancellationToken">Cancellation token.</param>
+	/// <returns>Result of rendering.</returns>
+	/// <remarks>The method is called only when the renderer reports <see cref="IImageRenderer.IsColorTableSupported"/>,
+	/// so a renderer which does not apply color tables needs no implementation of it.</remarks>
+	protected virtual ImageRenderingResult OnRenderWithColorTables(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken) =>
+		throw new NotSupportedException($"{this.GetType().Name} does not support applying color tables.");
 
 
     /// <inheritdoc/>
