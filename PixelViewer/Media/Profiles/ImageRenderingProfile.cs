@@ -39,8 +39,10 @@ namespace Carina.PixelViewer.Media.Profiles
 
 
         // Fields.
+        ColorTable? alphaColorTable;
         BayerPattern bayerPattern;
         IList<uint> blackLevels = emptyBlackLevels;
+        ColorTable? blueColorTable;
         double blueColorGain = 1.0;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         ColorSpace colorSpace;
@@ -51,10 +53,12 @@ namespace Carina.PixelViewer.Media.Profiles
         string? fileName;
         long framePaddingSize;
         double greenColorGain = 1.0;
+        ColorTable? greenColorTable;
         int height = 1;
         string name = "";
         IList<int> pixelStrides = emptyEffectiveBits;
         double redColorGain = 1.0;
+        ColorTable? redColorTable;
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
         bool useLinearColorSpace;
@@ -91,6 +95,38 @@ namespace Carina.PixelViewer.Media.Profiles
                     this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Name)));
                 };
             }
+        }
+
+
+        // Table which maps the value of alpha channel of source image to the color to be rendered.
+        public ColorTable? AlphaColorTable
+        {
+            get => this.alphaColorTable;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (AreSameColorTables(this.alphaColorTable, value))
+                    return;
+
+                // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
+                this.alphaColorTable?.Dispose();
+                this.alphaColorTable = value?.Share();
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AlphaColorTable)));
+            }
+        }
+
+
+        // Check whether the given color tables refer to the same table or not. Reference equality is not used because
+        // sharing a table produces a new instance which refers to the same colors.
+        static bool AreSameColorTables(ColorTable? x, ColorTable? y)
+        {
+            if (x is null)
+                return y is null;
+            if (y is null)
+                return false;
+            return x.IsContentSharedWith(y);
         }
 
 
@@ -148,6 +184,26 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 this.blueColorGain = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlueColorGain)));
+            }
+        }
+
+
+        // Table which maps the value of blue channel of source image to the color to be rendered.
+        public ColorTable? BlueColorTable
+        {
+            get => this.blueColorTable;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (AreSameColorTables(this.blueColorTable, value))
+                    return;
+
+                // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
+                this.blueColorTable?.Dispose();
+                this.blueColorTable = value?.Share();
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlueColorTable)));
             }
         }
 
@@ -270,6 +326,12 @@ namespace Carina.PixelViewer.Media.Profiles
             this.VerifyDefault();
             if (this.fileFormat != null)
                 fileFormat.PropertyChanged -= this.OnFileFormatPropertyChanged;
+
+            // release the color tables shared by this profile
+            this.alphaColorTable = this.alphaColorTable.DisposeAndReturnNull();
+            this.blueColorTable = this.blueColorTable.DisposeAndReturnNull();
+            this.greenColorTable = this.greenColorTable.DisposeAndReturnNull();
+            this.redColorTable = this.redColorTable.DisposeAndReturnNull();
         }
 
 
@@ -347,6 +409,26 @@ namespace Carina.PixelViewer.Media.Profiles
         }
 
 
+        // Table which maps the value of green channel of source image to the color to be rendered.
+        public ColorTable? GreenColorTable
+        {
+            get => this.greenColorTable;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (AreSameColorTables(this.greenColorTable, value))
+                    return;
+
+                // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
+                this.greenColorTable?.Dispose();
+                this.greenColorTable = value?.Share();
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GreenColorTable)));
+            }
+        }
+
+
         /// <summary>
         /// Check whether the given profile defines the same parameters to render image as this profile or not.
         /// </summary>
@@ -373,6 +455,10 @@ namespace Carina.PixelViewer.Media.Profiles
                 && Math.Abs(this.RedColorGain - profile.RedColorGain) <= 0.0001
                 && Math.Abs(this.GreenColorGain - profile.GreenColorGain) <= 0.0001
                 && Math.Abs(this.BlueColorGain - profile.BlueColorGain) <= 0.0001
+                && AreSameColorTables(this.alphaColorTable, profile.alphaColorTable)
+                && AreSameColorTables(this.blueColorTable, profile.blueColorTable)
+                && AreSameColorTables(this.greenColorTable, profile.greenColorTable)
+                && AreSameColorTables(this.redColorTable, profile.redColorTable)
                 && this.Orientation == profile.Orientation
                 && this.FlipX == profile.FlipX
                 && this.FlipY == profile.FlipY
@@ -588,6 +674,12 @@ namespace Carina.PixelViewer.Media.Profiles
                         profile.IsUpgradedWhenLoading = true;
                 }
 
+                // color tables, they are kept out of the profile when the image is rendered by its own values
+                profile.alphaColorTable = ReadColorTable(rootElement, nameof(AlphaColorTable));
+                profile.blueColorTable = ReadColorTable(rootElement, nameof(BlueColorTable));
+                profile.greenColorTable = ReadColorTable(rootElement, nameof(GreenColorTable));
+                profile.redColorTable = ReadColorTable(rootElement, nameof(RedColorTable));
+
                 // color space
                 if (rootElement.TryGetProperty(nameof(ColorSpace), out jsonProperty)
                        && jsonProperty.ValueKind == JsonValueKind.String)
@@ -786,6 +878,20 @@ namespace Carina.PixelViewer.Media.Profiles
         }
 
 
+        // Read a color table from the given JSON object, or null if the object carries no valid table with the given name.
+        static ColorTable? ReadColorTable(JsonElement rootElement, string name)
+        {
+            if (!rootElement.TryGetProperty(name, out var jsonProperty))
+                return null;
+            if (!ColorTable.TryLoadFromJson(jsonProperty, out var colorTable))
+            {
+                logger?.LogWarning("Unable to load {name} from profile", name);
+                return null;
+            }
+            return colorTable;
+        }
+
+
         // Gain of red color.
         public double RedColorGain
         {
@@ -800,6 +906,26 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 this.redColorGain = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RedColorGain)));
+            }
+        }
+
+
+        // Table which maps the value of red channel of source image to the color to be rendered.
+        public ColorTable? RedColorTable
+        {
+            get => this.redColorTable;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (AreSameColorTables(this.redColorTable, value))
+                    return;
+
+                // the profile owns its own share, so the table provided by the caller keeps being owned by the caller
+                this.redColorTable?.Dispose();
+                this.redColorTable = value?.Share();
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RedColorTable)));
             }
         }
 
@@ -891,6 +1017,10 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteString(nameof(ByteOrdering), this.byteOrdering.ToString());
                 if (format.Category == ImageFormatCategory.YUV)
                     jsonWriter.WriteString(nameof(YuvToBgraConverter), this.yuvToBgraConverter.Name);
+                WriteColorTable(jsonWriter, nameof(AlphaColorTable), this.alphaColorTable);
+                WriteColorTable(jsonWriter, nameof(BlueColorTable), this.blueColorTable);
+                WriteColorTable(jsonWriter, nameof(GreenColorTable), this.greenColorTable);
+                WriteColorTable(jsonWriter, nameof(RedColorTable), this.redColorTable);
                 jsonWriter.WriteString(nameof(ColorSpace), this.colorSpace.Name);
                 if (this.useLinearColorSpace)
                     jsonWriter.WriteBoolean(nameof(UseLinearColorSpace), true);
@@ -1007,6 +1137,16 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.width = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Width)));
             }
+        }
+
+
+        // Write the given color table into the JSON object being written, nothing is written if there is no table.
+        static void WriteColorTable(Utf8JsonWriter jsonWriter, string name, ColorTable? colorTable)
+        {
+            if (colorTable is null)
+                return;
+            jsonWriter.WritePropertyName(name);
+            colorTable.WriteToJson(jsonWriter);
         }
 
 

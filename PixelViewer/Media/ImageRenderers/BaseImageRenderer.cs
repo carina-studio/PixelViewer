@@ -232,73 +232,6 @@ abstract class BaseImageRenderer : IImageRenderer
 
 
 	/// <summary>
-	/// Create the mapping from the value of a color channel of source image to the 8-bit color to be rendered through the given color table.
-	/// </summary>
-	/// <param name="colorTable">Color table to map the value of color channel.</param>
-	/// <param name="blackLevel">Black level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
-	/// <param name="whiteLevel">White level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
-	/// <returns>Mapping from the value of color channel to the 8-bit color.</returns>
-	/// <remarks>The length of the mapping is <see cref="ColorTable.Count"/>, so rendering an image which refers to a
-	/// color out of the range of the table fails while the image is being rendered.</remarks>
-	protected static byte[] CreateColorTableTo8BitColorMapping(ColorTable colorTable, uint blackLevel, uint whiteLevel)
-	{
-		// check parameters
-		if (blackLevel >= whiteLevel)
-			throw new ArgumentOutOfRangeException(nameof(blackLevel));
-
-		// map each color in the table into the range defined by the black and white levels
-		var colors = colorTable.Memory.Span;
-		var mapping = new byte[colorTable.Count];
-		var scale = 255.0 / (whiteLevel - blackLevel);
-		for (var i = mapping.Length - 1; i >= 0; --i)
-		{
-			var color = colors[i];
-			if (color <= blackLevel)
-				mapping[i] = 0;
-			else if (color >= whiteLevel)
-				mapping[i] = 255;
-			else
-				mapping[i] = (byte)((color - blackLevel) * scale + 0.5);
-		}
-		return mapping;
-	}
-
-
-	/// <summary>
-	/// Create the mapping from the value of a color channel of source image to the 16-bit color to be rendered through the given color table.
-	/// </summary>
-	/// <param name="colorTable">Color table to map the value of color channel.</param>
-	/// <param name="blackLevel">Black level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
-	/// <param name="whiteLevel">White level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
-	/// <returns>Mapping from the value of color channel to the 16-bit color.</returns>
-	/// <remarks>The length of the mapping is <see cref="ColorTable.Count"/>, so rendering an image which refers to a
-	/// color out of the range of the table fails while the image is being rendered.</remarks>
-	protected static ushort[] CreateColorTableTo16BitColorMapping(ColorTable colorTable, uint blackLevel, uint whiteLevel)
-	{
-		// check parameters
-		if (blackLevel >= whiteLevel)
-			throw new ArgumentOutOfRangeException(nameof(blackLevel));
-
-		// map each color in the table into the range defined by the black and white levels, the color table is
-		// applied before the levels so the levels are values in the color space of the table instead of indexes of it
-		var colors = colorTable.Memory.Span;
-		var mapping = new ushort[colorTable.Count];
-		var scale = 65535.0 / (whiteLevel - blackLevel);
-		for (var i = mapping.Length - 1; i >= 0; --i)
-		{
-			var color = colors[i];
-			if (color <= blackLevel)
-				mapping[i] = 0;
-			else if (color >= whiteLevel)
-				mapping[i] = 65535;
-			else
-				mapping[i] = (ushort)((color - blackLevel) * scale + 0.5);
-		}
-		return mapping;
-	}
-
-
-	/// <summary>
 	/// Create function to extract from [1, 8]-bit data to 8-bit data.
 	/// </summary>
 	/// <param name="effectiveBits">Effective bits, range is [1, 8].</param>
@@ -353,6 +286,73 @@ abstract class BaseImageRenderer : IImageRenderer
 			b = (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | ((b >> paddingBitsShiftCount) & paddingBitsMask));
 			return correctedColors[b];
 		};
+	}
+
+
+	/// <summary>
+	/// Create the mapping from the value of a color channel of source image to the 16-bit color to be rendered through the given color table.
+	/// </summary>
+	/// <param name="colorTable">Color table to map the value of color channel.</param>
+	/// <param name="blackLevel">Black level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <param name="whiteLevel">White level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <returns>Mapping from the value of color channel to the 16-bit color.</returns>
+	/// <remarks>The length of the mapping is <see cref="ColorTable.Count"/>, so rendering an image which refers to a
+	/// color out of the range of the table fails while the image is being rendered.</remarks>
+	protected static ushort[] CreateColorTableTo16BitColorMapping(ColorTable colorTable, uint blackLevel, uint whiteLevel)
+	{
+		// check parameters
+		if (blackLevel >= whiteLevel)
+			throw new ArgumentOutOfRangeException(nameof(blackLevel));
+
+		// map each color in the table into the range defined by the black and white levels, the color table is
+		// applied before the levels so the levels are values in the color space of the table instead of indexes of it
+		var colors = colorTable.Memory.Span;
+		var mapping = new ushort[colorTable.Count];
+		var scale = 65535.0 / (whiteLevel - blackLevel);
+		for (var i = mapping.Length - 1; i >= 0; --i)
+		{
+			var color = colors[i];
+			if (color <= blackLevel)
+				mapping[i] = 0;
+			else if (color >= whiteLevel)
+				mapping[i] = 65535;
+			else
+				mapping[i] = (ushort)((color - blackLevel) * scale + 0.5);
+		}
+		return mapping;
+	}
+
+
+	/// <summary>
+	/// Create the mapping from the value of a color channel of source image to the 8-bit color to be rendered through the given color table.
+	/// </summary>
+	/// <param name="colorTable">Color table to map the value of color channel.</param>
+	/// <param name="blackLevel">Black level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <param name="whiteLevel">White level, which is a color in <paramref name="colorTable"/> instead of a value of color channel.</param>
+	/// <returns>Mapping from the value of color channel to the 8-bit color.</returns>
+	/// <remarks>The length of the mapping is <see cref="ColorTable.Count"/>, so rendering an image which refers to a
+	/// color out of the range of the table fails while the image is being rendered.</remarks>
+	protected static byte[] CreateColorTableTo8BitColorMapping(ColorTable colorTable, uint blackLevel, uint whiteLevel)
+	{
+		// check parameters
+		if (blackLevel >= whiteLevel)
+			throw new ArgumentOutOfRangeException(nameof(blackLevel));
+
+		// map each color in the table into the range defined by the black and white levels
+		var colors = colorTable.Memory.Span;
+		var mapping = new byte[colorTable.Count];
+		var scale = 255.0 / (whiteLevel - blackLevel);
+		for (var i = mapping.Length - 1; i >= 0; --i)
+		{
+			var color = colors[i];
+			if (color <= blackLevel)
+				mapping[i] = 0;
+			else if (color >= whiteLevel)
+				mapping[i] = 255;
+			else
+				mapping[i] = (byte)((color - blackLevel) * scale + 0.5);
+		}
+		return mapping;
 	}
 
 

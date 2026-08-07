@@ -205,11 +205,6 @@ class BayerPattern8ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(I
 	}
 
 
-    /// <inheritdoc/>
-    public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
-        Task.FromResult(SelectRenderedFormatByColorTables(renderingOptions, BitmapFormat.Bgra32));
-
-
     // Select the white level to be used when it is not defined by the image plane.
     static uint SelectDefaultWhiteLevel(ImageRenderingOptions renderingOptions, int effectiveBits)
     {
@@ -219,4 +214,9 @@ class BayerPattern8ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(I
 		    colorBitDepth = effectiveBits;
 	    return (uint)((1L << colorBitDepth) - 1);
     }
+    /// <inheritdoc/>
+    public override Task<BitmapFormat> SelectRenderedFormatAsync(IImageDataSource source, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken = default) =>
+        Task.FromResult(SelectRenderedFormatByColorTables(renderingOptions, BitmapFormat.Bgra32));
+
+
 }
