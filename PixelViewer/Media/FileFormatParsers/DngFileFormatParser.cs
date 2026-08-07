@@ -44,6 +44,45 @@ class DngFileFormatParser : BaseFileFormatParser
     { }
 
 
+    // Create the table which maps each value of source image to its color, according to the linearization table defined in the file.
+    ColorTable? CreateColorTable(ushort[] linearizationTable, int pixelStride, uint whiteLevel)
+    {
+        // the white level defines the range which the table maps the values to. the default white level of DNG is
+        // derived from the bits of source image, which says nothing about the range of a table, so the largest color
+        // in the table is used instead when the file defines no white level
+        var maxColor = whiteLevel > 0 ? whiteLevel : linearizationTable.Max();
+        if (maxColor == 0 || pixelStride <= 0)
+        {
+            this.Logger.LogWarning("Unable to use linearization table, maximum color: {maxColor}, pixel stride: {pixelStride}", maxColor, pixelStride);
+            return null;
+        }
+
+        // select the color depth needed to keep every color of the table
+        var colorBitDepth = 1;
+        var mask = 1u;
+        while (mask < maxColor)
+        {
+            ++colorBitDepth;
+            mask = ((mask << 1) | 1);
+        }
+
+        // the renderers index the table by the value read from source image rather than by its effective bits, so the
+        // table needs to cover every value which the pixel stride can carry. the colors beyond the table defined by
+        // the file are clamped to its last color, which is what the other DNG readers do with a shortened table
+        var count = Math.Min(1 << (pixelStride << 3), ColorTable.MaxCount);
+        var definedCount = Math.Min(linearizationTable.Length, count);
+        var lastColor = (uint)linearizationTable[definedCount - 1];
+        return new ColorTable(count, colorBitDepth).Also(it =>
+        {
+            var colors = it.Memory.Span;
+            for (var i = definedCount - 1; i >= 0; --i)
+                colors[i] = linearizationTable[i];
+            for (var i = count - 1; i >= definedCount; --i)
+                colors[i] = lastColor;
+        });
+    }
+
+
     /// <inheritdoc/>
     protected override async Task<ImageRenderingProfile?> ParseImageRenderingProfileAsyncCore(IImageDataSource source, Stream stream, CancellationToken cancellationToken)
     {
@@ -72,6 +111,7 @@ class DngFileFormatParser : BaseFileFormatParser
         var uniqueCameraModel = (string?)null;
         var blackLevel = 0u;
         var whiteLevel = 0u;
+        var linearizationTable = (ushort[]?)null;
         var effectiveBits = 0;
         var pixelStride = 0;
         var rowStride = 0;
@@ -253,6 +293,13 @@ class DngFileFormatParser : BaseFileFormatParser
                                 if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData))
                                     cfaLayout = ushortData[0];
                                 break;
+                            case 0xc618: // LinearizationTable
+                                if (isFullSizeImage && entryReader.TryGetEntryData(out ushortData) && ushortData.IsNotEmpty())
+                                {
+                                    linearizationTable = ushortData;
+                                    this.Logger.LogTrace("Linearization table: {count} colors, maximum: {maxColor}", ushortData.Length, ushortData.Max());
+                                }
+                                break;
                             case 0xc61a: // BlackLevel
                                 if (isFullSizeImage)
                                 {
@@ -288,19 +335,25 @@ class DngFileFormatParser : BaseFileFormatParser
                                     {
                                         whiteLevel = uintData[0];
                                     }
-                                    if (whiteLevel >= (1 << effectiveBits))
+                                    // the white level is checked against the value domain of source image only when no
+                                    // linearization table is defined, otherwise it belongs to the color domain of the table.
+                                    // the entries of an IFD are ordered by their ID, so the table has been read before reaching here
+                                    if (linearizationTable is null)
                                     {
-                                        whiteLevel = (uint)((1 << effectiveBits) - 1);
-                                        this.Logger.LogWarning("Unexpected white level: {whiteLevel}, effect bits: {effectiveBits}", whiteLevel, effectiveBits);
-                                    }
-                                    else if (whiteLevel > 0)
-                                    {
-                                        var mask = 1u;
-                                        effectiveBits = 1;
-                                        while (mask < whiteLevel)
+                                        if (whiteLevel >= (1 << effectiveBits))
                                         {
-                                            ++effectiveBits;
-                                            mask = ((mask << 1) | 1);
+                                            this.Logger.LogWarning("Unexpected white level: {whiteLevel}, effect bits: {effectiveBits}", whiteLevel, effectiveBits);
+                                            whiteLevel = (uint)((1 << effectiveBits) - 1);
+                                        }
+                                        else if (whiteLevel > 0)
+                                        {
+                                            var mask = 1u;
+                                            effectiveBits = 1;
+                                            while (mask < whiteLevel)
+                                            {
+                                                ++effectiveBits;
+                                                mask = ((mask << 1) | 1);
+                                            }
                                         }
                                     }
                                 }
@@ -590,6 +643,7 @@ class DngFileFormatParser : BaseFileFormatParser
         // create profile
         return new ImageRenderingProfile(FileFormats.Dng, imageRenderer).Also(profile =>
         {
+            // common properties
             profile.BayerPattern = bayerPattern;
             profile.ByteOrdering = byteOrdering;
             if (colorSpace != null)
@@ -607,6 +661,20 @@ class DngFileFormatParser : BaseFileFormatParser
             profile.PixelStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = pixelStride);
             profile.RowStrides = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = rowStride);
             profile.Width = imageWidth;
+
+            // apply the linearization table, DNG defines one table for every color channel of the mosaic. the profile
+            // shares the table by itself so the one created here is released after it has been set
+            if (linearizationTable is not null)
+            {
+                using var colorTable = this.CreateColorTable(linearizationTable, pixelStride, whiteLevel);
+                if (colorTable is not null)
+                {
+                    profile.RedColorTable = colorTable;
+                    profile.GreenColorTable = colorTable;
+                    profile.BlueColorTable = colorTable;
+                    this.Logger.LogTrace("Linearization table applied, colors: {count}, color bit depth: {colorBitDepth}", colorTable.Count, colorTable.ColorBitDepth);
+                }
+            }
 
             // apply white balance defined by as-shot neutral, the gains are normalized to make gain of green be 1
             if (asShotNeutral is not null)

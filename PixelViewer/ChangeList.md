@@ -12,6 +12,7 @@
 ## Improvement
 + Added support for parsing and applying the white balance recorded in DNG images.
 + Added support for parsing and applying the color matrix recorded in DNG images.
++ Added support for parsing and applying the linearization table recorded in DNG images.
 + Added support for specifying the effective bits of images with `ABGR_16161616`, `ARGB_16161616`, `BGRA_16161616` and `RGBA_16161616` formats.
 + Improved the performance of saving images in PNG format.
 + Added support for saving the rendered image while the next image is being rendered.
@@ -20,7 +21,7 @@
 + Prevented the displayed image from being cleared when the memory usage of rendered images reaches the limit.
 
 ## Behavior Changes
-+ 
++ The effective bits of image planes can no longer be specified when a color table is applied to the rendering, such as for a DNG image which carries a linearization table.
 
 ## Bug Fixing
 + Fixed the incorrect color value range of the selected pixel shown for images with RGB/ARGB formats such as `BGRA_8888` and `RGB_565`.
