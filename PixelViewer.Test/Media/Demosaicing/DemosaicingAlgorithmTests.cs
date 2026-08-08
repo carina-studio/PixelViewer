@@ -105,6 +105,27 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
+	// Assert that the algorithm which only prefers a dedicated buffer still interpolates accurately enough with the same buffer as both source and destination, which is what it falls back to when there is not enough memory for a dedicated one.
+	static void AssertInPlaceInterpolationQuality(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
+	{
+		// only the algorithm which prefers a dedicated buffer interpolates in place in a way of its own. The algorithm which needs no dedicated buffer is already covered by the consistency of its 2 arrangements together with the quality of the one with separate buffers, and the algorithm which requires one is never asked to work in place at all
+		if (algorithm.CheckOutputBufferRequirement(bayerPattern, width, height) != OutputBufferRequirement.Preferred)
+			return;
+
+		// demosaic with the buffer which is shared as both source and destination, which is how Session performs in-place demosaicing
+		using var groundTruth = CreateGroundTruthImage(format, width, height);
+		using var result = CreateMosaic(groundTruth, bayerPattern);
+		using var sharedResult = result.Share();
+		Assert.That(result.IsBufferSharedWith(sharedResult), Is.True, "Shared buffer should be reported as the same buffer.");
+		Demosaic(algorithm, result, sharedResult, bayerPattern);
+
+		// the interpolated image should be close enough to the image the mosaic is sampled from
+		var peakSignalNoiseRatio = ComputePeakSignalNoiseRatio(result, groundTruth, PeakSignalNoiseRatioBorderSize);
+		var minPeakSignalNoiseRatio = bayerPattern.BlockWidth > 2 ? Min4x4PeakSignalNoiseRatio : Min2x2PeakSignalNoiseRatio;
+		Assert.That(peakSignalNoiseRatio, Is.GreaterThanOrEqualTo(minPeakSignalNoiseRatio), $"Image interpolated in place is only {peakSignalNoiseRatio:F2} dB away from the ground truth. {Describe(algorithm, bayerPattern, format, width, height)}");
+	}
+
+
 	// Compute the peak signal-to-noise ratio between the demosaiced image and the ground truth in dB. Only the color components are compared, and the pixels near the border are excluded because interpolating them is inaccurate for every algorithm.
 	static unsafe double ComputePeakSignalNoiseRatio(IBitmapBuffer image, IBitmapBuffer groundTruth, int borderSize)
 	{
@@ -340,9 +361,13 @@ class DemosaicingAlgorithmTests : BaseTests
 	/// <summary>
 	/// Test for performing demosaicing with the same buffer as both source and destination.
 	/// </summary>
+	/// <remarks>The algorithm which needs no dedicated buffer must produce the same result in both arrangements, while the algorithm which only prefers one is allowed to interpolate differently in place and is checked for interpolating accurately enough instead.</remarks>
 	[Test]
-	public void TestInPlaceDemosaicing() =>
+	public void TestInPlaceDemosaicing()
+	{
 		RunOnEachSupportedCombination(imageSizes, AssertInPlaceDemosaicingConsistent);
+		RunOnEachSupportedCombination(imageSizes, AssertInPlaceInterpolationQuality);
+	}
 
 
 	/// <summary>
