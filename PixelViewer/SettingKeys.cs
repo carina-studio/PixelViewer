@@ -80,6 +80,10 @@ static class SettingKeys
 	/// </summary>
 	public static readonly SettingKey<long> MaxRenderedImagesMemoryUsageMB = new(nameof(MaxRenderedImagesMemoryUsageMB), Environment.Is64BitProcess ? 2048 : 1024);
 	/// <summary>
+	/// Reduce the quality of demosaicing when there is insufficient memory to keep the best quality.
+	/// </summary>
+	public static readonly SettingKey<bool> ReduceDemosaicingQualityWhenInsufficientMemory = new(nameof(ReduceDemosaicingQualityWhenInsufficientMemory), true);
+	/// <summary>
 	/// Whether using 32-bit colors to render images only or not.
 	/// </summary>
 	public static readonly SettingKey<bool> Render32BitColorsOnly = new(nameof(Render32BitColorsOnly), false);

@@ -4413,7 +4413,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			else
 				_ = this.ClearFilteredImageAsync();
 		}
-		else if (key == SettingKeys.ColorSpaceConversionTiming 
+		else if (key == SettingKeys.ColorSpaceConversionTiming
+		         || key == SettingKeys.ReduceDemosaicingQualityWhenInsufficientMemory
 		         || key == SettingKeys.Render32BitColorsOnly)
 		{
 			this.RenderImageCommand.TryExecute();
@@ -5389,10 +5390,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
-		// release the cached mosaic image which cannot be used by this rendering. A dedicated buffer is allocated only for the algorithm which requires it, the preference of an algorithm which interpolates better with a dedicated buffer is going to be honored by a setting instead
+		// release the cached mosaic image which cannot be used by this rendering. A dedicated buffer is acquired for the algorithm which prefers one as well as for the algorithm which requires one, but failing to acquire it aborts the rendering only for the latter, the former keeps rendering with the reduced quality of demosaicing in-place instead
 		var demosaicingAlgorithm = renderingOptions.Demosaicing;
-		var isMosaicImageNeeded = demosaicingAlgorithm is not null
-			&& demosaicingAlgorithm.CheckOutputBufferRequirement(renderingOptions.BayerPattern, this.ImageWidth, this.ImageHeight) == OutputBufferRequirement.Required;
+		var outputBufferRequirement = demosaicingAlgorithm?.CheckOutputBufferRequirement(renderingOptions.BayerPattern, this.ImageWidth, this.ImageHeight) ?? OutputBufferRequirement.NotRequired;
+		var isMosaicImageNeeded = outputBufferRequirement != OutputBufferRequirement.NotRequired;
+		var isMosaicImageMandatory = outputBufferRequirement == OutputBufferRequirement.Required
+			|| (outputBufferRequirement == OutputBufferRequirement.Preferred && !this.Settings.GetValueOrDefault(SettingKeys.ReduceDemosaicingQualityWhenInsufficientMemory));
 		if (this.cachedMosaicImageFrame is not null)
 		{
 			var cachedMosaicBitmapBuffer = this.cachedMosaicImageFrame.BitmapBuffer;
@@ -5412,7 +5415,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.Logger.LogWarning("Allocate rendered image frame, size: {width}x{height}", this.ImageWidth, this.ImageHeight);
 		var renderedImageFrame = isRenderingNeeded ? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight) : null;
 
-		// create the image to keep the mosaic if the algorithm requires a dedicated buffer to receive the result, the cached frame is taken out of the cache so that releasing the cached images while rendering cannot dispose the frame being rendered into
+		// create the image to keep the mosaic if the algorithm requires or prefers a dedicated buffer to receive the result, the cached frame is taken out of the cache so that releasing the cached images while rendering cannot dispose the frame being rendered into
 		var mosaicImageFrame = (ImageFrame?)null;
 		if (isRenderingNeeded && isMosaicImageNeeded && renderedImageFrame is not null)
 		{
@@ -5430,8 +5433,12 @@ class Session : ViewModel<IAppSuiteApplication>
 					this.Logger.LogWarning("Allocate mosaic image frame for demosaicing, size: {width}x{height}", this.ImageWidth, this.ImageHeight);
 				mosaicImageFrame = await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight);
 			}
+
+			// keep rendering without the dedicated buffer, the algorithm which only prefers one interpolates in-place with a reduced quality
+			if (mosaicImageFrame is null && !isMosaicImageMandatory)
+				this.Logger.LogWarning("Unable to acquire the mosaic image frame, reduce the quality of demosaicing by '{algorithm}'", demosaicingAlgorithm.AsNonNull().Id);
 		}
-		if (isRenderingNeeded && (renderedImageFrame is null || (isMosaicImageNeeded && mosaicImageFrame is null)))
+		if (isRenderingNeeded && (renderedImageFrame is null || (isMosaicImageMandatory && mosaicImageFrame is null)))
 		{
 			if (!cancellationTokenSource.IsCancellationRequested)
 			{
