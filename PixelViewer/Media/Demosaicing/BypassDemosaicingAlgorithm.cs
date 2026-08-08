@@ -1,5 +1,4 @@
 using Carina.PixelViewer.Media.ImageRenderers;
-using CarinaStudio;
 using CarinaStudio.Threading;
 using System;
 using System.Threading;
@@ -13,14 +12,14 @@ namespace Carina.PixelViewer.Media.Demosaicing;
 class BypassDemosaicingAlgorithm() : DemosaicingAlgorithm("Bypass")
 {
 	/// <inheritdoc/>
+	public override OutputBufferRequirement CheckOutputBufferRequirement(BayerPattern pattern, int width, int height) => OutputBufferRequirement.NotRequired;
+
+
+	/// <inheritdoc/>
 	[CalledOnBackgroundThread]
 	public override void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
 		// the mosaic is kept as-is, copying is needed only when the destination is another buffer
 		srcBuffer.CopyTo(destBuffer);
 	}
-
-
-	/// <inheritdoc/>
-	public override bool IsInPlaceDemosaicingSupported(BayerPattern pattern) => true;
 }

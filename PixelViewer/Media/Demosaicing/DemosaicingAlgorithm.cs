@@ -13,6 +13,21 @@ namespace Carina.PixelViewer.Media.Demosaicing;
 abstract class DemosaicingAlgorithm(string id)
 {
 	/// <summary>
+	/// Check whether a dedicated buffer is needed to receive the result of demosaicing the given image or not.
+	/// </summary>
+	/// <param name="pattern">Pattern of Bayer Filter which the image is rendered with.</param>
+	/// <param name="width">Width of image in pixels.</param>
+	/// <param name="height">Height of image in pixels.</param>
+	/// <returns>Requirement of dedicated buffer to receive the result of demosaicing.</returns>
+	/// <remarks>
+	/// The algorithm reports <see cref="OutputBufferRequirement.NotRequired"/> as long as interpolating a color component never needs a color component interpolated before, which costs no extra buffer at all. <see cref="OutputBufferRequirement.Required"/> makes the caller allocate a dedicated buffer, and demosaicing with the same buffer as both the source and the destination is rejected instead of corrupting the pixels silently.
+	/// <see cref="OutputBufferRequirement.Preferred"/> is for the algorithm which works in both ways but interpolates better with a dedicated buffer. The caller is free to hand over either arrangement for it, so the algorithm must check <see cref="IBitmapBuffer.IsBufferSharedWith"/> to know which one it got instead of assuming the preferred one.
+	/// The answer is allowed to differ between patterns and dimensions because an algorithm may need to pre-process the mosaic of one pattern while it can interpolate another directly, and because the cost of a dedicated buffer grows with the size of image. It is meaningful only for a pattern which <see cref="IsBayerPatternSupported"/> accepts, the caller never demosaics an image with an unsupported pattern.
+	/// </remarks>
+	public abstract OutputBufferRequirement CheckOutputBufferRequirement(BayerPattern pattern, int width, int height);
+
+
+	/// <summary>
 	/// Perform demosaicing on the given image.
 	/// </summary>
 	/// <param name="srcBuffer"><see cref="IBitmapBuffer"/> which contains the image rendered with Bayer Filter pattern, each of its pixels provides one color component only.</param>
@@ -21,7 +36,7 @@ abstract class DemosaicingAlgorithm(string id)
 	/// <param name="colorComponentSelector">Function which accepts horizontal and vertical position of pixel, and returns the color component provided by the pixel.</param>
 	/// <param name="renderingOptions">Rendering options which the image is rendered with.</param>
 	/// <param name="cancellationToken">Cancellation token.</param>
-	/// <remarks>Both buffers are guaranteed to have the same format and dimensions by the caller. <paramref name="destBuffer"/> shares its buffer with <paramref name="srcBuffer"/>, which can be checked by <see cref="IBitmapBuffer.IsBufferSharedWith"/>, only if <see cref="IsInPlaceDemosaicingSupported"/> is true for <paramref name="bayerPattern"/>. Every pixel of <paramref name="destBuffer"/> should be filled by the algorithm, including the color component provided by the pixel itself, because the buffer may be a newly allocated one.</remarks>
+	/// <remarks>Both buffers are guaranteed to have the same format and dimensions by the caller. <paramref name="destBuffer"/> shares its buffer with <paramref name="srcBuffer"/>, which can be checked by <see cref="IBitmapBuffer.IsBufferSharedWith"/>, only if <see cref="CheckOutputBufferRequirement"/> doesn't report <see cref="OutputBufferRequirement.Required"/> for <paramref name="bayerPattern"/>. Every pixel of <paramref name="destBuffer"/> should be filled by the algorithm, including the color component provided by the pixel itself, because the buffer may be a newly allocated one.</remarks>
 	[CalledOnBackgroundThread]
 	public abstract void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken);
 
@@ -48,15 +63,6 @@ abstract class DemosaicingAlgorithm(string id)
 	/// <returns>True if the pattern is supported by the algorithm.</returns>
 	/// <remarks>The algorithm is excluded from <see cref="Carina.PixelViewer.ViewModels.Session.DemosaicingAlgorithms"/> for an unsupported pattern, so it cannot be selected by user at all instead of falling back to another behavior silently.</remarks>
 	public virtual bool IsBayerPatternSupported(BayerPattern pattern) => true;
-
-
-	/// <summary>
-	/// Check whether performing demosaicing with the same <see cref="IBitmapBuffer"/> as both source and destination is supported by the algorithm for the given pattern of Bayer Filter or not.
-	/// </summary>
-	/// <param name="pattern">Pattern of Bayer Filter.</param>
-	/// <returns>True if demosaicing the image with the pattern in-place is supported by the algorithm.</returns>
-	/// <remarks>An extra buffer is allocated for the algorithm which doesn't support in-place demosaicing, so the algorithm should support it as long as interpolating a color component never needs a color component interpolated before. The answer is allowed to differ between patterns because an algorithm may need to pre-process the mosaic of one pattern while it can interpolate another directly. It is meaningful only for a pattern which <see cref="IsBayerPatternSupported"/> accepts, the caller never demosaics an image with an unsupported pattern.</remarks>
-	public abstract bool IsInPlaceDemosaicingSupported(BayerPattern pattern);
 
 
 	/// <inheritdoc/>

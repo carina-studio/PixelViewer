@@ -12,6 +12,10 @@ namespace Carina.PixelViewer.Media.Demosaicing;
 class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 {
 	/// <inheritdoc/>
+	public override OutputBufferRequirement CheckOutputBufferRequirement(BayerPattern pattern, int width, int height) => OutputBufferRequirement.NotRequired;
+
+
+	/// <inheritdoc/>
 	[CalledOnBackgroundThread]
 	public override void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
@@ -836,8 +840,4 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 			});
 		});
 	}
-
-
-	/// <inheritdoc/>
-	public override bool IsInPlaceDemosaicingSupported(BayerPattern pattern) => true;
 }

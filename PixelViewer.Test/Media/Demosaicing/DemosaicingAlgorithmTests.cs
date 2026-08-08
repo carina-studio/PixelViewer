@@ -84,8 +84,8 @@ class DemosaicingAlgorithmTests : BaseTests
 	// Assert that demosaicing in place produces the same result as demosaicing into another buffer.
 	static void AssertInPlaceDemosaicingConsistent(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
 	{
-		// the algorithm is never asked to work in place unless it supports doing so for the pattern
-		if (!algorithm.IsInPlaceDemosaicingSupported(bayerPattern))
+		// the algorithm is asked to work in place only when it needs no dedicated buffer at all. An algorithm which merely prefers one interpolates differently in each arrangement by definition, so comparing the 2 results would report the reason it states the preference as a failure
+		if (algorithm.CheckOutputBufferRequirement(bayerPattern, width, height) != OutputBufferRequirement.NotRequired)
 			return;
 
 		// demosaic with separate source and destination buffers

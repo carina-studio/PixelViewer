@@ -2511,13 +2511,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand DeleteProfileCommand { get; }
 
 
-	// Perform demosaicing on the image rendered with bayer filter pattern. The destination buffer is the same buffer as the source one if in-place demosaicing is supported by the algorithm.
+	// Perform demosaicing on the image rendered with bayer filter pattern. The destination buffer is the same buffer as the source one unless the algorithm requires a dedicated buffer to receive the result.
 	async Task DemosaicImageAsync(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
 		// check state
 		if (srcBuffer.Format != destBuffer.Format || srcBuffer.Width != destBuffer.Width || srcBuffer.Height != destBuffer.Height)
 			throw new ArgumentException("Format or dimensions of source and destination buffers of demosaicing are different.");
-		if (srcBuffer.IsBufferSharedWith(destBuffer) && !algorithm.IsInPlaceDemosaicingSupported(renderingOptions.BayerPattern))
+		if (srcBuffer.IsBufferSharedWith(destBuffer) && algorithm.CheckOutputBufferRequirement(renderingOptions.BayerPattern, srcBuffer.Width, srcBuffer.Height) == OutputBufferRequirement.Required)
 			throw new ArgumentException($"In-place demosaicing is not supported by '{algorithm.Id}'.");
 
 		// prepare
@@ -5389,9 +5389,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
-		// release the cached mosaic image which cannot be used by this rendering
+		// release the cached mosaic image which cannot be used by this rendering. A dedicated buffer is allocated only for the algorithm which requires it, the preference of an algorithm which interpolates better with a dedicated buffer is going to be honored by a setting instead
 		var demosaicingAlgorithm = renderingOptions.Demosaicing;
-		var isMosaicImageNeeded = demosaicingAlgorithm is not null && !demosaicingAlgorithm.IsInPlaceDemosaicingSupported(renderingOptions.BayerPattern);
+		var isMosaicImageNeeded = demosaicingAlgorithm is not null
+			&& demosaicingAlgorithm.CheckOutputBufferRequirement(renderingOptions.BayerPattern, this.ImageWidth, this.ImageHeight) == OutputBufferRequirement.Required;
 		if (this.cachedMosaicImageFrame is not null)
 		{
 			var cachedMosaicBitmapBuffer = this.cachedMosaicImageFrame.BitmapBuffer;
@@ -5411,7 +5412,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.Logger.LogWarning("Allocate rendered image frame, size: {width}x{height}", this.ImageWidth, this.ImageHeight);
 		var renderedImageFrame = isRenderingNeeded ? await this.AllocateRenderedImageFrame(frameNumber, renderedFormat, renderedColorSpace, this.ImageWidth, this.ImageHeight) : null;
 
-		// create the image to keep the mosaic if demosaicing cannot be performed in-place, the cached frame is taken out of the cache so that releasing the cached images while rendering cannot dispose the frame being rendered into
+		// create the image to keep the mosaic if the algorithm requires a dedicated buffer to receive the result, the cached frame is taken out of the cache so that releasing the cached images while rendering cannot dispose the frame being rendered into
 		var mosaicImageFrame = (ImageFrame?)null;
 		if (isRenderingNeeded && isMosaicImageNeeded && renderedImageFrame is not null)
 		{
