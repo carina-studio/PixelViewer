@@ -15,7 +15,7 @@ namespace Carina.PixelViewer.Test.Media.Demosaicing;
 [TestFixture]
 class DemosaicingAlgorithmTests : BaseTests
 {
-	// Constants. The minimum ratios are placed slightly below the ratios measured from the built-in bilinear algorithm, which is the algorithm interpolating least accurately, so that an algorithm interpolating even worse is reported instead of being accepted silently. Bilinear reaches 38.47 dB and 27.38 dB in the worst case, and the ratios of one algorithm spread by less than 0.4 dB over the patterns, formats and sizes covered here. Measure them again after changing the content of the ground truth.
+	// Constants. The minimum ratios are placed slightly below the ratios measured from the built-in bilinear algorithm, which is the algorithm interpolating least accurately, so that an algorithm interpolating even worse is reported instead of being accepted silently. Bilinear reaches 38.64 dB and 27.29 dB in the worst case. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 2 sizes differ by up to 1.6 dB because the smaller one is not a multiple of the color block and gives the border a larger share of the image. Measure them again after changing the content of the ground truth.
 	const double Min2x2PeakSignalNoiseRatio = 37;
 	const double Min4x4PeakSignalNoiseRatio = 26;
 	const int PeakSignalNoiseRatioBorderSize = 4;
@@ -162,8 +162,13 @@ class DemosaicingAlgorithmTests : BaseTests
 					var normalizedY = height > 1 ? (double)y / (height - 1) : 0.0;
 					for (var x = 0; x < width; ++x)
 					{
+						// carry the fine detail in 4 oblique gratings instead of one, so that no direction of the image is easier to interpolate than another. A single grating makes the ratios of the patterns incomparable to each other: 2 of the 16 pixels of a 4x4 color block are rearranged along a diagonal, along the main one for a chroma-leading pattern and along the anti-diagonal for a green-leading one, so a lone grating which one diagonal crosses faster than the other ranks the patterns by its own orientation. The 4 directions are the mirror images of each other and they share one period, which is what equalizes the directions - giving each of them a period of its own would reintroduce the bias it removes.
 						var normalizedX = width > 1 ? (double)x / (width - 1) : 0.0;
-						var luminance = 0.5 + 0.31 * Math.Sin(2 * Math.PI * (normalizedX + 0.35 * normalizedY)) + 0.09 * Math.Sin(2 * Math.PI * (x + 2 * y) / 17.0);
+						var detail = Math.Sin(2 * Math.PI * (x + 2 * y) / 17.0)
+							+ Math.Sin(2 * Math.PI * (x - 2 * y) / 17.0)
+							+ Math.Sin(2 * Math.PI * (2 * x + y) / 17.0)
+							+ Math.Sin(2 * Math.PI * (2 * x - y) / 17.0);
+						var luminance = 0.5 + 0.31 * Math.Sin(2 * Math.PI * (normalizedX + 0.35 * normalizedY)) + 0.045 * detail;
 						var blue = luminance * 0.92 + 0.03 + 0.04 * Math.Sin(2 * Math.PI * normalizedY);
 						var green = luminance + 0.03 * Math.Cos(2 * Math.PI * normalizedX);
 						var red = luminance * 1.06 - 0.03 + 0.04 * Math.Sin(2 * Math.PI * (normalizedX + normalizedY));
