@@ -37,7 +37,7 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Constants. The minimum ratios are placed slightly below the ratios measured from the built-in bilinear algorithm, which is the algorithm interpolating least accurately, so that an algorithm interpolating even worse is reported instead of being accepted silently. Bilinear reaches 38.64 dB and 27.29 dB in the worst case. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 2 sizes differ by up to 1.6 dB because the smaller one is not a multiple of the color block and gives the border a larger share of the image. Measure them again after changing the content of the ground truth.
+	// Constants. The minimum ratios are placed slightly below the ratios measured from the built-in bilinear algorithm, which is the algorithm interpolating least accurately, so that an algorithm interpolating even worse is reported instead of being accepted silently. Bilinear reaches 38.58 dB and 27.29 dB in the worst case. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 3 sizes differ by up to 1.6 dB because the ones which are not a multiple of the color block give the border a larger share of the image. One of the sizes is taller than the band which an algorithm processing the image band by band covers at once, so the rows where 2 bands meet are covered as well. Measure them again after changing the content of the ground truth.
 	const double Min2x2PeakSignalNoiseRatio = 37;
 	const double Min4x4PeakSignalNoiseRatio = 26;
 	const int PeakSignalNoiseRatioBorderSize = 4;
@@ -46,7 +46,7 @@ class DemosaicingAlgorithmTests : BaseTests
 	// Static fields.
 	static readonly BayerPattern[] bayerPatterns = Enum.GetValues<BayerPattern>();
 	static readonly BitmapFormat[] bitmapFormats = Enum.GetValues<BitmapFormat>();
-	static readonly (int Width, int Height)[] imageSizes = [ (66, 34), (35, 29) ];
+	static readonly (int Width, int Height)[] imageSizes = [ (66, 34), (35, 29), (35, 160) ];
 	static readonly (int Width, int Height)[] smallImageSizes = [ (1, 1), (1, 2), (2, 1), (2, 2) ];
 
 
