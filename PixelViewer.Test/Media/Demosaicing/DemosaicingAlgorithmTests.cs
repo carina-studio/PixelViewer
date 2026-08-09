@@ -286,14 +286,27 @@ class DemosaicingAlgorithmTests : BaseTests
 		});
 
 
+	// Create the buffer which the given algorithm keeps its own intermediate result in, or an empty one when it keeps none.
+	static Memory<byte> CreateWorkingBuffer(DemosaicingAlgorithm algorithm, ImageRenderingOptions renderingOptions, BitmapFormat format, int width, int height)
+	{
+		var size = algorithm.CheckWorkingBufferSize(renderingOptions, width, height, format, false);
+		return size > 0 ? new byte[size] : default;
+	}
+
+
 	// Create the rendering options which the image of the given pattern of Bayer Filter is rendered with.
 	static ImageRenderingOptions CreateRenderingOptions(BayerPattern bayerPattern) =>
 		new() { BayerPattern = bayerPattern };
 
 
 	// Perform demosaicing by the given algorithm, the arguments are prepared in the same way as Session does.
-	static void Demosaic(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Memory<byte> workingBuffer = default) =>
-		algorithm.Demosaic(srcBuffer, destBuffer, bayerPattern, bayerPattern.CreateColorComponentSelector(), workingBuffer, CreateRenderingOptions(bayerPattern), CancellationToken.None);
+	static void Demosaic(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Memory<byte>? workingBuffer = null)
+	{
+		// the algorithm writes through the working buffer without checking its bounds, so one of the size it asked for is provided unless the caller wants to check another one
+		var renderingOptions = CreateRenderingOptions(bayerPattern);
+		var buffer = workingBuffer ?? CreateWorkingBuffer(algorithm, renderingOptions, srcBuffer.Format, srcBuffer.Width, srcBuffer.Height);
+		algorithm.Demosaic(srcBuffer, destBuffer, bayerPattern, bayerPattern.CreateColorComponentSelector(), buffer, renderingOptions, CancellationToken.None);
+	}
 
 
 	// Describe the combination which is being tested for the message of assertion.
@@ -440,16 +453,20 @@ class DemosaicingAlgorithmTests : BaseTests
 	[Test]
 	public void TestWorkingBuffer()
 	{
-		// no built-in algorithm keeps an intermediate result of its own, in either arrangement of the output buffer
-		bool[] outputBufferArrangements = [ false, true ];
+		// the buffer an algorithm receives is only guaranteed to be at least as large as it asked for, so an algorithm must divide it by the sizes it computed itself and a larger buffer must not change anything it interpolates
 		RunOnEachSupportedCombination(imageSizes, (algorithm, bayerPattern, format, width, height) =>
 		{
-			var renderingOptions = CreateRenderingOptions(bayerPattern);
-			foreach (var hasDedicatedOutputBuffer in outputBufferArrangements)
-			{
-				var size = algorithm.CheckWorkingBufferSize(renderingOptions, width, height, format, hasDedicatedOutputBuffer);
-				Assert.That(size, Is.EqualTo(0), $"Built-in algorithm should keep no intermediate result of its own. {Describe(algorithm, bayerPattern, format, width, height)}");
-			}
+			var size = algorithm.CheckWorkingBufferSize(CreateRenderingOptions(bayerPattern), width, height, format, false);
+			Assert.That(size, Is.GreaterThanOrEqualTo(0), $"Size of working buffer should never be negative. {Describe(algorithm, bayerPattern, format, width, height)}");
+			if (size <= 0)
+				return;
+			using var groundTruth = CreateGroundTruthImage(format, width, height);
+			using var mosaic = CreateMosaic(groundTruth, bayerPattern);
+			using var exactResult = new BitmapBuffer(format, ColorSpace.Default, width, height);
+			using var largerResult = new BitmapBuffer(format, ColorSpace.Default, width, height);
+			Demosaic(algorithm, mosaic, exactResult, bayerPattern, new byte[size]);
+			Demosaic(algorithm, mosaic, largerResult, bayerPattern, new byte[size * 2]);
+			AssertBuffersEqual(exactResult, largerResult, $"Algorithm interpolates differently with a larger working buffer. {Describe(algorithm, bayerPattern, format, width, height)}");
 		});
 
 		// the algorithm which asks for a buffer receives one which is at least as large as it asked for
