@@ -15,6 +15,16 @@ namespace Carina.PixelViewer.Test.Media.Demosaicing;
 [TestFixture]
 class DemosaicingAlgorithmTests : BaseTests
 {
+	// Content of the image which a mosaic is sampled from. The 2 kinds differ in how much of the detail the channels share, which is the relation every algorithm correcting a missing component by the component the pixel itself provides depends on.
+	enum GroundTruthContent
+	{
+		// The content whose detail is carried by the luminance shared by every channel, which is how the channels of a photo of an unsaturated subject relate to each other.
+		CorrelatedChannels,
+		// The content whose channels are far apart in level and take a share of its own of the detail, which is the condition a photo of a saturated subject puts the algorithm in.
+		SaturatedColors,
+	}
+
+
 	// Implementation of DemosaicingAlgorithm which keeps an intermediate result of its own, only used to check how the buffer for it is provided.
 	class WorkingBufferDemosaicingAlgorithm(long size) : DemosaicingAlgorithm("WorkingBufferTest")
 	{
@@ -37,15 +47,18 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Constants. The minimum ratios are placed slightly below the ratios measured from the built-in bilinear algorithm, which is the algorithm interpolating least accurately, so that an algorithm interpolating even worse is reported instead of being accepted silently. Bilinear reaches 38.58 dB and 27.29 dB in the worst case. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 3 sizes differ by up to 1.6 dB because the ones which are not a multiple of the color block give the border a larger share of the image. One of the sizes is taller than the band which an algorithm processing the image band by band covers at once, so the rows where 2 bands meet are covered as well. Measure them again after changing the content of the ground truth.
-	const double Min2x2PeakSignalNoiseRatio = 37;
-	const double Min4x4PeakSignalNoiseRatio = 26;
+	// Constants. Each minimum ratio is placed slightly below the lowest ratio measured from the built-in algorithms over both buffer arrangements, so that an algorithm interpolating even worse is reported instead of being accepted silently. Which algorithm reaches that lowest ratio is not the same one for every content, so it cannot be assumed to be bilinear: bilinear sets it at 38.58 dB on a 2x2 pattern of the correlated content, but GBTF sets it at 37.47 dB on a 2x2 pattern of the saturated one, well below bilinear's 44.02 dB there. An algorithm which interpolates the difference between 2 channels in place of the channel itself loses more than a plain average does once that difference stops being smooth, which is exactly what the saturated content takes away. On a 4x4 pattern the lowest ratio comes from working in place, where the mosaic is rearranged without interpolating across the blocks: MalvarHeCutler at 26.88 dB on the correlated content and GBTF at 29.22 dB on the saturated one. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 3 sizes differ by up to 1.6 dB because the ones which are not a multiple of the color block give the border a larger share of the image. One of the sizes is taller than the band which an algorithm processing the image band by band covers at once, so the rows where 2 bands meet are covered as well. Measure them again after changing the content of the ground truth.
+	const double MinCorrelated2x2PeakSignalNoiseRatio = 37;
+	const double MinCorrelated4x4PeakSignalNoiseRatio = 26;
+	const double MinSaturated2x2PeakSignalNoiseRatio = 36;
+	const double MinSaturated4x4PeakSignalNoiseRatio = 28;
 	const int PeakSignalNoiseRatioBorderSize = 4;
 
 
 	// Static fields.
 	static readonly BayerPattern[] bayerPatterns = Enum.GetValues<BayerPattern>();
 	static readonly BitmapFormat[] bitmapFormats = Enum.GetValues<BitmapFormat>();
+	static readonly GroundTruthContent[] groundTruthContents = Enum.GetValues<GroundTruthContent>();
 	static readonly (int Width, int Height)[] imageSizes = [ (66, 34), (35, 29), (35, 160) ];
 	static readonly (int Width, int Height)[] smallImageSizes = [ (1, 1), (1, 2), (2, 1), (2, 2) ];
 
@@ -84,10 +97,10 @@ class DemosaicingAlgorithmTests : BaseTests
 
 
 	// Assert that every pixel of the destination buffer is filled by the given algorithm.
-	static void AssertDestinationFilled(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
+	static void AssertDestinationFilled(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, GroundTruthContent content, BitmapFormat format, int width, int height)
 	{
 		// prepare the mosaic to be demosaiced
-		using var groundTruth = CreateGroundTruthImage(format, width, height);
+		using var groundTruth = CreateGroundTruthImage(content, format, width, height);
 		using var mosaic = CreateMosaic(groundTruth, bayerPattern);
 
 		// demosaic into the destination buffers which are filled with different data before
@@ -99,19 +112,19 @@ class DemosaicingAlgorithmTests : BaseTests
 		Demosaic(algorithm, mosaic, filledResult, bayerPattern);
 
 		// the result should be independent of the data in the destination buffer before demosaicing
-		AssertBuffersEqual(clearedResult, filledResult, $"Destination buffer is not filled completely. {Describe(algorithm, bayerPattern, format, width, height)}");
+		AssertBuffersEqual(clearedResult, filledResult, $"Destination buffer is not filled completely. {Describe(algorithm, bayerPattern, content, format, width, height)}");
 	}
 
 
 	// Assert that demosaicing in place produces the same result as demosaicing into another buffer.
-	static void AssertInPlaceDemosaicingConsistent(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
+	static void AssertInPlaceDemosaicingConsistent(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, GroundTruthContent content, BitmapFormat format, int width, int height)
 	{
 		// the algorithm is asked to work in place only when it needs no dedicated buffer at all. An algorithm which merely prefers one interpolates differently in each arrangement by definition, so comparing the 2 results would report the reason it states the preference as a failure
 		if (algorithm.CheckOutputBufferRequirement(CreateRenderingOptions(bayerPattern), width, height) != OutputBufferRequirement.NotRequired)
 			return;
 
 		// demosaic with separate source and destination buffers
-		using var groundTruth = CreateGroundTruthImage(format, width, height);
+		using var groundTruth = CreateGroundTruthImage(content, format, width, height);
 		using var mosaic = CreateMosaic(groundTruth, bayerPattern);
 		using var result = new BitmapBuffer(format, ColorSpace.Default, width, height);
 		Demosaic(algorithm, mosaic, result, bayerPattern);
@@ -123,19 +136,19 @@ class DemosaicingAlgorithmTests : BaseTests
 		Demosaic(algorithm, inPlaceResult, sharedInPlaceResult, bayerPattern);
 
 		// working in place should not change the result at all
-		AssertBuffersEqual(result, inPlaceResult, $"Demosaicing in place produces a different result. {Describe(algorithm, bayerPattern, format, width, height)}");
+		AssertBuffersEqual(result, inPlaceResult, $"Demosaicing in place produces a different result. {Describe(algorithm, bayerPattern, content, format, width, height)}");
 	}
 
 
 	// Assert that the algorithm which only prefers a dedicated buffer still interpolates accurately enough with the same buffer as both source and destination, which is what it falls back to when there is not enough memory for a dedicated one.
-	static void AssertInPlaceInterpolationQuality(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
+	static void AssertInPlaceInterpolationQuality(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, GroundTruthContent content, BitmapFormat format, int width, int height)
 	{
 		// only the algorithm which prefers a dedicated buffer interpolates in place in a way of its own. The algorithm which needs no dedicated buffer is already covered by the consistency of its 2 arrangements together with the quality of the one with separate buffers, and the algorithm which requires one is never asked to work in place at all
 		if (algorithm.CheckOutputBufferRequirement(CreateRenderingOptions(bayerPattern), width, height) != OutputBufferRequirement.Preferred)
 			return;
 
 		// demosaic with the buffer which is shared as both source and destination, which is how Session performs in-place demosaicing
-		using var groundTruth = CreateGroundTruthImage(format, width, height);
+		using var groundTruth = CreateGroundTruthImage(content, format, width, height);
 		using var result = CreateMosaic(groundTruth, bayerPattern);
 		using var sharedResult = result.Share();
 		Assert.That(result.IsBufferSharedWith(sharedResult), Is.True, "Shared buffer should be reported as the same buffer.");
@@ -143,8 +156,8 @@ class DemosaicingAlgorithmTests : BaseTests
 
 		// the interpolated image should be close enough to the image the mosaic is sampled from
 		var peakSignalNoiseRatio = ComputePeakSignalNoiseRatio(result, groundTruth, PeakSignalNoiseRatioBorderSize);
-		var minPeakSignalNoiseRatio = bayerPattern.BlockWidth > 2 ? Min4x4PeakSignalNoiseRatio : Min2x2PeakSignalNoiseRatio;
-		Assert.That(peakSignalNoiseRatio, Is.GreaterThanOrEqualTo(minPeakSignalNoiseRatio), $"Image interpolated in place is only {peakSignalNoiseRatio:F2} dB away from the ground truth. {Describe(algorithm, bayerPattern, format, width, height)}");
+		var minPeakSignalNoiseRatio = SelectMinPeakSignalNoiseRatio(content, bayerPattern);
+		Assert.That(peakSignalNoiseRatio, Is.GreaterThanOrEqualTo(minPeakSignalNoiseRatio), $"Image interpolated in place is only {peakSignalNoiseRatio:F2} dB away from the ground truth. {Describe(algorithm, bayerPattern, content, format, width, height)}");
 	}
 
 
@@ -192,8 +205,8 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Create the image which the mosaic is sampled from. The content is detailed enough to tell the algorithms apart, and it is generated analytically so that a failure can be reproduced.
-	static unsafe IBitmapBuffer CreateGroundTruthImage(BitmapFormat format, int width, int height) =>
+	// Create the image which the mosaic is sampled from. The content is detailed enough to tell the algorithms apart, and it is generated analytically so that a failure can be reproduced. The saturated content is kept inside the range which the format can hold with margin to spare, because a value which the range cuts off is reconstructed by every algorithm alike and flatters all of them. The correlated content does reach both ends of the range, which is a property it has always had and which the ratios measured from it already include.
+	static unsafe IBitmapBuffer CreateGroundTruthImage(GroundTruthContent content, BitmapFormat format, int width, int height) =>
 		new BitmapBuffer(format, ColorSpace.Default, width, height).Setup(buffer =>
 		{
 			var rowStride = buffer.RowBytes;
@@ -201,20 +214,38 @@ class DemosaicingAlgorithmTests : BaseTests
 			{
 				for (var y = 0; y < height; ++y)
 				{
-					// generate the content which carries its detail in the luminance shared by every channel, and lets each channel drift away from it only slowly, which is how the channels of a natural image relate to each other. An algorithm correcting a missing component by the component the pixel itself provides relies on that relation, so content whose channels vary independently would measure something other than the quality of demosaicing.
+					// map the row to the range which both kinds of content are defined over
 					var normalizedY = height > 1 ? (double)y / (height - 1) : 0.0;
 					for (var x = 0; x < width; ++x)
 					{
-						// carry the fine detail in 4 oblique gratings instead of one, so that no direction of the image is easier to interpolate than another. A single grating makes the ratios of the patterns incomparable to each other: 2 of the 16 pixels of a 4x4 color block are rearranged along a diagonal, along the main one for a chroma-leading pattern and along the anti-diagonal for a green-leading one, so a lone grating which one diagonal crosses faster than the other ranks the patterns by its own orientation. The 4 directions are the mirror images of each other and they share one period, which is what equalizes the directions - giving each of them a period of its own would reintroduce the bias it removes.
+						// carry the fine detail in 4 oblique gratings instead of one, so that no direction of the image is easier to interpolate than another. A single grating makes the ratios of the patterns incomparable to each other: 2 of the 16 pixels of a 4x4 color block are rearranged along a diagonal, along the main one for a chroma-leading pattern and along the anti-diagonal for a green-leading one, so a lone grating which one diagonal crosses faster than the other ranks the patterns by its own orientation. The 4 directions are the mirror images of each other and they share one period, which is what equalizes the directions - giving each of them a period of its own would reintroduce the bias it removes. Both kinds of content are built on the same 4 gratings, so they grade the directions equally and differ only in how the channels consume them.
 						var normalizedX = width > 1 ? (double)x / (width - 1) : 0.0;
 						var detail = Math.Sin(2 * Math.PI * (x + 2 * y) / 17.0)
 							+ Math.Sin(2 * Math.PI * (x - 2 * y) / 17.0)
 							+ Math.Sin(2 * Math.PI * (2 * x + y) / 17.0)
 							+ Math.Sin(2 * Math.PI * (2 * x - y) / 17.0);
-						var luminance = 0.5 + 0.31 * Math.Sin(2 * Math.PI * (normalizedX + 0.35 * normalizedY)) + 0.045 * detail;
-						var blue = luminance * 0.92 + 0.03 + 0.04 * Math.Sin(2 * Math.PI * normalizedY);
-						var green = luminance + 0.03 * Math.Cos(2 * Math.PI * normalizedX);
-						var red = luminance * 1.06 - 0.03 + 0.04 * Math.Sin(2 * Math.PI * (normalizedX + normalizedY));
+
+						// compose the color of the pixel, how much of the detail the channels share is what distinguishes the 2 kinds of content from each other
+						double blue;
+						double green;
+						double red;
+						if (content == GroundTruthContent.CorrelatedChannels)
+						{
+							// carry the detail in the luminance shared by every channel, and let each channel drift away from it only slowly, which is how the channels of a photo of an unsaturated subject relate to each other. An algorithm correcting a missing component by the component the pixel itself provides relies on that relation, so this content measures how well an algorithm interpolates once the relation it assumes holds.
+							var luminance = 0.5 + 0.31 * Math.Sin(2 * Math.PI * (normalizedX + 0.35 * normalizedY)) + 0.045 * detail;
+							blue = luminance * 0.92 + 0.03 + 0.04 * Math.Sin(2 * Math.PI * normalizedY);
+							green = luminance + 0.03 * Math.Cos(2 * Math.PI * normalizedX);
+							red = luminance * 1.06 - 0.03 + 0.04 * Math.Sin(2 * Math.PI * (normalizedX + normalizedY));
+						}
+						else
+						{
+							// sweep the channels 120 degrees apart in hue so that they are far apart in level, which is what a saturated color is, and give each channel a share of its own of the detail so that the difference between 2 channels is no longer smooth where the image varies fastest. That difference is what an algorithm interpolates in place of the channel itself, so this content measures how far an algorithm falls once the relation it assumes only holds weakly.
+							var hue = 2 * Math.PI * (normalizedX + 0.35 * normalizedY);
+							var level = 0.5 + 0.10 * Math.Sin(2 * Math.PI * normalizedY);
+							blue = level + 0.22 * Math.Sin(hue + 4 * Math.PI / 3) + 0.014 * detail;
+							green = level + 0.22 * Math.Sin(hue + 2 * Math.PI / 3) + 0.034 * detail;
+							red = level + 0.22 * Math.Sin(hue) + 0.024 * detail;
+						}
 
 						// write the pixel as an opaque color
 						if (format == BitmapFormat.Bgra32)
@@ -310,8 +341,8 @@ class DemosaicingAlgorithmTests : BaseTests
 
 
 	// Describe the combination which is being tested for the message of assertion.
-	static string Describe(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height) =>
-		$"Algorithm: {algorithm.Id}, pattern: {bayerPattern}, format: {format}, size: {width}x{height}.";
+	static string Describe(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, GroundTruthContent content, BitmapFormat format, int width, int height) =>
+		$"Algorithm: {algorithm.Id}, pattern: {bayerPattern}, content: {content}, format: {format}, size: {width}x{height}.";
 
 
 	// Fill every byte of the given buffer with the given value.
@@ -331,8 +362,8 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Perform the given test on every combination of algorithm, pattern of Bayer Filter, format and size of image which is supported.
-	static void RunOnEachSupportedCombination((int Width, int Height)[] sizes, Action<DemosaicingAlgorithm, BayerPattern, BitmapFormat, int, int> test)
+	// Perform the given test on every combination of algorithm, pattern of Bayer Filter, content, format and size of image which is supported.
+	static void RunOnEachSupportedCombination((int Width, int Height)[] sizes, Action<DemosaicingAlgorithm, BayerPattern, GroundTruthContent, BitmapFormat, int, int> test)
 	{
 		foreach (var algorithm in DemosaicingAlgorithms.All)
 		{
@@ -340,14 +371,25 @@ class DemosaicingAlgorithmTests : BaseTests
 			{
 				if (!algorithm.IsBayerPatternSupported(bayerPattern))
 					continue;
-				foreach (var format in bitmapFormats)
+				foreach (var content in groundTruthContents)
 				{
-					foreach (var (width, height) in sizes)
-						test(algorithm, bayerPattern, format, width, height);
+					foreach (var format in bitmapFormats)
+					{
+						foreach (var (width, height) in sizes)
+							test(algorithm, bayerPattern, content, format, width, height);
+					}
 				}
 			}
 		}
 	}
+
+
+	// Select the ratio which an algorithm must reach on the given content and pattern. None of the 4 ratios can be derived from another: the saturated content is not uniformly harder than the correlated one, it is harder for an algorithm which interpolates the difference between 2 channels and easier for one which simply averages, so each ratio is measured on its own.
+	static double SelectMinPeakSignalNoiseRatio(GroundTruthContent content, BayerPattern bayerPattern) => content switch
+	{
+		GroundTruthContent.SaturatedColors => bayerPattern.BlockWidth > 2 ? MinSaturated4x4PeakSignalNoiseRatio : MinSaturated2x2PeakSignalNoiseRatio,
+		_ => bayerPattern.BlockWidth > 2 ? MinCorrelated4x4PeakSignalNoiseRatio : MinCorrelated2x2PeakSignalNoiseRatio,
+	};
 
 
 	/// <summary>
@@ -358,20 +400,23 @@ class DemosaicingAlgorithmTests : BaseTests
 	{
 		foreach (var bayerPattern in bayerPatterns)
 		{
-			foreach (var format in bitmapFormats)
+			foreach (var content in groundTruthContents)
 			{
-				foreach (var (width, height) in imageSizes)
+				foreach (var format in bitmapFormats)
 				{
-					// prepare the mosaic to be passed through
-					using var groundTruth = CreateGroundTruthImage(format, width, height);
-					using var mosaic = CreateMosaic(groundTruth, bayerPattern);
+					foreach (var (width, height) in imageSizes)
+					{
+						// prepare the mosaic to be passed through
+						using var groundTruth = CreateGroundTruthImage(content, format, width, height);
+						using var mosaic = CreateMosaic(groundTruth, bayerPattern);
 
-					// pass the mosaic through to another buffer
-					using var result = new BitmapBuffer(format, ColorSpace.Default, width, height);
-					Demosaic(DemosaicingAlgorithms.Bypass, mosaic, result, bayerPattern);
+						// pass the mosaic through to another buffer
+						using var result = new BitmapBuffer(format, ColorSpace.Default, width, height);
+						Demosaic(DemosaicingAlgorithms.Bypass, mosaic, result, bayerPattern);
 
-					// the mosaic should reach the destination without being interpolated
-					AssertBuffersEqual(mosaic, result, $"Mosaic is changed by the sentinel. {Describe(DemosaicingAlgorithms.Bypass, bayerPattern, format, width, height)}");
+						// the mosaic should reach the destination without being interpolated
+						AssertBuffersEqual(mosaic, result, $"Mosaic is changed by the sentinel. {Describe(DemosaicingAlgorithms.Bypass, bayerPattern, content, format, width, height)}");
+					}
 				}
 			}
 		}
@@ -416,22 +461,22 @@ class DemosaicingAlgorithmTests : BaseTests
 	[Test]
 	public void TestInterpolationQuality()
 	{
-		RunOnEachSupportedCombination(imageSizes, (algorithm, bayerPattern, format, width, height) =>
+		RunOnEachSupportedCombination(imageSizes, (algorithm, bayerPattern, content, format, width, height) =>
 		{
 			// the sentinel keeps the mosaic instead of interpolating it
 			if (algorithm == DemosaicingAlgorithms.Bypass)
 				return;
 
 			// demosaic the mosaic which is sampled from the ground truth
-			using var groundTruth = CreateGroundTruthImage(format, width, height);
+			using var groundTruth = CreateGroundTruthImage(content, format, width, height);
 			using var mosaic = CreateMosaic(groundTruth, bayerPattern);
 			using var result = new BitmapBuffer(format, ColorSpace.Default, width, height);
 			Demosaic(algorithm, mosaic, result, bayerPattern);
 
 			// the interpolated image should be close enough to the ground truth
 			var peakSignalNoiseRatio = ComputePeakSignalNoiseRatio(result, groundTruth, PeakSignalNoiseRatioBorderSize);
-			var minPeakSignalNoiseRatio = bayerPattern.BlockWidth > 2 ? Min4x4PeakSignalNoiseRatio : Min2x2PeakSignalNoiseRatio;
-			Assert.That(peakSignalNoiseRatio, Is.GreaterThanOrEqualTo(minPeakSignalNoiseRatio), $"Interpolated image is only {peakSignalNoiseRatio:F2} dB away from the ground truth. {Describe(algorithm, bayerPattern, format, width, height)}");
+			var minPeakSignalNoiseRatio = SelectMinPeakSignalNoiseRatio(content, bayerPattern);
+			Assert.That(peakSignalNoiseRatio, Is.GreaterThanOrEqualTo(minPeakSignalNoiseRatio), $"Interpolated image is only {peakSignalNoiseRatio:F2} dB away from the ground truth. {Describe(algorithm, bayerPattern, content, format, width, height)}");
 		});
 	}
 
@@ -454,26 +499,26 @@ class DemosaicingAlgorithmTests : BaseTests
 	public void TestWorkingBuffer()
 	{
 		// the buffer an algorithm receives is only guaranteed to be at least as large as it asked for, so an algorithm must divide it by the sizes it computed itself and a larger buffer must not change anything it interpolates
-		RunOnEachSupportedCombination(imageSizes, (algorithm, bayerPattern, format, width, height) =>
+		RunOnEachSupportedCombination(imageSizes, (algorithm, bayerPattern, content, format, width, height) =>
 		{
 			var size = algorithm.CheckWorkingBufferSize(CreateRenderingOptions(bayerPattern), width, height, format, false);
-			Assert.That(size, Is.GreaterThanOrEqualTo(0), $"Size of working buffer should never be negative. {Describe(algorithm, bayerPattern, format, width, height)}");
+			Assert.That(size, Is.GreaterThanOrEqualTo(0), $"Size of working buffer should never be negative. {Describe(algorithm, bayerPattern, content, format, width, height)}");
 			if (size <= 0)
 				return;
-			using var groundTruth = CreateGroundTruthImage(format, width, height);
+			using var groundTruth = CreateGroundTruthImage(content, format, width, height);
 			using var mosaic = CreateMosaic(groundTruth, bayerPattern);
 			using var exactResult = new BitmapBuffer(format, ColorSpace.Default, width, height);
 			using var largerResult = new BitmapBuffer(format, ColorSpace.Default, width, height);
 			Demosaic(algorithm, mosaic, exactResult, bayerPattern, new byte[size]);
 			Demosaic(algorithm, mosaic, largerResult, bayerPattern, new byte[size * 2]);
-			AssertBuffersEqual(exactResult, largerResult, $"Algorithm interpolates differently with a larger working buffer. {Describe(algorithm, bayerPattern, format, width, height)}");
+			AssertBuffersEqual(exactResult, largerResult, $"Algorithm interpolates differently with a larger working buffer. {Describe(algorithm, bayerPattern, content, format, width, height)}");
 		});
 
 		// the algorithm which asks for a buffer receives one which is at least as large as it asked for
 		var requestedSize = 4096L;
 		var algorithm = new WorkingBufferDemosaicingAlgorithm(requestedSize);
 		var bayerPattern = BayerPattern.BGGR_2x2;
-		using var groundTruth = CreateGroundTruthImage(BitmapFormat.Bgra32, 16, 16);
+		using var groundTruth = CreateGroundTruthImage(GroundTruthContent.CorrelatedChannels, BitmapFormat.Bgra32, 16, 16);
 		using var mosaic = CreateMosaic(groundTruth, bayerPattern);
 		using var result = new BitmapBuffer(BitmapFormat.Bgra32, ColorSpace.Default, 16, 16);
 		Assert.That(algorithm.CheckWorkingBufferSize(CreateRenderingOptions(bayerPattern), 16, 16, BitmapFormat.Bgra32, false), Is.EqualTo(requestedSize), "Algorithm should report the size it needs.");
