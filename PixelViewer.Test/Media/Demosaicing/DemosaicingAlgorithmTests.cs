@@ -22,6 +22,8 @@ class DemosaicingAlgorithmTests : BaseTests
 		CorrelatedChannels,
 		// The content whose channels are far apart in level and take a share of its own of the detail, which is the condition a photo of a saturated subject puts the algorithm in.
 		SaturatedColors,
+		// The content whose detail is interrupted by edges of every orientation, which is what an algorithm choosing a direction per pixel is built to handle and what the other 2 kinds of content contain none of.
+		SharpEdges,
 	}
 
 
@@ -47,9 +49,16 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Constants. Each minimum ratio is placed slightly below the lowest ratio measured from the built-in algorithms over both buffer arrangements, so that an algorithm interpolating even worse is reported instead of being accepted silently. Which algorithm reaches that lowest ratio is not the same one for every content, so it cannot be assumed to be bilinear: bilinear sets it at 38.58 dB on a 2x2 pattern of the correlated content, but GBTF sets it at 37.47 dB on a 2x2 pattern of the saturated one, well below bilinear's 44.02 dB there. An algorithm which interpolates the difference between 2 channels in place of the channel itself loses more than a plain average does once that difference stops being smooth, which is exactly what the saturated content takes away. On a 4x4 pattern the lowest ratio comes from working in place, where the mosaic is rearranged without interpolating across the blocks: MalvarHeCutler at 26.88 dB on the correlated content and GBTF at 29.22 dB on the saturated one. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 3 sizes differ by up to 1.6 dB because the ones which are not a multiple of the color block give the border a larger share of the image. One of the sizes is taller than the band which an algorithm processing the image band by band covers at once, so the rows where 2 bands meet are covered as well. Measure them again after changing the content of the ground truth.
+	// Constants. Each minimum ratio is placed slightly below the lowest ratio measured from the built-in algorithms over both buffer arrangements, so that an algorithm interpolating even worse is reported instead of being accepted silently. Which algorithm reaches that lowest ratio is not the same one for every content, so it cannot be assumed to be bilinear, and none of the 6 ratios can be derived from another:
+	//   correlated 2x2 - bilinear, 38.58 dB          saturated 2x2 - GBTF, 37.47 dB          edges 2x2 - bilinear, 22.72 dB
+	//   correlated 4x4 - MalvarHeCutler in place, 26.88 dB    saturated 4x4 - GBTF in place, 29.22 dB    edges 4x4 - MalvarHeCutler in place, 17.89 dB
+	// The saturated content is where an algorithm interpolating the difference between 2 channels loses more than a plain average does, because that difference stops being smooth: GBTF falls to 37.47 dB there against bilinear's 44.02. The edge content is the opposite case and the one which pays the directional decision back, GBTF reaching 35.62 dB against MalvarHeCutler's 27.43. On a 4x4 pattern the lowest ratio comes from working in place, where the mosaic is rearranged without interpolating across the blocks. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 3 sizes differ by up to 1.6 dB because the ones which are not a multiple of the color block give the border a larger share of the image. One of the sizes is taller than the band which an algorithm processing the image band by band covers at once, so the rows where 2 bands meet are covered as well. Measure them again after changing the content of the ground truth.
+	const int EdgeRingPeriod = 9;
+	const double EdgeWidth = 2.0;
 	const double MinCorrelated2x2PeakSignalNoiseRatio = 37;
 	const double MinCorrelated4x4PeakSignalNoiseRatio = 26;
+	const double MinEdges2x2PeakSignalNoiseRatio = 21;
+	const double MinEdges4x4PeakSignalNoiseRatio = 17;
 	const double MinSaturated2x2PeakSignalNoiseRatio = 36;
 	const double MinSaturated4x4PeakSignalNoiseRatio = 28;
 	const int PeakSignalNoiseRatioBorderSize = 4;
@@ -237,7 +246,7 @@ class DemosaicingAlgorithmTests : BaseTests
 							green = luminance + 0.03 * Math.Cos(2 * Math.PI * normalizedX);
 							red = luminance * 1.06 - 0.03 + 0.04 * Math.Sin(2 * Math.PI * (normalizedX + normalizedY));
 						}
-						else
+						else if (content == GroundTruthContent.SaturatedColors)
 						{
 							// sweep the channels 120 degrees apart in hue so that they are far apart in level, which is what a saturated color is, and give each channel a share of its own of the detail so that the difference between 2 channels is no longer smooth where the image varies fastest. That difference is what an algorithm interpolates in place of the channel itself, so this content measures how far an algorithm falls once the relation it assumes only holds weakly.
 							var hue = 2 * Math.PI * (normalizedX + 0.35 * normalizedY);
@@ -245,6 +254,19 @@ class DemosaicingAlgorithmTests : BaseTests
 							blue = level + 0.22 * Math.Sin(hue + 4 * Math.PI / 3) + 0.014 * detail;
 							green = level + 0.22 * Math.Sin(hue + 2 * Math.PI / 3) + 0.034 * detail;
 							red = level + 0.22 * Math.Sin(hue) + 0.024 * detail;
+						}
+						else
+						{
+							// interrupt the detail with edges laid on rings around the center of image. The edge of a ring runs perpendicular to the radius, so one ring already presents every orientation and the set of edges is isotropic by construction rather than by balancing straight edges against each other, which is also what lets it work in an image too small to hold 4 separate straight edges. The transition spans EdgeWidth pixels instead of one because a step of a single pixel lies beyond what the mosaic can carry at all, so every algorithm fails it alike and the measurement would describe aliasing rather than interpolation. The gratings stay underneath at a lower amplitude because an image of flat plateaus would let a handful of edge pixels decide the ratio, and the smooth regions are exactly where a longer directional filter earns its length.
+							var offsetX = x - (width - 1) / 2.0;
+							var offsetY = y - (height - 1) / 2.0;
+							var ringPhase = Math.Sqrt(offsetX * offsetX + offsetY * offsetY) / EdgeRingPeriod;
+							var distanceToEdge = (ringPhase - Math.Floor(ringPhase) - 0.5) * EdgeRingPeriod;
+							var step = Math.Clamp(distanceToEdge / EdgeWidth + 0.5, 0.0, 1.0);
+							var luminance = 0.28 + 0.44 * (step * step * (3 - 2 * step)) + 0.035 * detail;
+							blue = luminance * 0.92 + 0.03 + 0.04 * Math.Sin(2 * Math.PI * normalizedY);
+							green = luminance + 0.03 * Math.Cos(2 * Math.PI * normalizedX);
+							red = luminance * 1.06 - 0.03 + 0.04 * Math.Sin(2 * Math.PI * (normalizedX + normalizedY));
 						}
 
 						// write the pixel as an opaque color
@@ -388,6 +410,7 @@ class DemosaicingAlgorithmTests : BaseTests
 	static double SelectMinPeakSignalNoiseRatio(GroundTruthContent content, BayerPattern bayerPattern) => content switch
 	{
 		GroundTruthContent.SaturatedColors => bayerPattern.BlockWidth > 2 ? MinSaturated4x4PeakSignalNoiseRatio : MinSaturated2x2PeakSignalNoiseRatio,
+		GroundTruthContent.SharpEdges => bayerPattern.BlockWidth > 2 ? MinEdges4x4PeakSignalNoiseRatio : MinEdges2x2PeakSignalNoiseRatio,
 		_ => bayerPattern.BlockWidth > 2 ? MinCorrelated4x4PeakSignalNoiseRatio : MinCorrelated2x2PeakSignalNoiseRatio,
 	};
 
