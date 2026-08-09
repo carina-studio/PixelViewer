@@ -47,7 +47,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         ColorSpace colorSpace;
         long dataOffset;
-        DemosaicingAlgorithm? demosaicingAlgorithm = DemosaicingAlgorithms.Default;
+        DemosaicingAlgorithm? demosaicingAlgorithm = DemosaicingAlgorithms.Undefined;
         IList<int> effectiveBits = emptyEffectiveBits;
         readonly FileFormat? fileFormat;
         string? fileName;

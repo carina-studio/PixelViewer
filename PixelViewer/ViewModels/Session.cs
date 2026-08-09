@@ -1721,8 +1721,11 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(ColorSpaceProperty, colorSpace);
 			this.SetValue(UseLinearColorSpaceProperty, profile.UseLinearColorSpace);
 
-			// demosaicing
-			this.SetValue(DemosaicingAlgorithmProperty, profile.DemosaicingAlgorithm ?? Media.Demosaicing.DemosaicingAlgorithms.Bypass);
+			// demosaicing, a profile which names no algorithm of its own or names one the pattern rules out leaves the choice to the session, which is what a profile generated for a file format always does because no parser fills one in
+			var demosaicingAlgorithm = profile.DemosaicingAlgorithm ?? Media.Demosaicing.DemosaicingAlgorithms.Bypass;
+			if (demosaicingAlgorithm == Media.Demosaicing.DemosaicingAlgorithms.Undefined || !demosaicingAlgorithm.IsBayerPatternSupported(this.BayerPattern))
+				demosaicingAlgorithm = this.SelectDefaultDemosaicingAlgorithm(this.BayerPattern);
+			this.SetValue(DemosaicingAlgorithmProperty, demosaicingAlgorithm);
 
 			// dimensions
 			this.SetValue(ImageWidthProperty, profile.Width);
