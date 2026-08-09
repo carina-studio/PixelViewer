@@ -282,6 +282,55 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Buffer for a demosaicing algorithm to keep its own intermediate result. The content is meaningless outside a single demosaicing, only the allocation is kept so that a burst of renderings reuses it instead of allocating a large array again and again.
+	class WorkingBuffer : BaseDisposable
+	{
+		// Fields.
+		readonly IDisposable memoryUsageToken;
+		readonly Session session;
+
+		// Constructor.
+		WorkingBuffer(Session session, IDisposable memoryUsageToken, byte[] buffer)
+		{
+			this.Buffer = buffer;
+			this.memoryUsageToken = memoryUsageToken;
+			this.session = session;
+		}
+
+		// Allocate.
+		public static WorkingBuffer Allocate(Session session, int size)
+		{
+			var memoryUsageToken = session.RequestRenderedImageMemoryUsage(size);
+			if (memoryUsageToken is null)
+			{
+				session.Logger.LogError("Unable to request memory usage for working buffer of demosaicing");
+				throw new OutOfMemoryException();
+			}
+			try
+			{
+				return new WorkingBuffer(session, memoryUsageToken, new byte[size]);
+			}
+			catch
+			{
+				memoryUsageToken.Dispose();
+				throw;
+			}
+		}
+
+		// Buffer to be used by the algorithm.
+		public readonly byte[] Buffer;
+
+		/// <inheritdoc/>
+		protected override void Dispose(bool disposing)
+		{
+			if (this.session.CheckAccess())
+				this.memoryUsageToken.Dispose();
+			else
+				this.session.SynchronizationContext.Post(this.memoryUsageToken.Dispose);
+		}
+	}
+
+
 	/// <summary>
 	/// Maximum width of panel of histograms in pixels.
 	/// </summary>
@@ -883,6 +932,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	IDisposable? cachedAvaRenderedImageMemoryUsageToken;
 	readonly List<ImageFrame> cachedFilteredImageFrames = new(2);
 	ImageFrame? cachedMosaicImageFrame;
+	WorkingBuffer? cachedWorkingBuffer;
 	readonly MutableObservableBoolean canApplyProfile = new();
 	readonly MutableObservableBoolean canMoveToNextFrame = new();
 	readonly MutableObservableBoolean canMoveToPreviousFrame = new();
@@ -1380,6 +1430,39 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 	
 	
+	// Acquire the buffer which the given demosaicing algorithm needs to keep its own intermediate result, reusing the buffer of an earlier rendering when it fits. The flag reports whether the algorithm can be run or not, it is false only when a buffer is needed but cannot be acquired.
+	async Task<(WorkingBuffer? Buffer, bool IsAcquired)> AcquireWorkingBuffer(DemosaicingAlgorithm algorithm, ImageRenderingOptions renderingOptions, BitmapFormat format, bool hasDedicatedOutputBuffer)
+	{
+		// ask the algorithm how much it needs, the buffer kept for an earlier rendering is useless once it needs none
+		var size = algorithm.CheckWorkingBufferSize(renderingOptions, this.ImageWidth, this.ImageHeight, format, hasDedicatedOutputBuffer);
+		if (size <= 0)
+		{
+			this.cachedWorkingBuffer = this.cachedWorkingBuffer.DisposeAndReturnNull();
+			return (null, true);
+		}
+
+		// reuse the buffer of an earlier rendering unless it is too small, or so large that keeping it would waste most of it. It is taken out of the cache so that releasing the cached images while rendering cannot dispose the buffer being written into
+		var cachedBuffer = this.cachedWorkingBuffer;
+		if (cachedBuffer is not null)
+		{
+			if (cachedBuffer.Buffer.Length >= size && (size << 1) > cachedBuffer.Buffer.Length)
+			{
+				this.cachedWorkingBuffer = null;
+				if (this.Application.IsDebugMode)
+					this.Logger.LogTrace("Use cached working buffer of demosaicing, size: {size}", ((long)cachedBuffer.Buffer.Length).ToFileSizeString());
+				return (cachedBuffer, true);
+			}
+			this.cachedWorkingBuffer = this.cachedWorkingBuffer.DisposeAndReturnNull(); // released before allocating the new one so that the 2 sizes are never held at the same time
+		}
+
+		// allocate a new buffer
+		if (this.Application.IsDebugMode)
+			this.Logger.LogWarning("Allocate working buffer of demosaicing, size: {size}", size.ToFileSizeString());
+		var buffer = await this.AllocateWorkingBuffer(size);
+		return (buffer, buffer is not null);
+	}
+	
+	
 	// Change height of image with given alignment.
 	void AlignImageHeight(int bytes) =>
 		this.SetValue(ImageHeightProperty, this.AlignToInteger(this.GetValue(ImageHeightProperty), bytes));
@@ -1451,7 +1534,28 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Try allocating image frame for filtered image.
-	async Task<ImageFrame?> AllocateFilteredImageFrame(ImageFrame renderedImageFrame)
+	Task<ImageFrame?> AllocateFilteredImageFrame(ImageFrame renderedImageFrame) =>
+		this.AllocateRenderingBuffer("filtered image frame", () => ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.ColorSpace, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height), () =>
+		{
+			// dropping the filtered image makes the image flicker while filtering continuously, so it is released only when the cached images are gone
+			if (this.filteredImageFrame is null)
+				return false;
+			this.Logger.LogWarning("Release current filtered images");
+			this.SetValue(HistogramsProperty, null);
+			this.SetValue(QuarterSizeRenderedImageProperty, null);
+			this.SetValue(RenderedImageProperty, null);
+			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+			return true;
+		});
+
+
+	// Try allocating image frame for rendered image.
+	Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, ColorSpace colorSpace, int width, int height) =>
+		this.AllocateRenderingBuffer("rendered image frame", () => ImageFrame.Allocate(this, frameNumber, format, colorSpace, width, height), this.ReleaseCurrentRenderedImages);
+
+
+	// Allocate the object which needs the memory of rendered images, releasing the memory which can be released and trying again for as long as there is anything left to release. The steps escalate: the images cached only to avoid reallocation go first, then the images this session is showing, and then the images of another session.
+	async Task<T?> AllocateRenderingBuffer<T>(string usage, Func<T> allocate, Func<bool> releaseCurrentImages) where T : class
 	{
 		var extraWaitingPerformed = false;
 		while (true)
@@ -1460,113 +1564,60 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				if (!this.IsActivated)
 				{
-					this.Logger.LogWarning("No need to allocate filtered image frame because session has been deactivated");
+					this.Logger.LogWarning("No need to allocate {target} because session has been deactivated", usage);
 					return null;
 				}
-				return ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.ColorSpace, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height);
+				return allocate();
 			}
 			catch (Exception ex)
 			{
-				if (ex is OutOfMemoryException)
+				// only running out of memory is worth releasing anything for
+				if (ex is not OutOfMemoryException)
 				{
-					// the cached images are kept only to avoid reallocation, releasing them first keeps the image being displayed
-					// until there is really nothing else to release, dropping it makes the image flicker while filtering continuously
-					if (this.ReleaseCachedImages())
-					{
-						this.Logger.LogWarning("Unable to request memory usage for filtered image, release cached images");
-						continue;
-					}
-					if (this.filteredImageFrame is not null)
-					{
-						this.Logger.LogWarning("Unable to request memory usage for filtered image, dispose current images");
-						this.SetValue(HistogramsProperty, null);
-						this.SetValue(QuarterSizeRenderedImageProperty, null);
-						this.SetValue(RenderedImageProperty, null);
-						this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
-					}
-					else if (!(await this.HibernateAnotherSessionAsync()))
-					{
-						if (extraWaitingPerformed)
-						{
-							this.Logger.LogWarning("Unable to release rendered image from another session");
-							return null;
-						}
-						else
-						{
-							extraWaitingPerformed = true;
-							await Task.Delay(1000);
-						}
-					}
-				}
-				else
-				{
-					this.Logger.LogError(ex, "Unable to allocate filtered image");
+					this.Logger.LogError(ex, "Unable to allocate {target}", usage);
 					return null;
+				}
+
+				// the cached images are kept only to avoid reallocation, releasing them first keeps the image being displayed until there is really nothing else to release
+				if (this.ReleaseCachedImages())
+				{
+					this.Logger.LogWarning("Unable to request memory usage for {target}, release cached images", usage);
+					continue;
+				}
+				if (releaseCurrentImages())
+				{
+					this.Logger.LogWarning("Unable to request memory usage for {target}, dispose current images", usage);
+					continue;
+				}
+
+				// nothing of this session is left to release, another session is asked to hibernate and is given one extra moment to complete it
+				if (!await this.HibernateAnotherSessionAsync())
+				{
+					if (extraWaitingPerformed)
+					{
+						this.Logger.LogWarning("Unable to release rendered image from another session for {target}", usage);
+						return null;
+					}
+					extraWaitingPerformed = true;
+					await Task.Delay(1000);
 				}
 			}
 		}
 	}
 
 
-	// Try allocating image frame for rendered image.
-	async Task<ImageFrame?> AllocateRenderedImageFrame(long frameNumber, BitmapFormat format, ColorSpace colorSpace, int width, int height)
+	// Allocate the buffer for a demosaicing algorithm to keep its own intermediate result.
+	Task<WorkingBuffer?> AllocateWorkingBuffer(long size)
 	{
-		var extraWaitingPerformed = false;
-		while (true)
+		// the buffer is addressed by a 32-bit index, so a size beyond that cannot be served at all and releasing images would not bring it into range
+		if (size > int.MaxValue)
 		{
-			try
-			{
-				if (!this.IsActivated)
-				{
-					this.Logger.LogWarning("No need to allocate rendered image frame because session has been deactivated");
-					return null;
-				}
-				return ImageFrame.Allocate(this, frameNumber, format, colorSpace, width, height);
-			}
-			catch (Exception ex)
-			{
-				if (ex is OutOfMemoryException)
-				{
-					// the cached images are kept only to avoid reallocation, releasing them first keeps the image being displayed
-					// until there is really nothing else to release, dropping it makes the image flicker while rendering continuously
-					if (this.ReleaseCachedImages())
-					{
-						this.Logger.LogWarning("Unable to request memory usage for rendered image, release cached images");
-						continue;
-					}
-					if (this.renderedImageFrame is not null)
-					{
-						this.Logger.LogWarning("Unable to request memory usage for rendered image, dispose current images");
-						this.SetValue(HistogramsProperty, null);
-						this.SetValue(QuarterSizeRenderedImageProperty, null);
-						this.SetValue(RenderedImageProperty, null);
-						this.canSelectColorAdjustment.Update(false);
-						this.canSelectRgbGain.Update(false);
-						this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
-						this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-						this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
-					}
-					else if (!(await this.HibernateAnotherSessionAsync()))
-					{
-						if (extraWaitingPerformed)
-						{
-							this.Logger.LogWarning("Unable to release rendered image from another session");
-							return null;
-						}
-						else
-						{
-							extraWaitingPerformed = true;
-							await Task.Delay(1000);
-						}
-					}
-				}
-				else
-				{
-					this.Logger.LogError(ex, "Unable to allocate rendered image");
-					return null;
-				}
-			}
+			this.Logger.LogError("Working buffer of {size} for demosaicing is too large to be allocated", size.ToFileSizeString());
+			return Task.FromResult((WorkingBuffer?)null);
 		}
+
+		// allocate the buffer, releasing the images which can be released to make room for it
+		return this.AllocateRenderingBuffer("working buffer of demosaicing", () => WorkingBuffer.Allocate(this, (int)size), this.ReleaseCurrentRenderedImages);
 	}
 
 
@@ -2512,12 +2563,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	// Perform demosaicing on the image rendered with bayer filter pattern. The destination buffer is the same buffer as the source one unless the algorithm requires a dedicated buffer to receive the result.
-	async Task DemosaicImageAsync(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+	async Task DemosaicImageAsync(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, Memory<byte> workingBuffer, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
 		// check state
 		if (srcBuffer.Format != destBuffer.Format || srcBuffer.Width != destBuffer.Width || srcBuffer.Height != destBuffer.Height)
 			throw new ArgumentException("Format or dimensions of source and destination buffers of demosaicing are different.");
-		if (srcBuffer.IsBufferSharedWith(destBuffer) && algorithm.CheckOutputBufferRequirement(renderingOptions.BayerPattern, srcBuffer.Width, srcBuffer.Height) == OutputBufferRequirement.Required)
+		if (srcBuffer.IsBufferSharedWith(destBuffer) && algorithm.CheckOutputBufferRequirement(renderingOptions, srcBuffer.Width, srcBuffer.Height) == OutputBufferRequirement.Required)
 			throw new ArgumentException($"In-place demosaicing is not supported by '{algorithm.Id}'.");
 
 		// prepare
@@ -2528,7 +2579,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// perform demosaicing
 		using var sharedSrcBuffer = srcBuffer.Share();
 		using var sharedDestBuffer = destBuffer.Share();
-		await Task.Run(() => algorithm.Demosaic(sharedSrcBuffer, sharedDestBuffer, bayerPattern, colorComponentSelector, renderingOptions, cancellationToken), cancellationToken);
+		await Task.Run(() => algorithm.Demosaic(sharedSrcBuffer, sharedDestBuffer, bayerPattern, colorComponentSelector, workingBuffer, renderingOptions, cancellationToken), cancellationToken);
 		cancellationToken.ThrowIfCancellationRequested();
 
 		// complete
@@ -2631,8 +2682,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Release the rendered image and the frame converted from it. The caller needs to make sure that no rendering is in progress.
 	void DisposeRenderedImage()
 	{
-		// release the frame cached for demosaicing, it is released even if no rendered image is kept because nothing else can reach it
+		// release the frame and the buffer cached for demosaicing, they are released even if no rendered image is kept because nothing else can reach them
 		this.cachedMosaicImageFrame = this.cachedMosaicImageFrame.DisposeAndReturnNull();
+		this.cachedWorkingBuffer = this.cachedWorkingBuffer.DisposeAndReturnNull();
 
 		// check state
 		if (this.renderedImageFrame is null)
@@ -5041,8 +5093,31 @@ class Session : ViewModel<IAppSuiteApplication>
 			released = true;
 			this.cachedMosaicImageFrame = this.cachedMosaicImageFrame.DisposeAndReturnNull();
 		}
+		if (this.cachedWorkingBuffer is not null)
+		{
+			released = true;
+			this.cachedWorkingBuffer = this.cachedWorkingBuffer.DisposeAndReturnNull();
+		}
 		this.releasedCachedImagesAction.Cancel();
 		return released;
+	}
+
+
+	// Release the images which this session is showing to make room for another allocation, and report whether anything has been released or not. Dropping them makes the image flicker while rendering continuously, so it is done only after the cached images are gone.
+	bool ReleaseCurrentRenderedImages()
+	{
+		if (this.renderedImageFrame is null)
+			return false;
+		this.Logger.LogWarning("Release current rendered images");
+		this.SetValue(HistogramsProperty, null);
+		this.SetValue(QuarterSizeRenderedImageProperty, null);
+		this.SetValue(RenderedImageProperty, null);
+		this.canSelectColorAdjustment.Update(false);
+		this.canSelectRgbGain.Update(false);
+		this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+		this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
+		this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
+		return true;
 	}
 
 
@@ -5392,7 +5467,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// release the cached mosaic image which cannot be used by this rendering. A dedicated buffer is acquired for the algorithm which prefers one as well as for the algorithm which requires one, but failing to acquire it aborts the rendering only for the latter, the former keeps rendering with the reduced quality of demosaicing in-place instead
 		var demosaicingAlgorithm = renderingOptions.Demosaicing;
-		var outputBufferRequirement = demosaicingAlgorithm?.CheckOutputBufferRequirement(renderingOptions.BayerPattern, this.ImageWidth, this.ImageHeight) ?? OutputBufferRequirement.NotRequired;
+		var outputBufferRequirement = demosaicingAlgorithm?.CheckOutputBufferRequirement(renderingOptions, this.ImageWidth, this.ImageHeight) ?? OutputBufferRequirement.NotRequired;
 		var isMosaicImageNeeded = outputBufferRequirement != OutputBufferRequirement.NotRequired;
 		var isMosaicImageMandatory = outputBufferRequirement == OutputBufferRequirement.Required
 			|| (outputBufferRequirement == OutputBufferRequirement.Preferred && !this.Settings.GetValueOrDefault(SettingKeys.ReduceDemosaicingQualityWhenInsufficientMemory));
@@ -5438,22 +5513,44 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (mosaicImageFrame is null && !isMosaicImageMandatory)
 				this.Logger.LogWarning("Unable to acquire the mosaic image frame, reduce the quality of demosaicing by '{algorithm}'", demosaicingAlgorithm.AsNonNull().Id);
 		}
-		if (isRenderingNeeded && (renderedImageFrame is null || (isMosaicImageMandatory && mosaicImageFrame is null)))
+		// acquire the buffer which the algorithm keeps its own intermediate result in. The size is asked only after the arrangement of the output buffer is settled, because an algorithm may keep a different intermediate result in each of them
+		var workingBuffer = (WorkingBuffer?)null;
+		var isWorkingBufferAcquired = true;
+		if (isRenderingNeeded && renderedImageFrame is not null && demosaicingAlgorithm is not null)
 		{
-			if (!cancellationTokenSource.IsCancellationRequested)
+			// allocate
+			(workingBuffer, isWorkingBufferAcquired) = await this.AcquireWorkingBuffer(demosaicingAlgorithm, renderingOptions, renderedFormat, mosaicImageFrame is not null);
+
+			// the algorithm which only prefers a dedicated output buffer interpolates without one as well, so the one it is holding is given back and the intermediate result of the other arrangement, which may be smaller, is tried before giving up
+			if (!isWorkingBufferAcquired && mosaicImageFrame is not null && !isMosaicImageMandatory)
 			{
-				this.imageRenderingCancellationTokenSource = null;
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
-				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-				if (!this.IsActivated && !this.IsHibernated)
-				{
-					this.Logger.LogWarning("Unable to allocate rendered image frame after deactivation, hibernate the session");
-					_ = this.HibernateAsync(); // the images are released after this rendering completes, waiting for it here would wait for this rendering itself
-				}
+				this.Logger.LogWarning("Unable to acquire the working buffer of demosaicing by '{algorithm}', release the mosaic image frame and reduce the quality", demosaicingAlgorithm.Id);
+				mosaicImageFrame = mosaicImageFrame.DisposeAndReturnNull();
+				(workingBuffer, isWorkingBufferAcquired) = await this.AcquireWorkingBuffer(demosaicingAlgorithm, renderingOptions, renderedFormat, false);
 			}
-			mosaicImageFrame?.Dispose();
-			renderedImageFrame?.Dispose();
-			return;
+		}
+		if (isRenderingNeeded)
+		{
+			if (renderedImageFrame is null 
+			    || (isMosaicImageMandatory && mosaicImageFrame is null) 
+			    || !isWorkingBufferAcquired)
+			{
+				if (!cancellationTokenSource.IsCancellationRequested)
+				{
+					this.imageRenderingCancellationTokenSource = null;
+					this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
+					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
+					if (!this.IsActivated && !this.IsHibernated)
+					{
+						this.Logger.LogWarning("Unable to allocate rendered image frame after deactivation, hibernate the session");
+						_ = this.HibernateAsync(); // the images are released after this rendering completes, waiting for it here would wait for this rendering itself
+					}
+				}
+				workingBuffer?.Dispose();
+				mosaicImageFrame?.Dispose();
+				renderedImageFrame?.Dispose();
+				return;
+			}
 		}
 
 		// update state
@@ -5477,7 +5574,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 				// perform demosaicing, its duration is counted as part of rendering because it was performed by the image renderer before
 				if (demosaicingAlgorithm is not null)
-					await this.DemosaicImageAsync(demosaicingAlgorithm, renderingImageFrame.BitmapBuffer, renderedImageFrame.BitmapBuffer, renderingOptions, cancellationTokenSource.Token);
+					await this.DemosaicImageAsync(demosaicingAlgorithm, renderingImageFrame.BitmapBuffer, renderedImageFrame.BitmapBuffer, workingBuffer?.Buffer ?? default, renderingOptions, cancellationTokenSource.Token);
 
 				// update state of rendered image
 				renderStopwatch.Stop();
@@ -5515,6 +5612,17 @@ class Session : ViewModel<IAppSuiteApplication>
 				if (this.cachedMosaicImageFrame != mosaicImageFrame)
 					this.cachedMosaicImageFrame?.Dispose();
 				this.cachedMosaicImageFrame = mosaicImageFrame;
+			}
+		}
+		if (workingBuffer is not null)
+		{
+			if (this.IsHibernated || !this.IsActivated)
+				workingBuffer.Dispose();
+			else
+			{
+				if (this.cachedWorkingBuffer != workingBuffer)
+					this.cachedWorkingBuffer?.Dispose();
+				this.cachedWorkingBuffer = workingBuffer;
 			}
 		}
 

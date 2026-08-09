@@ -15,6 +15,28 @@ namespace Carina.PixelViewer.Test.Media.Demosaicing;
 [TestFixture]
 class DemosaicingAlgorithmTests : BaseTests
 {
+	// Implementation of DemosaicingAlgorithm which keeps an intermediate result of its own, only used to check how the buffer for it is provided.
+	class WorkingBufferDemosaicingAlgorithm(long size) : DemosaicingAlgorithm("WorkingBufferTest")
+	{
+		/// <inheritdoc/>
+		public override OutputBufferRequirement CheckOutputBufferRequirement(ImageRenderingOptions renderingOptions, int width, int height) => OutputBufferRequirement.NotRequired;
+
+		/// <inheritdoc/>
+		public override long CheckWorkingBufferSize(ImageRenderingOptions renderingOptions, int width, int height, BitmapFormat format, bool hasDedicatedOutputBuffer) => size;
+
+		/// <inheritdoc/>
+		public override void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, Memory<byte> workingBuffer, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+		{
+			// record the buffer which has been provided, and keep the mosaic so that the caller can check the destination is still filled
+			this.ReceivedBufferLength = workingBuffer.Length;
+			srcBuffer.CopyTo(destBuffer);
+		}
+
+		// Length of the buffer which the algorithm has received, or -1 if it has not been called yet.
+		public int ReceivedBufferLength { get; private set; } = -1;
+	}
+
+
 	// Constants. The minimum ratios are placed slightly below the ratios measured from the built-in bilinear algorithm, which is the algorithm interpolating least accurately, so that an algorithm interpolating even worse is reported instead of being accepted silently. Bilinear reaches 38.64 dB and 27.29 dB in the worst case. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 2 sizes differ by up to 1.6 dB because the smaller one is not a multiple of the color block and gives the border a larger share of the image. Measure them again after changing the content of the ground truth.
 	const double Min2x2PeakSignalNoiseRatio = 37;
 	const double Min4x4PeakSignalNoiseRatio = 26;
@@ -85,7 +107,7 @@ class DemosaicingAlgorithmTests : BaseTests
 	static void AssertInPlaceDemosaicingConsistent(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
 	{
 		// the algorithm is asked to work in place only when it needs no dedicated buffer at all. An algorithm which merely prefers one interpolates differently in each arrangement by definition, so comparing the 2 results would report the reason it states the preference as a failure
-		if (algorithm.CheckOutputBufferRequirement(bayerPattern, width, height) != OutputBufferRequirement.NotRequired)
+		if (algorithm.CheckOutputBufferRequirement(CreateRenderingOptions(bayerPattern), width, height) != OutputBufferRequirement.NotRequired)
 			return;
 
 		// demosaic with separate source and destination buffers
@@ -109,7 +131,7 @@ class DemosaicingAlgorithmTests : BaseTests
 	static void AssertInPlaceInterpolationQuality(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern, BitmapFormat format, int width, int height)
 	{
 		// only the algorithm which prefers a dedicated buffer interpolates in place in a way of its own. The algorithm which needs no dedicated buffer is already covered by the consistency of its 2 arrangements together with the quality of the one with separate buffers, and the algorithm which requires one is never asked to work in place at all
-		if (algorithm.CheckOutputBufferRequirement(bayerPattern, width, height) != OutputBufferRequirement.Preferred)
+		if (algorithm.CheckOutputBufferRequirement(CreateRenderingOptions(bayerPattern), width, height) != OutputBufferRequirement.Preferred)
 			return;
 
 		// demosaic with the buffer which is shared as both source and destination, which is how Session performs in-place demosaicing
@@ -264,9 +286,14 @@ class DemosaicingAlgorithmTests : BaseTests
 		});
 
 
+	// Create the rendering options which the image of the given pattern of Bayer Filter is rendered with.
+	static ImageRenderingOptions CreateRenderingOptions(BayerPattern bayerPattern) =>
+		new() { BayerPattern = bayerPattern };
+
+
 	// Perform demosaicing by the given algorithm, the arguments are prepared in the same way as Session does.
-	static void Demosaic(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern) =>
-		algorithm.Demosaic(srcBuffer, destBuffer, bayerPattern, bayerPattern.CreateColorComponentSelector(), new ImageRenderingOptions { BayerPattern = bayerPattern }, CancellationToken.None);
+	static void Demosaic(DemosaicingAlgorithm algorithm, IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Memory<byte> workingBuffer = default) =>
+		algorithm.Demosaic(srcBuffer, destBuffer, bayerPattern, bayerPattern.CreateColorComponentSelector(), workingBuffer, CreateRenderingOptions(bayerPattern), CancellationToken.None);
 
 
 	// Describe the combination which is being tested for the message of assertion.
@@ -404,5 +431,41 @@ class DemosaicingAlgorithmTests : BaseTests
 	{
 		RunOnEachSupportedCombination(smallImageSizes, AssertDestinationFilled);
 		RunOnEachSupportedCombination(smallImageSizes, AssertInPlaceDemosaicingConsistent);
+	}
+
+
+	/// <summary>
+	/// Test for providing the buffer which an algorithm keeps its own intermediate result in.
+	/// </summary>
+	[Test]
+	public void TestWorkingBuffer()
+	{
+		// no built-in algorithm keeps an intermediate result of its own, in either arrangement of the output buffer
+		bool[] outputBufferArrangements = [ false, true ];
+		RunOnEachSupportedCombination(imageSizes, (algorithm, bayerPattern, format, width, height) =>
+		{
+			var renderingOptions = CreateRenderingOptions(bayerPattern);
+			foreach (var hasDedicatedOutputBuffer in outputBufferArrangements)
+			{
+				var size = algorithm.CheckWorkingBufferSize(renderingOptions, width, height, format, hasDedicatedOutputBuffer);
+				Assert.That(size, Is.EqualTo(0), $"Built-in algorithm should keep no intermediate result of its own. {Describe(algorithm, bayerPattern, format, width, height)}");
+			}
+		});
+
+		// the algorithm which asks for a buffer receives one which is at least as large as it asked for
+		var requestedSize = 4096L;
+		var algorithm = new WorkingBufferDemosaicingAlgorithm(requestedSize);
+		var bayerPattern = BayerPattern.BGGR_2x2;
+		using var groundTruth = CreateGroundTruthImage(BitmapFormat.Bgra32, 16, 16);
+		using var mosaic = CreateMosaic(groundTruth, bayerPattern);
+		using var result = new BitmapBuffer(BitmapFormat.Bgra32, ColorSpace.Default, 16, 16);
+		Assert.That(algorithm.CheckWorkingBufferSize(CreateRenderingOptions(bayerPattern), 16, 16, BitmapFormat.Bgra32, false), Is.EqualTo(requestedSize), "Algorithm should report the size it needs.");
+		Demosaic(algorithm, mosaic, result, bayerPattern, new byte[requestedSize]);
+		Assert.That(algorithm.ReceivedBufferLength, Is.GreaterThanOrEqualTo(requestedSize), "Algorithm should receive a buffer which is at least as large as it asked for.");
+
+		// the algorithm which asks for nothing receives an empty buffer
+		var emptyBufferAlgorithm = new WorkingBufferDemosaicingAlgorithm(0);
+		Demosaic(emptyBufferAlgorithm, mosaic, result, bayerPattern);
+		Assert.That(emptyBufferAlgorithm.ReceivedBufferLength, Is.EqualTo(0), "Algorithm which needs no intermediate result of its own should receive an empty buffer.");
 	}
 }

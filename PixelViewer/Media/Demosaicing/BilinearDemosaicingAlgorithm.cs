@@ -12,12 +12,12 @@ namespace Carina.PixelViewer.Media.Demosaicing;
 class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 {
 	/// <inheritdoc/>
-	public override OutputBufferRequirement CheckOutputBufferRequirement(BayerPattern pattern, int width, int height) => OutputBufferRequirement.NotRequired;
+	public override OutputBufferRequirement CheckOutputBufferRequirement(ImageRenderingOptions renderingOptions, int width, int height) => OutputBufferRequirement.NotRequired;
 
 
 	/// <inheritdoc/>
 	[CalledOnBackgroundThread]
-	public override void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+	public override void Demosaic(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, Memory<byte> workingBuffer, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
 		// widen the sub block to 5x5 because a 3x3 one cannot cover every color component of a color block which is wider than 2 pixels
 		if (bayerPattern.BlockWidth > 2)
