@@ -32,7 +32,15 @@ static class DemosaicingAlgorithms
 	/// <summary>
 	/// Get default <see cref="DemosaicingAlgorithm"/>.
 	/// </summary>
+	/// <remarks>The algorithm is the one which every build can always run, so it is what an unknown identifier resolves to and what a session falls back to when the algorithm it would use cannot be used.</remarks>
 	public static DemosaicingAlgorithm Default => Bilinear;
+
+
+	/// <summary>
+	/// Get the <see cref="DemosaicingAlgorithm"/> which a new session starts with unless the settings name another one.
+	/// </summary>
+	/// <remarks>The algorithm is allowed to be one which the current build or the current state of the application cannot run, in which case the session falls back to <see cref="Default"/> instead of failing to render.</remarks>
+	public static DemosaicingAlgorithm Preferred => Bilinear;
 
 
 	/// <summary>

@@ -44,6 +44,10 @@ static class SettingKeys
 	/// </summary>
 	public static readonly SettingKey<string> DefaultColorSpaceName = new(nameof(DefaultColorSpaceName), "sRGB");
 	/// <summary>
+	/// Identifier of default demosaicing algorithm.
+	/// </summary>
+	public static readonly SettingKey<string> DefaultDemosaicingAlgorithm = new(nameof(DefaultDemosaicingAlgorithm), Media.Demosaicing.DemosaicingAlgorithms.Preferred.Id);
+	/// <summary>
 	/// Default aspect ratio for image dimensions evaluation.
 	/// </summary>
 	public static readonly SettingKey<AspectRatio> DefaultImageDimensionsEvaluationAspectRatio = new(nameof(DefaultImageDimensionsEvaluationAspectRatio), AspectRatio.Unknown);

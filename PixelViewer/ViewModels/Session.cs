@@ -408,7 +408,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="DemosaicingAlgorithm"/>.
 	/// </summary>
-	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProperty = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), Media.Demosaicing.DemosaicingAlgorithms.Default, coerce: (session, it) => it.IsBayerPatternSupported(session.BayerPattern) ? it : SelectDefaultDemosaicingAlgorithm(session.BayerPattern));
+	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProperty = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), Media.Demosaicing.DemosaicingAlgorithms.Default, coerce: (session, it) => session.CanUseDemosaicingAlgorithm(it, session.BayerPattern) ? it : session.SelectDefaultDemosaicingAlgorithm(session.BayerPattern));
 	/// <summary>
 	/// Property of <see cref="FitImageToViewport"/>.
 	/// </summary>
@@ -1362,8 +1362,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		(ColorSpace.AllColorSpaces as INotifyCollectionChanged)?.Let(it =>
 			it.CollectionChanged += this.OnAllColorSpacesChanged);
 
-		// attach to demosaicing algorithms
+		// attach to demosaicing algorithms and select the one which the settings prefer, the list is narrowed to the current pattern afterwards
 		this.DemosaicingAlgorithms = ListExtensions.AsReadOnly(this.demosaicingAlgorithms);
+		this.SetValue(DemosaicingAlgorithmProperty, this.SelectDefaultDemosaicingAlgorithm(this.BayerPattern));
 		this.UpdateDemosaicingAlgorithms();
 		(Media.Demosaicing.DemosaicingAlgorithms.All as INotifyCollectionChanged)?.Let(it =>
 			it.CollectionChanged += this.OnAllDemosaicingAlgorithmsChanged);
@@ -1983,6 +1984,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		// wait for the completion of the rendering being cancelled, the rendering is still in progress until it reaches its next cancellation check
 		return this.WaitForImageRenderingCompletionAsync();
 	}
+
+
+	// Check whether the given algorithm can be used to demosaic an image rendered with the given pattern of Bayer Filter or not.
+	bool CanUseDemosaicingAlgorithm(DemosaicingAlgorithm algorithm, BayerPattern bayerPattern) =>
+		algorithm.IsBayerPatternSupported(bayerPattern);
 
 
 	// Change black level of given image plane.
@@ -6248,7 +6254,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var yuvToBgraConverter = this.YuvToBgraConverter;
 		var colorSpace = ColorSpace.Default;
 		var useLinearColorSpace = false;
-		var demosaicingAlgorithm = Media.Demosaicing.DemosaicingAlgorithms.Default;
+		var demosaicingAlgorithm = this.SelectDefaultDemosaicingAlgorithm(this.BayerPattern);
 		var width = 1;
 		var height = 1;
 		var effectiveBits = new int[this.effectiveBits.Length];
@@ -7075,12 +7081,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand SelectColorAdjustmentCommand { get; }
 
 
-	// Select the default algorithm to replace the one which doesn't support the given bayer pattern. Bypass is the last resort because it supports every pattern by definition.
-	static DemosaicingAlgorithm SelectDefaultDemosaicingAlgorithm(BayerPattern bayerPattern)
+	// Select the default algorithm to replace the one which cannot be used for the given bayer pattern. The algorithm named by the settings comes first, then the one preferred for a new session, and Bypass is the last resort because it supports every pattern by definition.
+	DemosaicingAlgorithm SelectDefaultDemosaicingAlgorithm(BayerPattern bayerPattern)
 	{
-		var algorithm = Media.Demosaicing.DemosaicingAlgorithms.Default;
-		if (algorithm.IsBayerPatternSupported(bayerPattern))
+		Media.Demosaicing.DemosaicingAlgorithms.TryGetById(this.Settings.GetValueOrDefault(SettingKeys.DefaultDemosaicingAlgorithm), out var algorithm);
+		if (this.CanUseDemosaicingAlgorithm(algorithm, bayerPattern))
 			return algorithm;
+		var defaultAlgorithm = Media.Demosaicing.DemosaicingAlgorithms.Default;
+		if (this.CanUseDemosaicingAlgorithm(defaultAlgorithm, bayerPattern))
+			return defaultAlgorithm;
 		return Media.Demosaicing.DemosaicingAlgorithms.Bypass;
 	}
 
@@ -7452,8 +7461,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// select another algorithm before the selected one is removed from the list, otherwise the selection of the combo box is reset to null
 		var bayerPattern = this.BayerPattern;
-		if (!this.DemosaicingAlgorithm.IsBayerPatternSupported(bayerPattern))
-			this.SetValue(DemosaicingAlgorithmProperty, SelectDefaultDemosaicingAlgorithm(bayerPattern));
+		if (!this.CanUseDemosaicingAlgorithm(this.DemosaicingAlgorithm, bayerPattern))
+			this.SetValue(DemosaicingAlgorithmProperty, this.SelectDefaultDemosaicingAlgorithm(bayerPattern));
 
 		// remove the algorithms which are unsupported or unregistered
 		var allAlgorithms = Media.Demosaicing.DemosaicingAlgorithms.All;
