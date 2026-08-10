@@ -11,6 +11,11 @@ namespace Carina.PixelViewer.Media.Demosaicing;
 /// </summary>
 class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 {
+	// Constants.
+	const int ComponentTableOffset3x3 = 1;
+	const int ComponentTableOffset5x5 = 2;
+
+
 	/// <inheritdoc/>
 	public override OutputBufferRequirement CheckOutputBufferRequirement(ImageRenderingOptions renderingOptions, int width, int height) => OutputBufferRequirement.NotRequired;
 
@@ -21,20 +26,23 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 	{
 		// widen the sub block to 5x5 because a 3x3 one cannot cover every color component of a color block which is wider than 2 pixels
 		if (bayerPattern.BlockWidth > 2)
-			this.Demosaic5x5(srcBuffer, destBuffer, colorComponentSelector, renderingOptions, cancellationToken);
+			this.Demosaic5x5(srcBuffer, destBuffer, bayerPattern, colorComponentSelector, renderingOptions, cancellationToken);
 		else
-			this.Demosaic3x3(srcBuffer, destBuffer, colorComponentSelector, renderingOptions, cancellationToken);
+			this.Demosaic3x3(srcBuffer, destBuffer, bayerPattern, colorComponentSelector, renderingOptions, cancellationToken);
 	}
 
 
 	// Demosaicing by 3x3 sub block. Only the color component provided by each pixel is read from the source buffer, so the source and the destination can be the same buffer.
-	unsafe void Demosaic3x3(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+	unsafe void Demosaic3x3(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
 		var width = srcBuffer.Width;
 		var height = srcBuffer.Height;
 		var srcRowStride = srcBuffer.RowBytes;
 		var destRowStride = destBuffer.RowBytes;
 		var lastColumnIndex = width - 1;
+		var blockWidth = bayerPattern.BlockWidth;
+		var lastPhase = blockWidth - 1;
+		var componentCount = blockWidth + ComponentTableOffset3x3 * 2;
 		srcBuffer.Memory.Pin(srcBaseAddress =>
 		{
 			destBuffer.Memory.Pin(destBaseAddress =>
@@ -56,10 +64,19 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 							var bottomSrcPixelPtr = srcPixelPtr + srcRowStride;
 							var isNotTopRow = (y > 0);
 							var isNotBottomRow = (y < height - 1);
-							for (var x = 0; x < width; ++x, leftSrcPixelPtr = srcPixelPtr, srcPixelPtr = rightSrcPixelPtr, rightSrcPixelPtr += 4, topSrcPixelPtr += 4, bottomSrcPixelPtr += 4, destPixelPtr += 4)
+							var topComponents = stackalloc int[componentCount];
+							var centerComponents = stackalloc int[componentCount];
+							var bottomComponents = stackalloc int[componentCount];
+							var phase = 0;
+							SelectRowColorComponents(colorComponentSelector, y, blockWidth, ComponentTableOffset3x3, centerComponents);
+							if (isNotTopRow)
+								SelectRowColorComponents(colorComponentSelector, y - 1, blockWidth, ComponentTableOffset3x3, topComponents);
+							if (isNotBottomRow)
+								SelectRowColorComponents(colorComponentSelector, y + 1, blockWidth, ComponentTableOffset3x3, bottomComponents);
+							for (var x = 0; x < width; ++x, leftSrcPixelPtr = srcPixelPtr, srcPixelPtr = rightSrcPixelPtr, rightSrcPixelPtr += 4, topSrcPixelPtr += 4, bottomSrcPixelPtr += 4, destPixelPtr += 4, phase = phase < lastPhase ? phase + 1 : 0)
 							{
 								// get component at current pixel
-								var centerComponent = (int)colorComponentSelector(x, y);
+								var centerComponent = centerComponents[phase + 1];
 
 								// collect colors around current pixel
 								var isNotLastPixelInRow = x < lastColumnIndex;
@@ -68,14 +85,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y - 1);
+										neighborComponent = topComponents[phase];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (topSrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y - 1);
+									neighborComponent = topComponents[phase + 1];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += topSrcPixelPtr[neighborComponent];
@@ -83,7 +100,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (isNotLastPixelInRow)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y - 1);
+										neighborComponent = topComponents[phase + 2];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (topSrcPixelPtr + 4)[neighborComponent];
@@ -93,7 +110,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (x > 0)
 								{
-									neighborComponent = (int)colorComponentSelector(x - 1, y);
+									neighborComponent = centerComponents[phase];
 									if (neighborComponent != centerComponent)
 									{
 #pragma warning disable CS8602
@@ -104,7 +121,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (isNotLastPixelInRow)
 								{
-									neighborComponent = (int)colorComponentSelector(x + 1, y);
+									neighborComponent = centerComponents[phase + 2];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += rightSrcPixelPtr[neighborComponent];
@@ -115,14 +132,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y + 1);
+										neighborComponent = bottomComponents[phase];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottomSrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y + 1);
+									neighborComponent = bottomComponents[phase + 1];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += bottomSrcPixelPtr[neighborComponent];
@@ -130,7 +147,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (isNotLastPixelInRow)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y + 1);
+										neighborComponent = bottomComponents[phase + 2];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottomSrcPixelPtr + 4)[neighborComponent];
@@ -169,10 +186,19 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 							var bottomSrcPixelPtr = (ushort*)((byte*)srcPixelPtr + srcRowStride);
 							var isNotTopRow = (y > 0);
 							var isNotBottomRow = (y < height - 1);
-							for (var x = 0; x < width; ++x, leftSrcPixelPtr = srcPixelPtr, srcPixelPtr = rightSrcPixelPtr, rightSrcPixelPtr += 4, topSrcPixelPtr += 4, bottomSrcPixelPtr += 4, destPixelPtr += 4)
+							var topComponents = stackalloc int[componentCount];
+							var centerComponents = stackalloc int[componentCount];
+							var bottomComponents = stackalloc int[componentCount];
+							var phase = 0;
+							SelectRowColorComponents(colorComponentSelector, y, blockWidth, ComponentTableOffset3x3, centerComponents);
+							if (isNotTopRow)
+								SelectRowColorComponents(colorComponentSelector, y - 1, blockWidth, ComponentTableOffset3x3, topComponents);
+							if (isNotBottomRow)
+								SelectRowColorComponents(colorComponentSelector, y + 1, blockWidth, ComponentTableOffset3x3, bottomComponents);
+							for (var x = 0; x < width; ++x, leftSrcPixelPtr = srcPixelPtr, srcPixelPtr = rightSrcPixelPtr, rightSrcPixelPtr += 4, topSrcPixelPtr += 4, bottomSrcPixelPtr += 4, destPixelPtr += 4, phase = phase < lastPhase ? phase + 1 : 0)
 							{
 								// get component at current pixel
-								var centerComponent = (int)colorComponentSelector(x, y);
+								var centerComponent = centerComponents[phase + 1];
 
 								// collect colors around current pixel
 								var isNotLastPixelInRow = x < lastColumnIndex;
@@ -181,14 +207,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y - 1);
+										neighborComponent = topComponents[phase];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (topSrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y - 1);
+									neighborComponent = topComponents[phase + 1];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += topSrcPixelPtr[neighborComponent];
@@ -196,7 +222,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (isNotLastPixelInRow)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y - 1);
+										neighborComponent = topComponents[phase + 2];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (topSrcPixelPtr + 4)[neighborComponent];
@@ -206,7 +232,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (x > 0)
 								{
-									neighborComponent = (int)colorComponentSelector(x - 1, y);
+									neighborComponent = centerComponents[phase];
 									if (neighborComponent != centerComponent)
 									{
 #pragma warning disable CS8602
@@ -217,7 +243,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (isNotLastPixelInRow)
 								{
-									neighborComponent = (int)colorComponentSelector(x + 1, y);
+									neighborComponent = centerComponents[phase + 2];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += rightSrcPixelPtr[neighborComponent];
@@ -228,14 +254,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y + 1);
+										neighborComponent = bottomComponents[phase];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottomSrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y + 1);
+									neighborComponent = bottomComponents[phase + 1];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += bottomSrcPixelPtr[neighborComponent];
@@ -243,7 +269,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (isNotLastPixelInRow)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y + 1);
+										neighborComponent = bottomComponents[phase + 2];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottomSrcPixelPtr + 4)[neighborComponent];
@@ -273,7 +299,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 
 
 	// Demosaicing by 5x5 sub block. Only the color component provided by each pixel is read from the source buffer, so the source and the destination can be the same buffer.
-	unsafe void Demosaic5x5(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
+	unsafe void Demosaic5x5(IBitmapBuffer srcBuffer, IBitmapBuffer destBuffer, BayerPattern bayerPattern, Func<int, int, BayerPatternColorComponent> colorComponentSelector, ImageRenderingOptions renderingOptions, CancellationToken cancellationToken)
 	{
 		var width = srcBuffer.Width;
 		var height = srcBuffer.Height;
@@ -281,6 +307,9 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 		var destRowStride = destBuffer.RowBytes;
 		var last1ColumnIndex = width - 1;
 		var last2ColumnIndex = width - 2;
+		var blockWidth = bayerPattern.BlockWidth;
+		var lastPhase = blockWidth - 1;
+		var componentCount = blockWidth + ComponentTableOffset5x5 * 2;
 		srcBuffer.Memory.Pin(srcBaseAddress =>
 		{
 			destBuffer.Memory.Pin(destBaseAddress =>
@@ -305,10 +334,25 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 							var isNotTop2Row = (y > 1);
 							var isNotBottom1Row = (y < height - 1);
 							var isNotBottom2Row = (y < height - 2);
-							for (var x = 0; x < width; ++x, srcPixelPtr += 4, destPixelPtr += 4, top1SrcPixelPtr += 4, top2SrcPixelPtr += 4, bottom1SrcPixelPtr += 4, bottom2SrcPixelPtr += 4)
+							var top2Components = stackalloc int[componentCount];
+							var top1Components = stackalloc int[componentCount];
+							var centerComponents = stackalloc int[componentCount];
+							var bottom1Components = stackalloc int[componentCount];
+							var bottom2Components = stackalloc int[componentCount];
+							var phase = 0;
+							SelectRowColorComponents(colorComponentSelector, y, blockWidth, ComponentTableOffset5x5, centerComponents);
+							if (isNotTop1Row)
+								SelectRowColorComponents(colorComponentSelector, y - 1, blockWidth, ComponentTableOffset5x5, top1Components);
+							if (isNotTop2Row)
+								SelectRowColorComponents(colorComponentSelector, y - 2, blockWidth, ComponentTableOffset5x5, top2Components);
+							if (isNotBottom1Row)
+								SelectRowColorComponents(colorComponentSelector, y + 1, blockWidth, ComponentTableOffset5x5, bottom1Components);
+							if (isNotBottom2Row)
+								SelectRowColorComponents(colorComponentSelector, y + 2, blockWidth, ComponentTableOffset5x5, bottom2Components);
+							for (var x = 0; x < width; ++x, srcPixelPtr += 4, destPixelPtr += 4, top1SrcPixelPtr += 4, top2SrcPixelPtr += 4, bottom1SrcPixelPtr += 4, bottom2SrcPixelPtr += 4, phase = phase < lastPhase ? phase + 1 : 0)
 							{
 								// get component at current pixel
-								var centerComponent = (int)colorComponentSelector(x, y);
+								var centerComponent = centerComponents[phase + 2];
 
 								// collect colors in 3x3 sub block first
 								int neighborComponent;
@@ -316,14 +360,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y - 1);
+										neighborComponent = top1Components[phase + 1];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (top1SrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y - 1);
+									neighborComponent = top1Components[phase + 2];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (top1SrcPixelPtr)[neighborComponent];
@@ -331,7 +375,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x < last1ColumnIndex)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y - 1);
+										neighborComponent = top1Components[phase + 3];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (top1SrcPixelPtr + 4)[neighborComponent];
@@ -341,7 +385,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (x > 0)
 								{
-									neighborComponent = (int)colorComponentSelector(x - 1, y);
+									neighborComponent = centerComponents[phase + 1];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (srcPixelPtr - 4)[neighborComponent];
@@ -350,7 +394,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (x < last1ColumnIndex)
 								{
-									neighborComponent = (int)colorComponentSelector(x + 1, y);
+									neighborComponent = centerComponents[phase + 3];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (srcPixelPtr + 4)[neighborComponent];
@@ -361,14 +405,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y + 1);
+										neighborComponent = bottom1Components[phase + 1];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottom1SrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y + 1);
+									neighborComponent = bottom1Components[phase + 2];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (bottom1SrcPixelPtr)[neighborComponent];
@@ -376,7 +420,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x < last1ColumnIndex)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y + 1);
+										neighborComponent = bottom1Components[phase + 3];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottom1SrcPixelPtr + 4)[neighborComponent];
@@ -401,7 +445,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y - 2);
+											neighborComponent = top2Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr - 8)[neighborComponent];
@@ -410,14 +454,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x > 0)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 1, y - 2);
+											neighborComponent = top2Components[phase + 1];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr - 4)[neighborComponent];
 												++colorCounts[neighborComponent];
 											}
 										}
-										neighborComponent = (int)colorComponentSelector(x, y - 2);
+										neighborComponent = top2Components[phase + 2];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (top2SrcPixelPtr)[neighborComponent];
@@ -425,7 +469,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last1ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 1, y - 2);
+											neighborComponent = top2Components[phase + 3];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr + 4)[neighborComponent];
@@ -434,7 +478,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y - 2);
+											neighborComponent = top2Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr + 8)[neighborComponent];
@@ -446,7 +490,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y - 1);
+											neighborComponent = top1Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top1SrcPixelPtr - 8)[neighborComponent];
@@ -455,7 +499,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y - 1);
+											neighborComponent = top1Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top1SrcPixelPtr + 8)[neighborComponent];
@@ -465,7 +509,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x > 1)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 2, y);
+										neighborComponent = centerComponents[phase];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (srcPixelPtr - 8)[neighborComponent];
@@ -474,7 +518,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x < last2ColumnIndex)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 2, y);
+										neighborComponent = centerComponents[phase + 4];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (srcPixelPtr + 8)[neighborComponent];
@@ -485,7 +529,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y + 1);
+											neighborComponent = bottom1Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom1SrcPixelPtr - 8)[neighborComponent];
@@ -494,7 +538,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y + 1);
+											neighborComponent = bottom1Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom1SrcPixelPtr + 8)[neighborComponent];
@@ -506,7 +550,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y + 2);
+											neighborComponent = bottom2Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr - 8)[neighborComponent];
@@ -515,14 +559,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x > 0)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 1, y + 2);
+											neighborComponent = bottom2Components[phase + 1];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr - 4)[neighborComponent];
 												++colorCounts[neighborComponent];
 											}
 										}
-										neighborComponent = (int)colorComponentSelector(x, y + 2);
+										neighborComponent = bottom2Components[phase + 2];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (bottom2SrcPixelPtr)[neighborComponent];
@@ -530,7 +574,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last1ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 1, y + 2);
+											neighborComponent = bottom2Components[phase + 3];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr + 4)[neighborComponent];
@@ -539,7 +583,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y + 2);
+											neighborComponent = bottom2Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr + 8)[neighborComponent];
@@ -580,10 +624,25 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 							var isNotTop2Row = (y > 1);
 							var isNotBottom1Row = (y < height - 1);
 							var isNotBottom2Row = (y < height - 2);
-							for (var x = 0; x < width; ++x, srcPixelPtr += 4, destPixelPtr += 4, top1SrcPixelPtr += 4, top2SrcPixelPtr += 4, bottom1SrcPixelPtr += 4, bottom2SrcPixelPtr += 4)
+							var top2Components = stackalloc int[componentCount];
+							var top1Components = stackalloc int[componentCount];
+							var centerComponents = stackalloc int[componentCount];
+							var bottom1Components = stackalloc int[componentCount];
+							var bottom2Components = stackalloc int[componentCount];
+							var phase = 0;
+							SelectRowColorComponents(colorComponentSelector, y, blockWidth, ComponentTableOffset5x5, centerComponents);
+							if (isNotTop1Row)
+								SelectRowColorComponents(colorComponentSelector, y - 1, blockWidth, ComponentTableOffset5x5, top1Components);
+							if (isNotTop2Row)
+								SelectRowColorComponents(colorComponentSelector, y - 2, blockWidth, ComponentTableOffset5x5, top2Components);
+							if (isNotBottom1Row)
+								SelectRowColorComponents(colorComponentSelector, y + 1, blockWidth, ComponentTableOffset5x5, bottom1Components);
+							if (isNotBottom2Row)
+								SelectRowColorComponents(colorComponentSelector, y + 2, blockWidth, ComponentTableOffset5x5, bottom2Components);
+							for (var x = 0; x < width; ++x, srcPixelPtr += 4, destPixelPtr += 4, top1SrcPixelPtr += 4, top2SrcPixelPtr += 4, bottom1SrcPixelPtr += 4, bottom2SrcPixelPtr += 4, phase = phase < lastPhase ? phase + 1 : 0)
 							{
 								// get component at current pixel
-								var centerComponent = (int)colorComponentSelector(x, y);
+								var centerComponent = centerComponents[phase + 2];
 
 								// collect colors in 3x3 sub block first
 								int neighborComponent;
@@ -591,14 +650,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y - 1);
+										neighborComponent = top1Components[phase + 1];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (top1SrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y - 1);
+									neighborComponent = top1Components[phase + 2];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (top1SrcPixelPtr)[neighborComponent];
@@ -606,7 +665,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x < last1ColumnIndex)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y - 1);
+										neighborComponent = top1Components[phase + 3];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (top1SrcPixelPtr + 4)[neighborComponent];
@@ -616,7 +675,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (x > 0)
 								{
-									neighborComponent = (int)colorComponentSelector(x - 1, y);
+									neighborComponent = centerComponents[phase + 1];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (srcPixelPtr - 4)[neighborComponent];
@@ -625,7 +684,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								}
 								if (x < last1ColumnIndex)
 								{
-									neighborComponent = (int)colorComponentSelector(x + 1, y);
+									neighborComponent = centerComponents[phase + 3];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (srcPixelPtr + 4)[neighborComponent];
@@ -636,14 +695,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 								{
 									if (x > 0)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 1, y + 1);
+										neighborComponent = bottom1Components[phase + 1];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottom1SrcPixelPtr - 4)[neighborComponent];
 											++colorCounts[neighborComponent];
 										}
 									}
-									neighborComponent = (int)colorComponentSelector(x, y + 1);
+									neighborComponent = bottom1Components[phase + 2];
 									if (neighborComponent != centerComponent)
 									{
 										accumColors[neighborComponent] += (bottom1SrcPixelPtr)[neighborComponent];
@@ -651,7 +710,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x < last1ColumnIndex)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 1, y + 1);
+										neighborComponent = bottom1Components[phase + 3];
 										if (neighborComponent != centerComponent)
 										{
 											accumColors[neighborComponent] += (bottom1SrcPixelPtr + 4)[neighborComponent];
@@ -676,7 +735,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y - 2);
+											neighborComponent = top2Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr - 8)[neighborComponent];
@@ -685,14 +744,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x > 0)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 1, y - 2);
+											neighborComponent = top2Components[phase + 1];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr - 4)[neighborComponent];
 												++colorCounts[neighborComponent];
 											}
 										}
-										neighborComponent = (int)colorComponentSelector(x, y - 2);
+										neighborComponent = top2Components[phase + 2];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (top2SrcPixelPtr)[neighborComponent];
@@ -700,7 +759,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last1ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 1, y - 2);
+											neighborComponent = top2Components[phase + 3];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr + 4)[neighborComponent];
@@ -709,7 +768,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y - 2);
+											neighborComponent = top2Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top2SrcPixelPtr + 8)[neighborComponent];
@@ -721,7 +780,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y - 1);
+											neighborComponent = top1Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top1SrcPixelPtr - 8)[neighborComponent];
@@ -730,7 +789,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y - 1);
+											neighborComponent = top1Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (top1SrcPixelPtr + 8)[neighborComponent];
@@ -740,7 +799,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x > 1)
 									{
-										neighborComponent = (int)colorComponentSelector(x - 2, y);
+										neighborComponent = centerComponents[phase];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (srcPixelPtr - 8)[neighborComponent];
@@ -749,7 +808,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									}
 									if (x < last2ColumnIndex)
 									{
-										neighborComponent = (int)colorComponentSelector(x + 2, y);
+										neighborComponent = centerComponents[phase + 4];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (srcPixelPtr + 8)[neighborComponent];
@@ -760,7 +819,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y + 1);
+											neighborComponent = bottom1Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom1SrcPixelPtr - 8)[neighborComponent];
@@ -769,7 +828,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y + 1);
+											neighborComponent = bottom1Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom1SrcPixelPtr + 8)[neighborComponent];
@@ -781,7 +840,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 									{
 										if (x > 1)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 2, y + 2);
+											neighborComponent = bottom2Components[phase];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr - 8)[neighborComponent];
@@ -790,14 +849,14 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x > 0)
 										{
-											neighborComponent = (int)colorComponentSelector(x - 1, y + 2);
+											neighborComponent = bottom2Components[phase + 1];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr - 4)[neighborComponent];
 												++colorCounts[neighborComponent];
 											}
 										}
-										neighborComponent = (int)colorComponentSelector(x, y + 2);
+										neighborComponent = bottom2Components[phase + 2];
 										if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 										{
 											accumColors[neighborComponent] += (bottom2SrcPixelPtr)[neighborComponent];
@@ -805,7 +864,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last1ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 1, y + 2);
+											neighborComponent = bottom2Components[phase + 3];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr + 4)[neighborComponent];
@@ -814,7 +873,7 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 										}
 										if (x < last2ColumnIndex)
 										{
-											neighborComponent = (int)colorComponentSelector(x + 2, y + 2);
+											neighborComponent = bottom2Components[phase + 4];
 											if (neighborComponent != centerComponent && use5x5BlockColors[neighborComponent])
 											{
 												accumColors[neighborComponent] += (bottom2SrcPixelPtr + 8)[neighborComponent];
@@ -839,5 +898,18 @@ class BilinearDemosaicingAlgorithm() : DemosaicingAlgorithm("Bilinear")
 				}
 			});
 		});
+	}
+
+
+	// Resolve the color components which the pixels of the given row provide, one for each phase of pixel in the block of pattern. The table is padded by the given number of phases at both of its ends so that the neighbors of the first and the last phase are read without wrapping the index, and the caller is expected to fill it only for a row which is inside the image because the selector is not defined outside of it.
+	static unsafe void SelectRowColorComponents(Func<int, int, BayerPatternColorComponent> colorComponentSelector, int y, int blockWidth, int offset, int* components)
+	{
+		for (var i = blockWidth + offset * 2 - 1; i >= 0; --i)
+		{
+			var phase = (i - offset) % blockWidth;
+			if (phase < 0)
+				phase += blockWidth;
+			components[i] = (int)colorComponentSelector(phase, y);
+		}
 	}
 }

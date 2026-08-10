@@ -14,6 +14,7 @@
 + Added support for parsing and applying the color matrix recorded in DNG images.
 + Added support for parsing and applying the linearization table recorded in DNG images.
 + Added support for specifying the effective bits of images with `ABGR_16161616`, `ARGB_16161616`, `BGRA_16161616` and `RGBA_16161616` formats.
++ Improved the performance of demosaicing.
 + Improved the performance of saving images in PNG format.
 + Added support for saving the rendered image while the next image is being rendered.
 + Added support for adjusting the width of the panel of histograms.
