@@ -44,5 +44,5 @@ class AppInfo : ApplicationInfo
 
 
     /// <inheritdoc/>
-    public override Uri WebsiteUri => new("https://carinastudio.azurewebsites.net/PixelViewer/");
+    public override Uri WebsiteUri => new("https://carinastudio.net/PixelViewer/");
 }

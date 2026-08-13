@@ -948,7 +948,7 @@ namespace Carina.PixelViewer
 					Message = this.Application.GetObservableString("MainWindow.RefreshingAppIconOnMacOSHint"),
 				}.ShowDialog(this);
 				if (result == MessageDialogResult.Yes)
-					Platform.OpenLink("https://carinastudio.azurewebsites.net/PixelViewer/InstallAndUpgrade#Upgrade");
+					Platform.OpenLink("https://carinastudio.net/PixelViewer/InstallAndUpgrade#Upgrade");
 			}
 		}
 		

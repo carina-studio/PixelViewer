@@ -1,11 +1,11 @@
 # PixelViewer 
 [![](https://img.shields.io/github/release-date-pre/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/releases/tag/2.7.4.312) ![](https://img.shields.io/github/downloads/carina-studio/PixelViewer/total) [![](https://img.shields.io/github/last-commit/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/commits/master) [![](https://img.shields.io/github/license/carina-studio/PixelViewer?style=flat)](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE.md)
 
-A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixel data from files and rendering them. Please visit the [Website](https://carinastudio.azurewebsites.net/PixelViewer/) for more details.
+A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/Bayer pixel data from files and rendering them. Please visit the [Website](https://carinastudio.net/PixelViewer/) for more details.
 
-跨平台影像檢視器，支援讀取及繪製原始 Luminance/YUV/RGB/ARGB/Bayer 像素資料。請參閱 [網站](https://carinastudio.azurewebsites.net/PixelViewer/) 以取得更多資訊。
+跨平台影像檢視器，支援讀取及繪製原始 Luminance/YUV/RGB/ARGB/Bayer 像素資料。請參閱 [網站](https://carinastudio.net/PixelViewer/) 以取得更多資訊。
 
-![](https://carinastudio.azurewebsites.net/PixelViewer/Banner.png?v=2)
+![](https://carinastudio.net/PixelViewer/Banner.png?v=2)
 
 ## ⚠️ NOTICE
 If you are upgrading from `3.x` to `2026+` on macOS, please download the application bundle manually and place it alongside the existing `3.x` bundle *(instead of replacing it)*. This allows `2026+` to import your application data from the `3.x` bundle on first launch.
