@@ -7464,11 +7464,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// select another algorithm before the selected one is removed from the list, otherwise the selection of the combo box is reset to null
 		var bayerPattern = this.BayerPattern;
-		if (!this.DemosaicingAlgorithm.IsBayerPatternSupported(bayerPattern))
+		var allAlgorithms = Media.Demosaicing.DemosaicingAlgorithms.All;
+		var demosaicingAlgorithm = this.DemosaicingAlgorithm;
+		if (!demosaicingAlgorithm.IsBayerPatternSupported(bayerPattern) || !allAlgorithms.Contains(demosaicingAlgorithm))
 			this.SetValue(DemosaicingAlgorithmProperty, this.SelectDefaultDemosaicingAlgorithm(bayerPattern));
 
 		// remove the algorithms which are unsupported or unregistered
-		var allAlgorithms = Media.Demosaicing.DemosaicingAlgorithms.All;
 		for (var i = this.demosaicingAlgorithms.Count - 1; i >= 0; --i)
 		{
 			var algorithm = this.demosaicingAlgorithms[i];
