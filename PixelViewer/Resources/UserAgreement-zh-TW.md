@@ -1,7 +1,7 @@
 # PixelViewer 使用者協議
  ---
 + 版本：1.8
-+ 更新時間：2026/7/31
++ 更新時間：2026/8/13
 
 這是 PixelViewer 的使用者協議，您應該要在使用 PixelViewer 之前詳細閱讀本協議。 使用者協議可能會在未來有所更新，您可以在 PixelViewer 網站中查看。 當您開始使用 PixelViewer 表示您同意本使用者協議。
 
@@ -9,7 +9,7 @@
 ## 適用範圍
 PixelViewer 為 Carina Studio 之開放原始碼專案，以下所指 PixelViewer **僅包括** 與下列頁面所提供之可執行檔或壓縮檔內容完全相同之版本：
 
-+ [PixelViewer 網站](https://carinastudio.azurewebsites.net/PixelViewer/)
++ [PixelViewer 網站](https://carinastudio.net/PixelViewer/)
 + [GitHub 上之 PixelViewer 專案頁面及各版本釋出頁面](https://github.com/carina-studio/PixelViewer)
 
 若您透過原始碼自行建置 PixelViewer，您使用該建置之版本僅受 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授權之約束，不受本使用者協議之約束。
@@ -88,4 +88,4 @@ PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelVi
 
 
 ## 聯絡我們
-如果您對於本使用者協議有任何疑問，可以至 [GitHub](https://github.com/carina-studio/PixelViewer/issues) 提出或寄信至 [carina.software.studio@gmail.com](mailto:carina.software.studio@gmail.com)。
+如果您對於本使用者協議有任何疑問，可以至 [GitHub](https://github.com/carina-studio/PixelViewer/issues) 提出或寄信至 [support@carinastudio.net](mailto:support@carinastudio.net)。

@@ -1,7 +1,7 @@
 # PixelViewer User Agreement
  ---
 + Version: 1.8
-+ Update: 2026/7/31
++ Update: 2026/8/13
 
 This is the PixelViewer User Agreement which you need to read before using PixelViewer. The User Agreement may be updated in the future and you can check it on the PixelViewer website. It means that you have agreed to this User Agreement once you start using PixelViewer.
 
@@ -9,7 +9,7 @@ This is the PixelViewer User Agreement which you need to read before using Pixel
 ## User Agreement Scope
 PixelViewer is an open-source project of Carina Studio. The PixelViewer mentioned after includes **ONLY** the executable files or zipped files which are exact same as the files provided by the following pages:
 
-+ [PixelViewer Website](https://carinastudio.azurewebsites.net/PixelViewer/)
++ [PixelViewer Website](https://carinastudio.net/PixelViewer/)
 + [PixelViewer project and release pages on GitHub](https://github.com/carina-studio/PixelViewer)
 
 If you build PixelViewer from source code, your use of that build is governed solely by the [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) license, not by this User Agreement.
@@ -88,4 +88,4 @@ License and copyright of images loaded into PixelViewer or saved by PixelViewer 
 
 
 ## Contact Us
-If you have any concern about this User Agreement, please create an issue on [GitHub](https://github.com/carina-studio/PixelViewer/issues) or send e-mail to [carina.software.studio@gmail.com](mailto:carina.software.studio@gmail.com).
+If you have any concern about this User Agreement, please create an issue on [GitHub](https://github.com/carina-studio/PixelViewer/issues) or send e-mail to [support@carinastudio.net](mailto:support@carinastudio.net).
