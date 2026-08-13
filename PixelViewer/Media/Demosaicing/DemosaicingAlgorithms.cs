@@ -1,15 +1,18 @@
 using Carina.PixelViewer.Media.ImageRenderers;
+using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Carina.PixelViewer.Media.Demosaicing;
 
 /// <summary>
 /// Class to hold all available <see cref="DemosaicingAlgorithm"/>s.
 /// </summary>
-static class DemosaicingAlgorithms
+static partial class DemosaicingAlgorithms
 {
 	/// <summary>
 	/// Algorithm which interpolates each missing color component of pixel by averaging the same component of its neighbors.
@@ -45,6 +48,8 @@ static class DemosaicingAlgorithms
 
 	// Static fields.
 	static readonly ObservableList<DemosaicingAlgorithm> all = [ Bypass, Bilinear ];
+	static volatile IAppSuiteApplication? app;
+	static volatile ILogger? logger;
 
 
 	/// <summary>
@@ -59,6 +64,30 @@ static class DemosaicingAlgorithms
 	/// </summary>
 	/// <remarks>The algorithm is the one which every build can always run, so it is what an unknown identifier resolves to and what a session falls back to when the algorithm it would use cannot be used.</remarks>
 	public static DemosaicingAlgorithm Default => Bilinear;
+
+
+	/// <summary>
+	/// Initialize.
+	/// </summary>
+	/// <param name="app">Application.</param>
+	/// <returns>Task of initialization.</returns>
+	/// <remarks>Built-in algorithms are registered when <see cref="All"/> is first accessed, so this method only sets up the shared state that runtime-managed algorithms rely on. It must be called before any runtime algorithm is added. Initializing again by the same application does nothing, so a caller needn't track whether initialization has already happened; only another application initializing them is an error.</remarks>
+	public static Task InitializeAsync(IAppSuiteApplication app)
+	{
+		// check state
+		if (DemosaicingAlgorithms.app is not null)
+		{
+			if (DemosaicingAlgorithms.app != app)
+				throw new InvalidOperationException("Demosaicing algorithms have been initialized by another application.");
+			return Task.CompletedTask;
+		}
+
+		// setup application and logger
+		DemosaicingAlgorithms.app = app;
+		logger = app.LoggerFactory.CreateLogger(nameof(DemosaicingAlgorithms));
+		logger.LogDebug("Initialize");
+		return Task.CompletedTask;
+	}
 
 
 	/// <summary>

@@ -456,6 +456,9 @@ namespace Carina.PixelViewer
 			// initialize image renderers, must be done before initializing image rendering profiles which resolve their renderers by name
 			await Media.ImageRenderers.ImageRenderers.InitializeAsync(this);
 
+			// initialize demosaicing algorithms, must be done before initializing image rendering profiles which resolve their algorithms by identifier
+			await Media.Demosaicing.DemosaicingAlgorithms.InitializeAsync(this);
+
 			// initialize image rendering profiles
 			this.UpdateSplashWindowMessage(this.GetStringNonNull("App.InitializingImageRenderingProfiles"));
 			await Media.Profiles.ImageRenderingProfiles.InitializeAsync(this);
