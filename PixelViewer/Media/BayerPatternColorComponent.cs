@@ -4,7 +4,7 @@ namespace Carina.PixelViewer.Media;
 /// Color component of pixel in Bayer Filter pattern.
 /// </summary>
 /// <remarks>The value of each component is the offset of its color channel in a BGRA pixel, so the component can be used to select the channel of pixel directly.</remarks>
-enum BayerPatternColorComponent
+public enum BayerPatternColorComponent
 {
 	/// <summary>
 	/// Blue.
