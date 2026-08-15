@@ -48,6 +48,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ColorSpace colorSpace;
         long dataOffset;
         DemosaicingAlgorithm? demosaicingAlgorithm = DemosaicingAlgorithms.Undefined;
+        string? unresolvedDemosaicingAlgorithmId;
         IList<int> effectiveBits = emptyEffectiveBits;
         readonly FileFormat? fileFormat;
         string? fileName;
@@ -293,6 +294,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyDefault();
                 if (value == DemosaicingAlgorithms.Bypass)
                     value = null;
+                this.unresolvedDemosaicingAlgorithmId = null;
                 if (this.demosaicingAlgorithm == value)
                     return;
                 this.demosaicingAlgorithm = value;
@@ -688,13 +690,16 @@ namespace Carina.PixelViewer.Media.Profiles
                 }
 
                 // get demosaicing algorithm, the algorithm is not saved if demosaicing is not needed
-                // an unknown algorithm falls back to the default one without upgrading the profile, the identifier in file is kept for the version of application which provides the algorithm
+                // an unknown algorithm falls back to the default one without upgrading the profile, and the identifier which was read is remembered so that saving the profile keeps it in file for the version of application which provides the algorithm
                 if (rootElement.TryGetProperty(nameof(DemosaicingAlgorithm), out jsonProperty)
                     && jsonProperty.ValueKind == JsonValueKind.String)
                 {
                     var algorithmId = jsonProperty.GetString();
                     if (!DemosaicingAlgorithms.TryGetById(algorithmId, out var algorithm))
+                    {
                         logger?.LogWarning("Unknown demosaicing algorithm in profile '{fileName}', id: {algorithmId}", fileName, algorithmId);
+                        profile.unresolvedDemosaicingAlgorithmId = algorithmId;
+                    }
                     profile.demosaicingAlgorithm = algorithm;
                 }
                 else if (rootElement.TryGetProperty("Demosaicing", out jsonProperty))
@@ -1013,7 +1018,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 if (this.useLinearColorSpace)
                     jsonWriter.WriteBoolean(nameof(UseLinearColorSpace), true);
                 if (this.demosaicingAlgorithm is not null)
-                    jsonWriter.WriteString(nameof(DemosaicingAlgorithm), this.demosaicingAlgorithm.Id);
+                    jsonWriter.WriteString(nameof(DemosaicingAlgorithm), this.unresolvedDemosaicingAlgorithmId ?? this.demosaicingAlgorithm.Id);
                 jsonWriter.WriteNumber(nameof(Width), this.width);
                 jsonWriter.WriteNumber(nameof(Height), this.height);
                 jsonWriter.WritePropertyName(nameof(EffectiveBits));

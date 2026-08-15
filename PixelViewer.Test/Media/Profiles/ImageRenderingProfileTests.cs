@@ -2,10 +2,13 @@ using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.Demosaicing;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
+using CarinaStudio;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 
 namespace Carina.PixelViewer.Test.Media.Profiles;
@@ -89,6 +92,59 @@ class ImageRenderingProfileTests : BaseTests
 	/// <summary>
 	/// Test for checking whether profiles define the same parameters to render image or not.
 	/// </summary>
+	/// <summary>
+	/// Test for keeping the identifier of a demosaicing algorithm which cannot be resolved when the profile is loaded.
+	/// </summary>
+	[Test]
+	public void UnresolvedDemosaicingAlgorithmTest()
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// save a profile which uses a demosaicing algorithm
+			await this.InitializeSubSystemsAsync();
+			ImageRenderers.TryFindByFormatName("Bayer_Pattern_8", out var renderer);
+			var name = $"Unresolved Test {Guid.NewGuid()}";
+			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
+			{
+				DemosaicingAlgorithm = DemosaicingAlgorithms.Bilinear,
+			};
+			await profile.SaveAsync();
+			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
+			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
+			try
+			{
+				// replace the algorithm in file by an identifier which no algorithm carries
+				const string unresolvedId = "00000000-0000-0000-0000-00000000dead";
+				var json = await File.ReadAllTextAsync(fileName);
+				json = json.Replace($"\"{DemosaicingAlgorithms.Bilinear.Id}\"", $"\"{unresolvedId}\"");
+				Assert.That(json, Does.Contain(unresolvedId), "The identifier of algorithm should have been replaced.");
+				await File.WriteAllTextAsync(fileName, json);
+
+				// check that loading falls back to another algorithm, the unknown one cannot be used
+				using var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName);
+				Assert.That(loadedProfile.DemosaicingAlgorithm, Is.Not.Null);
+				Assert.That(loadedProfile.DemosaicingAlgorithm.AsNonNull().Id, Is.Not.EqualTo(unresolvedId));
+
+				// check that saving the profile keeps the identifier which was read instead of the one it fell back to
+				await loadedProfile.SaveAsync();
+				json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Contain(unresolvedId), "The identifier which cannot be resolved should be kept in file.");
+
+				// check that selecting another algorithm replaces the identifier, user made a choice of their own
+				loadedProfile.DemosaicingAlgorithm = DemosaicingAlgorithms.Bilinear;
+				await loadedProfile.SaveAsync();
+				json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Not.Contain(unresolvedId));
+				Assert.That(json, Does.Contain(DemosaicingAlgorithms.Bilinear.Id));
+			}
+			finally
+			{
+				File.Delete(fileName);
+			}
+		});
+	}
+
+
 	[Test]
 	public void HasSameRenderingParametersTest()
 	{
