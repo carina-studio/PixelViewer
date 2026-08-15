@@ -104,7 +104,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Default <see cref="IImageRenderer"/>.
 		/// </summary>
-		public IImageRenderer DefaultImageRenderer
+		/// <remarks>The value is never null, but setting null is allowed because the combo box which binds it selects nothing when the renderer it has selected leaves the registry.</remarks>
+		public IImageRenderer? DefaultImageRenderer
 		{
 			get
 			{
@@ -112,7 +113,14 @@ namespace Carina.PixelViewer.ViewModels
 					return renderer.AsNonNull();
 				return ImageRenderers.All[0];
 			}
-			set => this.Settings.SetValue(SettingKeys.DefaultImageRendererFormatName, value.Format.Name);
+			set
+			{
+				// select the default renderer again when the renderer which was selected is gone, keeping the name of a format which is not registered anymore would leave the setting pointing at nothing
+				if (value is null)
+					this.Settings.ResetValue(SettingKeys.DefaultImageRendererFormatName);
+				else
+					this.Settings.SetValue(SettingKeys.DefaultImageRendererFormatName, value.Format.Name);
+			}
 		}
 
 
