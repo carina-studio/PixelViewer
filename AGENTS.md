@@ -229,7 +229,7 @@ UI strings live in `PixelViewer/Strings/`:
 
 - `zh-TW.xaml` uses Taiwan terms: 檔案, 資訊, 資料, 介面, 影像, etc.
 - `zh-CN.xaml` uses Mainland terms: 文件, 信息, 数据, 界面, 图像, etc. **Watch for Taiwan-leaning leftovers** — common ones to convert:
-  - General vocabulary: 资讯→信息, 资料→数据 (when meaning "data"), 介面→界面, 回应→响应, 网路→网络, 数位→数字, 灰阶→灰度, 套用→应用, 储存→保存, 开启→打开 (when meaning "open file/dialog"; `开启` is fine for "enable"), 取得→获取, 透过→通过, 效能→性能, 载入→加载, 设定→设置 (as a UI label), 选取→选择/选中, 撷取→抓取/截取, 拖曳→拖动, 影像→图像, 字型→字体, 色彩→颜色.
+  - General vocabulary: 资讯→信息, 资料→数据 (when meaning "data"), 介面→界面, 回应→响应, 网路→网络, 数位→数字, 灰阶→灰度, 套用→应用, 储存→保存, 开启→打开 (when meaning "open file/dialog"; `开启` is fine for "enable"), 取得→获取, 透过→通过, 效能→性能, 载入→加载, 设定→设置 (as a UI label), 选取→选择/选中, 撷取→抓取/截取, 拖曳→拖动, 影像→图像, 字型→字体, 色彩→颜色, 辨识→识别, 追踪→跟踪, 预设→默认.
   - Compound terms: 资料库→数据库, 资料来源→数据源, 资料点→数据点, 资料夹→文件夹, 剪贴簿→剪贴板, 状态列→状态栏, 文件总管→Windows 资源管理器.
 - **Watch for Traditional characters mixed inside Simplified strings** — e.g. `設定` (Traditional 設) inside an otherwise-Simplified string, or a description that switches script mid-sentence. These are silent bugs that pass spell-check.
 - For "PNG" the `G` is *Graphics* — translate as 图形 / 圖形, not 图像 / 影像.

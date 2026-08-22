@@ -1,18 +1,18 @@
 # PixelViewer 隐私政策
  ---
 + 版本：1.4
-+ 更新时间：2026/8/13
++ 更新时间：2026/8/21
 
 这是 PixelViewer 的隐私政策，您应该要在使用 PixelViewer 之前详细阅读本政策。 隐私政策可能会在未来有所更新，您可以在 PixelViewer 网站中查看。 当您开始使用 PixelViewer 表示您同意本隐私政策。
 
 ## 适用范围
-PixelViewer 为 Carina Studio 之开放源代码项目，采用 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权。以下所指 PixelViewer **仅包括** 与下列页面所提供之可执行文件或压缩包内容完全相同之版本：
+PixelViewer 为 Carina Studio 的开放源代码项目，采用 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权。以下所指 PixelViewer **仅包括** 与下列页面所提供的可执行文件或压缩包内容完全相同的版本：
 + [PixelViewer 网站](https://carinastudio.net/PixelViewer/)
-+ [GitHub 上之 PixelViewer 项目页面及各版本发布页面](https://github.com/carina-studio/PixelViewer)
++ [GitHub 上的 PixelViewer 项目页面及各版本发布页面](https://github.com/carina-studio/PixelViewer)
 
-若您通过源代码自行构建 PixelViewer，您使用该构建之版本仅受 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权之约束，不受本隐私政策之约束。
+若您通过源代码自行构建 PixelViewer，您使用该构建的版本仅受 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权约束，不受本隐私政策约束。
 
-本隐私政策适用于您使用 PixelViewer 2026.1 及下一份隐私政策所指定之版本之间 (但不包括) 的所有版本。
+本隐私政策适用于您使用 PixelViewer 2026.1 及下一份隐私政策所指定的版本之间 (但不包括) 的所有版本。
 
 ## 个人信息的收集
 我们 **不会** 收集下列的个人信息：
@@ -21,7 +21,7 @@ PixelViewer 为 Carina Studio 之开放源代码项目，采用 [MIT](https://gi
 + 电子邮箱地址。
 + 地理位置信息。
 
-我们 **会** 收集下列可能与您个人信息有关联之数据：
+我们 **会** 收集下列可能与您个人信息有关联的数据：
 + 您在 PixelViewer 中打开或保存的**文件名称及路径**。
 + 应用程序错误的详细信息。
 
@@ -30,7 +30,7 @@ PixelViewer 为 Carina Studio 之开放源代码项目，采用 [MIT](https://gi
 + 应用程序错误的详细信息将会被存储至位于您电脑中 PixelViewer 目录内的日志文件。
 
 ## 个人信息的使用
-+ 所收集之信息将用于调试用途 (例如分析应用程序错误)。在提供这些信息之前，您可以查看它们甚至拒绝提供这些信息。
++ 所收集的信息将用于调试用途 (例如分析应用程序错误)。在提供这些信息之前，您可以查看它们甚至拒绝提供这些信息。
 
 除了政府要求之外，我们 **不会** 将您的个人信息提供给 Carina Studio 以外的人、团体及公司。
 
