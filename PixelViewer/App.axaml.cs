@@ -381,7 +381,7 @@ namespace Carina.PixelViewer
 		{
 			var isDarkMode = this.EffectiveThemeMode == ThemeMode.Dark;
 			it.AccentColor = Color.FromArgb(0xff, 0x50, 0xb2, 0x9b);
-			it.BackgroundImageOpacity = 0.75;
+			it.BackgroundImageOpacity = isDarkMode ? 0.70 : 0.75;
 			it.BackgroundImageUri = isDarkMode
 				? new Uri($"avares://{this.Assembly.GetName().Name}/SplashWindowBackground-Dark.png")
 				: new Uri($"avares://{this.Assembly.GetName().Name}/SplashWindowBackground-Light.png");
