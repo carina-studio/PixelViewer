@@ -14,7 +14,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">色彩空间转换时机</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">{0} 的详细信息</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更准确的色彩输出，但将会影响绘制图像的性能。</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空间「{0}」与「{1}」相同，您是否还要将其加入？</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空间 “{0}” 与 “{1}” 相同，您是否还要将其加入？</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">对比调整函数</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">新建标签页以打开拖放的文件</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">自定义色彩空间</sys:String>
@@ -47,7 +47,7 @@
 	<sys:String x:Key="String/ApplicationOptionsDialog.UnableToLoadColorSpaceFromFile">无法从文件加载色彩空间。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseDefaultImageRendererAfterOpeningSourceFile">打开文件后重置至默认格式</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace">优先使用系统定义的屏幕色彩空间</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">若无法获取系统定义的屏幕色彩空间，将改为使用「屏幕色彩空间」。</sys:String>
+	<sys:String x:Key="String/ApplicationOptionsDialog.UseSystemScreenColorSpace.Description">若无法获取系统定义的屏幕色彩空间，将改为使用 “屏幕色彩空间”。</sys:String>
 
 	<!-- ArgbColorFormat -->
 	<sys:String x:Key="String/ArgbColorFormat.Default">按源图像位深度</sys:String>
@@ -236,7 +236,7 @@
 	<sys:String x:Key="String/SessionControl.Demosaicing">去马赛克</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section1">拖放文件到这里，或点击</sys:String>
 	<sys:String x:Key="String/SessionControl.DragDropHint.Section2">(Ctrl+O) 以打开图像文件。</sys:String>
-	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">配置「{0}」已经存在。</sys:String>
+	<sys:String x:Key="String/SessionControl.DuplicateNameOfProfile">配置 “{0}” 已经存在。</sys:String>
 	<sys:String x:Key="String/SessionControl.EffectiveBits">有效位数</sys:String>
 	<sys:String x:Key="String/SessionControl.EffectiveBits.DisabledByColorTable">因应用颜色对照表而禁用。</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">自动评估</sys:String>

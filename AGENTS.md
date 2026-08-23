@@ -225,6 +225,22 @@ UI strings live in `PixelViewer/Strings/`:
 - Articles in titles: keep when natural (`Show CPU/Memory Usage on the Status Bar`, `Hibernated to Save Resources`).
 - Avoid `Max` in long option labels — prefer `Maximum`.
 
+### Quoting
+
+Quoting follows the target locale, not the source text. Mirrored from AppSuiteBase's `AGENTS.md`, so change it here only when it changes there:
+
+| Locale | Quoting a name in prose |
+|---|---|
+| `zh-TW` | `AAA「BBB」CCC` — corner brackets, no surrounding whitespace |
+| `zh-CN` | `AAA “BBB” CCC` — curly double quotes, one half-width space on each side |
+| `Default` (en) | `AAA 'BBB' CCC` |
+
+- Corner brackets (`「」`) are **wrong in `zh-CN`**, which uses `“”`.
+- Drop the surrounding space when the quote sits next to `，`, `。`, `、` or `…` — the full-width punctuation already carries it (`…已成功导出至 “BBB”。`, `正在执行 “{0}”…`).
+- **File names and file paths take ASCII single quotes in every locale**: `AAA 'Path' BBB`, spaced the same way. This overrides the locale quoting above, so a placeholder holding a path is never wrapped in `「」` or `“”`. An *alias* for a location is a name, not a path, and keeps the locale quotes.
+- A product or application name substituted from a placeholder takes no quotes at all: `无法启用 {0}，请尝试再次启用。`
+- Document titles use `《…》` in `zh-CN` / `zh-TW`.
+
 ### Chinese conventions
 
 - `zh-TW.xaml` uses Taiwan terms: 檔案, 資訊, 資料, 介面, 影像, etc.
@@ -239,7 +255,7 @@ UI strings live in `PixelViewer/Strings/`:
 - For "keyboard shortcut", zh-TW uses 快速鍵 (the standard Taiwan vendor term, per Microsoft / Apple Taiwan), **not** 快捷鍵 (the Mainland-origin form); zh-CN uses 快捷键.
 - Tab UI term: 标签页 (Mainland) / 分頁 (Taiwan).
 - "Image plane" translates as 圖層 (zh-TW) / 图层 (zh-CN) — the established product term (see 圖層參數/图层参数 in the options dialog); never the literal 影像平面 / 图像平面.
-- For "set" (a value), zh-TW uses 設定, zh-CN uses 设置. A description explaining a special value uses the declarative pattern 「設定為 X 表示…」 / 「设置为 X 表示…」 — state what the value means, not a conditional 「若…則設為 X」.
+- For "set" (a value), zh-TW uses 設定, zh-CN uses 设置. A description explaining a special value uses the declarative pattern 「設定為 X 表示…」 (zh-TW) / “设置为 X 表示…” (zh-CN, per § *Quoting*) — state what the value means, not a conditional 「若…則設為 X」.
 - "Packed into bits": 緊密位元排列 (zh-TW) / 紧密位排列 (zh-CN — 位, not 位元).
 - For English entries phrased as "Added support for X" (typical in `ChangeList*.md` and similar notes), translate as `支援 X` (zh-TW) / `支持 X` (zh-CN), not the literal `新增 X 的支援 / 新增 X 的支持`. That covers a new **capability** ("support for opening TIFF images"). When what was added is instead a new **concrete item the user picks from a list** — an image format, a color space — use `新增` plus the item as a noun phrase: `` 新增 `BGRA_8888` 影像格式。 `` (zh-TW) / `` 新增 `BGRA_8888` 图像格式。 `` (zh-CN). This is not the banned form above, which is `新增` wrapped around `的支援 / 的支持`.
 - "Demosaicing" translates as 去馬賽克 (zh-TW) / 去马赛克 (zh-CN), and the term **is itself a verb** — never prefix it with 進行 / 进行. Write 使用雙線性演算法去馬賽克 (zh-TW) / 使用双线性算法去马赛克 (zh-CN), not 使用雙線性演算法進行去馬賽克. Note 演算法 (zh-TW) vs 算法 (zh-CN).
