@@ -18,7 +18,7 @@ PixelViewer 为 Carina Studio 的开放源代码项目，以下所指 PixelViewe
 
 
 ## 调试模式
-PixelViewer 包含默认关闭的内建调试模式，您可以通过 **「关于 PixelViewer > 以调试模式重新启动」** 启用调试模式。
+PixelViewer 包含默认关闭的内建调试模式，您可以通过 **“关于 PixelViewer > 以调试模式重新启动”** 启用调试模式。
 
 
 ## 文件访问
@@ -74,7 +74,7 @@ PixelViewer 会连接至下列服务器以确认设备的公开 [IP 地址](http
 
 
 ## 免责声明
-PixelViewer 系以 **「现状」** 提供，不附带任何明示或暗示的保证，包括但不限于适销性、特定用途适用性及不侵权的保证。Carina Studio 不保证 PixelViewer 能符合您的需求，亦不保证其运行不会中断或不发生错误。
+PixelViewer 系以 **“现状”** 提供，不附带任何明示或暗示的保证，包括但不限于适销性、特定用途适用性及不侵权的保证。Carina Studio 不保证 PixelViewer 能符合您的需求，亦不保证其运行不会中断或不发生错误。
 
 在适用法律允许的最大范围内，Carina Studio 对于因使用或无法使用 PixelViewer 而产生的任何直接、间接、偶发、特殊、惩罚性或衍生性损害（包括但不限于数据丢失、利润损失或业务中断），概不承担任何责任，即使已被告知可能发生此类损害亦然。
 
@@ -82,7 +82,7 @@ PixelViewer 系以 **「现状」** 提供，不附带任何明示或暗示的�
 ## 授权及版权
 PixelViewer 是 Carina Studio 在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE) 授权下的开放源代码项目。所有图标皆在 [MIT](https://github.com/carina-studio/PixelViewer/blob/master/LICENSE)、[CC 4.0](https://en.wikipedia.org/wiki/Creative_Commons_license) 或 [Universal Multimedia License Agreement for Icons8](https://intercom.help/icons8-7fb7577e8170/en/articles/5534926-universal-multimedia-licensing-agreement-for-icons8) 授权下使用。您可以在 [MahApps.Metro.IconPacks](https://github.com/MahApps/MahApps.Metro.IconPacks)、[SVG Repo](https://www.svgrepo.com/)、[Icons8](https://icons8.com/)、[Google Fonts Icons](https://fonts.google.com/icons)、[Phosphor Icons](https://phosphoricons.com/) 及 [Tabler Icons](https://tabler.io/icons) 了解更多图标相关信息与授权。
 
-内建字体 **「Noto Sans SC」** 及 **「Noto Sans TC」** 在 [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) 授权下使用及发布。
+内建字体 **“Noto Sans SC”** 及 **“Noto Sans TC”** 在 [Open Font License](https://scripts.sil.org/cms/scripts/page.php?site_id=nrsi&id=OFL) 授权下使用及发布。
 
 加载至 PixelViewer 或由 PixelViewer 保存的图像的授权与版权不受本协议约束。您必须自行注意及负责图像的授权与版权。
 

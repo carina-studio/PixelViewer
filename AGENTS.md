@@ -240,6 +240,7 @@ Quoting follows the target locale, not the source text. Mirrored from AppSuiteBa
 - **File names and file paths take ASCII single quotes in every locale**: `AAA 'Path' BBB`, spaced the same way. This overrides the locale quoting above, so a placeholder holding a path is never wrapped in `「」` or `“”`. An *alias* for a location is a name, not a path, and keeps the locale quotes.
 - A product or application name substituted from a placeholder takes no quotes at all: `无法启用 {0}，请尝试再次启用。`
 - Document titles use `《…》` in `zh-CN` / `zh-TW`.
+- The rule is about the **language**, not the file type, so it governs `PixelViewer/Resources/UserAgreement*.md` and `PrivacyPolicy*.md` as well as the string resources — a reader of the zh-CN User Agreement sees the Taiwan brackets just as plainly. The `"AS IS"` of the English disclaimer is the exception which proves it: those ASCII double quotes are a warranty term of art rather than a name being quoted, so they stay.
 
 ### Chinese conventions
 
