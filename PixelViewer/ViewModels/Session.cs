@@ -224,63 +224,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 	}
 	
-	
-	// Constants for usage tracking events.
-	static class UsageEvents
-	{
-		public const string AutoColorAdjustmentApplied = "Session.AutoColorAdjustmentApplied";
-		public const string BrightnessAndContrastAdjustmentReset = "Session.BrightnessAndContrastAdjustmentReset";
-		public const string ColorAdjustmentReset = "Session.ColorAdjustmentReset";
-		public const string FilteringParamsApplied = "Session.FilteringParamsApplied";
-		public const string RenderedImageSaved = "Session.RenderedImageSaved";
-		public const string RenderingParamsApplied = "Session.RenderingParamsApplied";
-	}
-
-
-	// Constants for usage tracking metrics.
-	static class UsageMetrics
-	{
-		public const string FrameNavigationCount = "Session.FrameNavigationCount";
-		public const string LargestFilteredImageDimensionMP = "Session.LargestFilteredImageDimensionMP";
-		public const string LargestRenderedImageDimensionMP = "Session.LargestRenderedImageDimensionMP";
-		public const string LongestFilteringDuration = "Session.LongestFilteringDuration";
-		public const string LongestRenderingDuration = "Session.LongestRenderingDuration";
-	}
-
-
-	// Constants for usage tracking properties.
-	static class UsageProperties
-	{
-		public const string BlueColorAdjustment = "BlueColorAdjustment";
-		public const string BrightnessAdjustment = "BrightnessAdjustment";
-		public const string ColorSpace = "ColorSpace";
-		public const string ContrastAdjustment = "ContrastAdjustment";
-		public const string DimensionMP = "DimensionMP";
-		public const string Duration = "Duration";
-		public const string FilterCount = "FilterCount";
-		public const string Filters = "Filters";
-		public const string FrameCount = "FrameCount";
-		public const string GreenColorAdjustment = "GreenColorAdjustment";
-		public const string HighlightAdjustment = "HighlightAdjustment";
-		public const string Id = "Id";
-		public const string ImageEncoder = "ImageEncoder";
-		public const string ImageRenderer = "ImageRenderer";
-		public const string IsColorSpaceManagementEnabled = "IsColorSpaceManagementEnabled";
-		public const string IsFileFormatProfile = "IsFileFormatProfile";
-		public const string IsFilteredImage = "IsFilteredImage";
-		public const string IsGrayscaleFilterEnabled = "IsGrayscaleFilterEnabled";
-		public const string IsTransformationApplied = "IsTransformationApplied";
-		public const string Profile = "Profile";
-		public const string QualityLevel = "QualityLevel";
-		public const string RedColorAdjustment = "RedColorAdjustment";
-		public const string RenderCount = "RenderCount";
-		public const string SaturationAdjustment = "SaturationAdjustment";
-		public const string ShadowAdjustment = "ShadowAdjustment";
-		public const string UseLinearColorSpace = "UseLinearColorSpace";
-		public const string VibranceAdjustment = "VibranceAdjustment";
-		public const string YuvToRgbaConversion = "YuvToRgbaConversion";
-	}
-
 
 	// Buffer for a demosaicing algorithm to keep its own intermediate result. The content is meaningless outside a single demosaicing, only the allocation is kept so that a burst of renderings reuses it instead of allocating a large array again and again.
 	class WorkingBuffer : BaseDisposable
@@ -901,10 +844,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	public const int MinFramePlaybackRate = 1;
 	const int ReleaseCachedImagesDelay = 3000;
 	const int RenderImageDelay = 500;
-	const int TrackFilteringParamsAppliedEventDelay = 5000;
-	const int TrackFilteringPerfDuration = 5000;
-	const int TrackRenderingParamsAppliedEventDelay = 5000;
-	const int TrackRenderingPerfDuration = 5000;
 
 
 	// Static fields.
@@ -979,16 +918,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	ImageRenderingProfile? fileFormatProfile;
 	readonly ScheduledAction filterImageAction;
 	ImageFrame? filteredImageFrame;
-	long filteringPerfLargestDurationMs;
-	string? filteringPerfLargestFilters;
-	long filteringPerfLargestPixelCount;
-	long filteringPerfLongestDurationMs;
-	string? filteringPerfLongestFilters;
-	long filteringPerfLongestPixelCount;
-	int filteringPerfSampleCount;
 	double fitRenderedImageToViewportScale = double.NaN;
 	double fitRenderedImageToViewportScaleSwapped = double.NaN;
-	int frameNavigationCount;
 	bool hasPendingImageRendering;
 	IImageDataSource? frameImageDataSource;
 	long framePlaybackBaseFrameNumber;
@@ -1015,19 +946,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly ScheduledAction releasedCachedImagesAction;
 	ImageFrame? renderedImageFrame;
 	readonly ScheduledAction renderImageAction;
-	long renderingPerfLargestDurationMs;
-	long renderingPerfLargestPixelCount;
-	string? renderingPerfLargestRendererName;
-	long renderingPerfLongestDurationMs;
-	long renderingPerfLongestPixelCount;
-	string? renderingPerfLongestRendererName;
-	int renderingPerfSampleCount;
 	readonly int[] rowStrides = new int[ImageFormat.MaxPlaneCount];
 	readonly IDisposable sharedRenderedImagesMemoryUsageObserverToken;
-	readonly ScheduledAction trackFilteringParamsAppliedAction;
-	readonly ScheduledAction trackFilteringPerfAction;
-	readonly ScheduledAction trackRenderingParamsAppliedAction;
-	readonly ScheduledAction trackRenderingPerfAction;
 	readonly ScheduledAction updateFilterSupportingAction;
 	readonly ScheduledAction updateImageDisplaySizeAction;
 	readonly ScheduledAction updateIsFilteringImageNeededAction;
@@ -1108,117 +1028,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.releasedCachedImagesAction = new ScheduledAction(() => this.ReleaseCachedImages());
 		this.renderImageAction = new ScheduledAction(this.RenderImage, true);
 		this.playFrameAction = new ScheduledAction(this.PlayNextFrame);
-		this.trackFilteringParamsAppliedAction = new(() =>
-		{
-			if (!this.GetValue(IsSourceOpenedProperty))
-				return;
-			if (!this.GetValue(IsFilteringRenderedImageNeededProperty))
-				return;
-			var properties = this.PrepareFilteringParamsTrackingProperties();
-			this.Application.UsageManager.TrackEvent(UsageEvents.FilteringParamsApplied, properties);
-		});
-		this.trackFilteringPerfAction = new(() =>
-		{
-			// defer until current filtering completes so the window covers a full filter pass
-			if (this.IsFilteringRenderedImage)
-			{
-				this.trackFilteringPerfAction!.Reschedule(TrackFilteringPerfDuration);
-				return;
-			}
-
-			// nothing to report
-			if (this.filteringPerfSampleCount <= 0)
-				return;
-
-			// emit metrics
-			var um = this.Application.UsageManager;
-			var id = this.Id.ToString(CultureInfo.InvariantCulture);
-			var filterCount = this.filteringPerfSampleCount.ToString(CultureInfo.InvariantCulture);
-			var largestMP = (long)Math.Round(this.filteringPerfLargestPixelCount / 1_000_000.0);
-			var longestMP = (long)Math.Round(this.filteringPerfLongestPixelCount / 1_000_000.0);
-			um.TrackMetric(UsageMetrics.LargestFilteredImageDimensionMP, largestMP, new Dictionary<string, string>
-			{
-				[UsageProperties.Duration] = this.filteringPerfLargestDurationMs.ToString(CultureInfo.InvariantCulture),
-				[UsageProperties.FilterCount] = filterCount,
-				[UsageProperties.Filters] = this.filteringPerfLargestFilters ?? "",
-				[UsageProperties.Id] = id,
-			});
-			um.TrackMetric(UsageMetrics.LongestFilteringDuration, this.filteringPerfLongestDurationMs, new Dictionary<string, string>
-			{
-				[UsageProperties.DimensionMP] = longestMP.ToString(CultureInfo.InvariantCulture),
-				[UsageProperties.FilterCount] = filterCount,
-				[UsageProperties.Filters] = this.filteringPerfLongestFilters ?? "",
-				[UsageProperties.Id] = id,
-			});
-
-			// reset window
-			this.ResetFilteringPerfWindow();
-		});
-		this.trackRenderingPerfAction = new(() =>
-		{
-			// defer until current rendering completes so the window covers a full render
-			if (this.IsRenderingImage)
-			{
-				this.trackRenderingPerfAction!.Reschedule(TrackRenderingPerfDuration);
-				return;
-			}
-
-			// nothing to report
-			if (this.renderingPerfSampleCount <= 0)
-				return;
-
-			// emit metrics
-			var um = this.Application.UsageManager;
-			var id = this.Id.ToString(CultureInfo.InvariantCulture);
-			var renderCount = this.renderingPerfSampleCount.ToString(CultureInfo.InvariantCulture);
-			var largestMP = (long)Math.Round(this.renderingPerfLargestPixelCount / 1_000_000.0);
-			var longestMP = (long)Math.Round(this.renderingPerfLongestPixelCount / 1_000_000.0);
-			um.TrackMetric(UsageMetrics.LargestRenderedImageDimensionMP, largestMP, new Dictionary<string, string>
-			{
-				[UsageProperties.Duration] = this.renderingPerfLargestDurationMs.ToString(CultureInfo.InvariantCulture),
-				[UsageProperties.Id] = id,
-				[UsageProperties.ImageRenderer] = this.renderingPerfLargestRendererName ?? "Unknown",
-				[UsageProperties.RenderCount] = renderCount,
-			});
-			um.TrackMetric(UsageMetrics.LongestRenderingDuration, this.renderingPerfLongestDurationMs, new Dictionary<string, string>
-			{
-				[UsageProperties.DimensionMP] = longestMP.ToString(CultureInfo.InvariantCulture),
-				[UsageProperties.Id] = id,
-				[UsageProperties.ImageRenderer] = this.renderingPerfLongestRendererName ?? "Unknown",
-				[UsageProperties.RenderCount] = renderCount,
-			});
-
-			// reset window
-			this.ResetRenderingPerfWindow();
-		});
-		this.trackRenderingParamsAppliedAction = new(() =>
-		{
-			if (!this.GetValue(IsSourceOpenedProperty))
-				return;
-			var imageRenderer = this.GetValue(ImageRendererProperty);
-			if (imageRenderer is null || !ImageRenderers.All.Contains(imageRenderer))
-				return;
-			if (!this.GetValue(HasRenderedImageProperty))
-			{
-				this.trackRenderingParamsAppliedAction!.Reschedule(TrackRenderingParamsAppliedEventDelay);
-				return;
-			}
-			var profile = this.GetValue(ProfileProperty);
-			var properties = this.PrepareUsageTrackingProperties().Also(properties =>
-			{
-				properties[UsageProperties.ColorSpace] = this.GetValue(ColorSpaceProperty).Name;
-				properties[UsageProperties.ImageRenderer] = imageRenderer.Format.Name;
-				properties[UsageProperties.IsColorSpaceManagementEnabled] = this.GetValue(IsColorSpaceManagementEnabledProperty).ToString(CultureInfo.InvariantCulture);
-				properties[UsageProperties.IsFileFormatProfile] = profile.IsFileFormat.ToString(CultureInfo.InvariantCulture);
-				properties[UsageProperties.Profile] = profile.Type == ImageRenderingProfileType.UserDefined
-					? "UserDefined"
-					: profile.Name;
-				properties[UsageProperties.UseLinearColorSpace] = this.GetValue(UseLinearColorSpaceProperty).ToString(CultureInfo.InvariantCulture);
-				if (this.GetValue(IsYuvToBgraConverterSupportedProperty))
-					properties[UsageProperties.YuvToRgbaConversion] = this.GetValue(YuvToBgraConverterProperty).Name;
-			});
-			this.Application.UsageManager.TrackEvent(UsageEvents.RenderingParamsApplied, properties);
-		});
 		this.updateFilterSupportingAction = new ScheduledAction(() =>
 		{
 			if (this.IsDisposed)
@@ -1664,7 +1473,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.isImagePlaneOptionsResetNeeded = true;
 		this.updateFilterSupportingAction.Reschedule();
 		this.renderImageAction.Reschedule();
-		this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 	}
 
 
@@ -2193,23 +2001,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// stop frame playback
 		this.StopPlayingFrames();
-
-		// flush pending rendering-params and filtering-params tracking
-		this.trackRenderingParamsAppliedAction.ExecuteIfScheduled();
-		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		this.trackRenderingPerfAction.ExecuteIfScheduled();
-		this.trackFilteringPerfAction.ExecuteIfScheduled();
-
-		// emit frame navigation count
-		if (this.frameNavigationCount > 0)
-		{
-			this.Application.UsageManager.TrackMetric(UsageMetrics.FrameNavigationCount, this.frameNavigationCount, new Dictionary<string, string>
-			{
-				[UsageProperties.FrameCount] = this.GetValue(FrameCountProperty).ToString(CultureInfo.InvariantCulture),
-				[UsageProperties.Id] = this.Id.ToString(CultureInfo.InvariantCulture),
-			});
-			this.frameNavigationCount = 0;
-		}
 
 		// clear selected pixel
 		this.SelectRenderedImagePixel(-1, -1);
@@ -2943,7 +2734,6 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// prepare for performance check
 		var stopwatch = this.Application.IsDebugMode ? new Stopwatch() : null;
-		var filteringStopwatch = Stopwatch.StartNew();
 
 		// apply color LUT filter
 		if (!failedToApply && isColorLutFilterNeeded)
@@ -3107,9 +2897,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				failedToApply = true;
 		}
 
-		// stop measuring filter pipeline duration before post-filter steps
-		filteringStopwatch.Stop();
-
 		// check filtering result
 		if (failedToApply)
 		{
@@ -3154,21 +2941,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		// log
 		if (this.Application.IsDebugMode)
 			this.Logger.LogTrace("Complete filtering image");
-
-		// record filtering performance sample
-		if (filterCount > 0)
-		{
-			var filterList = new List<string>(4);
-			if (isColorLutFilterNeeded)
-				filterList.Add("ColorLut");
-			if (isSaturationFilterNeeded)
-				filterList.Add("Saturation");
-			if (isLuminanceLutFilterNeeded)
-				filterList.Add("Luminance");
-			if (isGrayscaleFilterNeeded)
-				filterList.Add("Grayscale");
-			this.RecordFilteringSample(width, height, filteringStopwatch.ElapsedMilliseconds, string.Join(",", filterList));
-		}
 
 		// complete
 		this.imageFilteringCancellationTokenSource = null;
@@ -3254,8 +3026,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		set
 		{
 			this.StopPlayingFrames(); // moving to frame explicitly stops playback
-			if (this.GetValue(IsSourceOpenedProperty) && value != this.GetValue(FrameNumberProperty))
-				++this.frameNavigationCount;
 			this.SetValue(FrameNumberProperty, value);
 		}
 	}
@@ -4063,8 +3833,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetColorAdjustment.Update(this.HasColorAdjustment && this.IsColorAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == BlueColorGainProperty
 			|| property == GreenColorGainProperty
@@ -4082,8 +3850,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == ByteOrderingProperty)
 		{
@@ -4095,8 +3861,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.IsColorSpaceManagementEnabled)
 				this.renderImageAction.Reschedule();
-			if (this.IsSourceOpened)
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == ContrastAdjustmentProperty)
 		{
@@ -4104,8 +3868,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == CustomTitleProperty)
 			this.UpdateTitle();
@@ -4159,21 +3921,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.PersistentState.SetValue(IsInitFramePlaybackRateUnlimited, (bool)newValue.AsNonNull());
 			this.RestartFramePlaybackTimeline();
 		}
-		else if (property == HasRenderingErrorProperty)
-		{
-			if ((bool)newValue!)
-				this.trackRenderingParamsAppliedAction.Cancel();
-			else if (this.GetValue(IsSourceOpenedProperty))
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
-		}
 		else if (property == HighlightAdjustmentProperty)
 		{
 			this.SetValue(HasHighlightAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetHighlightAdjustment.Update(this.HasHighlightAdjustment && this.IsHighlightAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == HistogramsPanelSizeProperty)
 			this.PersistentState.SetValue(LatestHistogramsPanelSize, (int)(this.HistogramsPanelSize + 0.5));
@@ -4192,10 +3945,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.ApplyImageRendererFormat(imageRenderer);
 			}
 			else
-			{
 				this.Logger.LogError("{newValue} is not part of available image renderer list", newValue);
-				this.trackRenderingParamsAppliedAction.Cancel();
-			}
 		}
 		else if (property == ImageViewportSizeProperty
 			|| property == ScreenPixelDensityProperty)
@@ -4227,8 +3977,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.renderImageAction.Reschedule();
 			else
 				_ = this.ClearRenderedImageAsync();
-			if (this.IsSourceOpened)
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == IsContrastAdjustmentSupportedProperty)
 		{
@@ -4264,8 +4012,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule();
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == IsHighlightAdjustmentSupportedProperty)
 		{
@@ -4300,11 +4046,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsSourceOpened)
 				this.updateFilterSupportingAction.Schedule();
 			else
-			{
-				this.trackFilteringParamsAppliedAction.Cancel();
-				this.trackRenderingParamsAppliedAction.Cancel();
 				this.updateFilterSupportingAction.Execute();
-			}
 			this.UpdateCanZoomInOut();
 			this.UpdateCanPlayFrames();
 		}
@@ -4322,15 +4064,9 @@ class Session : ViewModel<IAppSuiteApplication>
 				if (this.IsColorSpaceManagementEnabled)
 					this.renderImageAction.Reschedule();
 			}
-			if (this.IsSourceOpened)
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
 		else if (property == ProfileProperty)
 		{
-			if (this.IsSourceOpened)
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
-			else
-				this.trackRenderingParamsAppliedAction.Cancel();
 			this.canApplyProfile.Update(((ImageRenderingProfile)newValue.AsNonNull()).Type != ImageRenderingProfileType.Default);
 			this.ApplyProfile();
 		}
@@ -4378,8 +4114,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && this.IsSaturationAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == ShadowAdjustmentProperty)
 		{
@@ -4387,8 +4121,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == SourceDataSizeProperty)
 			this.SetValue(HasSourceDataSizeProperty, (long)newValue.AsNonNull() > 0);
@@ -4400,8 +4132,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
-			if (this.IsSourceOpened)
-				this.trackFilteringParamsAppliedAction.Reschedule(TrackFilteringParamsAppliedEventDelay);
 		}
 		else if (property == YuvToBgraConverterProperty)
 		{
@@ -4410,8 +4140,6 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.SetValue(ColorSpaceProperty, ((YuvToBgraConverter)newValue.AsNonNull()).ColorSpace);
 				this.renderImageAction.Reschedule();
 			}
-			if (this.IsSourceOpened)
-				this.trackRenderingParamsAppliedAction.Reschedule(TrackRenderingParamsAppliedEventDelay);
 		}
     }
 
@@ -4951,39 +4679,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 	
 	
-	// Prepare properties for tracking image filtering events.
-	IDictionary<string, string> PrepareFilteringParamsTrackingProperties() => this.PrepareUsageTrackingProperties().Also(properties =>
-	{
-		properties[UsageProperties.BlueColorAdjustment] = this.GetValue(BlueColorAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.BrightnessAdjustment] = this.GetValue(BrightnessAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.ContrastAdjustment] = this.GetValue(ContrastAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.GreenColorAdjustment] = this.GetValue(GreenColorAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.HighlightAdjustment] = this.GetValue(HighlightAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.IsGrayscaleFilterEnabled] = this.GetValue(IsGrayscaleFilterEnabledProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.RedColorAdjustment] = this.GetValue(RedColorAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.SaturationAdjustment] = this.GetValue(SaturationAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.ShadowAdjustment] = this.GetValue(ShadowAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.VibranceAdjustment] = this.GetValue(VibranceAdjustmentProperty).ToString(CultureInfo.InvariantCulture);
-	});
-
-
-	// Prepare properties for tracking rendered image saved event.
-	IDictionary<string, string> PrepareRenderedImageSavedTrackingProperties(ImageSavingParams savingParams, bool isFilteredImage, bool isTransformationApplied) => this.PrepareUsageTrackingProperties().Also(properties =>
-	{
-		properties[UsageProperties.ImageEncoder] = savingParams.Encoder?.Name ?? "Unknown";
-		properties[UsageProperties.IsFilteredImage] = isFilteredImage.ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.IsTransformationApplied] = isTransformationApplied.ToString(CultureInfo.InvariantCulture);
-		properties[UsageProperties.QualityLevel] = savingParams.Options.QualityLevel.ToString(CultureInfo.InvariantCulture);
-	});
-	
-	
-	// Prepare properties for usage tracking.
-	IDictionary<string, string> PrepareUsageTrackingProperties() => new Dictionary<string, string>
-	{
-		[UsageProperties.Id] = this.Id.ToString(CultureInfo.InvariantCulture)
-	};
-
-
 	/// <summary>
 	/// Get or set current profile.
 	/// </summary>
@@ -5023,54 +4718,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		get => this.GetValue(RedColorGainProperty);
 		set => this.SetValue(RedColorGainProperty, value);
-	}
-
-
-	// Record a single filtering sample into the current performance window.
-	void RecordFilteringSample(int width, int height, long durationMs, string filters)
-	{
-		var pixelCount = (long)width * height;
-		if (pixelCount > this.filteringPerfLargestPixelCount)
-		{
-			this.filteringPerfLargestPixelCount = pixelCount;
-			this.filteringPerfLargestDurationMs = durationMs;
-			this.filteringPerfLargestFilters = filters;
-		}
-		if (durationMs > this.filteringPerfLongestDurationMs)
-		{
-			this.filteringPerfLongestDurationMs = durationMs;
-			this.filteringPerfLongestPixelCount = pixelCount;
-			this.filteringPerfLongestFilters = filters;
-		}
-
-		// open a new window on the first sample; later samples do not extend it
-		if (this.filteringPerfSampleCount == 0)
-			this.trackFilteringPerfAction.Schedule(TrackFilteringPerfDuration);
-		++this.filteringPerfSampleCount;
-	}
-
-
-	// Record a single rendering sample into the current performance window.
-	void RecordRenderingSample(int width, int height, long durationMs, string rendererName)
-	{
-		var pixelCount = (long)width * height;
-		if (pixelCount > this.renderingPerfLargestPixelCount)
-		{
-			this.renderingPerfLargestPixelCount = pixelCount;
-			this.renderingPerfLargestDurationMs = durationMs;
-			this.renderingPerfLargestRendererName = rendererName;
-		}
-		if (durationMs > this.renderingPerfLongestDurationMs)
-		{
-			this.renderingPerfLongestDurationMs = durationMs;
-			this.renderingPerfLongestPixelCount = pixelCount;
-			this.renderingPerfLongestRendererName = rendererName;
-		}
-
-		// open a new window on the first sample; later samples do not extend it
-		if (this.renderingPerfSampleCount == 0)
-			this.trackRenderingPerfAction.Schedule(TrackRenderingPerfDuration);
-		++this.renderingPerfSampleCount;
 	}
 
 
@@ -5570,7 +5217,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		bool isColorSpaceConversionNeeded = false;
 		var colorSpaceConvertedImageFrame = default(ImageFrame);
 		var exception = (Exception?)null;
-		var renderStopwatch = (Stopwatch?)null;
 		try
 		{
 			// render
@@ -5578,7 +5224,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				// render image, the mosaic image receives the rendered image if demosaicing needs another buffer to put its result into
 				var renderingImageFrame = mosaicImageFrame ?? renderedImageFrame;
-				renderStopwatch = Stopwatch.StartNew();
 				renderedImageFrame.RenderingResult = await imageRenderer.RenderAsync(renderingImageDataSource, renderingImageFrame.BitmapBuffer, renderingOptions, planeOptionsList, cancellationTokenSource.Token);
 
 				// perform demosaicing, its duration is counted as part of rendering because it was performed by the image renderer before
@@ -5586,7 +5231,6 @@ class Session : ViewModel<IAppSuiteApplication>
 					await this.DemosaicImageAsync(demosaicingAlgorithm, renderingImageFrame.BitmapBuffer, renderedImageFrame.BitmapBuffer, workingBuffer?.Buffer ?? default, renderingOptions, cancellationTokenSource.Token);
 
 				// update state of rendered image
-				renderStopwatch.Stop();
 				renderedImageFrame.ImageRenderer = imageRenderer;
 				renderedImageFrame.RenderingOptions = renderingOptions;
 				renderedImageFrame.PlaneOptions = planeOptionsList;
@@ -5688,10 +5332,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canSelectColorAdjustment.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.Histograms is not null);
 			this.canSelectRgbGain.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.RenderingResult.Let(it =>
 				it.HasMeanOfRgb || it.HasWeightedMeanOfRgb) ?? false);
-
-			// record rendering performance sample
-			if (renderStopwatch is not null)
-				this.RecordRenderingSample(this.ImageWidth, this.ImageHeight, renderStopwatch.ElapsedMilliseconds, imageRenderer.Format.Name);
 
 			// filter image or report now
 			if (this.IsFilteringRenderedImageNeeded && this.SelectImageFrameToFilter() is not null)
@@ -6100,19 +5740,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Reset state of current filtering performance window.
-	void ResetFilteringPerfWindow()
-	{
-		this.filteringPerfLargestDurationMs = 0;
-		this.filteringPerfLargestFilters = null;
-		this.filteringPerfLargestPixelCount = 0;
-		this.filteringPerfLongestDurationMs = 0;
-		this.filteringPerfLongestFilters = null;
-		this.filteringPerfLongestPixelCount = 0;
-		this.filteringPerfSampleCount = 0;
-	}
-
-
 	// Reset highlight adjustment.
 	void ResetHighlightAdjustment()
 	{
@@ -6127,19 +5754,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Command to reset <see cref="HighlightAdjustment"/>.
 	/// </summary>
 	public ICommand ResetHighlightAdjustmentCommand { get; }
-
-
-	// Reset state of current rendering performance window.
-	void ResetRenderingPerfWindow()
-	{
-		this.renderingPerfLargestDurationMs = 0;
-		this.renderingPerfLargestPixelCount = 0;
-		this.renderingPerfLargestRendererName = null;
-		this.renderingPerfLongestDurationMs = 0;
-		this.renderingPerfLongestPixelCount = 0;
-		this.renderingPerfLongestRendererName = null;
-		this.renderingPerfSampleCount = 0;
-	}
 
 
 	// Reset RGB gain.
@@ -6696,25 +6310,18 @@ class Session : ViewModel<IAppSuiteApplication>
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 		this.canSaveFilteredImage.Update(false);
 		this.SetValue(IsSavingFilteredImageProperty, true);
-		var properties = this.PrepareRenderedImageSavedTrackingProperties(parameters, true, applyTransformation);
 		try
 		{
 			using IBitmapBuffer bufferToEncode = this.filteredImageFrame.AsNonNull().BitmapBuffer.Let(it => flipX || flipY
 				? it.Flip(flipX, flipY)
 				: it.Share());
-			var encodingStopwatch = Stopwatch.StartNew();
 			await encoder.AsNonNull().EncodeAsync(bufferToEncode, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
-			encodingStopwatch.Stop();
-			properties[UsageProperties.DimensionMP] = ((long)Math.Round((long)bufferToEncode.Width * bufferToEncode.Height / 1_000_000.0)).ToString(CultureInfo.InvariantCulture);
-			properties[UsageProperties.Duration] = encodingStopwatch.ElapsedMilliseconds.ToString(CultureInfo.InvariantCulture);
-			this.Application.UsageManager.TrackEvent(UsageEvents.RenderedImageSaved, properties);
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
 		}
 		catch (Exception ex)
 		{
 			this.Logger.LogError(ex, "Unable to save filtered image");
-			this.Application.UsageManager.TrackException(ex, properties: properties);
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, false));
 			return false;
 		}
@@ -6800,25 +6407,18 @@ class Session : ViewModel<IAppSuiteApplication>
 			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
 		this.canSaveRenderedImage.Update(false);
 		this.SetValue(IsSavingRenderedImageProperty, true);
-		var properties = this.PrepareRenderedImageSavedTrackingProperties(parameters, false, applyTransformation);
 		try
 		{
 			using IBitmapBuffer bufferToEncode = renderedImageFrame.BitmapBuffer.Let(it => flipX || flipY
 				? it.Flip(flipX, flipY)
 				: it.Share());
-			var encodingStopwatch = Stopwatch.StartNew();
 			await encoder.AsNonNull().EncodeAsync(bufferToEncode, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
-			encodingStopwatch.Stop();
-			properties[UsageProperties.DimensionMP] = ((long)Math.Round((long)bufferToEncode.Width * bufferToEncode.Height / 1_000_000.0)).ToString(CultureInfo.InvariantCulture);
-			properties[UsageProperties.Duration] = encodingStopwatch.ElapsedMilliseconds.ToString(CultureInfo.InvariantCulture);
-			this.Application.UsageManager.TrackEvent(UsageEvents.RenderedImageSaved, properties);
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
 		}
 		catch (Exception ex)
 		{
 			this.Logger.LogError(ex, "Unable to save rendered image");
-			this.Application.UsageManager.TrackException(ex, properties: properties);
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, false));
 			return false;
 		}
@@ -7041,14 +6641,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		if (rRatio == 0 || gRatio == 0 || bRatio == 0)
 			return;
-
-		// track auto color adjustment
-		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		if (this.GetValue(IsSourceOpenedProperty))
-		{
-			var properties = this.PrepareUsageTrackingProperties();
-			this.Application.UsageManager.TrackEvent(UsageEvents.AutoColorAdjustmentApplied, properties);
-		}
 
 		// apply color adjustment
 		static double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
@@ -7392,34 +6984,6 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Get total memory usage for rendered images in bytes.
 	/// </summary>
 	public long TotalRenderedImagesMemoryUsage => this.GetValue(TotalRenderedImagesMemoryUsageProperty);
-
-
-	/// <summary>
-	/// Track event of resetting brightness, contrast, highlight and shadow adjustments.
-	/// </summary>
-	public void TrackBrightnessAndContrastAdjustmentResetEvent()
-	{
-		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		if (this.GetValue(IsSourceOpenedProperty))
-		{
-			var properties = this.PrepareUsageTrackingProperties();
-			this.Application.UsageManager.TrackEvent(UsageEvents.BrightnessAndContrastAdjustmentReset, properties);
-		}
-	}
-
-
-	/// <summary>
-	/// Track event of resetting color, saturation and vibrance adjustments.
-	/// </summary>
-	public void TrackColorAdjustmentResetEvent()
-	{
-		this.trackFilteringParamsAppliedAction.ExecuteIfScheduled();
-		if (this.GetValue(IsSourceOpenedProperty))
-		{
-			var properties = this.PrepareUsageTrackingProperties();
-			this.Application.UsageManager.TrackEvent(UsageEvents.ColorAdjustmentReset, properties);
-		}
-	}
 
 
 	// Update CanSaveOrDeleteProfile and CanSaveAsNewProfile according to current state.
