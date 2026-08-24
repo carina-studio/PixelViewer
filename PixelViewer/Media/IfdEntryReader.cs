@@ -72,6 +72,13 @@ namespace Carina.PixelViewer.Media
 
 
         /// <summary>
+        /// Get size of data of current entry in bytes.
+        /// </summary>
+        /// <remarks>The value is undefined if there is no current entry to read.</remarks>
+        public long CurrentEntryDataSize => this.currentEntryDataSize;
+
+
+        /// <summary>
         /// Get ID of current entry.
         /// </summary>
         public ushort CurrentEntryId { get; private set; }
