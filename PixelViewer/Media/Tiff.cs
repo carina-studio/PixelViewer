@@ -9,6 +9,11 @@ namespace Carina.PixelViewer.Media;
 /// </summary>
 static class Tiff
 {
+    // Constants.
+    const ushort XmpTagId = 0x02bc;
+
+
+
     /// <summary>
     /// Check whether header of file represents TIFF or not.
     /// </summary>
@@ -32,6 +37,29 @@ static class Tiff
     }
     
     
+    /// <summary>
+    /// Combine the metadata parsed from the IFDs of TIFF-based data with the metadata parsed from the XMP data which is kept by an entry of the IFDs.
+    /// </summary>
+    /// <param name="ifdMetadata">Metadata parsed from the IFDs.</param>
+    /// <returns>Combined metadata, or Null if no metadata was parsed from the data.</returns>
+    public static TiffCompoundMediaMetadata? CombineMediaMetadata(TiffMediaMetadata ifdMetadata)
+    {
+        // parse the XMP data which is kept by an entry of the IFD of main image
+        XmpMediaMetadata? xmpMetadata = null;
+        if (ifdMetadata.TryGetEntryData(IfdNames.Default, XmpTagId, out byte[]? xmpData)
+            && XmpMediaMetadata.TryCreate(xmpData, 0, xmpData.Length, out var parsedXmpMetadata))
+        {
+            xmpMetadata = parsedXmpMetadata;
+        }
+
+        // combine the metadata, no metadata is available if nothing was parsed
+        var isIfdMetadataEmpty = ifdMetadata.IsEmpty;
+        if (isIfdMetadataEmpty && xmpMetadata is null)
+            return null;
+        return new TiffCompoundMediaMetadata(isIfdMetadataEmpty ? null : ifdMetadata, xmpMetadata);
+    }
+
+
     /// <summary>
     /// Convert from TIFF orientation to degrees.
     /// </summary>

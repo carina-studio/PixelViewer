@@ -66,6 +66,7 @@ class TiffFileFormatParser : MagickFileFormatParser
         var orientation = 0;
         var iccProfileData = (byte[]?)null;
         var exifColorSpace = (ColorSpace?)null;
+        var ifdMetadata = new TiffMediaMetadata();
         await Task.Run(() =>
         {
             // create entry reader
@@ -82,6 +83,7 @@ class TiffFileFormatParser : MagickFileFormatParser
             // read entries
             while (entryReader.Read())
             {
+                ifdMetadata.SetEntry(entryReader);
                 if (entryReader.CurrentIfdName == IfdNames.Default && entryReader.CurrentIfdIndex == 0)
                 {
                     switch (entryReader.CurrentEntryId)
@@ -134,6 +136,9 @@ class TiffFileFormatParser : MagickFileFormatParser
         var colorSpace = await LoadColorSpaceAsync(iccProfileData, exifColorSpace, cancellationToken);
         if (colorSpace is not null)
             profile.ColorSpace = colorSpace;
+
+        // apply metadata
+        profile.MediaMetadata = Tiff.CombineMediaMetadata(ifdMetadata);
     }
 
 
@@ -169,6 +174,7 @@ class TiffFileFormatParser : MagickFileFormatParser
         var orientation = 0;
         var iccProfileData = (byte[]?)null;
         var exifColorSpace = (ColorSpace?)null;
+        var ifdMetadata = new TiffMediaMetadata();
         await Task.Run(() =>
         {
             // create entry reader
@@ -186,6 +192,7 @@ class TiffFileFormatParser : MagickFileFormatParser
             // read entries of the first IFD (and its Exif sub-IFD)
             while (entryReader.Read())
             {
+                ifdMetadata.SetEntry(entryReader);
                 if (entryReader.CurrentIfdName == IfdNames.Default && entryReader.CurrentIfdIndex == 0)
                 {
                     switch (entryReader.CurrentEntryId)
@@ -332,6 +339,7 @@ class TiffFileFormatParser : MagickFileFormatParser
             profile.DataOffset = dataOffset;
             profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = bits);
             profile.Height = imageHeight;
+            profile.MediaMetadata = Tiff.CombineMediaMetadata(ifdMetadata);
             Tiff.FromTiffOrientation(orientation, out var rotation, out var flipX, out var flipY);
             profile.Orientation = rotation;
             profile.FlipX = flipX;

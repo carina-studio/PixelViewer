@@ -17,6 +17,10 @@ namespace Carina.PixelViewer.Media.FileFormatParsers;
 /// </summary>
 class JpegFileFormatParser : SkiaFileFormatParser
 {
+    // Constants.
+    const string XmpIdentifier = "http://ns.adobe.com/xap/1.0/\0";
+
+
     /// <summary>
     /// Initialize new <see cref="JpegFileFormatParser"/> instance.
     /// </summary>
@@ -47,15 +51,17 @@ class JpegFileFormatParser : SkiaFileFormatParser
     /// <inheritdoc/>
     protected override async Task OnParseExtraInformationAsync(Stream stream, ImageRenderingProfile profile, CancellationToken cancellationToken)
     {
-        // parse EXIF
+        // parse EXIF and XMP
         var orientation = 0;
+        TiffMediaMetadata? exifMetadata = null;
+        XmpMediaMetadata? xmpMetadata = null;
         await Task.Run(() =>
         {
             // skip file header
             var segmentHeaderBuffer = new byte[4];
             stream.Seek(2, SeekOrigin.Current);
 
-            // read EXIF in APP segment
+            // read EXIF and XMP in APP segments, both of them are placed before the start of scan
             while (true)
             {
                 if (stream.Read(segmentHeaderBuffer, 0, 4) < 4)
@@ -67,21 +73,27 @@ class JpegFileFormatParser : SkiaFileFormatParser
                 var segmentSize = BinaryPrimitives.ReadUInt16BigEndian(segmentHeaderBuffer.AsSpan(2));
                 if (segmentSize < 2)
                     return;
-                if ((segmentHeaderBuffer[1] == 0xe1 || segmentHeaderBuffer[1] == 0xe2) // APP1 or APP2
-                    && segmentSize > 6)
+                if (segmentHeaderBuffer[1] != 0xe1 // APP1
+                    || segmentSize <= 6)
                 {
-                    var segmentDataBuffer = new byte[segmentSize - 2];
-                    if (stream.Read(segmentDataBuffer, 0, segmentDataBuffer.Length) < segmentDataBuffer.Length)
-                        return;
-                    if (segmentDataBuffer[0] != 'E'
-                        || segmentDataBuffer[1] != 'x'
-                        || segmentDataBuffer[2] != 'i'
-                        || segmentDataBuffer[3] != 'f'
-                        || segmentDataBuffer[4] != 0x0
-                        || segmentDataBuffer[5] != 0x0)
-                    {
-                        return;
-                    }
+                    stream.Seek(segmentSize - 2, SeekOrigin.Current);
+                    continue;
+                }
+                var segmentDataBuffer = new byte[segmentSize - 2];
+                if (stream.Read(segmentDataBuffer, 0, segmentDataBuffer.Length) < segmentDataBuffer.Length)
+                    return;
+
+                // parse EXIF which is placed after its identifier
+                if (segmentDataBuffer[0] == 'E'
+                    && segmentDataBuffer[1] == 'x'
+                    && segmentDataBuffer[2] == 'i'
+                    && segmentDataBuffer[3] == 'f'
+                    && segmentDataBuffer[4] == 0x0
+                    && segmentDataBuffer[5] == 0x0)
+                {
+                    if (exifMetadata is not null)
+                        continue;
+                    var metadata = new TiffMediaMetadata();
                     var entryReader = new IfdEntryReader(new MemoryStream(segmentDataBuffer).Also(it => it.Position = 6));
                     while (entryReader.Read())
                     {
@@ -93,30 +105,40 @@ class JpegFileFormatParser : SkiaFileFormatParser
                                 switch (entryReader.CurrentEntryId)
                                 {
                                     case 0x0112: // Orientation
-                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData != null && ushortData.Length > 0)
+                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData is not null && ushortData.Length > 0)
                                             orientation = ushortData[0];
                                         break;
                                     case 0x8769: // ExifOffset
-                                        if (entryReader.TryGetEntryData(out uintData) && uintData != null && uintData.Length > 0)
-                                            entryReader.EnqueueIfdToRead(uintData[0], IfdNames.Exif);
+                                        if (entryReader.TryGetEntryData(out uintData) && uintData is not null && uintData.Length > 0)
+                                            entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + uintData[0], IfdNames.Exif);
                                         break;
                                 }
                                 break;
                             case IfdNames.Exif:
-                            switch (entryReader.CurrentEntryId)
+                                switch (entryReader.CurrentEntryId)
                                 {
                                     case 0x0112: // Orientation
-                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData != null && ushortData.Length > 0)
+                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData is not null && ushortData.Length > 0)
                                             orientation = ushortData[0];
                                         break;
                                 }
                                 break;
                         }
+                        metadata.SetEntry(entryReader);
                     }
-                    return;
+                    if (!metadata.IsEmpty)
+                        exifMetadata = metadata;
+                    continue;
                 }
-                else
-                    stream.Seek(segmentSize - 2, SeekOrigin.Current);
+
+                // parse XMP which is placed after its identifier
+                if (xmpMetadata is null
+                    && segmentDataBuffer.Length > XmpIdentifier.Length
+                    && Encoding.ASCII.GetString(segmentDataBuffer, 0, XmpIdentifier.Length) == XmpIdentifier
+                    && XmpMediaMetadata.TryCreate(segmentDataBuffer, XmpIdentifier.Length, segmentDataBuffer.Length - XmpIdentifier.Length, out var parsedXmpMetadata))
+                {
+                    xmpMetadata = parsedXmpMetadata;
+                }
             }
         }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
@@ -127,6 +149,8 @@ class JpegFileFormatParser : SkiaFileFormatParser
         profile.Orientation = rotation;
         profile.FlipX = flipX;
         profile.FlipY = flipY;
+        if (exifMetadata is not null || xmpMetadata is not null)
+            profile.MediaMetadata = new JpegCompoundMediaMetadata(exifMetadata, xmpMetadata);
     }
 
 

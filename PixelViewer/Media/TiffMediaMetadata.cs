@@ -179,6 +179,12 @@ class TiffMediaMetadata(int ifdIndex = 0) : IMediaMetadata
     public int IfdIndex { get; } = ifdIndex;
 
 
+    /// <summary>
+    /// Check whether no data of entry is kept by the metadata or not.
+    /// </summary>
+    public bool IsEmpty => this.entryValues.IsEmpty();
+
+
     /// <inheritdoc/>
     public int? IsoSpeed
     {
@@ -384,7 +390,7 @@ class TiffMediaMetadata(int ifdIndex = 0) : IMediaMetadata
         }
 
         // no metadata is available if no entry needed by the metadata was read
-        if (createdMetadata.entryValues.IsEmpty())
+        if (createdMetadata.IsEmpty)
         {
             metadata = null;
             return false;

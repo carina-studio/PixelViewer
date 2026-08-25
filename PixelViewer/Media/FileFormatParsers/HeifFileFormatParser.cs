@@ -74,6 +74,7 @@ class HeifFileFormatParser : MagickFileFormatParser
     {
         // parse extra information
         var orientation = 0;
+        TiffMediaMetadata? exifMetadata = null;
         await Task.Run(() =>
         {
             var reader = new IsoBaseMediaFileReader(stream);
@@ -144,8 +145,9 @@ class HeifFileFormatParser : MagickFileFormatParser
                         return;
                     }
 
-                    // parse ifd entries (currently there is no need to parse orientation because ImageMagick will handle it)
-                    var entryReader = new IfdEntryReader(stream);
+                    // parse metadata (currently there is no need to parse orientation because ImageMagick will handle it)
+                    if (TiffMediaMetadata.TryCreate(stream, out var parsedMetadata))
+                        exifMetadata = parsedMetadata;
                     /*
                     entryReader.ReadEntries(() =>
                     {
@@ -188,6 +190,8 @@ class HeifFileFormatParser : MagickFileFormatParser
         profile.Orientation = rotation;
         profile.FlipX = flipX;
         profile.FlipY = flipY;
+        if (exifMetadata is not null)
+            profile.MediaMetadata = new HeifCompoundMediaMetadata(exifMetadata, null);
     }
 
 

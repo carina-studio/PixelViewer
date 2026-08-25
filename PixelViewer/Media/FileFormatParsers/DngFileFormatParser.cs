@@ -121,6 +121,7 @@ class DngFileFormatParser : BaseFileFormatParser
         var cfaPattern = (byte[]?)null;
         var imageDataOffset = 0L;
         var colorSpace = (Media.ColorSpace?)null;
+        var ifdMetadata = new TiffMediaMetadata();
         await Task.Run(async () =>
         {
             // create reader
@@ -285,6 +286,10 @@ class DngFileFormatParser : BaseFileFormatParser
                                         entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + offset, "Raw");
                                 }
                                 break;
+                            case 0x8769: // ExifOffset, the entries which describe how the image was captured are kept by the Exif IFD
+                                if (entryReader.CurrentIfdName == IfdNames.Default && entryReader.CurrentIfdIndex == 0 && entryReader.TryGetEntryData(out uintData) && uintData.IsNotEmpty())
+                                    entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + uintData[0], IfdNames.Exif);
+                                break;
                             case 0xc614: // UniqueCameraModel, it is defined in the IFD of main image
                                 if (entryReader.TryGetEntryData(out string? stringData) && !string.IsNullOrWhiteSpace(stringData))
                                     uniqueCameraModel = stringData;
@@ -447,6 +452,7 @@ class DngFileFormatParser : BaseFileFormatParser
                             //System.Diagnostics.Debug.WriteLine($"{entryReader.CurrentIfdName}[{entryReader.CurrentIfdIndex}] {entryReader.CurrentEntryId:x4} {entryReader.CurrentEntryType}");
                         break;
                 }
+                ifdMetadata.SetEntry(entryReader);
             }
 
             // try combining strips into single block
@@ -553,6 +559,9 @@ class DngFileFormatParser : BaseFileFormatParser
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
 
+        // combine the metadata parsed from the file
+        var mediaMetadata = Tiff.CombineMediaMetadata(ifdMetadata);
+
         // check image data and size
         if (imageWidth <= 0 || imageHeight <= 0)
             return null;
@@ -580,6 +589,7 @@ class DngFileFormatParser : BaseFileFormatParser
                         if (colorSpace != null)
                             profile.ColorSpace = colorSpace;
                         profile.DataOffset = imageDataOffset;
+                        profile.MediaMetadata = mediaMetadata;
                         profile.Height = imageHeight;
                         profile.Width = imageWidth;
                         Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation, out var rotation, out var flipX, out var flipY);
@@ -600,6 +610,7 @@ class DngFileFormatParser : BaseFileFormatParser
                             if (colorSpace != null)
                                 profile.ColorSpace = colorSpace;
                             profile.DataOffset = compressedThumbOffset;
+                            profile.MediaMetadata = mediaMetadata;
                             profile.Height = compressedThumbHeight;
                             profile.Width = compressedThumbWidth;
                             Tiff.FromTiffOrientation(compressedThumbOrientation >= 0 ? compressedThumbOrientation : orientation, out var rotation, out var flipX, out var flipY);
@@ -648,6 +659,7 @@ class DngFileFormatParser : BaseFileFormatParser
             profile.ByteOrdering = byteOrdering;
             if (colorSpace != null)
                 profile.ColorSpace = colorSpace;
+            profile.MediaMetadata = mediaMetadata;
             profile.UseLinearColorSpace = true;
             profile.DataOffset = imageDataOffset;
             profile.EffectiveBits = new int[ImageFormat.MaxPlaneCount].Also(it => it[0] = effectiveBits);

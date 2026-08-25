@@ -817,6 +817,12 @@ namespace Carina.PixelViewer.Media.Profiles
         ILogger Logger => logger ?? throw new InvalidOperationException("Instance is not ready yet.");
 
 
+        /// <summary>
+        /// Metadata parsed from the source of media, or Null if no metadata was parsed from it.
+        /// </summary>
+        public IMediaMetadata? MediaMetadata { get; set; }
+
+
         // Name of profile.
         public string Name
         {

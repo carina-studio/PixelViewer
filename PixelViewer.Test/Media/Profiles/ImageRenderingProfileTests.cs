@@ -22,6 +22,7 @@ class ImageRenderingProfileTests : BaseTests
 	// Parameters of profile which are not applied to render image, they are not compared by HasSameRenderingParameters().
 	static readonly ISet<string> NonRenderingParameters = new HashSet<string>
 	{
+		nameof(ImageRenderingProfile.MediaMetadata),
 		nameof(ImageRenderingProfile.Name),
 	};
 

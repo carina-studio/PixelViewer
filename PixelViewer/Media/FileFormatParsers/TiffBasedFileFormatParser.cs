@@ -39,6 +39,7 @@ abstract class TiffBasedFileFormatParser : BaseFileFormatParser
         var colorSpace = default(ColorSpace);
         var orientation = -1;
         var thumbOrientation = -1;
+        var ifdMetadata = new TiffMediaMetadata();
         await Task.Run(() =>
         {
             // create entry reader
@@ -58,6 +59,7 @@ abstract class TiffBasedFileFormatParser : BaseFileFormatParser
             uint[]? uintData;
             while (entryReader.Read())
             {
+                ifdMetadata.SetEntry(entryReader);
                 switch (entryReader.CurrentIfdName)
                 {
                     case IfdNames.Default:
@@ -170,6 +172,7 @@ abstract class TiffBasedFileFormatParser : BaseFileFormatParser
             if (colorSpace != null)
                 profile.ColorSpace = colorSpace;
             profile.Height = imageHeight;
+            profile.MediaMetadata = Tiff.CombineMediaMetadata(ifdMetadata);
             Tiff.FromTiffOrientation(orientation >= 0
                 ? orientation
                 : (thumbOrientation >= 0 ? thumbOrientation : 0), out var rotation, out var flipX, out var flipY);

@@ -4631,9 +4631,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
-		// keep the current profile if frame is rendered in the same way
+		// keep the current profile if frame is rendered in the same way, the metadata of frame is still carried by the current profile because it describes the frame instead of the way to render it
 		if (currentProfile.HasSameRenderingParameters(frameProfile))
 		{
+			currentProfile.MediaMetadata = frameProfile.MediaMetadata;
 			frameProfile.Dispose();
 			return;
 		}
