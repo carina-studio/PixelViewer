@@ -40,6 +40,14 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
 
 
     /// <summary>
+    /// Called to parse the metadata of media which is kept by the file.
+    /// </summary>
+    /// <param name="stream">Stream to read image data, which is positioned at the beginning of the data.</param>
+    /// <returns>Parsed metadata, or Null if the file keeps no metadata.</returns>
+    protected virtual IMediaMetadata? OnParseMediaMetadata(Stream stream) => null;
+
+
+    /// <summary>
     /// Called to seek stream to position of embedded ICC profile.
     /// </summary>
     /// <param name="stream">Stream to read image data.</param>
@@ -126,6 +134,21 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             }
         }, cancellationToken);
 
+        // parse metadata of media
+        var mediaMetadata = await Task.Run(() =>
+        {
+            try
+            {
+                stream.Position = position;
+                return this.OnParseMediaMetadata(stream);
+            }
+            catch
+            {
+                return null;
+            }
+        }, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+
         // create profile
         if (width <= 0 || height <= 0)
             return null;
@@ -137,6 +160,7 @@ abstract class MacOSNativeFileFormatParser : BaseFileFormatParser
             it.FlipX = flipX;
             it.FlipY = flipY;
             it.Height = height;
+            it.MediaMetadata = mediaMetadata;
             it.Orientation = rotation;
             it.Width = width;
         });

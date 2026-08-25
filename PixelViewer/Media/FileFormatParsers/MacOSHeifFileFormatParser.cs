@@ -23,6 +23,15 @@ class MacOSHeifFileFormatParser : MacOSNativeFileFormatParser
 
 
     /// <inheritdoc/>
+    protected override IMediaMetadata? OnParseMediaMetadata(Stream stream)
+    {
+        if (HeifFileFormatParser.SeekToExifData(stream) && TiffMediaMetadata.TryCreate(stream, out var exifMetadata))
+            return new HeifCompoundMediaMetadata(exifMetadata, null);
+        return null;
+    }
+
+
+    /// <inheritdoc/>
     protected override bool OnSeekToIccProfile(Stream stream) =>
         HeifFileFormatParser.SeekToIccProfile(stream);
 }

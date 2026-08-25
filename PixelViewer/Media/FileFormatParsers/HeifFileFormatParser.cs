@@ -72,118 +72,15 @@ class HeifFileFormatParser : MagickFileFormatParser
     /// <inheritdoc/>
     protected override async Task OnParseExtraInformationAsync(Stream stream, ImageRenderingProfile profile, CancellationToken cancellationToken)
     {
-        // parse extra information
+        // parse metadata (there is no need to parse orientation because ImageMagick will handle it)
         var orientation = 0;
         TiffMediaMetadata? exifMetadata = null;
         await Task.Run(() =>
         {
-            var reader = new IsoBaseMediaFileReader(stream);
-            var exifItemIndex = 0;
-            var exifDataOffset = 0u;
-            var startPosition = stream.Position;
-            while (reader.Read())
-            {
-                if (reader.CurrentBoxType == 0x6d657461u) // 'meta'
-                {
-                    var metaBoxReader = reader.GetCurrentBoxDataReader(4);
-                    while (metaBoxReader.Read())
-                    {
-                        if (metaBoxReader.CurrentBoxType == 0x69696e66u) // 'iinf'
-                        {
-                            var iinfBoxReader = metaBoxReader.GetCurrentBoxDataReader(6);
-                            var itemIndex = 1;
-                            while (iinfBoxReader.Read())
-                            {
-                                if (iinfBoxReader.CurrentBoxType == 0x696e6665u) // 'infe'
-                                {
-                                    var data = iinfBoxReader.GetCurrentBoxData();
-                                    if (data.Length > 12
-                                        && data[8] == 'E'
-                                        && data[9] == 'x'
-                                        && data[10] == 'i'
-                                        && data[11] == 'f')
-                                    {
-                                        exifItemIndex = itemIndex;
-                                    }
-                                    ++itemIndex;
-                                }
-                            }
-                            if (exifItemIndex == 0)
-                                return;
-                        }
-                        else if (metaBoxReader.CurrentBoxType == 0x696c6f63u) // 'iloc'
-                        {
-                            if (exifItemIndex == 0)
-                                return;
-                            var ilocData = metaBoxReader.GetCurrentBoxData();
-                            var offset = 15 + ((exifItemIndex - 1) * 16);
-                            if (offset >= ilocData.Length + 9)
-                                return;
-                            if (ilocData[offset] != 0x1) // exif must be stored in 'mdat' box
-                                return;
-                            exifDataOffset = BinaryPrimitives.ReadUInt32BigEndian(ilocData.Slice(offset + 1));
-                        }
-                    }
-                    if (exifItemIndex == 0 || exifDataOffset == 0)
-                        return;
-                }
-                else if (reader.CurrentBoxType == 0x6d646174u) // 'mdat'
-                {
-                    // check header
-                    if (exifDataOffset == 0)
-                        return;
-                    stream.Seek(startPosition + exifDataOffset, SeekOrigin.Begin);
-                    var buffer = new byte[10];
-                    if (stream.Read(buffer, 0, 10) < 0
-                        || buffer[4] != 'E'
-                        || buffer[5] != 'x'
-                        || buffer[6] != 'i'
-                        || buffer[7] != 'f'
-                        || buffer[8] != 0x0
-                        || buffer[9] != 0x0)
-                    {
-                        return;
-                    }
-
-                    // parse metadata (currently there is no need to parse orientation because ImageMagick will handle it)
-                    if (TiffMediaMetadata.TryCreate(stream, out var parsedMetadata))
-                        exifMetadata = parsedMetadata;
-                    /*
-                    entryReader.ReadEntries(() =>
-                    {
-                        var ushortData = (ushort[]?)null;
-                        var uintData = (uint[]?)null;
-                        switch (entryReader.CurrentIfdName)
-                        {
-                            case IfdNames.Default:
-                                switch (entryReader.CurrentEntryId)
-                                {
-                                    case 0x0112: // Orientation
-                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData != null && ushortData.Length > 0)
-                                            orientation = ushortData[0];
-                                        break;
-                                    case 0x8769: // ExifOffset
-                                        if (entryReader.TryGetEntryData(out uintData) && uintData != null && uintData.Length > 0)
-                                            entryReader.EnqueueIfdToRead(uintData[0], IfdNames.Exif);
-                                        break;
-                                }
-                                break;
-                            case IfdNames.Exif:
-                                switch (entryReader.CurrentEntryId)
-                                {
-                                    case 0x0112: // Orientation
-                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData != null && ushortData.Length > 0)
-                                            orientation = ushortData[0];
-                                        break;
-                                }
-                                break;
-                        }
-                        return true;
-                    });
-                    */
-                }
-            }
-        });
+            if (SeekToExifData(stream) && TiffMediaMetadata.TryCreate(stream, out var parsedMetadata))
+                exifMetadata = parsedMetadata;
+        }, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
 
         // update profile
         Tiff.FromTiffOrientation(orientation, out var rotation, out var flipX, out var flipY);
@@ -192,6 +89,169 @@ class HeifFileFormatParser : MagickFileFormatParser
         profile.FlipY = flipY;
         if (exifMetadata is not null)
             profile.MediaMetadata = new HeifCompoundMediaMetadata(exifMetadata, null);
+    }
+
+
+    // Find the identifier of the item which keeps the Exif data, or 0 if there is no such item.
+    static uint FindExifItemId(ReadOnlySpan<byte> iinfData)
+    {
+        // the number of entries is kept by a field whose size is defined by the version of box
+        if (iinfData.Length < 6)
+            return 0;
+        var version = iinfData[0];
+        var offset = version == 0 ? 6 : 8;
+
+        // find the entry which describes the item of Exif data
+        while (offset + 8 <= iinfData.Length)
+        {
+            var boxSize = BinaryPrimitives.ReadUInt32BigEndian(iinfData[offset..]);
+            var boxType = BinaryPrimitives.ReadUInt32BigEndian(iinfData[(offset + 4)..]);
+            if (boxSize < 8 || offset + boxSize > iinfData.Length)
+                return 0;
+            if (boxType == 0x696e6665u) // 'infe'
+            {
+                var entry = iinfData.Slice(offset + 8, (int)boxSize - 8);
+                var entryVersion = entry.Length > 0 ? entry[0] : 0;
+                var itemIdSize = entryVersion >= 3 ? 4 : 2;
+                var itemTypeOffset = 4 + itemIdSize + 2;
+                if (entry.Length >= itemTypeOffset + 4
+                    && entry[itemTypeOffset] == 'E'
+                    && entry[itemTypeOffset + 1] == 'x'
+                    && entry[itemTypeOffset + 2] == 'i'
+                    && entry[itemTypeOffset + 3] == 'f')
+                {
+                    return itemIdSize == 4
+                        ? BinaryPrimitives.ReadUInt32BigEndian(entry[4..])
+                        : BinaryPrimitives.ReadUInt16BigEndian(entry[4..]);
+                }
+            }
+            offset += (int)boxSize;
+        }
+        return 0;
+    }
+
+
+    // Find the offset to the data of the item with the given identifier, or 0 if the offset cannot be found.
+    static long FindItemDataOffset(ReadOnlySpan<byte> ilocData, uint itemId)
+    {
+        // the sizes of the fields which describe an item are defined by the header of box
+        if (ilocData.Length < 8)
+            return 0;
+        var version = ilocData[0];
+        var offsetSize = ilocData[4] >> 4;
+        var lengthSize = ilocData[4] & 0xf;
+        var baseOffsetSize = ilocData[5] >> 4;
+        var indexSize = version == 1 || version == 2 ? (ilocData[5] & 0xf) : 0;
+        var offset = 6;
+        var itemCount = 0L;
+        if (version < 2)
+        {
+            itemCount = BinaryPrimitives.ReadUInt16BigEndian(ilocData[offset..]);
+            offset += 2;
+        }
+        else
+        {
+            if (ilocData.Length < 10)
+                return 0;
+            itemCount = BinaryPrimitives.ReadUInt32BigEndian(ilocData[offset..]);
+            offset += 4;
+        }
+
+        // find the item and take the offset to the first extent of it
+        for (var i = 0L; i < itemCount; ++i)
+        {
+            // read the identifier of item and how its data is constructed
+            var itemIdSize = version < 2 ? 2 : 4;
+            if (offset + itemIdSize + 2 > ilocData.Length)
+                return 0;
+            var currentItemId = itemIdSize == 2
+                ? BinaryPrimitives.ReadUInt16BigEndian(ilocData[offset..])
+                : BinaryPrimitives.ReadUInt32BigEndian(ilocData[offset..]);
+            offset += itemIdSize;
+            var constructionMethod = 0;
+            if (version == 1 || version == 2)
+            {
+                constructionMethod = BinaryPrimitives.ReadUInt16BigEndian(ilocData[offset..]) & 0xf;
+                offset += 2;
+            }
+
+            // read the base offset which every extent of the item is relative to
+            offset += 2; // data_reference_index
+            if (offset + baseOffsetSize + 2 > ilocData.Length)
+                return 0;
+            var baseOffset = ReadUIntBigEndian(ilocData[offset..], baseOffsetSize);
+            offset += baseOffsetSize;
+            var extentCount = BinaryPrimitives.ReadUInt16BigEndian(ilocData[offset..]);
+            offset += 2;
+
+            // read extents of the item, only the data which is placed in the file itself can be located
+            var extentSize = indexSize + offsetSize + lengthSize;
+            if (offset + (extentCount * extentSize) > ilocData.Length)
+                return 0;
+            if (currentItemId == itemId && extentCount > 0 && constructionMethod == 0)
+                return baseOffset + ReadUIntBigEndian(ilocData[(offset + indexSize)..], offsetSize);
+            offset += extentCount * extentSize;
+        }
+        return 0;
+    }
+
+
+    // Read an unsigned integer with the given size in bytes.
+    static long ReadUIntBigEndian(ReadOnlySpan<byte> data, int size)
+    {
+        var value = 0L;
+        for (var i = 0; i < size; ++i)
+            value = (value << 8) | data[i];
+        return value;
+    }
+
+
+    /// <summary>
+    /// Seek to the Exif data which is kept by the file.
+    /// </summary>
+    /// <param name="stream">Stream to read HEIF image.</param>
+    /// <returns>True if seeking successfully, the stream will be positioned at the header of TIFF-based data.</returns>
+    public static bool SeekToExifData(Stream stream)
+    {
+        // find the item of Exif data and the offset to it
+        var startPosition = stream.Position;
+        var reader = new IsoBaseMediaFileReader(stream);
+        var exifItemId = 0u;
+        var exifDataOffset = 0L;
+        try
+        {
+            while (reader.Read())
+            {
+                if (reader.CurrentBoxType != 0x6d657461u) // 'meta'
+                    continue;
+                var metaBoxReader = reader.GetCurrentBoxDataReader(4);
+                while (metaBoxReader.Read())
+                {
+                    if (metaBoxReader.CurrentBoxType == 0x69696e66u) // 'iinf'
+                        exifItemId = FindExifItemId(metaBoxReader.GetCurrentBoxData());
+                    else if (metaBoxReader.CurrentBoxType == 0x696c6f63u && exifItemId != 0) // 'iloc'
+                        exifDataOffset = FindItemDataOffset(metaBoxReader.GetCurrentBoxData(), exifItemId);
+                }
+                break;
+            }
+        }
+        catch
+        {
+            return false;
+        }
+        if (exifDataOffset <= 0)
+            return false;
+
+        // seek to the header of TIFF-based data which is placed after the identifier of Exif data
+        stream.Seek(startPosition + exifDataOffset, SeekOrigin.Begin);
+        var buffer = new byte[10];
+        return stream.Read(buffer, 0, 10) == 10
+            && buffer[4] == 'E'
+            && buffer[5] == 'x'
+            && buffer[6] == 'i'
+            && buffer[7] == 'f'
+            && buffer[8] == 0x0
+            && buffer[9] == 0x0;
     }
 
 

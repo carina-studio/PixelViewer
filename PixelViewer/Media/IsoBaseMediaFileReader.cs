@@ -164,7 +164,7 @@ class IsoBaseMediaFileReader
         }
         this.currentBoxDataSize = BinaryPrimitives.ReadUInt32BigEndian(this.buffer.AsSpan());
         this.currentBoxType = BinaryPrimitives.ReadUInt32BigEndian(this.buffer.AsSpan(4));
-        if (this.currentBoxDataSize == 1) // expand to end of stream
+        if (this.currentBoxDataSize == 0) // expand to end of stream
         {
             if (this.stream.CanSeek)
             {
@@ -181,6 +181,23 @@ class IsoBaseMediaFileReader
             }
             else
                 this.currentBoxDataSize = -1;
+        }
+        else if (this.currentBoxDataSize == 1) // size of box is kept by the 64-bit field which follows the type of box
+        {
+            if (this.stream.Read(this.buffer, 0, 8) < 8)
+            {
+                this.currentBoxType = 0;
+                this.eof = true;
+                return false;
+            }
+            var largeBoxSize = BinaryPrimitives.ReadUInt64BigEndian(this.buffer.AsSpan());
+            if (largeBoxSize < 16 || largeBoxSize > long.MaxValue)
+            {
+                this.currentBoxType = 0;
+                this.eof = true;
+                return false;
+            }
+            this.currentBoxDataSize = (long)largeBoxSize - 16;
         }
         else if (this.currentBoxDataSize < 8)
         {
