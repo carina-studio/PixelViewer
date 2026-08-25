@@ -73,3 +73,37 @@ interface IMediaMetadata
     /// </summary>
     string? Software { get; }
 }
+
+
+/// <summary>
+/// Extensions for <see cref="IMediaMetadata"/>.
+/// </summary>
+static class MediaMetadataExtensions
+{
+    extension(IMediaMetadata metadata)
+    {
+        /// <summary>
+        /// Find the metadata with the given type from the metadata itself and the metadata which are combined by it.
+        /// </summary>
+        /// <typeparam name="T">Type of metadata to be found.</typeparam>
+        /// <returns>Found metadata, or Null if the metadata cannot be found.</returns>
+        public T? Find<T>() where T : class, IMediaMetadata
+        {
+            // the metadata itself may be the metadata to be found
+            if (metadata is T foundMetadata)
+                return foundMetadata;
+
+            // find from the metadata which are combined by the metadata
+            if (metadata is CompoundMediaMetadata compoundMetadata)
+            {
+                foreach (var element in compoundMetadata.Elements)
+                {
+                    var foundElement = element.Find<T>();
+                    if (foundElement is not null)
+                        return foundElement;
+                }
+            }
+            return null;
+        }
+    }
+}
