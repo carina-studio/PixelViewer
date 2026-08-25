@@ -18,6 +18,7 @@
 + Improved the performance of saving images in PNG format.
 + Added support for saving the rendered image while the next image is being rendered.
 + Added support for adjusting the width of the panel of histograms.
++ The name generated for new profile includes the name of camera by default.
 + The application no longer needs to be restarted when the Chinese environment changes after modifying the `Language` option.
 + Prevented the displayed image from being cleared when the memory usage of rendered images reaches the limit.
 

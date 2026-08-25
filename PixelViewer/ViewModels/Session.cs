@@ -3083,7 +3083,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <returns>Name for new profile.</returns>
 	public string GenerateNameForNewProfile()
 	{
+		// describe the image and the camera which captured it, the metadata is kept by the profile generated for the file format no matter which profile is being used
 		var name = $"{this.ImageWidth}x{this.ImageHeight} [{this.ImageRenderer.Format.DisplayName}]";
+		var cameraName = GetCameraNameForProfile(this.fileFormatProfile?.MediaMetadata);
+		if (cameraName is not null)
+			name = $"{cameraName} {name}";
+
+		// make the name unique
 		if (ImageRenderingProfiles.ValidateNewUserDefinedProfileName(name))
 			return name;
 		for (var i = 1; i <= 1000; ++i)
@@ -3103,6 +3109,32 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		get => this.GetValue(GreenColorAdjustmentProperty);
 		set => this.SetValue(GreenColorAdjustmentProperty, value);
+	}
+
+
+	// Get the name of camera which captured the media to be used by the name of profile, or Null if the camera is unknown.
+	static string? GetCameraNameForProfile(IMediaMetadata? metadata)
+	{
+		// use the name which is available when the other one is unavailable
+		var manufacturer = metadata?.CameraManufacturer;
+		var model = metadata?.CameraModel;
+		if (string.IsNullOrEmpty(model))
+			return string.IsNullOrEmpty(manufacturer) ? null : manufacturer;
+		if (string.IsNullOrEmpty(manufacturer))
+			return model;
+
+		// the name of model usually starts with the name of manufacturer, the name of model describes the camera by itself in that case
+		return GetFirstWord(manufacturer).Equals(GetFirstWord(model), StringComparison.OrdinalIgnoreCase)
+			? model
+			: $"{manufacturer} {model}";
+	}
+
+
+	// Get the first word of the given string.
+	static ReadOnlySpan<char> GetFirstWord(string s)
+	{
+		var index = s.IndexOf(' ');
+		return index >= 0 ? s.AsSpan(0, index) : s.AsSpan();
 	}
 
 
