@@ -21,6 +21,7 @@
 + The name generated for new profile includes the name of camera by default.
 + The application no longer needs to be restarted when the Chinese environment changes after modifying the `Language` option.
 + Prevented the displayed image from being cleared when the memory usage of rendered images reaches the limit.
++ Applied the new window style of macOS 26.
 
 ## Behavior Changes
 + The effective bits of image planes can no longer be specified when a color table is applied to the rendering, such as for a DNG image which carries a linearization table.
