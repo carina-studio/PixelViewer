@@ -297,7 +297,7 @@ class SessionRenderingInterruptionTests : BaseTests
 
 			// delete the generated source files
 			foreach (var filePath in this.sourceFilePaths)
-				Global.RunWithoutError(() => File.Delete(filePath));
+				await DeleteFileAsync(filePath);
 			this.sourceFilePaths.Clear();
 
 			// restore the settings overridden for the test

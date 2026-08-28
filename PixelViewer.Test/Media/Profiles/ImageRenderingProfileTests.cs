@@ -140,7 +140,7 @@ class ImageRenderingProfileTests : BaseTests
 			}
 			finally
 			{
-				File.Delete(fileName);
+				await DeleteFileAsync(fileName);
 			}
 		});
 	}

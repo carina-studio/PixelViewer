@@ -1,5 +1,4 @@
-﻿using CarinaStudio;
-using NLog;
+﻿using NLog;
 using NUnit.Framework;
 using System;
 using System.ComponentModel;
@@ -16,6 +15,11 @@ namespace Carina.PixelViewer.Test
 	/// </summary>
 	abstract class BaseTests : CarinaStudio.AppSuite.ApplicationBasedTests<CarinaStudio.AppSuite.IAppSuiteApplication>
 	{
+		// Constants.
+		const int FileDeletionRetryInterval = 50;
+		const int FileDeletionTimeout = 10000;
+
+
 		// Fields.
 		volatile string? cacheDirectory;
 
@@ -31,10 +35,10 @@ namespace Carina.PixelViewer.Test
 		/// Clear created cache directory.
 		/// </summary>
 		[OneTimeTearDown]
-		public void ClearCacheDirectory()
-		{
-			this.cacheDirectory?.Let(it => Directory.Delete(it, true));
-		}
+		public Task ClearCacheDirectoryAsync() =>
+			this.cacheDirectory is not null
+				? DeleteDirectoryAsync(this.cacheDirectory)
+				: Task.CompletedTask;
 
 
 		/// <summary>
@@ -80,6 +84,53 @@ namespace Carina.PixelViewer.Test
 				return File.Create(filePath);
 			}
 		}
+
+
+		// Delete the file or directory at the given path, retrying while it is still held by a source which has not been released yet.
+		static async Task DeleteAsync(string path, bool isDirectory)
+		{
+			// start counting the time spent on waiting for the path to become deletable
+			var stopWatch = new Stopwatch();
+			stopWatch.Start();
+
+			// delete, the source which held the path may be released asynchronously after the session reported it as closed
+			while (true)
+			{
+				try
+				{
+					if (isDirectory)
+						Directory.Delete(path, true);
+					else
+						File.Delete(path);
+					return;
+				}
+				catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+				{
+					if (stopWatch.ElapsedMilliseconds >= FileDeletionTimeout)
+						throw;
+					await Task.Delay(FileDeletionRetryInterval, CancellationToken.None);
+				}
+			}
+		}
+
+
+		/// <summary>
+		/// Delete the given directory, waiting for the asynchronous release of any source which still holds a file in it.
+		/// </summary>
+		/// <param name="path">Path of directory to delete.</param>
+		/// <returns>Task of deleting the directory.</returns>
+		protected static Task DeleteDirectoryAsync(string path) =>
+			DeleteAsync(path, true);
+
+
+		/// <summary>
+		/// Delete the given file, waiting for the asynchronous release of the source which held it.
+		/// </summary>
+		/// <param name="filePath">Path of file to delete.</param>
+		/// <returns>Task of deleting the file.</returns>
+		/// <remarks>A file which is never released still fails the test, the deletion is only retried for a limited time.</remarks>
+		protected static Task DeleteFileAsync(string filePath) =>
+			DeleteAsync(filePath, false);
 
 
 		/// <summary>

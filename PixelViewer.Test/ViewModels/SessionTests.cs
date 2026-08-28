@@ -204,7 +204,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				session.Profile = ImageRenderingProfile.Default;
 				session.ClearSourceCommand.Execute(null);
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
-				File.Delete(filePath);
+				await DeleteFileAsync(filePath);
 			});
 		}
 
@@ -249,7 +249,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				session.ClearSourceCommand.Execute(null);
 				Assert.That(await this.WaitForPropertyAsync(session,nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
 				Assert.That(session.RenderedImage, Is.Null, "Rendered image is still there after closing source file.");
-				File.Delete(filePath);
+				await DeleteFileAsync(filePath);
 			});
 		}
 
@@ -339,7 +339,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.That(closeCommand.CanExecute(null), Is.True, "Source file closing should be able to be executed.");
 
 				// delete file 1 to make sure that file has been unlocked
-				File.Delete(filePath1);
+				await DeleteFileAsync(filePath1);
 
 				// close file 2
 				closeCommand.Execute(null);
@@ -352,7 +352,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.That(openCommand.CanExecute(null), Is.True, "Source file opening should be able to be executed.");
 
 				// delete file 2 to make sure that file has been unlocked
-				File.Delete(filePath2);
+				await DeleteFileAsync(filePath2);
 			});
 		}
 

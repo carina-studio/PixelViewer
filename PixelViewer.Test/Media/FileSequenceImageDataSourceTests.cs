@@ -59,7 +59,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 	/// Test for providing no data by the sequence itself.
 	/// </summary>
 	[Test]
-	public void DataAccessTest() => this.TestOnApplicationThread(() =>
+	public void DataAccessTest() => this.TestOnApplicationThread(async () =>
 	{
 		// create files of frames
 		string directory = CreateFrameFiles(out string[] fileNames);
@@ -73,7 +73,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		}
 		finally
 		{
-			Directory.Delete(directory, true);
+			await DeleteDirectoryAsync(directory);
 		}
 	});
 
@@ -119,7 +119,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		}
 		finally
 		{
-			Directory.Delete(directory, true);
+			await DeleteDirectoryAsync(directory);
 		}
 	});
 
@@ -147,7 +147,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		}
 		finally
 		{
-			Directory.Delete(directory, true);
+			await DeleteDirectoryAsync(directory);
 		}
 	});
 
@@ -177,7 +177,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		}
 		finally
 		{
-			Directory.Delete(directory, true);
+			await DeleteDirectoryAsync(directory);
 		}
 	});
 
@@ -192,7 +192,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		string directory = CreateFrameFiles(out string[] fileNames);
 		try
 		{
-			File.Delete(fileNames[1]);
+			await DeleteFileAsync(fileNames[1]);
 			using var source = new FileSequenceImageDataSource(this.Application, fileNames);
 			Assert.That(source.FrameCount, Is.EqualTo(3), "Inaccessible file must be kept in the sequence.");
 			Assert.That(source.Size, Is.EqualTo(4), "Size of inaccessible file should be treated as zero.");
@@ -216,7 +216,7 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		}
 		finally
 		{
-			Directory.Delete(directory, true);
+			await DeleteDirectoryAsync(directory);
 		}
 	});
 
