@@ -5,12 +5,27 @@ A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/B
 
 跨平台影像檢視器，支援讀取及繪製原始 Luminance/YUV/RGB/ARGB/Bayer 像素資料。請參閱 [網站](https://carinastudio.net/PixelViewer/) 以取得更多資訊。
 
-![](https://carinastudio.net/PixelViewer/Banner.png?v=2)
+![](https://carinastudio.net/PixelViewer/Banner.png?v=3)
 
 ## ⚠️ NOTICE
 If you are upgrading from `3.x` to `2026+` on macOS, please download the application bundle manually and place it alongside the existing `3.x` bundle *(instead of replacing it)*. This allows `2026+` to import your application data from the `3.x` bundle on first launch.
 
-## 📥 Download 2026.0.1
+## 📥 Download 2026.1 Preview
+
+### Windows
+[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-win-x64.zip)
+[![](https://img.shields.io/badge/x86-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-win-x86.zip)
+[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-win-arm64.zip)
+
+### macOS
+[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-osx-arm64.zip)
+[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-osx-x64.zip)
+
+### Linux
+[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-linux-x64.zip)
+[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-linux-arm64.zip)
+
+## 📥 Download 2026.0
 
 ### Windows
 [![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-x64.zip)
@@ -103,15 +118,18 @@ If you are upgrading from `3.x` to `2026+` on macOS, please download the applica
 * Specify data offset to image in file.
 * Specify color space of image and screen.
 * Import ICC profile as custom color space.
+* Defining custom image rendering scripts in JavaScript, C# or Python. `2026.1+`
 * Rotate and scale rendered image.
 * Navigate to specific image frame in file.
+* Playing frames continuously with an adjustable frame rate. `2026.1+`
 * Adjust R/G/B gain for Bayer Pattern formats.
 * Adjust brightness/contrast and color balance.
 * Adjust highlight/shadow of image.
 * Show histograms of R/G/B and luminance.
 * Demosaicing for Bayer Pattern formats.
-* Save rendered image as PNG file.
-* Save rendered image as JPEG/BGRA file.
+* Defining custom demosaicing scripts in JavaScript, C# or Python. `2026.1+`
+* Pasting an image from the clipboard. `2026.1+`
+* Saving the rendered image as a PNG/JPEG/TIFF/BGRA file.
 
 ## 🤝 Dependencies
 * [.NET](https://dotnet.microsoft.com/)
