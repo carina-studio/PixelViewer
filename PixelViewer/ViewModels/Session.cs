@@ -4599,11 +4599,17 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public void StopPlayingFrames()
 	{
+		// check state
 		if (!this.GetValue(IsPlayingFramesProperty))
 			return;
+
+		// stop playback
 		this.playFrameAction.Cancel();
 		this.framePlaybackStopwatch.Stop();
-		this.SetValue(IsPlayingFramesProperty, false);
+
+		// update state, the property cannot be updated after the session has been disposed
+		if (!this.IsDisposed)
+			this.SetValue(IsPlayingFramesProperty, false);
 	}
 
 
