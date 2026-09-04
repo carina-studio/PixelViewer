@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<AssemblyVersion>4.1.0.829</AssemblyVersion>
-		<Version>2026.1.0</Version>
+		<AssemblyVersion>4.1.1.905</AssemblyVersion>
+		<Version>2026.1.1</Version>
 		<Authors>Carina Studio</Authors>
 		<Company>Carina Studio</Company>
 		<Copyright>©2021-$([System.DateTime]::Now.Year) Carina Studio</Copyright>
