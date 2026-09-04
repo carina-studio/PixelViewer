@@ -1,50 +1,85 @@
 {
   "Name": "PixelViewer",
-  "Version": "4.1.0.829",
-  "InformationalVersion": "2026.1.0",
-  "PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/2026.1.0",
+  "Version": "4.1.1.905",
+  "InformationalVersion": "2026.1.1",
+  "PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/2026.1.1",
   "Packages": [
     {
       "Architecture": "Arm64",
+      "BaseVersion": "4.1.0.829",
       "OperatingSystem": "Linux",
-      "SHA256": "2878308E38AB7CD38B766ACDE21A447D8E221C114B91E4C876C358CB53292DD2",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-linux-arm64.zip"
+      "SHA256": "DA6B50C727559E78E21D845CD6FEF8EF0C059EC0263B5E40D9361EA0F91F1326",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.0-2026.1.1-linux-arm64.zip"
+    },
+    {
+      "Architecture": "X64",
+      "BaseVersion": "4.1.0.829",
+      "OperatingSystem": "Linux",
+      "SHA256": "A508E56AF647C5FE30A2EEFC656502C904718D4C60E16BB1B0B6B35F4EC4693B",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.0-2026.1.1-linux-x64.zip"
+    },
+    {
+      "Architecture": "Arm64",
+      "BaseVersion": "4.1.0.829",
+      "OperatingSystem": "Windows",
+      "SHA256": "ECA8D3EB9D1B22A021365D6D9539D4FA2E0F14340D32D747104A0476A05D03EB",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.0-2026.1.1-win-arm64.zip"
+    },
+    {
+      "Architecture": "X64",
+      "BaseVersion": "4.1.0.829",
+      "OperatingSystem": "Windows",
+      "SHA256": "D2F05B0CAE14C2DD344FFCAAA567FB2DEDDA7EBA476C43CBC0DAABA373D046F2",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.0-2026.1.1-win-x64.zip"
+    },
+    {
+      "Architecture": "X86",
+      "BaseVersion": "4.1.0.829",
+      "OperatingSystem": "Windows",
+      "SHA256": "846D1383F7469860DE4549627C2326FBAB00C061062BB6267B622E41C70EA9BC",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.0-2026.1.1-win-x86.zip"
+    },
+    {
+      "Architecture": "Arm64",
+      "OperatingSystem": "Linux",
+      "SHA256": "9F22E02906867AA2C62B3FE73579D5D821EF4FADFAA45323B3648D53FA0A30DF",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-linux-arm64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "Linux",
-      "SHA256": "9D30FCE34B0F3BA3FA2C96D6BDEE20DDA64B60D4F4E256B7B610869055DBE395",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-linux-x64.zip"
+      "SHA256": "86017F9F5EB2F1AF7606B8764203AADC45498E60E03B29DE88B3B9794D4A82AA",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-linux-x64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "OSX",
-      "SHA256": "922F47CCB47600845B829850B33E99F24045D24FDA4DCD32C436B2F47094DDED",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-osx-arm64.zip"
+      "SHA256": "384D42BFCA4415ED7DF2F495655DA6B5A8F10ECA47B6BB5399F6417DA7772B1F",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-osx-arm64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "Windows",
-      "SHA256": "34C8C3AF7DE9B4EE0E28F43AA4BB11CA8C8B9770941EEF5996168B9527A4DF60",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-win-arm64.zip"
+      "SHA256": "756D8D73EF8AC4FE2436C9B1FBC8D3D27D0E87B34052638F4224CF55DFD61076",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-win-arm64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "OSX",
-      "SHA256": "B61BA5F20BED23C09AF3F01C53A4600FC7099F0DE42B4C359239852289EA0C2A",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-osx-x64.zip"
+      "SHA256": "42B8512212D3DA2108A39EC526AE074DC71AFAFB92BD9C962CECDD00677DEA83",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-osx-x64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "Windows",
-      "SHA256": "00D6D934CAF92D884BF898F7E7A41A29AC379624D9AEE6F0DCDDD79B1C5E4956",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-win-x64.zip"
+      "SHA256": "9AB50FE0369C906D7FACBD4A935802561C015B42C77CB5A66F2F9C30F591623B",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-win-x64.zip"
     },
     {
       "Architecture": "X86",
       "OperatingSystem": "Windows",
-      "SHA256": "854DC6E80B1236C148E5A1D24B014EEC8B5439A2E64A543ED705E2DC8937BFB3",
-      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.0/PixelViewer-2026.1.0-win-x86.zip"
+      "SHA256": "3CCFDED5C1DD25CBBFCF5356A7C1C1F1918E3C064371503327D2D3C35D66DD74",
+      "Uri": "https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-win-x86.zip"
     }
   ]
 }
