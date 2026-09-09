@@ -89,8 +89,7 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 				{
 					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 					{
-						// ReSharper disable once MustUseReturnValue
-						imageStream.Read(row, 0, rowStride);
+						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var pixelPtr = rowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						var isVerticalWeightedArea = (y >= wTop && y <= wBottom);
@@ -199,8 +198,7 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 				{
 					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 					{
-						// ReSharper disable once MustUseReturnValue
-						imageStream.Read(row, 0, rowStride);
+						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var pixelPtr = rowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						var isVerticalWeightedArea = (y >= wTop && y <= wBottom);

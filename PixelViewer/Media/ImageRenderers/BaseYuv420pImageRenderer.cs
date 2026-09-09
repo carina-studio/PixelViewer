@@ -92,10 +92,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						var yPixelPtr = yRowPtr;
 						var bitmapPixelPtr = bitmapRowPtr;
 						var isLastRow = (rowIndex == height - 1);
-						if (isLastRow && this.eliminateTailPadding)
-							imageStream.Read(yRow, 0, yPixelStride * (width - 1) + 1);
-						else
-							imageStream.Read(yRow, 0, yRowStride);
+						var yReadCount = isLastRow && this.eliminateTailPadding ? yPixelStride * (width - 1) + 1 : yRowStride;
+						imageStream.ReadAtLeast(yRow.AsSpan(0, yReadCount), yReadCount, throwOnEndOfStream: false);
 						for (var columnIndex = 0; columnIndex < width; ++columnIndex, yPixelPtr += yPixelStride, bitmapPixelPtr += 4)
 							bitmapPixelPtr[0] = yPixelPtr[0];
 						if (cancellationToken.IsCancellationRequested)
@@ -115,10 +113,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					{
 						// read UV row
 						var isLastRow = (rowIndex == height - 2);
-						if (isLastRow && this.eliminateTailPadding)
-							imageStream.Read(uv1Row, 0, uv1PixelStride * (width / 2 - 1) + 1);
-						else
-							imageStream.Read(uv1Row, 0, uv1RowStride);
+						var uv1ReadCount = isLastRow && this.eliminateTailPadding ? uv1PixelStride * (width / 2 - 1) + 1 : uv1RowStride;
+						imageStream.ReadAtLeast(uv1Row.AsSpan(0, uv1ReadCount), uv1ReadCount, throwOnEndOfStream: false);
 						var uvPixelPtr = uv1RowPtr;
 						var bitmapPixelPtr = bitmapRowPtr;
 						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv1PixelStride, bitmapPixelPtr += 8)
@@ -142,10 +138,8 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 					{
 						// read UV row
 						var isLastRow = (rowIndex == height - 2);
-						if (isLastRow && this.eliminateTailPadding)
-							imageStream.Read(uv2Row, 0, uv2PixelStride * (width / 2 - 1) + 1);
-						else
-							imageStream.Read(uv2Row, 0, uv2RowStride);
+						var uv2ReadCount = isLastRow && this.eliminateTailPadding ? uv2PixelStride * (width / 2 - 1) + 1 : uv2RowStride;
+						imageStream.ReadAtLeast(uv2Row.AsSpan(0, uv2ReadCount), uv2ReadCount, throwOnEndOfStream: false);
 						var uvPixelPtr = uv2RowPtr;
 						var bitmapPixelPtr = bitmapRowPtr;
 						for (var columnIndex = 0; columnIndex < width; columnIndex += 2, uvPixelPtr += uv2PixelStride, bitmapPixelPtr += 8)

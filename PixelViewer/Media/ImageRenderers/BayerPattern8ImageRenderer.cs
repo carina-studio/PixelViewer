@@ -144,8 +144,7 @@ class BayerPattern8ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(I
 				{
 					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 					{
-						// ReSharper disable once MustUseReturnValue
-						imageStream.Read(row, 0, rowStride);
+						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var pixelPtr = rowPtr;
 						var bitmapPixelPtr8 = bitmapRowPtr;
 						var bitmapPixelPtr16 = (ushort*)bitmapRowPtr;

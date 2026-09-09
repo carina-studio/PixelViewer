@@ -118,8 +118,7 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 				{
 					for (var y = 0; y < height; ++y, bitmapRowPtr += bitmapRowStride)
 					{
-						// ReSharper disable once MustUseReturnValue
-						imageStream.Read(row, 0, rowStride);
+						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var packedPixelsPtr = rowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
 						var isVerticalWeightedArea = (y >= wTop && y <= wBottom);

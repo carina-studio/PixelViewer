@@ -324,21 +324,23 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
         {
             throw new Exception($"Unable to get dimensions of image.");
         }
-        var width = CFObject.FromHandle<CFNumber>(widthNumber.Handle).ToInt32();
-        var height = CFObject.FromHandle<CFNumber>(heightNumber.Handle).ToInt32();
+        var width = CFObject.FromHandle<CFNumber>(widthNumber.Handle).AsNonNull().ToInt32();
+        var height = CFObject.FromHandle<CFNumber>(heightNumber.Handle).AsNonNull().ToInt32();
         if (width != bitmapBuffer.Width || height != bitmapBuffer.Height)
             throw new ArgumentException($"Incorrect bitmap size: {bitmapBuffer.Width}x{bitmapBuffer.Height}, {width}x{height} expected.");
         
         // check image format
         if (!imageProperties.TryGetValue(CGImageProperties.ColorModel, out var colorModelString)
             || colorModelString?.TypeDescription != nameof(CFString)
-            || CFObject.FromHandle<CFString>(colorModelString.Handle).ToString() != CGImageProperties.ColorModelRGB.ToString())
+            || CFObject.FromHandle<CFString>(colorModelString.Handle).AsNonNull().ToString() != CGImageProperties.ColorModelRGB.ToString())
         {
             throw new Exception($"Only RGB color model is supported.");
         }
 
         // load image
         using var image = imageSource.CreateImage();
+        if (image is null)
+            throw new Exception("Unable to create image.");
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
         
@@ -378,7 +380,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                     return BitmapFormat.Bgra32;
                 if (!imageProperties.TryGetValue(CGImageProperties.ColorModel, out var colorModelString)
                     || colorModelString?.TypeDescription != nameof(CFString)
-                    || CFObject.FromHandle<CFString>(colorModelString.Handle).ToString() != CGImageProperties.ColorModelRGB.ToString())
+                    || CFObject.FromHandle<CFString>(colorModelString.Handle).AsNonNull().ToString() != CGImageProperties.ColorModelRGB.ToString())
                 {
                     throw new Exception($"Only RGB color model is supported.");
                 }
@@ -388,7 +390,7 @@ abstract class MacOSNativeCompressedImageRenderer : CompressedFormatImageRendere
                 if (imageProperties.TryGetValue(depthKey, out var depthNumber)
                     && depthNumber?.TypeDescription == nameof(CFNumber))
                 {
-                    return CFObject.FromHandle<CFNumber>(depthNumber.Handle).ToInt32() switch
+                    return CFObject.FromHandle<CFNumber>(depthNumber.Handle).AsNonNull().ToInt32() switch
                     {  
                         >= 16 => BitmapFormat.Bgra64,
                         _ => BitmapFormat.Bgra32,
