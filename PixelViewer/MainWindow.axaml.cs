@@ -13,6 +13,7 @@ using CarinaStudio.AppSuite.Controls;
 using CarinaStudio.AppSuite.Input;
 using CarinaStudio.AppSuite.Media;
 using CarinaStudio.Collections;
+using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Key = Avalonia.Input.Key;
@@ -41,7 +42,7 @@ namespace Carina.PixelViewer
 
 		// Static fields.
 		static readonly DataFormat<byte[]> DraggingSessionFormat = DataFormat.CreateBytesApplicationFormat("DraggingSession");
-		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>("HasMultipleSessions");
+		static readonly StyledProperty<bool> HasMultipleSessionsProperty = AvaloniaProperty.Register<MainWindow, bool>(nameof(HasMultipleSessions));
 		static bool IsRefreshingAppIconOnMacOSHintDialogShown;
 		static readonly string[] NativeMenuItemIconResourceNames =
 		[
@@ -247,7 +248,7 @@ namespace Carina.PixelViewer
 					if (!session.IsSourceOpened || session.ClearSourceCommand.TryExecute())
 						return;
 				}
-				workspace.DetachAndCloseSession(session);
+				_ = workspace.DetachAndCloseSession(session);
 			});
 		}
 
@@ -320,6 +321,12 @@ namespace Carina.PixelViewer
 
 
 		/// <summary>
+		/// Check whether at least 2 sessions are hosted by the window or not.
+		/// </summary>
+		public bool HasMultipleSessions => this.GetValue(HasMultipleSessionsProperty);
+
+
+		/// <summary>
 		/// Move current session to new workspace.
 		/// </summary>
 		public async Task MoveCurrentSessionToNewWorkspace()
@@ -357,7 +364,7 @@ namespace Carina.PixelViewer
 
 			// close empty session
 			if (emptySession is not null)
-				newWorkspace.DetachAndCloseSession(emptySession);
+				_ = newWorkspace.DetachAndCloseSession(emptySession);
 		}
 
 
@@ -483,7 +490,7 @@ namespace Carina.PixelViewer
 			e.Handled = true;
 
 			// handle file dragging
-			if (e.DataTransfer.HasFiles())
+			if (e.DataTransfer.HasFiles)
 			{
 				if (e.ItemIndex < this.mainTabItems.Count - 1)
 					this.mainTabControl.SelectedIndex = e.ItemIndex;
@@ -544,7 +551,7 @@ namespace Carina.PixelViewer
 			ItemInsertionIndicator.SetInsertingItemBefore(tabItem, false);
 			
 			// drop files
-			if (e.DataTransfer.HasFiles())
+			if (e.DataTransfer.HasFiles)
 			{
 				// find tab
 				if (e.ItemIndex >= this.mainTabItems.Count - 1)
@@ -769,14 +776,9 @@ namespace Carina.PixelViewer
 				case NotifyCollectionChangedAction.Move:
 				{
 					var selectedIndex = this.mainTabControl.SelectedIndex;
-					if (selectedIndex == e.OldStartingIndex)
-						this.StopRendering();
 					this.mainTabItems.Move(e.OldStartingIndex, e.NewStartingIndex);
 					if (selectedIndex == e.OldStartingIndex)
-					{
 						this.mainTabControl.SelectedIndex = e.NewStartingIndex;
-						this.StartRendering();
-					}
 					break;
 				}
 				case NotifyCollectionChangedAction.Remove:
@@ -837,7 +839,7 @@ namespace Carina.PixelViewer
 			data.Add(DraggingSessionFormat, sessionHandle);
 
 			// start dragging session
-			DragDrop.DoDragDropAsync(e.PointerEventArgs, data, DragDropEffects.Move).GetAwaiter().UnsafeOnCompleted(() => sessionHandle.Free());
+			DragDrop.DoDragDropAsync(e.PointerPressedEventArgs, data, DragDropEffects.Move).GetAwaiter().UnsafeOnCompleted(() => sessionHandle.Free());
 		}
 
 

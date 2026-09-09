@@ -4,11 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 		xmlns:abConverters="using:CarinaStudio.Data.Converters"
 		xmlns:aConverters="using:Avalonia.Data.Converters"
+        xmlns:app="using:Carina.PixelViewer"
         xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
 		xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
 		xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.MainWindow"
+        x:DataType="{x:Type appViewModels:Workspace}"
         Name="window"
 		Classes="Tabbed"
         Icon="/PixelViewer.ico"
@@ -138,7 +140,7 @@
 						<NativeMenuItem Command="{Binding #window.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}" Gesture="Cmd+T"/>
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding #window.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}"/>
-						<NativeMenuItem Command="{Binding #window.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}"/>
+						<NativeMenuItem Command="{Binding #window.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}, FallbackValue={x:Null}}"/>
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding #window.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding #window.HasMultipleSessions}"/>
 						<NativeMenuItemSeparator/>
@@ -149,20 +151,13 @@
 			<NativeMenuItem Header="{DynamicResource String/SessionControl.Tools}">
 				<NativeMenuItem.Menu>
 					<NativeMenu>
-						<NativeMenuItem Command="{Binding #window.Application.ShowConfigurationEditor}" CommandParameter="EditConfiguration" Header="Edit Configurations…"/>
+						<NativeMenuItem Command="{Binding #window.((app:App)Application).ShowConfigurationEditor}" CommandParameter="EditConfiguration" Header="Edit Configurations…"/>
 					</NativeMenu>
 				</NativeMenuItem.Menu>
 			</NativeMenuItem>
 		</NativeMenu>
 
 	</Window.Resources>
-
-	<!-- Styles -->
-	<Window.Styles>
-		<Style Selector="CaptionButtons">
-			<Setter Property="MaxHeight" Value="{Binding #window.ExtendClientAreaTitleBarHeightHint}"/>
-		</Style>
-	</Window.Styles>
 	
 	<!-- Content -->
 	<Panel>

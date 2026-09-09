@@ -5,7 +5,8 @@
 + 
 
 ## Improvement
-+ 
++ Improved the overall performance of the user interface.
++ Improved the user experience of full screen mode on macOS.
 
 ## Behavior Changes
 + 

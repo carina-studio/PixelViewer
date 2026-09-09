@@ -315,12 +315,16 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     }
 
 
-    // Image of blue histogram.
-    IImage? BlueHistogramImage => this.GetValue(BlueHistogramImageProperty);
+    /// <summary>
+    /// Get image of blue histogram.
+    /// </summary>
+    public IImage? BlueHistogramImage => this.GetValue(BlueHistogramImageProperty);
 
 
-    // Display scale of blue histogram.
-    double BlueHistogramScaleY => this.GetValue(BlueHistogramScaleYProperty);
+    /// <summary>
+    /// Get display scale of blue histogram.
+    /// </summary>
+    public double BlueHistogramScaleY => this.GetValue(BlueHistogramScaleYProperty);
 
 
     // Detach from histograms.
@@ -462,28 +466,40 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     }
 
 
-    // Image of green histogram.
-    IImage? GreenHistogramImage => this.GetValue(GreenHistogramImageProperty);
+    /// <summary>
+    /// Get image of green histogram.
+    /// </summary>
+    public IImage? GreenHistogramImage => this.GetValue(GreenHistogramImageProperty);
 
 
-    // Display scale of green histogram.
-    double GreenHistogramScaleY => this.GetValue(GreenHistogramScaleYProperty);
+    /// <summary>
+    /// Get display scale of green histogram.
+    /// </summary>
+    public double GreenHistogramScaleY => this.GetValue(GreenHistogramScaleYProperty);
 
 
-    // Pixel offset of highlight of blue.
-    double HighlightOfBlueOffset => this.GetValue(HighlightOfBlueOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of highlight of blue.
+    /// </summary>
+    public double HighlightOfBlueOffset => this.GetValue(HighlightOfBlueOffsetProperty);
 
 
-    // Pixel offset of highlight of green.
-    double HighlightOfGreenOffset => this.GetValue(HighlightOfGreenOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of highlight of green.
+    /// </summary>
+    public double HighlightOfGreenOffset => this.GetValue(HighlightOfGreenOffsetProperty);
 
 
-    // Pixel offset of highlight of luminance.
-    double HighlightOfLuminanceOffset => this.GetValue(HighlightOfLuminanceOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of highlight of luminance.
+    /// </summary>
+    public double HighlightOfLuminanceOffset => this.GetValue(HighlightOfLuminanceOffsetProperty);
 
 
-    // Pixel offset of highlight of red.
-    double HighlightOfRedOffset => this.GetValue(HighlightOfRedOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of highlight of red.
+    /// </summary>
+    public double HighlightOfRedOffset => this.GetValue(HighlightOfRedOffsetProperty);
 
 
     // Initialize.
@@ -590,12 +606,16 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     }
 
 
-    // Image of luminance histogram.
-    IImage? LuminanceHistogramImage => this.GetValue(LuminanceHistogramImageProperty);
+    /// <summary>
+    /// Get image of luminance histogram.
+    /// </summary>
+    public IImage? LuminanceHistogramImage => this.GetValue(LuminanceHistogramImageProperty);
 
 
-    // Display scale of luminance histogram.
-    double LuminanceHistogramScaleY => this.GetValue(LuminanceHistogramScaleYProperty);
+    /// <summary>
+    /// Get display scale of luminance histogram.
+    /// </summary>
+    public double LuminanceHistogramScaleY => this.GetValue(LuminanceHistogramScaleYProperty);
 
 
     // Pixel offset of maximum of blue.
@@ -614,52 +634,76 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     double MaxOfRedOffset => this.GetValue(MaxOfRedOffsetProperty);
 
 
-    // Pixel offset of mean of blue.
-    double MeanOfBlueOffset => this.GetValue(MeanOfBlueOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of mean of blue.
+    /// </summary>
+    public double MeanOfBlueOffset => this.GetValue(MeanOfBlueOffsetProperty);
 
 
-    // Pixel offset of mean of green.
-    double MeanOfGreenOffset => this.GetValue(MeanOfGreenOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of mean of green.
+    /// </summary>
+    public double MeanOfGreenOffset => this.GetValue(MeanOfGreenOffsetProperty);
 
 
-    // Pixel offset of mean of luminance.
-    double MeanOfLuminanceOffset => this.GetValue(MeanOfLuminanceOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of mean of luminance.
+    /// </summary>
+    public double MeanOfLuminanceOffset => this.GetValue(MeanOfLuminanceOffsetProperty);
 
 
-    // Pixel offset of mean of red.
-    double MeanOfRedOffset => this.GetValue(MeanOfRedOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of mean of red.
+    /// </summary>
+    public double MeanOfRedOffset => this.GetValue(MeanOfRedOffsetProperty);
 
 
-    // Pixel offset of median of blue.
-    double MedianOfBlueOffset => this.GetValue(MedianOfBlueOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of median of blue.
+    /// </summary>
+    public double MedianOfBlueOffset => this.GetValue(MedianOfBlueOffsetProperty);
 
 
-    // Pixel offset of median of green.
-    double MedianOfGreenOffset => this.GetValue(MedianOfGreenOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of median of green.
+    /// </summary>
+    public double MedianOfGreenOffset => this.GetValue(MedianOfGreenOffsetProperty);
 
 
-    // Pixel offset of median of luminance.
-    double MedianOfLuminanceOffset => this.GetValue(MedianOfLuminanceOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of median of luminance.
+    /// </summary>
+    public double MedianOfLuminanceOffset => this.GetValue(MedianOfLuminanceOffsetProperty);
 
 
-    // Pixel offset of median of red.
-    double MedianOfRedOffset => this.GetValue(MedianOfRedOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of median of red.
+    /// </summary>
+    public double MedianOfRedOffset => this.GetValue(MedianOfRedOffsetProperty);
 
 
-    // Pixel offset of minimum of blue.
-    double MinOfBlueOffset => this.GetValue(MinOfBlueOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of minimum of blue.
+    /// </summary>
+    public double MinOfBlueOffset => this.GetValue(MinOfBlueOffsetProperty);
 
 
-    // Pixel offset of minimum of green.
-    double MinOfGreenOffset => this.GetValue(MinOfGreenOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of minimum of green.
+    /// </summary>
+    public double MinOfGreenOffset => this.GetValue(MinOfGreenOffsetProperty);
 
 
-    // Pixel offset of minimum of luminance.
-    double MinOfLuminanceOffset => this.GetValue(MinOfLuminanceOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of minimum of luminance.
+    /// </summary>
+    public double MinOfLuminanceOffset => this.GetValue(MinOfLuminanceOffsetProperty);
 
 
-    // Pixel offset of minimum of red.
-    double MinOfRedOffset => this.GetValue(MinOfRedOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of minimum of red.
+    /// </summary>
+    public double MinOfRedOffset => this.GetValue(MinOfRedOffsetProperty);
 
 
     /// <inheritdoc/>
@@ -707,20 +751,28 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     }
     
     
-    // Width of the range between minimum and maximum of blue in pixels.
-    double RangeOfBlue => this.GetValue(RangeOfBlueProperty);
+    /// <summary>
+    /// Get width of the range between minimum and maximum of blue in pixels.
+    /// </summary>
+    public double RangeOfBlue => this.GetValue(RangeOfBlueProperty);
 
 
-    // Width of the range between minimum and maximum of green in pixels.
-    double RangeOfGreen => this.GetValue(RangeOfGreenProperty);
+    /// <summary>
+    /// Get width of the range between minimum and maximum of green in pixels.
+    /// </summary>
+    public double RangeOfGreen => this.GetValue(RangeOfGreenProperty);
 
 
-    // Width of the range between minimum and maximum of luminance in pixels.
-    double RangeOfLuminance => this.GetValue(RangeOfLuminanceProperty);
+    /// <summary>
+    /// Get width of the range between minimum and maximum of luminance in pixels.
+    /// </summary>
+    public double RangeOfLuminance => this.GetValue(RangeOfLuminanceProperty);
 
 
-    // Width of the range between minimum and maximum of red in pixels.
-    double RangeOfRed => this.GetValue(RangeOfRedProperty);
+    /// <summary>
+    /// Get width of the range between minimum and maximum of red in pixels.
+    /// </summary>
+    public double RangeOfRed => this.GetValue(RangeOfRedProperty);
     
     
     /// <summary>
@@ -743,26 +795,38 @@ class BitmapHistogramsView : UserControl<IAppSuiteApplication>
     }
 
 
-    // Image of red histogram.
-    IImage? RedHistogramImage => this.GetValue(RedHistogramImageProperty);
+    /// <summary>
+    /// Get image of red histogram.
+    /// </summary>
+    public IImage? RedHistogramImage => this.GetValue(RedHistogramImageProperty);
 
 
-    // Display scale of red histogram.
-    double RedHistogramScaleY => this.GetValue(RedHistogramScaleYProperty);
+    /// <summary>
+    /// Get display scale of red histogram.
+    /// </summary>
+    public double RedHistogramScaleY => this.GetValue(RedHistogramScaleYProperty);
 
 
-    // Pixel offset of shadow of blue.
-    double ShadowOfBlueOffset => this.GetValue(ShadowOfBlueOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of shadow of blue.
+    /// </summary>
+    public double ShadowOfBlueOffset => this.GetValue(ShadowOfBlueOffsetProperty);
 
 
-    // Pixel offset of shadow of green.
-    double ShadowOfGreenOffset => this.GetValue(ShadowOfGreenOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of shadow of green.
+    /// </summary>
+    public double ShadowOfGreenOffset => this.GetValue(ShadowOfGreenOffsetProperty);
 
 
-    // Pixel offset of shadow of luminance.
-    double ShadowOfLuminanceOffset => this.GetValue(ShadowOfLuminanceOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of shadow of luminance.
+    /// </summary>
+    public double ShadowOfLuminanceOffset => this.GetValue(ShadowOfLuminanceOffsetProperty);
 
 
-    // Pixel offset of shadow of red.
-    double ShadowOfRedOffset => this.GetValue(ShadowOfRedOffsetProperty);
+    /// <summary>
+    /// Get pixel offset of shadow of red.
+    /// </summary>
+    public double ShadowOfRedOffset => this.GetValue(ShadowOfRedOffsetProperty);
 }

@@ -303,171 +303,171 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="AreAdjustableBlackWhiteLevels1"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels1Property = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels1));
+	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels1Prop = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels1));
 	/// <summary>
 	/// Property of <see cref="AreAdjustableBlackWhiteLevels2"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels2Property = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels2));
+	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels2Prop = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels2));
 	/// <summary>
 	/// Property of <see cref="AreAdjustableBlackWhiteLevels3"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels3Property = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels3));
+	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels3Prop = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels3));
 	/// <summary>
 	/// Property of <see cref="BayerPattern"/>.
 	/// </summary>
-	public static readonly ObservableProperty<BayerPattern> BayerPatternProperty = ObservableProperty.Register<Session, BayerPattern>(nameof(BayerPattern));
+	public static readonly ObservableProperty<BayerPattern> BayerPatternProp = ObservableProperty.Register<Session, BayerPattern>(nameof(BayerPattern));
 	/// <summary>
 	/// Property of <see cref="BlueColorAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> BlueColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> BlueColorAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(BlueColorAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="BlueColorGain"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> BlueColorGainProperty = ObservableProperty.Register<Session, double>(nameof(BlueColorGain), 1.0, coerce: (_, it) => ImageRenderingOptions.GetValidRgbGain(it));
+	public static readonly ObservableProperty<double> BlueColorGainProp = ObservableProperty.Register<Session, double>(nameof(BlueColorGain), 1.0, coerce: (_, it) => ImageRenderingOptions.GetValidRgbGain(it));
 	/// <summary>
 	/// Property of <see cref="BrightnessAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> BrightnessAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(BrightnessAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> BrightnessAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(BrightnessAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="ByteOrdering"/>.
 	/// </summary>
-	public static readonly ObservableProperty<ByteOrdering> ByteOrderingProperty = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
+	public static readonly ObservableProperty<ByteOrdering> ByteOrderingProp = ObservableProperty.Register<Session, ByteOrdering>(nameof(ByteOrdering), ByteOrdering.BigEndian);
 	/// <summary>
 	/// Property of <see cref="ColorSpace"/>.
 	/// </summary>
-	public static readonly ObservableProperty<ColorSpace> ColorSpaceProperty = ObservableProperty.Register<Session, ColorSpace>(nameof(ColorSpace), ColorSpace.Default);
+	public static readonly ObservableProperty<ColorSpace> ColorSpaceProp = ObservableProperty.Register<Session, ColorSpace>(nameof(ColorSpace), ColorSpace.Default);
 	/// <summary>
 	/// Property of <see cref="ContrastAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> ContrastAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> ContrastAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="CustomTitle"/>.
 	/// </summary>
-	public static readonly ObservableProperty<string?> CustomTitleProperty = ObservableProperty.Register<Session, string?>(nameof(CustomTitle));
+	public static readonly ObservableProperty<string?> CustomTitleProp = ObservableProperty.Register<Session, string?>(nameof(CustomTitle));
 	/// <summary>
 	/// Property of <see cref="DataOffset"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> DataOffsetProperty = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
+	public static readonly ObservableProperty<long> DataOffsetProp = ObservableProperty.Register<Session, long>(nameof(DataOffset), 0L);
 	/// <summary>
 	/// Property of <see cref="DemosaicingAlgorithm"/>.
 	/// </summary>
-	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProperty = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), Media.Demosaicing.DemosaicingAlgorithms.Default, coerce: (session, it) => it.IsBayerPatternSupported(session.BayerPattern) ? it : session.SelectDefaultDemosaicingAlgorithm(session.BayerPattern));
+	public static readonly ObservableProperty<DemosaicingAlgorithm> DemosaicingAlgorithmProp = ObservableProperty.Register<Session, DemosaicingAlgorithm>(nameof(DemosaicingAlgorithm), Media.Demosaicing.DemosaicingAlgorithms.Default, coerce: (session, it) => it.IsBayerPatternSupported(session.BayerPattern) ? it : session.SelectDefaultDemosaicingAlgorithm(session.BayerPattern));
 	/// <summary>
 	/// Property of <see cref="FitImageToViewport"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> FitImageToViewportProperty = ObservableProperty.Register<Session, bool>(nameof(FitImageToViewport), true);
+	public static readonly ObservableProperty<bool> FitImageToViewportProp = ObservableProperty.Register<Session, bool>(nameof(FitImageToViewport), true);
 	/// <summary>
 	/// Property of <see cref="FrameCount"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> FrameCountProperty = ObservableProperty.Register<Session, long>(nameof(FrameCount), 0);
+	public static readonly ObservableProperty<long> FrameCountProp = ObservableProperty.Register<Session, long>(nameof(FrameCount), 0);
 	/// <summary>
 	/// Property of <see cref="FrameNumber"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> FrameNumberProperty = ObservableProperty.Register<Session, long>(nameof(FrameNumber), 0);
+	public static readonly ObservableProperty<long> FrameNumberProp = ObservableProperty.Register<Session, long>(nameof(FrameNumber), 0);
 	/// <summary>
 	/// Property of <see cref="FramePaddingSize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> FramePaddingSizeProperty = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
+	public static readonly ObservableProperty<long> FramePaddingSizeProp = ObservableProperty.Register<Session, long>(nameof(FramePaddingSize), 0L);
 	/// <summary>
 	/// Property of <see cref="FramePlaybackRate"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> FramePlaybackRateProperty = ObservableProperty.Register<Session, int>(nameof(FramePlaybackRate), 30, coerce: (_, it) => Math.Max(MinFramePlaybackRate, Math.Min(MaxFramePlaybackRate, it)));
+	public static readonly ObservableProperty<int> FramePlaybackRateProp = ObservableProperty.Register<Session, int>(nameof(FramePlaybackRate), 30, coerce: (_, it) => Math.Max(MinFramePlaybackRate, Math.Min(MaxFramePlaybackRate, it)));
 	/// <summary>
 	/// Property of <see cref="GreenColorAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> GreenColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> GreenColorAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(GreenColorAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="GreenColorGain"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> GreenColorGainProperty = ObservableProperty.Register<Session, double>(nameof(GreenColorGain), 1.0, coerce: (_, it) => ImageRenderingOptions.GetValidRgbGain(it));
+	public static readonly ObservableProperty<double> GreenColorGainProp = ObservableProperty.Register<Session, double>(nameof(GreenColorGain), 1.0, coerce: (_, it) => ImageRenderingOptions.GetValidRgbGain(it));
 	/// <summary>
 	/// Property of <see cref="HasBrightnessAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasBrightnessAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasBrightnessAdjustment));
+	public static readonly ObservableProperty<bool> HasBrightnessAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasBrightnessAdjustment));
 	/// <summary>
 	/// Property of <see cref="HasColorAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasColorAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasColorAdjustment));
+	public static readonly ObservableProperty<bool> HasColorAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasColorAdjustment));
 	/// <summary>
 	/// Property of <see cref="HasColorTables"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasColorTablesProperty = ObservableProperty.Register<Session, bool>(nameof(HasColorTables));
+	public static readonly ObservableProperty<bool> HasColorTablesProp = ObservableProperty.Register<Session, bool>(nameof(HasColorTables));
 	/// <summary>
 	/// Property of <see cref="HasContrastAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasContrastAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasContrastAdjustment));
+	public static readonly ObservableProperty<bool> HasContrastAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasContrastAdjustment));
 	/// <summary>
 	/// Property of <see cref="HasHighlightAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasHighlightAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasHighlightAdjustment));
+	public static readonly ObservableProperty<bool> HasHighlightAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasHighlightAdjustment));
 	/// <summary>
 	/// Property of <see cref="HasHistograms"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasHistogramsProperty = ObservableProperty.Register<Session, bool>(nameof(HasHistograms));
+	public static readonly ObservableProperty<bool> HasHistogramsProp = ObservableProperty.Register<Session, bool>(nameof(HasHistograms));
 	/// <summary>
 	/// Property of <see cref="HasImagePlane1"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasImagePlane1Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane1), true);
+	public static readonly ObservableProperty<bool> HasImagePlane1Prop = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane1), true);
 	/// <summary>
 	/// Property of <see cref="HasImagePlane2"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasImagePlane2Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane2));
+	public static readonly ObservableProperty<bool> HasImagePlane2Prop = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane2));
 	/// <summary>
 	/// Property of <see cref="HasImagePlane3"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasImagePlane3Property = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane3));
+	public static readonly ObservableProperty<bool> HasImagePlane3Prop = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane3));
 	/// <summary>
 	/// Property of <see cref="HasMultipleByteOrderings"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasMultipleByteOrderingsProperty = ObservableProperty.Register<Session, bool>(nameof(HasMultipleByteOrderings));
+	public static readonly ObservableProperty<bool> HasMultipleByteOrderingsProp = ObservableProperty.Register<Session, bool>(nameof(HasMultipleByteOrderings));
 	/// <summary>
 	/// Property of <see cref="HasMultipleFrames"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasMultipleFramesProperty = ObservableProperty.Register<Session, bool>(nameof(HasMultipleFrames));
+	public static readonly ObservableProperty<bool> HasMultipleFramesProp = ObservableProperty.Register<Session, bool>(nameof(HasMultipleFrames));
 	/// <summary>
 	/// Property of <see cref="HasQuarterSizeRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasQuarterSizeRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(HasQuarterSizeRenderedImage));
+	public static readonly ObservableProperty<bool> HasQuarterSizeRenderedImageProp = ObservableProperty.Register<Session, bool>(nameof(HasQuarterSizeRenderedImage));
 	/// <summary>
 	/// Property of <see cref="HasRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderedImage));
+	public static readonly ObservableProperty<bool> HasRenderedImageProp = ObservableProperty.Register<Session, bool>(nameof(HasRenderedImage));
 	/// <summary>
 	/// Property of <see cref="HasRenderingError"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasRenderingErrorProperty = ObservableProperty.Register<Session, bool>(nameof(HasRenderingError));
+	public static readonly ObservableProperty<bool> HasRenderingErrorProp = ObservableProperty.Register<Session, bool>(nameof(HasRenderingError));
 	/// <summary>
 	/// Property of <see cref="HasRgbGain"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasRgbGainProperty = ObservableProperty.Register<Session, bool>(nameof(HasRgbGain));
+	public static readonly ObservableProperty<bool> HasRgbGainProp = ObservableProperty.Register<Session, bool>(nameof(HasRgbGain));
 	/// <summary>
 	/// Property of <see cref="HasSaturationAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasSaturationAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasSaturationAdjustment));
+	public static readonly ObservableProperty<bool> HasSaturationAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasSaturationAdjustment));
 	/// <summary>
 	/// Property of <see cref="HasSelectedRenderedImagePixel"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProperty = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
+	public static readonly ObservableProperty<bool> HasSelectedRenderedImagePixelProp = ObservableProperty.Register<Session, bool>(nameof(HasSelectedRenderedImagePixel));
 	/// <summary>
 	/// Property of <see cref="HasShadowAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasShadowAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasShadowAdjustment));
+	public static readonly ObservableProperty<bool> HasShadowAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasShadowAdjustment));
 	/// <summary>
 	/// Property of <see cref="HasSourceDataSize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasSourceDataSizeProperty = ObservableProperty.Register<Session, bool>(nameof(HasSourceDataSize));
+	public static readonly ObservableProperty<bool> HasSourceDataSizeProp = ObservableProperty.Register<Session, bool>(nameof(HasSourceDataSize));
 	/// <summary>
 	/// Property of <see cref="HasVibranceAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> HasVibranceAdjustmentProperty = ObservableProperty.Register<Session, bool>(nameof(HasVibranceAdjustment));
+	public static readonly ObservableProperty<bool> HasVibranceAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasVibranceAdjustment));
 	/// <summary>
 	/// Property of <see cref="HighlightAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> HighlightAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(HighlightAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> HighlightAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(HighlightAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="HistogramsPanelSize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> HistogramsPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(HistogramsPanelSize), 170,
+	public static readonly ObservableProperty<double> HistogramsPanelSizeProp = ObservableProperty.Register<Session, double>(nameof(HistogramsPanelSize), 170,
 		coerce: (_, it) =>
 		{
 			if (it >= MaxHistogramsPanelSize)
@@ -480,251 +480,251 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="Histograms"/>.
 	/// </summary>
-	public static readonly ObservableProperty<BitmapHistograms?> HistogramsProperty = ObservableProperty.Register<Session, BitmapHistograms?>(nameof(Histograms));
+	public static readonly ObservableProperty<BitmapHistograms?> HistogramsProp = ObservableProperty.Register<Session, BitmapHistograms?>(nameof(Histograms));
 	/// <summary>
 	/// Property of <see cref="ImageDisplayRotation"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> ImageDisplayRotationProperty = ObservableProperty.Register<Session, double>(nameof(ImageDisplayRotation));
+	public static readonly ObservableProperty<double> ImageDisplayRotationProp = ObservableProperty.Register<Session, double>(nameof(ImageDisplayRotation));
 	/// <summary>
 	/// Property of <see cref="ImageDisplayScale"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> ImageDisplayScaleProperty = ObservableProperty.Register<Session, double>(nameof(ImageDisplayScale), double.NaN);
+	public static readonly ObservableProperty<double> ImageDisplayScaleProp = ObservableProperty.Register<Session, double>(nameof(ImageDisplayScale), double.NaN);
 	/// <summary>
 	/// Property of <see cref="ImageDisplaySize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Size> ImageDisplaySizeProperty = ObservableProperty.Register<Session, Size>(nameof(ImageDisplaySize));
+	public static readonly ObservableProperty<Size> ImageDisplaySizeProp = ObservableProperty.Register<Session, Size>(nameof(ImageDisplaySize));
 	/// <summary>
 	/// Property of <see cref="ImageHeight"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> ImageHeightProperty = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: (_, it) => Math.Max(1, it));
+	public static readonly ObservableProperty<int> ImageHeightProp = ObservableProperty.Register<Session, int>(nameof(ImageHeight), 1, coerce: (_, it) => Math.Max(1, it));
 	/// <summary>
 	/// Property of <see cref="ImagePlaneCount"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> ImagePlaneCountProperty = ObservableProperty.Register<Session, int>(nameof(ImagePlaneCount), 1);
+	public static readonly ObservableProperty<int> ImagePlaneCountProp = ObservableProperty.Register<Session, int>(nameof(ImagePlaneCount), 1);
 	/// <summary>
 	/// Property of <see cref="ImageViewportSize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Size> ImageViewportSizeProperty = ObservableProperty.Register<Session, Size>(nameof(ImageViewportSize));
+	public static readonly ObservableProperty<Size> ImageViewportSizeProp = ObservableProperty.Register<Session, Size>(nameof(ImageViewportSize));
 	/// <summary>
 	/// Property of <see cref="ImageRenderer"/>.
 	/// </summary>
-	public static readonly ObservableProperty<IImageRenderer?> ImageRendererProperty = ObservableProperty.Register<Session, IImageRenderer?>(nameof(ImageRenderer));
+	public static readonly ObservableProperty<IImageRenderer?> ImageRendererProp = ObservableProperty.Register<Session, IImageRenderer?>(nameof(ImageRenderer));
 	/// <summary>
 	/// Property of <see cref="ImageWidth"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> ImageWidthProperty = ObservableProperty.Register<Session, int>(nameof(ImageWidth), 1, coerce: (_, it) => Math.Max(1, it));
+	public static readonly ObservableProperty<int> ImageWidthProp = ObservableProperty.Register<Session, int>(nameof(ImageWidth), 1, coerce: (_, it) => Math.Max(1, it));
 	/// <summary>
 	/// Property of <see cref="InsufficientMemoryForRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> InsufficientMemoryForRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(InsufficientMemoryForRenderedImage));
+	public static readonly ObservableProperty<bool> InsufficientMemoryForRenderedImageProp = ObservableProperty.Register<Session, bool>(nameof(InsufficientMemoryForRenderedImage));
 	/// <summary>
 	/// Property of <see cref="IsActivated"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsActivatedProperty = ObservableProperty.Register<Session, bool>(nameof(IsActivated));
+	public static readonly ObservableProperty<bool> IsActivatedProp = ObservableProperty.Register<Session, bool>(nameof(IsActivated));
 	/// <summary>
 	/// Property of <see cref="IsAdjustableEffectiveBits1"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits1Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits1));
+	public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits1Prop = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits1));
 	/// <summary>
 	/// Property of <see cref="IsAdjustableEffectiveBits2"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits2Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits2));
+	public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits2Prop = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits2));
 	/// <summary>
 	/// Property of <see cref="IsAdjustableEffectiveBits3"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
+	public static readonly ObservableProperty<bool> IsAdjustableEffectiveBits3Prop = ObservableProperty.Register<Session, bool>(nameof(IsAdjustableEffectiveBits3));
 	/// <summary>
 	/// Property of <see cref="IsAdjustablePixelStride1"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAdjustablePixelStride1Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride1));
+	public static readonly ObservableProperty<bool> IsAdjustablePixelStride1Prop = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride1));
 	/// <summary>
 	/// Property of <see cref="IsAdjustablePixelStride2"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAdjustablePixelStride2Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride2));
+	public static readonly ObservableProperty<bool> IsAdjustablePixelStride2Prop = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride2));
 	/// <summary>
 	/// Property of <see cref="IsAdjustablePixelStride3"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAdjustablePixelStride3Property = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride3));
+	public static readonly ObservableProperty<bool> IsAdjustablePixelStride3Prop = ObservableProperty.Register<Session, bool>(nameof(IsAdjustablePixelStride3));
 	/// <summary>
 	/// Property of <see cref="IsAlphaChannelAvailable"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsAlphaChannelAvailableProperty = ObservableProperty.Register<Session, bool>(nameof(IsAlphaChannelAvailable));
+	public static readonly ObservableProperty<bool> IsAlphaChannelAvailableProp = ObservableProperty.Register<Session, bool>(nameof(IsAlphaChannelAvailable));
 	/// <summary>
 	/// Property of <see cref="IsBayerPatternSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsBayerPatternSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBayerPatternSupported));
+	public static readonly ObservableProperty<bool> IsBayerPatternSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsBayerPatternSupported));
 	/// <summary>
 	/// Property of <see cref="IsBrightnessAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsBrightnessAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsBrightnessAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsBrightnessAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsBrightnessAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsColorAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsColorAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsColorAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsColorAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsColorAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsColorSpaceManagementEnabled"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsColorSpaceManagementEnabledProperty = ObservableProperty.Register<Session, bool>(nameof(IsColorSpaceManagementEnabled));
+	public static readonly ObservableProperty<bool> IsColorSpaceManagementEnabledProp = ObservableProperty.Register<Session, bool>(nameof(IsColorSpaceManagementEnabled));
 	/// <summary>
 	/// Property of <see cref="IsCompressedImageFormat"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsCompressedImageFormatProperty = ObservableProperty.Register<Session, bool>(nameof(IsCompressedImageFormat));
+	public static readonly ObservableProperty<bool> IsCompressedImageFormatProp = ObservableProperty.Register<Session, bool>(nameof(IsCompressedImageFormat));
 	/// <summary>
 	/// Property of <see cref="IsContrastAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsContrastAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsContrastAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsContrastAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsContrastAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsConvertingColorSpace"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsConvertingColorSpaceProperty = ObservableProperty.Register<Session, bool>(nameof(IsConvertingColorSpace));
+	public static readonly ObservableProperty<bool> IsConvertingColorSpaceProp = ObservableProperty.Register<Session, bool>(nameof(IsConvertingColorSpace));
 	/// <summary>
 	/// Property of <see cref="IsDemosaicingSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsDemosaicingSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsDemosaicingSupported));
+	public static readonly ObservableProperty<bool> IsDemosaicingSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsDemosaicingSupported));
 	/// <summary>
 	/// Property of <see cref="IsFilteringRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsFilteringRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImage));
+	public static readonly ObservableProperty<bool> IsFilteringRenderedImageProp = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImage));
 	/// <summary>
 	/// Property of <see cref="IsFilteringRenderedImageNeeded"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsFilteringRenderedImageNeededProperty = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImageNeeded));
+	public static readonly ObservableProperty<bool> IsFilteringRenderedImageNeededProp = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImageNeeded));
 	/// <summary>
 	/// Property of <see cref="IsGrayscaleFilterEnabled"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsGrayscaleFilterEnabledProperty = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterEnabled));
+	public static readonly ObservableProperty<bool> IsGrayscaleFilterEnabledProp = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterEnabled));
 	/// <summary>
 	/// Property of <see cref="IsGrayscaleFilterSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsGrayscaleFilterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterSupported));
+	public static readonly ObservableProperty<bool> IsGrayscaleFilterSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterSupported));
 	/// <summary>
 	/// Property of <see cref="IsHibernated"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsHibernatedProperty = ObservableProperty.Register<Session, bool>(nameof(IsHibernated));
+	public static readonly ObservableProperty<bool> IsHibernatedProp = ObservableProperty.Register<Session, bool>(nameof(IsHibernated));
 	/// <summary>
 	/// Property of <see cref="IsHighlightAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsHighlightAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsHighlightAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsHighlightAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsHighlightAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsHistogramMeanMarkerVisible"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsHistogramMeanMarkerVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramMeanMarkerVisible), true);
+	public static readonly ObservableProperty<bool> IsHistogramMeanMarkerVisibleProp = ObservableProperty.Register<Session, bool>(nameof(IsHistogramMeanMarkerVisible), true);
 	/// <summary>
 	/// Property of <see cref="IsHistogramsVisible"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsHistogramsVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
+	public static readonly ObservableProperty<bool> IsHistogramsVisibleProp = ObservableProperty.Register<Session, bool>(nameof(IsHistogramsVisible));
 	/// <summary>
 	/// Property of <see cref="IsImageFlippedX"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsImageFlippedXProperty = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedX));
+	public static readonly ObservableProperty<bool> IsImageFlippedXProp = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedX));
 	/// <summary>
 	/// Property of <see cref="IsImageFlippedY"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsImageFlippedYProperty = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedY));
+	public static readonly ObservableProperty<bool> IsImageFlippedYProp = ObservableProperty.Register<Session, bool>(nameof(IsImageFlippedY));
 	/// <summary>
 	/// Property of <see cref="IsOpeningSource"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsOpeningSourceProperty = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSource));
+	public static readonly ObservableProperty<bool> IsOpeningSourceProp = ObservableProperty.Register<Session, bool>(nameof(IsOpeningSource));
 	/// <summary>
 	/// Property of <see cref="IsFramePlaybackLooping"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsFramePlaybackLoopingProperty = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackLooping), true);
+	public static readonly ObservableProperty<bool> IsFramePlaybackLoopingProp = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackLooping), true);
 	/// <summary>
 	/// Property of <see cref="IsFramePlaybackRateUnlimited"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsFramePlaybackRateUnlimitedProperty = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackRateUnlimited));
+	public static readonly ObservableProperty<bool> IsFramePlaybackRateUnlimitedProp = ObservableProperty.Register<Session, bool>(nameof(IsFramePlaybackRateUnlimited));
 	/// <summary>
 	/// Property of <see cref="IsPlayingFrames"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsPlayingFramesProperty = ObservableProperty.Register<Session, bool>(nameof(IsPlayingFrames));
+	public static readonly ObservableProperty<bool> IsPlayingFramesProp = ObservableProperty.Register<Session, bool>(nameof(IsPlayingFrames));
 	/// <summary>
 	/// Property of <see cref="IsProcessingImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsProcessingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsProcessingImage));
+	public static readonly ObservableProperty<bool> IsProcessingImageProp = ObservableProperty.Register<Session, bool>(nameof(IsProcessingImage));
 	/// <summary>
 	/// Property of <see cref="IsProVersionActivated"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsProVersionActivatedProperty = ObservableProperty.Register<Session, bool>(nameof(IsProVersionActivated));
+	public static readonly ObservableProperty<bool> IsProVersionActivatedProp = ObservableProperty.Register<Session, bool>(nameof(IsProVersionActivated));
 	/// <summary>
 	/// Property of <see cref="IsRenderingImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsRenderingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
+	public static readonly ObservableProperty<bool> IsRenderingImageProp = ObservableProperty.Register<Session, bool>(nameof(IsRenderingImage));
 	/// <summary>
 	/// Property of <see cref="IsRenderingParametersPanelVisible"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsRenderingParametersPanelVisibleProperty = ObservableProperty.Register<Session, bool>(nameof(IsRenderingParametersPanelVisible), true);
+	public static readonly ObservableProperty<bool> IsRenderingParametersPanelVisibleProp = ObservableProperty.Register<Session, bool>(nameof(IsRenderingParametersPanelVisible), true);
 	/// <summary>
 	/// Property of <see cref="IsRgbGainSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsRgbGainSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsRgbGainSupported));
+	public static readonly ObservableProperty<bool> IsRgbGainSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsRgbGainSupported));
 	/// <summary>
 	/// Property of <see cref="IsSaturationAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsSaturationAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSaturationAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsSaturationAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsSaturationAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsSavingFilteredImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsSavingFilteredImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingFilteredImage));
+	public static readonly ObservableProperty<bool> IsSavingFilteredImageProp = ObservableProperty.Register<Session, bool>(nameof(IsSavingFilteredImage));
 	/// <summary>
 	/// Property of <see cref="IsSavingImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsSavingImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingImage));
+	public static readonly ObservableProperty<bool> IsSavingImageProp = ObservableProperty.Register<Session, bool>(nameof(IsSavingImage));
 	/// <summary>
 	/// Property of <see cref="IsSavingRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsSavingRenderedImageProperty = ObservableProperty.Register<Session, bool>(nameof(IsSavingRenderedImage));
+	public static readonly ObservableProperty<bool> IsSavingRenderedImageProp = ObservableProperty.Register<Session, bool>(nameof(IsSavingRenderedImage));
 	/// <summary>
 	/// Property of <see cref="IsShadowAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsShadowAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsShadowAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsShadowAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsShadowAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsSourceOpened"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsSourceOpenedProperty = ObservableProperty.Register<Session, bool>(nameof(IsSourceOpened));
+	public static readonly ObservableProperty<bool> IsSourceOpenedProp = ObservableProperty.Register<Session, bool>(nameof(IsSourceOpened));
 	/// <summary>
 	/// Property of <see cref="IsVibranceAdjustmentSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsVibranceAdjustmentSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsVibranceAdjustmentSupported));
+	public static readonly ObservableProperty<bool> IsVibranceAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsVibranceAdjustmentSupported));
 	/// <summary>
 	/// Property of <see cref="IsYuvToBgraConverterSupported"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsYuvToBgraConverterSupportedProperty = ObservableProperty.Register<Session, bool>(nameof(IsYuvToBgraConverterSupported));
+	public static readonly ObservableProperty<bool> IsYuvToBgraConverterSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsYuvToBgraConverterSupported));
 	/// <summary>
 	/// Property of <see cref="IsZooming"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> IsZoomingProperty = ObservableProperty.Register<Session, bool>(nameof(IsZooming));
+	public static readonly ObservableProperty<bool> IsZoomingProp = ObservableProperty.Register<Session, bool>(nameof(IsZooming));
 	/// <summary>
 	/// Property of <see cref="LuminanceHistogramGeometry"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Geometry?> LuminanceHistogramGeometryProperty = ObservableProperty.Register<Session, Geometry?>(nameof(LuminanceHistogramGeometry));
+	public static readonly ObservableProperty<Geometry?> LuminanceHistogramGeometryProp = ObservableProperty.Register<Session, Geometry?>(nameof(LuminanceHistogramGeometry));
 	/// <summary>
 	/// Property of <see cref="Profile"/>.
 	/// </summary>
-	public static readonly ObservableProperty<ImageRenderingProfile> ProfileProperty = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default);
+	public static readonly ObservableProperty<ImageRenderingProfile> ProfileProp = ObservableProperty.Register<Session, ImageRenderingProfile>(nameof(Profile), ImageRenderingProfile.Default);
 	/// <summary>
 	/// Property of <see cref="QuarterSizeRenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Bitmap?> QuarterSizeRenderedImageProperty = ObservableProperty.Register<Session, Bitmap?>(nameof(QuarterSizeRenderedImage));
+	public static readonly ObservableProperty<Bitmap?> QuarterSizeRenderedImageProp = ObservableProperty.Register<Session, Bitmap?>(nameof(QuarterSizeRenderedImage));
 	/// <summary>
 	/// Property of <see cref="RedColorAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> RedColorAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(RedColorAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> RedColorAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(RedColorAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="RedColorGain"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> RedColorGainProperty = ObservableProperty.Register<Session, double>(nameof(RedColorGain), 1.0, coerce: (_, it) => ImageRenderingOptions.GetValidRgbGain(it));
+	public static readonly ObservableProperty<double> RedColorGainProp = ObservableProperty.Register<Session, double>(nameof(RedColorGain), 1.0, coerce: (_, it) => ImageRenderingOptions.GetValidRgbGain(it));
 	/// <summary>
 	/// Property of <see cref="RenderedImage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Bitmap?> RenderedImageProperty = ObservableProperty.Register<Session, Bitmap?>(nameof(RenderedImage));
+	public static readonly ObservableProperty<Bitmap?> RenderedImageProp = ObservableProperty.Register<Session, Bitmap?>(nameof(RenderedImage));
 	/// <summary>
 	/// Property of <see cref="RenderedImagesMemoryUsage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> RenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(RenderedImagesMemoryUsage));
+	public static readonly ObservableProperty<long> RenderedImagesMemoryUsageProp = ObservableProperty.Register<Session, long>(nameof(RenderedImagesMemoryUsage));
 	/// <summary>
 	/// Property of <see cref="RenderingParametersPanelSize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> RenderingParametersPanelSizeProperty = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, 
+	public static readonly ObservableProperty<double> RenderingParametersPanelSizeProp = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, 
 		coerce: (_, it) =>
 		{
 			if (it >= MaxRenderingParametersPanelSize)
@@ -737,7 +737,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="RequestedImageDisplayScale"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> RequestedImageDisplayScaleProperty = ObservableProperty.Register<Session, double>(nameof(RequestedImageDisplayScale), 1.0,
+	public static readonly ObservableProperty<double> RequestedImageDisplayScaleProp = ObservableProperty.Register<Session, double>(nameof(RequestedImageDisplayScale), 1.0,
 		coerce: (_, it) =>
 		{
 			if (it < MinRenderedImageScale)
@@ -750,7 +750,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="SaturationAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> SaturationAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(SaturationAdjustment), 0, 
+	public static readonly ObservableProperty<double> SaturationAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(SaturationAdjustment), 0, 
 		coerce: (_, it) => 
 		{
 			if (it < -1)
@@ -763,61 +763,61 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="ScreenPixelDensity"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> ScreenPixelDensityProperty = ObservableProperty.Register<Session, double>(nameof(ScreenPixelDensity), 1, 
+	public static readonly ObservableProperty<double> ScreenPixelDensityProp = ObservableProperty.Register<Session, double>(nameof(ScreenPixelDensity), 1, 
 		coerce: (_, it) => Math.Max(1, it),
 		validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelColor"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Color64> SelectedRenderedImagePixelColorProperty = ObservableProperty.Register<Session, Color64>(nameof(SelectedRenderedImagePixelColor));
+	public static readonly ObservableProperty<Color64> SelectedRenderedImagePixelColorProp = ObservableProperty.Register<Session, Color64>(nameof(SelectedRenderedImagePixelColor));
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelLabColor"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Tuple<double, double, double>> SelectedRenderedImagePixelLabColorProperty = ObservableProperty.Register<Session, Tuple<double, double, double>>(nameof(SelectedRenderedImagePixelLabColor), new(0, 0, 0));
+	public static readonly ObservableProperty<Tuple<double, double, double>> SelectedRenderedImagePixelLabColorProp = ObservableProperty.Register<Session, Tuple<double, double, double>>(nameof(SelectedRenderedImagePixelLabColor), new(0, 0, 0));
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelXyzColor"/>.
 	/// </summary>
-	public static readonly ObservableProperty<Tuple<double, double, double>> SelectedRenderedImagePixelXyzColorProperty = ObservableProperty.Register<Session, Tuple<double, double, double>>(nameof(SelectedRenderedImagePixelXyzColor), new(0, 0, 0));
+	public static readonly ObservableProperty<Tuple<double, double, double>> SelectedRenderedImagePixelXyzColorProp = ObservableProperty.Register<Session, Tuple<double, double, double>>(nameof(SelectedRenderedImagePixelXyzColor), new(0, 0, 0));
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelPositionX"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionXProperty = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionX), -1);
+	public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionXProp = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionX), -1);
 	/// <summary>
 	/// Property of <see cref="SelectedRenderedImagePixelPositionY"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionYProperty = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionY), -1);
+	public static readonly ObservableProperty<int> SelectedRenderedImagePixelPositionYProp = ObservableProperty.Register<Session, int>(nameof(SelectedRenderedImagePixelPositionY), -1);
 	/// <summary>
 	/// Property of <see cref="ShadowAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> ShadowAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(ShadowAdjustment), 0, validate: double.IsFinite);
+	public static readonly ObservableProperty<double> ShadowAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(ShadowAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="SourceDataSize"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> SourceDataSizeProperty = ObservableProperty.Register<Session, long>(nameof(SourceDataSize));
+	public static readonly ObservableProperty<long> SourceDataSizeProp = ObservableProperty.Register<Session, long>(nameof(SourceDataSize));
 	/// <summary>
 	/// Property of <see cref="SourceFileName"/>.
 	/// </summary>
-	public static readonly ObservableProperty<string?> SourceFileNameProperty = ObservableProperty.Register<Session, string?>(nameof(SourceFileName));
+	public static readonly ObservableProperty<string?> SourceFileNameProp = ObservableProperty.Register<Session, string?>(nameof(SourceFileName));
 	/// <summary>
 	/// Property of <see cref="SourceSizeString"/>.
 	/// </summary>
-	public static readonly ObservableProperty<string?> SourceSizeStringProperty = ObservableProperty.Register<Session, string?>(nameof(SourceSizeString));
+	public static readonly ObservableProperty<string?> SourceSizeStringProp = ObservableProperty.Register<Session, string?>(nameof(SourceSizeString));
 	/// <summary>
 	/// Property of <see cref="SourceImageEffectiveBits"/>.
 	/// </summary>
-	public static readonly ObservableProperty<int> SourceImageEffectiveBitsProperty = ObservableProperty.Register<Session, int>(nameof(SourceImageEffectiveBits), 8);
+	public static readonly ObservableProperty<int> SourceImageEffectiveBitsProp = ObservableProperty.Register<Session, int>(nameof(SourceImageEffectiveBits), 8);
 	/// <summary>
 	/// Property of <see cref="TotalRenderedImagesMemoryUsage"/>.
 	/// </summary>
-	public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProperty = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
+	public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProp = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
 	/// <summary>
 	/// Property of <see cref="UseLinearColorSpace"/>.
 	/// </summary>
-	public static readonly ObservableProperty<bool> UseLinearColorSpaceProperty = ObservableProperty.Register<Session, bool>(nameof(UseLinearColorSpace), false);
+	public static readonly ObservableProperty<bool> UseLinearColorSpaceProp = ObservableProperty.Register<Session, bool>(nameof(UseLinearColorSpace), false);
 	/// <summary>
 	/// Property of <see cref="VibranceAdjustment"/>.
 	/// </summary>
-	public static readonly ObservableProperty<double> VibranceAdjustmentProperty = ObservableProperty.Register<Session, double>(nameof(VibranceAdjustment), 0, 
+	public static readonly ObservableProperty<double> VibranceAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(VibranceAdjustment), 0, 
 		coerce: (_, it) => 
 		{
 			if (it < -1)
@@ -830,7 +830,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Property of <see cref="YuvToBgraConverter"/>.
 	/// </summary>
-	public static readonly ObservableProperty<YuvToBgraConverter> YuvToBgraConverterProperty = ObservableProperty.Register<Session, YuvToBgraConverter>(nameof(YuvToBgraConverter), YuvToBgraConverter.Default);
+	public static readonly ObservableProperty<YuvToBgraConverter> YuvToBgraConverterProp = ObservableProperty.Register<Session, YuvToBgraConverter>(nameof(YuvToBgraConverter), YuvToBgraConverter.Default);
 
 
 	// Constants.
@@ -851,9 +851,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	static readonly SettingKey<bool> IsInitFramePlaybackRateUnlimited = new("Session.IsInitFramePlaybackRateUnlimited", false);
 	static readonly SettingKey<bool> IsInitHistogramMeanMarkerVisible = new("Session.IsInitHistogramMeanMarkerVisible", true);
 	static readonly SettingKey<bool> IsInitHistogramsPanelVisible = new("Session.IsInitHistogramsPanelVisible", false);
-	static readonly SettingKey<int> LatestFramePlaybackRate = new("Session.LatestFramePlaybackRate", FramePlaybackRateProperty.DefaultValue);
-	static readonly SettingKey<int> LatestHistogramsPanelSize = new("Session.LatestHistogramsPanelSize", (int)(HistogramsPanelSizeProperty.DefaultValue + 0.5));
-	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProperty.DefaultValue + 0.5));
+	static readonly SettingKey<int> LatestFramePlaybackRate = new("Session.LatestFramePlaybackRate", FramePlaybackRateProp.DefaultValue);
+	static readonly SettingKey<int> LatestHistogramsPanelSize = new("Session.LatestHistogramsPanelSize", (int)(HistogramsPanelSizeProp.DefaultValue + 0.5));
+	static readonly SettingKey<int> LatestRenderingParamsPanelSize = new("Session.LatestRenderingParamsPanelSize", (int)(RenderingParametersPanelSizeProp.DefaultValue + 0.5));
 	static readonly MutableObservableInt64 SharedRenderedImagesMemoryUsage = new();
 	static readonly Func<double, double> ZoomingInterpolator = Interpolators.FastDeceleration;
 
@@ -961,7 +961,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	public Session(IAppSuiteApplication app, JsonElement? savedState) : base(app)
 	{
 		// create commands
-		var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceOpenedProperty);
+		var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceOpenedProp);
 		this.AlignImageHeightCommand = new Command<int>(this.AlignImageHeight, isSrcFileOpenedObservable);
 		this.AlignImageWidthCommand = new Command<int>(this.AlignImageWidth, isSrcFileOpenedObservable);
 		this.AlignRowStride1Command = new Command<int>(this.AlignRowStride1, isSrcFileOpenedObservable);
@@ -996,12 +996,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSource);
 		this.OpenSourceFilesCommand = new Command<IList<string>>(fileNames => _ = this.OpenSourceFiles(fileNames), this.canOpenSource);
 		this.PlayFramesCommand = new Command(this.TogglePlayingFrames, this.canPlayFrames);
-		this.RenderImageCommand = new Command(() => _ = this.ClearAndRenderImageAsync(), this.GetValueAsObservable(IsSourceOpenedProperty));
+		this.RenderImageCommand = new Command(() => _ = this.ClearAndRenderImageAsync(), this.GetValueAsObservable(IsSourceOpenedProp));
 		this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
 		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 		this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
 		this.ResetHighlightAdjustmentCommand = new Command(this.ResetHighlightAdjustment, this.canResetHighlightAdjustment);
-		this.ResetRgbGainCommand = new Command(this.ResetRgbGain, this.GetValueAsObservable(HasRgbGainProperty));
+		this.ResetRgbGainCommand = new Command(this.ResetRgbGain, this.GetValueAsObservable(HasRgbGainProp));
 		this.ResetSaturationAdjustmentCommand = new Command(this.ResetSaturationAdjustment, this.canResetSaturationAdjustment);
 		this.ResetShadowAdjustmentCommand = new Command(this.ResetShadowAdjustment, this.canResetShadowAdjustment);
 		this.ResetVibranceAdjustmentCommand = new Command(this.ResetVibranceAdjustment, this.canResetVibranceAdjustment);
@@ -1019,7 +1019,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			scale = this.ZoomTo(scale);
 			if (double.IsFinite(scale))
-				this.SetValue(RequestedImageDisplayScaleProperty, scale);
+				this.SetValue(RequestedImageDisplayScaleProp, scale);
 		}, this.canZoomTo);
 
 		// setup operations
@@ -1034,26 +1034,26 @@ class Session : ViewModel<IAppSuiteApplication>
 				return;
 			if (!this.IsSourceOpened)
 			{
-				this.SetValue(IsBrightnessAdjustmentSupportedProperty, false);
-				this.SetValue(IsColorAdjustmentSupportedProperty, false);
-				this.SetValue(IsContrastAdjustmentSupportedProperty, false);
-				this.SetValue(IsGrayscaleFilterSupportedProperty, false);
-				this.SetValue(IsHighlightAdjustmentSupportedProperty, false);
-				this.SetValue(IsSaturationAdjustmentSupportedProperty, false);
-				this.SetValue(IsShadowAdjustmentSupportedProperty, false);
-				this.SetValue(IsVibranceAdjustmentSupportedProperty, false);
+				this.SetValue(IsBrightnessAdjustmentSupportedProp, false);
+				this.SetValue(IsColorAdjustmentSupportedProp, false);
+				this.SetValue(IsContrastAdjustmentSupportedProp, false);
+				this.SetValue(IsGrayscaleFilterSupportedProp, false);
+				this.SetValue(IsHighlightAdjustmentSupportedProp, false);
+				this.SetValue(IsSaturationAdjustmentSupportedProp, false);
+				this.SetValue(IsShadowAdjustmentSupportedProp, false);
+				this.SetValue(IsVibranceAdjustmentSupportedProp, false);
 			}
 			else
 			{
 				var format = this.ImageRenderer.Format;
-				this.SetValue(IsBrightnessAdjustmentSupportedProperty, true);
-				this.SetValue(IsColorAdjustmentSupportedProperty, true);
-				this.SetValue(IsContrastAdjustmentSupportedProperty, true);
-				this.SetValue(IsGrayscaleFilterSupportedProperty, format.Category != ImageFormatCategory.Luminance);
-				this.SetValue(IsHighlightAdjustmentSupportedProperty, true);
-				this.SetValue(IsSaturationAdjustmentSupportedProperty, true);
-				this.SetValue(IsShadowAdjustmentSupportedProperty, true);
-				this.SetValue(IsVibranceAdjustmentSupportedProperty, true);
+				this.SetValue(IsBrightnessAdjustmentSupportedProp, true);
+				this.SetValue(IsColorAdjustmentSupportedProp, true);
+				this.SetValue(IsContrastAdjustmentSupportedProp, true);
+				this.SetValue(IsGrayscaleFilterSupportedProp, format.Category != ImageFormatCategory.Luminance);
+				this.SetValue(IsHighlightAdjustmentSupportedProp, true);
+				this.SetValue(IsSaturationAdjustmentSupportedProp, true);
+				this.SetValue(IsShadowAdjustmentSupportedProp, true);
+				this.SetValue(IsVibranceAdjustmentSupportedProp, true);
 			}
 		});
 		this.updateImageDisplaySizeAction = new ScheduledAction(() =>
@@ -1063,47 +1063,47 @@ class Session : ViewModel<IAppSuiteApplication>
 				return;
 			
 			// get original image size
-			var image = this.GetValue(RenderedImageProperty);
+			var image = this.GetValue(RenderedImageProp);
 			if (image is null)
 			{
-				this.ResetValue(ImageDisplaySizeProperty);
+				this.ResetValue(ImageDisplaySizeProp);
 				return;
 			}
-			var screenPixelDensity = this.GetValue(ScreenPixelDensityProperty);
+			var screenPixelDensity = this.GetValue(ScreenPixelDensityProp);
 			var imageWidth = image.Size.Width / screenPixelDensity;
 			var imageHeight = image.Size.Height / screenPixelDensity;
 
 			// calculate display size
 			double scale;
-			if (!this.GetValue(FitImageToViewportProperty))
+			if (!this.GetValue(FitImageToViewportProp))
 			{
-				scale = this.GetValue(ImageDisplayScaleProperty);
+				scale = this.GetValue(ImageDisplayScaleProp);
 				if (!double.IsFinite(scale))
 				{
-					scale = this.GetValue(RequestedImageDisplayScaleProperty);
-					this.SetValue(ImageDisplayScaleProperty, scale);
+					scale = this.GetValue(RequestedImageDisplayScaleProp);
+					this.SetValue(ImageDisplayScaleProp, scale);
 					this.CompleteZooming(true);
 				}
 			}
 			else if (double.IsFinite(this.fitRenderedImageToViewportScale))
 			{
-				scale = this.GetValue(ImageDisplayScaleProperty);
+				scale = this.GetValue(ImageDisplayScaleProp);
 				if (!double.IsFinite(scale))
 				{
 					scale = this.fitRenderedImageToViewportScale;
-					this.SetValue(ImageDisplayScaleProperty, scale);
+					this.SetValue(ImageDisplayScaleProp, scale);
 					this.CompleteZooming(true);
 				}
 			}
 			else
 			{
 				// get size of viewport
-				var viewport = this.GetValue(ImageViewportSizeProperty);
+				var viewport = this.GetValue(ImageViewportSizeProp);
 				var viewportWidth = viewport.Width;
 				var viewportHeight = viewport.Height;
 				if (viewportWidth <= 0 || viewportHeight <= 0)
 				{
-					this.ResetValue(ImageDisplaySizeProperty);
+					this.ResetValue(ImageDisplaySizeProp);
 					return;
 				}
 				var useSwappedScale = (((int)(this.ImageDisplayRotation + 0.5) % 180) != 0);
@@ -1113,16 +1113,16 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.fitRenderedImageToViewportScaleSwapped = Math.Min(viewportHeight / imageWidth, viewportWidth / imageHeight);
 				this.CompleteZooming(true);
 				scale = useSwappedScale ? this.fitRenderedImageToViewportScaleSwapped : this.fitRenderedImageToViewportScale;
-				this.SetValue(ImageDisplayScaleProperty, scale);
-				this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
+				this.SetValue(ImageDisplayScaleProp, scale);
+				this.SetValue(ImageDisplaySizeProp, new Size(imageWidth * scale, imageHeight * scale));
 			}
-			this.SetValue(ImageDisplaySizeProperty, new Size(imageWidth * scale, imageHeight * scale));
+			this.SetValue(ImageDisplaySizeProp, new Size(imageWidth * scale, imageHeight * scale));
 		});
 		this.updateIsProcessingImageAction = new ScheduledAction(() =>
 		{
 			if (this.IsDisposed)
 				return;
-			this.SetValue(IsProcessingImageProperty, this.IsFilteringRenderedImage
+			this.SetValue(IsProcessingImageProp, this.IsFilteringRenderedImage
 				|| this.IsOpeningSource
 				|| this.IsRenderingImage
 				|| this.IsSavingImage);
@@ -1131,7 +1131,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.IsDisposed)
 				return;
-			this.SetValue(IsFilteringRenderedImageNeededProperty, this.canResetBrightnessAdjustment.Value
+			this.SetValue(IsFilteringRenderedImageNeededProp, this.canResetBrightnessAdjustment.Value
 				|| this.canResetColorAdjustment.Value
 				|| this.canResetContrastAdjustment.Value
 				|| this.canResetHighlightAdjustment.Value
@@ -1143,10 +1143,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		
 		// attach to application
 		app.PropertyChanged += this.OnApplicationPropertyChanged;
-		this.SetValue(IsProVersionActivatedProperty, (app as App)?.IsProVersionActivated == true);
+		this.SetValue(IsProVersionActivatedProp, (app as App)?.IsProVersionActivated == true);
 
 		// setup rendered images memory usage
-		this.SetValue(TotalRenderedImagesMemoryUsageProperty, SharedRenderedImagesMemoryUsage.Value);
+		this.SetValue(TotalRenderedImagesMemoryUsageProp, SharedRenderedImagesMemoryUsage.Value);
 		this.sharedRenderedImagesMemoryUsageObserverToken = SharedRenderedImagesMemoryUsage.Subscribe(new Observer<long>(this.OnSharedRenderedImagesMemoryUsageChanged));
 
 		// attach to profiles
@@ -1160,10 +1160,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged += this.OnUserDefinedProfilesChanged;
 
 		// select default image renderer
-		this.SetValue(ImageRendererProperty, this.SelectDefaultImageRenderer());
+		this.SetValue(ImageRendererProp, this.SelectDefaultImageRenderer());
 
 		// select default byte ordering
-		this.SetValue(ByteOrderingProperty, this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering));
+		this.SetValue(ByteOrderingProp, this.Settings.GetValueOrDefault(SettingKeys.DefaultByteOrdering));
 
 		// attach to color spaces
 		this.ColorSpaces = ListExtensions.AsReadOnly(this.colorSpaces);
@@ -1173,19 +1173,19 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// attach to demosaicing algorithms and select the one which the settings prefer, the list is narrowed to the current pattern afterwards
 		this.DemosaicingAlgorithms = ListExtensions.AsReadOnly(this.demosaicingAlgorithms);
-		this.SetValue(DemosaicingAlgorithmProperty, this.SelectDefaultDemosaicingAlgorithm(this.BayerPattern));
+		this.SetValue(DemosaicingAlgorithmProp, this.SelectDefaultDemosaicingAlgorithm(this.BayerPattern));
 		this.UpdateDemosaicingAlgorithms();
 		(Media.Demosaicing.DemosaicingAlgorithms.All as INotifyCollectionChanged)?.Let(it =>
 			it.CollectionChanged += this.OnAllDemosaicingAlgorithmsChanged);
 
 		// select default YUV to RGB converter
 		if (YuvToBgraConverter.TryGetByName(this.Settings.GetValueOrDefault(SettingKeys.DefaultYuvToBgraConversion), out var converter))
-			this.SetValue(YuvToBgraConverterProperty, converter);
+			this.SetValue(YuvToBgraConverterProp, converter);
 
 		// setup color space management
-		this.SetValue(IsColorSpaceManagementEnabledProperty, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
+		this.SetValue(IsColorSpaceManagementEnabledProp, this.Settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement));
 		if (ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace))
-			this.SetValue(ColorSpaceProperty, colorSpace);
+			this.SetValue(ColorSpaceProp, colorSpace);
 
 		// setup title
 		this.UpdateTitle();
@@ -1195,13 +1195,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			_ = this.RestoreState(savedState.Value);
 		else
 		{
-			this.SetValue(FramePlaybackRateProperty, this.PersistentState.GetValueOrDefault(LatestFramePlaybackRate));
-			this.SetValue(HistogramsPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestHistogramsPanelSize));
-			this.SetValue(IsFramePlaybackLoopingProperty, this.PersistentState.GetValueOrDefault(IsInitFramePlaybackLooping));
-			this.SetValue(IsFramePlaybackRateUnlimitedProperty, this.PersistentState.GetValueOrDefault(IsInitFramePlaybackRateUnlimited));
-			this.SetValue(IsHistogramMeanMarkerVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible));
-			this.SetValue(IsHistogramsVisibleProperty, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
-			this.SetValue(RenderingParametersPanelSizeProperty, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
+			this.SetValue(FramePlaybackRateProp, this.PersistentState.GetValueOrDefault(LatestFramePlaybackRate));
+			this.SetValue(HistogramsPanelSizeProp, this.PersistentState.GetValueOrDefault(LatestHistogramsPanelSize));
+			this.SetValue(IsFramePlaybackLoopingProp, this.PersistentState.GetValueOrDefault(IsInitFramePlaybackLooping));
+			this.SetValue(IsFramePlaybackRateUnlimitedProp, this.PersistentState.GetValueOrDefault(IsInitFramePlaybackRateUnlimited));
+			this.SetValue(IsHistogramMeanMarkerVisibleProp, this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible));
+			this.SetValue(IsHistogramsVisibleProp, this.PersistentState.GetValueOrDefault(IsInitHistogramsPanelVisible));
+			this.SetValue(RenderingParametersPanelSizeProp, this.PersistentState.GetValueOrDefault(LatestRenderingParamsPanelSize));
 		}
 
 		// add event handlers
@@ -1230,11 +1230,11 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsHibernated)
 			{
 				this.Logger.LogWarning("Leave hibernation");
-				this.SetValue(IsHibernatedProperty, false);
+				this.SetValue(IsHibernatedProp, false);
 			}
 			if (!this.HasRenderedImage)
 				this.renderImageAction.Reschedule();
-			this.SetValue(IsActivatedProperty, true);
+			this.SetValue(IsActivatedProp, true);
 		}
 		return token;
 	}
@@ -1275,7 +1275,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	
 	// Change height of image with given alignment.
 	void AlignImageHeight(int bytes) =>
-		this.SetValue(ImageHeightProperty, this.AlignToInteger(this.GetValue(ImageHeightProperty), bytes));
+		this.SetValue(ImageHeightProp, this.AlignToInteger(this.GetValue(ImageHeightProp), bytes));
 	
 	
 	/// <summary>
@@ -1287,7 +1287,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	
 	// Change width of image with given alignment.
 	void AlignImageWidth(int bytes) =>
-		this.SetValue(ImageWidthProperty, this.AlignToInteger(this.GetValue(ImageWidthProperty), bytes));
+		this.SetValue(ImageWidthProp, this.AlignToInteger(this.GetValue(ImageWidthProp), bytes));
 	
 	
 	/// <summary>
@@ -1351,9 +1351,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.filteredImageFrame is null)
 				return false;
 			this.Logger.LogWarning("Release current filtered images");
-			this.SetValue(HistogramsProperty, null);
-			this.SetValue(QuarterSizeRenderedImageProperty, null);
-			this.SetValue(RenderedImageProperty, null);
+			this.SetValue(HistogramsProp, null);
+			this.SetValue(QuarterSizeRenderedImageProp, null);
+			this.SetValue(RenderedImageProp, null);
 			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			return true;
 		});
@@ -1460,12 +1460,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		// setup values according to format and renderer
 		var imageFormatCategory = imageRenderer.Format.Category;
 		var isBayerPatternFormat = imageFormatCategory == ImageFormatCategory.Bayer;
-		this.SetValue(HasMultipleByteOrderingsProperty, imageRenderer.Format.HasMultipleByteOrderings);
-		this.SetValue(IsBayerPatternSupportedProperty, isBayerPatternFormat);
-		this.SetValue(IsCompressedImageFormatProperty, imageFormatCategory == ImageFormatCategory.Compressed);
-		this.SetValue(IsDemosaicingSupportedProperty, isBayerPatternFormat);
-		this.SetValue(IsRgbGainSupportedProperty, isBayerPatternFormat);
-		this.SetValue(IsYuvToBgraConverterSupportedProperty, imageFormatCategory == ImageFormatCategory.YUV);
+		this.SetValue(HasMultipleByteOrderingsProp, imageRenderer.Format.HasMultipleByteOrderings);
+		this.SetValue(IsBayerPatternSupportedProp, isBayerPatternFormat);
+		this.SetValue(IsCompressedImageFormatProp, imageFormatCategory == ImageFormatCategory.Compressed);
+		this.SetValue(IsDemosaicingSupportedProp, isBayerPatternFormat);
+		this.SetValue(IsRgbGainSupportedProp, isBayerPatternFormat);
+		this.SetValue(IsYuvToBgraConverterSupportedProp, imageFormatCategory == ImageFormatCategory.YUV);
 		this.UpdateHasColorTables();
 		this.UpdateIsAlphaChannelAvailable();
 
@@ -1489,22 +1489,22 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (profile.Type != ImageRenderingProfileType.Default)
 		{
 			// renderer
-			this.SetValue(ImageRendererProperty, profile.Renderer);
+			this.SetValue(ImageRendererProp, profile.Renderer);
 
 			// data offset
-			this.SetValue(DataOffsetProperty, profile.DataOffset);
+			this.SetValue(DataOffsetProp, profile.DataOffset);
 
 			// frame padding size
-			this.SetValue(FramePaddingSizeProperty, profile.FramePaddingSize);
+			this.SetValue(FramePaddingSizeProp, profile.FramePaddingSize);
 
 			// byte ordering
-			this.SetValue(ByteOrderingProperty, profile.ByteOrdering);
+			this.SetValue(ByteOrderingProp, profile.ByteOrdering);
 
 			// bayer pattern
-			this.SetValue(BayerPatternProperty, profile.BayerPattern);
+			this.SetValue(BayerPatternProp, profile.BayerPattern);
 
 			// YUV to RGB converter
-			this.SetValue(YuvToBgraConverterProperty, profile.YuvToBgraConverter);
+			this.SetValue(YuvToBgraConverterProp, profile.YuvToBgraConverter);
 
 			// color space
 			this.colorSpaces.RemoveAll(it => it.IsEmbedded);
@@ -1526,18 +1526,18 @@ class Session : ViewModel<IAppSuiteApplication>
 #endif
 				}
 			}
-			this.SetValue(ColorSpaceProperty, colorSpace);
-			this.SetValue(UseLinearColorSpaceProperty, profile.UseLinearColorSpace);
+			this.SetValue(ColorSpaceProp, colorSpace);
+			this.SetValue(UseLinearColorSpaceProp, profile.UseLinearColorSpace);
 
 			// demosaicing, a profile which names no algorithm of its own or names one the pattern rules out leaves the choice to the session, which is what a profile generated for a file format always does because no parser fills one in
 			var demosaicingAlgorithm = profile.DemosaicingAlgorithm ?? Media.Demosaicing.DemosaicingAlgorithms.Bypass;
 			if (demosaicingAlgorithm == Media.Demosaicing.DemosaicingAlgorithms.Undefined || !demosaicingAlgorithm.IsBayerPatternSupported(this.BayerPattern))
 				demosaicingAlgorithm = this.SelectDefaultDemosaicingAlgorithm(this.BayerPattern);
-			this.SetValue(DemosaicingAlgorithmProperty, demosaicingAlgorithm);
+			this.SetValue(DemosaicingAlgorithmProp, demosaicingAlgorithm);
 
 			// dimensions
-			this.SetValue(ImageWidthProperty, profile.Width);
-			this.SetValue(ImageHeightProperty, profile.Height);
+			this.SetValue(ImageWidthProp, profile.Width);
+			this.SetValue(ImageHeightProp, profile.Height);
 
 			// color tables, they need to be applied before the plane options because they decide the effective bits of every plane
 			this.ChangeColorTables(profile.RedColorTable, profile.GreenColorTable, profile.BlueColorTable, profile.AlphaColorTable);
@@ -1585,9 +1585,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			// RGB gain
 			if (this.IsRgbGainSupported)
 			{
-				this.SetValue(RedColorGainProperty, profile.RedColorGain);
-				this.SetValue(GreenColorGainProperty, profile.GreenColorGain);
-				this.SetValue(BlueColorGainProperty, profile.BlueColorGain);
+				this.SetValue(RedColorGainProp, profile.RedColorGain);
+				this.SetValue(GreenColorGainProp, profile.GreenColorGain);
+				this.SetValue(BlueColorGainProp, profile.BlueColorGain);
 			}
 
 			// rotation and flip
@@ -1599,10 +1599,10 @@ class Session : ViewModel<IAppSuiteApplication>
 				else if (rotation > 360)
 					rotation -= 360;
 				rotation = (int)(rotation / 90.0 + 0.5) * 90;
-				this.SetValue(ImageDisplayRotationProperty, rotation);
-				this.SetValue(IsImageFlippedXProperty, profile.FlipX);
-				this.SetValue(IsImageFlippedYProperty, profile.FlipY);
-				if (this.GetValue(FitImageToViewportProperty)
+				this.SetValue(ImageDisplayRotationProp, rotation);
+				this.SetValue(IsImageFlippedXProp, profile.FlipX);
+				this.SetValue(IsImageFlippedYProp, profile.FlipY);
+				if (this.GetValue(FitImageToViewportProp)
 					&& double.IsFinite(this.fitRenderedImageToViewportScale))
 				{
 					var scale = (rotation % 180) == 0
@@ -1638,19 +1638,19 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Check whether black/white levels for 1st image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool AreAdjustableBlackWhiteLevels1 => this.GetValue(AreAdjustableBlackWhiteLevels1Property);
+	public bool AreAdjustableBlackWhiteLevels1 => this.GetValue(AreAdjustableBlackWhiteLevels1Prop);
 
 
 	/// <summary>
 	/// Check whether black/white levels for 2nd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool AreAdjustableBlackWhiteLevels2 => this.GetValue(AreAdjustableBlackWhiteLevels2Property);
+	public bool AreAdjustableBlackWhiteLevels2 => this.GetValue(AreAdjustableBlackWhiteLevels2Prop);
 
 
 	/// <summary>
 	/// Check whether black/white levels for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool AreAdjustableBlackWhiteLevels3 => this.GetValue(AreAdjustableBlackWhiteLevels3Property);
+	public bool AreAdjustableBlackWhiteLevels3 => this.GetValue(AreAdjustableBlackWhiteLevels3Prop);
 
 
 	/// <summary>
@@ -1658,8 +1658,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public BayerPattern BayerPattern
 	{
-		get => this.GetValue(BayerPatternProperty);
-		set => this.SetValue(BayerPatternProperty, value);
+		get => this.GetValue(BayerPatternProp);
+		set => this.SetValue(BayerPatternProp, value);
 	}
 
 
@@ -1698,8 +1698,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double BlueColorAdjustment
 	{
-		get => this.GetValue(BlueColorAdjustmentProperty);
-		set => this.SetValue(BlueColorAdjustmentProperty, value);
+		get => this.GetValue(BlueColorAdjustmentProp);
+		set => this.SetValue(BlueColorAdjustmentProp, value);
 	}
 
 
@@ -1708,8 +1708,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double BlueColorGain
 	{
-		get => this.GetValue(BlueColorGainProperty);
-		set => this.SetValue(BlueColorGainProperty, value);
+		get => this.GetValue(BlueColorGainProp);
+		set => this.SetValue(BlueColorGainProp, value);
 	}
 
 
@@ -1718,8 +1718,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double BrightnessAdjustment
 	{
-		get => this.GetValue(BrightnessAdjustmentProperty);
-		set => this.SetValue(BrightnessAdjustmentProperty, value);
+		get => this.GetValue(BrightnessAdjustmentProp);
+		set => this.SetValue(BrightnessAdjustmentProp, value);
 	}
 
 
@@ -1728,8 +1728,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public ByteOrdering ByteOrdering
 	{
-		get => this.GetValue(ByteOrderingProperty);
-		set => this.SetValue(ByteOrderingProperty, value);
+		get => this.GetValue(ByteOrderingProp);
+		set => this.SetValue(ByteOrderingProp, value);
 	}
 
 
@@ -1748,7 +1748,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageReportingCancellationTokenSource = null;
 			}
 			this.imageFilteringCancellationTokenSource = null;
-			if (this.GetValue(IsConvertingColorSpaceProperty))
+			if (this.GetValue(IsConvertingColorSpaceProp))
 				this.Logger.LogWarning("Cancel color space conversion for filtering image"); // the state is reset by ConvertColorSpaceAsync() when the conversion unwinds
 		}
 
@@ -1765,7 +1765,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.Logger.LogWarning("Cancel reporting rendered image for source '{sourceFileName}'", this.SourceFileName);
 		this.imageReportingCancellationTokenSource.Cancel();
 		this.imageReportingCancellationTokenSource = null;
-		if (this.GetValue(IsConvertingColorSpaceProperty))
+		if (this.GetValue(IsConvertingColorSpaceProp))
 			this.Logger.LogWarning("Cancel color space conversion for reporting rendered image"); // the state is reset by ConvertColorSpaceAsync() when the conversion unwinds
 		return true;
 	}
@@ -1788,7 +1788,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.imageReportingCancellationTokenSource = null;
 			}
 			this.imageRenderingCancellationTokenSource = null;
-			if (this.GetValue(IsConvertingColorSpaceProperty))
+			if (this.GetValue(IsConvertingColorSpaceProp))
 				this.Logger.LogWarning("Cancel color space conversion for rendering image"); // the state is reset by ConvertColorSpaceAsync() when the conversion unwinds
 		}
 
@@ -1874,7 +1874,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update black/white levels
 		if (effectiveBits > 0)
 		{
-			var imageFormat = this.GetValue(ImageRendererProperty)?.Format;
+			var imageFormat = this.GetValue(ImageRendererProp)?.Format;
 			if (imageFormat is not null && imageFormat.PlaneDescriptors.Count > index)
 			{
 				var planeDescriptor = imageFormat.PlaneDescriptors[index];
@@ -1979,7 +1979,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.CloseSource(false);
 
 		// update state, name of source file is cleared by CloseSource()
-		this.SetValue(SourceSizeStringProperty, null);
+		this.SetValue(SourceSizeStringProp, null);
 		
 		// reset scaling
 		this.FitImageToViewport = true;
@@ -2011,21 +2011,21 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update state
 		if (!disposing)
 		{
-			this.SetValue(DataOffsetProperty, 0L);
-			this.SetValue(FrameCountProperty, 0);
-			this.SetValue(FrameNumberProperty, 0);
-			this.SetValue(FramePaddingSizeProperty, 0L);
-			this.SetValue(HistogramsProperty, null);
-			this.SetValue(QuarterSizeRenderedImageProperty, null);
-			this.SetValue(RenderedImageProperty, null);
-			this.SetValue(IsSourceOpenedProperty, false);
-			this.SetValue(LuminanceHistogramGeometryProperty, null);
+			this.SetValue(DataOffsetProp, 0L);
+			this.SetValue(FrameCountProp, 0);
+			this.SetValue(FrameNumberProp, 0);
+			this.SetValue(FramePaddingSizeProp, 0L);
+			this.SetValue(HistogramsProp, null);
+			this.SetValue(QuarterSizeRenderedImageProp, null);
+			this.SetValue(RenderedImageProp, null);
+			this.SetValue(IsSourceOpenedProp, false);
+			this.SetValue(LuminanceHistogramGeometryProp, null);
 			this.canMoveToNextFrame.Update(false);
 			this.canMoveToPreviousFrame.Update(false);
 			this.canSaveRenderedImage.Update(false);
 			this.canSelectColorAdjustment.Update(false);
 			this.canSelectRgbGain.Update(false);
-			this.SetValue(SourceDataSizeProperty, 0);
+			this.SetValue(SourceDataSizeProp, 0);
 			this.UpdateCanSaveDeleteProfile();
 		}
 		this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
@@ -2034,11 +2034,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.isImageRenderingForced = false;
 		if (!disposing)
 		{
-			this.ResetValue(ImageDisplayRotationProperty);
-			this.ResetValue(HasRenderingErrorProperty);
-			this.ResetValue(InsufficientMemoryForRenderedImageProperty);
-			this.ResetValue(IsImageFlippedXProperty);
-			this.ResetValue(IsImageFlippedYProperty);
+			this.ResetValue(ImageDisplayRotationProp);
+			this.ResetValue(HasRenderingErrorProp);
+			this.ResetValue(InsufficientMemoryForRenderedImageProp);
+			this.ResetValue(IsImageFlippedXProp);
+			this.ResetValue(IsImageFlippedYProp);
 		}
 
 		// release cached images
@@ -2078,7 +2078,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (!disposing)
 		{
 			// name of source file describes the source which has been closed, so it is cleared along with the source
-			this.SetValue(SourceFileNameProperty, null);
+			this.SetValue(SourceFileNameProp, null);
 			this.UpdateTitle(); // title is selected by source, so it is updated after the source has been detached
 		}
 		if (imageDataSource is not null)
@@ -2095,7 +2095,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Replace the effective bits of an image plane by the color depth of the color tables when the tables are applied.
 	// The tables define the colors to be rendered, so the value set by user has no effect on the rendering and reporting it would be misleading.
 	int CoerceEffectiveBitsToColorTables(int effectiveBits) =>
-		this.GetValue(HasColorTablesProperty) ? this.colorTableBitDepth : effectiveBits;
+		this.GetValue(HasColorTablesProp) ? this.colorTableBitDepth : effectiveBits;
 
 
 	// Clamp the frame number into [1, frameCount], applying the correction to the property and cancelling
@@ -2105,13 +2105,13 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (frameNumber < 1)
 		{
 			frameNumber = 1;
-			this.SetValue(FrameNumberProperty, 1);
+			this.SetValue(FrameNumberProp, 1);
 			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
 		}
 		else if (frameNumber > frameCount)
 		{
 			frameNumber = frameCount;
-			this.SetValue(FrameNumberProperty, frameCount);
+			this.SetValue(FrameNumberProp, frameCount);
 			this.renderImageAction.Cancel(); // prevent re-rendering caused by change of frame number
 		}
 		return frameNumber;
@@ -2123,8 +2123,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public ColorSpace ColorSpace 
 	{
-		get => this.GetValue(ColorSpaceProperty);
-		set => this.SetValue(ColorSpaceProperty, value);
+		get => this.GetValue(ColorSpaceProp);
+		set => this.SetValue(ColorSpaceProp, value);
 	}
 
 
@@ -2153,14 +2153,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	void CompleteOpeningSource(IImageDataSource source, Action applyProfile)
 	{
 		// update state
-		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProperty));
-		this.SetValue(DataOffsetProperty, 0L);
-		this.SetValue(FrameNumberProperty, 1);
-		this.SetValue(FramePaddingSizeProperty, 0L);
-		this.SetValue(IsOpeningSourceProperty, false);
-		this.SetValue(IsSourceOpenedProperty, true);
+		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProp));
+		this.SetValue(DataOffsetProp, 0L);
+		this.SetValue(FrameNumberProp, 1);
+		this.SetValue(FramePaddingSizeProp, 0L);
+		this.SetValue(IsOpeningSourceProp, false);
+		this.SetValue(IsSourceOpenedProp, true);
 		this.canOpenSource.Update(true);
-		this.SetValue(SourceSizeStringProperty, source.Size.ToFileSizeString());
+		this.SetValue(SourceSizeStringProp, source.Size.ToFileSizeString());
 		this.UpdateCanSaveDeleteProfile();
 
 		// apply profile
@@ -2190,7 +2190,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.imageScalingAnimator.Cancel();
 		this.imageScalingAnimator = null;
 		if (resetIsZooming)
-			this.SetValue(IsZoomingProperty, false);
+			this.SetValue(IsZoomingProp, false);
 	}
 
 
@@ -2199,8 +2199,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double ContrastAdjustment
 	{
-		get => this.GetValue(ContrastAdjustmentProperty);
-		set => this.SetValue(ContrastAdjustmentProperty, value);
+		get => this.GetValue(ContrastAdjustmentProp);
+		set => this.SetValue(ContrastAdjustmentProp, value);
 	}
 
 
@@ -2208,14 +2208,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	async Task<ImageFrame?> ConvertColorSpaceAsync(ImageFrame src, ColorSpace srcColorSpace, ColorSpace destColorSpace, CancellationToken cancellationToken)
 	{
 		// check state
-		if (this.GetValue(IsConvertingColorSpaceProperty))
+		if (this.GetValue(IsConvertingColorSpaceProp))
 		{
 			this.Logger.LogError("Previous color space conversion is not completed yet");
 			return null;
 		}
 
 		// update state, the state is kept until the conversion completes or unwinds so that it is not reported as completed while it is still being cancelled
-		this.SetValue(IsConvertingColorSpaceProperty, true);
+		this.SetValue(IsConvertingColorSpaceProp, true);
 		try
 		{
 			// allocate frame
@@ -2243,7 +2243,7 @@ class Session : ViewModel<IAppSuiteApplication>
 						cancellationToken.ThrowIfCancellationRequested();
 					}
 					this.Logger.LogError("Unable to allocate image frame for color space conversion");
-					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					this.SetValue(InsufficientMemoryForRenderedImageProp, true);
 					return null;
 				}
 			}
@@ -2283,7 +2283,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		finally
 		{
 			if (!this.IsDisposed)
-				this.ResetValue(IsConvertingColorSpaceProperty);
+				this.ResetValue(IsConvertingColorSpaceProp);
 		}
 	}
 
@@ -2293,8 +2293,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public string? CustomTitle
     {
-		get => this.GetValue(CustomTitleProperty);
-		set => this.SetValue(CustomTitleProperty, value);
+		get => this.GetValue(CustomTitleProp);
+		set => this.SetValue(CustomTitleProp, value);
     }
 
 
@@ -2303,8 +2303,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public long DataOffset
 	{
-		get => this.GetValue(DataOffsetProperty);
-		set => this.SetValue(DataOffsetProperty, value);
+		get => this.GetValue(DataOffsetProp);
+		set => this.SetValue(DataOffsetProp, value);
 	}
 
 
@@ -2322,7 +2322,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// deactivate
 		this.Logger.LogDebug("Deactivate");
-		this.SetValue(IsActivatedProperty, false);
+		this.SetValue(IsActivatedProp, false);
 
 		// stop frame playback while the session is not active
 		this.StopPlayingFrames();
@@ -2395,7 +2395,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	public bool Demosaicing
 	{
 		get => this.DemosaicingAlgorithm != Media.Demosaicing.DemosaicingAlgorithms.Bypass;
-		set => this.SetValue(DemosaicingAlgorithmProperty, value ? Media.Demosaicing.DemosaicingAlgorithms.Default : Media.Demosaicing.DemosaicingAlgorithms.Bypass);
+		set => this.SetValue(DemosaicingAlgorithmProp, value ? Media.Demosaicing.DemosaicingAlgorithms.Default : Media.Demosaicing.DemosaicingAlgorithms.Bypass);
 	}
 
 
@@ -2405,8 +2405,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <remarks><see cref="Media.Demosaicing.DemosaicingAlgorithms.Bypass"/> means that demosaicing will not be performed.</remarks>
 	public DemosaicingAlgorithm DemosaicingAlgorithm
 	{
-		get => this.GetValue(DemosaicingAlgorithmProperty);
-		set => this.SetValue(DemosaicingAlgorithmProperty, value);
+		get => this.GetValue(DemosaicingAlgorithmProp);
+		set => this.SetValue(DemosaicingAlgorithmProp, value);
 	}
 
 
@@ -2428,7 +2428,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.Application.PropertyChanged -= this.OnApplicationPropertyChanged;
 
 		// detach from image renderer
-		this.GetValue(ImageRendererProperty)?.Let(it => it.PropertyChanged -= this.OnImageRendererPropertyChanged);
+		this.GetValue(ImageRendererProp)?.Let(it => it.PropertyChanged -= this.OnImageRendererPropertyChanged);
 
 		// detach from profiles
 		((INotifyCollectionChanged)ImageRenderingProfiles.UserDefinedProfiles).CollectionChanged -= this.OnUserDefinedProfilesChanged;
@@ -2469,9 +2469,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 
 		// release the images
-		this.SetValue(HistogramsProperty, null);
-		this.SetValue(QuarterSizeRenderedImageProperty, null);
-		this.SetValue(RenderedImageProperty, null);
+		this.SetValue(HistogramsProp, null);
+		this.SetValue(QuarterSizeRenderedImageProp, null);
+		this.SetValue(RenderedImageProp, null);
 		foreach (var cachedFrame in this.cachedFilteredImageFrames)
 			cachedFrame.Dispose();
 		this.cachedFilteredImageFrames.Clear();
@@ -2491,9 +2491,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 
 		// release the images
-		this.SetValue(HistogramsProperty, null);
-		this.SetValue(QuarterSizeRenderedImageProperty, null);
-		this.SetValue(RenderedImageProperty, null);
+		this.SetValue(HistogramsProp, null);
+		this.SetValue(QuarterSizeRenderedImageProp, null);
+		this.SetValue(RenderedImageProp, null);
 		this.canSelectColorAdjustment.Update(false);
 		this.canSelectRgbGain.Update(false);
 		this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
@@ -2587,7 +2587,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// filter, then release whoever is waiting for the completion of this filtering
 		var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		this.imageFilteringCompletionSource = completionSource;
-		this.SetValue(IsFilteringRenderedImageProperty, true);
+		this.SetValue(IsFilteringRenderedImageProp, true);
 		try
 		{
 			await this.FilterImageCore(renderedImageFrame);
@@ -2596,7 +2596,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.imageFilteringCompletionSource = null;
 			if (!this.IsDisposed)
-				this.SetValue(IsFilteringRenderedImageProperty, false);
+				this.SetValue(IsFilteringRenderedImageProp, false);
 			completionSource.TrySetResult();
 		}
 	}
@@ -2684,7 +2684,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (!cancellationTokenSource.IsCancellationRequested)
 			{
 				this.imageFilteringCancellationTokenSource = null;
-				this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
+				this.SetValue(InsufficientMemoryForRenderedImageProp, this.IsActivated);
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 				if (!this.IsActivated && !this.IsHibernated)
 				{
@@ -2718,7 +2718,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageFilteringCancellationTokenSource = null;
-					this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
+					this.SetValue(InsufficientMemoryForRenderedImageProp, true);
 					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 				}
 				else
@@ -2730,7 +2730,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var sourceImageFrame = renderedImageFrame;
 		var resultImageFrame = filteredImageFrame1;
 		var failedToApply = false;
-		this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+		this.SetValue(InsufficientMemoryForRenderedImageProp, false);
 
 		// prepare for performance check
 		var stopwatch = this.Application.IsDebugMode ? new Stopwatch() : null;
@@ -2906,7 +2906,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (!cancellationTokenSource.IsCancellationRequested)
 			{
 				this.imageFilteringCancellationTokenSource = null;
-				this.SetValue(HasRenderingErrorProperty, true);
+				this.SetValue(HasRenderingErrorProp, true);
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 			}
 			else if (this.Application.IsDebugMode)
@@ -2976,8 +2976,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool FitImageToViewport
 	{
-		get => this.GetValue(FitImageToViewportProperty);
-		set => this.SetValue(FitImageToViewportProperty, value);
+		get => this.GetValue(FitImageToViewportProp);
+		set => this.SetValue(FitImageToViewportProp, value);
 	}
 
 
@@ -2986,7 +2986,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (!this.IsSourceOpened)
 			return;
-		this.SetValue(IsImageFlippedXProperty, !this.GetValue(IsImageFlippedXProperty));
+		this.SetValue(IsImageFlippedXProp, !this.GetValue(IsImageFlippedXProp));
 	}
 
 
@@ -3001,7 +3001,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (!this.IsSourceOpened)
 			return;
-		this.SetValue(IsImageFlippedYProperty, !this.GetValue(IsImageFlippedYProperty));
+		this.SetValue(IsImageFlippedYProp, !this.GetValue(IsImageFlippedYProp));
 	}
 
 
@@ -3014,7 +3014,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get number of frames in source file.
 	/// </summary>
-	public long FrameCount => this.GetValue(FrameCountProperty);
+	public long FrameCount => this.GetValue(FrameCountProp);
 
 
 	/// <summary>
@@ -3022,11 +3022,11 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public long FrameNumber
 	{
-		get => this.GetValue(FrameNumberProperty);
+		get => this.GetValue(FrameNumberProp);
 		set
 		{
 			this.StopPlayingFrames(); // moving to frame explicitly stops playback
-			this.SetValue(FrameNumberProperty, value);
+			this.SetValue(FrameNumberProp, value);
 		}
 	}
 
@@ -3036,8 +3036,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public long FramePaddingSize
 	{
-		get => this.GetValue(FramePaddingSizeProperty);
-		set => this.SetValue(FramePaddingSizeProperty, value);
+		get => this.GetValue(FramePaddingSizeProp);
+		set => this.SetValue(FramePaddingSizeProp, value);
 	}
 
 
@@ -3046,8 +3046,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public int FramePlaybackRate
 	{
-		get => this.GetValue(FramePlaybackRateProperty);
-		set => this.SetValue(FramePlaybackRateProperty, value);
+		get => this.GetValue(FramePlaybackRateProp);
+		set => this.SetValue(FramePlaybackRateProp, value);
 	}
 
 
@@ -3056,8 +3056,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsFramePlaybackLooping
 	{
-		get => this.GetValue(IsFramePlaybackLoopingProperty);
-		set => this.SetValue(IsFramePlaybackLoopingProperty, value);
+		get => this.GetValue(IsFramePlaybackLoopingProp);
+		set => this.SetValue(IsFramePlaybackLoopingProp, value);
 	}
 
 
@@ -3066,15 +3066,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsFramePlaybackRateUnlimited
 	{
-		get => this.GetValue(IsFramePlaybackRateUnlimitedProperty);
-		set => this.SetValue(IsFramePlaybackRateUnlimitedProperty, value);
+		get => this.GetValue(IsFramePlaybackRateUnlimitedProp);
+		set => this.SetValue(IsFramePlaybackRateUnlimitedProp, value);
 	}
 
 
 	/// <summary>
 	/// Check whether the frame sequence is currently being played or not.
 	/// </summary>
-	public bool IsPlayingFrames => this.GetValue(IsPlayingFramesProperty);
+	public bool IsPlayingFrames => this.GetValue(IsPlayingFramesProp);
 
 
 	/// <summary>
@@ -3107,8 +3107,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double GreenColorAdjustment
 	{
-		get => this.GetValue(GreenColorAdjustmentProperty);
-		set => this.SetValue(GreenColorAdjustmentProperty, value);
+		get => this.GetValue(GreenColorAdjustmentProp);
+		set => this.SetValue(GreenColorAdjustmentProp, value);
 	}
 
 
@@ -3143,130 +3143,130 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double GreenColorGain
 	{
-		get => this.GetValue(GreenColorGainProperty);
-		set => this.SetValue(GreenColorGainProperty, value);
+		get => this.GetValue(GreenColorGainProp);
+		set => this.SetValue(GreenColorGainProp, value);
 	}
 
 
 	/// <summary>
 	/// Check whether <see cref="BrightnessAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasBrightnessAdjustment => this.GetValue(HasBrightnessAdjustmentProperty);
+	public bool HasBrightnessAdjustment => this.GetValue(HasBrightnessAdjustmentProp);
 
 
 	/// <summary>
 	/// Check whether at least one of <see cref="RedColorAdjustment"/>, <see cref="GreenColorAdjustment"/>, <see cref="BlueColorAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasColorAdjustment => this.GetValue(HasColorAdjustmentProperty);
+	public bool HasColorAdjustment => this.GetValue(HasColorAdjustmentProp);
 
 
 	/// <summary>
 	/// Check whether at least one color table is applied to the current rendering or not.
 	/// </summary>
 	/// <remarks>The color tables define the colors to be rendered, so the effective bits of image planes are decided by the tables instead of the value set by user.</remarks>
-	public bool HasColorTables => this.GetValue(HasColorTablesProperty);
+	public bool HasColorTables => this.GetValue(HasColorTablesProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="ContrastAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasContrastAdjustment => this.GetValue(HasContrastAdjustmentProperty);
+	public bool HasContrastAdjustment => this.GetValue(HasContrastAdjustmentProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="HighlightAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasHighlightAdjustment => this.GetValue(HasHighlightAdjustmentProperty);
+	public bool HasHighlightAdjustment => this.GetValue(HasHighlightAdjustmentProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="Histograms"/> is valid or not.
 	/// </summary>
-	public bool HasHistograms => this.GetValue(HasHistogramsProperty);
+	public bool HasHistograms => this.GetValue(HasHistogramsProp);
 
 
 	/// <summary>
 	/// Check whether 1st image plane exists or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool HasImagePlane1 => this.GetValue(HasImagePlane1Property);
+	public bool HasImagePlane1 => this.GetValue(HasImagePlane1Prop);
 
 
 	/// <summary>
 	/// Check whether 2nd image plane exists or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool HasImagePlane2 => this.GetValue(HasImagePlane2Property);
+	public bool HasImagePlane2 => this.GetValue(HasImagePlane2Prop);
 
 
 	/// <summary>
 	/// Check whether 3rd image plane exists or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool HasImagePlane3 => this.GetValue(HasImagePlane3Property);
+	public bool HasImagePlane3 => this.GetValue(HasImagePlane3Prop);
 
 
 	/// <summary>
 	/// Check whether multiple byte orderings are supported by the format of current <see cref="ImageRenderer"/> or not.
 	/// </summary>
-	public bool HasMultipleByteOrderings => this.GetValue(HasMultipleByteOrderingsProperty);
+	public bool HasMultipleByteOrderings => this.GetValue(HasMultipleByteOrderingsProp);
 
 
 	/// <summary>
 	/// Check whether multiple frames are contained in source file or not.
 	/// </summary>
-	public bool HasMultipleFrames => this.GetValue(HasMultipleFramesProperty);
+	public bool HasMultipleFrames => this.GetValue(HasMultipleFramesProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="QuarterSizeRenderedImage"/> is non-null or not.
 	/// </summary>
-	public bool HasQuarterSizeRenderedImage => this.GetValue(HasQuarterSizeRenderedImageProperty);
+	public bool HasQuarterSizeRenderedImage => this.GetValue(HasQuarterSizeRenderedImageProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="RenderedImage"/> is non-null or not.
 	/// </summary>
-	public bool HasRenderedImage => this.GetValue(HasRenderedImageProperty);
+	public bool HasRenderedImage => this.GetValue(HasRenderedImageProp);
 
 
 	/// <summary>
 	/// Check whether error was occurred when rendering or not.
 	/// </summary>
-	public bool HasRenderingError => this.GetValue(HasRenderingErrorProperty);
+	public bool HasRenderingError => this.GetValue(HasRenderingErrorProp);
 
 
 	/// <summary>
 	/// Check whether RGB gain is not 1.0 or not.
 	/// </summary>
-	public bool HasRgbGain => this.GetValue(HasRgbGainProperty);
+	public bool HasRgbGain => this.GetValue(HasRgbGainProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="SaturationAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasSaturationAdjustment => this.GetValue(HasSaturationAdjustmentProperty);
+	public bool HasSaturationAdjustment => this.GetValue(HasSaturationAdjustmentProp);
 
 
 	/// <summary>
 	/// Check whether there is a pixel selected on rendered image or not.
 	/// </summary>
-	public bool HasSelectedRenderedImagePixel => this.GetValue(HasSelectedRenderedImagePixelProperty);
+	public bool HasSelectedRenderedImagePixel => this.GetValue(HasSelectedRenderedImagePixelProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="ShadowAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasShadowAdjustment => this.GetValue(HasShadowAdjustmentProperty);
+	public bool HasShadowAdjustment => this.GetValue(HasShadowAdjustmentProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="SourceDataSize"/> is non-zero or not.
 	/// </summary>
-	public bool HasSourceDataSize => this.GetValue(HasSourceDataSizeProperty);
+	public bool HasSourceDataSize => this.GetValue(HasSourceDataSizeProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="VibranceAdjustment"/> is non-zero or not.
 	/// </summary>
-	public bool HasVibranceAdjustment => this.GetValue(HasVibranceAdjustmentProperty);
+	public bool HasVibranceAdjustment => this.GetValue(HasVibranceAdjustmentProp);
 
 
 	// Hibernate another session.
@@ -3330,7 +3330,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.Logger.LogWarning("Hibernate");
 
 		// update state and release the images
-		this.SetValue(IsHibernatedProperty, true);
+		this.SetValue(IsHibernatedProp, true);
 		this.DisposeFilteredImage();
 		this.DisposeRenderedImage();
 
@@ -3344,15 +3344,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double HighlightAdjustment
 	{
-		get => this.GetValue(HighlightAdjustmentProperty);
-		set => this.SetValue(HighlightAdjustmentProperty, value);
+		get => this.GetValue(HighlightAdjustmentProp);
+		set => this.SetValue(HighlightAdjustmentProp, value);
 	}
 
 
 	/// <summary>
 	/// Get histograms of <see cref="RenderedImage"/>.
 	/// </summary>
-	public BitmapHistograms? Histograms => this.GetValue(HistogramsProperty);
+	public BitmapHistograms? Histograms => this.GetValue(HistogramsProp);
 
 
 	/// <summary>
@@ -3360,27 +3360,27 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double HistogramsPanelSize
 	{
-		get => this.GetValue(HistogramsPanelSizeProperty);
-		set => this.SetValue(HistogramsPanelSizeProperty, value);
+		get => this.GetValue(HistogramsPanelSizeProp);
+		set => this.SetValue(HistogramsPanelSizeProp, value);
 	}
 
 
 	/// <summary>
 	/// Get rotation for displaying rendered image.
 	/// </summary>
-	public double ImageDisplayRotation => this.GetValue(ImageDisplayRotationProperty);
+	public double ImageDisplayRotation => this.GetValue(ImageDisplayRotationProp);
 
 
 	/// <summary>
 	/// Get proper scale for displaying rendered image.
 	/// </summary>
-	public double ImageDisplayScale => this.GetValue(ImageDisplayScaleProperty);
+	public double ImageDisplayScale => this.GetValue(ImageDisplayScaleProp);
 
 
 	/// <summary>
 	/// Get proper size for displaying rendered image.
 	/// </summary>
-	public Size ImageDisplaySize => this.GetValue(ImageDisplaySizeProperty);
+	public Size ImageDisplaySize => this.GetValue(ImageDisplaySizeProp);
 
 
 	/// <summary>
@@ -3388,15 +3388,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public int ImageHeight
 	{
-		get => this.GetValue(ImageHeightProperty);
-		set => this.SetValue(ImageHeightProperty, value);
+		get => this.GetValue(ImageHeightProp);
+		set => this.SetValue(ImageHeightProp, value);
 	}
 
 
 	/// <summary>
 	/// Get number of image planes according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public int ImagePlaneCount => this.GetValue(ImagePlaneCountProperty);
+	public int ImagePlaneCount => this.GetValue(ImagePlaneCountProp);
 
 
 	/// <summary>
@@ -3405,8 +3405,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	// ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 	public IImageRenderer ImageRenderer
 	{
-		get => this.GetValue(ImageRendererProperty).AsNonNull();
-		set => this.SetValue(ImageRendererProperty, value ?? this.SelectDefaultImageRenderer());
+		get => this.GetValue(ImageRendererProp).AsNonNull();
+		set => this.SetValue(ImageRendererProp, value ?? this.SelectDefaultImageRenderer());
 	}
 	// ReSharper restore NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract
 
@@ -3422,8 +3422,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public Size ImageViewportSize
 	{
-		get => this.GetValue(ImageViewportSizeProperty);
-		set => this.SetValue(ImageViewportSizeProperty, value);
+		get => this.GetValue(ImageViewportSizeProp);
+		set => this.SetValue(ImageViewportSizeProp, value);
 	}
 
 
@@ -3432,123 +3432,123 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public int ImageWidth
 	{
-		get => this.GetValue(ImageWidthProperty);
-		set => this.SetValue(ImageWidthProperty, value);
+		get => this.GetValue(ImageWidthProp);
+		set => this.SetValue(ImageWidthProp, value);
 	}
 
 
 	/// <summary>
 	/// Value to indicate whether there is insufficient memory for rendered image or not.
 	/// </summary>
-	public bool InsufficientMemoryForRenderedImage => this.GetValue(InsufficientMemoryForRenderedImageProperty);
+	public bool InsufficientMemoryForRenderedImage => this.GetValue(InsufficientMemoryForRenderedImageProp);
 
 
 	/// <summary>
 	/// Check whether session is activated or not.
 	/// </summary>
-	public bool IsActivated => this.GetValue(IsActivatedProperty);
+	public bool IsActivated => this.GetValue(IsActivatedProp);
 
 
 	/// <summary>
 	/// Check whether effective bits for 1st image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool IsAdjustableEffectiveBits1 => this.GetValue(IsAdjustableEffectiveBits1Property);
+	public bool IsAdjustableEffectiveBits1 => this.GetValue(IsAdjustableEffectiveBits1Prop);
 
 
 	/// <summary>
 	/// Check whether effective bits for 2nd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool IsAdjustableEffectiveBits2 => this.GetValue(IsAdjustableEffectiveBits2Property);
+	public bool IsAdjustableEffectiveBits2 => this.GetValue(IsAdjustableEffectiveBits2Prop);
 
 
 	/// <summary>
 	/// Check whether effective bits for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool IsAdjustableEffectiveBits3 => this.GetValue(IsAdjustableEffectiveBits3Property);
+	public bool IsAdjustableEffectiveBits3 => this.GetValue(IsAdjustableEffectiveBits3Prop);
 
 
 	/// <summary>
 	/// Check whether pixel stride for 1st image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool IsAdjustablePixelStride1 => this.GetValue(IsAdjustablePixelStride1Property);
+	public bool IsAdjustablePixelStride1 => this.GetValue(IsAdjustablePixelStride1Prop);
 
 
 	/// <summary>
 	/// Check whether pixel stride for 2nd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool IsAdjustablePixelStride2 => this.GetValue(IsAdjustablePixelStride2Property);
+	public bool IsAdjustablePixelStride2 => this.GetValue(IsAdjustablePixelStride2Prop);
 
 
 	/// <summary>
 	/// Check whether pixel stride for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
-	public bool IsAdjustablePixelStride3 => this.GetValue(IsAdjustablePixelStride3Property);
+	public bool IsAdjustablePixelStride3 => this.GetValue(IsAdjustablePixelStride3Prop);
 
 
 	/// <summary>
 	/// Check whether the source image carries a meaningful alpha channel. True for ARGB-category renderers and for Compressed-category renderers whose source <see cref="FileFormat"/> is PNG, WebP, or HEIF; false otherwise.
 	/// </summary>
-	public bool IsAlphaChannelAvailable => this.GetValue(IsAlphaChannelAvailableProperty);
+	public bool IsAlphaChannelAvailable => this.GetValue(IsAlphaChannelAvailableProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="BayerPattern"/> is supported by current <see cref="ImageRenderer"/> or not.
 	/// </summary>
-	public bool IsBayerPatternSupported => this.GetValue(IsBayerPatternSupportedProperty);
+	public bool IsBayerPatternSupported => this.GetValue(IsBayerPatternSupportedProp);
 
 
 	/// <summary>
 	/// Check whether brightness adjustment is supported or not.
 	/// </summary>
-	public bool IsBrightnessAdjustmentSupported => this.GetValue(IsBrightnessAdjustmentSupportedProperty);
+	public bool IsBrightnessAdjustmentSupported => this.GetValue(IsBrightnessAdjustmentSupportedProp);
 
 
 	/// <summary>
 	/// Check whether color adjustment is supported or not.
 	/// </summary>
-	public bool IsColorAdjustmentSupported => this.GetValue(IsColorAdjustmentSupportedProperty);
+	public bool IsColorAdjustmentSupported => this.GetValue(IsColorAdjustmentSupportedProp);
 
 
 	/// <summary>
 	/// Check whether color space management is enabled or not.
 	/// </summary>
-	public bool IsColorSpaceManagementEnabled => this.GetValue(IsColorSpaceManagementEnabledProperty);
+	public bool IsColorSpaceManagementEnabled => this.GetValue(IsColorSpaceManagementEnabledProp);
 
 
 	/// <summary>
 	/// Check whether image format supported by current <see cref="ImageRenderer"/> is a compressed format or not.
 	/// </summary>
-	public bool IsCompressedImageFormat => this.GetValue(IsCompressedImageFormatProperty);
+	public bool IsCompressedImageFormat => this.GetValue(IsCompressedImageFormatProp);
 
 
 	/// <summary>
 	/// Check whether contrast adjustment is supported or not.
 	/// </summary>
-	public bool IsContrastAdjustmentSupported => this.GetValue(IsContrastAdjustmentSupportedProperty);
+	public bool IsContrastAdjustmentSupported => this.GetValue(IsContrastAdjustmentSupportedProp);
 
 
 	/// <summary>
 	/// Check whether color space of rendered image is being converted or not.
 	/// </summary>
-	public bool IsConvertingColorSpace => this.GetValue(IsConvertingColorSpaceProperty);
+	public bool IsConvertingColorSpace => this.GetValue(IsConvertingColorSpaceProp);
 
 
 	/// <summary>
 	/// Check whether demosaicing is supported by current <see cref="ImageRenderer"/> or not.
 	/// </summary>
-	public bool IsDemosaicingSupported => this.GetValue(IsDemosaicingSupportedProperty);
+	public bool IsDemosaicingSupported => this.GetValue(IsDemosaicingSupportedProp);
 
 
 	/// <summary>
 	/// Check whether rendered image is being filtered or not.
 	/// </summary>
-	public bool IsFilteringRenderedImage => this.GetValue(IsFilteringRenderedImageProperty);
+	public bool IsFilteringRenderedImage => this.GetValue(IsFilteringRenderedImageProp);
 
 
 	/// <summary>
 	/// Check whether rendered image is needed to be filtered or not.
 	/// </summary>
-	public bool IsFilteringRenderedImageNeeded => this.GetValue(IsFilteringRenderedImageNeededProperty);
+	public bool IsFilteringRenderedImageNeeded => this.GetValue(IsFilteringRenderedImageNeededProp);
 
 
 	/// <summary>
@@ -3556,27 +3556,27 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsGrayscaleFilterEnabled
 	{
-		get => this.GetValue(IsGrayscaleFilterEnabledProperty);
-		set => this.SetValue(IsGrayscaleFilterEnabledProperty, value);
+		get => this.GetValue(IsGrayscaleFilterEnabledProp);
+		set => this.SetValue(IsGrayscaleFilterEnabledProp, value);
 	}
 
 
 	/// <summary>
 	/// Check whether grayscale filter is supported or not.
 	/// </summary>
-	public bool IsGrayscaleFilterSupported => this.GetValue(IsGrayscaleFilterSupportedProperty);
+	public bool IsGrayscaleFilterSupported => this.GetValue(IsGrayscaleFilterSupportedProp);
 
 
 	/// <summary>
 	/// Check whether instance is hibernated or not.
 	/// </summary>
-	public bool IsHibernated => this.GetValue(IsHibernatedProperty);
+	public bool IsHibernated => this.GetValue(IsHibernatedProp);
 
 
 	/// <summary>
 	/// Check whether highlight adjustment is supported or not.
 	/// </summary>
-	public bool IsHighlightAdjustmentSupported => this.GetValue(IsHighlightAdjustmentSupportedProperty);
+	public bool IsHighlightAdjustmentSupported => this.GetValue(IsHighlightAdjustmentSupportedProp);
 
 
 	/// <summary>
@@ -3584,8 +3584,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsHistogramMeanMarkerVisible
 	{
-		get => this.GetValue(IsHistogramMeanMarkerVisibleProperty);
-		set => this.SetValue(IsHistogramMeanMarkerVisibleProperty, value);
+		get => this.GetValue(IsHistogramMeanMarkerVisibleProp);
+		set => this.SetValue(IsHistogramMeanMarkerVisibleProp, value);
 	}
 
 
@@ -3594,8 +3594,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsHistogramsVisible
 	{
-		get => this.GetValue(IsHistogramsVisibleProperty);
-		set => this.SetValue(IsHistogramsVisibleProperty, value);
+		get => this.GetValue(IsHistogramsVisibleProp);
+		set => this.SetValue(IsHistogramsVisibleProp, value);
 	}
 
 
@@ -3604,8 +3604,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsImageFlippedX
 	{
-		get => this.GetValue(IsImageFlippedXProperty);
-		set => this.SetValue(IsImageFlippedXProperty, value);
+		get => this.GetValue(IsImageFlippedXProp);
+		set => this.SetValue(IsImageFlippedXProp, value);
 	}
 
 
@@ -3614,33 +3614,33 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsImageFlippedY
 	{
-		get => this.GetValue(IsImageFlippedYProperty);
-		set => this.SetValue(IsImageFlippedYProperty, value);
+		get => this.GetValue(IsImageFlippedYProp);
+		set => this.SetValue(IsImageFlippedYProp, value);
 	}
 
 
 	/// <summary>
 	/// Check whether source file is being opened or not.
 	/// </summary>
-	public bool IsOpeningSource => this.GetValue(IsOpeningSourceProperty);
+	public bool IsOpeningSource => this.GetValue(IsOpeningSourceProp);
 
 
 	/// <summary>
 	/// Check whether image is being processed or not.
 	/// </summary>
-	public bool IsProcessingImage => this.GetValue(IsProcessingImageProperty);
+	public bool IsProcessingImage => this.GetValue(IsProcessingImageProp);
 
 
 	/// <summary>
 	/// Check whether PixelViewer Pro is activated or not.
 	/// </summary>
-	public bool IsProVersionActivated => this.GetValue(IsProVersionActivatedProperty);
+	public bool IsProVersionActivated => this.GetValue(IsProVersionActivatedProp);
 
 
 	/// <summary>
 	/// Check whether image is being rendered or not.
 	/// </summary>
-	public bool IsRenderingImage => this.GetValue(IsRenderingImageProperty);
+	public bool IsRenderingImage => this.GetValue(IsRenderingImageProp);
 
 
 	/// <summary>
@@ -3648,75 +3648,75 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public bool IsRenderingParametersPanelVisible
     {
-		get => this.GetValue(IsRenderingParametersPanelVisibleProperty);
-		set => this.SetValue(IsRenderingParametersPanelVisibleProperty, value);
+		get => this.GetValue(IsRenderingParametersPanelVisibleProp);
+		set => this.SetValue(IsRenderingParametersPanelVisibleProp, value);
     }
 
 
 	/// <summary>
 	/// Check whether RGB gain is available for current <see cref="ImageRenderer"/> or not.
 	/// </summary>
-	public bool IsRgbGainSupported => this.GetValue(IsRgbGainSupportedProperty);
+	public bool IsRgbGainSupported => this.GetValue(IsRgbGainSupportedProp);
 
 
 	/// <summary>
 	/// Check whether saturation adjustment is supported or not.
 	/// </summary>
-	public bool IsSaturationAdjustmentSupported => this.GetValue(IsSaturationAdjustmentSupportedProperty);
+	public bool IsSaturationAdjustmentSupported => this.GetValue(IsSaturationAdjustmentSupportedProp);
 
 
 	/// <summary>
 	/// Check whether filtered image is being saved or not.
 	/// </summary>
-	public bool IsSavingFilteredImage => this.GetValue(IsSavingFilteredImageProperty);
+	public bool IsSavingFilteredImage => this.GetValue(IsSavingFilteredImageProp);
 
 
 	/// <summary>
 	/// Check whether at least one image is being saved or not.
 	/// </summary>
-	public bool IsSavingImage => this.GetValue(IsSavingImageProperty);
+	public bool IsSavingImage => this.GetValue(IsSavingImageProp);
 
 
 	/// <summary>
 	/// Check whether rendered image is being saved or not.
 	/// </summary>
-	public bool IsSavingRenderedImage => this.GetValue(IsSavingRenderedImageProperty);
+	public bool IsSavingRenderedImage => this.GetValue(IsSavingRenderedImageProp);
 
 
 	/// <summary>
 	/// Check whether shadow adjustment is supported or not.
 	/// </summary>
-	public bool IsShadowAdjustmentSupported => this.GetValue(IsShadowAdjustmentSupportedProperty);
+	public bool IsShadowAdjustmentSupported => this.GetValue(IsShadowAdjustmentSupportedProp);
 
 
 	/// <summary>
 	/// Check whether source image file has been opened or not.
 	/// </summary>
-	public bool IsSourceOpened => this.GetValue(IsSourceOpenedProperty);
+	public bool IsSourceOpened => this.GetValue(IsSourceOpenedProp);
 
 
 	/// <summary>
 	/// Check whether vibrance adjustment is supported or not.
 	/// </summary>
-	public bool IsVibranceAdjustmentSupported => this.GetValue(IsVibranceAdjustmentSupportedProperty);
+	public bool IsVibranceAdjustmentSupported => this.GetValue(IsVibranceAdjustmentSupportedProp);
 
 
 	/// <summary>
 	/// Check whether <see cref="YuvToBgraConverter"/> is supported by current <see cref="ImageRenderer"/> or not.
 	/// </summary>
-	public bool IsYuvToBgraConverterSupported => this.GetValue(IsYuvToBgraConverterSupportedProperty);
+	public bool IsYuvToBgraConverterSupported => this.GetValue(IsYuvToBgraConverterSupportedProp);
 
 
 	/// <summary>
 	/// Check whether smooth zooming is on-going or not.
 	/// </summary>
-	public bool IsZooming => this.GetValue(IsZoomingProperty);
+	public bool IsZooming => this.GetValue(IsZoomingProp);
 
 
 	/// <summary>
 	/// Get <see cref="Geometry"/> of luminance histogram.
 	/// </summary>
-	public Geometry? LuminanceHistogramGeometry => this.GetValue(LuminanceHistogramGeometryProperty);
+	public Geometry? LuminanceHistogramGeometry => this.GetValue(LuminanceHistogramGeometryProp);
 
 
 	/// <summary>
@@ -3767,7 +3767,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	void OnApplicationPropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		if (e.PropertyName == nameof(App.IsProVersionActivated))
-			this.SetValue(IsProVersionActivatedProperty, (sender as App)?.IsProVersionActivated == true);
+			this.SetValue(IsProVersionActivatedProp, (sender as App)?.IsProVersionActivated == true);
 	}
 
 
@@ -3803,7 +3803,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	void OnImageRendererPropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
 		// ignore event from renderer which is no longer the current one
-		if (sender is not IImageRenderer imageRenderer || !ReferenceEquals(imageRenderer, this.GetValue(ImageRendererProperty)))
+		if (sender is not IImageRenderer imageRenderer || !ReferenceEquals(imageRenderer, this.GetValue(ImageRendererProp)))
 			return;
 
 		// apply swapped format
@@ -3822,7 +3822,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		base.OnOwnerChanged(prevOwner, newOwner);
 		this.effectiveScreenColorSpaceObserverToken = this.effectiveScreenColorSpaceObserverToken.DisposeAndReturnNull();
-		this.effectiveScreenColorSpaceObserverToken = (newOwner as Workspace)?.GetValueAsObservable(Workspace.EffectiveScreenColorSpaceProperty).Subscribe(this.effectiveScreenColorSpaceObserver);
+		this.effectiveScreenColorSpaceObserverToken = (newOwner as Workspace)?.GetValueAsObservable(Workspace.EffectiveScreenColorSpaceProp).Subscribe(this.effectiveScreenColorSpaceObserver);
 		this.OnScreenColorSpaceChanged();
 	}
 
@@ -3849,68 +3849,68 @@ class Session : ViewModel<IAppSuiteApplication>
 	protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
 	{
 		base.OnPropertyChanged(property, oldValue, newValue);
-		if (property == BayerPatternProperty)
+		if (property == BayerPatternProp)
 		{
 			this.UpdateDemosaicingAlgorithms();
 			if (this.IsBayerPatternSupported)
 				this.renderImageAction.Reschedule();
 		}
-		else if (property == BlueColorAdjustmentProperty
-			|| property == GreenColorAdjustmentProperty
-			|| property == RedColorAdjustmentProperty)
+		else if (property == BlueColorAdjustmentProp
+			|| property == GreenColorAdjustmentProp
+			|| property == RedColorAdjustmentProp)
 		{
-			this.SetValue(HasColorAdjustmentProperty, Math.Abs(this.BlueColorAdjustment) > 0.01
+			this.SetValue(HasColorAdjustmentProp, Math.Abs(this.BlueColorAdjustment) > 0.01
 				|| Math.Abs(this.GreenColorAdjustment) > 0.01
 				|| Math.Abs(this.RedColorAdjustment) > 0.01);
 			this.canResetColorAdjustment.Update(this.HasColorAdjustment && this.IsColorAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == BlueColorGainProperty
-			|| property == GreenColorGainProperty
-			|| property == RedColorGainProperty)
+		else if (property == BlueColorGainProp
+			|| property == GreenColorGainProp
+			|| property == RedColorGainProp)
 		{
 			if (this.IsRgbGainSupported)
 				this.renderImageAction.Reschedule(RenderImageDelay);
-			this.SetValue(HasRgbGainProperty, Math.Abs(this.BlueColorGain - 1) > 0.001
+			this.SetValue(HasRgbGainProp, Math.Abs(this.BlueColorGain - 1) > 0.001
 				|| Math.Abs(this.GreenColorGain - 1) > 0.001
 				|| Math.Abs(this.RedColorGain - 1) > 0.001);
 		}
-		else if (property == BrightnessAdjustmentProperty)
+		else if (property == BrightnessAdjustmentProp)
 		{
-			this.SetValue(HasBrightnessAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.SetValue(HasBrightnessAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && this.IsBrightnessAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == ByteOrderingProperty)
+		else if (property == ByteOrderingProp)
 		{
 			if (this.HasMultipleByteOrderings)
 				this.renderImageAction.Reschedule();
 		}
-		else if (property == ColorSpaceProperty
-			|| property == UseLinearColorSpaceProperty)
+		else if (property == ColorSpaceProp
+			|| property == UseLinearColorSpaceProp)
 		{
 			if (this.IsColorSpaceManagementEnabled)
 				this.renderImageAction.Reschedule();
 		}
-		else if (property == ContrastAdjustmentProperty)
+		else if (property == ContrastAdjustmentProp)
 		{
-			this.SetValue(HasContrastAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.SetValue(HasContrastAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && this.IsContrastAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == CustomTitleProperty)
+		else if (property == CustomTitleProp)
 			this.UpdateTitle();
-		else if (property == DataOffsetProperty
-			|| property == FrameNumberProperty
-			|| property == FramePaddingSizeProperty
-			|| property == ImageHeightProperty)
+		else if (property == DataOffsetProp
+			|| property == FrameNumberProp
+			|| property == FramePaddingSizeProp
+			|| property == ImageHeightProp)
 		{
 			this.renderImageAction.Reschedule();
 		}
-		else if (property == DemosaicingAlgorithmProperty)
+		else if (property == DemosaicingAlgorithmProp)
 		{
 			// notify the change of on/off state of demosaicing
 			this.OnPropertyChanged(nameof(this.Demosaicing));
@@ -3919,16 +3919,16 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsDemosaicingSupported)
 				this.renderImageAction.Reschedule();
 		}
-		else if (property == FitImageToViewportProperty)
+		else if (property == FitImageToViewportProp)
 		{
 			var fitToViewport = (bool)newValue.AsNonNull();
 			this.canZoomTo.Update(!fitToViewport && this.IsSourceOpened);
 			this.UpdateCanZoomInOut();
 			if (!fitToViewport)
-				this.ZoomTo(this.GetValue(RequestedImageDisplayScaleProperty));
+				this.ZoomTo(this.GetValue(RequestedImageDisplayScaleProp));
 			else if (double.IsFinite(this.fitRenderedImageToViewportScale))
 			{
-				var scale = ((int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) % 180) == 0
+				var scale = ((int)(this.GetValue(ImageDisplayRotationProp) + 0.5) % 180) == 0
 					? this.fitRenderedImageToViewportScale
 					: this.fitRenderedImageToViewportScaleSwapped;
 				this.ZoomTo(scale);
@@ -3936,35 +3936,35 @@ class Session : ViewModel<IAppSuiteApplication>
 			else
 				this.updateImageDisplaySizeAction.Execute();
 		}
-		else if (property == FrameCountProperty)
+		else if (property == FrameCountProp)
 		{
-			this.SetValue(HasMultipleFramesProperty, (long)newValue.AsNonNull() > 1);
+			this.SetValue(HasMultipleFramesProp, (long)newValue.AsNonNull() > 1);
 			this.UpdateCanPlayFrames();
 		}
-		else if (property == FramePlaybackRateProperty)
+		else if (property == FramePlaybackRateProp)
 		{
 			this.PersistentState.SetValue(LatestFramePlaybackRate, (int)newValue.AsNonNull());
 			this.RestartFramePlaybackTimeline();
 		}
-		else if (property == IsFramePlaybackLoopingProperty)
+		else if (property == IsFramePlaybackLoopingProp)
 			this.PersistentState.SetValue(IsInitFramePlaybackLooping, (bool)newValue.AsNonNull());
-		else if (property == IsFramePlaybackRateUnlimitedProperty)
+		else if (property == IsFramePlaybackRateUnlimitedProp)
 		{
 			this.PersistentState.SetValue(IsInitFramePlaybackRateUnlimited, (bool)newValue.AsNonNull());
 			this.RestartFramePlaybackTimeline();
 		}
-		else if (property == HighlightAdjustmentProperty)
+		else if (property == HighlightAdjustmentProp)
 		{
-			this.SetValue(HasHighlightAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.SetValue(HasHighlightAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetHighlightAdjustment.Update(this.HasHighlightAdjustment && this.IsHighlightAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == HistogramsPanelSizeProperty)
+		else if (property == HistogramsPanelSizeProp)
 			this.PersistentState.SetValue(LatestHistogramsPanelSize, (int)(this.HistogramsPanelSize + 0.5));
-		else if (property == HistogramsProperty)
-			this.SetValue(HasHistogramsProperty, newValue is not null);
-		else if (property == ImageRendererProperty)
+		else if (property == HistogramsProp)
+			this.SetValue(HasHistogramsProp, newValue is not null);
+		else if (property == ImageRendererProp)
 		{
 			// detach from previous renderer, its format may be swapped when user edits it
 			(oldValue as IImageRenderer)?.Let(it => it.PropertyChanged -= this.OnImageRendererPropertyChanged);
@@ -3979,44 +3979,44 @@ class Session : ViewModel<IAppSuiteApplication>
 			else
 				this.Logger.LogError("{newValue} is not part of available image renderer list", newValue);
 		}
-		else if (property == ImageViewportSizeProperty
-			|| property == ScreenPixelDensityProperty)
+		else if (property == ImageViewportSizeProp
+			|| property == ScreenPixelDensityProp)
 		{
 			this.fitRenderedImageToViewportScale = double.NaN;
 			this.updateImageDisplaySizeAction.Schedule();
 		}
-		else if (property == ImageWidthProperty)
+		else if (property == ImageWidthProp)
 		{
 			if (this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions))
 				this.isImagePlaneOptionsResetNeeded = true;
 			this.renderImageAction.Reschedule();
 		}
-		else if (property == IsBrightnessAdjustmentSupportedProperty)
+		else if (property == IsBrightnessAdjustmentSupportedProp)
 		{
 			this.canResetBrightnessAdjustment.Update(this.HasBrightnessAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsColorAdjustmentSupportedProperty)
+		else if (property == IsColorAdjustmentSupportedProp)
 		{
 			this.canResetColorAdjustment.Update(this.HasColorAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsColorSpaceManagementEnabledProperty)
+		else if (property == IsColorSpaceManagementEnabledProp)
 		{
 			if (this.IsActivated)
 				this.renderImageAction.Reschedule();
 			else
 				_ = this.ClearRenderedImageAsync();
 		}
-		else if (property == IsContrastAdjustmentSupportedProperty)
+		else if (property == IsContrastAdjustmentSupportedProp)
 		{
 			this.canResetContrastAdjustment.Update(this.HasContrastAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsFilteringRenderedImageNeededProperty)
+		else if (property == IsFilteringRenderedImageNeededProp)
 		{
 			if ((bool)newValue.AsNonNull())
 				this.filterImageAction.Schedule();
@@ -4031,49 +4031,49 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			}
 		}
-		else if (property == IsFilteringRenderedImageProperty
-			|| property == IsOpeningSourceProperty
-			|| property == IsRenderingImageProperty)
+		else if (property == IsFilteringRenderedImageProp
+			|| property == IsOpeningSourceProp
+			|| property == IsRenderingImageProp)
 		{
 			this.updateIsProcessingImageAction.Schedule();
-			if (property == IsRenderingImageProperty && !(bool)newValue.AsNonNull())
+			if (property == IsRenderingImageProp && !(bool)newValue.AsNonNull())
 				this.ScheduleNextFrameForPlayback(); // rendering of current frame completed, playback moves to next frame
 		}
-		else if (property == IsGrayscaleFilterEnabledProperty
-			|| property == IsGrayscaleFilterSupportedProperty)
+		else if (property == IsGrayscaleFilterEnabledProp
+			|| property == IsGrayscaleFilterSupportedProp)
 		{
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule();
 		}
-		else if (property == IsHighlightAdjustmentSupportedProperty)
+		else if (property == IsHighlightAdjustmentSupportedProp)
 		{
 			this.canResetHighlightAdjustment.Update(this.HasHighlightAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsHistogramMeanMarkerVisibleProperty)
+		else if (property == IsHistogramMeanMarkerVisibleProp)
 			this.PersistentState.SetValue(IsInitHistogramMeanMarkerVisible, (bool)newValue.AsNonNull());
-		else if (property == IsHistogramsVisibleProperty)
+		else if (property == IsHistogramsVisibleProp)
 			this.PersistentState.SetValue(IsInitHistogramsPanelVisible, (bool)newValue.AsNonNull());
-		else if (property == IsSaturationAdjustmentSupportedProperty)
+		else if (property == IsSaturationAdjustmentSupportedProp)
 		{
 			this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsSavingFilteredImageProperty
-			|| property == IsSavingRenderedImageProperty)
+		else if (property == IsSavingFilteredImageProp
+			|| property == IsSavingRenderedImageProp)
 		{
-			this.SetValue(IsSavingImageProperty, this.IsSavingFilteredImage || this.IsSavingRenderedImage);
+			this.SetValue(IsSavingImageProp, this.IsSavingFilteredImage || this.IsSavingRenderedImage);
 			this.updateIsProcessingImageAction.Schedule();
 		}
-		else if (property == IsShadowAdjustmentSupportedProperty)
+		else if (property == IsShadowAdjustmentSupportedProp)
 		{
 			this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsSourceOpenedProperty)
+		else if (property == IsSourceOpenedProp)
 		{
 			if (this.IsSourceOpened)
 				this.updateFilterSupportingAction.Schedule();
@@ -4082,27 +4082,27 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.UpdateCanZoomInOut();
 			this.UpdateCanPlayFrames();
 		}
-		else if (property == IsVibranceAdjustmentSupportedProperty)
+		else if (property == IsVibranceAdjustmentSupportedProp)
 		{
 			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
-		else if (property == IsYuvToBgraConverterSupportedProperty)
+		else if (property == IsYuvToBgraConverterSupportedProp)
 		{
 			if ((bool)newValue.AsNonNull())
 			{
-				this.SetValue(ColorSpaceProperty, this.YuvToBgraConverter.ColorSpace);
+				this.SetValue(ColorSpaceProp, this.YuvToBgraConverter.ColorSpace);
 				if (this.IsColorSpaceManagementEnabled)
 					this.renderImageAction.Reschedule();
 			}
 		}
-		else if (property == ProfileProperty)
+		else if (property == ProfileProp)
 		{
 			this.canApplyProfile.Update(((ImageRenderingProfile)newValue.AsNonNull()).Type != ImageRenderingProfileType.Default);
 			this.ApplyProfile();
 		}
-		else if (property == QuarterSizeRenderedImageProperty)
+		else if (property == QuarterSizeRenderedImageProp)
 		{
 			if (newValue is null)
 			{
@@ -4110,9 +4110,9 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.avaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			}
-			this.SetValue(HasQuarterSizeRenderedImageProperty, newValue is not null);
+			this.SetValue(HasQuarterSizeRenderedImageProp, newValue is not null);
 		}
-		else if (property == RenderedImageProperty)
+		else if (property == RenderedImageProp)
 		{
 			if (newValue is null)
 			{
@@ -4120,16 +4120,16 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.avaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 				this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
 			}
-			this.SetValue(HasRenderedImageProperty, newValue is not null);
+			this.SetValue(HasRenderedImageProp, newValue is not null);
 			if (oldValue is null || newValue is null || ((IImage)oldValue).Size != ((IImage)newValue).Size)
 				this.fitRenderedImageToViewportScale = double.NaN;
 			this.updateImageDisplaySizeAction.Execute();
 		}
-		else if (property == RenderingParametersPanelSizeProperty)
+		else if (property == RenderingParametersPanelSizeProp)
 			this.PersistentState.SetValue(LatestRenderingParamsPanelSize, (int)(this.RenderingParametersPanelSize + 0.5));
-		else if (property == RequestedImageDisplayScaleProperty)
+		else if (property == RequestedImageDisplayScaleProp)
 		{
-			if (!this.GetValue(FitImageToViewportProperty))
+			if (!this.GetValue(FitImageToViewportProp))
 			{
 				var scale = (double)newValue.AsNonNull();
 				this.UpdateCanZoomInOut();
@@ -4140,36 +4140,36 @@ class Session : ViewModel<IAppSuiteApplication>
 				}
 			}
 		}
-		else if (property == SaturationAdjustmentProperty)
+		else if (property == SaturationAdjustmentProp)
 		{
-			this.SetValue(HasSaturationAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.SetValue(HasSaturationAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetSaturationAdjustment.Update(this.HasSaturationAdjustment && this.IsSaturationAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == ShadowAdjustmentProperty)
+		else if (property == ShadowAdjustmentProp)
 		{
-			this.SetValue(HasShadowAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.SetValue(HasShadowAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == SourceDataSizeProperty)
-			this.SetValue(HasSourceDataSizeProperty, (long)newValue.AsNonNull() > 0);
-		else if (property == SourceImageEffectiveBitsProperty)
+		else if (property == SourceDataSizeProp)
+			this.SetValue(HasSourceDataSizeProp, (long)newValue.AsNonNull() > 0);
+		else if (property == SourceImageEffectiveBitsProp)
 			this.Logger.LogTrace("Source image effective bits: {bits}", newValue);
-		else if (property == VibranceAdjustmentProperty)
+		else if (property == VibranceAdjustmentProp)
 		{
-			this.SetValue(HasVibranceAdjustmentProperty, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.SetValue(HasVibranceAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
-		else if (property == YuvToBgraConverterProperty)
+		else if (property == YuvToBgraConverterProp)
 		{
 			if (this.IsYuvToBgraConverterSupported)
 			{
-				this.SetValue(ColorSpaceProperty, ((YuvToBgraConverter)newValue.AsNonNull()).ColorSpace);
+				this.SetValue(ColorSpaceProp, ((YuvToBgraConverter)newValue.AsNonNull()).ColorSpace);
 				this.renderImageAction.Reschedule();
 			}
 		}
@@ -4179,11 +4179,11 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Called before removing user-defined color space.
 	void OnRemovingUserDefinedColorSpace(object? sender, ColorSpaceEventArgs e)
 	{
-		if (e.ColorSpace.Equals(this.GetValue(ColorSpaceProperty)))
+		if (e.ColorSpace.Equals(this.GetValue(ColorSpaceProp)))
 		{
 			this.Logger.LogWarning("Color space '{colorSpace}' is being removed, switch back to default color space", e.ColorSpace);
 			ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
-			this.SetValue(ColorSpaceProperty, colorSpace);
+			this.SetValue(ColorSpaceProp, colorSpace);
 		}
 	}
 
@@ -4204,10 +4204,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		var prevScreenColorSpace = this.colorSpaces.FirstOrDefault(it => it.IsSystemDefined);
 		if (prevScreenColorSpace is not null)
 		{
-			if (this.GetValue(ColorSpaceProperty).Equals(prevScreenColorSpace))
+			if (this.GetValue(ColorSpaceProp).Equals(prevScreenColorSpace))
 			{
 				ColorSpace.TryGetColorSpace(this.Settings.GetValueOrDefault(SettingKeys.DefaultColorSpaceName), out var colorSpace);
-				this.SetValue(ColorSpaceProperty, colorSpace);
+				this.SetValue(ColorSpaceProp, colorSpace);
 			}
 			this.colorSpaces.Remove(prevScreenColorSpace);
 		}
@@ -4241,7 +4241,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.RenderImageCommand.TryExecute();
 		}
 		else if (key == SettingKeys.EnableColorSpaceManagement)
-			this.SetValue(IsColorSpaceManagementEnabledProperty, (bool)e.Value.AsNonNull());
+			this.SetValue(IsColorSpaceManagementEnabledProp, (bool)e.Value.AsNonNull());
     }
 
 
@@ -4249,7 +4249,7 @@ class Session : ViewModel<IAppSuiteApplication>
     void OnSharedRenderedImagesMemoryUsageChanged(long usage)
 	{
 		if (!this.IsDisposed)
-			this.SetValue(TotalRenderedImagesMemoryUsageProperty, usage);
+			this.SetValue(TotalRenderedImagesMemoryUsageProp, usage);
 	}
 
 
@@ -4361,7 +4361,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// update state
 		this.canOpenSource.Update(false);
-		this.SetValue(IsOpeningSourceProperty, true);
+		this.SetValue(IsOpeningSourceProp, true);
 
 		// create image data source
 		var imageDataSource = await createDataSource();
@@ -4373,13 +4373,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 		if (imageDataSource is FileImageDataSource)
-			this.SetValue(SourceFileNameProperty, fileName);
+			this.SetValue(SourceFileNameProp, fileName);
 		else if (imageDataSource is null)
 		{
 			// reset state
-			this.SetValue(SourceFileNameProperty, null);
-			this.SetValue(IsSourceOpenedProperty, false);
-			this.SetValue(IsOpeningSourceProperty, false);
+			this.SetValue(SourceFileNameProp, null);
+			this.SetValue(IsSourceOpenedProp, false);
+			this.SetValue(IsOpeningSourceProp, false);
 			this.canOpenSource.Update(true);
 			this.canZoomTo.Update(false);
 
@@ -4436,7 +4436,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.Profile = this.fileFormatProfile;
 			else if (evaluatedImageRenderer is not null)
 			{
-				this.SetValue(ImageRendererProperty, evaluatedImageRenderer);
+				this.SetValue(ImageRendererProp, evaluatedImageRenderer);
 				if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 					this.isImageDimensionsEvaluationNeeded = true;
 				this.isImagePlaneOptionsResetNeeded = true;
@@ -4447,7 +4447,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				var defaultImageRenderer = this.SelectDefaultImageRenderer();
 				if (this.ImageRenderer != defaultImageRenderer)
 				{
-					this.SetValue(ImageRendererProperty, defaultImageRenderer);
+					this.SetValue(ImageRendererProp, defaultImageRenderer);
 					if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterChangingRenderer))
 						this.isImageDimensionsEvaluationNeeded = true;
 					this.isImagePlaneOptionsResetNeeded = true;
@@ -4479,23 +4479,23 @@ class Session : ViewModel<IAppSuiteApplication>
 	void PlayNextFrame()
 	{
 		// check state
-		if (!this.GetValue(IsPlayingFramesProperty))
+		if (!this.GetValue(IsPlayingFramesProp))
 			return;
 
 		// move to the selected frame, render the current frame again if all frames were dropped in this round
-		if (this.GetValue(FrameNumberProperty) == this.framePlaybackNextFrameNumber)
+		if (this.GetValue(FrameNumberProp) == this.framePlaybackNextFrameNumber)
 			this.renderImageAction.Reschedule();
 		else
-			this.SetValue(FrameNumberProperty, this.framePlaybackNextFrameNumber);
+			this.SetValue(FrameNumberProp, this.framePlaybackNextFrameNumber);
 	}
 
 
 	// Anchor the playback timeline to the frame being displayed so that the current frame rate takes effect immediately.
 	void RestartFramePlaybackTimeline()
 	{
-		if (!this.GetValue(IsPlayingFramesProperty))
+		if (!this.GetValue(IsPlayingFramesProp))
 			return;
-		this.framePlaybackBaseFrameNumber = this.GetValue(FrameNumberProperty);
+		this.framePlaybackBaseFrameNumber = this.GetValue(FrameNumberProp);
 		this.framePlaybackBaseTime = this.framePlaybackStopwatch.Elapsed.TotalMilliseconds;
 		this.ScheduleNextFrameForPlayback();
 	}
@@ -4505,7 +4505,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	void ScheduleNextFrameForPlayback()
 	{
 		// check state
-		if (!this.GetValue(IsPlayingFramesProperty) || this.hasPendingImageRendering)
+		if (!this.GetValue(IsPlayingFramesProp) || this.hasPendingImageRendering)
 			return;
 		if (!this.canPlayFrames.Value)
 		{
@@ -4514,10 +4514,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 
 		// select the frame to be rendered next
-		var frameInterval = this.GetValue(IsFramePlaybackRateUnlimitedProperty)
+		var frameInterval = this.GetValue(IsFramePlaybackRateUnlimitedProp)
 			? 0.0
-			: 1000.0 / this.GetValue(FramePlaybackRateProperty);
-		var nextFrame = SelectNextFrameForPlayback(this.framePlaybackBaseFrameNumber, this.framePlaybackBaseTime, this.framePlaybackStopwatch.Elapsed.TotalMilliseconds, frameInterval, this.GetValue(FrameCountProperty), this.GetValue(IsFramePlaybackLoopingProperty));
+			: 1000.0 / this.GetValue(FramePlaybackRateProp);
+		var nextFrame = SelectNextFrameForPlayback(this.framePlaybackBaseFrameNumber, this.framePlaybackBaseTime, this.framePlaybackStopwatch.Elapsed.TotalMilliseconds, frameInterval, this.GetValue(FrameCountProp), this.GetValue(IsFramePlaybackLoopingProp));
 		if (nextFrame is null)
 		{
 			this.StopPlayingFrames();
@@ -4584,10 +4584,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		this.VerifyAccess();
 		this.VerifyDisposed();
-		if (!this.canPlayFrames.Value || this.GetValue(IsPlayingFramesProperty))
+		if (!this.canPlayFrames.Value || this.GetValue(IsPlayingFramesProp))
 			return;
-		this.SetValue(IsPlayingFramesProperty, true);
-		this.framePlaybackBaseFrameNumber = this.GetValue(FrameNumberProperty);
+		this.SetValue(IsPlayingFramesProp, true);
+		this.framePlaybackBaseFrameNumber = this.GetValue(FrameNumberProp);
 		this.framePlaybackBaseTime = 0;
 		this.framePlaybackStopwatch.Restart();
 		this.ScheduleNextFrameForPlayback();
@@ -4600,7 +4600,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	public void StopPlayingFrames()
 	{
 		// check state
-		if (!this.GetValue(IsPlayingFramesProperty))
+		if (!this.GetValue(IsPlayingFramesProp))
 			return;
 
 		// stop playback
@@ -4609,14 +4609,14 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// update state, the property cannot be updated after the session has been disposed
 		if (!this.IsDisposed)
-			this.SetValue(IsPlayingFramesProperty, false);
+			this.SetValue(IsPlayingFramesProp, false);
 	}
 
 
 	// Toggle between playing and stopping the frame sequence.
 	void TogglePlayingFrames()
 	{
-		if (this.GetValue(IsPlayingFramesProperty))
+		if (this.GetValue(IsPlayingFramesProp))
 			this.StopPlayingFrames();
 		else
 			this.StartPlayingFrames();
@@ -4628,7 +4628,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// each frame of multi-frame source is rendered by its own source, keep moving to another frame available so that the frame which cannot be rendered can be skipped
 		var canMove = isFrameRendered || this.imageDataSource is IMultiFrameImageDataSource;
-		this.canMoveToNextFrame.Update(canMove && frameNumber < this.GetValue(FrameCountProperty));
+		this.canMoveToNextFrame.Update(canMove && frameNumber < this.GetValue(FrameCountProp));
 		this.canMoveToPreviousFrame.Update(canMove && frameNumber > 1);
 	}
 
@@ -4636,7 +4636,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Update whether the frame sequence can be played and stop playback when it cannot.
 	void UpdateCanPlayFrames()
 	{
-		var canPlay = this.GetValue(IsSourceOpenedProperty) && this.GetValue(HasMultipleFramesProperty);
+		var canPlay = this.GetValue(IsSourceOpenedProp) && this.GetValue(HasMultipleFramesProp);
 		this.canPlayFrames.Update(canPlay);
 		if (!canPlay)
 			this.StopPlayingFrames();
@@ -4681,7 +4681,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.Logger.LogDebug("Render frame {frameNumber} by profile of {format} instead of {currentFormat}", frameNumber, frameProfile.Renderer.Format.Name, currentProfile.Renderer.Format.Name);
 		this.fileFormatProfile = frameProfile;
 		this.profiles.Add(frameProfile);
-		this.SetValue(ProfileProperty, frameProfile); // parameters of profile are applied by ApplyProfile()
+		this.SetValue(ProfileProp, frameProfile); // parameters of profile are applied by ApplyProfile()
 		this.profiles.Remove(currentProfile);
 		currentProfile.Dispose();
 		this.renderImageAction.Cancel(); // prevent re-rendering caused by change of parameters
@@ -4723,8 +4723,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public ImageRenderingProfile Profile
 	{
-		get => this.GetValue(ProfileProperty);
-		set => this.SetValue(ProfileProperty, value);
+		get => this.GetValue(ProfileProp);
+		set => this.SetValue(ProfileProp, value);
 	}
 
 
@@ -4737,7 +4737,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get rendered image with quarter size.
 	/// </summary>
-	public Bitmap? QuarterSizeRenderedImage => this.GetValue(QuarterSizeRenderedImageProperty);
+	public Bitmap? QuarterSizeRenderedImage => this.GetValue(QuarterSizeRenderedImageProp);
 
 
 	/// <summary>
@@ -4745,8 +4745,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double RedColorAdjustment
 	{
-		get => this.GetValue(RedColorAdjustmentProperty);
-		set => this.SetValue(RedColorAdjustmentProperty, value);
+		get => this.GetValue(RedColorAdjustmentProp);
+		set => this.SetValue(RedColorAdjustmentProp, value);
 	}
 
 
@@ -4755,8 +4755,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double RedColorGain
 	{
-		get => this.GetValue(RedColorGainProperty);
-		set => this.SetValue(RedColorGainProperty, value);
+		get => this.GetValue(RedColorGainProp);
+		set => this.SetValue(RedColorGainProp, value);
 	}
 
 
@@ -4804,9 +4804,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (this.renderedImageFrame is null)
 			return false;
 		this.Logger.LogWarning("Release current rendered images");
-		this.SetValue(HistogramsProperty, null);
-		this.SetValue(QuarterSizeRenderedImageProperty, null);
-		this.SetValue(RenderedImageProperty, null);
+		this.SetValue(HistogramsProp, null);
+		this.SetValue(QuarterSizeRenderedImageProp, null);
+		this.SetValue(RenderedImageProp, null);
 		this.canSelectColorAdjustment.Update(false);
 		this.canSelectRgbGain.Update(false);
 		this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
@@ -4821,7 +4821,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		var maxUsage = this.Settings.GetValueOrDefault(SettingKeys.MaxRenderedImagesMemoryUsageMB) << 20;
 		if (!this.IsDisposed)
-			this.SetValue(RenderedImagesMemoryUsageProperty, this.RenderedImagesMemoryUsage - token.DataSize);
+			this.SetValue(RenderedImagesMemoryUsageProp, this.RenderedImagesMemoryUsage - token.DataSize);
 		SharedRenderedImagesMemoryUsage.Decrease(token.DataSize);
 		this.Logger.LogDebug("Release {dataSize} for rendered image, total: {totalUsage}, max: {maxUsage}", token.DataSize.ToFileSizeString(), SharedRenderedImagesMemoryUsage.Value.ToFileSizeString(), maxUsage.ToFileSizeString());
 	}
@@ -4830,13 +4830,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get rendered image.
 	/// </summary>
-	public Bitmap? RenderedImage => this.GetValue(RenderedImageProperty);
+	public Bitmap? RenderedImage => this.GetValue(RenderedImageProp);
 
 
 	/// <summary>
 	/// Get memory usage of rendered images by this session in bytes.
 	/// </summary>
-	public long RenderedImagesMemoryUsage => this.GetValue(RenderedImagesMemoryUsageProperty);
+	public long RenderedImagesMemoryUsage => this.GetValue(RenderedImagesMemoryUsageProp);
 
 
 	// Render image according to current state.
@@ -4872,7 +4872,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// render, then release whoever is waiting for the completion of this rendering
 		var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		this.imageRenderingCompletionSource = completionSource;
-		this.SetValue(IsRenderingImageProperty, true);
+		this.SetValue(IsRenderingImageProp, true);
 		try
 		{
 			await this.RenderImageCore();
@@ -4881,7 +4881,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.imageRenderingCompletionSource = null;
 			if (!this.IsDisposed)
-				this.SetValue(IsRenderingImageProperty, false);
+				this.SetValue(IsRenderingImageProp, false);
 			completionSource.TrySetResult();
 		}
 	}
@@ -4910,7 +4910,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			// frames are provided by the source itself, one source for each frame
 			var frameCount = (long)multiFrameImageDataSource.FrameCount;
 			frameNumber = this.CoerceFrameNumberToRange(frameNumber, frameCount);
-			this.SetValue(FrameCountProperty, frameCount);
+			this.SetValue(FrameCountProp, frameCount);
 			this.frameImageDataSource = this.frameImageDataSource.DisposeAndReturnNull();
 			try
 			{
@@ -4931,7 +4931,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				else
 				{
 					this.Logger.LogError(ex, "Unable to get source of frame {frameNumber} of '{sourceFileName}'", frameNumber, sourceFileName);
-					this.SetValue(HasRenderingErrorProperty, true);
+					this.SetValue(HasRenderingErrorProp, true);
 					this.DisposeFilteredImage();
 					this.DisposeRenderedImage();
 					this.UpdateCanMoveToFrames(frameNumber, false);
@@ -4955,8 +4955,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.isImageDimensionsEvaluationNeeded = false;
 			imageRenderer.EvaluateDimensions(renderingImageDataSource, this.Settings.GetValueOrDefault(SettingKeys.DefaultImageDimensionsEvaluationAspectRatio))?.Also((ref it) =>
 			{
-				this.SetValue(ImageWidthProperty, it.Width);
-				this.SetValue(ImageHeightProperty, it.Height);
+				this.SetValue(ImageWidthProp, it.Width);
+				this.SetValue(ImageHeightProp, it.Height);
 				this.renderImageAction.Cancel(); // prevent re-rendering caused by change of dimensions
 			});
 		}
@@ -4965,42 +4965,42 @@ class Session : ViewModel<IAppSuiteApplication>
 		var planeDescriptors = imageRenderer.Format.PlaneDescriptors;
 		if (imageRenderer.Format.Category != ImageFormatCategory.Compressed)
 		{
-			this.SetValue(HasImagePlane1Property, true);
+			this.SetValue(HasImagePlane1Prop, true);
 			if (this.ImagePlaneCount != planeDescriptors.Count)
 			{
-				this.SetValue(ImagePlaneCountProperty, planeDescriptors.Count);
-				this.SetValue(HasImagePlane2Property, planeDescriptors.Count >= 2);
-				this.SetValue(HasImagePlane3Property, planeDescriptors.Count >= 3);
+				this.SetValue(ImagePlaneCountProp, planeDescriptors.Count);
+				this.SetValue(HasImagePlane2Prop, planeDescriptors.Count >= 2);
+				this.SetValue(HasImagePlane3Prop, planeDescriptors.Count >= 3);
 			}
 		}
 		else
 		{
-			this.SetValue(ImagePlaneCountProperty, 0);
-			this.SetValue(HasImagePlane1Property, false);
-			this.SetValue(HasImagePlane2Property, false);
-			this.SetValue(HasImagePlane3Property, false);
+			this.SetValue(ImagePlaneCountProp, 0);
+			this.SetValue(HasImagePlane1Prop, false);
+			this.SetValue(HasImagePlane2Prop, false);
+			this.SetValue(HasImagePlane3Prop, false);
 		}
 		for (var i = planeDescriptors.Count - 1; i >= 0; --i)
 		{
 			this.SetValue(i switch
 			{
-				0 => AreAdjustableBlackWhiteLevels1Property,
-				1 => AreAdjustableBlackWhiteLevels2Property,
-				2 => AreAdjustableBlackWhiteLevels3Property,
+				0 => AreAdjustableBlackWhiteLevels1Prop,
+				1 => AreAdjustableBlackWhiteLevels2Prop,
+				2 => AreAdjustableBlackWhiteLevels3Prop,
 				_ => throw new ArgumentException(),
 			}, planeDescriptors[i].AreAdjustableBlackWhiteLevels);
 			this.SetValue(i switch
 			{
-				0 => IsAdjustableEffectiveBits1Property,
-				1 => IsAdjustableEffectiveBits2Property,
-				2 => IsAdjustableEffectiveBits3Property,
+				0 => IsAdjustableEffectiveBits1Prop,
+				1 => IsAdjustableEffectiveBits2Prop,
+				2 => IsAdjustableEffectiveBits3Prop,
 				_ => throw new ArgumentException(),
 			}, planeDescriptors[i].IsAdjustableEffectiveBits);
 			this.SetValue(i switch
 			{
-				0 => IsAdjustablePixelStride1Property,
-				1 => IsAdjustablePixelStride2Property,
-				2 => IsAdjustablePixelStride3Property,
+				0 => IsAdjustablePixelStride1Prop,
+				1 => IsAdjustablePixelStride2Prop,
+				2 => IsAdjustablePixelStride3Prop,
 				_ => throw new ArgumentException(),
 			}, planeDescriptors[i].IsAdjustablePixelStride);
 		}
@@ -5086,13 +5086,13 @@ class Session : ViewModel<IAppSuiteApplication>
 						: 1 + (totalDataSize - frameDataSize) / (frameDataSize + this.FramePaddingSize)
 					: 1;
 				frameNumber = this.CoerceFrameNumberToRange(frameNumber, frameCount);
-				this.SetValue(FrameCountProperty, frameCount);
+				this.SetValue(FrameCountProp, frameCount);
 			}
 			catch (Exception ex)
 			{
 				this.imageRenderingCancellationTokenSource = null;
 				this.Logger.LogError(ex, "Unable to update frame count and index of '{sourceFileName}'", this.SourceFileName);
-				this.SetValue(HasRenderingErrorProperty, true);
+				this.SetValue(HasRenderingErrorProp, true);
 				this.DisposeFilteredImage();
 				this.DisposeRenderedImage();
 				return;
@@ -5155,7 +5155,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 				// request reporting and update state
 				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
-				this.SetValue(HasRenderingErrorProperty, true);
+				this.SetValue(HasRenderingErrorProp, true);
 			}
 			return;
 		}
@@ -5233,7 +5233,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				if (!cancellationTokenSource.IsCancellationRequested)
 				{
 					this.imageRenderingCancellationTokenSource = null;
-					this.SetValue(InsufficientMemoryForRenderedImageProperty, this.IsActivated);
+					this.SetValue(InsufficientMemoryForRenderedImageProp, this.IsActivated);
 					Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
 					if (!this.IsActivated && !this.IsHibernated)
 					{
@@ -5249,7 +5249,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 
 		// update state
-		this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
+		this.SetValue(InsufficientMemoryForRenderedImageProp, false);
 
 		// render
 		this.Logger.LogDebug("Render image for '{sourceFileName}', dimensions: {width}x{height}", sourceFileName, this.ImageWidth, this.ImageHeight);
@@ -5365,8 +5365,8 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.renderedImageFrame?.Dispose();
 				this.renderedImageFrame = renderedImageFrame;
 			}
-			this.ResetValue(HasRenderingErrorProperty);
-			this.SetValue(SourceDataSizeProperty, frameDataSize);
+			this.ResetValue(HasRenderingErrorProp);
+			this.SetValue(SourceDataSizeProp, frameDataSize);
 			this.UpdateCanMoveToFrames(frameNumber, true);
 			this.canSelectColorAdjustment.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.Histograms is not null);
 			this.canSelectRgbGain.Update((colorSpaceConvertedImageFrame ?? renderedImageFrame)?.RenderingResult.Let(it =>
@@ -5403,7 +5403,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			renderedImageFrame?.Dispose();
 			this.colorSpaceConvertedImageFrame = this.colorSpaceConvertedImageFrame.DisposeAndReturnNull();
 			this.renderedImageFrame = this.renderedImageFrame.DisposeAndReturnNull();
-			this.SetValue(HasRenderingErrorProperty, true);
+			this.SetValue(HasRenderingErrorProp, true);
 			this.UpdateCanMoveToFrames(frameNumber, false);
 			this.canSelectColorAdjustment.Update(false);
 			this.canSelectRgbGain.Update(false);
@@ -5417,8 +5417,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double RenderingParametersPanelSize
     {
-		get => this.GetValue(RenderingParametersPanelSizeProperty);
-		set => this.SetValue(RenderingParametersPanelSizeProperty, value);
+		get => this.GetValue(RenderingParametersPanelSizeProp);
+		set => this.SetValue(RenderingParametersPanelSizeProp, value);
     }
 
 
@@ -5427,8 +5427,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double RequestedImageDisplayScale
 	{
-		get => this.GetValue(RequestedImageDisplayScaleProperty);
-		set => this.SetValue(RequestedImageDisplayScaleProperty, value);
+		get => this.GetValue(RequestedImageDisplayScaleProp);
+		set => this.SetValue(RequestedImageDisplayScaleProp, value);
 	}
 
 
@@ -5440,7 +5440,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (totalMemoryUsage <= maxUsage)
 		{
 			SharedRenderedImagesMemoryUsage.Update(totalMemoryUsage);
-			this.SetValue(RenderedImagesMemoryUsageProperty, this.RenderedImagesMemoryUsage + dataSize);
+			this.SetValue(RenderedImagesMemoryUsageProp, this.RenderedImagesMemoryUsage + dataSize);
 			this.Logger.LogDebug("Request {dataSize} for rendered image, total: {totalMemoryUsage}, max: {maxUsage}", dataSize.ToFileSizeString(), totalMemoryUsage.ToFileSizeString(), maxUsage.ToFileSizeString());
 			return new RenderedImageMemoryUsageToken(this, dataSize);
 		}
@@ -5555,8 +5555,8 @@ class Session : ViewModel<IAppSuiteApplication>
 					if (this.RenderedImage is not null)
 					{
 						this.Logger.LogWarning("Unable to request memory usage for Avalonia Bitmap, drop the image being displayed");
-						this.SetValue(QuarterSizeRenderedImageProperty, null);
-						this.SetValue(RenderedImageProperty, null);
+						this.SetValue(QuarterSizeRenderedImageProp, null);
+						this.SetValue(RenderedImageProp, null);
 						memoryUsageToken = this.RequestRenderedImageMemoryUsage(dataSize);
 						continue;
 					}
@@ -5570,11 +5570,11 @@ class Session : ViewModel<IAppSuiteApplication>
 							colorSpaceConvertedImageFrame?.Dispose();
 						this.canSelectColorAdjustment.Update(false);
 						this.canSelectRgbGain.Update(false);
-						this.ResetValue(HasRenderingErrorProperty);
-						this.SetValue(InsufficientMemoryForRenderedImageProperty, true);
-						this.SetValue(HistogramsProperty, null);
-						this.SetValue(QuarterSizeRenderedImageProperty, null);
-						this.SetValue(RenderedImageProperty, null);
+						this.ResetValue(HasRenderingErrorProp);
+						this.SetValue(InsufficientMemoryForRenderedImageProp, true);
+						this.SetValue(HistogramsProp, null);
+						this.SetValue(QuarterSizeRenderedImageProp, null);
+						this.SetValue(RenderedImageProp, null);
 						return;
 					}
 				}
@@ -5678,10 +5678,10 @@ class Session : ViewModel<IAppSuiteApplication>
 
 			// update state
 			this.cachedAvaRenderedImageMemoryUsageToken = this.cachedAvaRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-			this.cachedAvaRenderedImage = this.GetValue(RenderedImageProperty) as WriteableBitmap;
+			this.cachedAvaRenderedImage = this.GetValue(RenderedImageProp) as WriteableBitmap;
 			this.cachedAvaRenderedImageMemoryUsageToken = this.avaRenderedImageMemoryUsageToken;
 			this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken.DisposeAndReturnNull();
-			this.cachedAvaQuarterSizeRenderedImage = this.GetValue(QuarterSizeRenderedImageProperty) as WriteableBitmap;
+			this.cachedAvaQuarterSizeRenderedImage = this.GetValue(QuarterSizeRenderedImageProp) as WriteableBitmap;
 			this.cachedAvaQuarterSizeRenderedImageMemoryUsageToken = this.avaQuarterSizeRenderedImageMemoryUsageToken;
 			this.avaQuarterSizeRenderedImageMemoryUsageToken = quarterSizeMemoryUsageToken;
 			this.avaRenderedImageMemoryUsageToken = memoryUsageToken;
@@ -5690,11 +5690,11 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canSelectColorAdjustment.Update(imageFrame.Histograms is not null);
 			this.canSelectRgbGain.Update(imageFrame.RenderingResult.Let(it =>
 				it.HasMeanOfRgb || it.HasWeightedMeanOfRgb));
-			this.ResetValue(HasRenderingErrorProperty);
-			this.SetValue(InsufficientMemoryForRenderedImageProperty, false);
-			this.SetValue(HistogramsProperty, imageFrame.Histograms);
-			this.SetValue(QuarterSizeRenderedImageProperty, quarterSizeBitmap);
-			this.SetValue(RenderedImageProperty, bitmap);
+			this.ResetValue(HasRenderingErrorProp);
+			this.SetValue(InsufficientMemoryForRenderedImageProp, false);
+			this.SetValue(HistogramsProp, imageFrame.Histograms);
+			this.SetValue(QuarterSizeRenderedImageProp, quarterSizeBitmap);
+			this.SetValue(RenderedImageProp, bitmap);
 		}
 		else if (!this.IsFilteringRenderedImageNeeded || this.RenderedImage is null)
 		{
@@ -5704,9 +5704,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canSaveRenderedImage.Update(false);
 			this.canSelectColorAdjustment.Update(false);
 			this.canSelectRgbGain.Update(false);
-			this.SetValue(HistogramsProperty, null);
-			this.SetValue(QuarterSizeRenderedImageProperty, null);
-			this.SetValue(RenderedImageProperty, null);
+			this.SetValue(HistogramsProp, null);
+			this.SetValue(QuarterSizeRenderedImageProp, null);
+			this.SetValue(RenderedImageProp, null);
 		}
 		this.imageReportingCancellationTokenSource = null;
 		this.releasedCachedImagesAction.Reschedule(ReleaseCachedImagesDelay);
@@ -5721,7 +5721,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(BrightnessAdjustmentProperty, 0);
+		this.SetValue(BrightnessAdjustmentProp, 0);
     }
 
 
@@ -5737,9 +5737,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(BlueColorAdjustmentProperty, 0);
-		this.SetValue(GreenColorAdjustmentProperty, 0);
-		this.SetValue(RedColorAdjustmentProperty, 0);
+		this.SetValue(BlueColorAdjustmentProp, 0);
+		this.SetValue(GreenColorAdjustmentProp, 0);
+		this.SetValue(RedColorAdjustmentProp, 0);
 	}
 
 
@@ -5755,7 +5755,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(ContrastAdjustmentProperty, 0);
+		this.SetValue(ContrastAdjustmentProp, 0);
 	}
 
 
@@ -5775,7 +5775,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.ResetSaturationAdjustment();
 		this.ResetShadowAdjustment();
 		this.ResetVibranceAdjustment();
-		this.SetValue(IsGrayscaleFilterEnabledProperty, false);
+		this.SetValue(IsGrayscaleFilterEnabledProp, false);
 	}
 
 
@@ -5785,7 +5785,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(HighlightAdjustmentProperty, 0);
+		this.SetValue(HighlightAdjustmentProp, 0);
 	}
 
 
@@ -5800,9 +5800,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		this.VerifyAccess();
 		this.VerifyDisposed();
-		this.SetValue(BlueColorGainProperty, 1.0);
-		this.SetValue(GreenColorGainProperty, 1.0);
-		this.SetValue(RedColorGainProperty, 1.0);
+		this.SetValue(BlueColorGainProp, 1.0);
+		this.SetValue(GreenColorGainProp, 1.0);
+		this.SetValue(RedColorGainProp, 1.0);
 		this.renderImageAction.Reschedule();
 	}
 
@@ -5819,7 +5819,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(SaturationAdjustmentProperty, 0);
+		this.SetValue(SaturationAdjustmentProp, 0);
 	}
 
 
@@ -5835,7 +5835,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(ShadowAdjustmentProperty, 0);
+		this.SetValue(ShadowAdjustmentProp, 0);
 	}
 
 
@@ -5851,7 +5851,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyAccess();
 		if (this.IsDisposed)
 			return;
-		this.SetValue(VibranceAdjustmentProperty, 0);
+		this.SetValue(VibranceAdjustmentProp, 0);
 	}
 
 
@@ -6046,7 +6046,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var fitToViewport = true;
 		var frameNumber = 1L;
 		var framePlaybackRate = this.PersistentState.GetValueOrDefault(LatestFramePlaybackRate);
-		var histogramsPanelSize = HistogramsPanelSizeProperty.DefaultValue;
+		var histogramsPanelSize = HistogramsPanelSizeProp.DefaultValue;
 		var isFramePlaybackLooping = this.PersistentState.GetValueOrDefault(IsInitFramePlaybackLooping);
 		var isFramePlaybackRateUnlimited = this.PersistentState.GetValueOrDefault(IsInitFramePlaybackRateUnlimited);
 		var isHistogramMeanMarkerVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible);
@@ -6054,7 +6054,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var isImageFlippedX = false;
 		var isImageFlippedY = false;
 		var isRenderingParamsPanelVisible = true;
-		var renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
+		var renderingParamsPanelSize = RenderingParametersPanelSizeProp.DefaultValue;
 		var rotation = 0;
 		var scale = 1.0;
 		if (savedState.TryGetProperty(nameof(FitImageToViewport), out jsonProperty))
@@ -6084,31 +6084,31 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (savedState.TryGetProperty(nameof(HistogramsPanelSize), out jsonProperty)
 			&& jsonProperty.TryGetDouble(out histogramsPanelSize))
 		{
-			histogramsPanelSize = this.CoerceValue(HistogramsPanelSizeProperty, histogramsPanelSize);
-			if (!HistogramsPanelSizeProperty.ValidationFunction(histogramsPanelSize))
-				histogramsPanelSize = HistogramsPanelSizeProperty.DefaultValue;
+			histogramsPanelSize = this.CoerceValue(HistogramsPanelSizeProp, histogramsPanelSize);
+			if (!HistogramsPanelSizeProp.ValidationFunction(histogramsPanelSize))
+				histogramsPanelSize = HistogramsPanelSizeProp.DefaultValue;
 		}
 		if (savedState.TryGetProperty(nameof(RenderingParametersPanelSize), out jsonProperty)
 			&& jsonProperty.TryGetDouble(out renderingParamsPanelSize))
 		{
-			renderingParamsPanelSize = this.CoerceValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
-			if (!RenderingParametersPanelSizeProperty.ValidationFunction(renderingParamsPanelSize))
-				renderingParamsPanelSize = RenderingParametersPanelSizeProperty.DefaultValue;
+			renderingParamsPanelSize = this.CoerceValue(RenderingParametersPanelSizeProp, renderingParamsPanelSize);
+			if (!RenderingParametersPanelSizeProp.ValidationFunction(renderingParamsPanelSize))
+				renderingParamsPanelSize = RenderingParametersPanelSizeProp.DefaultValue;
 		}
 
 		// load other state
 		if (savedState.TryGetProperty(nameof(CustomTitle), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
-			this.SetValue(CustomTitleProperty, jsonProperty.GetString());
+			this.SetValue(CustomTitleProp, jsonProperty.GetString());
 		
 		// restore size and visibility of histograms before opening the source (opening the source may block for a while)
-		this.SetValue(HistogramsPanelSizeProperty, histogramsPanelSize);
-		this.SetValue(IsHistogramMeanMarkerVisibleProperty, isHistogramMeanMarkerVisible);
-		this.SetValue(IsHistogramsVisibleProperty, isHistogramsVisible);
+		this.SetValue(HistogramsPanelSizeProp, histogramsPanelSize);
+		this.SetValue(IsHistogramMeanMarkerVisibleProp, isHistogramMeanMarkerVisible);
+		this.SetValue(IsHistogramsVisibleProp, isHistogramsVisible);
 
 		// restore parameters of frame playback
-		this.SetValue(FramePlaybackRateProperty, framePlaybackRate);
-		this.SetValue(IsFramePlaybackLoopingProperty, isFramePlaybackLooping);
-		this.SetValue(IsFramePlaybackRateUnlimitedProperty, isFramePlaybackRateUnlimited);
+		this.SetValue(FramePlaybackRateProp, framePlaybackRate);
+		this.SetValue(IsFramePlaybackLoopingProp, isFramePlaybackLooping);
+		this.SetValue(IsFramePlaybackRateUnlimitedProp, isFramePlaybackRateUnlimited);
 
 		// open source file
 		if (fileName is not null)
@@ -6120,20 +6120,20 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// apply profile
 		if (profile is not null)
-			this.SetValue(ProfileProperty, profile);
+			this.SetValue(ProfileProp, profile);
 
 		// apply rendering parameters
 		if (renderer is not null)
-			this.SetValue(ImageRendererProperty, renderer);
-		this.SetValue(DataOffsetProperty, dataOffset);
-		this.SetValue(FramePaddingSizeProperty, framePaddingSize);
-		this.SetValue(ByteOrderingProperty, byteOrdering);
-		this.SetValue(YuvToBgraConverterProperty, yuvToBgraConverter);
-		this.SetValue(ColorSpaceProperty, colorSpace);
-		this.SetValue(UseLinearColorSpaceProperty, useLinearColorSpace);
-		this.SetValue(DemosaicingAlgorithmProperty, demosaicingAlgorithm);
-		this.SetValue(ImageWidthProperty, width);
-		this.SetValue(ImageHeightProperty, height);
+			this.SetValue(ImageRendererProp, renderer);
+		this.SetValue(DataOffsetProp, dataOffset);
+		this.SetValue(FramePaddingSizeProp, framePaddingSize);
+		this.SetValue(ByteOrderingProp, byteOrdering);
+		this.SetValue(YuvToBgraConverterProp, yuvToBgraConverter);
+		this.SetValue(ColorSpaceProp, colorSpace);
+		this.SetValue(UseLinearColorSpaceProp, useLinearColorSpace);
+		this.SetValue(DemosaicingAlgorithmProp, demosaicingAlgorithm);
+		this.SetValue(ImageWidthProp, width);
+		this.SetValue(ImageHeightProp, height);
 		for (var i = effectiveBits.Length - 1; i >= 0; --i)
 			this.ChangeEffectiveBits(i, effectiveBits[i]);
 		for (var i = blackLevels.Length - 1; i >= 0; --i)
@@ -6144,30 +6144,30 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.ChangePixelStride(i, pixelStrides[i]);
 		for (var i = rowStrides.Length - 1; i >= 0; --i)
 			this.ChangeRowStride(i, rowStrides[i]);
-		this.SetValue(RedColorGainProperty, rGain);
-		this.SetValue(GreenColorGainProperty, gGain);
-		this.SetValue(BlueColorGainProperty, bGain);
+		this.SetValue(RedColorGainProp, rGain);
+		this.SetValue(GreenColorGainProp, gGain);
+		this.SetValue(BlueColorGainProp, bGain);
 
 		// apply filtering parameters
-		this.SetValue(BlueColorAdjustmentProperty, blueColorAdjustment);
-		this.SetValue(BrightnessAdjustmentProperty, brightnessAdjustment);
-		this.SetValue(ContrastAdjustmentProperty, contrastAdjustment);
-		this.SetValue(GreenColorAdjustmentProperty, greenColorAdjustment);
-		this.SetValue(HighlightAdjustmentProperty, highlightAdjustment);
-		this.SetValue(IsGrayscaleFilterEnabledProperty, isGrayscaleFilterEnabled);
-		this.SetValue(RedColorAdjustmentProperty, redColorAdjustment);
-		this.SetValue(ShadowAdjustmentProperty, shadowAdjustment);
-		this.SetValue(VibranceAdjustmentProperty, vibranceAdjustment);
+		this.SetValue(BlueColorAdjustmentProp, blueColorAdjustment);
+		this.SetValue(BrightnessAdjustmentProp, brightnessAdjustment);
+		this.SetValue(ContrastAdjustmentProp, contrastAdjustment);
+		this.SetValue(GreenColorAdjustmentProp, greenColorAdjustment);
+		this.SetValue(HighlightAdjustmentProp, highlightAdjustment);
+		this.SetValue(IsGrayscaleFilterEnabledProp, isGrayscaleFilterEnabled);
+		this.SetValue(RedColorAdjustmentProp, redColorAdjustment);
+		this.SetValue(ShadowAdjustmentProp, shadowAdjustment);
+		this.SetValue(VibranceAdjustmentProp, vibranceAdjustment);
 
 		// apply displaying parameters
-		this.SetValue(FitImageToViewportProperty, fitToViewport);
-		this.SetValue(FrameNumberProperty, frameNumber);
-		this.SetValue(ImageDisplayRotationProperty, rotation);
-		this.SetValue(IsImageFlippedXProperty, isImageFlippedX);
-		this.SetValue(IsImageFlippedYProperty, isImageFlippedY);
-		this.SetValue(RenderingParametersPanelSizeProperty, renderingParamsPanelSize);
-		this.SetValue(IsRenderingParametersPanelVisibleProperty, isRenderingParamsPanelVisible);
-		this.SetValue(RequestedImageDisplayScaleProperty, scale);
+		this.SetValue(FitImageToViewportProp, fitToViewport);
+		this.SetValue(FrameNumberProp, frameNumber);
+		this.SetValue(ImageDisplayRotationProp, rotation);
+		this.SetValue(IsImageFlippedXProp, isImageFlippedX);
+		this.SetValue(IsImageFlippedYProp, isImageFlippedY);
+		this.SetValue(RenderingParametersPanelSizeProp, renderingParamsPanelSize);
+		this.SetValue(IsRenderingParametersPanelVisibleProp, isRenderingParamsPanelVisible);
+		this.SetValue(RequestedImageDisplayScaleProp, scale);
 
 		this.Logger.LogWarning("State restored");
 
@@ -6186,15 +6186,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (!this.IsSourceOpened)
 			return;
-		var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
+		var rotation = (int)(this.GetValue(ImageDisplayRotationProp) + 0.5) switch
 		{
 			0 => 270,
 			180 => 90,
 			270 => 180,
 			_ => 0,
 		};
-		this.SetValue(ImageDisplayRotationProperty, rotation);
-		if (this.GetValue(FitImageToViewportProperty) 
+		this.SetValue(ImageDisplayRotationProp, rotation);
+		if (this.GetValue(FitImageToViewportProp) 
 			&& double.IsFinite(this.fitRenderedImageToViewportScale))
 		{
 			var scale = (rotation % 180) == 0
@@ -6218,15 +6218,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (!this.IsSourceOpened)
 			return;
-		var rotation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5) switch
+		var rotation = (int)(this.GetValue(ImageDisplayRotationProp) + 0.5) switch
 		{
 			0 => 90,
 			90 => 180,
 			180 => 270,
 			_ => 0,
 		};
-		this.SetValue(ImageDisplayRotationProperty, rotation);
-		if (this.GetValue(FitImageToViewportProperty) 
+		this.SetValue(ImageDisplayRotationProp, rotation);
+		if (this.GetValue(FitImageToViewportProp) 
 			&& double.IsFinite(this.fitRenderedImageToViewportScale))
 		{
 			var scale = (rotation % 180) == 0
@@ -6280,8 +6280,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double SaturationAdjustment
 	{
-		get => this.GetValue(SaturationAdjustmentProperty);
-		set => this.SetValue(SaturationAdjustmentProperty, value);
+		get => this.GetValue(SaturationAdjustmentProp);
+		set => this.SetValue(SaturationAdjustmentProp, value);
 	}
 
 
@@ -6343,12 +6343,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (encoder is null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
 		var applyTransformation = this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithTransformation);
-		var flipX = applyTransformation && this.GetValue(IsImageFlippedXProperty);
-		var flipY = applyTransformation && this.GetValue(IsImageFlippedYProperty);
+		var flipX = applyTransformation && this.GetValue(IsImageFlippedXProp);
+		var flipY = applyTransformation && this.GetValue(IsImageFlippedYProp);
 		if (applyTransformation)
-			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
+			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProp) + 0.5);
 		this.canSaveFilteredImage.Update(false);
-		this.SetValue(IsSavingFilteredImageProperty, true);
+		this.SetValue(IsSavingFilteredImageProp, true);
 		try
 		{
 			using IBitmapBuffer bufferToEncode = this.filteredImageFrame.AsNonNull().BitmapBuffer.Let(it => flipX || flipY
@@ -6367,7 +6367,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		finally
 		{
 			this.canSaveFilteredImage.Update(!this.IsFilteringRenderedImage);
-			this.SetValue(IsSavingFilteredImageProperty, false);
+			this.SetValue(IsSavingFilteredImageProp, false);
 		}
 	}
 
@@ -6440,12 +6440,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (encoder is null && !ImageEncoders.TryGetEncoderByFormat(FileFormats.Png, out encoder))
 			return false;
 		var applyTransformation = this.Settings.GetValueOrDefault(SettingKeys.SaveRenderedImageWithTransformation);
-		var flipX = applyTransformation && this.GetValue(IsImageFlippedXProperty);
-		var flipY = applyTransformation && this.GetValue(IsImageFlippedYProperty);
+		var flipX = applyTransformation && this.GetValue(IsImageFlippedXProp);
+		var flipY = applyTransformation && this.GetValue(IsImageFlippedYProp);
 		if (applyTransformation)
-			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5);
+			options.Orientation = (int)(this.GetValue(ImageDisplayRotationProp) + 0.5);
 		this.canSaveRenderedImage.Update(false);
-		this.SetValue(IsSavingRenderedImageProperty, true);
+		this.SetValue(IsSavingRenderedImageProp, true);
 		try
 		{
 			using IBitmapBuffer bufferToEncode = renderedImageFrame.BitmapBuffer.Let(it => flipX || flipY
@@ -6463,7 +6463,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		finally
 		{
-			this.SetValue(IsSavingRenderedImageProperty, false);
+			this.SetValue(IsSavingRenderedImageProp, false);
 			this.canSaveRenderedImage.Update(this.renderedImageFrame is not null);
 		}
 	}
@@ -6564,11 +6564,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 
 		// displaying parameters
-		writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProperty));
+		writer.WriteBoolean(nameof(FitImageToViewport), this.GetValue(FitImageToViewportProp));
 		writer.WriteNumber(nameof(FrameNumber), this.FrameNumber);
 		writer.WriteNumber(nameof(FramePlaybackRate), this.FramePlaybackRate);
 		writer.WriteNumber(nameof(HistogramsPanelSize), this.HistogramsPanelSize);
-		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProperty) + 0.5));
+		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProp) + 0.5));
 		writer.WriteBoolean(nameof(IsFramePlaybackLooping), this.IsFramePlaybackLooping);
 		writer.WriteBoolean(nameof(IsFramePlaybackRateUnlimited), this.IsFramePlaybackRateUnlimited);
 		writer.WriteBoolean(nameof(IsHistogramMeanMarkerVisible), this.IsHistogramMeanMarkerVisible);
@@ -6576,7 +6576,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteBoolean(nameof(IsImageFlippedX), this.IsImageFlippedX);
 		writer.WriteBoolean(nameof(IsImageFlippedY), this.IsImageFlippedY);
 		writer.WriteBoolean(nameof(IsRenderingParametersPanelVisible), this.IsRenderingParametersPanelVisible);
-		writer.WriteNumber(nameof(RequestedImageDisplayScale), this.GetValue(RequestedImageDisplayScaleProperty));
+		writer.WriteNumber(nameof(RequestedImageDisplayScale), this.GetValue(RequestedImageDisplayScaleProp));
 		writer.WriteNumber(nameof(RenderingParametersPanelSize), this.RenderingParametersPanelSize);
 
 		// other state
@@ -6601,8 +6601,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double ScreenPixelDensity
 	{
-		get => this.GetValue(ScreenPixelDensityProperty);
-		set => this.SetValue(ScreenPixelDensityProperty, value);
+		get => this.GetValue(ScreenPixelDensityProp);
+		set => this.SetValue(ScreenPixelDensityProp, value);
 	}
 
 
@@ -6683,21 +6683,21 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// apply color adjustment
 		static double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
-		this.SetValue(RedColorAdjustmentProperty, rRatio < 0.5
+		this.SetValue(RedColorAdjustmentProp, rRatio < 0.5
 			? -1
 			: rRatio > 2
 				? 1
 				: rRatio >= 1
 					? Quantize(rRatio - 1)
 					: Quantize(1 - 1 / rRatio));
-		this.SetValue(GreenColorAdjustmentProperty, gRatio < 0.5
+		this.SetValue(GreenColorAdjustmentProp, gRatio < 0.5
 			? -1
 			: gRatio > 2
 				? 1
 				: gRatio >= 1
 					? Quantize(gRatio - 1)
 					: Quantize(1 - 1 / gRatio));
-		this.SetValue(BlueColorAdjustmentProperty, bRatio < 0.5
+		this.SetValue(BlueColorAdjustmentProp, bRatio < 0.5
 			? -1
 			: bRatio > 2
 				? 1
@@ -6828,9 +6828,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		
 		// apply RGB gain
 		static double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
-		this.SetValue(RedColorGainProperty, Quantize(rRatio));
-		this.SetValue(GreenColorGainProperty, Quantize(gRatio));
-		this.SetValue(BlueColorGainProperty, Quantize(bRatio));
+		this.SetValue(RedColorGainProp, Quantize(rRatio));
+		this.SetValue(GreenColorGainProp, Quantize(gRatio));
+		this.SetValue(BlueColorGainProp, Quantize(bRatio));
 		if (this.renderImageAction.IsScheduled)
 			this.renderImageAction.Reschedule();
 	}
@@ -6854,31 +6854,31 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get color of selected pixel on rendered image.
 	/// </summary>
-	public Color64 SelectedRenderedImagePixelColor => this.GetValue(SelectedRenderedImagePixelColorProperty);
+	public Color64 SelectedRenderedImagePixelColor => this.GetValue(SelectedRenderedImagePixelColorProp);
 
 
 	/// <summary>
 	/// Get L*a*b* color of selected pixel on rendered image.
 	/// </summary>
-	public Tuple<double, double, double> SelectedRenderedImagePixelLabColor => this.GetValue(SelectedRenderedImagePixelLabColorProperty);
+	public Tuple<double, double, double> SelectedRenderedImagePixelLabColor => this.GetValue(SelectedRenderedImagePixelLabColorProp);
 
 
 	/// <summary>
 	/// Get XYZ color of selected pixel on rendered image.
 	/// </summary>
-	public Tuple<double, double, double> SelectedRenderedImagePixelXyzColor => this.GetValue(SelectedRenderedImagePixelXyzColorProperty);
+	public Tuple<double, double, double> SelectedRenderedImagePixelXyzColor => this.GetValue(SelectedRenderedImagePixelXyzColorProp);
 
 
 	/// <summary>
 	/// Get horizontal position of selected pixel on rendered image. Return -1 if no pixel selected.
 	/// </summary>
-	public int SelectedRenderedImagePixelPositionX => this.GetValue(SelectedRenderedImagePixelPositionXProperty);
+	public int SelectedRenderedImagePixelPositionX => this.GetValue(SelectedRenderedImagePixelPositionXProp);
 
 
 	/// <summary>
 	/// Get vertical position of selected pixel on rendered image. Return -1 if no pixel selected.
 	/// </summary>
-	public int SelectedRenderedImagePixelPositionY => this.GetValue(SelectedRenderedImagePixelPositionYProperty);
+	public int SelectedRenderedImagePixelPositionY => this.GetValue(SelectedRenderedImagePixelPositionYProp);
 
 
 	/// <summary>
@@ -6905,12 +6905,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.HasSelectedRenderedImagePixel)
 			{
-				this.SetValue(HasSelectedRenderedImagePixelProperty, false);
-				this.SetValue(SelectedRenderedImagePixelColorProperty, SelectedRenderedImagePixelColorProperty.DefaultValue);
-				this.SetValue(SelectedRenderedImagePixelLabColorProperty, SelectedRenderedImagePixelLabColorProperty.DefaultValue);
-				this.SetValue(SelectedRenderedImagePixelXyzColorProperty, SelectedRenderedImagePixelXyzColorProperty.DefaultValue);
-				this.SetValue(SelectedRenderedImagePixelPositionXProperty, -1);
-				this.SetValue(SelectedRenderedImagePixelPositionYProperty, -1);
+				this.SetValue(HasSelectedRenderedImagePixelProp, false);
+				this.SetValue(SelectedRenderedImagePixelColorProp, SelectedRenderedImagePixelColorProp.DefaultValue);
+				this.SetValue(SelectedRenderedImagePixelLabColorProp, SelectedRenderedImagePixelLabColorProp.DefaultValue);
+				this.SetValue(SelectedRenderedImagePixelXyzColorProp, SelectedRenderedImagePixelXyzColorProp.DefaultValue);
+				this.SetValue(SelectedRenderedImagePixelPositionXProp, -1);
+				this.SetValue(SelectedRenderedImagePixelPositionYProp, -1);
 			}
 		}
 		else
@@ -6961,12 +6961,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			xyzZ *= 100;
 
 			// update state
-			this.SetValue(SelectedRenderedImagePixelColorProperty, color);
-			this.SetValue(SelectedRenderedImagePixelLabColorProperty, new Tuple<double, double, double>(labL, labA, labB));
-			this.SetValue(SelectedRenderedImagePixelXyzColorProperty, new Tuple<double, double, double>(xyzX, xyzY, xyzZ));
-			this.SetValue(SelectedRenderedImagePixelPositionXProperty, x);
-			this.SetValue(SelectedRenderedImagePixelPositionYProperty, y);
-			this.SetValue(HasSelectedRenderedImagePixelProperty, true);
+			this.SetValue(SelectedRenderedImagePixelColorProp, color);
+			this.SetValue(SelectedRenderedImagePixelLabColorProp, new Tuple<double, double, double>(labL, labA, labB));
+			this.SetValue(SelectedRenderedImagePixelXyzColorProp, new Tuple<double, double, double>(xyzX, xyzY, xyzZ));
+			this.SetValue(SelectedRenderedImagePixelPositionXProp, x);
+			this.SetValue(SelectedRenderedImagePixelPositionYProp, y);
+			this.SetValue(HasSelectedRenderedImagePixelProp, true);
 		}
 	}
 
@@ -6976,39 +6976,39 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double ShadowAdjustment
 	{
-		get => this.GetValue(ShadowAdjustmentProperty);
-		set => this.SetValue(ShadowAdjustmentProperty, value);
+		get => this.GetValue(ShadowAdjustmentProp);
+		set => this.SetValue(ShadowAdjustmentProp, value);
 	}
 
 
 	/// <summary>
 	/// Get size of source image data in bytes.
 	/// </summary>
-	public long SourceDataSize => this.GetValue(SourceDataSizeProperty);
+	public long SourceDataSize => this.GetValue(SourceDataSizeProp);
 
 
 	/// <summary>
 	/// Get name of source image file.
 	/// </summary>
-	public string? SourceFileName => this.GetValue(SourceFileNameProperty);
+	public string? SourceFileName => this.GetValue(SourceFileNameProp);
 
 
 	/// <summary>
 	/// Get description of size of source image file.
 	/// </summary>
-	public string? SourceSizeString => this.GetValue(SourceSizeStringProperty);
+	public string? SourceSizeString => this.GetValue(SourceSizeStringProp);
 
 
 	/// <summary>
 	/// Get the highest effective bits-per-channel among the source image's planes. Returns 8 when no image renderer or planes are available.
 	/// </summary>
-	public int SourceImageEffectiveBits => this.GetValue(SourceImageEffectiveBitsProperty);
+	public int SourceImageEffectiveBits => this.GetValue(SourceImageEffectiveBitsProp);
 
 
 	// Switch profile without applying parameters.
 	void SwitchToProfileWithoutApplying(ImageRenderingProfile profile)
 	{
-		this.SetValue(ProfileProperty, profile);
+		this.SetValue(ProfileProp, profile);
 		this.UpdateCanSaveDeleteProfile();
 	}
 
@@ -7022,7 +7022,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Get total memory usage for rendered images in bytes.
 	/// </summary>
-	public long TotalRenderedImagesMemoryUsage => this.GetValue(TotalRenderedImagesMemoryUsageProperty);
+	public long TotalRenderedImagesMemoryUsage => this.GetValue(TotalRenderedImagesMemoryUsageProp);
 
 
 	// Update CanSaveOrDeleteProfile and CanSaveAsNewProfile according to current state.
@@ -7048,14 +7048,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (this.IsDisposed)
 			return;
-		if (this.GetValue(FitImageToViewportProperty) || !this.IsSourceOpened)
+		if (this.GetValue(FitImageToViewportProp) || !this.IsSourceOpened)
 		{
 			this.canZoomIn.Update(false);
 			this.canZoomOut.Update(false);
 		}
 		else
 		{
-			var scale = this.GetValue(RequestedImageDisplayScaleProperty);
+			var scale = this.GetValue(RequestedImageDisplayScaleProp);
 			this.canZoomIn.Update(scale < (MaxRenderedImageScale - 0.001));
 			this.canZoomOut.Update(scale > (MinRenderedImageScale + 0.001));
 		}
@@ -7070,7 +7070,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var allAlgorithms = Media.Demosaicing.DemosaicingAlgorithms.All;
 		var demosaicingAlgorithm = this.DemosaicingAlgorithm;
 		if (!demosaicingAlgorithm.IsBayerPatternSupported(bayerPattern) || !allAlgorithms.Contains(demosaicingAlgorithm))
-			this.SetValue(DemosaicingAlgorithmProperty, this.SelectDefaultDemosaicingAlgorithm(bayerPattern));
+			this.SetValue(DemosaicingAlgorithmProp, this.SelectDefaultDemosaicingAlgorithm(bayerPattern));
 
 		// remove the algorithms which are unsupported or unregistered
 		for (var i = this.demosaicingAlgorithms.Count - 1; i >= 0; --i)
@@ -7100,12 +7100,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (this.IsDisposed)
 			return;
-		var hasColorTables = this.GetValue(ImageRendererProperty)?.IsColorTableSupported is true
+		var hasColorTables = this.GetValue(ImageRendererProp)?.IsColorTableSupported is true
 			&& (this.alphaColorTable is not null
 				|| this.blueColorTable is not null
 				|| this.greenColorTable is not null
 				|| this.redColorTable is not null);
-		this.SetValue(HasColorTablesProperty, hasColorTables);
+		this.SetValue(HasColorTablesProp, hasColorTables);
 	}
 
 
@@ -7114,7 +7114,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (this.IsDisposed)
 			return;
-		var renderer = this.GetValue(ImageRendererProperty);
+		var renderer = this.GetValue(ImageRendererProp);
 		var available = renderer?.Format.Category switch
 		{
 			ImageFormatCategory.ARGB => true,
@@ -7128,7 +7128,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			}),
 			_ => false,
 		};
-		this.SetValue(IsAlphaChannelAvailableProperty, available);
+		this.SetValue(IsAlphaChannelAvailableProp, available);
 	}
 
 
@@ -7137,7 +7137,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		if (this.IsDisposed)
 			return;
-		var imageRenderer = this.GetValue(ImageRendererProperty);
+		var imageRenderer = this.GetValue(ImageRendererProp);
 		var format = imageRenderer?.Format;
 		var maxBits = 0;
 		if (format is null || format.Category == ImageFormatCategory.Compressed)
@@ -7154,7 +7154,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (maxBits <= 0)
 				maxBits = 8;
 		}
-		this.SetValue(SourceImageEffectiveBitsProperty, maxBits);
+		this.SetValue(SourceImageEffectiveBitsProp, maxBits);
 	}
 
 
@@ -7191,8 +7191,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <value></value>
 	public bool UseLinearColorSpace
 	{
-		get => this.GetValue(UseLinearColorSpaceProperty);
-		set => this.SetValue(UseLinearColorSpaceProperty, value);
+		get => this.GetValue(UseLinearColorSpaceProp);
+		set => this.SetValue(UseLinearColorSpaceProp, value);
 	}
 
 
@@ -7201,8 +7201,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public double VibranceAdjustment
 	{
-		get => this.GetValue(VibranceAdjustmentProperty);
-		set => this.SetValue(VibranceAdjustmentProperty, value);
+		get => this.GetValue(VibranceAdjustmentProp);
+		set => this.SetValue(VibranceAdjustmentProp, value);
 	}
 	
 	
@@ -7286,8 +7286,8 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public YuvToBgraConverter YuvToBgraConverter
     {
-		get => this.GetValue(YuvToBgraConverterProperty);
-		set => this.SetValue(YuvToBgraConverterProperty, value);
+		get => this.GetValue(YuvToBgraConverterProp);
+		set => this.SetValue(YuvToBgraConverterProp, value);
     }
 
 
@@ -7298,7 +7298,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyDisposed();
 		if (!this.canZoomIn.Value)
 			return;
-		var scale = this.GetValue(RequestedImageDisplayScaleProperty).Let((it) =>
+		var scale = this.GetValue(RequestedImageDisplayScaleProp).Let((it) =>
 		{
 			if (it <= 0.999)
 				return (Math.Floor(it * 20) + 1) / 20;
@@ -7306,7 +7306,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		});
 		scale = this.ZoomTo(scale);
 		if (double.IsFinite(scale))
-			this.SetValue(RequestedImageDisplayScaleProperty, scale);
+			this.SetValue(RequestedImageDisplayScaleProp, scale);
 	}
 
 
@@ -7323,7 +7323,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyDisposed();
 		if (!this.canZoomOut.Value)
 			return;
-		var scale = this.GetValue(RequestedImageDisplayScaleProperty).Let((it) =>
+		var scale = this.GetValue(RequestedImageDisplayScaleProp).Let((it) =>
 		{
 			if (it <= 1.001)
 				return (Math.Ceiling(it * 20) - 1) / 20;
@@ -7331,7 +7331,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		});
 		scale = this.ZoomTo(scale);
 		if (double.IsFinite(scale))
-			this.SetValue(RequestedImageDisplayScaleProperty, scale);
+			this.SetValue(RequestedImageDisplayScaleProp, scale);
 	}
 
 
@@ -7352,20 +7352,20 @@ class Session : ViewModel<IAppSuiteApplication>
 		// check state
 		this.VerifyAccess();
 		this.VerifyDisposed();
-		if (!this.GetValue(FitImageToViewportProperty) && !this.canZoomTo.Value)
+		if (!this.GetValue(FitImageToViewportProp) && !this.canZoomTo.Value)
 			return double.NaN;
 		if (!double.IsFinite(scale))
 			return double.NaN;
 
 		// check zoom
-		if (!this.GetValue(FitImageToViewportProperty))
+		if (!this.GetValue(FitImageToViewportProp))
 		{
 			if (scale < MinRenderedImageScale)
 				scale = MinRenderedImageScale;
 			else if (scale > MaxRenderedImageScale)
 				scale = MaxRenderedImageScale;
 		}
-		var initScale = this.GetValue(ImageDisplayScaleProperty);
+		var initScale = this.GetValue(ImageDisplayScaleProp);
 		if (!double.IsFinite(initScale))
 			animate = false;
 
@@ -7379,7 +7379,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				it.Completed += (_, _) => 
 				{
-					this.SetValue(ImageDisplayScaleProperty, it.EndValue);
+					this.SetValue(ImageDisplayScaleProp, it.EndValue);
 					this.updateImageDisplaySizeAction.Execute();
 					this.CompleteZooming(true);
 				};
@@ -7387,17 +7387,17 @@ class Session : ViewModel<IAppSuiteApplication>
 				it.Interpolator = ZoomingInterpolator;
 				it.ProgressChanged += (_, _) =>
 				{
-					this.SetValue(ImageDisplayScaleProperty, it.Value);
+					this.SetValue(ImageDisplayScaleProp, it.Value);
 					this.updateImageDisplaySizeAction.Execute();
 				};
 				it.Start();
 			});
-			this.SetValue(IsZoomingProperty, true);
+			this.SetValue(IsZoomingProp, true);
 		}
 		else
 		{
-			this.SetValue(ImageDisplayScaleProperty, scale);
-			this.SetValue(IsZoomingProperty, false);
+			this.SetValue(ImageDisplayScaleProp, scale);
+			this.SetValue(IsZoomingProp, false);
 			this.updateImageDisplaySizeAction.Execute();
 		}
 		return scale;

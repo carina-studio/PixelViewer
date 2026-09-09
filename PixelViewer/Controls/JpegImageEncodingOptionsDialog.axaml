@@ -8,7 +8,6 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.JpegImageEncodingOptionsDialog"
 		Name="dialog"
-		x:CompileBindings="True"
 		Classes="Dialog"
         Title="{asXaml:StringResource JpegImageEncodingOptionsDialog.Title}"
 		Width="{DynamicResource Double/JpegImageEncodingOptionsDialog.Width}">

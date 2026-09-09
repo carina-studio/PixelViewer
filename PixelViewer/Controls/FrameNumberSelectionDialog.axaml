@@ -8,7 +8,6 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Carina.PixelViewer.Controls.FrameNumberSelectionDialog"
 		Name="dialog"
-		x:CompileBindings="True"
 		Classes="Dialog"
         Title="{asXaml:StringResource FrameNumberSelectionDialog.Title}"
 		Width="{DynamicResource Double/FrameNumberSelectionDialog.Width}">

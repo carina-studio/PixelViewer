@@ -2,9 +2,9 @@
     <PropertyGroup>
 
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <AppSuiteVersion>3.2.2.903-preview</AppSuiteVersion>
-        <AvaloniaVersion>11.3.20</AvaloniaVersion>
-        <AvaloniaXamlBehaviorsVersion>11.3.0.6</AvaloniaXamlBehaviorsVersion>
+        <AppSuiteVersion>4.0.0.908-dev</AppSuiteVersion>
+        <AvaloniaVersion>12.1.1</AvaloniaVersion>
+        <AvaloniaXamlBehaviorsVersion>12.0.7</AvaloniaXamlBehaviorsVersion>
         <DotNetLibVersion>10.0.11</DotNetLibVersion>
         <Nullable>enable</Nullable>
         <RuntimeIdentifiers>win-x86;win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>

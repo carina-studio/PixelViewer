@@ -5,6 +5,7 @@ using Avalonia.Controls.Primitives;
 using Avalonia.Data;
 using Avalonia.Data.Converters;
 using Avalonia.Input;
+using Avalonia.Input.Platform;
 using Avalonia.Interactivity;
 using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
@@ -13,6 +14,8 @@ using Avalonia.Media.Imaging;
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using Avalonia.VisualTree;
+using Carina.PixelViewer.Media;
+using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
@@ -21,6 +24,7 @@ using CarinaStudio.AppSuite.Input;
 using CarinaStudio.Collections;
 using CarinaStudio.Configuration;
 using CarinaStudio.Controls;
+using CarinaStudio.Input;
 using CarinaStudio.Threading;
 using CarinaStudio.Windows.Input;
 using Cursor = Avalonia.Input.Cursor;
@@ -49,11 +53,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <summary>
 	/// Maximum value of RGB gain.
 	/// </summary>
-	public static readonly double MaxRgbGain = Media.ImageRenderers.ImageRenderingOptions.MaxRgbGain;
+	public static readonly double MaxRgbGain = ImageRenderingOptions.MaxRgbGain;
 	/// <summary>
 	/// Minimum value of RGB gain.
 	/// </summary>
-	public static readonly double MinRgbGain = Media.ImageRenderers.ImageRenderingOptions.MinRgbGain;
+	public static readonly double MinRgbGain = ImageRenderingOptions.MinRgbGain;
 
 
 	/// <summary>
@@ -84,18 +88,18 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly Dictionary<int, Cursor> ImageDraggingCursors = new();
 	static readonly StyledProperty<Thickness> ImageViewerShadowsMarginProperty = AvaloniaProperty.Register<SessionControl, Thickness>(nameof(ImageViewerShadowsMargin), new Thickness(-100, 0, 0, 0));
 	static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
-	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerOverImage");
-	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnBrightnessAdjustmentUI");
-	static readonly StyledProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnColorAdjustmentUI");
-	static readonly StyledProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnContrastAdjustmentUI");
-	static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>("IsPointerPressedOnImage");
-	static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>("PointerPositionOnImageControl");
+	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerOverImage));
+	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnBrightnessAdjustmentUI));
+	static readonly StyledProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnColorAdjustmentUI));
+	static readonly StyledProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnContrastAdjustmentUI));
+	static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnImage));
+	static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>(nameof(PointerPositionOnImageControl));
 	static readonly StyledProperty<string> SelectedImageDisplayPixelArgbStringProperty = AvaloniaProperty.Register<SessionControl, string>(nameof(SelectedImageDisplayPixelArgbString), "");
 	static readonly StyledProperty<Rect> SelectedImageDisplayPixelBoundsProperty = AvaloniaProperty.Register<SessionControl, Rect>(nameof(SelectedImageDisplayPixelBounds));
 	static readonly StyledProperty<bool> ShowProcessInfoProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowProcessInfo));
-	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelArgbColor));
-	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelLabColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelLabColor));
-	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelXyzColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(SettingKeys.ShowSelectedRenderedImagePixelXyzColor));
+	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelArgbColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowSelectedRenderedImagePixelArgbColor));
+	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelLabColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowSelectedRenderedImagePixelLabColor));
+	static readonly StyledProperty<bool> ShowSelectedRenderedImagePixelXyzColorProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(ShowSelectedRenderedImagePixelXyzColor));
 	static readonly StyledProperty<StatusBarState> StatusBarStateProperty = AvaloniaProperty.Register<SessionControl, StatusBarState>(nameof(StatusBarState), StatusBarState.None);
 
 
@@ -640,14 +644,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			var format = this.Settings.GetValueOrDefault(SettingKeys.SelectedRenderedImagePixelArgbColorFormat);
 			var text = format switch
 			{
-				Media.ArgbColorFormat.Fixed8Bit => Global.Run(() =>
+				ArgbColorFormat.Fixed8Bit => Global.Run(() =>
 				{
 					var c8 = color.Color;
 					return hasAlpha
 						? $"{prefix}({c8.A:D3}, {c8.R:D3}, {c8.G:D3}, {c8.B:D3})"
 						: $"{prefix}({c8.R:D3}, {c8.G:D3}, {c8.B:D3})";
 				}),
-				Media.ArgbColorFormat.Normalized => hasAlpha
+				ArgbColorFormat.Normalized => hasAlpha
 					? $"{prefix}({color.A / 65535.0:F4}, {color.R / 65535.0:F4}, {color.G / 65535.0:F4}, {color.B / 65535.0:F4})"
 					: $"{prefix}({color.R / 65535.0:F4}, {color.G / 65535.0:F4}, {color.B / 65535.0:F4})",
 				_ => Global.Run(() =>
@@ -792,8 +796,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	}
 
 
-	// Effective rendered image to display.
-	IImage? EffectiveRenderedImage => this.GetValue(EffectiveRenderedImageProperty);
+	/// <summary>
+	/// Get effective rendered image to display.
+	/// </summary>
+	public IImage? EffectiveRenderedImage => this.GetValue(EffectiveRenderedImageProperty);
 
 
 	// Interpolation mode for rendered image.
@@ -826,8 +832,40 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	public ICommand IncreaseSliderValueCommand { get; }
 
 
-	// Check whether image viewer is scrollable in current state or not.
-	bool IsImageViewerScrollable => this.GetValue(IsImageViewerScrollableProperty);
+	/// <summary>
+	/// Check whether image viewer is scrollable in current state or not.
+	/// </summary>
+	public bool IsImageViewerScrollable => this.GetValue(IsImageViewerScrollableProperty);
+
+
+	/// <summary>
+	/// Check whether the pointer is over the image or not.
+	/// </summary>
+	public bool IsPointerOverImage => this.GetValue(IsPointerOverImageProperty);
+
+
+	/// <summary>
+	/// Check whether the pointer is pressing on the brightness adjustment UI or not.
+	/// </summary>
+	public bool IsPointerPressedOnBrightnessAdjustmentUI => this.GetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty);
+	
+	
+	/// <summary>
+	/// Check whether the pointer is pressing on the color adjustment UI or not.
+	/// </summary>
+	public bool IsPointerPressedOnColorAdjustmentUI => this.GetValue(IsPointerPressedOnColorAdjustmentUIProperty);
+	
+	
+	/// <summary>
+	/// Check whether the pointer is pressing on the contrast adjustment UI or not.
+	/// </summary>
+	public bool IsPointerPressedOnContrastAdjustmentUI => this.GetValue(IsPointerPressedOnContrastAdjustmentUIProperty);
+	
+	
+	/// <summary>
+	/// Check whether the pointer is pressing on the image or not.
+	/// </summary>
+	public bool IsPointerPressedOnImage => this.GetValue(IsPointerPressedOnImageProperty);
 	
 	
 	// Load cursor from resource.
@@ -932,7 +970,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 		// add event handlers
 		this.Application.StringsUpdated += this.OnApplicationStringsUpdated;
-		Media.ColorSpace.CustomNameChanged += this.OnColorSpaceCustomNameChanged;
+		ColorSpace.CustomNameChanged += this.OnColorSpaceCustomNameChanged;
 		this.AddHandler(PointerWheelChangedEvent, this.OnPointerWheelChanged, RoutingStrategies.Tunnel);
 
 		// attach to settings
@@ -1025,7 +1063,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 
 	// Called when custom name of color space changed.
-    void OnColorSpaceCustomNameChanged(object? sender, Media.ColorSpaceEventArgs e) =>
+    void OnColorSpaceCustomNameChanged(object? sender, ColorSpaceEventArgs e) =>
         RefreshComboBoxContent(this.colorSpaceComboBox);
 
 
@@ -1142,7 +1180,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when drag over.
 	void OnDragOver(object? sender, DragEventArgs e)
 	{
-		if (e.DataTransfer.HasFiles())
+		if (e.DataTransfer.HasFiles)
 		{
 			e.DragEffects = DragDropEffects.Copy;
 			e.Handled = true;
@@ -1258,6 +1296,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Called when pointer leave from image.
 	void OnImagePointerLeave(object? sender, PointerEventArgs e)
 	{
+		// ignore the leaving reported while an element inside the image holds the pointer capture, the pointer is still on the image in that case
+		if (e.Pointer.Captured is Visual captured && captured.FindAncestorOfType<Image>(true) == this.image)
+			return;
+
+		// clear the state because the pointer left the image
 		this.latestPointerEventArgsOnImage = null;
 		this.SetValue(IsPointerOverImageProperty, false);
 		this.SetValue(PointerPositionOnImageControlProperty, new Point(-1, -1));
@@ -1523,7 +1566,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 
 		// check focus
-		var isFocusedOnEditor = this.attachedWindow?.FocusManager?.GetFocusedElement()?.Let(it => 
+		var isFocusedOnEditor = this.attachedWindow?.FocusManager.GetFocusedElement()?.Let(it => 
 			it is TextBox || it is NumericUpDown) ?? false;
 
 		// get session
@@ -1609,7 +1652,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// check focus
-		var focusedElement = this.attachedWindow?.FocusManager?.GetFocusedElement();
+		var focusedElement = this.attachedWindow?.FocusManager.GetFocusedElement();
 		if (focusedElement is Visual focusedVisual)
 		{
 			if (focusedElement is TextBox || focusedElement is NumericUpDown)
@@ -1976,7 +2019,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		if (string.IsNullOrEmpty(fileName))
 			return;
 		
-		using var dataSource = await Media.FFmpegVideoDataSource.TryCreateAsync(this.Application, fileName);
+		using var dataSource = await FFmpegVideoDataSource.TryCreateAsync(this.Application, fileName);
 	}
 
 
@@ -2186,6 +2229,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	public ICommand OpenSourceFileCommand { get; }
 
 
+	/// <summary>
+	/// Get the latest pointer position on the image control.
+	/// </summary>
+	public Point PointerPositionOnImageControl => this.GetValue(PointerPositionOnImageControlProperty);
+
+
 	// [Workaround] Force refreshing content shown by given combo box, including the content of its selection box.
 	static void RefreshComboBoxContent(ComboBox comboBox)
 	{
@@ -2369,13 +2418,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 
 		// check format
-		var fileFormat = (Media.FileFormat?)null;
-		if (Media.FileFormats.TryGetFormatsByFileName(fileName, out var fileFormats))
+		FileFormat? fileFormat = null;
+		if (FileFormats.TryGetFormatsByFileName(fileName, out var fileFormats))
 			fileFormat = fileFormats.First();
 
 		// setup parameters
 		var parameters = new Session.ImageSavingParams();
-		if (fileFormat == Media.FileFormats.Jpeg)
+		if (fileFormat == FileFormats.Jpeg)
 		{
 			var jpegOptions = await new JpegImageEncodingOptionsDialog().ShowDialog<Media.ImageEncoders.ImageEncodingOptions?>(this.attachedWindow);
 			if (jpegOptions == null)
@@ -2603,6 +2652,24 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			IsReadOnly = !colorSpace.IsUserDefined,
 		}.ShowDialog(this.attachedWindow);
 	}
+
+
+	/// <summary>
+	/// Check whether the ARGB color of selected rendered image pixel should be shown or not.
+	/// </summary>
+	public bool ShowSelectedRenderedImagePixelArgbColor => this.GetValue(ShowSelectedRenderedImagePixelArgbColorProperty);
+	
+	
+	/// <summary>
+	/// Check whether the L*a*b* color of selected rendered image pixel should be shown or not.
+	/// </summary>
+	public bool ShowSelectedRenderedImagePixelLabColor => this.GetValue(ShowSelectedRenderedImagePixelLabColorProperty);
+	
+	
+	/// <summary>
+	/// Check whether the XYZ color of selected rendered image pixel should be shown or not.
+	/// </summary>
+	public bool ShowSelectedRenderedImagePixelXyzColor => this.GetValue(ShowSelectedRenderedImagePixelXyzColorProperty);
 
 
 	/// <summary>

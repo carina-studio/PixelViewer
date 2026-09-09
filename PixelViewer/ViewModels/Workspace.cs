@@ -27,15 +27,15 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Property of <see cref="ActivatedSession"/>.
 		/// </summary>
-		public static readonly ObservableProperty<Session?> ActivatedSessionProperty = ObservableProperty.Register<Workspace, Session?>(nameof(ActivatedSession));
+		public static readonly ObservableProperty<Session?> ActivatedSessionProp = ObservableProperty.Register<Workspace, Session?>(nameof(ActivatedSession));
 		/// <summary>
 		/// Property of <see cref="EffectiveScreenColorSpace"/>.
 		/// </summary>
-		public static readonly ObservableProperty<ColorSpace> EffectiveScreenColorSpaceProperty = ObservableProperty.Register<Workspace, ColorSpace>(nameof(EffectiveScreenColorSpace), ColorSpace.Default);
+		public static readonly ObservableProperty<ColorSpace> EffectiveScreenColorSpaceProp = ObservableProperty.Register<Workspace, ColorSpace>(nameof(EffectiveScreenColorSpace), ColorSpace.Default);
 		/// <summary>
 		/// Property of <see cref="Window"/>.
 		/// </summary>
-		public static readonly ObservableProperty<Window?> WindowProperty = ObservableProperty.Register<Workspace, Window?>(nameof(Window), null);
+		public static readonly ObservableProperty<Window?> WindowProp = ObservableProperty.Register<Workspace, Window?>(nameof(Window), null);
 
 
 		// Constants.
@@ -68,7 +68,7 @@ namespace Carina.PixelViewer.ViewModels
 				// check state
 				if (this.IsDisposed)
 					return;
-				var window = this.GetValue(WindowProperty);
+				var window = this.GetValue(WindowProp);
 				if (window == null || !window.IsActive)
 					return;
 				var screen = window.Screens.ScreenFromVisual(window);
@@ -96,7 +96,7 @@ namespace Carina.PixelViewer.ViewModels
 
 				// update state
 				if (!this.IsDisposed)
-					this.SetValue(EffectiveScreenColorSpaceProperty, screenColorSpace);
+					this.SetValue(EffectiveScreenColorSpaceProp, screenColorSpace);
 			});
 			this.windowBoundsObserver = new(_ => 
 				this.updateEffectiveScreenColorSpaceAction.Schedule(UpdateEffectiveScreenColorSpaceInterval));
@@ -134,7 +134,7 @@ namespace Carina.PixelViewer.ViewModels
 					&& intValue >= 0
 					&& intValue < this.sessions.Count)
 				{
-					this.SetValue(ActivatedSessionProperty, this.sessions[intValue]);
+					this.SetValue(ActivatedSessionProp, this.sessions[intValue]);
 				}
 
 				this.Logger.LogWarning("State restored, session count: {count}", this.sessions.Count);
@@ -147,8 +147,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public Session? ActivatedSession
 		{
-			get => this.GetValue(ActivatedSessionProperty);
-			set => this.SetValue(ActivatedSessionProperty, value);
+			get => this.GetValue(ActivatedSessionProp);
+			set => this.SetValue(ActivatedSessionProp, value);
 		}
 
 
@@ -322,7 +322,7 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Get effective screen color space.
 		/// </summary>
-		public ColorSpace EffectiveScreenColorSpace => this.GetValue(EffectiveScreenColorSpaceProperty);
+		public ColorSpace EffectiveScreenColorSpace => this.GetValue(EffectiveScreenColorSpaceProp);
 
 
 		/// <summary>
@@ -347,7 +347,7 @@ namespace Carina.PixelViewer.ViewModels
         protected override void OnPropertyChanged(ObservableProperty property, object? oldValue, object? newValue)
         {
             base.OnPropertyChanged(property, oldValue, newValue);
-			if (property == ActivatedSessionProperty)
+			if (property == ActivatedSessionProp)
 			{
 				// deactivate
 				this.sessionActivationToken = this.sessionActivationToken.DisposeAndReturnNull();
@@ -369,7 +369,7 @@ namespace Carina.PixelViewer.ViewModels
 				}
 				this.InvalidateTitle();
 			}
-			else if (property == WindowProperty)
+			else if (property == WindowProp)
 			{
 				this.windowBoundsObserverToken = this.windowBoundsObserverToken.DisposeAndReturnNull();
 				this.windowIsActiveObserverToken = this.windowIsActiveObserverToken.DisposeAndReturnNull();
@@ -462,8 +462,8 @@ namespace Carina.PixelViewer.ViewModels
 		/// </summary>
 		public Window? Window
 		{
-			get => this.GetValue(WindowProperty);
-			set => this.SetValue(WindowProperty, value);
+			get => this.GetValue(WindowProp);
+			set => this.SetValue(WindowProp, value);
 		}
 	}
 }

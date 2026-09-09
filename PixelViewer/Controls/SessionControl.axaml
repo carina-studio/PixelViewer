@@ -6,21 +6,23 @@
 			 xmlns:abControls="using:CarinaStudio.Controls"
 			 xmlns:abConverters="using:CarinaStudio.Data.Converters"
 			 xmlns:aConverters="using:Avalonia.Data.Converters"
-			 xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
-			 xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
-             xmlns:asMedia="using:CarinaStudio.AppSuite.Media"
-             xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
 			 xmlns:app="using:Carina.PixelViewer"
              xmlns:appControls="clr-namespace:Carina.PixelViewer.Controls"
              xmlns:appConverters="clr-namespace:Carina.PixelViewer.Data.Converters"
              xmlns:appImageRenderers="clr-namespace:Carina.PixelViewer.Media.ImageRenderers"
              xmlns:appMedia="clr-namespace:Carina.PixelViewer.Media"
 			 xmlns:appViewModels="clr-namespace:Carina.PixelViewer.ViewModels"
+             xmlns:as="using:CarinaStudio.AppSuite"
+             xmlns:asControls="using:CarinaStudio.AppSuite.Controls"
+             xmlns:asConverters="using:CarinaStudio.AppSuite.Converters"
+             xmlns:asMedia="using:CarinaStudio.AppSuite.Media"
+             xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
 			 xmlns:ia="using:Avalonia.Xaml.Interactivity"
              xmlns:iaCore="using:Avalonia.Xaml.Interactions.Core"
 			 xmlns:sys="using:System"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Carina.PixelViewer.Controls.SessionControl"
+             x:DataType="{x:Type appViewModels:Session}"
 			 Background="{DynamicResource Brush/Window.Background}"
              Name="root">
 	
@@ -73,29 +75,29 @@
 
 		<!-- Other actions -->
 		<ContextMenu x:Key="otherActionsMenu" Placement="Bottom">
-			<MenuItem Command="{Binding #root.Application.ShowApplicationOptionsDialog}" Header="{asXaml:StringResource SessionControl.ApplicationOptions}">
+			<MenuItem Command="{Binding #root.((app:App)Application).ShowApplicationOptionsDialog}" Header="{asXaml:StringResource SessionControl.ApplicationOptions}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Settings.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
-			<MenuItem Command="{Binding $parent[Window].CreateMainWindow}" Header="{asXaml:StringResource Common.CreateWindow}" InputGesture="Ctrl+N">
+			<MenuItem Command="{Binding $parent[app:MainWindow].CreateMainWindow}" Header="{asXaml:StringResource Common.CreateWindow}" InputGesture="Ctrl+N">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.AddWindow}"/>
 				</MenuItem.Icon>
 			</MenuItem>
 			<Separator/>
-			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{asXaml:StringResource MainWindow.LayoutMainWindows.Horizontal}">
+			<MenuItem Command="{Binding $parent[app:MainWindow].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Horizontal}" Header="{asXaml:StringResource MainWindow.LayoutMainWindows.Horizontal}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Horizontal}"/>
 				</MenuItem.Icon>
 			</MenuItem>
-			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{asXaml:StringResource MainWindow.LayoutMainWindows.Vertical}">
+			<MenuItem Command="{Binding $parent[app:MainWindow].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Vertical}" Header="{asXaml:StringResource MainWindow.LayoutMainWindows.Vertical}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Vertical}"/>
 				</MenuItem.Icon>
 			</MenuItem>
-			<MenuItem Command="{Binding $parent[Window].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{asXaml:StringResource MainWindow.LayoutMainWindows.Tile}">
+			<MenuItem Command="{Binding $parent[app:MainWindow].LayoutMainWindowsCommand}" CommandParameter="{x:Static asControls:MultiWindowLayout.Tile}" Header="{asXaml:StringResource MainWindow.LayoutMainWindows.Tile}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Layout.Tile}"/>
 				</MenuItem.Icon>
@@ -105,14 +107,14 @@
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Tool.Outline}"/>
 				</MenuItem.Icon>
-				<MenuItem Name="editConfigMenuItem" Command="{Binding #root.Application.ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False">
+				<MenuItem Name="editConfigMenuItem" Command="{Binding #root.((app:App)Application).ShowConfigurationEditor}" Header="Edit Configurations…" IsVisible="False">
 					<MenuItem.Icon>
 						<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Tool.Outline}"/>
 					</MenuItem.Icon>
 				</MenuItem>
 			</MenuItem>
 			<Separator/>
-			<MenuItem Command="{Binding #root.Application.ShowApplicationInfoDialog}" Header="{asXaml:StringResource SessionControl.ApplicationInfo}">
+			<MenuItem Command="{Binding #root.((app:App)Application).ShowApplicationInfoDialog}" Header="{asXaml:StringResource SessionControl.ApplicationInfo}">
 				<MenuItem.Icon>
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Information.Outline}"/>
 				</MenuItem.Icon>
@@ -252,7 +254,7 @@
 						<Separator asControls:ToolbarElement.Role="Separator"/>
 
 						<!-- Histograms -->
-						<ToggleButton Name="histogramsButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" IsEnabled="{Binding !#root.IsHistogramsDisabled}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.Histograms}">
+						<ToggleButton Name="histogramsButton" IsChecked="{Binding IsHistogramsVisible, Mode=TwoWay}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.Histograms}">
 							<Panel>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Histogram}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Histogram.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -655,25 +657,25 @@
 
 						<!-- Luminance -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Luminance}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsLuminanceHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.((appViewModels:Session)DataContext).IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Border Background="{DynamicResource Brush/BitmapHistogramsView.LuminanceHistogram.Background}" Height="{StaticResource Double/SessionControl.Histogram.RangeBar.Height}" Margin="{StaticResource Thickness/SessionControl.Histogram.RangeBar.Margin}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
 						<!-- Red -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Red}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsRedHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.((appViewModels:Session)DataContext).IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Border Background="{DynamicResource Brush/BitmapHistogramsView.RedHistogram.Background}" Height="{StaticResource Double/SessionControl.Histogram.RangeBar.Height}" Margin="{StaticResource Thickness/SessionControl.Histogram.RangeBar.Margin}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
 						<!-- Green -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Green}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsGreenHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.((appViewModels:Session)DataContext).IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Border Background="{DynamicResource Brush/BitmapHistogramsView.GreenHistogram.Background}" Height="{StaticResource Double/SessionControl.Histogram.RangeBar.Height}" Margin="{StaticResource Thickness/SessionControl.Histogram.RangeBar.Margin}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
 						<!-- Blue -->
 						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Histogram.Blue}"/>
-						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.DataContext.IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
+						<appControls:BitmapHistogramsView DataContext="{Binding Histograms}" IsBlueHistogramVisible="True" IsMeanMarkerVisible="{Binding #root.((appViewModels:Session)DataContext).IsHistogramMeanMarkerVisible, FallbackValue=True}"/>
 						<Border Background="{DynamicResource Brush/BitmapHistogramsView.BlueHistogram.Background}" Height="{StaticResource Double/SessionControl.Histogram.RangeBar.Height}" Margin="{StaticResource Thickness/SessionControl.Histogram.RangeBar.Margin}"/>
 						<Separator asControls:DialogElement.SeparatorType="Default"/>
 
@@ -763,9 +765,9 @@
 				              Background="{x:Static Brushes.Transparent}" 
 				              HorizontalScrollBarVisibility="Disabled"
 				              IsScrollInertiaEnabled="False"
-				              Gestures.Pinch="OnImagePinch" 
-				              Gestures.PinchEnded="OnImagePinchEnded" 
-				              Gestures.PointerTouchPadGestureMagnify="OnImagePointerTouchPadGestureMagnify"
+				              Pinch="OnImagePinch" 
+				              PinchEnded="OnImagePinchEnded" 
+				              PointerTouchPadGestureMagnify="OnImagePointerTouchPadGestureMagnify"
 				              PointerPressed="OnImageScrollViewerPointerPressed"
 				              VerticalScrollBarVisibility="Disabled">
 					<ScrollViewer.GestureRecognizers>
@@ -901,7 +903,7 @@
 			        Grid.Column="1"
 			        Grid.ColumnSpan="{Binding #imageViewerGrid.(Grid.ColumnSpan)}"
 			        IsHitTestVisible="false"
-			        Margin="{ReflectionBinding #root.ImageViewerShadowsMargin}"/>
+			        Margin="{Binding #root.ImageViewerShadowsMargin}"/>
 
 			<!-- Rendering parameters panel -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="4" IsVisible="{Binding IsRenderingParametersPanelVisible}">
@@ -1352,7 +1354,7 @@
 										<GeometryDrawing Brush="{DynamicResource Brush/StatusBar.Foreground}" Geometry="{StaticResource Geometry/Icon.Screen}"/>
 									</DrawingImage>
 								</Image>
-								<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding Owner.EffectiveScreenColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+								<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding ((appViewModels:Workspace)Owner).EffectiveScreenColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}, FallbackValue={x:Null}}"/>
 							</StackPanel>
 						</Button>
 						<Separator IsVisible="{Binding IsColorSpaceManagementEnabled}" asControls:StatusBarElement.Role="Separator"/>
@@ -1406,7 +1408,7 @@
 						<StackPanel IsVisible="{Binding #root.ShowProcessInfo}" Orientation="Horizontal">
 							
 							<!-- UI response duration -->
-							<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=IsDebugMode}" Orientation="Horizontal">
+							<StackPanel IsVisible="{Binding Source={x:Static app:App.Current}, Path=(as:AppSuiteApplication).IsDebugMode}" Orientation="Horizontal">
 								<Separator asControls:StatusBarElement.Role="Separator"/>
 								<Image asControls:StatusBarElement.Role="IconWithLabel">
 									<DrawingImage>
@@ -1415,7 +1417,7 @@
 								</Image>
 								<Panel>
 									<TextBlock Opacity="0" asControls:StatusBarElement.Role="Label" Text="000 ms   "/>
-									<TextBlock HorizontalAlignment="Left" asControls:StatusBarElement.Role="Label" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.UIResponseDuration, Converter={x:Static asConverters:TimeSpanConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.UIResponseDuration}"/>
+									<TextBlock HorizontalAlignment="Left" asControls:StatusBarElement.Role="Label" Text="{Binding Source={x:Static app:App.Current}, Path=(as:AppSuiteApplication).ProcessInfo.UIResponseDuration, Converter={x:Static asConverters:TimeSpanConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.UIResponseDuration}"/>
 								</Panel>
 							</StackPanel>
 
@@ -1428,7 +1430,7 @@
 							</Image>
 							<Panel>
 								<TextBlock Opacity="0" asControls:StatusBarElement.Role="Label" Text="00.0%"/>
-								<TextBlock HorizontalAlignment="Left" asControls:StatusBarElement.Role="Label" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.CpuUsagePercentage, StringFormat={}{0:F1}%}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.CpuUsage}"/>
+								<TextBlock HorizontalAlignment="Left" asControls:StatusBarElement.Role="Label" Text="{Binding Source={x:Static app:App.Current}, Path=(as:AppSuiteApplication).ProcessInfo.CpuUsagePercentage, StringFormat={}{0:F1}%}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.CpuUsage}"/>
 							</Panel>
 
 							<!-- Memory usage -->
@@ -1443,7 +1445,7 @@
 								<StackPanel Orientation="Horizontal" VerticalAlignment="Center">
 									<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding RenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderedImagesMemoryUsage}"/>
 									<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding TotalRenderedImagesMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.TotalRenderedImagesMemoryUsage}"/>
-									<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding Source={x:Static app:App.Current}, Path=ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.PrivateMemoryUsage}"/>
+									<TextBlock asControls:StatusBarElement.Role="Label" Text="{Binding Source={x:Static app:App.Current}, Path=(as:AppSuiteApplication).ProcessInfo.PrivateMemoryUsage, Converter={x:Static asConverters:FileSizeConverter.Default}, StringFormat={}/{0}}" ToolTip.Placement="Left" ToolTip.Tip="{asXaml:StringResource SessionControl.PrivateMemoryUsage}"/>
 								</StackPanel>
 							</Panel>
 

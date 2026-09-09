@@ -252,7 +252,7 @@
 		<Setter Property="IsLightDismissEnabled" Value="True"/>
 		<Setter Property="PlacementAnchor" Value="Bottom"/>
 		<Setter Property="PlacementGravity" Value="Bottom"/>
-		<Setter Property="PlacementMode" Value="AnchorAndGravity"/>
+		<Setter Property="Placement" Value="AnchorAndGravity"/>
 	</Style>
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Decrease">
 		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
