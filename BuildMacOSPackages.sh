@@ -13,6 +13,7 @@ MACOS_SDK_VERSION="26.0" # Linked SDK version to write into the application bina
 CERT_NAME="" # Name of certification to sign the application
 SIGN_PACKAGE="true"
 RUN_TESTS="true"
+TESTS_ONLY="false"
 
 # Print usage of this script.
 print_usage() {
@@ -26,6 +27,7 @@ print_usage() {
     echo "  --no-sign         Do not sign the built application."
     echo "  --no-trim         Do not trim assemblies while publishing the application."
     echo "  --no-tests        Do not run test cases before building packages."
+    echo "  --tests-only      Only run test cases without building packages."
 }
 
 # Parse arguments
@@ -85,6 +87,10 @@ while [ $# -gt 0 ]; do
             RUN_TESTS="false"
             shift
             ;;
+        --tests-only)
+            TESTS_ONLY="true"
+            shift
+            ;;
         *)
             echo "Unknown argument: $1"
             echo " "
@@ -100,6 +106,12 @@ if [ ${#RID_LIST[@]} -eq 0 ]; then
     PUB_PLATFORM_LIST=("${DEFAULT_PUB_PLATFORM_LIST[@]}")
 fi
 
+# Check conflict between arguments
+if [ "$TESTS_ONLY" = "true" ] && [ "$RUN_TESTS" = "false" ]; then
+    echo "Cannot specify both '--no-tests' and '--tests-only'"
+    exit 1
+fi
+
 echo "********** Start building $APP_NAME **********"
 
 # Run test cases
@@ -108,15 +120,20 @@ if [ "$RUN_TESTS" = "true" ]; then
     dotnet test $APP_NAME.Test -c $CONFIG
     if [ "$?" != "0" ]; then
         echo "Test cases failed"
-        exit
+        exit 1
     fi
+fi
+
+# Stop if only test cases need to be run
+if [ "$TESTS_ONLY" = "true" ]; then
+    exit 0
 fi
 
 # Get application version
 VERSION=$(dotnet run PackagingTool.cs -- get-current-version $APP_NAME/$APP_NAME.csproj)
 if [ "$?" != "0" ]; then
     echo "Unable to get version of $APP_NAME"
-    exit
+    exit 1
 fi
 INFORMATIONAL_VERSION=$(dotnet run PackagingTool.cs -- get-current-informational-version $APP_NAME/$APP_NAME.csproj)
 PACKAGE_VERSION=$VERSION
@@ -130,7 +147,7 @@ if [[ ! -d "./Packages/$VERSION" ]]; then
     echo "Create directory 'Packages/$VERSION'"
     mkdir -p ./Packages/$VERSION
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
 fi
 
@@ -148,14 +165,14 @@ for i in "${!RID_LIST[@]}"; do
     dotnet clean $APP_NAME
     dotnet restore $APP_NAME
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
 
     # build
     dotnet publish $APP_NAME -c $CONFIG -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=$TRIM_ASSEMBLIES -p:RuntimeIdentifier=$RID -p:PublishReadyToRun=$READY_TO_RUN
     dotnet msbuild $APP_NAME -t:BundleApp -property:Configuration=$CONFIG -p:SelfContained=true -p:PublishSingleFile=false -p:PublishTrimmed=$TRIM_ASSEMBLIES -p:RuntimeIdentifier=$RID -p:PublishReadyToRun=$READY_TO_RUN
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
 
     # create output directory
@@ -165,19 +182,19 @@ for i in "${!RID_LIST[@]}"; do
     echo "Create directory 'Packages/$VERSION/$PUB_PLATFORM'"
     mkdir ./Packages/$VERSION/$PUB_PLATFORM
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
 
     # copy .app directory to output directoty
     mv ./$APP_NAME/bin/$CONFIG/$FRAMEWORK/$RID/publish/$APP_NAME.app ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
 
     # copy application icon and remove unnecessary files
     cp ./$APP_NAME/$APP_NAME.icns ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/Resources/$APP_NAME.icns
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
     rm ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/MacOS/libMono*.dylib
     rm ./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/MacOS/*.png
@@ -189,17 +206,17 @@ for i in "${!RID_LIST[@]}"; do
     APP_BINARY="./Packages/$VERSION/$PUB_PLATFORM/$APP_NAME.app/Contents/MacOS/$APP_NAME"
     if [ -z "$(command -v vtool)" ]; then
         echo "Unable to find 'vtool', please install Xcode"
-        exit
+        exit 1
     fi
     MIN_OS_VERSION=$(vtool -show-build-version "$APP_BINARY" | awk '/minos/ { print $2; exit }')
     if [ -z "$MIN_OS_VERSION" ]; then
         echo "Unable to get minimum OS version from '$APP_BINARY'"
-        exit
+        exit 1
     fi
     echo "Set linked SDK version of '$APP_BINARY' to $MACOS_SDK_VERSION"
     vtool -set-build-version macos "$MIN_OS_VERSION" "$MACOS_SDK_VERSION" -replace -output "$APP_BINARY" "$APP_BINARY"
     if [ "$?" != "0" ]; then
-        exit
+        exit 1
     fi
 
     # sign application

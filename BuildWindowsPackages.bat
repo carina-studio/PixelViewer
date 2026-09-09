@@ -11,6 +11,7 @@ set SELF_CONTAINED=true
 set TRIM_ASSEMBLIES=true
 set GENERATE_DIFF_PACKAGES=true
 set RUN_TESTS=true
+set TESTS_ONLY=false
 
 REM Parse arguments
 :parse_arguments
@@ -35,6 +36,11 @@ if /I "%~1"=="--no-trim" (
 )
 if /I "%~1"=="--no-tests" (
     set RUN_TESTS=false
+    shift
+    goto parse_arguments
+)
+if /I "%~1"=="--tests-only" (
+    set TESTS_ONLY=true
     shift
     goto parse_arguments
 )
@@ -96,12 +102,21 @@ echo   --rid ^<rid^>          Runtime identifier to build package for, can be sp
 echo                        Supported: %DEFAULT_RID_LIST%. (Default: all of them)
 echo   --no-trim            Do not trim assemblies while publishing the application.
 echo   --no-tests           Do not run test cases before building packages.
+echo   --tests-only         Only run test cases without building packages.
 echo   --no-diff-packages   Do not generate diff packages.
 goto :eof
 
 REM Select all runtime identifiers if none of them was specified
 :arguments_parsed
 if "%RID_LIST%"=="" set RID_LIST=%DEFAULT_RID_LIST%
+
+REM Check conflict between arguments
+if /I "%TESTS_ONLY%"=="true" (
+    if /I "%RUN_TESTS%"=="false" (
+        echo Cannot specify both '--no-tests' and '--tests-only'
+        exit /b 1
+    )
+)
 
 echo ********** Start building %APP_NAME% **********
 
@@ -115,12 +130,15 @@ if /I "%RUN_TESTS%"=="true" (
     )
 )
 
+REM Stop if only test cases need to be run
+if /I "%TESTS_ONLY%"=="true" exit /b 0
+
 REM Create base directory
 IF not exist Packages (
     echo Create directory 'Packages'
 	mkdir Packages
     if !ERRORLEVEL! neq 0 (
-        exit
+        exit /b 1
     )
 )
 
@@ -128,7 +146,7 @@ REM Get current version
 dotnet run PackagingTool.cs -- get-current-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
 if !ERRORLEVEL! neq 0 (
     del /Q Packages\Packaging.txt
-    exit
+    exit /b 1
 )
 set /p CURRENT_VERSION=<Packages\Packaging.txt
 dotnet run PackagingTool.cs -- get-current-informational-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
@@ -142,7 +160,7 @@ if /I not "%GENERATE_DIFF_PACKAGES%"=="true" goto previous_version_checked
 dotnet run PackagingTool.cs -- get-previous-version %APP_NAME%\%APP_NAME%.csproj > Packages\Packaging.txt
 if !ERRORLEVEL! neq 0 (
     del /Q Packages\Packaging.txt
-    exit
+    exit /b 1
 )
 set /p PREVIOUS_VERSION=<Packages\Packaging.txt
 if [%PREVIOUS_VERSION%] neq [] (
@@ -174,7 +192,7 @@ REM Build packages
     if !ERRORLEVEL! neq 0 (
         echo Failed to build project: !ERRORLEVEL!
         del /Q Packages\Packaging.txt
-        exit
+        exit /b 1
     )
 
     REM Generate package
@@ -182,7 +200,7 @@ REM Build packages
     if !ERRORLEVEL! neq 0 (
         echo Failed to generate package: !ERRORLEVEL!
         del /Q Packages\Packaging.txt
-        exit
+        exit /b 1
     )
 ))
 
