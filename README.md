@@ -10,97 +10,41 @@ A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/B
 ## ⚠️ NOTICE
 If you are upgrading from `3.x` to `2026+` on macOS, please download the application bundle manually and place it alongside the existing `3.x` bundle *(instead of replacing it)*. This allows `2026+` to import your application data from the `3.x` bundle on first launch.
 
-## 📥 Download 2026.1 RC
+## 📥 Download 2026.1
 
 ### Windows
-[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-win-x64.zip)
-[![](https://img.shields.io/badge/x86-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-win-x86.zip)
-[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-win-arm64.zip)
+[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-win-x64.zip)
+[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-win-arm64.zip)
 
 ### macOS
-[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-osx-arm64.zip)
-[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-osx-x64.zip)
+[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-osx-arm64.zip)
+[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-osx-x64.zip)
 
 ### Linux
-[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-linux-x64.zip)
-[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.1/PixelViewer-2026.1.1-linux-arm64.zip)
-
-## 📥 Download 2026.0
-
-### Windows
-[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-x64.zip)
-[![](https://img.shields.io/badge/x86-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-x86.zip)
-[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-win-arm64.zip)
-
-### macOS
-[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-osx-arm64.zip)
-[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-osx-x64.zip)
-
-### Linux
-[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-linux-x64.zip)
-[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.0.1/PixelViewer-2026.0.1-linux-arm64.zip)
+[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-linux-x64.zip)
+[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-linux-arm64.zip)
 
 ## ⭐ Supported formats
-- Luminance
-  - L8
-  - L16
-- YUV
-  - YUV444p
-  - P410
-  - P416
-  - YUV422p
-  - P210
-  - P216
-  - UYVY
-  - YUVY
-  - YUYV (v3.1+)
-  - YVYU (v3.1+)
-  - NV12
-  - NV21
-  - I420
-  - YV12
-  - P010
-  - P016
-- RGB
-  - BGR_888
-  - RGB_565
-  - RGB_888
-  - BGRX_8888
-  - RGBX_8888
-  - XBGR_8888
-  - XRGB_8888
-  - BGR_161616
-  - RGB_161616
-- ARGB
-  - ARGB_8888
-  - ABGR_8888
-  - BGRA_8888
-  - RGBA_8888
-  - ARGB_16161616
-  - ABGR_16161616
-  - BGRA_16161616
-  - RGBA_16161616
-  - ABGR_2101010
-  - ARGB_2101010
-  - BGRA_1010102
-  - RGBA_1010102
-  - ABGR_F16
-  - ARGB_F16
-  - BGRA_F16
-  - RGBA_F16
-- Bayer Pattern
-  - 10-bit MIPI
-  - 12-bit MIPI
-  - 14-bit MIPI
-  - 16-bit
-  - 8-bit
-- Compressed
-  - HEIF
-  - JPEG/JFIF
-  - PNG
-  - TIFF `2026.1+`
-  - WebP
-  
+| Luminance | YUV                 | RGB        | ARGB          | Bayer Pattern | Compressed     |
+|-----------|---------------------|------------|---------------|---------------|----------------|
+| L8        | YUV444p             | BGR_888    | ARGB_8888     | 10-bit MIPI   | HEIF           |
+| L16       | P410                | RGB_565    | ABGR_8888     | 12-bit MIPI   | JPEG/JFIF      |
+|           | P416                | RGB_888    | BGRA_8888     | 14-bit MIPI   | PNG            |
+|           | YUV422p             | BGRX_8888  | RGBA_8888     | 16-bit        | TIFF `2026.1+` |
+|           | P210                | RGBX_8888  | ARGB_16161616 | 8-bit         | WebP           |
+|           | P216                | XBGR_8888  | ABGR_16161616 |               |                |
+|           | UYVY                | XRGB_8888  | BGRA_16161616 |               |                |
+|           | YUVY                | BGR_161616 | RGBA_16161616 |               |                |
+|           | YUYV                | RGB_161616 | ABGR_2101010  |               |                |
+|           | YVYU                |            | ARGB_2101010  |               |                |
+|           | NV12                |            | BGRA_1010102  |               |                |
+|           | NV21                |            | RGBA_1010102  |               |                |
+|           | I420                |            | ABGR_F16      |               |                |
+|           | YV12                |            | ARGB_F16      |               |                |
+|           | Android_YUV_420_888 |            | BGRA_F16      |               |                |
+|           | P010                |            | RGBA_F16      |               |                |
+|           | P016                |            |               |               |                |
+
 ## ⭐ Supported color spaces
 - sRGB
 - DCI-P3
@@ -145,4 +89,3 @@ If you are upgrading from `3.x` to `2026+` on macOS, please download the applica
 - [NLog](https://github.com/NLog/NLog)
 - [NUnit](https://github.com/nunit/nunit)
 - [Roslyn](https://github.com/dotnet/roslyn)
-- [SharpZipLib](https://github.com/icsharpcode/SharpZipLib)
