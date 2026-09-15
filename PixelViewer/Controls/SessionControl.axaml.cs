@@ -575,7 +575,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.updateImageCursorAction = new(() =>
 		{
 			var screen = this.attachedWindow?.Screens.ScreenFromWindow(this.attachedWindow);
-			if (screen is null)
+			if (screen is null || !double.IsFinite(screen.Scaling) || screen.Scaling <= 0)
 				return;
 			var screenScaling = (int)(screen.Scaling * 100 + 0.5);
 			ImageDraggingCursors.TryGetValue(screenScaling, out var draggingCursor);
@@ -676,6 +676,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			var scale = session.ImageDisplayScale;
 			if (this.attachedScreen is not null)
 				scale /= this.attachedScreen.Scaling; // [Workaround]
+			if (!double.IsFinite(scale) || scale <= 0)
+			{
+				this.SetValue(SelectedImageDisplayPixelBoundsProperty, default);
+				if (this.attachedScreen is not null && (!double.IsFinite(this.attachedScreen.Scaling) || this.attachedScreen.Scaling <= 0))
+					this.checkAttachedScreenAction.Schedule();
+				return;
+			}
 			x = (int)(x * scale + 0.5);
 			y = (int)(y * scale + 0.5);
 			if (scale <= 6.999)
@@ -948,6 +955,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.attachedWindow = this.FindLogicalAncestorOfType<Avalonia.Controls.Window>()?.Also(it =>
 		{
 			it.PropertyChanged += this.OnWindowPropertyChanged;
+			it.Screens.Changed += this.OnScreensChanged;
 		});
 	}
 	
@@ -1048,6 +1056,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.attachedWindow = this.attachedWindow?.Let(it =>
 		{
 			it.PropertyChanged -= this.OnWindowPropertyChanged;
+			it.Screens.Changed -= this.OnScreensChanged;
 			return (Avalonia.Controls.Window?)null;
 		});
 		this.checkAttachedScreenAction.Execute();
@@ -1773,6 +1782,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
     }
 
 
+	// Called when any screen changed.
+	void OnScreensChanged(object? sender, EventArgs e) =>
+		this.checkAttachedScreenAction.Schedule();
+
+
 	// Called when property of session changed.
 	void OnSessionPropertyChanged(object? sender, PropertyChangedEventArgs e)
 	{
@@ -2215,7 +2229,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		if (this.attachedScreen is null)
 			return;
-		session.ScreenPixelDensity = this.attachedScreen.Scaling;
+		var scaling = this.attachedScreen.Scaling;
+		if (!double.IsFinite(scaling) || scaling <= 0)
+			return;
+		session.ScreenPixelDensity = scaling;
 	}
 
 
