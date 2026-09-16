@@ -3,7 +3,7 @@
 setlocal EnableDelayedExpansion
 
 set APP_NAME=PixelViewer
-set DEFAULT_RID_LIST=win-arm64 win-x64 win-x86
+set DEFAULT_RID_LIST=win-arm64 win-x64
 set RID_LIST=
 set CONFIG=Release
 set FRAMEWORK=net10.0
