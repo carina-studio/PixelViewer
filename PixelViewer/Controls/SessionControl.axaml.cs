@@ -884,8 +884,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		var scaleX = maxSide / imageSize.Width;
 		var scaleY = maxSide / imageSize.Height;
 		var scale = Math.Min(scaleX, scaleY);
-		var cursorWidth = (int)(imageSize.Width * scale * screen.Scaling + 0.5);
-		var cursorHeight = (int)(imageSize.Height * scale * screen.Scaling + 0.5);
+		var scaling = screen.Scaling;
+		if (!double.IsFinite(scaling) || scaling <= 0)
+			scaling = 1;
+		var cursorWidth = (int)(imageSize.Width * scale * scaling + 0.5);
+		var cursorHeight = (int)(imageSize.Height * scale * scaling + 0.5);
 		var cursorBitmap = new RenderTargetBitmap(new(cursorWidth, cursorHeight));
 		using var cursorDrawingContext = cursorBitmap.CreateDrawingContext();
 		image.Draw(cursorDrawingContext, new(default, imageSize), new(0, 0, cursorWidth, cursorHeight));
