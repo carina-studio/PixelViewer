@@ -5,7 +5,7 @@ A cross-platform image viewer that supports reading raw Luminance/YUV/RGB/ARGB/B
 
 跨平台影像檢視器，支援讀取及繪製原始 Luminance/YUV/RGB/ARGB/Bayer 像素資料。請參閱 [網站](https://carinastudio.net/PixelViewer/) 以取得更多資訊。
 
-![](https://carinastudio.net/PixelViewer/Banner.png?v=3)
+![](https://carinastudio.net/PixelViewer/Banner-v2.png?v=1)
 
 ## ⚠️ NOTICE
 If you are upgrading from `3.x` to `2026+` on macOS, please download the application bundle manually and place it alongside the existing `3.x` bundle *(instead of replacing it)*. This allows `2026+` to import your application data from the `3.x` bundle on first launch.
@@ -13,16 +13,16 @@ If you are upgrading from `3.x` to `2026+` on macOS, please download the applica
 ## 📥 Download 2026.1
 
 ### Windows
-[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-win-x64.zip)
-[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-win-arm64.zip)
+[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-win-x64.zip)
+[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-win-arm64.zip)
 
 ### macOS
-[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-osx-arm64.zip)
-[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-osx-x64.zip)
+[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-osx-arm64.zip)
+[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-osx-x64.zip)
 
 ### Linux
-[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-linux-x64.zip)
-[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.2/PixelViewer-2026.1.2-linux-arm64.zip)
+[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-linux-x64.zip)
+[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-linux-arm64.zip)
 
 ## ⭐ Supported formats
 | Luminance | YUV                 | RGB        | ARGB          | Bayer Pattern | Compressed     |
