@@ -13,16 +13,16 @@ If you are upgrading from `3.x` to `2026+` on macOS, please download the applica
 ## 📥 Download 2026.1
 
 ### Windows
-[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-win-x64.zip)
-[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-win-arm64.zip)
+[![](https://img.shields.io/badge/x64-blue?style=for-the-badge)](https://packages.carinastudio.net/PixelViewer/2026.1.3/PixelViewer-2026.1.3-win-x64.zip)
+[![](https://img.shields.io/badge/arm64-blue?style=for-the-badge)](https://packages.carinastudio.net/PixelViewer/2026.1.3/PixelViewer-2026.1.3-win-arm64.zip)
 
 ### macOS
-[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-osx-arm64.zip)
-[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-osx-x64.zip)
+[![](https://img.shields.io/badge/Apple%20Silicon%20(arm64)-blueviolet?style=for-the-badge)](https://packages.carinastudio.net/PixelViewer/2026.1.3/PixelViewer-2026.1.3-osx-arm64.zip)
+[![](https://img.shields.io/badge/x64-blueviolet?style=for-the-badge)](https://packages.carinastudio.net/PixelViewer/2026.1.3/PixelViewer-2026.1.3-osx-x64.zip)
 
 ### Linux
-[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-linux-x64.zip)
-[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://github.com/carina-studio/PixelViewer/releases/download/2026.1.3/PixelViewer-2026.1.3-linux-arm64.zip)
+[![](https://img.shields.io/badge/x64-orange?style=for-the-badge)](https://packages.carinastudio.net/PixelViewer/2026.1.3/PixelViewer-2026.1.3-linux-x64.zip)
+[![](https://img.shields.io/badge/arm64-orange?style=for-the-badge)](https://packages.carinastudio.net/PixelViewer/2026.1.3/PixelViewer-2026.1.3-linux-arm64.zip)
 
 ## ⭐ Supported formats
 | Luminance | YUV                 | RGB        | ARGB          | Bayer Pattern | Compressed     |
