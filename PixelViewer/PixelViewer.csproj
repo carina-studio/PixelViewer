@@ -13,7 +13,7 @@
 		<ApplicationIcon>PixelViewer.ico</ApplicationIcon>
 		<NoWin32Manifest>true</NoWin32Manifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+		<SatelliteResourceLanguages>en;zh-Hans;zh-Hant</SatelliteResourceLanguages>
 		<Configurations>Debug;Release</Configurations>
 		<AvaloniaNameGeneratorFilterByNamespace>Dummy</AvaloniaNameGeneratorFilterByNamespace> <!-- Prevent generating InitializeComponents() and fields -->
 	</PropertyGroup>
