@@ -84,7 +84,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 					})
 					: (lsb, msb) => 
 					{
-						var color = correctedColors[msb | ((lsb & 0x3) << 8)];
+						var color = correctedColors[lsb | ((msb & 0x3) << 8)];
 						return (ushort)(color << 6);
 					};
 			});
@@ -128,7 +128,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							// 1st pixel
 							var bytes4 = packedPixelsPtr[4];
 							var colorComponent = (int)colorComponentSelector(x, y);
-							var color = bitsCombinationFunc(packedPixelsPtr[0], (byte)(bytes4 >> 6));
+							var color = bitsCombinationFunc(packedPixelsPtr[0], bytes4);
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
 							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -148,7 +148,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 
 							// 2nd pixel
 							colorComponent = (int)colorComponentSelector(x, y);
-							color = bitsCombinationFunc(packedPixelsPtr[1], (byte)(bytes4 >> 4));
+							color = bitsCombinationFunc(packedPixelsPtr[1], (byte)(bytes4 >> 2));
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
 							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -168,7 +168,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 
 							// 3rd pixel
 							colorComponent = (int)colorComponentSelector(x, y);
-							color = bitsCombinationFunc(packedPixelsPtr[2], (byte)(bytes4 >> 2));
+							color = bitsCombinationFunc(packedPixelsPtr[2], (byte)(bytes4 >> 4));
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
 							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -188,7 +188,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 
 							// 4th pixel
 							colorComponent = (int)colorComponentSelector(x, y);
-							color = bitsCombinationFunc(packedPixelsPtr[3], bytes4);
+							color = bitsCombinationFunc(packedPixelsPtr[3], (byte)(bytes4 >> 6));
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
 							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
