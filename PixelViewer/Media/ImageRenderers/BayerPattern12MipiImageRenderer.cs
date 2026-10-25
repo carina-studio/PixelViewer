@@ -129,7 +129,7 @@ class BayerPattern12MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							// 1st pixel
 							var bytes2 = packedPixelsPtr[2];
 							var colorComponent = (int)colorComponentSelector(x, y);
-							var color = bitsCombinationFunc(packedPixelsPtr[0], (byte)(bytes2 >> 4));
+							var color = bitsCombinationFunc(packedPixelsPtr[0], bytes2);
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
 							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
@@ -149,7 +149,7 @@ class BayerPattern12MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 
 							// 2nd pixel
 							colorComponent = (int)colorComponentSelector(x, y);
-							color = bitsCombinationFunc(packedPixelsPtr[1], bytes2);
+							color = bitsCombinationFunc(packedPixelsPtr[1], (byte)(bytes2 >> 4));
 							accuColor[colorComponent] += color;
 							++accuPixelCount[colorComponent];
 							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)

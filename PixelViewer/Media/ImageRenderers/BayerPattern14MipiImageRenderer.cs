@@ -63,7 +63,7 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 			{
 				return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
 					? new Func<byte, byte, ushort>((b1, b2) => (ushort)((b1 << 8) | ((b2 & 0x3f) << 2) | ((b1 >> 6) & 0x3)))
-					: (b1, b2) => (ushort)(((b2 & 0x3f) << 8) | (b1 << 2) | ((b1 >> 6) & 0x3));
+					: (b1, b2) => (ushort)(((b2 & 0x3f) << 10) | (b1 << 2) | ((b2 >> 4) & 0x3));
 			})
 			: Global.Run(() =>
 			{
@@ -78,7 +78,7 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 				return renderingOptions.ByteOrdering == ByteOrdering.BigEndian
 					? new Func<byte, byte, ushort>((b1, b2) => 
 					{
-						var color = correctedColors[(b1 << 6) | ((b2 & 0x3f) << 2)];
+						var color = correctedColors[(b1 << 6) | (b2 & 0x3f)];
 						return (ushort)((color << 2) | ((color >> 12) & 0x3));
 					})
 					: (b1, b2) => 
@@ -126,10 +126,10 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 						for (var x = 0; x < width; packedPixelsPtr += 7)
 						{
 							// prepare extra bits
-							var extraBits = (uint)((packedPixelsPtr[4] << 16) | (packedPixelsPtr[5] << 8) | packedPixelsPtr[6]);
+							var extraBits = (uint)(packedPixelsPtr[4] | (packedPixelsPtr[5] << 8) | (packedPixelsPtr[6] << 16));
 							
 							// 1st pixel
-							var b2 = (byte)((extraBits >> 18) & 0x3f);
+							var b2 = (byte)(extraBits & 0x3f);
 							var colorComponent = (int)colorComponentSelector(x, y);
 							var color = bitsCombinationFunc(packedPixelsPtr[0], b2);
 							accuColor[colorComponent] += color;
@@ -150,7 +150,7 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							++x;
 
 							// 2nd pixel
-							b2 = (byte)((extraBits >> 12) & 0x3f);
+							b2 = (byte)((extraBits >> 6) & 0x3f);
 							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[1], b2);
 							accuColor[colorComponent] += color;
@@ -171,7 +171,7 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							++x;
 							
 							// 3rd pixel
-							b2 = (byte)((extraBits >> 6) & 0x3f);
+							b2 = (byte)((extraBits >> 12) & 0x3f);
 							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[2], b2);
 							accuColor[colorComponent] += color;
@@ -192,7 +192,7 @@ class BayerPattern14MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							++x;
 							
 							// 4th pixel
-							b2 = (byte)(extraBits & 0x3f);
+							b2 = (byte)((extraBits >> 18) & 0x3f);
 							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[3], b2);
 							accuColor[colorComponent] += color;
