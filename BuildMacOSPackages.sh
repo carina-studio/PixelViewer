@@ -1,7 +1,7 @@
 #!/bin/bash
 
 APP_NAME="PixelViewer"
-FRAMEWORK="net10.0"
+FRAMEWORK="net11.0"
 DEFAULT_RID_LIST=("osx-x64" "osx-arm64")
 DEFAULT_PUB_PLATFORM_LIST=("osx-x64" "osx-arm64")
 RID_LIST=()

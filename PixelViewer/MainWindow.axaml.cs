@@ -593,14 +593,27 @@ namespace Carina.PixelViewer
 					if (srcIndex != targetIndex && srcIndex + 1 != targetIndex)
 					{
 						if (srcIndex < targetIndex)
+						{
+							using var _ = this.mainTabControl.EnterMovingItemScope(srcIndex, targetIndex - 1);
+							// [Workaround] prevent unexpected content flickering in tab
+							this.mainTabControl.SelectedIndex = targetIndex - 1;
 							srcWorkspace.MoveSession(srcIndex, targetIndex - 1);
+						}
 						else
+						{
+							using var _ = this.mainTabControl.EnterMovingItemScope(srcIndex, targetIndex);
+							// [Workaround] prevent unexpected content flickering in tab
+							this.mainTabControl.SelectedIndex = targetIndex;
 							srcWorkspace.MoveSession(srcIndex, targetIndex);
+						}
 					}
 				}
 				else if (this.DataContext is Workspace targetWorkspace)
 				{
 					// attach to target workspace
+					using var _ = this.mainTabControl.EnterMovingItemScope(srcIndex, targetIndex);
+					// [Workaround] prevent unexpected content flickering in tab
+					this.mainTabControl.SelectedIndex = targetIndex;
 					targetWorkspace.AttachSession(targetIndex, session);
 					targetWorkspace.ActivatedSession = session;
 					
