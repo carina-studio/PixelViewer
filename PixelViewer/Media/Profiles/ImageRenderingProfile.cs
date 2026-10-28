@@ -63,6 +63,8 @@ namespace Carina.PixelViewer.Media.Profiles
         ColorTable? redColorTable;
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
+        int tileHeight;
+        int tileWidth;
         bool useLinearColorSpace;
         IList<uint> whiteLevels = emptyBlackLevels;
         int width = 1;
@@ -454,6 +456,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 && this.Height == profile.Height
                 && this.DataOffset == profile.DataOffset
                 && this.Compression == profile.Compression
+                && this.TileWidth == profile.TileWidth
+                && this.TileHeight == profile.TileHeight
                 && this.FramePaddingSize == profile.FramePaddingSize
                 && this.BayerPattern == profile.BayerPattern
                 && this.ByteOrdering == profile.ByteOrdering
@@ -664,6 +668,12 @@ namespace Carina.PixelViewer.Media.Profiles
                 // get frame padding size
                 if (rootElement.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
                     jsonProperty.TryGetInt64(out profile.framePaddingSize);
+
+                // get tile size, a negative one is treated as no tiles
+                if (rootElement.TryGetProperty(nameof(TileWidth), out jsonProperty) && jsonProperty.TryGetInt32(out var tileWidth))
+                    profile.tileWidth = Math.Max(0, tileWidth);
+                if (rootElement.TryGetProperty(nameof(TileHeight), out jsonProperty) && jsonProperty.TryGetInt32(out var tileHeight))
+                    profile.tileHeight = Math.Max(0, tileHeight);
 
                 // get byte ordering
                 if (profile.renderer?.Format.HasMultipleByteOrderings == true
@@ -1042,6 +1052,10 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteString(nameof(Compression), this.compression.ToString());
                 if (this.framePaddingSize != 0)
                     jsonWriter.WriteNumber(nameof(FramePaddingSize), this.framePaddingSize);
+                if (this.tileWidth != 0)
+                    jsonWriter.WriteNumber(nameof(TileWidth), this.tileWidth);
+                if (this.tileHeight != 0)
+                    jsonWriter.WriteNumber(nameof(TileHeight), this.tileHeight);
                 if (format.Category == ImageFormatCategory.Bayer)
                     jsonWriter.WriteString(nameof(BayerPattern), this.bayerPattern.ToString());
                 if (format.HasMultipleByteOrderings)
@@ -1102,6 +1116,44 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Raised when property changed.
         public event PropertyChangedEventHandler? PropertyChanged;
+
+
+        // Height of each tile in pixels, or 0 if data is not stored as tiles.
+        public int TileHeight
+        {
+            get => this.tileHeight;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.tileHeight == value)
+                    return;
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException();
+                this.tileHeight = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TileHeight)));
+            }
+        }
+
+
+        // Width of each tile in pixels, or 0 if data is not stored as tiles.
+        public int TileWidth
+        {
+            get => this.tileWidth;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.tileWidth == value)
+                    return;
+                if (value < 0)
+                    throw new ArgumentOutOfRangeException();
+                this.tileWidth = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TileWidth)));
+            }
+        }
 
 
         // Type of profile.

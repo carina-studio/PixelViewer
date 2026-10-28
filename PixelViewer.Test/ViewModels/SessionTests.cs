@@ -358,10 +358,10 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 
 		/// <summary>
-		/// Test for refusing to render compressed data which current renderer cannot decompress.
+		/// Test for refusing to render compressed or tiled data which current renderer cannot handle.
 		/// </summary>
 		[Test]
-		public void TestRenderingCompressedData()
+		public void TestRenderingCompressedOrTiledData()
 		{
 			var session = this.session ?? throw new AssertionException("No instance for testing.");
 			this.TestOnApplicationThread(async () =>
@@ -390,6 +390,16 @@ namespace Carina.PixelViewer.Test.ViewModels
 				session.Compression = ImageDataCompression.None;
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering without compression.");
 				Assert.That(session.HasRenderingError, Is.False, "Rendering should succeed again without compression.");
+
+				// select tiles which current renderer cannot handle, one non-zero dimension is enough to make data tiled
+				Assert.That(session.IsTileLayoutSupported, Is.False, "The renderer selected for testing should not support tiles.");
+				session.TileWidth = 8;
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.HasRenderingError), true, 5000), Is.True, "Rendering tiled data which cannot be handled should fail.");
+
+				// select no tiles again
+				session.TileWidth = 0;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering without tiles.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering should succeed again without tiles.");
 
 				// close file
 				session.ClearSourceCommand.Execute(null);

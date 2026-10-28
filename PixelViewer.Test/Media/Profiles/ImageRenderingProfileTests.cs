@@ -69,6 +69,8 @@ class ImageRenderingProfileTests : BaseTests
 		}),
 		(nameof(ImageRenderingProfile.Renderer), profile => profile.Renderer = ImageRenderers.All.First(it => it != profile.Renderer)),
 		(nameof(ImageRenderingProfile.RowStrides), profile => profile.RowStrides = IncreaseFirstElement(profile.RowStrides)),
+		(nameof(ImageRenderingProfile.TileHeight), profile => profile.TileHeight += 1),
+		(nameof(ImageRenderingProfile.TileWidth), profile => profile.TileWidth += 1),
 		(nameof(ImageRenderingProfile.UseLinearColorSpace), profile => profile.UseLinearColorSpace = !profile.UseLinearColorSpace),
 		(nameof(ImageRenderingProfile.WhiteLevels), profile => profile.WhiteLevels = IncreaseFirstElement(profile.WhiteLevels)),
 		(nameof(ImageRenderingProfile.Width), profile => profile.Width += 1),
@@ -77,37 +79,51 @@ class ImageRenderingProfileTests : BaseTests
 
 
 	/// <summary>
-	/// Test for saving and loading compression of data.
+	/// Test for saving and loading compression and tile size of data.
 	/// </summary>
 	[Test]
-	public void CompressionPersistenceTest()
+	public void CompressionAndTilePersistenceTest()
 	{
 		this.TestOnApplicationThread(async () =>
 		{
-			// save a profile which uses compression
+			// save a profile which uses compression and tiles
 			await this.InitializeSubSystemsAsync();
 			ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
 			var name = $"Compression Test {Guid.NewGuid()}";
 			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
 			{
 				Compression = ImageDataCompression.LosslessJpeg,
+				TileWidth = 256,
+				TileHeight = 128,
 			};
 			await profile.SaveAsync();
 			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
 			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
 			try
 			{
-				// check that compression is loaded
+				// check that compression and tile size are loaded
 				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
 					Assert.That(loadedProfile.Compression, Is.EqualTo(ImageDataCompression.LosslessJpeg), "Compression should be loaded.");
+					Assert.That(loadedProfile.TileWidth, Is.EqualTo(256), "Tile width should be loaded.");
+					Assert.That(loadedProfile.TileHeight, Is.EqualTo(128), "Tile height should be loaded.");
+				}
 
-				// check that no compression is not written, so the file stays the same as one written before compression was supported
+				// check that neither compression nor tiles are written, so the file stays the same as one written before they were supported
 				profile.Compression = ImageDataCompression.None;
+				profile.TileWidth = 0;
+				profile.TileHeight = 0;
 				await profile.SaveAsync();
 				var json = await File.ReadAllTextAsync(fileName);
 				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.Compression)}\":"), "No compression should not be written.");
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.TileWidth)}\":"), "No tile width should not be written.");
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.TileHeight)}\":"), "No tile height should not be written.");
 				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
 					Assert.That(loadedProfile.Compression, Is.EqualTo(ImageDataCompression.None), "No compression should be loaded.");
+					Assert.That(loadedProfile.TileWidth, Is.Zero, "No tile width should be loaded.");
+					Assert.That(loadedProfile.TileHeight, Is.Zero, "No tile height should be loaded.");
+				}
 
 				// check that an unknown compression is treated as no compression
 				json = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.Compression)}\": \"UnknownCompression\", \"{nameof(ImageRenderingProfile.Width)}\"");

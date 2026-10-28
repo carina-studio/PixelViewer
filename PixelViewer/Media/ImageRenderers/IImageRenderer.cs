@@ -374,6 +374,8 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		&& Math.Abs(this.GreenGain - options.GreenGain) <= 0.001
 		&& this.RedColorTable.IsSameAs(options.RedColorTable)
 		&& Math.Abs(this.RedGain - options.RedGain) <= 0.001
+		&& this.TileHeight == options.TileHeight
+		&& this.TileWidth == options.TileWidth
 		&& this.YuvToBgraConverter == options.YuvToBgraConverter;
 
 
@@ -451,6 +453,20 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	/// Gain of red color when rendering.
 	/// </summary>
 	public double RedGain { get; set; }
+
+
+	/// <summary>
+	/// Height of each tile in pixels, or 0 if data is not stored as tiles.
+	/// </summary>
+	/// <remarks>Data is stored as tiles when either <see cref="TileWidth"/> or <see cref="TileHeight"/> is not 0.</remarks>
+	public int TileHeight { get; set; }
+
+
+	/// <summary>
+	/// Width of each tile in pixels, or 0 if data is not stored as tiles.
+	/// </summary>
+	/// <remarks>Data is stored as tiles when either <see cref="TileWidth"/> or <see cref="TileHeight"/> is not 0.</remarks>
+	public int TileWidth { get; set; }
 
 
 	/// <summary>

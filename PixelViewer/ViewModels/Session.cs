@@ -690,6 +690,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsSourceOpenedProp = ObservableProperty.Register<Session, bool>(nameof(IsSourceOpened));
 	/// <summary>
+	/// Property of <see cref="IsTileLayoutSupported"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsTileLayoutSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsTileLayoutSupported));
+	/// <summary>
 	/// Property of <see cref="IsVibranceAdjustmentSupported"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsVibranceAdjustmentSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsVibranceAdjustmentSupported));
@@ -814,6 +818,14 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="SourceImageEffectiveBits"/>.
 	/// </summary>
 	public static readonly ObservableProperty<int> SourceImageEffectiveBitsProp = ObservableProperty.Register<Session, int>(nameof(SourceImageEffectiveBits), 8);
+	/// <summary>
+	/// Property of <see cref="TileHeight"/>.
+	/// </summary>
+	public static readonly ObservableProperty<int> TileHeightProp = ObservableProperty.Register<Session, int>(nameof(TileHeight), 0, coerce: (_, it) => Math.Max(0, it));
+	/// <summary>
+	/// Property of <see cref="TileWidth"/>.
+	/// </summary>
+	public static readonly ObservableProperty<int> TileWidthProp = ObservableProperty.Register<Session, int>(nameof(TileWidth), 0, coerce: (_, it) => Math.Max(0, it));
 	/// <summary>
 	/// Property of <see cref="TotalRenderedImagesMemoryUsage"/>.
 	/// </summary>
@@ -1505,6 +1517,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			// compression
 			this.SetValue(CompressionProp, profile.Compression);
 
+			// tile size
+			this.SetValue(TileWidthProp, profile.TileWidth);
+			this.SetValue(TileHeightProp, profile.TileHeight);
+
 			// frame padding size
 			this.SetValue(FramePaddingSizeProp, profile.FramePaddingSize);
 
@@ -2024,6 +2040,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.SetValue(CompressionProp, ImageDataCompression.None);
 			this.SetValue(DataOffsetProp, 0L);
+			this.SetValue(TileHeightProp, 0);
+			this.SetValue(TileWidthProp, 0);
 			this.SetValue(FrameCountProp, 0);
 			this.SetValue(FrameNumberProp, 0);
 			this.SetValue(FramePaddingSizeProp, 0L);
@@ -2168,6 +2186,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProp));
 		this.SetValue(CompressionProp, ImageDataCompression.None);
 		this.SetValue(DataOffsetProp, 0L);
+		this.SetValue(TileHeightProp, 0);
+		this.SetValue(TileWidthProp, 0);
 		this.SetValue(FrameNumberProp, 1);
 		this.SetValue(FramePaddingSizeProp, 0L);
 		this.SetValue(IsOpeningSourceProp, false);
@@ -3727,6 +3747,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Check whether current <see cref="ImageRenderer"/> accepts data stored as tiles.
+	/// </summary>
+	public bool IsTileLayoutSupported => this.GetValue(IsTileLayoutSupportedProp);
+
+
+	/// <summary>
 	/// Check whether vibrance adjustment is supported or not.
 	/// </summary>
 	public bool IsVibranceAdjustmentSupported => this.GetValue(IsVibranceAdjustmentSupportedProp);
@@ -3938,7 +3964,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			|| property == DataOffsetProp
 			|| property == FrameNumberProp
 			|| property == FramePaddingSizeProp
-			|| property == ImageHeightProp)
+			|| property == ImageHeightProp
+			|| property == TileHeightProp
+			|| property == TileWidthProp)
 		{
 			this.renderImageAction.Reschedule();
 		}
@@ -4932,11 +4960,16 @@ class Session : ViewModel<IAppSuiteApplication>
 		var imageDataSource = this.imageDataSource.AsNonNull();
 		var sourceFileName = this.SourceFileName;
 
-		// give up rendering compressed data which cannot be decompressed by current renderer, the error of previous rendering is reset first so that the view reports it to user again
+		// give up rendering compressed or tiled data which cannot be handled by current renderer, the error of previous rendering is reset first so that the view reports it to user again
 		var compression = this.Compression;
-		if (compression != ImageDataCompression.None && !this.IsCompressionSupported)
+		var isCompressionUnsupported = compression != ImageDataCompression.None && !this.IsCompressionSupported;
+		var isTileLayoutUnsupported = (this.TileWidth != 0 || this.TileHeight != 0) && !this.IsTileLayoutSupported;
+		if (isCompressionUnsupported || isTileLayoutUnsupported)
 		{
-			this.Logger.LogError("Unable to render image of '{sourceFileName}', renderer does not support compression {compression}", sourceFileName, compression);
+			if (isCompressionUnsupported)
+				this.Logger.LogError("Unable to render image of '{sourceFileName}', renderer does not support compression {compression}", sourceFileName, compression);
+			if (isTileLayoutUnsupported)
+				this.Logger.LogError("Unable to render image of '{sourceFileName}', renderer does not support tiles, tile width: {tileWidth}, tile height: {tileHeight}", sourceFileName, this.TileWidth, this.TileHeight);
 			this.ResetValue(HasRenderingErrorProp);
 			this.SetValue(HasRenderingErrorProp, true);
 			this.DisposeFilteredImage();
@@ -5116,12 +5149,14 @@ class Session : ViewModel<IAppSuiteApplication>
 			GreenGain = isRgbGainSupported ? this.GreenColorGain : 1.0,
 			RedColorTable = isColorTableSupported ? this.redColorTable : null,
 			RedGain = isRgbGainSupported ? this.RedColorGain : 1.0,
+			TileHeight = this.TileHeight,
+			TileWidth = this.TileWidth,
 			YuvToBgraConverter = this.YuvToBgraConverter,
 		};
 		var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
-		if (renderingOptions.Compression != ImageDataCompression.None && imageDataSource is not IMultiFrameImageDataSource)
+		if ((renderingOptions.Compression != ImageDataCompression.None || renderingOptions.TileWidth != 0 || renderingOptions.TileHeight != 0) && imageDataSource is not IMultiFrameImageDataSource)
 		{
-			// size of compressed data cannot tell number of frames packed in it, so it is treated as a single frame
+			// size of compressed or tiled data cannot tell number of frames packed in it, so it is treated as a single frame
 			frameNumber = this.CoerceFrameNumberToRange(frameNumber, 1);
 			this.SetValue(FrameCountProp, 1L);
 		}
@@ -5957,6 +5992,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		});
 		var dataOffset = 0L;
 		var compression = ImageDataCompression.None;
+		var tileWidth = 0;
+		var tileHeight = 0;
 		var framePaddingSize = 0L;
 		var byteOrdering = ByteOrdering.BigEndian;
 		var yuvToBgraConverter = this.YuvToBgraConverter;
@@ -5981,6 +6018,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.Logger.LogWarning("Unknown compression '{compression}' to restore", jsonProperty.GetString());
 			compression = ImageDataCompression.None;
 		}
+		if (savedState.TryGetProperty(nameof(TileWidth), out jsonProperty))
+			jsonProperty.TryGetInt32(out tileWidth);
+		if (savedState.TryGetProperty(nameof(TileHeight), out jsonProperty))
+			jsonProperty.TryGetInt32(out tileHeight);
 		if (savedState.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
 			jsonProperty.TryGetInt64(out framePaddingSize);
 		if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
@@ -6185,6 +6226,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(ImageRendererProp, renderer);
 		this.SetValue(DataOffsetProp, dataOffset);
 		this.SetValue(CompressionProp, compression);
+		this.SetValue(TileWidthProp, tileWidth);
+		this.SetValue(TileHeightProp, tileHeight);
 		this.SetValue(FramePaddingSizeProp, framePaddingSize);
 		this.SetValue(ByteOrderingProp, byteOrdering);
 		this.SetValue(YuvToBgraConverterProp, yuvToBgraConverter);
@@ -6563,6 +6606,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteString(nameof(ImageRenderer), this.ImageRenderer.Format.Name);
 		writer.WriteNumber(nameof(DataOffset), this.DataOffset);
 		writer.WriteString(nameof(Compression), this.Compression.ToString());
+		writer.WriteNumber(nameof(TileWidth), this.TileWidth);
+		writer.WriteNumber(nameof(TileHeight), this.TileHeight);
 		writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 		writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
 		writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
@@ -7074,6 +7119,28 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Get or set height of each tile in pixels, or 0 if data is not stored as tiles.
+	/// </summary>
+	/// <remarks>Data is stored as tiles when either <see cref="TileWidth"/> or <see cref="TileHeight"/> is not 0. Rendering fails when data is stored as tiles but <see cref="IsTileLayoutSupported"/> is false.</remarks>
+	public int TileHeight
+	{
+		get => this.GetValue(TileHeightProp);
+		set => this.SetValue(TileHeightProp, value);
+	}
+
+
+	/// <summary>
+	/// Get or set width of each tile in pixels, or 0 if data is not stored as tiles.
+	/// </summary>
+	/// <remarks>Data is stored as tiles when either <see cref="TileWidth"/> or <see cref="TileHeight"/> is not 0. Rendering fails when data is stored as tiles but <see cref="IsTileLayoutSupported"/> is false.</remarks>
+	public int TileWidth
+	{
+		get => this.GetValue(TileWidthProp);
+		set => this.SetValue(TileWidthProp, value);
+	}
+
+
+	/// <summary>
 	/// Get title of session.
 	/// </summary>
 	public string? Title { get; private set; }
@@ -7312,6 +7379,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		profile.Renderer = this.ImageRenderer;
 		profile.DataOffset = this.DataOffset;
 		profile.Compression = this.Compression;
+		profile.TileWidth = this.TileWidth;
+		profile.TileHeight = this.TileHeight;
 		profile.FramePaddingSize = this.FramePaddingSize;
 		profile.ByteOrdering = this.ByteOrdering;
 		profile.BayerPattern = this.BayerPattern;
