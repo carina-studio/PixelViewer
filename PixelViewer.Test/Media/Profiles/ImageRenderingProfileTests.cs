@@ -45,6 +45,7 @@ class ImageRenderingProfileTests : BaseTests
 		}),
 		(nameof(ImageRenderingProfile.ByteOrdering), profile => profile.ByteOrdering = profile.ByteOrdering == ByteOrdering.BigEndian ? ByteOrdering.LittleEndian : ByteOrdering.BigEndian),
 		(nameof(ImageRenderingProfile.ColorSpace), profile => profile.ColorSpace = profile.ColorSpace.Equals(ColorSpace.Srgb) ? ColorSpace.AdobeRGB_1998 : ColorSpace.Srgb),
+		(nameof(ImageRenderingProfile.Compression), profile => profile.Compression = profile.Compression == ImageDataCompression.None ? ImageDataCompression.LosslessJpeg : ImageDataCompression.None),
 		(nameof(ImageRenderingProfile.DataOffset), profile => profile.DataOffset += 1),
 		(nameof(ImageRenderingProfile.DemosaicingAlgorithm), profile => profile.DemosaicingAlgorithm = profile.DemosaicingAlgorithm is null ? DemosaicingAlgorithms.Bilinear : DemosaicingAlgorithms.Bypass),
 		(nameof(ImageRenderingProfile.EffectiveBits), profile => profile.EffectiveBits = IncreaseFirstElement(profile.EffectiveBits)),
@@ -73,6 +74,55 @@ class ImageRenderingProfileTests : BaseTests
 		(nameof(ImageRenderingProfile.Width), profile => profile.Width += 1),
 		(nameof(ImageRenderingProfile.YuvToBgraConverter), profile => profile.YuvToBgraConverter = profile.YuvToBgraConverter == YuvToBgraConverter.BT_709 ? YuvToBgraConverter.BT_601 : YuvToBgraConverter.BT_709),
 	];
+
+
+	/// <summary>
+	/// Test for saving and loading compression of data.
+	/// </summary>
+	[Test]
+	public void CompressionPersistenceTest()
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// save a profile which uses compression
+			await this.InitializeSubSystemsAsync();
+			ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+			var name = $"Compression Test {Guid.NewGuid()}";
+			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
+			{
+				Compression = ImageDataCompression.LosslessJpeg,
+			};
+			await profile.SaveAsync();
+			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
+			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
+			try
+			{
+				// check that compression is loaded
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.Compression, Is.EqualTo(ImageDataCompression.LosslessJpeg), "Compression should be loaded.");
+
+				// check that no compression is not written, so the file stays the same as one written before compression was supported
+				profile.Compression = ImageDataCompression.None;
+				await profile.SaveAsync();
+				var json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.Compression)}\":"), "No compression should not be written.");
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.Compression, Is.EqualTo(ImageDataCompression.None), "No compression should be loaded.");
+
+				// check that an unknown compression is treated as no compression
+				json = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.Compression)}\": \"UnknownCompression\", \"{nameof(ImageRenderingProfile.Width)}\"");
+				Assert.That(json, Does.Contain("UnknownCompression"), "The unknown compression should have been written.");
+				await File.WriteAllTextAsync(fileName, json);
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.Compression, Is.EqualTo(ImageDataCompression.None), "Unknown compression should be treated as no compression.");
+			}
+			finally
+			{
+				profile.Dispose();
+				await DeleteFileAsync(fileName);
+			}
+		});
+	}
 
 
 	// Create a color table for testing.

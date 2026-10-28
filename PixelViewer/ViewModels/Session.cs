@@ -337,6 +337,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<ColorSpace> ColorSpaceProp = ObservableProperty.Register<Session, ColorSpace>(nameof(ColorSpace), ColorSpace.Default);
 	/// <summary>
+	/// Property of <see cref="Compression"/>.
+	/// </summary>
+	public static readonly ObservableProperty<ImageDataCompression> CompressionProp = ObservableProperty.Register<Session, ImageDataCompression>(nameof(Compression), ImageDataCompression.None);
+	/// <summary>
 	/// Property of <see cref="ContrastAdjustment"/>.
 	/// </summary>
 	public static readonly ObservableProperty<double> ContrastAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(ContrastAdjustment), 0, validate: double.IsFinite);
@@ -569,6 +573,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="IsCompressedImageFormat"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsCompressedImageFormatProp = ObservableProperty.Register<Session, bool>(nameof(IsCompressedImageFormat));
+	/// <summary>
+	/// Property of <see cref="IsCompressionSupported"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsCompressionSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsCompressionSupported));
 	/// <summary>
 	/// Property of <see cref="IsContrastAdjustmentSupported"/>.
 	/// </summary>
@@ -1494,6 +1502,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			// data offset
 			this.SetValue(DataOffsetProp, profile.DataOffset);
 
+			// compression
+			this.SetValue(CompressionProp, profile.Compression);
+
 			// frame padding size
 			this.SetValue(FramePaddingSizeProp, profile.FramePaddingSize);
 
@@ -2011,6 +2022,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update state
 		if (!disposing)
 		{
+			this.SetValue(CompressionProp, ImageDataCompression.None);
 			this.SetValue(DataOffsetProp, 0L);
 			this.SetValue(FrameCountProp, 0);
 			this.SetValue(FrameNumberProp, 0);
@@ -2154,6 +2166,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		// update state
 		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProp));
+		this.SetValue(CompressionProp, ImageDataCompression.None);
 		this.SetValue(DataOffsetProp, 0L);
 		this.SetValue(FrameNumberProp, 1);
 		this.SetValue(FramePaddingSizeProp, 0L);
@@ -2191,6 +2204,17 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.imageScalingAnimator = null;
 		if (resetIsZooming)
 			this.SetValue(IsZoomingProp, false);
+	}
+
+
+	/// <summary>
+	/// Get or set compression of data starting from <see cref="DataOffset"/>.
+	/// </summary>
+	/// <remarks>Rendering fails when the compression is not <see cref="ImageDataCompression.None"/> but <see cref="IsCompressionSupported"/> is false.</remarks>
+	public ImageDataCompression Compression
+	{
+		get => this.GetValue(CompressionProp);
+		set => this.SetValue(CompressionProp, value);
 	}
 
 
@@ -3522,6 +3546,13 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Check whether current <see cref="ImageRenderer"/> accepts raw image data compressed by any <see cref="ImageDataCompression"/> other than <see cref="ImageDataCompression.None"/>.
+	/// </summary>
+	/// <remarks>It is about compressed raw data selected by <see cref="Compression"/>, which is different from a compressed image format such as JPEG or PNG reported by <see cref="IsCompressedImageFormat"/>.</remarks>
+	public bool IsCompressionSupported => this.GetValue(IsCompressionSupportedProp);
+
+
+	/// <summary>
 	/// Check whether contrast adjustment is supported or not.
 	/// </summary>
 	public bool IsContrastAdjustmentSupported => this.GetValue(IsContrastAdjustmentSupportedProp);
@@ -3903,7 +3934,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		else if (property == CustomTitleProp)
 			this.UpdateTitle();
-		else if (property == DataOffsetProp
+		else if (property == CompressionProp
+			|| property == DataOffsetProp
 			|| property == FrameNumberProp
 			|| property == FramePaddingSizeProp
 			|| property == ImageHeightProp)
@@ -4900,6 +4932,18 @@ class Session : ViewModel<IAppSuiteApplication>
 		var imageDataSource = this.imageDataSource.AsNonNull();
 		var sourceFileName = this.SourceFileName;
 
+		// give up rendering compressed data which cannot be decompressed by current renderer, the error of previous rendering is reset first so that the view reports it to user again
+		var compression = this.Compression;
+		if (compression != ImageDataCompression.None && !this.IsCompressionSupported)
+		{
+			this.Logger.LogError("Unable to render image of '{sourceFileName}', renderer does not support compression {compression}", sourceFileName, compression);
+			this.ResetValue(HasRenderingErrorProp);
+			this.SetValue(HasRenderingErrorProp, true);
+			this.DisposeFilteredImage();
+			this.DisposeRenderedImage();
+			return;
+		}
+
 		// get source which provides data of frame to render
 		var cancellationTokenSource = new CancellationTokenSource();
 		this.imageRenderingCancellationTokenSource = cancellationTokenSource;
@@ -5065,6 +5109,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			BlueColorTable = isColorTableSupported ? this.blueColorTable : null,
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 			ByteOrdering = this.ByteOrdering,
+			Compression = this.Compression,
 			DataOffset = this.DataOffset,
 			Demosaicing = (this.IsDemosaicingSupported && this.DemosaicingAlgorithm != Media.Demosaicing.DemosaicingAlgorithms.Bypass) ? this.DemosaicingAlgorithm : null,
 			GreenColorTable = isColorTableSupported ? this.greenColorTable : null,
@@ -5074,7 +5119,13 @@ class Session : ViewModel<IAppSuiteApplication>
 			YuvToBgraConverter = this.YuvToBgraConverter,
 		};
 		var frameDataSize = imageRenderer.EvaluateSourceDataSize(this.ImageWidth, this.ImageHeight, renderingOptions, planeOptionsList);
-		if (imageDataSource is not IMultiFrameImageDataSource)
+		if (renderingOptions.Compression != ImageDataCompression.None && imageDataSource is not IMultiFrameImageDataSource)
+		{
+			// size of compressed data cannot tell number of frames packed in it, so it is treated as a single frame
+			frameNumber = this.CoerceFrameNumberToRange(frameNumber, 1);
+			this.SetValue(FrameCountProp, 1L);
+		}
+		else if (imageDataSource is not IMultiFrameImageDataSource)
 		{
 			// frames are packed in data of source, locate the frame by its offset in data
 			try
@@ -5905,6 +5956,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return null;
 		});
 		var dataOffset = 0L;
+		var compression = ImageDataCompression.None;
 		var framePaddingSize = 0L;
 		var byteOrdering = ByteOrdering.BigEndian;
 		var yuvToBgraConverter = this.YuvToBgraConverter;
@@ -5923,6 +5975,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		var bGain = 1.0;
 		if (savedState.TryGetProperty(nameof(DataOffset), out jsonProperty))
 			jsonProperty.TryGetInt64(out dataOffset);
+		if (savedState.TryGetProperty(nameof(Compression), out jsonProperty)
+			&& (!Enum.TryParse(jsonProperty.GetString(), out compression) || !Enum.IsDefined(compression)))
+		{
+			this.Logger.LogWarning("Unknown compression '{compression}' to restore", jsonProperty.GetString());
+			compression = ImageDataCompression.None;
+		}
 		if (savedState.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
 			jsonProperty.TryGetInt64(out framePaddingSize);
 		if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
@@ -6126,6 +6184,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		if (renderer is not null)
 			this.SetValue(ImageRendererProp, renderer);
 		this.SetValue(DataOffsetProp, dataOffset);
+		this.SetValue(CompressionProp, compression);
 		this.SetValue(FramePaddingSizeProp, framePaddingSize);
 		this.SetValue(ByteOrderingProp, byteOrdering);
 		this.SetValue(YuvToBgraConverterProp, yuvToBgraConverter);
@@ -6503,6 +6562,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		writer.WriteString(nameof(ImageRenderer), this.ImageRenderer.Format.Name);
 		writer.WriteNumber(nameof(DataOffset), this.DataOffset);
+		writer.WriteString(nameof(Compression), this.Compression.ToString());
 		writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 		writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
 		writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
@@ -7251,6 +7311,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		profile.Renderer = this.ImageRenderer;
 		profile.DataOffset = this.DataOffset;
+		profile.Compression = this.Compression;
 		profile.FramePaddingSize = this.FramePaddingSize;
 		profile.ByteOrdering = this.ByteOrdering;
 		profile.BayerPattern = this.BayerPattern;

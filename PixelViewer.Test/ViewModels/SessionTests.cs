@@ -358,6 +358,48 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 
 		/// <summary>
+		/// Test for refusing to render compressed data which current renderer cannot decompress.
+		/// </summary>
+		[Test]
+		public void TestRenderingCompressedData()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// open file
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+
+				// render by a renderer and dimensions which the data is sufficient for, the session is shared with other tests so its renderer is unknown
+				ImageRenderers.TryFindByFormatName("L8", out var renderer);
+				Assert.That(renderer, Is.Not.Null);
+				session.ImageRenderer = renderer.AsNonNull();
+				session.ImageWidth = 16;
+				session.ImageHeight = 16;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering by the renderer selected for testing.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering data which is not compressed should succeed.");
+
+				// select compression which current renderer cannot decompress
+				Assert.That(session.IsCompressionSupported, Is.False, "The renderer selected for testing should not support compression.");
+				session.Compression = ImageDataCompression.LosslessJpeg;
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.HasRenderingError), true, 5000), Is.True, "Rendering compressed data which cannot be decompressed should fail.");
+
+				// select no compression again
+				session.Compression = ImageDataCompression.None;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering without compression.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering should succeed again without compression.");
+
+				// close file
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
+				await DeleteFileAsync(filePath);
+			});
+		}
+
+
+		/// <summary>
 		/// Test for rendering frames of frame sequence which consists of files with different file formats.
 		/// </summary>
 		[Test]

@@ -46,6 +46,7 @@ namespace Carina.PixelViewer.Media.Profiles
         double blueColorGain = 1.0;
         ByteOrdering byteOrdering = ByteOrdering.BigEndian;
         ColorSpace colorSpace;
+        ImageDataCompression compression;
         long dataOffset;
         DemosaicingAlgorithm? demosaicingAlgorithm = DemosaicingAlgorithms.Undefined;
         string? unresolvedDemosaicingAlgorithmId;
@@ -233,6 +234,23 @@ namespace Carina.PixelViewer.Media.Profiles
                     return;
                 this.colorSpace = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ColorSpace)));
+            }
+        }
+
+
+        // Compression of data starting from data offset.
+        public ImageDataCompression Compression
+        {
+            get => this.compression;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.compression == value)
+                    return;
+                this.compression = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Compression)));
             }
         }
 
@@ -435,6 +453,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 && this.Width == profile.Width
                 && this.Height == profile.Height
                 && this.DataOffset == profile.DataOffset
+                && this.Compression == profile.Compression
                 && this.FramePaddingSize == profile.FramePaddingSize
                 && this.BayerPattern == profile.BayerPattern
                 && this.ByteOrdering == profile.ByteOrdering
@@ -630,6 +649,17 @@ namespace Carina.PixelViewer.Media.Profiles
                 // get data offset
                 if (rootElement.TryGetProperty(nameof(DataOffset), out jsonProperty))
                     jsonProperty.TryGetInt64(out profile.dataOffset);
+
+                // get compression, an unknown one is written by newer version and treated as no compression
+                if (rootElement.TryGetProperty(nameof(Compression), out jsonProperty) && jsonProperty.ValueKind == JsonValueKind.String)
+                {
+                    var compressionName = jsonProperty.GetString();
+                    if (!Enum.TryParse(compressionName, out profile.compression) || !Enum.IsDefined(profile.compression))
+                    {
+                        logger?.LogWarning("Unknown compression '{compression}' in profile '{fileName}'", compressionName, fileName);
+                        profile.compression = ImageDataCompression.None;
+                    }
+                }
 
                 // get frame padding size
                 if (rootElement.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
@@ -1008,6 +1038,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 jsonWriter.WriteString("Format", format.Name);
                 if (this.dataOffset != 0)
                     jsonWriter.WriteNumber(nameof(DataOffset), this.dataOffset);
+                if (this.compression != ImageDataCompression.None)
+                    jsonWriter.WriteString(nameof(Compression), this.compression.ToString());
                 if (this.framePaddingSize != 0)
                     jsonWriter.WriteNumber(nameof(FramePaddingSize), this.framePaddingSize);
                 if (format.Category == ImageFormatCategory.Bayer)

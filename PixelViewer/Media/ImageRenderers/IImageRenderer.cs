@@ -342,8 +342,15 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Compression of data starting from <see cref="DataOffset"/>.
+	/// </summary>
+	public ImageDataCompression Compression { get; set; }
+
+
+	/// <summary>
 	/// Offset to first byte of data provided by <see cref="IImageDataSource"/>.
 	/// </summary>
+	/// <remarks>The offset is applied to the compressed data when <see cref="Compression"/> is not <see cref="ImageDataCompression.None"/>.</remarks>
 	public long DataOffset { get; set; }
 
 
@@ -360,6 +367,7 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		&& this.BlueColorTable.IsSameAs(options.BlueColorTable)
 		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001
 		&& this.ByteOrdering == options.ByteOrdering
+		&& this.Compression == options.Compression
 		&& this.DataOffset == options.DataOffset
 		&& this.Demosaicing == options.Demosaicing
 		&& this.GreenColorTable.IsSameAs(options.GreenColorTable)

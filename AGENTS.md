@@ -18,7 +18,7 @@ This file provides guidance to AI coding agents when working with code in this r
 - Namespace matches the folder path: `Carina.PixelViewer.<Subfolder>`.
 - Inner types within a class/file are ordered **alphabetically** by name.
 - `extension` blocks (C# 14 extension members) are placed **first** in the containing class, before all other members; they are not sorted with the members listed below. Members inside an `extension` block are ordered alphabetically.
-- Enum values are ordered **alphabetically** — except in native-interop declarations (e.g. the P/Invoke types in `Native/Win32.cs`), where an enum mirrors the OS definition and keeps its native member names, ordering, and value grouping (for a native constant set used as a single field's value, such as `BITMAPV5HEADER.bV5CSType`, prefer a `[uint]`-backed enum over flattened constants).
+- Enum values are ordered **alphabetically** — except that a member which stands for "none" or the default comes **first**, so that it is the enum's default value, followed by the others in alphabetical order (`ImageDataCompression`: `None`, then `LosslessJpeg`; do not assign it an explicit `= 0` for this), and except in native-interop declarations (e.g. the P/Invoke types in `Native/Win32.cs`), where an enum mirrors the OS definition and keeps its native member names, ordering, and value grouping (for a native constant set used as a single field's value, such as `BITMAPV5HEADER.bV5CSType`, prefer a `[uint]`-backed enum over flattened constants).
 
 Members inside a class are ordered as follows:
 
