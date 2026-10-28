@@ -482,6 +482,29 @@ namespace Carina.PixelViewer.Media
             new Uri("https://en.wikipedia.org/wiki/DCI-P3"));
         
         /// <summary>
+        /// ProPhoto RGB (ROMM RGB).
+        /// </summary>
+        public static readonly ColorSpace ProPhoto_RGB = new ColorSpace(
+            ColorSpaceSource.BuiltIn,
+            "ProPhoto-RGB",
+            null,
+            new SKColorSpaceTransferFn()
+            {
+                G = 1.8f,
+                A = 1f,
+                C = 1f / 16f,
+                D = 0.03125f
+            },
+            // primaries scaled to the D50 white point, which is already the D50 profile connection space
+            new SKColorSpaceXyz(
+                0.797672f, 0.135188f, 0.031340f,
+                0.288041f, 0.711869f, 0.000090f,
+                0.000000f, 0.000000f, 0.824900f
+            ),
+            D50,
+            new Uri("https://en.wikipedia.org/wiki/ProPhoto_RGB_color_space"));
+
+        /// <summary>
         /// sRGB.
         /// </summary>
         public static readonly ColorSpace Srgb = new ColorSpace(
@@ -515,6 +538,7 @@ namespace Carina.PixelViewer.Media
             { BT_601_625Line.Name, BT_601_625Line },
             { DCI_P3.Name, DCI_P3 },
             { Display_P3.Name, Display_P3 },
+            { ProPhoto_RGB.Name, ProPhoto_RGB },
             { Srgb.Name, Srgb },
         };
         static volatile ILogger? logger;

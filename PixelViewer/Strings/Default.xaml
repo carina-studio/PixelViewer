@@ -93,6 +93,7 @@
 	<sys:String x:Key="String/ColorSpace.DCI-P3">DCI-P3</sys:String>
 	<sys:String x:Key="String/ColorSpace.Display-P3">Display-P3 (P3-D65)</sys:String>
 	<sys:String x:Key="String/ColorSpace.EmbeddedInFile">Embedded Color Space</sys:String>
+	<sys:String x:Key="String/ColorSpace.ProPhoto-RGB">ProPhoto RGB</sys:String>
 	<sys:String x:Key="String/ColorSpace.sRGB">sRGB</sys:String>
 	<sys:String x:Key="String/ColorSpace.SystemDefined">System-Defined Color Space</sys:String>
 	
