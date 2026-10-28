@@ -149,6 +149,10 @@
 	<sys:String x:Key="String/ImageFormat.P416">P416 (16 位 YUV444sp)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10 位 YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16 位 YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV420_10_MIPI">YUV420 (10 位，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV420_8_LEGACY_MIPI">YUV420 (旧版 8 位，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV420_8_MIPI">YUV420 (8 位，MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV422_10_MIPI">YUV422 (10 位，MIPI)</sys:String>
 
 	<!-- ImageFormatCategory -->
 	<sys:String x:Key="String/ImageFormatCategory.Bayer">Bayer 排列</sys:String>

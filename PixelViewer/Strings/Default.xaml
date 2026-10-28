@@ -179,6 +179,10 @@
 	<sys:String x:Key="String/ImageFormat.UYVY">UYVY (YUV422)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y010">Y010 (10-bit YUV420p)</sys:String>
 	<sys:String x:Key="String/ImageFormat.Y016">Y016 (16-bit YUV420p)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV420_10_MIPI">YUV420 (10-bit, MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV420_8_LEGACY_MIPI">YUV420 (Legacy 8-bit, MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV420_8_MIPI">YUV420 (8-bit, MIPI)</sys:String>
+	<sys:String x:Key="String/ImageFormat.YUV422_10_MIPI">YUV422 (10-bit, MIPI)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YUVY">YUVY (YUV422)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YUYV">YUYV (YUV422)</sys:String>
 	<sys:String x:Key="String/ImageFormat.YVYU">YVYU (YUV422)</sys:String>

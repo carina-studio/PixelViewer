@@ -41,6 +41,10 @@ static partial class ImageRenderers
 			//new P412ImageRenderer(), // Not standardized by Microsoft
 			new P416ImageRenderer(),
 			new AndroidYuv420ImageRenderer(),
+			new Yuv420Mipi8ImageRenderer(),
+			new Yuv420Mipi8LegacyImageRenderer(),
+			new Yuv420Mipi10ImageRenderer(),
+			new Yuv422Mipi10ImageRenderer(),
 
 			new Rgb565ImageRenderer(),
 			new Bgr888ImageRenderer(),
