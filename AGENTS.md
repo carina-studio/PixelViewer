@@ -281,6 +281,7 @@ Quoting follows the target locale, not the source text. Mirrored from AppSuiteBa
 `PixelViewer/ChangeList.md`, `PixelViewer/ChangeList-zh-TW.md`, and `PixelViewer/ChangeList-zh-CN.md` describe the changes shipping in the next version.
 
 - **Key names and key combinations must be wrapped in single-backtick inline code** — e.g. `` `⌘Q` ``, `` `Ctrl+Q` ``, `` `⌘←` ``, `` `Ctrl+Shift+F` ``. Use single backticks, not triple. This rule applies in every locale variant; the inline code wrapping is identical across English, zh-TW, and zh-CN.
+- **Image format names are wrapped in single-backtick inline code too, spelled exactly as that locale's UI displays them** — `` `YUV420 (10-bit, MIPI)` `` in English, `` `YUV420 (10 位元，MIPI)` `` in zh-TW, `` `YUV420 (10 位，MIPI)` `` in zh-CN — so each locale's entry names the format the reader will actually find in the picker.
 - **When an entry lists a shortcut for more than one platform, order the platforms Windows/Linux first, then macOS** — e.g. `Ctrl+V` on Windows/Linux, `⌘V` on macOS.
 - English entries use past tense (`Added`, `Improved`, `Prevented`, `Fixed`).
 - Each new bullet must be mirrored in all three locale files; do not update one without updating the others.
