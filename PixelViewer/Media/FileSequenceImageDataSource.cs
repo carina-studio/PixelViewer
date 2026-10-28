@@ -26,6 +26,7 @@ class FileSequenceImageDataSource : BaseShareableDisposable<FileSequenceImageDat
 		public readonly LinkedList<FileImageDataSource> FrameSourceCache = new();
 		public readonly ILogger Logger;
 		public readonly IList<string> ReadOnlyFileNames;
+		public readonly IImageDataSource.SourceReleasedCallbacks ReleasedCallbacks;
 		public readonly long TotalSize;
 
 		// Constructor.
@@ -41,6 +42,7 @@ class FileSequenceImageDataSource : BaseShareableDisposable<FileSequenceImageDat
 			this.Logger.LogDebug("Create source of {count} file(s)", fileNames.Length);
 			this.FileNames = fileNames;
 			this.ReadOnlyFileNames = ListExtensions.AsReadOnly(fileNames);
+			this.ReleasedCallbacks = new(this.Logger);
 
 			// collect size of file of each frame, size of inaccessible file is treated as zero
 			this.FileSizes = new long[fileNames.Length];
@@ -72,6 +74,9 @@ class FileSequenceImageDataSource : BaseShareableDisposable<FileSequenceImageDat
 
 			// complete
 			this.Logger.LogDebug("Release source of {count} file(s)", this.FileNames.Length);
+
+			// notify
+			this.ReleasedCallbacks.Invoke();
 		}
 	}
 
@@ -215,8 +220,18 @@ class FileSequenceImageDataSource : BaseShareableDisposable<FileSequenceImageDat
 
 
 	/// <inheritdoc/>
+	public bool IsSourceSharedWith(IImageDataSource source) =>
+		source is FileSequenceImageDataSource sequenceSource && this.holder == sequenceSource.holder;
+
+
+	/// <inheritdoc/>
 	public Task<Stream> OpenStreamAsync(StreamAccess access, CancellationToken token) =>
 		throw new InvalidOperationException($"Cannot open stream of {nameof(FileSequenceImageDataSource)}, open stream of source of frame instead.");
+
+
+	/// <inheritdoc/>
+	public IDisposable RegisterSourceReleasedCallback(Action callback) =>
+		this.GetResourceHolder<HolderImpl>().ReleasedCallbacks.Register(callback);
 
 
 	/// <inheritdoc/>

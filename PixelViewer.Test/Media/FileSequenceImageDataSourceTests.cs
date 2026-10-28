@@ -270,6 +270,31 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 	}
 
 
+	/// <summary>
+	/// Test for calling callback once after the last instance which shares the resource is disposed.
+	/// </summary>
+	[Test]
+	public void SourceReleasedCallbackTest() => this.TestOnApplicationThread(() =>
+	{
+		// register callback
+		var source = this.CreateInstance();
+		var sharedSource = source.Share();
+		using var otherSource = this.CreateInstance();
+		var callCount = 0;
+		using var registration = source.RegisterSourceReleasedCallback(() => { ++callCount; });
+
+		// check sharing of resource
+		Assert.That(source.IsSourceSharedWith(sharedSource), "Instance should share resource with its shared instance.");
+		Assert.That(source.IsSourceSharedWith(otherSource), Is.False, "Separate instances should not share resource.");
+
+		// dispose instances
+		source.Dispose();
+		Assert.That(callCount, Is.Zero, "Callback should not be called before the last instance is disposed.");
+		sharedSource.Dispose();
+		Assert.That(callCount, Is.EqualTo(1), "Callback should be called once after the last instance is disposed.");
+	});
+
+
 	// Validate instance.
 	protected override async Task ValidateInstanceAsync(FileSequenceImageDataSource instance)
 	{

@@ -23,12 +23,14 @@ namespace Carina.PixelViewer.Media
 			public readonly FileStream BaseStream;
 			readonly bool DeleteWhenReleasing;
 			public readonly ILogger Logger;
+			public readonly IImageDataSource.SourceReleasedCallbacks ReleasedCallbacks;
 
 			// Constructor.
 			public HolderImpl(IApplication app, string fileName, bool deleteWhenReleasing)
 			{
 				this.Logger = app.LoggerFactory.CreateLogger(nameof(FileImageDataSource));
 				this.Logger.LogDebug("Create source of '{fileName}'", fileName);
+				this.ReleasedCallbacks = new(this.Logger);
 				this.BaseStream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 				this.DeleteWhenReleasing = deleteWhenReleasing;
 			}
@@ -36,6 +38,7 @@ namespace Carina.PixelViewer.Media
 			// Release.
 			protected override void Release()
 			{
+				// release file
 				var fileName = this.BaseStream.Name;
 				this.Logger.LogDebug("Release source of '{fileName}'", fileName);
 				Global.RunWithoutError(this.BaseStream.Close);
@@ -50,6 +53,9 @@ namespace Carina.PixelViewer.Media
 						}
 					});
 				}
+
+				// notify
+				this.ReleasedCallbacks.Invoke();
 			}
 		}
 
@@ -200,6 +206,16 @@ namespace Carina.PixelViewer.Media
 		/// Get name of file.
 		/// </summary>
 		public string FileName { get; }
+
+
+		/// <inheritdoc/>
+		public bool IsSourceSharedWith(IImageDataSource source) =>
+			source is FileImageDataSource fileSource && this.GetResourceHolder<HolderImpl>() == fileSource.GetResourceHolder<HolderImpl>();
+
+
+		/// <inheritdoc/>
+		public IDisposable RegisterSourceReleasedCallback(Action callback) =>
+			this.GetResourceHolder<HolderImpl>().ReleasedCallbacks.Register(callback);
 
 
 		// Share.

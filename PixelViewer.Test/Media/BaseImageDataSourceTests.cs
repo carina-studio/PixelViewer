@@ -2,6 +2,7 @@ using Carina.PixelViewer.Media;
 using CarinaStudio;
 using CarinaStudio.IO;
 using NUnit.Framework;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -72,6 +73,108 @@ namespace Carina.PixelViewer.Test.Media
 				for (var j = size - 1; j >= 0; --j)
 					Assert.That(readData[j], Is.EqualTo(data[j]), $"Data[{j}] read from source is different from expected.");
 			}
+		});
+
+
+		/// <summary>
+		/// Test for calling callback once after the last instance which shares the resource is disposed.
+		/// </summary>
+		[Test]
+		public void TestSourceReleasedCallback() => this.TestOnApplicationThread(() =>
+		{
+			// register callback
+			var source = this.CreateInstance();
+			var sharedSource1 = ((IShareableDisposable<T>)source).Share();
+			var sharedSource2 = ((IShareableDisposable<T>)source).Share();
+			var callCount = 0;
+			using var registration = sharedSource1.RegisterSourceReleasedCallback(() => { ++callCount; });
+
+			// dispose instances other than the last one
+			source.Dispose();
+			sharedSource1.Dispose();
+			Assert.That(callCount, Is.Zero, "Callback should not be called before the last instance is disposed.");
+
+			// dispose the last instance
+			sharedSource2.Dispose();
+			Assert.That(callCount, Is.EqualTo(1), "Callback should be called after the last instance is disposed.");
+
+			// dispose the last instance again
+			sharedSource2.Dispose();
+			Assert.That(callCount, Is.EqualTo(1), "Callback should be called only once.");
+		});
+
+
+		/// <summary>
+		/// Test for registering callback through a disposed instance.
+		/// </summary>
+		[Test]
+		public void TestSourceReleasedCallbackOnDisposedSource() => this.TestOnApplicationThread(() =>
+		{
+			var source = this.CreateInstance();
+			using var sharedSource = ((IShareableDisposable<T>)source).Share();
+			source.Dispose();
+			Assert.Throws<ObjectDisposedException>(() => source.RegisterSourceReleasedCallback(() => { }), "Registering through a disposed instance should be rejected.");
+		});
+
+
+		/// <summary>
+		/// Test for unregistering callback.
+		/// </summary>
+		[Test]
+		public void TestSourceReleasedCallbackUnregistration() => this.TestOnApplicationThread(() =>
+		{
+			// register the same callback twice
+			var source = this.CreateInstance();
+			var callCount = 0;
+			Action callback = () => { ++callCount; };
+			var registration1 = source.RegisterSourceReleasedCallback(callback);
+			var registration2 = source.RegisterSourceReleasedCallback(callback);
+
+			// unregister one of them more than once
+			registration1.Dispose();
+			registration1.Dispose();
+
+			// release resource
+			source.Dispose();
+			Assert.That(callCount, Is.EqualTo(1), "Only the callback which is still registered should be called.");
+
+			// unregister after releasing resource
+			registration2.Dispose();
+			Assert.That(callCount, Is.EqualTo(1), "Unregistering after releasing resource should take no effect.");
+		});
+
+
+		/// <summary>
+		/// Test for checking whether resource is shared between instances or not.
+		/// </summary>
+		[Test]
+		public void TestSourceSharing() => this.TestOnApplicationThread(() =>
+		{
+			using var source = this.CreateInstance();
+			using var sharedSource = ((IShareableDisposable<T>)source).Share();
+			using var otherSource = this.CreateInstance();
+			Assert.That(source.IsSourceSharedWith(source), "Instance should share resource with itself.");
+			Assert.That(source.IsSourceSharedWith(sharedSource), "Instance should share resource with its shared instance.");
+			Assert.That(sharedSource.IsSourceSharedWith(source), "Shared instance should share resource with its base instance.");
+			Assert.That(source.IsSourceSharedWith(otherSource), Is.False, "Separate instances should not share resource.");
+		});
+
+
+		/// <summary>
+		/// Test for calling other callbacks when one of callbacks throws exception.
+		/// </summary>
+		[Test]
+		public void TestThrowingSourceReleasedCallback() => this.TestOnApplicationThread(() =>
+		{
+			// register callbacks
+			var source = this.CreateInstance();
+			var isCallbackCalled = false;
+			using var registration1 = source.RegisterSourceReleasedCallback(() => throw new InvalidOperationException());
+			using var registration2 = source.RegisterSourceReleasedCallback(() => { isCallbackCalled = true; });
+
+			// release resource
+			Assert.DoesNotThrow(source.Dispose, "Exception thrown by callback should not break disposing.");
+			Assert.That(isCallbackCalled, "Callback should be called even if other callback throws exception.");
 		});
 
 
