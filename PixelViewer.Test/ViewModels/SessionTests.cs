@@ -391,6 +391,13 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering without compression.");
 				Assert.That(session.HasRenderingError, Is.False, "Rendering should succeed again without compression.");
 
+				// select a renderer which cannot handle tiles
+				ImageRenderers.TryFindByFormatName("YUYV", out var yuvRenderer);
+				Assert.That(yuvRenderer, Is.Not.Null);
+				session.ImageRenderer = yuvRenderer.AsNonNull();
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering by the renderer which cannot handle tiles.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering data which is not tiled should succeed.");
+
 				// select tiles which current renderer cannot handle, one non-zero dimension is enough to make data tiled
 				Assert.That(session.IsTileLayoutSupported, Is.False, "The renderer selected for testing should not support tiles.");
 				session.TileWidth = 8;
