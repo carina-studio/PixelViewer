@@ -235,7 +235,7 @@ class FileSequenceImageDataSource : BaseShareableDisposable<FileSequenceImageDat
 
 
 	/// <inheritdoc/>
-	protected override FileSequenceImageDataSource Share(BaseResourceHolder holder) => new FileSequenceImageDataSource((HolderImpl)holder);
+	protected override FileSequenceImageDataSource Share(BaseResourceHolder holder) => new((HolderImpl)holder);
 	/// <inheritdoc/>
 	IImageDataSource IShareableDisposable<IImageDataSource>.Share() => this.Share();
 

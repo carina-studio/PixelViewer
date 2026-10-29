@@ -150,13 +150,25 @@ namespace Carina.PixelViewer.Test.Media
 		[Test]
 		public void TestSourceSharing() => this.TestOnApplicationThread(() =>
 		{
-			using var source = this.CreateInstance();
-			using var sharedSource = ((IShareableDisposable<T>)source).Share();
+			// check sharing of resource
+			var source = this.CreateInstance();
+			var sharedSource = ((IShareableDisposable<T>)source).Share();
 			using var otherSource = this.CreateInstance();
 			Assert.That(source.IsSourceSharedWith(source), "Instance should share resource with itself.");
 			Assert.That(source.IsSourceSharedWith(sharedSource), "Instance should share resource with its shared instance.");
 			Assert.That(sharedSource.IsSourceSharedWith(source), "Shared instance should share resource with its base instance.");
 			Assert.That(source.IsSourceSharedWith(otherSource), Is.False, "Separate instances should not share resource.");
+
+			// check sharing of resource through disposed instance
+			sharedSource.Dispose();
+			Assert.That(source.IsSourceSharedWith(sharedSource), "Instance should share resource with its disposed shared instance.");
+			Assert.That(sharedSource.IsSourceSharedWith(source), "Disposed shared instance should share resource with its base instance.");
+
+			// check sharing of resource after releasing resource
+			source.Dispose();
+			Assert.That(source.IsSourceSharedWith(sharedSource), "Disposed instances should share resource after releasing resource.");
+			Assert.That(otherSource.IsSourceSharedWith(source), Is.False, "Separate instance should not share resource with disposed instance.");
+			Assert.That(source.IsSourceSharedWith(otherSource), Is.False, "Disposed instance should not share resource with separate instance.");
 		});
 
 

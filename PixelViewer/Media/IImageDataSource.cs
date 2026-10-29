@@ -96,7 +96,7 @@ interface IImageDataSource : IShareableDisposable<IImageDataSource>, IStreamProv
 	/// </summary>
 	/// <param name="source"><see cref="IImageDataSource"/> to check.</param>
 	/// <returns>True if the resource is shared with <paramref name="source"/>.</returns>
-	/// <remarks>True is also returned if <paramref name="source"/> is the same instance. None of the instances should be disposed before calling the method.</remarks>
+	/// <remarks>True is also returned if <paramref name="source"/> is the same instance. Either instance may have been disposed, so a disposed instance can be kept to identify the resource without keeping it alive.</remarks>
 	bool IsSourceSharedWith(IImageDataSource source);
 
 

@@ -292,6 +292,10 @@ class FileSequenceImageDataSourceTests : BaseShareableDisposableTests<FileSequen
 		Assert.That(callCount, Is.Zero, "Callback should not be called before the last instance is disposed.");
 		sharedSource.Dispose();
 		Assert.That(callCount, Is.EqualTo(1), "Callback should be called once after the last instance is disposed.");
+
+		// check sharing of resource through disposed instances
+		Assert.That(source.IsSourceSharedWith(sharedSource), "Disposed instances should share resource after releasing resource.");
+		Assert.That(otherSource.IsSourceSharedWith(source), Is.False, "Separate instance should not share resource with disposed instance.");
 	});
 
 

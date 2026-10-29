@@ -74,6 +74,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Fields.
+		readonly HolderImpl holder;
 		readonly ILogger logger;
 		readonly List<WeakReference<StreamImpl>> openedStreams = new List<WeakReference<StreamImpl>>();
 
@@ -88,6 +89,7 @@ namespace Carina.PixelViewer.Media
 		{
 			var holder = this.GetResourceHolder<HolderImpl>();
 			this.FileName = holder.BaseStream.Name;
+			this.holder = holder;
 			this.logger = holder.Logger;
 		}
 
@@ -96,6 +98,7 @@ namespace Carina.PixelViewer.Media
 		FileImageDataSource(HolderImpl holder) : base(holder)
 		{
 			this.FileName = holder.BaseStream.Name;
+			this.holder = holder;
 			this.logger = holder.Logger;
 		}
 
@@ -210,7 +213,7 @@ namespace Carina.PixelViewer.Media
 
 		/// <inheritdoc/>
 		public bool IsSourceSharedWith(IImageDataSource source) =>
-			source is FileImageDataSource fileSource && this.GetResourceHolder<HolderImpl>() == fileSource.GetResourceHolder<HolderImpl>();
+			source is FileImageDataSource fileSource && this.holder == fileSource.holder;
 
 
 		/// <inheritdoc/>
@@ -219,7 +222,7 @@ namespace Carina.PixelViewer.Media
 
 
 		// Share.
-		protected override FileImageDataSource Share(BaseResourceHolder holder) => new FileImageDataSource((HolderImpl)holder);
+		protected override FileImageDataSource Share(BaseResourceHolder holder) => new((HolderImpl)holder);
 		IImageDataSource IShareableDisposable<IImageDataSource>.Share() => this.Share();
 
 
