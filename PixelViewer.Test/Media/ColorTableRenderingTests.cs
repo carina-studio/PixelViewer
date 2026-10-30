@@ -284,6 +284,72 @@ class ColorTableRenderingTests : BaseTests
 
 
 	/// <summary>
+	/// Test for rendering a 16-bit RGB image with color tables, a color without color table is rendered by its own value.
+	/// </summary>
+	[Test]
+	public void RgbColorTableRenderingTest([Values("RGB_161616", "BGR_161616")] string formatName)
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// create image whose components carry values beyond the effective bits set below
+			await this.InitializeSubSystemsAsync();
+			string fileName;
+			using (var stream = this.CreateCacheFile())
+			{
+				fileName = stream.Name;
+				var data = new byte[TestImageWidth * TestImageHeight * 6];
+				for (var i = TestImageWidth * TestImageHeight - 1; i >= 0; --i)
+				{
+					for (var c = 0; c < 3; ++c)
+					{
+						var value = i + c * 1000;
+						data[i * 6 + c * 2] = (byte)value;
+						data[i * 6 + c * 2 + 1] = (byte)(value >> 8);
+					}
+				}
+				stream.Write(data);
+			}
+			using var source = new FileImageDataSource(this.Application, fileName);
+
+			// render with tables of red and green only
+			using var redColorTable = CreateColorTable(65536, 16, i => (uint)Math.Min(65535, i * 2));
+			using var greenColorTable = CreateColorTable(65536, 16, i => (uint)Math.Min(65535, i * 3));
+			var renderer = ImageRenderers.All.First(it => it.Format.Name == formatName);
+			Assert.That(renderer.IsColorTableSupported, Is.True, $"{formatName} should support color tables.");
+			var renderingOptions = new ImageRenderingOptions
+			{
+				ByteOrdering = ByteOrdering.LittleEndian,
+				GreenColorTable = greenColorTable,
+				RedColorTable = redColorTable,
+			};
+			var planeOptions = new List<ImagePlaneOptions> { new(9, 6, TestImageWidth * 6) };
+			var format = await renderer.SelectRenderedFormatAsync(source, renderingOptions, planeOptions, CancellationToken.None);
+			using var buffer = new BitmapBuffer(format, ColorSpace.Default, TestImageWidth, TestImageHeight);
+			await renderer.RenderAsync(source, buffer, renderingOptions, planeOptions, CancellationToken.None);
+
+			// check colors of each pixel, the components are read as whole 16-bit values whatever the effective bits are
+			var isRgb = formatName == "RGB_161616";
+			unsafe
+			{
+				buffer.Memory.Pin(baseAddress =>
+				{
+					for (var i = TestImageWidth * TestImageHeight - 1; i >= 0; --i)
+					{
+						var pixelPtr = (ushort*)((byte*)baseAddress + (long)(i / TestImageWidth) * buffer.RowBytes) + (i % TestImageWidth) * 4;
+						var red = isRgb ? i : i + 2000;
+						var green = i + 1000;
+						var blue = isRgb ? i + 2000 : i;
+						Assert.That(pixelPtr[2], Is.EqualTo(red * 2), $"Incorrect red of pixel {i} rendered by {formatName}.");
+						Assert.That(pixelPtr[1], Is.EqualTo(green * 3), $"Incorrect green of pixel {i} rendered by {formatName}.");
+						Assert.That(pixelPtr[0], Is.EqualTo(blue), $"Incorrect blue of pixel {i} rendered by {formatName}.");
+					}
+				});
+			}
+		});
+	}
+
+
+	/// <summary>
 	/// Test for rendering a 16-bit image through a color table which is shorter than the range of its values.
 	/// </summary>
 	[Test]
