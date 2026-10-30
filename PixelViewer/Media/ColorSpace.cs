@@ -140,9 +140,12 @@ namespace Carina.PixelViewer.Media
                     qB = transfer(qB);
                 }
                 var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
+                var sR = qR;
+                var sG = qG;
+                var sB = qB;
+                qR = Clip((m[0] * sR + m[1] * sG + m[2] * sB) >> QuantizationBits);
+                qG = Clip((m[3] * sR + m[4] * sG + m[5] * sB) >> QuantizationBits);
+                qB = Clip((m[6] * sR + m[7] * sG + m[8] * sB) >> QuantizationBits);
                 if (!this.SkipDestinationNumericalTransfer)
                 {
                     var transfer = this.destNumericalTransferFromLinear;
@@ -167,9 +170,12 @@ namespace Carina.PixelViewer.Media
                     qB = transfer(qB);
                 }
                 var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
+                var sR = qR;
+                var sG = qG;
+                var sB = qB;
+                qR = Clip((m[0] * sR + m[1] * sG + m[2] * sB) >> QuantizationBits);
+                qG = Clip((m[3] * sR + m[4] * sG + m[5] * sB) >> QuantizationBits);
+                qB = Clip((m[6] * sR + m[7] * sG + m[8] * sB) >> QuantizationBits);
                 if (!this.SkipDestinationNumericalTransfer)
                 {
                     var transfer = this.destNumericalTransferFromLinear;
@@ -194,9 +200,12 @@ namespace Carina.PixelViewer.Media
                     qB = transfer(qB);
                 }
                 var m = this.matrix;
-                qR = Clip((m[0] * qR + m[1] * qG + m[2] * qB) >> QuantizationBits);
-                qG = Clip((m[3] * qR + m[4] * qG + m[5] * qB) >> QuantizationBits);
-                qB = Clip((m[6] * qR + m[7] * qG + m[8] * qB) >> QuantizationBits);
+                var sR = qR;
+                var sG = qG;
+                var sB = qB;
+                qR = Clip((m[0] * sR + m[1] * sG + m[2] * sB) >> QuantizationBits);
+                qG = Clip((m[3] * sR + m[4] * sG + m[5] * sB) >> QuantizationBits);
+                qB = Clip((m[6] * sR + m[7] * sG + m[8] * sB) >> QuantizationBits);
                 if (!this.SkipDestinationNumericalTransfer)
                 {
                     var transfer = this.destNumericalTransferFromLinear;
@@ -204,7 +213,7 @@ namespace Carina.PixelViewer.Media
                     qG = transfer(qG);
                     qB = transfer(qB);
                 }
-                return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
+                return ((double)qR / (QuantizationSteps - 1), (double)qG / (QuantizationSteps - 1), (double)qB / (QuantizationSteps - 1));
             }
         }
         
@@ -330,7 +339,7 @@ namespace Carina.PixelViewer.Media
                     qG = transfer(qG);
                     qB = transfer(qB);
                 }
-                return ((double)qR / QuantizationBits, (double)qG / QuantizationBits, (double)qB / QuantizationBits);
+                return ((double)qR / (QuantizationSteps - 1), (double)qG / (QuantizationSteps - 1), (double)qB / (QuantizationSteps - 1));
             }
 
             /// <inheritdoc/>
@@ -1569,6 +1578,8 @@ namespace Carina.PixelViewer.Media
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe long NumericalTransferFromLinear(long color)
         {
+            if (this.IsLinear || !this.hasTransferFunc)
+                return color;
             var table = this.numericalTransferTableFromLinear;
             if (table is not null)
                 return table[color];
@@ -1620,6 +1631,8 @@ namespace Carina.PixelViewer.Media
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         unsafe long NumericalTransferToLinear(long color)
         {
+            if (this.IsLinear || !this.hasTransferFunc)
+                return color;
             var table = this.numericalTransferTableToLinear;
             if (table is not null)
                 return table[color];
