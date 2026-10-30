@@ -1,72 +1,72 @@
 {
   "Name": "PixelViewer",
-  "Version": "4.1.4.1019",
-  "InformationalVersion": "2026.1.4",
-  "PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/2026.1.4",
+  "Version": "4.1.5.1030",
+  "InformationalVersion": "2026.1.5",
+  "PageUri": "https://github.com/carina-studio/PixelViewer/releases/tag/2026.1.5",
   "Packages": [
     {
       "Architecture": "Arm64",
-      "BaseVersion": "4.1.3.919",
+      "BaseVersion": "4.1.4.1019",
       "OperatingSystem": "Linux",
-      "SHA256": "B8EF69D30F4568FB7492B46BE7A69CB0A27D888BBB79F5C91A04DB9AC2018630",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.3-2026.1.4-linux-arm64.zip"
+      "SHA256": "63B6940A6DF188F9398776A4A4136DB59E730C7A06C8E91CB4C8FD3F47BAE87D",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.4-2026.1.5-linux-arm64.zip"
     },
     {
       "Architecture": "X64",
-      "BaseVersion": "4.1.3.919",
+      "BaseVersion": "4.1.4.1019",
       "OperatingSystem": "Linux",
-      "SHA256": "D4ED2FD1823454BAA08598EAC2DE50886F36BD4638D204E04700640628407A9E",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.3-2026.1.4-linux-x64.zip"
+      "SHA256": "504B01395B1054C6A6060AE4DBA0DDAE72A8434FEF557E6163ADAB67C6C71456",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.4-2026.1.5-linux-x64.zip"
     },
     {
       "Architecture": "Arm64",
-      "BaseVersion": "4.1.3.919",
+      "BaseVersion": "4.1.4.1019",
       "OperatingSystem": "Windows",
-      "SHA256": "79BF57CD89953A76FAA8A9324C53B6435437A28D484C087AD48B8CF6F26B9243",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.3-2026.1.4-win-arm64.zip"
+      "SHA256": "73818547242BFD77C5DCAE17CFBD8A8FABE3E441BC38297A121B86A3EB09D394",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.4-2026.1.5-win-arm64.zip"
     },
     {
       "Architecture": "X64",
-      "BaseVersion": "4.1.3.919",
+      "BaseVersion": "4.1.4.1019",
       "OperatingSystem": "Windows",
-      "SHA256": "E02CB87D319F04E8BF1FF963941269268F43A808B921A359739A4D79ED299D3C",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.3-2026.1.4-win-x64.zip"
+      "SHA256": "5A13932D51E35A94BC1A9569042BBB10D13833E0BF727EBC163C8834864F1098",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.4-2026.1.5-win-x64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "Linux",
-      "SHA256": "8135F8D398784BE4795002174E6075F7C9310D250F223394AD8A077713227853",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.4-linux-arm64.zip"
+      "SHA256": "A24B60EB37965CA7F110FCB0452C23C53745FC32EF19586E8951DBCD6DED1F36",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.5-linux-arm64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "Linux",
-      "SHA256": "1015D96315B2AECD5F14ABF4898C1A2952D8D15F2C8A25CCA8A126E0CD268D51",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.4-linux-x64.zip"
+      "SHA256": "344461135982694053D156AA91449D3DB55B34356939D5C5255AE0D50A24F565",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.5-linux-x64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "OSX",
-      "SHA256": "B960EBBA272C0F29B30F111EAF7AEC2A3AD6A89743BF1F736F506AB26F62B3DC",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.4-osx-arm64.zip"
+      "SHA256": "4284CBBC3D65EF8266A0E78C298740F4842ABE93FA684DD0A9F27180BDF0C2B8",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.5-osx-arm64.zip"
     },
     {
       "Architecture": "Arm64",
       "OperatingSystem": "Windows",
-      "SHA256": "DB73DFAABA3ADD1467AC36CF3F961168E385434DC82EE2FB6E73B436EBF93EAD",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.4-win-arm64.zip"
+      "SHA256": "F65BBAC3DC75D5E72523E981F4E94DC8E92B0B135ED05697349370E020273F6B",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.5-win-arm64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "OSX",
-      "SHA256": "5D7DC94BE6F7AC64DF11FB331BDD5BF1647F21AB7CE1ABD385FC6FC7C32E7666",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.4-osx-x64.zip"
+      "SHA256": "C89FA75886DA07286D7733D0DA6ED0870234F94FA022573B4B393542B6E2F81C",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.5-osx-x64.zip"
     },
     {
       "Architecture": "X64",
       "OperatingSystem": "Windows",
-      "SHA256": "AD20CD7CAB849ECE31D85DC236EDA61B70C84B70BE796B324A58300473FC9360",
-      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.4/PixelViewer-2026.1.4-win-x64.zip"
+      "SHA256": "9BB0001C71928D931AE4111F6720ACAADE2E6937AE475E643308505AE245DC94",
+      "Uri": "https://packages.carinastudio.net/PixelViewer/2026.1.5/PixelViewer-2026.1.5-win-x64.zip"
     }
   ]
 }
