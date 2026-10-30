@@ -145,6 +145,25 @@ abstract class BaseImageRenderer : IImageRenderer
 		var paddingBitsMask = 0xffff >> effectiveBits;
 		if (blackLevel == 0 && whiteLevel == (1 << effectiveBits) - 1)
 		{
+			// the value beyond effective bits aligned to LSB is clamped rather than masked, otherwise it wraps to a dark color
+			if (lsbAligned)
+			{
+				return byteOrdering == ByteOrdering.LittleEndian
+					? (b1, b2) =>
+					{
+						var value = (b2 << 8) | b1;
+						value = (value & ~effectiveBitsMask) == 0 ? value : effectiveBitsMask;
+						return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
+					}
+					: (b1, b2) =>
+					{
+						var value = (b1 << 8) | b2;
+						value = (value & ~effectiveBitsMask) == 0 ? value : effectiveBitsMask;
+						return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
+					};
+			}
+
+			// the bits beyond effective bits aligned to MSB are padding
 			return byteOrdering == ByteOrdering.LittleEndian
 				? (b1, b2) =>
 				{
@@ -172,13 +191,13 @@ abstract class BaseImageRenderer : IImageRenderer
 				? (b1, b2) =>
 				{
 					var value = (b2 << 8) | b1;
-					value = correctedColors[(ushort)(value & effectiveBitsMask)];
+					value = correctedColors[(value & ~effectiveBitsMask) == 0 ? value : effectiveBitsMask];
 					return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 				}
 				: (b1, b2) =>
 				{
 					var value = (b1 << 8) | b2;
-					value = correctedColors[(ushort)(value & effectiveBitsMask)];
+					value = correctedColors[(value & ~effectiveBitsMask) == 0 ? value : effectiveBitsMask];
 					return (ushort)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 				};
 		}
@@ -215,10 +234,18 @@ abstract class BaseImageRenderer : IImageRenderer
 				: (b1, _) => b1;
 		}
 		var effectiveBitsShiftCount = (effectiveBits - 8);
-		var effectiveBitsMask = (0xff << effectiveBitsShiftCount);
+		var maxValue = (1 << effectiveBits) - 1;
 		return byteOrdering == ByteOrdering.LittleEndian
-			? (b1, b2) => (byte)((((b2 << 8) | b1) & effectiveBitsMask) >> effectiveBitsShiftCount)
-			: (b1, b2) => (byte)((((b1 << 8) | b2) & effectiveBitsMask) >> effectiveBitsShiftCount);
+			? (b1, b2) =>
+			{
+				var value = (b2 << 8) | b1;
+				return (byte)(((value & ~maxValue) == 0 ? value : maxValue) >> effectiveBitsShiftCount);
+			}
+			: (b1, b2) =>
+			{
+				var value = (b1 << 8) | b2;
+				return (byte)(((value & ~maxValue) == 0 ? value : maxValue) >> effectiveBitsShiftCount);
+			};
 	}
 
 
@@ -271,7 +298,13 @@ abstract class BaseImageRenderer : IImageRenderer
 		var paddingBitsShiftCount = ((effectiveBits << 1) - 8);
 		var paddingBitsMask = (0xff >> effectiveBits);
 		if (blackLevel == 0 && whiteLevel == (1 << effectiveBits) - 1)
-			return b => (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | ((b >> paddingBitsShiftCount) & paddingBitsMask));
+		{
+			return b =>
+			{
+				var value = (b & ~effectiveBitsMask) == 0 ? b : effectiveBitsMask;
+				return (byte)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
+			};
+		}
 		correctedColors = new byte[1 << effectiveBits].Also(it =>
 		{
 			var maxColor = (byte)(it.Length - 1);
@@ -283,8 +316,8 @@ abstract class BaseImageRenderer : IImageRenderer
 		});
 		return b =>
 		{
-			b = (byte)(((b & effectiveBitsMask) << effectiveBitsShiftCount) | ((b >> paddingBitsShiftCount) & paddingBitsMask));
-			return correctedColors[b];
+			var value = correctedColors[(b & ~effectiveBitsMask) == 0 ? b : effectiveBitsMask];
+			return (byte)((value << effectiveBitsShiftCount) | ((value >> paddingBitsShiftCount) & paddingBitsMask));
 		};
 	}
 
