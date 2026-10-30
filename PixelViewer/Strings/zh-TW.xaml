@@ -246,7 +246,7 @@
 	<sys:String x:Key="String/SessionControl.Histogram.Markers">標記</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Red">紅色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histograms">色階分布圖</sys:String>
-	<sys:String x:Key="String/SessionControl.ImageDimensions">尺寸 (像素)</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageDimensions">影像尺寸 (像素)</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">圖層 #1</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">圖層 #2</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">圖層 #3</sys:String>
