@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -42,6 +43,38 @@ abstract class BaseImageRenderer : IImageRenderer
 	{
 		this.format = format;
 		this.Logger = IAppSuiteApplication.Current.LoggerFactory.CreateLogger(this.GetType().Name);
+	}
+
+
+	/// <summary>
+	/// Allocate native memory of bytes when the given condition is satisfied.
+	/// </summary>
+	/// <param name="condition">Condition to allocate the memory.</param>
+	/// <param name="count">Number of bytes.</param>
+	/// <returns>Pointer to allocated memory, or Null if <paramref name="condition"/> is not satisfied.</returns>
+	/// <remarks>The memory should be released by <see cref="NativeMemory.Free(void*)"/>, which accepts Null as well.</remarks>
+	protected static unsafe byte* AllocateNativeBytesWhen(bool condition, int count)
+	{
+		if (!condition)
+			return null;
+		ArgumentOutOfRangeException.ThrowIfNegative(count);
+		return (byte*)NativeMemory.Alloc((nuint)count);
+	}
+
+
+	/// <summary>
+	/// Allocate native memory of 16-bit unsigned integers when the given condition is satisfied.
+	/// </summary>
+	/// <param name="condition">Condition to allocate the memory.</param>
+	/// <param name="count">Number of 16-bit unsigned integers.</param>
+	/// <returns>Pointer to allocated memory, or Null if <paramref name="condition"/> is not satisfied.</returns>
+	/// <remarks>The memory should be released by <see cref="NativeMemory.Free(void*)"/>, which accepts Null as well.</remarks>
+	protected static unsafe ushort* AllocateNativeUInt16When(bool condition, int count)
+	{
+		if (!condition)
+			return null;
+		ArgumentOutOfRangeException.ThrowIfNegative(count);
+		return (ushort*)NativeMemory.Alloc((nuint)count, sizeof(ushort));
 	}
 
 

@@ -458,6 +458,12 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Check whether <see cref="BaseExposure"/> changes the colors of rendered image or not.
+	/// </summary>
+	public bool HasBaseExposure => Math.Abs(CoerceBaseExposure(this.BaseExposure)) >= MinBaseExposureDifference;
+
+
+	/// <summary>
 	/// Check whether at least one color table is defined to map the values of color channels or not.
 	/// </summary>
 	public bool HasColorTables => this.AlphaColorTable is not null
