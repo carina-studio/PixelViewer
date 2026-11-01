@@ -137,7 +137,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyDisposed();
                 this.VerifyDefault();
                 value = ImageRenderers.ImageRenderingOptions.CoerceBaseExposure(value);
-                if (Math.Abs(this.baseExposure - value) < 0.001)
+                if (Math.Abs(this.baseExposure - value) < ImageRenderers.ImageRenderingOptions.MinBaseExposureDifference)
                     return;
                 this.baseExposure = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BaseExposure)));
@@ -487,7 +487,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 && Math.Abs(this.RedColorGain - profile.RedColorGain) <= 0.0001
                 && Math.Abs(this.GreenColorGain - profile.GreenColorGain) <= 0.0001
                 && Math.Abs(this.BlueColorGain - profile.BlueColorGain) <= 0.0001
-                && Math.Abs(this.BaseExposure - profile.BaseExposure) <= 0.001
+                && Math.Abs(this.BaseExposure - profile.BaseExposure) < ImageRenderers.ImageRenderingOptions.MinBaseExposureDifference
                 && this.alphaColorTable.IsSameAs(profile.alphaColorTable)
                 && this.blueColorTable.IsSameAs(profile.blueColorTable)
                 && this.greenColorTable.IsSameAs(profile.greenColorTable)

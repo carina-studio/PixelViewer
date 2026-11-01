@@ -121,18 +121,18 @@ class BayerPattern8ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(I
 				colorTransformationTables16[0] = table;
 				colorTransformationTables16[1] = table + 65536;
 				colorTransformationTables16[2] = table + 131072;
-				BuildColorTransformationTableUnsafe(colorTransformationTables16[0], blueGain);
-				BuildColorTransformationTableUnsafe(colorTransformationTables16[1], greenGain);
-				BuildColorTransformationTableUnsafe(colorTransformationTables16[2], redGain);
+				BuildColorTransformationTableUnsafe(colorTransformationTables16[0], gain: blueGain);
+				BuildColorTransformationTableUnsafe(colorTransformationTables16[1], gain: greenGain);
+				BuildColorTransformationTableUnsafe(colorTransformationTables16[2], gain: redGain);
 			}
 			else
 			{
 				colorTransformationTables8[0] = baseColorTransformationTable;
 				colorTransformationTables8[1] = baseColorTransformationTable + 256;
 				colorTransformationTables8[2] = baseColorTransformationTable + 512;
-				BuildColorTransformationTableUnsafe(colorTransformationTables8[0], blueGain);
-				BuildColorTransformationTableUnsafe(colorTransformationTables8[1], greenGain);
-				BuildColorTransformationTableUnsafe(colorTransformationTables8[2], redGain);
+				BuildColorTransformationTableUnsafe(colorTransformationTables8[0], gain: blueGain);
+				BuildColorTransformationTableUnsafe(colorTransformationTables8[1], gain: greenGain);
+				BuildColorTransformationTableUnsafe(colorTransformationTables8[2], gain: redGain);
 			}
 			bitmapBuffer.Memory.Pin(bitmapBaseAddress =>
 			{

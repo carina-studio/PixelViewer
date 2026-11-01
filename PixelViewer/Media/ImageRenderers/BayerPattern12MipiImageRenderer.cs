@@ -106,9 +106,9 @@ class BayerPattern12MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 				baseColorTransformationTable + 65536,
 				baseColorTransformationTable + 131072,
 			};
-			BuildColorTransformationTableUnsafe(colorTransformationTables[0], ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[1], ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[2], ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[0], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[1], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[2], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
 				// render to 16-bit R/G/B

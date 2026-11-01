@@ -31,48 +31,6 @@ abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
     /// <param name="format">Format.</param>
     protected BayerPatternImageRenderer(ImageFormat format) : base(format)
     { }
-    
-    
-    /// <summary>
-    /// Build color transformation table for single color of BGRA32.
-    /// </summary>
-    /// <param name="table">Pointer to table, the length should be 256.</param>
-    /// <param name="gain">Gain for color.</param>
-    protected static unsafe void BuildColorTransformationTableUnsafe(byte* table, double gain)
-    {
-        table += 255;
-        if (Math.Abs(gain - 1) <= 0.0001)
-        {
-	        for (var i = 255; i >= 0; --i, --table)
-		        *table = (byte)i;
-        }
-        else
-        {
-	        for (var i = 255; i >= 0; --i, --table)
-		        *table = ImageProcessing.ClipToByte(i * gain);
-        }
-    }
-
-
-	/// <summary>
-	/// Build color transformation table for single color of BGRA64.
-	/// </summary>
-	/// <param name="table">Pointer to table, the length should be 65536.</param>
-	/// <param name="gain">Gain for color.</param>
-	protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain)
-	{
-		table += 65535;
-		if (Math.Abs(gain - 1) <= 0.0001)
-		{
-			for (var i = 65535; i >= 0; --i, --table)
-				*table = (ushort)i;
-		}
-		else
-		{
-			for (var i = 65535; i >= 0; --i, --table)
-				*table = ImageProcessing.ClipToUInt16(i * gain);
-		}
-	}
 
 
 	/// <inheritdoc/>

@@ -316,6 +316,12 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Minimum difference between two values of <see cref="BaseExposure"/> in EV for them to be treated as different.
+	/// </summary>
+	public const double MinBaseExposureDifference = 0.001;
+
+
+	/// <summary>
 	/// Minimum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
 	/// </summary>
 	public const double MinRgbGain = 0.01;
@@ -394,7 +400,7 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	/// <inheritdoc/>
 	public bool Equals(ImageRenderingOptions options) =>
 		this.AlphaColorTable.IsSameAs(options.AlphaColorTable)
-		&& Math.Abs(this.BaseExposure - options.BaseExposure) <= 0.001
+		&& Math.Abs(this.BaseExposure - options.BaseExposure) < MinBaseExposureDifference
 		&& this.BayerPattern == options.BayerPattern
 		&& this.BlueColorTable.IsSameAs(options.BlueColorTable)
 		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001

@@ -46,6 +46,56 @@ abstract class BaseImageRenderer : IImageRenderer
 
 
 	/// <summary>
+	/// Build color transformation table for single 8-bit color.
+	/// </summary>
+	/// <param name="table">Pointer to table, the length should be 256.</param>
+	/// <param name="gain">Gain for color.</param>
+	/// <param name="baseExposure">Base exposure in EV.</param>
+	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them.</remarks>
+	protected static unsafe void BuildColorTransformationTableUnsafe(byte* table, double gain = 1.0, double baseExposure = 0.0)
+	{
+		// build identical table if the color is not transformed
+		var baseExposureScale = GetBaseExposureScale(baseExposure);
+		table += 255;
+		if (Math.Abs(gain - 1) <= 0.0001 && Math.Abs(baseExposureScale - 1) <= 0.0001)
+		{
+			for (var i = 255; i >= 0; --i, --table)
+				*table = (byte)i;
+			return;
+		}
+
+		// build table
+		for (var i = 255; i >= 0; --i, --table)
+			*table = ImageProcessing.ClipToByte(ImageProcessing.ClipToByte(i * baseExposureScale) * gain);
+	}
+
+
+	/// <summary>
+	/// Build color transformation table for single 16-bit color.
+	/// </summary>
+	/// <param name="table">Pointer to table, the length should be 65536.</param>
+	/// <param name="gain">Gain for color.</param>
+	/// <param name="baseExposure">Base exposure in EV.</param>
+	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them.</remarks>
+	protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain = 1.0, double baseExposure = 0.0)
+	{
+		// build identical table if the color is not transformed
+		var baseExposureScale = GetBaseExposureScale(baseExposure);
+		table += 65535;
+		if (Math.Abs(gain - 1) <= 0.0001 && Math.Abs(baseExposureScale - 1) <= 0.0001)
+		{
+			for (var i = 65535; i >= 0; --i, --table)
+				*table = (ushort)i;
+			return;
+		}
+
+		// build table
+		for (var i = 65535; i >= 0; --i, --table)
+			*table = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16(i * baseExposureScale) * gain);
+	}
+
+
+	/// <summary>
 	/// Change the format supported by this renderer.
 	/// </summary>
 	/// <param name="format">New format, which is expected to carry the same identifier as the current one.</param>
@@ -386,6 +436,20 @@ abstract class BaseImageRenderer : IImageRenderer
 				mapping[i] = (byte)((color - blackLevel) * scale + 0.5);
 		}
 		return mapping;
+	}
+
+
+	/// <summary>
+	/// Get the scale to be applied to colors by given base exposure.
+	/// </summary>
+	/// <param name="baseExposure">Base exposure in EV.</param>
+	/// <returns>Scale of colors, which is 1 if <paramref name="baseExposure"/> is 0 or invalid.</returns>
+	protected static double GetBaseExposureScale(double baseExposure)
+	{
+		baseExposure = ImageRenderingOptions.CoerceBaseExposure(baseExposure);
+		if (Math.Abs(baseExposure) < ImageRenderingOptions.MinBaseExposureDifference)
+			return 1;
+		return Math.Pow(2, baseExposure);
 	}
 
 
