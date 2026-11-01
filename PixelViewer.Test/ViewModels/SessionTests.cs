@@ -211,6 +211,81 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 
 		/// <summary>
+		/// Test for applying base exposure and RGB gains of current profile after selecting a renderer which does not apply them.
+		/// </summary>
+		[Test]
+		public void TestApplyingProfileValuesToRendererWithoutSupport()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// prepare the actions to select renderer and to set and check the values
+				void SelectRenderer(string formatName)
+				{
+					ImageRenderers.TryFindByFormatName(formatName, out var renderer);
+					Assert.That(renderer, Is.Not.Null, $"Renderer of {formatName} should be found.");
+					session.ImageRenderer = renderer;
+				}
+				void SetValues(double baseExposure, double gain)
+				{
+					session.BaseExposure = baseExposure;
+					session.RedColorGain = gain;
+					session.GreenColorGain = gain;
+					session.BlueColorGain = gain;
+				}
+				void CheckValues(double baseExposure, double gain, string message)
+				{
+					Assert.That(session.BaseExposure, Is.EqualTo(baseExposure).Within(ImageRenderingOptions.MinBaseExposureDifference), message);
+					Assert.That((session.RedColorGain, session.GreenColorGain, session.BlueColorGain), Is.EqualTo((gain, gain, gain)), message);
+				}
+
+				// open file, its format is unidentifiable so the default profile is kept
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// the values of the default profile are applied after selecting the renderer which does not apply them, base exposure is applied by the renderer of luminance only if it is supported at all
+					SelectRenderer("Bayer_Pattern_16");
+					SetValues(1.5, 2.0);
+					SelectRenderer("L8");
+					CheckValues(session.IsBaseExposureSupported ? 1.5 : 0, 1.0, "RGB gains of default profile should be applied after selecting the renderer which does not apply them.");
+					SelectRenderer("P010");
+					CheckValues(0, 1.0, "Values of default profile should be applied after selecting the renderer which does not apply them.");
+					SelectRenderer("Bayer_Pattern_16");
+					CheckValues(0, 1.0, "Values should not come back after selecting the renderer which applies them.");
+
+					// the values of the user-defined profile are applied after selecting the renderer which does not apply them
+					ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+					using var profile = new ImageRenderingProfile("Base Exposure and RGB Gains", renderer.AsNonNull()).Setup(it =>
+					{
+						it.BaseExposure = 0.75;
+						it.RedColorGain = 3.0;
+						it.GreenColorGain = 3.0;
+						it.BlueColorGain = 3.0;
+					});
+					session.Profile = profile;
+					SetValues(2.5, 1.25);
+					SelectRenderer("P010");
+					CheckValues(0.75, 3.0, "Values of user-defined profile should be applied after selecting the renderer which does not apply them.");
+					SelectRenderer("Bayer_Pattern_16");
+					CheckValues(0.75, 3.0, "Values of user-defined profile should be kept after selecting the renderer which applies them.");
+					Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering.");
+				}
+				finally
+				{
+					// close file
+					session.Profile = ImageRenderingProfile.Default;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
+				}
+			});
+		}
+
+
+		/// <summary>
 		/// Test for changing image renderer.
 		/// </summary>
 		/// <returns></returns>
@@ -526,7 +601,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 						it.BlueColorGain = 3.0;
 					});
 					session.Profile = profile;
-					CheckValues(session.IsBaseExposureSupported ? 0.75 : -1.25, 3.0, "Values of user-defined profile should be applied.");
+					CheckValues(0.75, 3.0, "Values of user-defined profile should be applied.");
 					SetValues(2.5, 1.25);
 					await OpenAsync(this.GenerateSourceFile());
 					Assert.That(session.Profile, Is.SameAs(profile), "User-defined profile should be kept selected.");

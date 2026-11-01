@@ -1497,6 +1497,17 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.UpdateHasColorTables();
 		this.UpdateIsAlphaChannelAvailable();
 
+		// apply base exposure and RGB gains of current profile if they are not applied by the renderer, so the ones left by the previous renderer do not come back after switching to a renderer which applies them
+		var profile = this.Profile;
+		if (!this.IsBaseExposureSupported)
+			this.SetValue(BaseExposureProp, profile.BaseExposure);
+		if (!this.IsRgbGainSupported)
+		{
+			this.SetValue(RedColorGainProp, profile.RedColorGain);
+			this.SetValue(GreenColorGainProp, profile.GreenColorGain);
+			this.SetValue(BlueColorGainProp, profile.BlueColorGain);
+		}
+
 		// reset plane options and restart rendering
 		this.isImagePlaneOptionsResetNeeded = true;
 		this.updateFilterSupportingAction.Reschedule();
