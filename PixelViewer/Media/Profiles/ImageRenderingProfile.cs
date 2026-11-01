@@ -40,6 +40,7 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Fields.
         ColorTable? alphaColorTable;
+        double baseExposure;
         BayerPattern bayerPattern;
         IList<uint> blackLevels = emptyBlackLevels;
         ColorTable? blueColorTable;
@@ -124,6 +125,24 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Application.
         public IApplication Application => app ?? throw new InvalidOperationException("Profile is not ready yet.");
+
+
+        // Base exposure in EV.
+        public double BaseExposure
+        {
+            get => this.baseExposure;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                value = ImageRenderers.ImageRenderingOptions.CoerceBaseExposure(value);
+                if (Math.Abs(this.baseExposure - value) < 0.001)
+                    return;
+                this.baseExposure = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BaseExposure)));
+            }
+        }
 
 
         // Pattern of Bayer Filter.
@@ -468,6 +487,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 && Math.Abs(this.RedColorGain - profile.RedColorGain) <= 0.0001
                 && Math.Abs(this.GreenColorGain - profile.GreenColorGain) <= 0.0001
                 && Math.Abs(this.BlueColorGain - profile.BlueColorGain) <= 0.0001
+                && Math.Abs(this.BaseExposure - profile.BaseExposure) <= 0.001
                 && this.alphaColorTable.IsSameAs(profile.alphaColorTable)
                 && this.blueColorTable.IsSameAs(profile.blueColorTable)
                 && this.greenColorTable.IsSameAs(profile.greenColorTable)
@@ -836,6 +856,10 @@ namespace Carina.PixelViewer.Media.Profiles
                     profile.rowStrides = ListExtensions.AsReadOnly(array);
                 }
 
+                // get base exposure
+                if (rootElement.TryGetProperty(nameof(BaseExposure), out jsonProperty) && jsonProperty.TryGetDouble(out profile.baseExposure))
+                    profile.baseExposure = ImageRenderers.ImageRenderingOptions.CoerceBaseExposure(profile.baseExposure);
+
                 // get RGB gain
                 if (rootElement.TryGetProperty(nameof(RedColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out profile.redColorGain))
                     profile.redColorGain = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(profile.redColorGain);
@@ -1098,6 +1122,8 @@ namespace Carina.PixelViewer.Media.Profiles
                 for (var i = 0; i < format.PlaneCount; ++i)
                     jsonWriter.WriteNumberValue(this.rowStrides[i]);
                 jsonWriter.WriteEndArray();
+                if (this.baseExposure != 0)
+                    jsonWriter.WriteNumber(nameof(BaseExposure), this.baseExposure);
                 jsonWriter.WriteNumber(nameof(RedColorGain), this.redColorGain);
                 jsonWriter.WriteNumber(nameof(GreenColorGain), this.greenColorGain);
                 jsonWriter.WriteNumber(nameof(BlueColorGain), this.blueColorGain);

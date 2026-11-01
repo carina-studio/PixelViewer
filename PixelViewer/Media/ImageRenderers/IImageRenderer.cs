@@ -298,9 +298,21 @@ static class ImageRendererExtensions
 struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 {
 	/// <summary>
+	/// Maximum value of <see cref="BaseExposure"/> in EV.
+	/// </summary>
+	public const double MaxBaseExposure = 10;
+
+
+	/// <summary>
 	/// Maximum value of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/>.
 	/// </summary>
 	public const double MaxRgbGain = 100;
+
+
+	/// <summary>
+	/// Minimum value of <see cref="BaseExposure"/> in EV.
+	/// </summary>
+	public const double MinBaseExposure = -10;
 
 
 	/// <summary>
@@ -314,6 +326,12 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	/// </summary>
 	/// <remarks>The instance is borrowed from the caller, the renderer should share it before rendering the image.</remarks>
 	public ColorTable? AlphaColorTable { get; set; }
+
+
+	/// <summary>
+	/// Base exposure in EV, the colors of rendered image are scaled by 2^<see cref="BaseExposure"/>.
+	/// </summary>
+	public double BaseExposure { get; set; }
 
 
 	/// <summary>
@@ -342,6 +360,19 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Coerce base exposure into valid range.
+	/// </summary>
+	/// <param name="baseExposure">Original base exposure in EV.</param>
+	/// <returns>Valid base exposure in EV.</returns>
+	public static double CoerceBaseExposure(double baseExposure)
+	{
+		if (!double.IsFinite(baseExposure))
+			return 0;
+		return Math.Clamp(baseExposure, MinBaseExposure, MaxBaseExposure);
+	}
+
+
+	/// <summary>
 	/// Compression of data starting from <see cref="DataOffset"/>.
 	/// </summary>
 	public ImageDataCompression Compression { get; set; }
@@ -363,6 +394,7 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	/// <inheritdoc/>
 	public bool Equals(ImageRenderingOptions options) =>
 		this.AlphaColorTable.IsSameAs(options.AlphaColorTable)
+		&& Math.Abs(this.BaseExposure - options.BaseExposure) <= 0.001
 		&& this.BayerPattern == options.BayerPattern
 		&& this.BlueColorTable.IsSameAs(options.BlueColorTable)
 		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001

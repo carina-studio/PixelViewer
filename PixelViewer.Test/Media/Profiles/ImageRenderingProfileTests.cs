@@ -35,6 +35,7 @@ class ImageRenderingProfileTests : BaseTests
 			using var colorTable = CreateColorTable();
 			profile.AlphaColorTable = colorTable;
 		}),
+		(nameof(ImageRenderingProfile.BaseExposure), profile => profile.BaseExposure += 1),
 		(nameof(ImageRenderingProfile.BayerPattern), profile => profile.BayerPattern = profile.BayerPattern == BayerPattern.BGGR_2x2 ? BayerPattern.GBRG_4x4 : BayerPattern.BGGR_2x2),
 		(nameof(ImageRenderingProfile.BlackLevels), profile => profile.BlackLevels = IncreaseFirstElement(profile.BlackLevels)),
 		(nameof(ImageRenderingProfile.BlueColorGain), profile => profile.BlueColorGain += 1),
@@ -76,6 +77,58 @@ class ImageRenderingProfileTests : BaseTests
 		(nameof(ImageRenderingProfile.Width), profile => profile.Width += 1),
 		(nameof(ImageRenderingProfile.YuvToBgraConverter), profile => profile.YuvToBgraConverter = profile.YuvToBgraConverter == YuvToBgraConverter.BT_709 ? YuvToBgraConverter.BT_601 : YuvToBgraConverter.BT_709),
 	];
+
+
+	/// <summary>
+	/// Test for saving and loading base exposure.
+	/// </summary>
+	[Test]
+	public void BaseExposurePersistenceTest()
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// save a profile which uses base exposure
+			await this.InitializeSubSystemsAsync();
+			ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+			var name = $"Base Exposure Test {Guid.NewGuid()}";
+			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
+			{
+				BaseExposure = 1.37,
+			};
+			await profile.SaveAsync();
+			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
+			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
+			try
+			{
+				// check that base exposure is loaded
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.BaseExposure, Is.EqualTo(1.37), "Base exposure should be loaded.");
+
+				// check that no base exposure is written, so the file stays the same as one written before it was supported
+				profile.BaseExposure = 0;
+				await profile.SaveAsync();
+				var json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.BaseExposure)}\":"), "No base exposure should not be written.");
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.BaseExposure, Is.Zero, "No base exposure should be loaded.");
+
+				// check that base exposure out of range is coerced when loading
+				foreach (var (savedValue, expectedValue) in new[] { (25.0, ImageRenderingOptions.MaxBaseExposure), (-25.0, ImageRenderingOptions.MinBaseExposure) })
+				{
+					var jsonWithExposure = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.BaseExposure)}\": {savedValue}, \"{nameof(ImageRenderingProfile.Width)}\"");
+					Assert.That(jsonWithExposure, Does.Contain($"\"{nameof(ImageRenderingProfile.BaseExposure)}\":"), "The base exposure out of range should have been written.");
+					await File.WriteAllTextAsync(fileName, jsonWithExposure);
+					using var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName);
+					Assert.That(loadedProfile.BaseExposure, Is.EqualTo(expectedValue), "Base exposure out of range should be coerced.");
+				}
+			}
+			finally
+			{
+				profile.Dispose();
+				await DeleteFileAsync(fileName);
+			}
+		});
+	}
 
 
 	/// <summary>

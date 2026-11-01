@@ -313,6 +313,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels3Prop = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels3));
 	/// <summary>
+	/// Property of <see cref="BaseExposure"/>.
+	/// </summary>
+	public static readonly ObservableProperty<double> BaseExposureProp = ObservableProperty.Register<Session, double>(nameof(BaseExposure), 0, coerce: (_, it) => ImageRenderingOptions.CoerceBaseExposure(it));
+	/// <summary>
 	/// Property of <see cref="BayerPattern"/>.
 	/// </summary>
 	public static readonly ObservableProperty<BayerPattern> BayerPatternProp = ObservableProperty.Register<Session, BayerPattern>(nameof(BayerPattern));
@@ -553,6 +557,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="IsAlphaChannelAvailable"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsAlphaChannelAvailableProp = ObservableProperty.Register<Session, bool>(nameof(IsAlphaChannelAvailable));
+	/// <summary>
+	/// Property of <see cref="IsBaseExposureSupported"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsBaseExposureSupportedProp = ObservableProperty.Register<Session, bool>(nameof(IsBaseExposureSupported));
 	/// <summary>
 	/// Property of <see cref="IsBayerPatternSupported"/>.
 	/// </summary>
@@ -1609,6 +1617,10 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.ChangeRowStride(i, profile.RowStrides[i]);
 			}
 
+			// base exposure
+			if (this.IsBaseExposureSupported)
+				this.SetValue(BaseExposureProp, profile.BaseExposure);
+
 			// RGB gain
 			if (this.IsRgbGainSupported)
 			{
@@ -1678,6 +1690,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Check whether black/white levels for 3rd image plane is adjustable or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
 	public bool AreAdjustableBlackWhiteLevels3 => this.GetValue(AreAdjustableBlackWhiteLevels3Prop);
+
+
+	/// <summary>
+	/// Get or set base exposure in EV for rendered image.
+	/// </summary>
+	public double BaseExposure
+	{
+		get => this.GetValue(BaseExposureProp);
+		set => this.SetValue(BaseExposureProp, value);
+	}
 
 
 	/// <summary>
@@ -3536,9 +3558,15 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Check whether <see cref="BaseExposure"/> is supported by current <see cref="ImageRenderer"/> or not.
+	/// </summary>
+	public bool IsBaseExposureSupported => this.GetValue(IsBaseExposureSupportedProp);
+
+
+	/// <summary>
 	/// Check whether <see cref="BayerPattern"/> is supported by current <see cref="ImageRenderer"/> or not.
 	/// </summary>
-	public bool IsBayerPatternSupported => this.GetValue(IsBayerPatternSupportedProp);
+	public bool IsBayerPatternSupported =>this.GetValue(IsBayerPatternSupportedProp);
 
 
 	/// <summary>
@@ -6007,6 +6035,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var whiteLevels = new uint[this.whiteLevels.Length];
 		var pixelStrides = new int[this.pixelStrides.Length];
 		var rowStrides = new int[this.rowStrides.Length];
+		var baseExposure = 0.0;
 		var rGain = 1.0;
 		var gGain = 1.0;
 		var bGain = 1.0;
@@ -6105,6 +6134,8 @@ class Session : ViewModel<IAppSuiteApplication>
 					break;
 			}
 		}
+		if (savedState.TryGetProperty(nameof(BaseExposure), out jsonProperty) && jsonProperty.TryGetDouble(out baseExposure))
+			baseExposure = ImageRenderingOptions.CoerceBaseExposure(baseExposure);
 		if (savedState.TryGetProperty(nameof(RedColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out rGain))
 			rGain = ImageRenderingOptions.GetValidRgbGain(rGain);
 		if (savedState.TryGetProperty(nameof(GreenColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out gGain))
@@ -6246,6 +6277,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.ChangePixelStride(i, pixelStrides[i]);
 		for (var i = rowStrides.Length - 1; i >= 0; --i)
 			this.ChangeRowStride(i, rowStrides[i]);
+		this.SetValue(BaseExposureProp, baseExposure);
 		this.SetValue(RedColorGainProp, rGain);
 		this.SetValue(GreenColorGainProp, gGain);
 		this.SetValue(BlueColorGainProp, bGain);
@@ -6642,6 +6674,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		foreach (var n in this.rowStrides)
 			writer.WriteNumberValue(n);
 		writer.WriteEndArray();
+		if (this.IsBaseExposureSupported)
+			writer.WriteNumber(nameof(BaseExposure), this.BaseExposure);
 		if (this.IsRgbGainSupported)
 		{
 			writer.WriteNumber(nameof(RedColorGain), this.RedColorGain);
@@ -7398,6 +7432,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		profile.WhiteLevels = this.whiteLevels;
 		profile.PixelStrides = this.pixelStrides;
 		profile.RowStrides = this.rowStrides;
+		if (this.IsBaseExposureSupported)
+			profile.BaseExposure = this.BaseExposure;
 		if (this.IsRgbGainSupported)
 		{
 			profile.RedColorGain = this.RedColorGain;
