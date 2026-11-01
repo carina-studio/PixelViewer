@@ -1137,18 +1137,18 @@
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 								</Panel>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsAdjustablePixelStride1}"/>
+								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride1}"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
+								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
-								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowLabel" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits1}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
+								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits1}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
 								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels1}">
-									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel1, Mode=TwoWay}"/>
-									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel1, Mode=TwoWay}"/>
 								</StackPanel>
@@ -1174,18 +1174,18 @@
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 								</Panel>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsAdjustablePixelStride2}"/>
+								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride2}"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
+								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
-								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowLabel" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits2}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
+								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits2}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
 								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels2}">
-									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel2, Mode=TwoWay}"/>
-									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel2, Mode=TwoWay}"/>
 								</StackPanel>
@@ -1211,18 +1211,18 @@
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 								</Panel>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsAdjustablePixelStride3}"/>
+								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride3}"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
+								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
 								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
-								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowLabel" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits3}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
+								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits3}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
 								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels3}">
-									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel3, Mode=TwoWay}"/>
-									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel3, Mode=TwoWay}"/>
 								</StackPanel>
@@ -1243,7 +1243,7 @@
 								                              MinDecimalPlaces="4"
 								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
 								                              Value="{Binding RedColorGain, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Default"/>
+								<Separator asControls:DialogElement.SeparatorType="Small"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.GreenColorGain}"/>
 								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
 								                              DecimalPlaces="4"
@@ -1254,7 +1254,7 @@
 								                              MinDecimalPlaces="4"
 								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
 								                              Value="{Binding GreenColorGain, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Default"/>
+								<Separator asControls:DialogElement.SeparatorType="Small"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlueColorGain}"/>
 								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
 								                              DecimalPlaces="4"
