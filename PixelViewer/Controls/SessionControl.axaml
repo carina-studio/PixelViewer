@@ -1234,13 +1234,37 @@
 						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.RgbGain}" IsExpanded="True" IsVisible="{Binding IsRgbGainSupported}">
 							<StackPanel>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RedColorGain}"/>
-								<abControls:RealNumberTextBox Classes="Dialog_TextBox" DefaultValue="1" IsNullValueAllowed="False" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Value="{Binding RedColorGain, Mode=TwoWay}"/>
+								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
+								                              DecimalPlaces="4"
+								                              DefaultValue="1" 
+								                              Increment="0.1"
+								                              IsNullValueAllowed="False" 
+								                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
+								                              MinDecimalPlaces="4"
+								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
+								                              Value="{Binding RedColorGain, Mode=TwoWay}"/>
 								<Separator asControls:DialogElement.SeparatorType="Default"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.GreenColorGain}"/>
-								<abControls:RealNumberTextBox Classes="Dialog_TextBox" DefaultValue="1" IsNullValueAllowed="False" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Value="{Binding GreenColorGain, Mode=TwoWay}"/>
+								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
+								                              DecimalPlaces="4"
+								                              DefaultValue="1" 
+								                              Increment="0.1"
+								                              IsNullValueAllowed="False" 
+								                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
+								                              MinDecimalPlaces="4"
+								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
+								                              Value="{Binding GreenColorGain, Mode=TwoWay}"/>
 								<Separator asControls:DialogElement.SeparatorType="Default"/>
 								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlueColorGain}"/>
-								<abControls:RealNumberTextBox Classes="Dialog_TextBox" DefaultValue="1" IsNullValueAllowed="False" Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" Minimum="{x:Static appControls:SessionControl.MinRgbGain}" Value="{Binding BlueColorGain, Mode=TwoWay}"/>
+								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
+								                              DecimalPlaces="4"
+								                              DefaultValue="1" 
+								                              Increment="0.1"
+								                              IsNullValueAllowed="False" 
+								                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
+								                              MinDecimalPlaces="4"
+								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
+								                              Value="{Binding BlueColorGain, Mode=TwoWay}"/>
 								<Separator asControls:DialogElement.SeparatorType="Default"/>
 								<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{asXaml:StringResource SessionControl.SelectRgbGain}"/>
 								<Separator asControls:DialogElement.SeparatorType="Small"/>

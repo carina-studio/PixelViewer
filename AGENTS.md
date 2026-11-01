@@ -192,6 +192,7 @@ Exception: struct fields declared with `[StructLayout(LayoutKind.Sequential)]` m
 - Resource names use slash-separated paths: `Brush/SessionView.StatusBar.Background`.
 - To combine multiple bindings with boolean AND / OR, prefer the `{asXaml:AndBindings …}` / `{asXaml:OrBindings …}` markup extensions (comma-separated child `{Binding …}` entries) over a `MultiBinding` with `{x:Static aConverters:BoolConverters.And}` / `.Or`. The markup-extension form is more concise and is the established pattern in this repo.
 - **`asControls:DialogItem` sizing** — use the default item size only when the item contains a **ComboBox** input or has a **description** (`asControls:DialogElement.TextRole="DescriptionBelowLabel"`); for every other item (plain TextBox/IntegerTextBox, ToggleSwitch, etc. with just a label) set `ItemSize="Small"`.
+- **A trailing space before a line break is fine** — the IDE leaves one at the end of each line when an element's attributes are split across lines (as the `RealNumberTextBox`es of `SessionControl.axaml` are). Do not strip it, and do not flag it in review.
 
 ### Logging
 

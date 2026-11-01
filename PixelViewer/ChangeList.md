@@ -8,6 +8,7 @@
 ## Improvement
 + Improved the overall performance of the user interface.
 + Improved the user experience of full screen mode on macOS.
++ Improved the user experience of specifying color pre-correction.
 
 ## Behavior Changes
 + Color pre-correction defined by an image file (such as DNG) is no longer kept after opening another file.
