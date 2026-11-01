@@ -608,6 +608,7 @@ abstract class BaseImageRenderer : IImageRenderer
 	public abstract int EvaluatePixelCount(IImageDataSource source);
 	public abstract long EvaluateSourceDataSize(int width, int height, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions);
 	public ImageFormat Format => this.format;
+	public virtual bool IsBaseExposureSupported => false;
 	public bool IsBuiltIn => this.format.Category != ImageFormatCategory.UserDefined;
 	public virtual bool IsColorTableSupported => false;
 	public event PropertyChangedEventHandler? PropertyChanged;

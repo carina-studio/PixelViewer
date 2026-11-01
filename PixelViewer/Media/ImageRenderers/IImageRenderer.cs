@@ -60,6 +60,13 @@ interface IImageRenderer : INotifyPropertyChanged
 
 
 	/// <summary>
+	/// Check whether <see cref="ImageRenderingOptions.BaseExposure"/> is applied by this renderer or not.
+	/// </summary>
+	/// <remarks>The base exposure is ignored by a renderer which reports False.</remarks>
+	bool IsBaseExposureSupported => false;
+
+
+	/// <summary>
 	/// Check whether the color tables in <see cref="ImageRenderingOptions"/> are applied by this renderer or not.
 	/// </summary>
 	/// <remarks>The color tables are ignored by a renderer which reports False, so the effective bits of the image
