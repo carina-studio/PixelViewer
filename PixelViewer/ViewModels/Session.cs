@@ -2115,7 +2115,14 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (!disposing)
 			{
 				if (this.Profile == this.fileFormatProfile)
+				{
+					// base exposure and RGB gains of file format are defined for the file only, they should not be applied to the next source
 					this.SwitchToProfileWithoutApplying(ImageRenderingProfile.Default);
+					this.ResetValue(BaseExposureProp);
+					this.ResetValue(BlueColorGainProp);
+					this.ResetValue(GreenColorGainProp);
+					this.ResetValue(RedColorGainProp);
+				}
 				this.profiles.Remove(this.fileFormatProfile);
 			}
 			this.fileFormatProfile.Dispose();
@@ -2217,6 +2224,20 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.canOpenSource.Update(true);
 		this.SetValue(SourceSizeStringProp, source.Size.ToFileSizeString());
 		this.UpdateCanSaveDeleteProfile();
+
+		// apply base exposure and RGB gains of the user-defined profile which is kept selected, they may have been changed since the profile was applied
+		var profile = this.Profile;
+		if (profile.Type == ImageRenderingProfileType.UserDefined)
+		{
+			if (this.IsBaseExposureSupported)
+				this.SetValue(BaseExposureProp, profile.BaseExposure);
+			if (this.IsRgbGainSupported)
+			{
+				this.SetValue(RedColorGainProp, profile.RedColorGain);
+				this.SetValue(GreenColorGainProp, profile.GreenColorGain);
+				this.SetValue(BlueColorGainProp, profile.BlueColorGain);
+			}
+		}
 
 		// apply profile
 		applyProfile();

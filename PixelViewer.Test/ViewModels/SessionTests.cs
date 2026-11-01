@@ -6,6 +6,7 @@ using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -461,6 +462,85 @@ namespace Carina.PixelViewer.Test.ViewModels
 				// close files
 				session.ClearSourceCommand.Execute(null);
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close frame sequence.");
+			});
+		}
+
+
+		/// <summary>
+		/// Test for resetting base exposure and RGB gains after changing source, according to where they came from.
+		/// </summary>
+		[Test]
+		public void TestResettingBaseExposureAndRgbGainsAfterChangingSource()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// prepare the actions to open file after closing the current one, and to set and check the values
+				var filePaths = new List<string>();
+				async Task OpenAsync(string filePath)
+				{
+					filePaths.Add(filePath);
+					if (session.IsSourceOpened)
+					{
+						session.ClearSourceCommand.Execute(null);
+						Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
+					}
+					session.OpenSourceFileCommand.Execute(filePath);
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+					Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				}
+				void SetValues(double baseExposure, double gain)
+				{
+					session.BaseExposure = baseExposure;
+					session.RedColorGain = gain;
+					session.GreenColorGain = gain;
+					session.BlueColorGain = gain;
+				}
+				void CheckValues(double baseExposure, double gain, string message)
+				{
+					Assert.That(session.BaseExposure, Is.EqualTo(baseExposure).Within(ImageRenderingOptions.MinBaseExposureDifference), message);
+					Assert.That((session.RedColorGain, session.GreenColorGain, session.BlueColorGain), Is.EqualTo((gain, gain, gain)), message);
+				}
+				try
+				{
+					// the values of a source opened with its profile of file format are not applied to the next source
+					await OpenAsync(await this.GenerateImageFileAsync("reset_params_1.png", FileFormats.Png, 16, 16));
+					Assert.That(session.Profile.IsFileFormat, Is.True, "Profile of file format should be applied.");
+					SetValues(1.5, 2.0);
+					await OpenAsync(this.GenerateSourceFile());
+					CheckValues(0, 1.0, "Values of previous source opened with its profile of file format should be reset.");
+
+					// the values set by user for a source without profile are kept for the next source
+					SetValues(-1.25, 1.5);
+					await OpenAsync(this.GenerateSourceFile());
+					CheckValues(-1.25, 1.5, "Values set by user should be kept for the next source.");
+
+					// the values of the user-defined profile kept selected are applied again to the next source, base exposure is applied only by the renderer which supports it
+					ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+					Assert.That(renderer, Is.Not.Null);
+					using var profile = new ImageRenderingProfile("Base Exposure and RGB Gains", renderer!).Setup(it =>
+					{
+						it.BaseExposure = 0.75;
+						it.RedColorGain = 3.0;
+						it.GreenColorGain = 3.0;
+						it.BlueColorGain = 3.0;
+					});
+					session.Profile = profile;
+					CheckValues(session.IsBaseExposureSupported ? 0.75 : -1.25, 3.0, "Values of user-defined profile should be applied.");
+					SetValues(2.5, 1.25);
+					await OpenAsync(this.GenerateSourceFile());
+					Assert.That(session.Profile, Is.SameAs(profile), "User-defined profile should be kept selected.");
+					CheckValues(session.IsBaseExposureSupported ? 0.75 : 2.5, 3.0, "Values of user-defined profile should be applied again to the next source.");
+				}
+				finally
+				{
+					// close file and delete generated files
+					session.Profile = ImageRenderingProfile.Default;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					foreach (var filePath in filePaths)
+						await DeleteFileAsync(filePath);
+				}
 			});
 		}
 	}

@@ -10,7 +10,8 @@
 + Improved the user experience of full screen mode on macOS.
 
 ## Behavior Changes
-+ 
++ Color pre-correction defined by an image file (such as DNG) is no longer kept after opening another file.
++ Color pre-correction of the current profile is applied again when opening a file.
 
 ## Bug Fixing
 + Minor bug fixing.
