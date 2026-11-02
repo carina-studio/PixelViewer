@@ -34,6 +34,10 @@ abstract class BayerPatternImageRenderer : SinglePlaneImageRenderer
 
 
 	/// <inheritdoc/>
+	public override bool IsRgbGainSupported => true;
+
+
+	/// <inheritdoc/>
 	protected override ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 	{
 		// get parameters

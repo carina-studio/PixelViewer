@@ -91,14 +91,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 
 		// render
 		var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
-		var accuColor = stackalloc ulong[] { 0L, 0L, 0L };
-		var accuPixelCount = stackalloc int[] { 0, 0, 0 };
-		var wAccuColor = stackalloc ulong[] { 0L, 0L, 0L };
-		var wAccuPixelCount = stackalloc int[] { 0, 0, 0 };
-		var wLeft = width / 3;
-		var wRight = width - wLeft;
-		var wTop = height / 3;
-		var wBottom = height - wTop;
+		var meansAccumulator = new RgbMeansAccumulator(width, height, 65535, renderingOptions);
 		try
 		{
 			ushort** colorTransformationTables = stackalloc ushort*[3] {
@@ -106,9 +99,9 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 				baseColorTransformationTable + 65536,
 				baseColorTransformationTable + 131072,
 			};
-			BuildColorTransformationTableUnsafe(colorTransformationTables[0], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[1], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[2], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[0], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[1], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[2], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
 			bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 			{
 				// render to 16-bit R/G/B
@@ -122,25 +115,13 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var packedPixelsPtr = rowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
-						var isVerticalWeightedArea = (y >= wTop && y <= wBottom);
 						for (var x = 0; x < width; packedPixelsPtr += 5)
 						{
 							// 1st pixel
 							var bytes4 = packedPixelsPtr[4];
 							var colorComponent = (int)colorComponentSelector(x, y);
 							var color = bitsCombinationFunc(packedPixelsPtr[0], bytes4);
-							accuColor[colorComponent] += color;
-							++accuPixelCount[colorComponent];
-							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
-							{
-								wAccuColor[colorComponent] += (ushort)(color << 1);
-								wAccuPixelCount[colorComponent] += 2;
-							}
-							else
-							{
-								wAccuColor[colorComponent] += color;
-								++wAccuPixelCount[colorComponent];
-							}
+							meansAccumulator.Accumulate(x, y, colorComponent, color);
 							bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 							bitmapPixelPtr[3] = 65535;
 							bitmapPixelPtr += 4;
@@ -149,18 +130,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							// 2nd pixel
 							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[1], (byte)(bytes4 >> 2));
-							accuColor[colorComponent] += color;
-							++accuPixelCount[colorComponent];
-							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
-							{
-								wAccuColor[colorComponent] += (ushort)(color << 1);
-								wAccuPixelCount[colorComponent] += 2;
-							}
-							else
-							{
-								wAccuColor[colorComponent] += color;
-								++wAccuPixelCount[colorComponent];
-							}
+							meansAccumulator.Accumulate(x, y, colorComponent, color);
 							bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 							bitmapPixelPtr[3] = 65535;
 							bitmapPixelPtr += 4;
@@ -169,18 +139,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							// 3rd pixel
 							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[2], (byte)(bytes4 >> 4));
-							accuColor[colorComponent] += color;
-							++accuPixelCount[colorComponent];
-							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
-							{
-								wAccuColor[colorComponent] += (ushort)(color << 1);
-								wAccuPixelCount[colorComponent] += 2;
-							}
-							else
-							{
-								wAccuColor[colorComponent] += color;
-								++wAccuPixelCount[colorComponent];
-							}
+							meansAccumulator.Accumulate(x, y, colorComponent, color);
 							bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 							bitmapPixelPtr[3] = 65535;
 							bitmapPixelPtr += 4;
@@ -189,18 +148,7 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 							// 4th pixel
 							colorComponent = (int)colorComponentSelector(x, y);
 							color = bitsCombinationFunc(packedPixelsPtr[3], (byte)(bytes4 >> 6));
-							accuColor[colorComponent] += color;
-							++accuPixelCount[colorComponent];
-							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
-							{
-								wAccuColor[colorComponent] += (ushort)(color << 1);
-								wAccuPixelCount[colorComponent] += 2;
-							}
-							else
-							{
-								wAccuColor[colorComponent] += color;
-								++wAccuPixelCount[colorComponent];
-							}
+							meansAccumulator.Accumulate(x, y, colorComponent, color);
 							bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 							bitmapPixelPtr[3] = 65535;
 							bitmapPixelPtr += 4;
@@ -220,14 +168,8 @@ class BayerPattern10MipiImageRenderer() : BayerPatternImageRenderer(new ImageFor
 		}
 
 		// complete
-		return new ImageRenderingResult()
-		{
-			MeanOfBlue = accuColor[BlueColorComponent] / (double)accuPixelCount[BlueColorComponent],
-			MeanOfGreen = accuColor[GreenColorComponent] / (double)accuPixelCount[GreenColorComponent],
-			MeanOfRed = accuColor[RedColorComponent] / (double)accuPixelCount[RedColorComponent],
-			WeightedMeanOfBlue = wAccuColor[BlueColorComponent] / (double)wAccuPixelCount[BlueColorComponent],
-			WeightedMeanOfGreen = wAccuColor[GreenColorComponent] / (double)wAccuPixelCount[GreenColorComponent],
-			WeightedMeanOfRed = wAccuColor[RedColorComponent] / (double)wAccuPixelCount[RedColorComponent],
-		};
+		var result = new ImageRenderingResult();
+		meansAccumulator.WriteToRenderingResult(ref result);
+		return result;
 	}
 }

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,6 +22,94 @@ namespace Carina.PixelViewer.Media.ImageRenderers;
 /// </summary>
 abstract class BaseImageRenderer : IImageRenderer
 {
+	/// <summary>
+	/// Accumulator of colors of rendered image to calculate the means of RGB colors.
+	/// </summary>
+	/// <remarks>The colors are accumulated as linear colors when the color transfer functions are defined by the rendering options, so the RGB gains selected from the means fit the gains applied to linear colors. A pixel in the central area of image is counted twice by the weighted means.</remarks>
+	protected sealed class RgbMeansAccumulator
+	{
+		// Fields.
+		readonly ulong[] colors = new ulong[3];
+		readonly int[] counts = new int[3];
+		readonly ushort[]? linearColors;
+		readonly int weightedAreaBottom;
+		readonly int weightedAreaLeft;
+		readonly int weightedAreaRight;
+		readonly int weightedAreaTop;
+		readonly ulong[] weightedColors = new ulong[3];
+		readonly int[] weightedCounts = new int[3];
+
+		/// <summary>
+		/// Initialize new <see cref="RgbMeansAccumulator"/> instance.
+		/// </summary>
+		/// <param name="width">Width of image in pixels.</param>
+		/// <param name="height">Height of image in pixels.</param>
+		/// <param name="maxColor">Maximum value of the colors to be accumulated.</param>
+		/// <param name="renderingOptions">Rendering options.</param>
+		public RgbMeansAccumulator(int width, int height, int maxColor, in ImageRenderingOptions renderingOptions)
+		{
+			// select the central area of image
+			this.weightedAreaLeft = width / 3;
+			this.weightedAreaRight = width - this.weightedAreaLeft;
+			this.weightedAreaTop = height / 3;
+			this.weightedAreaBottom = height - this.weightedAreaTop;
+
+			// build the table which transfers colors to 16-bit linear colors
+			var colorTransferFuncToLinear = renderingOptions.ColorTransferFuncToLinear;
+			if (renderingOptions.HasColorTransferFunctions && colorTransferFuncToLinear is not null)
+			{
+				var linearColors = new ushort[maxColor + 1];
+				for (var i = maxColor; i >= 0; --i)
+					linearColors[i] = ImageProcessing.ClipToUInt16(colorTransferFuncToLinear(i / (double)maxColor) * 65535 + 0.5);
+				this.linearColors = linearColors;
+			}
+		}
+
+		/// <summary>
+		/// Accumulate color of a pixel.
+		/// </summary>
+		/// <param name="x">Horizontal position of pixel.</param>
+		/// <param name="y">Vertical position of pixel.</param>
+		/// <param name="colorComponent">Color component, which is the offset of its color channel in a BGRA pixel.</param>
+		/// <param name="color">Color, which should not be larger than the maximum value given to the constructor.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Accumulate(int x, int y, int colorComponent, uint color)
+		{
+			// transfer to linear color
+			if (this.linearColors is not null)
+				color = this.linearColors[color];
+
+			// accumulate color, a pixel in the central area is counted twice by the weighted means
+			this.colors[colorComponent] += color;
+			++this.counts[colorComponent];
+			if (x >= this.weightedAreaLeft && x <= this.weightedAreaRight && y >= this.weightedAreaTop && y <= this.weightedAreaBottom)
+			{
+				this.weightedColors[colorComponent] += (ulong)color << 1;
+				this.weightedCounts[colorComponent] += 2;
+			}
+			else
+			{
+				this.weightedColors[colorComponent] += color;
+				++this.weightedCounts[colorComponent];
+			}
+		}
+
+		/// <summary>
+		/// Write the means of RGB colors to rendering result.
+		/// </summary>
+		/// <param name="result">Rendering result.</param>
+		public void WriteToRenderingResult(ref ImageRenderingResult result)
+		{
+			result.MeanOfBlue = this.colors[(int)BayerPatternColorComponent.Blue] / (double)this.counts[(int)BayerPatternColorComponent.Blue];
+			result.MeanOfGreen = this.colors[(int)BayerPatternColorComponent.Green] / (double)this.counts[(int)BayerPatternColorComponent.Green];
+			result.MeanOfRed = this.colors[(int)BayerPatternColorComponent.Red] / (double)this.counts[(int)BayerPatternColorComponent.Red];
+			result.WeightedMeanOfBlue = this.weightedColors[(int)BayerPatternColorComponent.Blue] / (double)this.weightedCounts[(int)BayerPatternColorComponent.Blue];
+			result.WeightedMeanOfGreen = this.weightedColors[(int)BayerPatternColorComponent.Green] / (double)this.weightedCounts[(int)BayerPatternColorComponent.Green];
+			result.WeightedMeanOfRed = this.weightedColors[(int)BayerPatternColorComponent.Red] / (double)this.weightedCounts[(int)BayerPatternColorComponent.Red];
+		}
+	}
+
+
 #if SIMULATE_SLOW_IMAGE_RENDERING
 	// Constants.
 	const int SimulatedMinRenderingDuration = 1000;
@@ -84,8 +173,10 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <param name="table">Pointer to table, the length should be 256.</param>
 	/// <param name="gain">Gain for color.</param>
 	/// <param name="baseExposure">Base exposure in EV.</param>
-	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them.</remarks>
-	protected static unsafe void BuildColorTransformationTableUnsafe(byte* table, double gain = 1.0, double baseExposure = 0.0)
+	/// <param name="colorTransferFuncToLinear">Function to transfer normalized color to normalized linear color, or Null if the color is linear.</param>
+	/// <param name="colorTransferFuncFromLinear">Function to transfer normalized linear color back to normalized color, or Null if the color is linear.</param>
+	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them. Both of them are applied to the linear color when both functions are given.</remarks>
+	protected static unsafe void BuildColorTransformationTableUnsafe(byte* table, double gain = 1.0, double baseExposure = 0.0, Func<double, double>? colorTransferFuncToLinear = null, Func<double, double>? colorTransferFuncFromLinear = null)
 	{
 		// build identical table if the color is not transformed
 		var baseExposureScale = GetBaseExposureScale(baseExposure);
@@ -94,6 +185,18 @@ abstract class BaseImageRenderer : IImageRenderer
 		{
 			for (var i = 255; i >= 0; --i, --table)
 				*table = (byte)i;
+			return;
+		}
+
+		// build table which transforms the linear color
+		if (colorTransferFuncToLinear is not null && colorTransferFuncFromLinear is not null)
+		{
+			for (var i = 255; i >= 0; --i, --table)
+			{
+				var color = Math.Min(1, colorTransferFuncToLinear(i / 255.0) * baseExposureScale);
+				color = Math.Min(1, color * gain);
+				*table = ImageProcessing.ClipToByte(colorTransferFuncFromLinear(color) * 255);
+			}
 			return;
 		}
 
@@ -109,8 +212,10 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <param name="table">Pointer to table, the length should be 65536.</param>
 	/// <param name="gain">Gain for color.</param>
 	/// <param name="baseExposure">Base exposure in EV.</param>
-	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them.</remarks>
-	protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain = 1.0, double baseExposure = 0.0)
+	/// <param name="colorTransferFuncToLinear">Function to transfer normalized color to normalized linear color, or Null if the color is linear.</param>
+	/// <param name="colorTransferFuncFromLinear">Function to transfer normalized linear color back to normalized color, or Null if the color is linear.</param>
+	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them. Both of them are applied to the linear color when both functions are given.</remarks>
+	protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain = 1.0, double baseExposure = 0.0, Func<double, double>? colorTransferFuncToLinear = null, Func<double, double>? colorTransferFuncFromLinear = null)
 	{
 		// build identical table if the color is not transformed
 		var baseExposureScale = GetBaseExposureScale(baseExposure);
@@ -122,10 +227,42 @@ abstract class BaseImageRenderer : IImageRenderer
 			return;
 		}
 
+		// build table which transforms the linear color
+		if (colorTransferFuncToLinear is not null && colorTransferFuncFromLinear is not null)
+		{
+			for (var i = 65535; i >= 0; --i, --table)
+			{
+				var color = Math.Min(1, colorTransferFuncToLinear(i / 65535.0) * baseExposureScale);
+				color = Math.Min(1, color * gain);
+				*table = ImageProcessing.ClipToUInt16(colorTransferFuncFromLinear(color) * 65535 + 0.5);
+			}
+			return;
+		}
+
 		// build table
 		for (var i = 65535; i >= 0; --i, --table)
 			*table = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16(i * baseExposureScale) * gain);
 	}
+
+
+	/// <summary>
+	/// Build color transformation table for single 8-bit color by the base exposure and the color transfer functions of given rendering options.
+	/// </summary>
+	/// <param name="table">Pointer to table, the length should be 256.</param>
+	/// <param name="renderingOptions">Rendering options.</param>
+	/// <param name="gain">Gain for color.</param>
+	protected static unsafe void BuildColorTransformationTableUnsafe(byte* table, in ImageRenderingOptions renderingOptions, double gain = 1.0) =>
+		BuildColorTransformationTableUnsafe(table, gain, renderingOptions.BaseExposure, renderingOptions.ColorTransferFuncToLinear, renderingOptions.ColorTransferFuncFromLinear);
+
+
+	/// <summary>
+	/// Build color transformation table for single 16-bit color by the base exposure and the color transfer functions of given rendering options.
+	/// </summary>
+	/// <param name="table">Pointer to table, the length should be 65536.</param>
+	/// <param name="renderingOptions">Rendering options.</param>
+	/// <param name="gain">Gain for color.</param>
+	protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, in ImageRenderingOptions renderingOptions, double gain = 1.0) =>
+		BuildColorTransformationTableUnsafe(table, gain, renderingOptions.BaseExposure, renderingOptions.ColorTransferFuncToLinear, renderingOptions.ColorTransferFuncFromLinear);
 
 
 	/// <summary>
@@ -611,5 +748,6 @@ abstract class BaseImageRenderer : IImageRenderer
 	public virtual bool IsBaseExposureSupported => false;
 	public bool IsBuiltIn => this.format.Category != ImageFormatCategory.UserDefined;
 	public virtual bool IsColorTableSupported => false;
+	public virtual bool IsRgbGainSupported => false;
 	public event PropertyChangedEventHandler? PropertyChanged;
 }

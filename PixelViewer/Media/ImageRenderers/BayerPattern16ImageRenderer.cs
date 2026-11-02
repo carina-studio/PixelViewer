@@ -59,16 +59,7 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 
 		// render
 		var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
-		// ReSharper disable IdentifierTypo
-		var accuColor = stackalloc ulong[] { 0L, 0L, 0L };
-		var accuPixelCount = stackalloc int[] { 0, 0, 0 };
-		var wAccuColor = stackalloc ulong[] { 0L, 0L, 0L };
-		var wAccuPixelCount = stackalloc int[] { 0, 0, 0 };
-		// ReSharper restore IdentifierTypo
-		var wLeft = width / 3;
-		var wRight = width - wLeft;
-		var wTop = height / 3;
-		var wBottom = height - wTop;
+		var meansAccumulator = new RgbMeansAccumulator(width, height, 65535, renderingOptions);
 		try
 		{
 			var colorTransformationTables = stackalloc ushort*[3] { 
@@ -76,9 +67,9 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 				baseColorTransformationTable + 65536,
 				baseColorTransformationTable + 131072,
 			};
-			BuildColorTransformationTableUnsafe(colorTransformationTables[0], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[1], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[2], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[0], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[1], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[2], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
 			bitmapBuffer.Memory.Pin(bitmapBaseAddress =>
 			{
 				// render to 16-bit R/G/B
@@ -92,23 +83,11 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var pixelPtr = rowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
-						var isVerticalWeightedArea = (y >= wTop && y <= wBottom);
 						for (var x = 0; x < width; ++x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 						{
 							var colorComponent = (int)colorComponentSelector(x, y);
 							var color = extractFunc(pixelPtr[0], pixelPtr[1]);
-							accuColor[colorComponent] += color;
-							++accuPixelCount[colorComponent];
-							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
-							{
-								wAccuColor[colorComponent] += (ushort)(color << 1);
-								wAccuPixelCount[colorComponent] += 2;
-							}
-							else
-							{
-								wAccuColor[colorComponent] += color;
-								++wAccuPixelCount[colorComponent];
-							}
+							meansAccumulator.Accumulate(x, y, colorComponent, color);
 							bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 							bitmapPixelPtr[3] = 65535;
 						}
@@ -126,15 +105,9 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 		}
 
 		// complete
-		return new ImageRenderingResult
-		{
-			MeanOfBlue = accuColor[BlueColorComponent] / (double)accuPixelCount[BlueColorComponent],
-			MeanOfGreen = accuColor[GreenColorComponent] / (double)accuPixelCount[GreenColorComponent],
-			MeanOfRed = accuColor[RedColorComponent] / (double)accuPixelCount[RedColorComponent],
-			WeightedMeanOfBlue = wAccuColor[BlueColorComponent] / (double)wAccuPixelCount[BlueColorComponent],
-			WeightedMeanOfGreen = wAccuColor[GreenColorComponent] / (double)wAccuPixelCount[GreenColorComponent],
-			WeightedMeanOfRed = wAccuColor[RedColorComponent] / (double)wAccuPixelCount[RedColorComponent],
-		};
+		var result = new ImageRenderingResult();
+		meansAccumulator.WriteToRenderingResult(ref result);
+		return result;
 	}
 
 
@@ -168,16 +141,7 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 
 		// render
 		var baseColorTransformationTable = (ushort*)NativeMemory.Alloc(65536 * sizeof(ushort) * 3);
-		// ReSharper disable IdentifierTypo
-		var accuColor = stackalloc ulong[] { 0L, 0L, 0L };
-		var accuPixelCount = stackalloc int[] { 0, 0, 0 };
-		var wAccuColor = stackalloc ulong[] { 0L, 0L, 0L };
-		var wAccuPixelCount = stackalloc int[] { 0, 0, 0 };
-		// ReSharper restore IdentifierTypo
-		var wLeft = width / 3;
-		var wRight = width - wLeft;
-		var wTop = height / 3;
-		var wBottom = height - wTop;
+		var meansAccumulator = new RgbMeansAccumulator(width, height, 65535, renderingOptions);
 		try
 		{
 			var colorTransformationTables = stackalloc ushort*[3] {
@@ -185,9 +149,9 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 				baseColorTransformationTable + 65536,
 				baseColorTransformationTable + 131072,
 			};
-			BuildColorTransformationTableUnsafe(colorTransformationTables[0], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[1], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
-			BuildColorTransformationTableUnsafe(colorTransformationTables[2], gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[0], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[1], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+			BuildColorTransformationTableUnsafe(colorTransformationTables[2], renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
 			bitmapBuffer.Memory.Pin(bitmapBaseAddress =>
 			{
 				// render to 16-bit R/G/B
@@ -201,7 +165,6 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 						imageStream.ReadAtLeast(row, rowStride, throwOnEndOfStream: false);
 						var pixelPtr = rowPtr;
 						var bitmapPixelPtr = (ushort*)bitmapRowPtr;
-						var isVerticalWeightedArea = (y >= wTop && y <= wBottom);
 						for (var x = 0; x < width; ++x, pixelPtr += pixelStride, bitmapPixelPtr += 4)
 						{
 							var colorComponent = (int)colorComponentSelector(x, y);
@@ -209,18 +172,7 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 								? (pixelPtr[1] << 8) | pixelPtr[0]
 								: (pixelPtr[0] << 8) | pixelPtr[1];
 							var color = mappings[colorComponent][index];
-							accuColor[colorComponent] += color;
-							++accuPixelCount[colorComponent];
-							if (isVerticalWeightedArea && x >= wLeft && x <= wRight)
-							{
-								wAccuColor[colorComponent] += (ulong)color << 1;
-								wAccuPixelCount[colorComponent] += 2;
-							}
-							else
-							{
-								wAccuColor[colorComponent] += color;
-								++wAccuPixelCount[colorComponent];
-							}
+							meansAccumulator.Accumulate(x, y, colorComponent, color);
 							bitmapPixelPtr[colorComponent] = colorTransformationTables[colorComponent][color];
 							bitmapPixelPtr[3] = 65535;
 						}
@@ -238,15 +190,9 @@ class BayerPattern16ImageRenderer() : BayerPatternImageRenderer(new ImageFormat(
 		}
 
 		// complete
-		return new ImageRenderingResult
-		{
-			MeanOfBlue = accuColor[BlueColorComponent] / (double)accuPixelCount[BlueColorComponent],
-			MeanOfGreen = accuColor[GreenColorComponent] / (double)accuPixelCount[GreenColorComponent],
-			MeanOfRed = accuColor[RedColorComponent] / (double)accuPixelCount[RedColorComponent],
-			WeightedMeanOfBlue = wAccuColor[BlueColorComponent] / (double)wAccuPixelCount[BlueColorComponent],
-			WeightedMeanOfGreen = wAccuColor[GreenColorComponent] / (double)wAccuPixelCount[GreenColorComponent],
-			WeightedMeanOfRed = wAccuColor[RedColorComponent] / (double)wAccuPixelCount[RedColorComponent],
-		};
+		var result = new ImageRenderingResult();
+		meansAccumulator.WriteToRenderingResult(ref result);
+		return result;
 	}
 
 

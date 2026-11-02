@@ -1492,7 +1492,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsBayerPatternSupportedProp, isBayerPatternFormat);
 		this.SetValue(IsCompressedImageFormatProp, imageFormatCategory == ImageFormatCategory.Compressed);
 		this.SetValue(IsDemosaicingSupportedProp, isBayerPatternFormat);
-		this.SetValue(IsRgbGainSupportedProp, isBayerPatternFormat);
+		this.SetValue(IsRgbGainSupportedProp, imageRenderer.IsRgbGainSupported);
 		this.SetValue(IsYuvToBgraConverterSupportedProp, imageFormatCategory == ImageFormatCategory.YUV);
 		this.UpdateHasColorTables();
 		this.UpdateIsAlphaChannelAvailable();
@@ -5195,6 +5195,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		// prepare rendering options and calculate frame count of packed frames
 		var isColorTableSupported = imageRenderer.IsColorTableSupported;
 		var isRgbGainSupported = this.IsRgbGainSupported;
+		var sourceColorSpace = this.IsColorSpaceManagementEnabled ? this.ColorSpace : ColorSpace.Default;
+		var isSourceColorLinear = (this.IsColorSpaceManagementEnabled && this.UseLinearColorSpace) || sourceColorSpace.IsLinear;
 		var renderingOptions = new ImageRenderingOptions
 		{
 			AlphaColorTable = isColorTableSupported ? this.alphaColorTable : null,
@@ -5202,6 +5204,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			BlueColorTable = isColorTableSupported ? this.blueColorTable : null,
 			BlueGain = isRgbGainSupported ?this.BlueColorGain : 1.0,
 			ByteOrdering = this.ByteOrdering,
+			ColorTransferFuncFromLinear = isSourceColorLinear ? null : sourceColorSpace.NumericalTransferFromLinear,
+			ColorTransferFuncToLinear = isSourceColorLinear ? null : sourceColorSpace.NumericalTransferToLinear,
 			Compression = this.Compression,
 			DataOffset = this.DataOffset,
 			Demosaicing = (this.IsDemosaicingSupported && this.DemosaicingAlgorithm != Media.Demosaicing.DemosaicingAlgorithms.Bypass) ? this.DemosaicingAlgorithm : null,

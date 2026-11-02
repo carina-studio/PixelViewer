@@ -75,6 +75,13 @@ interface IImageRenderer : INotifyPropertyChanged
 
 
 	/// <summary>
+	/// Check whether <see cref="ImageRenderingOptions.BlueGain"/>, <see cref="ImageRenderingOptions.GreenGain"/> and <see cref="ImageRenderingOptions.RedGain"/> are applied by this renderer or not.
+	/// </summary>
+	/// <remarks>The gains are ignored by a renderer which reports False.</remarks>
+	bool IsRgbGainSupported => false;
+
+
+	/// <summary>
 	/// Start rendering.
 	/// </summary>
 	/// <param name="source"><see cref="IImageDataSource"/>.</param>
@@ -373,6 +380,20 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Function to transfer normalized linear color to normalized color of source image, or Null if colors of source image are linear.
+	/// </summary>
+	/// <remarks>The base exposure and the RGB gains are applied to linear colors. The function is used only when <see cref="ColorTransferFuncToLinear"/> is also defined, and it should be the inverse of that function.</remarks>
+	public Func<double, double>? ColorTransferFuncFromLinear { get; set; }
+
+
+	/// <summary>
+	/// Function to transfer normalized color of source image to normalized linear color, or Null if colors of source image are linear.
+	/// </summary>
+	/// <remarks>The base exposure and the RGB gains are applied to linear colors. The function is used only when <see cref="ColorTransferFuncFromLinear"/> is also defined, and it should be the inverse of that function.</remarks>
+	public Func<double, double>? ColorTransferFuncToLinear { get; set; }
+
+
+	/// <summary>
 	/// Coerce base exposure into valid range.
 	/// </summary>
 	/// <param name="baseExposure">Original base exposure in EV.</param>
@@ -412,6 +433,8 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		&& this.BlueColorTable.IsSameAs(options.BlueColorTable)
 		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001
 		&& this.ByteOrdering == options.ByteOrdering
+		&& Equals(this.ColorTransferFuncFromLinear, options.ColorTransferFuncFromLinear)
+		&& Equals(this.ColorTransferFuncToLinear, options.ColorTransferFuncToLinear)
 		&& this.Compression == options.Compression
 		&& this.DataOffset == options.DataOffset
 		&& this.Demosaicing == options.Demosaicing
@@ -477,6 +500,12 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		|| this.BlueColorTable is not null
 		|| this.GreenColorTable is not null
 		|| this.RedColorTable is not null;
+
+
+	/// <summary>
+	/// Check whether colors of source image are transferred to linear colors before applying the base exposure and the RGB gains or not.
+	/// </summary>
+	public bool HasColorTransferFunctions => this.ColorTransferFuncFromLinear is not null && this.ColorTransferFuncToLinear is not null;
 
 
 	/// <summary>
