@@ -191,7 +191,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyDisposed();
                 this.VerifyDefault();
                 value = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(value);
-                if (Math.Abs(this.blueColorGain - value) < 0.001)
+                if (Math.Abs(this.blueColorGain - value) < ImageRenderers.ImageRenderingOptions.MinRgbGainDifference)
                     return;
                 this.blueColorGain = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BlueColorGain)));
@@ -430,7 +430,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyDisposed();
                 this.VerifyDefault();
                 value = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(value);
-                if (Math.Abs(this.greenColorGain - value) < 0.001)
+                if (Math.Abs(this.greenColorGain - value) < ImageRenderers.ImageRenderingOptions.MinRgbGainDifference)
                     return;
                 this.greenColorGain = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(GreenColorGain)));
@@ -484,9 +484,9 @@ namespace Carina.PixelViewer.Media.Profiles
                 && this.ColorSpace.Equals(profile.ColorSpace)
                 && this.UseLinearColorSpace == profile.UseLinearColorSpace
                 && this.YuvToBgraConverter == profile.YuvToBgraConverter
-                && Math.Abs(this.RedColorGain - profile.RedColorGain) <= 0.0001
-                && Math.Abs(this.GreenColorGain - profile.GreenColorGain) <= 0.0001
-                && Math.Abs(this.BlueColorGain - profile.BlueColorGain) <= 0.0001
+                && Math.Abs(this.RedColorGain - profile.RedColorGain) < ImageRenderers.ImageRenderingOptions.MinRgbGainDifference
+                && Math.Abs(this.GreenColorGain - profile.GreenColorGain) < ImageRenderers.ImageRenderingOptions.MinRgbGainDifference
+                && Math.Abs(this.BlueColorGain - profile.BlueColorGain) < ImageRenderers.ImageRenderingOptions.MinRgbGainDifference
                 && Math.Abs(this.BaseExposure - profile.BaseExposure) < ImageRenderers.ImageRenderingOptions.MinBaseExposureDifference
                 && this.alphaColorTable.IsSameAs(profile.alphaColorTable)
                 && this.blueColorTable.IsSameAs(profile.blueColorTable)
@@ -965,7 +965,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.VerifyDisposed();
                 this.VerifyDefault();
                 value = ImageRenderers.ImageRenderingOptions.GetValidRgbGain(value);
-                if (Math.Abs(this.redColorGain - value) < 0.001)
+                if (Math.Abs(this.redColorGain - value) < ImageRenderers.ImageRenderingOptions.MinRgbGainDifference)
                     return;
                 this.redColorGain = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(RedColorGain)));

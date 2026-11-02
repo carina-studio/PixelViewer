@@ -95,6 +95,42 @@ abstract class BaseImageRenderer : IImageRenderer
 		}
 
 		/// <summary>
+		/// Accumulate colors of a pixel.
+		/// </summary>
+		/// <param name="x">Horizontal position of pixel.</param>
+		/// <param name="y">Vertical position of pixel.</param>
+		/// <param name="blue">Blue color, which should not be larger than the maximum value given to the constructor.</param>
+		/// <param name="green">Green color, which should not be larger than the maximum value given to the constructor.</param>
+		/// <param name="red">Red color, which should not be larger than the maximum value given to the constructor.</param>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Accumulate(int x, int y, uint blue, uint green, uint red)
+		{
+			// transfer to linear colors
+			var linearColors = this.linearColors;
+			if (linearColors is not null)
+			{
+				blue = linearColors[blue];
+				green = linearColors[green];
+				red = linearColors[red];
+			}
+
+			// accumulate colors, a pixel in the central area is counted twice by the weighted means
+			this.colors[(int)BayerPatternColorComponent.Blue] += blue;
+			this.colors[(int)BayerPatternColorComponent.Green] += green;
+			this.colors[(int)BayerPatternColorComponent.Red] += red;
+			++this.counts[(int)BayerPatternColorComponent.Blue];
+			++this.counts[(int)BayerPatternColorComponent.Green];
+			++this.counts[(int)BayerPatternColorComponent.Red];
+			var weight = (x >= this.weightedAreaLeft && x <= this.weightedAreaRight && y >= this.weightedAreaTop && y <= this.weightedAreaBottom) ? 2 : 1;
+			this.weightedColors[(int)BayerPatternColorComponent.Blue] += (ulong)blue * (ulong)weight;
+			this.weightedColors[(int)BayerPatternColorComponent.Green] += (ulong)green * (ulong)weight;
+			this.weightedColors[(int)BayerPatternColorComponent.Red] += (ulong)red * (ulong)weight;
+			this.weightedCounts[(int)BayerPatternColorComponent.Blue] += weight;
+			this.weightedCounts[(int)BayerPatternColorComponent.Green] += weight;
+			this.weightedCounts[(int)BayerPatternColorComponent.Red] += weight;
+		}
+
+		/// <summary>
 		/// Write the means of RGB colors to rendering result.
 		/// </summary>
 		/// <param name="result">Rendering result.</param>
@@ -181,7 +217,7 @@ abstract class BaseImageRenderer : IImageRenderer
 		// build identical table if the color is not transformed
 		var baseExposureScale = GetBaseExposureScale(baseExposure);
 		table += 255;
-		if (Math.Abs(gain - 1) <= 0.0001 && Math.Abs(baseExposureScale - 1) <= 0.0001)
+		if (Math.Abs(gain - 1) < ImageRenderingOptions.MinRgbGainDifference && Math.Abs(baseExposureScale - 1) <= 0.0001)
 		{
 			for (var i = 255; i >= 0; --i, --table)
 				*table = (byte)i;
@@ -220,7 +256,7 @@ abstract class BaseImageRenderer : IImageRenderer
 		// build identical table if the color is not transformed
 		var baseExposureScale = GetBaseExposureScale(baseExposure);
 		table += 65535;
-		if (Math.Abs(gain - 1) <= 0.0001 && Math.Abs(baseExposureScale - 1) <= 0.0001)
+		if (Math.Abs(gain - 1) < ImageRenderingOptions.MinRgbGainDifference && Math.Abs(baseExposureScale - 1) <= 0.0001)
 		{
 			for (var i = 65535; i >= 0; --i, --table)
 				*table = (ushort)i;

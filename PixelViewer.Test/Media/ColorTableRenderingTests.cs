@@ -318,9 +318,12 @@ class ColorTableRenderingTests : BaseTests
 			Assert.That(renderer.IsColorTableSupported, Is.True, $"{formatName} should support color tables.");
 			var renderingOptions = new ImageRenderingOptions
 			{
+				BlueGain = 1.0,
 				ByteOrdering = ByteOrdering.LittleEndian,
 				GreenColorTable = greenColorTable,
+				GreenGain = 1.0,
 				RedColorTable = redColorTable,
+				RedGain = 1.0,
 			};
 			var planeOptions = new List<ImagePlaneOptions> { new(9, 6, TestImageWidth * 6) };
 			var format = await renderer.SelectRenderedFormatAsync(source, renderingOptions, planeOptions, CancellationToken.None);

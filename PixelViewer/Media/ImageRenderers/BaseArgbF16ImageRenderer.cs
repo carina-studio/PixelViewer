@@ -2,6 +2,7 @@ using CarinaStudio;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,8 +21,44 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		{ }
 
 
+		// Build the table which maps the bits of half-precision color to 16-bit color with the base exposure and the gain applied.
+		static unsafe void BuildHalfColorTransformationTableUnsafe(ushort* table, in ImageRenderingOptions renderingOptions, double gain)
+		{
+			// get parameters
+			var baseExposureScale = GetBaseExposureScale(renderingOptions.BaseExposure);
+			var colorTransferFuncFromLinear = renderingOptions.ColorTransferFuncFromLinear;
+			var colorTransferFuncToLinear = renderingOptions.ColorTransferFuncToLinear;
+
+			// build the table which transforms the linear color, the color is clipped into [0, 1] first because the color transfer functions are defined in that range only
+			if (colorTransferFuncFromLinear is not null && colorTransferFuncToLinear is not null)
+			{
+				for (var i = 65535; i >= 0; --i)
+				{
+					var color = (double)BitConverter.UInt16BitsToHalf((ushort)i);
+					if (!(color > 0))
+						color = 0;
+					else if (color > 1)
+						color = 1;
+					color = Math.Min(1, colorTransferFuncToLinear(color) * baseExposureScale);
+					color = Math.Min(1, color * gain);
+					table[i] = ImageProcessing.ClipToUInt16(colorTransferFuncFromLinear(color) * 65535 + 0.5);
+				}
+				return;
+			}
+
+			// build the table
+			var colorScale = 65535 * baseExposureScale;
+			for (var i = 65535; i >= 0; --i)
+				table[i] = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16((double)BitConverter.UInt16BitsToHalf((ushort)i) * colorScale) * gain);
+		}
+
+
 		/// <inheritdoc/>
 		public override IList<ImagePlaneOptions> CreateDefaultPlaneOptions(int width, int height) => [ new(16, 8, width * 8) ];
+
+
+        /// <inheritdoc/>
+        public override bool IsRgbGainSupported => true;
 
 
         /// <inheritdoc/>
@@ -41,42 +78,70 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 				: (b1, b2) => BitConverter.UInt16BitsToHalf((ushort)((b1 << 8) | b2));
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
-			// render
-			var srcRow = new byte[rowStride];
-			fixed (byte* srcRowAddress = srcRow)
+			// prepare accumulating colors to calculate the means of RGB colors
+			var meansAccumulator = new RgbMeansAccumulator(width, height, 65535, renderingOptions);
+
+			// allocate the tables which map the bits of half-precision colors to 16-bit colors with the base exposure and the RGB gains applied, no table is needed if the colors are not changed
+			var colorTransformationTables = AllocateNativeUInt16When(renderingOptions.HasBaseExposure || renderingOptions.HasRgbGain, 65536 * 3);
+			try
 			{
-				var srcRowPtr = srcRowAddress;
-				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
+				// build the tables
+				if (colorTransformationTables is not null)
 				{
-					var bitmapRowPtr = (byte*)bitmapBaseAddress;
-					var bitmapRowStride = bitmapBuffer.RowBytes;
-					for (var y = height; ; --y, bitmapRowPtr += bitmapRowStride)
+					BuildHalfColorTransformationTableUnsafe(colorTransformationTables, renderingOptions, ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+					BuildHalfColorTransformationTableUnsafe(colorTransformationTables + 65536, renderingOptions, ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+					BuildHalfColorTransformationTableUnsafe(colorTransformationTables + 131072, renderingOptions, ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+				}
+
+				// render
+				var srcRow = new byte[rowStride];
+				fixed (byte* srcRowAddress = srcRow)
+				{
+					var srcRowPtr = srcRowAddress;
+					bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 					{
-						var isLastRow = (imageStream.Read(srcRow) < rowStride || y == 1);
-						var srcPixelPtr = srcRowPtr;
-						var bitmapPixelPtr = (ulong*)bitmapRowPtr;
-						for (var x = width; x > 0; --x, srcPixelPtr += pixelStride, ++bitmapPixelPtr)
+						var bitmapRowPtr = (byte*)bitmapBaseAddress;
+						var bitmapRowStride = bitmapBuffer.RowBytes;
+						for (var y = height; ; --y, bitmapRowPtr += bitmapRowStride)
 						{
-							var component1 = extractComponentFunc(srcPixelPtr[0], srcPixelPtr[1]);
-							var component2 = extractComponentFunc(srcPixelPtr[2], srcPixelPtr[3]);
-							var component3 = extractComponentFunc(srcPixelPtr[4], srcPixelPtr[5]);
-							var component4 = extractComponentFunc(srcPixelPtr[6], srcPixelPtr[7]);
-							this.SelectArgb(component1, component2, component3, component4, out var a, out var r, out var g, out var b);
-							*bitmapPixelPtr = packFunc(
-                                ImageProcessing.ClipToUInt16((double)b * 65535), 
-                                ImageProcessing.ClipToUInt16((double)g * 65535), 
-                                ImageProcessing.ClipToUInt16((double)r * 65535), 
-                                ImageProcessing.ClipToUInt16((double)a * 65535));
+							var isLastRow = (imageStream.Read(srcRow) < rowStride || y == 1);
+							var srcPixelPtr = srcRowPtr;
+							var bitmapPixelPtr = (ulong*)bitmapRowPtr;
+							for (var x = width; x > 0; --x, srcPixelPtr += pixelStride, ++bitmapPixelPtr)
+							{
+								var component1 = extractComponentFunc(srcPixelPtr[0], srcPixelPtr[1]);
+								var component2 = extractComponentFunc(srcPixelPtr[2], srcPixelPtr[3]);
+								var component3 = extractComponentFunc(srcPixelPtr[4], srcPixelPtr[5]);
+								var component4 = extractComponentFunc(srcPixelPtr[6], srcPixelPtr[7]);
+								this.SelectArgb(component1, component2, component3, component4, out var a, out var r, out var g, out var b);
+								var b16 = ImageProcessing.ClipToUInt16((double)b * 65535);
+								var g16 = ImageProcessing.ClipToUInt16((double)g * 65535);
+								var r16 = ImageProcessing.ClipToUInt16((double)r * 65535);
+								meansAccumulator.Accumulate(width - x, height - y, b16, g16, r16);
+								if (colorTransformationTables is not null)
+								{
+									b16 = colorTransformationTables[BitConverter.HalfToUInt16Bits(b)];
+									g16 = colorTransformationTables[65536 + BitConverter.HalfToUInt16Bits(g)];
+									r16 = colorTransformationTables[131072 + BitConverter.HalfToUInt16Bits(r)];
+								}
+								*bitmapPixelPtr = packFunc(b16, g16, r16, ImageProcessing.ClipToUInt16((double)a * 65535));
+							}
+							if (isLastRow || cancellationToken.IsCancellationRequested)
+								break;
+							Array.Clear(srcRow, 0, rowStride);
 						}
-						if (isLastRow || cancellationToken.IsCancellationRequested)
-							break;
-						Array.Clear(srcRow, 0, rowStride);
-					}
-				});
+					});
+				}
+			}
+			finally
+			{
+				NativeMemory.Free(colorTransformationTables);
 			}
 
 			// complete
-			return new ImageRenderingResult();
+			var result = new ImageRenderingResult();
+			meansAccumulator.WriteToRenderingResult(ref result);
+			return result;
 		}
 
 

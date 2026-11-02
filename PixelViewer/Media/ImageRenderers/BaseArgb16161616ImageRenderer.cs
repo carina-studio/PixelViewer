@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -25,6 +26,10 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 
 
         /// <inheritdoc/>
+        public override bool IsRgbGainSupported => true;
+
+
+        /// <inheritdoc/>
         protected override unsafe ImageRenderingResult OnRender(IImageDataSource source, Stream imageStream, IBitmapBuffer bitmapBuffer, ImageRenderingOptions renderingOptions, IList<ImagePlaneOptions> planeOptions, CancellationToken cancellationToken)
 		{
 			// get parameters
@@ -39,38 +44,67 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			var extractComponentFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, planeOptions[0].EffectiveBits);
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
-			// render
-			var srcRow = new byte[rowStride];
-			fixed (byte* srcRowAddress = srcRow)
+			// prepare accumulating colors to calculate the means of RGB colors
+			var meansAccumulator = new RgbMeansAccumulator(width, height, 65535, renderingOptions);
+
+			// allocate the tables which apply the base exposure and the RGB gains, no table is needed if the colors are not changed
+			var colorTransformationTables = AllocateNativeUInt16When(renderingOptions.HasBaseExposure || renderingOptions.HasRgbGain, 65536 * 3);
+			try
 			{
-				var srcRowPtr = srcRowAddress;
-				bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
+				// build the tables
+				if (colorTransformationTables is not null)
 				{
-					var bitmapRowPtr = (byte*)bitmapBaseAddress;
-					var bitmapRowStride = bitmapBuffer.RowBytes;
-					for (var y = height; ; --y, bitmapRowPtr += bitmapRowStride)
+					BuildColorTransformationTableUnsafe(colorTransformationTables, renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.BlueGain));
+					BuildColorTransformationTableUnsafe(colorTransformationTables + 65536, renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.GreenGain));
+					BuildColorTransformationTableUnsafe(colorTransformationTables + 131072, renderingOptions, gain: ImageRenderingOptions.GetValidRgbGain(renderingOptions.RedGain));
+				}
+
+				// render
+				var srcRow = new byte[rowStride];
+				fixed (byte* srcRowAddress = srcRow)
+				{
+					var srcRowPtr = srcRowAddress;
+					bitmapBuffer.Memory.Pin((bitmapBaseAddress) =>
 					{
-						var isLastRow = (imageStream.Read(srcRow) < rowStride || y == 1);
-						var srcPixelPtr = srcRowPtr;
-						var bitmapPixelPtr = (ulong*)bitmapRowPtr;
-						for (var x = width; x > 0; --x, srcPixelPtr += pixelStride, ++bitmapPixelPtr)
+						var bitmapRowPtr = (byte*)bitmapBaseAddress;
+						var bitmapRowStride = bitmapBuffer.RowBytes;
+						for (var y = height; ; --y, bitmapRowPtr += bitmapRowStride)
 						{
-							var component1 = extractComponentFunc(srcPixelPtr[0], srcPixelPtr[1]);
-							var component2 = extractComponentFunc(srcPixelPtr[2], srcPixelPtr[3]);
-							var component3 = extractComponentFunc(srcPixelPtr[4], srcPixelPtr[5]);
-							var component4 = extractComponentFunc(srcPixelPtr[6], srcPixelPtr[7]);
-							this.SelectArgb(component1, component2, component3, component4, out var a, out var r, out var g, out var b);
-							*bitmapPixelPtr = packFunc(b, g, r, a);
+							var isLastRow = (imageStream.Read(srcRow) < rowStride || y == 1);
+							var srcPixelPtr = srcRowPtr;
+							var bitmapPixelPtr = (ulong*)bitmapRowPtr;
+							for (var x = width; x > 0; --x, srcPixelPtr += pixelStride, ++bitmapPixelPtr)
+							{
+								var component1 = extractComponentFunc(srcPixelPtr[0], srcPixelPtr[1]);
+								var component2 = extractComponentFunc(srcPixelPtr[2], srcPixelPtr[3]);
+								var component3 = extractComponentFunc(srcPixelPtr[4], srcPixelPtr[5]);
+								var component4 = extractComponentFunc(srcPixelPtr[6], srcPixelPtr[7]);
+								this.SelectArgb(component1, component2, component3, component4, out var a, out var r, out var g, out var b);
+								meansAccumulator.Accumulate(width - x, height - y, b, g, r);
+								if (colorTransformationTables is not null)
+								{
+									b = colorTransformationTables[b];
+									g = colorTransformationTables[65536 + g];
+									r = colorTransformationTables[131072 + r];
+								}
+								*bitmapPixelPtr = packFunc(b, g, r, a);
+							}
+							if (isLastRow || cancellationToken.IsCancellationRequested)
+								break;
+							Array.Clear(srcRow, 0, rowStride);
 						}
-						if (isLastRow || cancellationToken.IsCancellationRequested)
-							break;
-						Array.Clear(srcRow, 0, rowStride);
-					}
-				});
+					});
+				}
+			}
+			finally
+			{
+				NativeMemory.Free(colorTransformationTables);
 			}
 
 			// complete
-			return new ImageRenderingResult();
+			var result = new ImageRenderingResult();
+			meansAccumulator.WriteToRenderingResult(ref result);
+			return result;
 		}
 
 

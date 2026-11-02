@@ -342,6 +342,12 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 
 
 	/// <summary>
+	/// Minimum difference between two values of <see cref="BlueGain"/>, <see cref="GreenGain"/> or <see cref="RedGain"/> for them to be treated as different.
+	/// </summary>
+	public const double MinRgbGainDifference = 0.00001;
+
+
+	/// <summary>
 	/// Table which maps the value of alpha channel of source image to the color to be rendered, or Null if the values are rendered directly.
 	/// </summary>
 	/// <remarks>The instance is borrowed from the caller, the renderer should share it before rendering the image.</remarks>
@@ -431,7 +437,7 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		&& Math.Abs(this.BaseExposure - options.BaseExposure) < MinBaseExposureDifference
 		&& this.BayerPattern == options.BayerPattern
 		&& this.BlueColorTable.IsSameAs(options.BlueColorTable)
-		&& Math.Abs(this.BlueGain - options.BlueGain) <= 0.001
+		&& Math.Abs(this.BlueGain - options.BlueGain) < MinRgbGainDifference
 		&& this.ByteOrdering == options.ByteOrdering
 		&& Equals(this.ColorTransferFuncFromLinear, options.ColorTransferFuncFromLinear)
 		&& Equals(this.ColorTransferFuncToLinear, options.ColorTransferFuncToLinear)
@@ -439,9 +445,9 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 		&& this.DataOffset == options.DataOffset
 		&& this.Demosaicing == options.Demosaicing
 		&& this.GreenColorTable.IsSameAs(options.GreenColorTable)
-		&& Math.Abs(this.GreenGain - options.GreenGain) <= 0.001
+		&& Math.Abs(this.GreenGain - options.GreenGain) < MinRgbGainDifference
 		&& this.RedColorTable.IsSameAs(options.RedColorTable)
-		&& Math.Abs(this.RedGain - options.RedGain) <= 0.001
+		&& Math.Abs(this.RedGain - options.RedGain) < MinRgbGainDifference
 		&& this.TileHeight == options.TileHeight
 		&& this.TileWidth == options.TileWidth
 		&& this.YuvToBgraConverter == options.YuvToBgraConverter;
@@ -506,6 +512,14 @@ struct ImageRenderingOptions : IEquatable<ImageRenderingOptions>
 	/// Check whether colors of source image are transferred to linear colors before applying the base exposure and the RGB gains or not.
 	/// </summary>
 	public bool HasColorTransferFunctions => this.ColorTransferFuncFromLinear is not null && this.ColorTransferFuncToLinear is not null;
+
+
+	/// <summary>
+	/// Check whether at least one of <see cref="BlueGain"/>, <see cref="GreenGain"/> and <see cref="RedGain"/> changes the colors of rendered image or not.
+	/// </summary>
+	public bool HasRgbGain => Math.Abs(GetValidRgbGain(this.BlueGain) - 1) >= MinRgbGainDifference
+		|| Math.Abs(GetValidRgbGain(this.GreenGain) - 1) >= MinRgbGainDifference
+		|| Math.Abs(GetValidRgbGain(this.RedGain) - 1) >= MinRgbGainDifference;
 
 
 	/// <summary>

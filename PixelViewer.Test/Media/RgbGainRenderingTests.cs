@@ -88,9 +88,22 @@ class RgbGainRenderingTests : BaseTests
 	// Create source which contains random data to be rendered by the renderer.
 	FileImageDataSource CreateSource(IImageRenderer renderer)
 	{
+		// create data, half-float colors are kept in [0, 1] so that they are not clipped
 		var planeOptions = renderer.CreateDefaultPlaneOptions(TestImageWidth, TestImageHeight);
 		var data = new byte[renderer.EvaluateSourceDataSize(TestImageWidth, TestImageHeight, new ImageRenderingOptions(), planeOptions)];
-		this.Random.NextBytes(data);
+		if (IsHalfFloatFormat(renderer))
+		{
+			for (var i = data.Length - 2; i >= 0; i -= 2)
+			{
+				var bits = BitConverter.HalfToUInt16Bits((Half)this.Random.NextDouble());
+				data[i] = (byte)bits;
+				data[i + 1] = (byte)(bits >> 8);
+			}
+		}
+		else
+			this.Random.NextBytes(data);
+
+		// create source
 		return new FileImageDataSource(this.Application, this.CreateCacheFile(data), true);
 	}
 
@@ -104,6 +117,13 @@ class RgbGainRenderingTests : BaseTests
 	[TestCase("Bayer_Pattern_10_MIPI")]
 	[TestCase("Bayer_Pattern_12_MIPI")]
 	[TestCase("Bayer_Pattern_14_MIPI")]
+	[TestCase("ABGR_F16")]
+	[TestCase("ARGB_16161616")]
+	[TestCase("ARGB_2101010")]
+	[TestCase("ARGB_8888")]
+	[TestCase("RGB_161616")]
+	[TestCase("RGB_565")]
+	[TestCase("RGB_888")]
 	public void GainTest(string formatName) => this.TestOnApplicationThread(async () =>
 	{
 		// render without gains and with gains applied to linear colors
@@ -117,21 +137,53 @@ class RgbGainRenderingTests : BaseTests
 		var (_, gainedColors, _) = await RenderAsync(renderer, source, CreateRenderingOptions(transfer, gains[0], gains[1], gains[2]));
 		Assert.That(transferredColors, Is.EqualTo(colors), "Colors should not be changed by color transfer functions without gains.");
 
-		// check that the gains are applied to linear colors
+		// check that the gains are applied to linear colors, half-float colors are rendered from the exact colors instead of the truncated ones so they may differ by 2
 		var maxColor = format == BitmapFormat.Bgra64 ? 65535 : 255;
-		var colorComponentSelector = BayerPattern.RGGB_2x2.CreateColorComponentSelector();
+		var tolerance = IsHalfFloatFormat(renderer) ? 2 : 1;
 		for (var y = TestImageHeight - 1; y >= 0; --y)
 		{
 			for (var x = TestImageWidth - 1; x >= 0; --x)
 			{
-				var colorComponent = (int)colorComponentSelector(x, y);
-				var index = (y * TestImageWidth + x) * 4 + colorComponent;
-				var linearColor = Math.Min(1, transfer.ToLinear(colors[index] / (double)maxColor) * gains[colorComponent]);
-				var expectedColor = (int)Math.Min(maxColor, transfer.FromLinear(linearColor) * maxColor + 0.5);
-				Assert.That(gainedColors[index], Is.EqualTo(expectedColor).Within(1), $"Gain should be applied to linear color at ({x}, {y}).");
+				foreach (var colorComponent in SelectColorComponents(renderer, x, y))
+				{
+					var index = (y * TestImageWidth + x) * 4 + colorComponent;
+					var linearColor = Math.Min(1, transfer.ToLinear(colors[index] / (double)maxColor) * gains[colorComponent]);
+					var expectedColor = (int)Math.Min(maxColor, transfer.FromLinear(linearColor) * maxColor + 0.5);
+					Assert.That(gainedColors[index], Is.EqualTo(expectedColor).Within(tolerance), $"Gain should be applied to linear color {colorComponent} at ({x}, {y}).");
+				}
 			}
 		}
 	});
+
+
+	/// <summary>
+	/// Test for checking whether RGB gains change the colors or not, and whether the smallest step of gains is treated as a change.
+	/// </summary>
+	/// <param name="gain">Gain.</param>
+	/// <param name="expectedResult">Expected result.</param>
+	[TestCase(1.0, false)]
+	[TestCase(1.000005, false)]
+	[TestCase(0.999995, false)]
+	[TestCase(1.0001, true)]
+	[TestCase(0.9999, true)]
+	[TestCase(double.NaN, false)]
+	[TestCase(0.0, true)]
+	public void HasRgbGainTest(double gain, bool expectedResult)
+	{
+		// check each gain
+		Assert.That(CreateRenderingOptions(null, blueGain: gain).HasRgbGain, Is.EqualTo(expectedResult), $"Incorrect result for blue gain {gain}.");
+		Assert.That(CreateRenderingOptions(null, greenGain: gain).HasRgbGain, Is.EqualTo(expectedResult), $"Incorrect result for green gain {gain}.");
+		Assert.That(CreateRenderingOptions(null, redGain: gain).HasRgbGain, Is.EqualTo(expectedResult), $"Incorrect result for red gain {gain}.");
+
+		// check that the options are different from the ones without gain
+		if (double.IsFinite(gain))
+			Assert.That(CreateRenderingOptions(null, redGain: gain) == CreateRenderingOptions(null), Is.EqualTo(!expectedResult), $"Incorrect equality for red gain {gain}.");
+	}
+
+
+	// Check whether colors of the format rendered by the renderer are half-float or not.
+	static bool IsHalfFloatFormat(IImageRenderer renderer) =>
+		renderer.Format.Name.EndsWith("_F16");
 
 
 	/// <summary>
@@ -140,6 +192,10 @@ class RgbGainRenderingTests : BaseTests
 	/// <param name="formatName">Name of format to render.</param>
 	[TestCase("Bayer_Pattern_8")]
 	[TestCase("Bayer_Pattern_16")]
+	[TestCase("ABGR_F16")]
+	[TestCase("ARGB_2101010")]
+	[TestCase("RGB_565")]
+	[TestCase("RGB_888")]
 	public void LinearMeansTest(string formatName) => this.TestOnApplicationThread(async () =>
 	{
 		// render with color transfer functions
@@ -151,7 +207,6 @@ class RgbGainRenderingTests : BaseTests
 
 		// calculate means of linear colors, a pixel in the central area is counted twice by the weighted means
 		var maxColor = format == BitmapFormat.Bgra64 ? 65535 : 255;
-		var colorComponentSelector = BayerPattern.RGGB_2x2.CreateColorComponentSelector();
 		var sums = new double[3];
 		var counts = new int[3];
 		var weightedSums = new double[3];
@@ -164,13 +219,15 @@ class RgbGainRenderingTests : BaseTests
 		{
 			for (var x = TestImageWidth - 1; x >= 0; --x)
 			{
-				var colorComponent = (int)colorComponentSelector(x, y);
-				var linearColor = (int)(transfer.ToLinear(colors[(y * TestImageWidth + x) * 4 + colorComponent] / (double)maxColor) * 65535 + 0.5);
 				var weight = (x >= left && x <= right && y >= top && y <= bottom) ? 2 : 1;
-				sums[colorComponent] += linearColor;
-				++counts[colorComponent];
-				weightedSums[colorComponent] += linearColor * weight;
-				weightedCounts[colorComponent] += weight;
+				foreach (var colorComponent in SelectColorComponents(renderer, x, y))
+				{
+					var linearColor = (int)(transfer.ToLinear(colors[(y * TestImageWidth + x) * 4 + colorComponent] / (double)maxColor) * 65535 + 0.5);
+					sums[colorComponent] += linearColor;
+					++counts[colorComponent];
+					weightedSums[colorComponent] += linearColor * weight;
+					weightedCounts[colorComponent] += weight;
+				}
 			}
 		}
 
@@ -218,6 +275,12 @@ class RgbGainRenderingTests : BaseTests
 	}
 
 
+	// Select the offsets of color channels in a BGRA pixel rendered by the renderer which carry colors of source.
+	static int[] SelectColorComponents(IImageRenderer renderer, int x, int y) => renderer.Format.Category == ImageFormatCategory.Bayer
+		? [ (int)BayerPattern.RGGB_2x2.CreateColorComponentSelector()(x, y) ]
+		: [ 0, 1, 2 ];
+
+
 	/// <summary>
 	/// Test for checking which built-in renderers apply RGB gains.
 	/// </summary>
@@ -226,6 +289,11 @@ class RgbGainRenderingTests : BaseTests
 	{
 		await this.InitializeSubSystemsAsync();
 		foreach (var renderer in ImageRenderers.All.Where(it => it.IsBuiltIn))
-			Assert.That(renderer.IsRgbGainSupported, Is.EqualTo(renderer.Format.Category == ImageFormatCategory.Bayer), $"Incorrect support of RGB gains of {renderer.Format.Name}.");
+		{
+			var expectedResult = renderer.Format.Category is ImageFormatCategory.ARGB
+				or ImageFormatCategory.Bayer
+				or ImageFormatCategory.RGB;
+			Assert.That(renderer.IsRgbGainSupported, Is.EqualTo(expectedResult), $"Incorrect support of RGB gains of {renderer.Format.Name}.");
+		}
 	});
 }
