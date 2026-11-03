@@ -8,6 +8,8 @@ using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -326,6 +328,78 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.That(await this.WaitForPropertyAsync(session,nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
 				Assert.That(session.RenderedImage, Is.Null, "Rendered image is still there after closing source file.");
 				await DeleteFileAsync(filePath);
+			});
+		}
+
+
+		/// <summary>
+		/// Test for reporting the lens shading defined by current profile, and for keeping whether it is applied or not in the saved state.
+		/// </summary>
+		[Test]
+		public void TestLensShadingOfProfile()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// save the state of session as a JSON string
+				static string SaveState(Session session)
+				{
+					using var stream = new MemoryStream();
+					using (var writer = new Utf8JsonWriter(stream))
+						session.SaveState(writer);
+					return Encoding.UTF8.GetString(stream.ToArray());
+				}
+
+				// open file, its format is unidentifiable so the default profile is kept
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// the default profile defines no lens shading
+					Assert.That(session.HasLensShading, Is.False, "Default profile should define no lens shading.");
+
+					// the lens shading of the profile is reported only while the renderer renders a mosaic
+					ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+					ImageRenderers.TryFindByFormatName("L8", out var luminanceRenderer);
+					Assert.That(renderer, Is.Not.Null);
+					Assert.That(luminanceRenderer, Is.Not.Null);
+					var gains = new float[2 * 2 * 2 * 2];
+					Array.Fill(gains, 2f);
+					using var profile = new ImageRenderingProfile("Lens Shading", renderer.AsNonNull()).Setup(it =>
+					{
+						it.LensShading = new LensShadingMap(0, 0, 16, 16, 2, 2, 2, 2, 0, 0, 1, 1, gains);
+					});
+					session.Profile = profile;
+					Assert.That(session.HasLensShading, Is.True, "Lens shading of the profile should be reported.");
+					session.ImageRenderer = luminanceRenderer;
+					Assert.That(session.HasLensShading, Is.False, "Lens shading should not be reported for the renderer which does not render a mosaic.");
+					session.ImageRenderer = renderer;
+					Assert.That(session.HasLensShading, Is.True, "Lens shading should be reported again for the renderer which renders a mosaic.");
+					session.Profile = ImageRenderingProfile.Default;
+					Assert.That(session.HasLensShading, Is.False, "Lens shading should not be reported after selecting the profile which defines none.");
+
+					// whether lens shading is applied or not is kept in the saved state, it is written only when it is not applied
+					Assert.That(session.ApplyLensShading, Is.True, "Lens shading should be applied by default.");
+					Assert.That(SaveState(session), Does.Not.Contain($"\"{nameof(Session.ApplyLensShading)}\""), "Applying lens shading by default should not be written to the saved state.");
+					session.ApplyLensShading = false;
+					var savedState = SaveState(session);
+					Assert.That(savedState, Does.Contain($"\"{nameof(Session.ApplyLensShading)}\""), "Not applying lens shading should be written to the saved state.");
+					session.ApplyLensShading = true;
+					using (var document = JsonDocument.Parse(savedState))
+						await session.RestoreState(document.RootElement);
+					Assert.That(session.ApplyLensShading, Is.False, "Not applying lens shading should be restored from the saved state.");
+				}
+				finally
+				{
+					// close file
+					session.ApplyLensShading = true;
+					session.Profile = ImageRenderingProfile.Default;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
+				}
 			});
 		}
 

@@ -60,6 +60,7 @@ class ImageRenderingProfileTests : BaseTests
 			profile.GreenColorTable = colorTable;
 		}),
 		(nameof(ImageRenderingProfile.Height), profile => profile.Height += 1),
+		(nameof(ImageRenderingProfile.LensShading), profile => profile.LensShading = CreateLensShadingMap(profile.LensShading is null ? 1.5f : profile.LensShading.Gains[0] + 1)),
 		(nameof(ImageRenderingProfile.Orientation), profile => profile.Orientation += 90),
 		(nameof(ImageRenderingProfile.PixelStrides), profile => profile.PixelStrides = IncreaseFirstElement(profile.PixelStrides)),
 		(nameof(ImageRenderingProfile.RedColorGain), profile => profile.RedColorGain += 1),
@@ -205,6 +206,15 @@ class ImageRenderingProfileTests : BaseTests
 	}
 
 
+	// Create a lens shading map of a 2x2 block of positions whose gains are all the given value.
+	static LensShadingMap CreateLensShadingMap(float gain)
+	{
+		var gains = new float[2 * 2 * 3 * 3];
+		Array.Fill(gains, gain);
+		return new LensShadingMap(0, 0, 16, 16, 2, 2, 3, 3, 0, 0, 0.5, 0.5, gains);
+	}
+
+
 	// Create profile for testing.
 	ImageRenderingProfile CreateProfile() => new(FileFormats.Png, ImageRenderers.All[0]);
 
@@ -315,5 +325,60 @@ class ImageRenderingProfileTests : BaseTests
 		var array = list.ToArray();
 		++array[0];
 		return array;
+	}
+
+
+	/// <summary>
+	/// Test for saving and loading lens shading.
+	/// </summary>
+	[Test]
+	public void LensShadingPersistenceTest()
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// save a profile which carries lens shading
+			await this.InitializeSubSystemsAsync();
+			ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+			var name = $"Lens Shading Test {Guid.NewGuid()}";
+			var lensShading = CreateLensShadingMap(2.5f);
+			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
+			{
+				LensShading = lensShading,
+			};
+			await profile.SaveAsync();
+			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
+			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
+			try
+			{
+				// check that lens shading is loaded
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
+					Assert.That(loadedProfile.LensShading, Is.EqualTo(lensShading), "Lens shading should be loaded.");
+					Assert.That(loadedProfile.HasSameRenderingParameters(profile), Is.True, "Loaded profile should have same rendering parameters.");
+				}
+
+				// check that no lens shading is written, so the file stays the same as one written before it was supported
+				profile.LensShading = null;
+				await profile.SaveAsync();
+				var json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.LensShading)}\":"), "No lens shading should not be written.");
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.LensShading, Is.Null, "No lens shading should be loaded.");
+
+				// check that invalid lens shading is ignored when loading
+				var jsonWithInvalidLensShading = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.LensShading)}\": {{ \"PitchX\": 2 }}, \"{nameof(ImageRenderingProfile.Width)}\"");
+				await File.WriteAllTextAsync(fileName, jsonWithInvalidLensShading);
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
+					Assert.That(loadedProfile.LensShading, Is.Null, "Invalid lens shading should be ignored.");
+					Assert.That(loadedProfile.Width, Is.EqualTo(profile.Width), "Other parameters should still be loaded.");
+				}
+			}
+			finally
+			{
+				profile.Dispose();
+				await DeleteFileAsync(fileName);
+			}
+		});
 	}
 }

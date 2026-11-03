@@ -301,6 +301,10 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Property of <see cref="ApplyLensShading"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> ApplyLensShadingProp = ObservableProperty.Register<Session, bool>(nameof(ApplyLensShading), true);
+	/// <summary>
 	/// Property of <see cref="AreAdjustableBlackWhiteLevels1"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels1Prop = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels1));
@@ -424,6 +428,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="HasImagePlane3"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasImagePlane3Prop = ObservableProperty.Register<Session, bool>(nameof(HasImagePlane3));
+	/// <summary>
+	/// Property of <see cref="HasLensShading"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> HasLensShadingProp = ObservableProperty.Register<Session, bool>(nameof(HasLensShading));
 	/// <summary>
 	/// Property of <see cref="HasMultipleByteOrderings"/>.
 	/// </summary>
@@ -1492,6 +1500,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsBayerPatternSupportedProp, isBayerPatternFormat);
 		this.SetValue(IsCompressedImageFormatProp, imageFormatCategory == ImageFormatCategory.Compressed);
 		this.SetValue(IsDemosaicingSupportedProp, isBayerPatternFormat);
+		this.UpdateHasLensShading();
 		this.SetValue(IsRgbGainSupportedProp, imageRenderer.IsRgbGainSupported);
 		this.SetValue(IsYuvToBgraConverterSupportedProp, imageFormatCategory == ImageFormatCategory.YUV);
 		this.UpdateHasColorTables();
@@ -1515,6 +1524,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	/// <summary>
+	/// Get or set whether the lens shading defined by current <see cref="Profile"/> should be corrected or not.
+	/// </summary>
+	public bool ApplyLensShading
+	{
+		get => this.GetValue(ApplyLensShadingProp);
+		set => this.SetValue(ApplyLensShadingProp, value);
+	}
+
+
 	// Apply parameters defined in current profile.
 	void ApplyProfile()
 	{
@@ -1523,6 +1542,7 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// update state
 		this.UpdateCanSaveDeleteProfile();
+		this.UpdateHasLensShading();
 
 		// apply profile
 		if (profile.Type != ImageRenderingProfileType.Default)
@@ -3299,6 +3319,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Check whether 3rd image plane exists or not according to current <see cref="ImageRenderer"/>.
 	/// </summary>
 	public bool HasImagePlane3 => this.GetValue(HasImagePlane3Prop);
+
+
+	/// <summary>
+	/// Check whether current <see cref="Profile"/> defines lens shading which can be corrected for current <see cref="ImageRenderer"/> or not.
+	/// </summary>
+	public bool HasLensShading => this.GetValue(HasLensShadingProp);
 
 
 	/// <summary>
@@ -6072,6 +6098,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var pixelStrides = new int[this.pixelStrides.Length];
 		var rowStrides = new int[this.rowStrides.Length];
 		var baseExposure = 0.0;
+		var applyLensShading = true;
 		var rGain = 1.0;
 		var gGain = 1.0;
 		var bGain = 1.0;
@@ -6172,6 +6199,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		if (savedState.TryGetProperty(nameof(BaseExposure), out jsonProperty) && jsonProperty.TryGetDouble(out baseExposure))
 			baseExposure = ImageRenderingOptions.CoerceBaseExposure(baseExposure);
+		if (savedState.TryGetProperty(nameof(ApplyLensShading), out jsonProperty))
+			applyLensShading = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(RedColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out rGain))
 			rGain = ImageRenderingOptions.GetValidRgbGain(rGain);
 		if (savedState.TryGetProperty(nameof(GreenColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out gGain))
@@ -6314,6 +6343,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		for (var i = rowStrides.Length - 1; i >= 0; --i)
 			this.ChangeRowStride(i, rowStrides[i]);
 		this.SetValue(BaseExposureProp, baseExposure);
+		this.SetValue(ApplyLensShadingProp, applyLensShading);
 		this.SetValue(RedColorGainProp, rGain);
 		this.SetValue(GreenColorGainProp, gGain);
 		this.SetValue(BlueColorGainProp, bGain);
@@ -6712,6 +6742,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteEndArray();
 		if (this.IsBaseExposureSupported)
 			writer.WriteNumber(nameof(BaseExposure), this.BaseExposure);
+		if (!this.ApplyLensShading)
+			writer.WriteBoolean(nameof(ApplyLensShading), false);
 		if (this.IsRgbGainSupported)
 		{
 			writer.WriteNumber(nameof(RedColorGain), this.RedColorGain);
@@ -7306,6 +7338,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Update HasLensShading according to the map defined by current profile and whether the current renderer renders a mosaic or not.
+	void UpdateHasLensShading()
+	{
+		if (this.IsDisposed)
+			return;
+		this.SetValue(HasLensShadingProp, this.IsDemosaicingSupported && this.Profile.LensShading is not null);
+	}
+
+
 	// Update IsAlphaChannelAvailable based on the current renderer's category and (for Compressed) the profile's file format.
 	void UpdateIsAlphaChannelAvailable()
 	{
@@ -7480,6 +7521,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		profile.GreenColorTable = this.greenColorTable;
 		profile.BlueColorTable = this.blueColorTable;
 		profile.AlphaColorTable = this.alphaColorTable;
+		profile.LensShading = this.Profile.LensShading;
 	}
 
 

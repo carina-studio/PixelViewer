@@ -58,6 +58,7 @@ namespace Carina.PixelViewer.Media.Profiles
         double greenColorGain = 1.0;
         ColorTable? greenColorTable;
         int height = 1;
+        LensShadingMap? lensShading;
         string name = "";
         IList<int> pixelStrides = emptyEffectiveBits;
         double redColorGain = 1.0;
@@ -492,6 +493,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 && this.blueColorTable.IsSameAs(profile.blueColorTable)
                 && this.greenColorTable.IsSameAs(profile.greenColorTable)
                 && this.redColorTable.IsSameAs(profile.redColorTable)
+                && Equals(this.lensShading, profile.lensShading)
                 && this.Orientation == profile.Orientation
                 && this.FlipX == profile.FlipX
                 && this.FlipY == profile.FlipY
@@ -545,6 +547,23 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Check upgrading state.
         public bool IsUpgradedWhenLoading { get; private set; }
+
+
+        // Map of gains to correct the shading of lens, or Null if there is no map.
+        public LensShadingMap? LensShading
+        {
+            get => this.lensShading;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (Equals(this.lensShading, value))
+                    return;
+                this.lensShading = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LensShading)));
+            }
+        }
 
 
         // Load and create profile from file.
@@ -729,6 +748,15 @@ namespace Carina.PixelViewer.Media.Profiles
                 profile.blueColorTable = ReadColorTable(rootElement, nameof(BlueColorTable));
                 profile.greenColorTable = ReadColorTable(rootElement, nameof(GreenColorTable));
                 profile.redColorTable = ReadColorTable(rootElement, nameof(RedColorTable));
+
+                // lens shading
+                if (rootElement.TryGetProperty(nameof(LensShading), out jsonProperty))
+                {
+                    if (LensShadingMap.TryLoadFromJson(jsonProperty, out var lensShading))
+                        profile.lensShading = lensShading;
+                    else
+                        logger?.LogWarning("Unable to load {name} from profile", nameof(LensShading));
+                }
 
                 // color space
                 if (rootElement.TryGetProperty(nameof(ColorSpace), out jsonProperty)
@@ -1090,6 +1118,11 @@ namespace Carina.PixelViewer.Media.Profiles
                 WriteColorTable(jsonWriter, nameof(BlueColorTable), this.blueColorTable);
                 WriteColorTable(jsonWriter, nameof(GreenColorTable), this.greenColorTable);
                 WriteColorTable(jsonWriter, nameof(RedColorTable), this.redColorTable);
+                if (this.lensShading is not null)
+                {
+                    jsonWriter.WritePropertyName(nameof(LensShading));
+                    this.lensShading.WriteToJson(jsonWriter);
+                }
                 jsonWriter.WriteString(nameof(ColorSpace), this.colorSpace.Name);
                 if (this.useLinearColorSpace)
                     jsonWriter.WriteBoolean(nameof(UseLinearColorSpace), true);
