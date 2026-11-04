@@ -464,6 +464,35 @@ namespace Carina.PixelViewer.Media
             }
             return true;
         }
+
+
+        /// <summary>
+        /// Try reading data of entry whose type is either 16-bit or 32-bit unsigned integer.
+        /// </summary>
+        /// <param name="data">Read data.</param>
+        /// <returns>True if data read successfully.</returns>
+        /// <remarks>Only <see cref="IfdEntryType.UInt16"/> and <see cref="IfdEntryType.UInt32"/> entries can be read by this method.</remarks>
+        public bool TryGetUInt32EntryData([NotNullWhen(true)] out uint[]? data)
+        {
+            switch (this.CurrentEntryType)
+            {
+                case IfdEntryType.UInt16:
+                    if (this.TryGetEntryData(out ushort[]? ushortData))
+                    {
+                        data = new uint[ushortData.Length];
+                        for (var i = ushortData.Length - 1; i >= 0; --i)
+                            data[i] = ushortData[i];
+                        return true;
+                    }
+                    break;
+                case IfdEntryType.UInt32:
+                    if (this.TryGetEntryData(out data))
+                        return true;
+                    break;
+            }
+            data = null;
+            return false;
+        }
     }
 
 

@@ -13,4 +13,8 @@ enum ImageDataCompression
 	/// Lossless JPEG (ITU-T T.81 process 14).
 	/// </summary>
 	LosslessJpeg,
+	/// <summary>
+	/// Compression of NEF data by Nikon, either lossless or lossy.
+	/// </summary>
+	Nef,
 }
