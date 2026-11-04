@@ -162,7 +162,7 @@
 	<StaticResourceExtension x:Key="String/ImageFormatCategory.UserDefined" ResourceKey="String/Common.Custom"/>
 
 	<!-- ImageRenderingProfile -->
-	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;无&gt;</sys:String>
+	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;无配置&gt;</sys:String>
 
 	<!-- ImageRenderingProfileSelectionDialog -->
 	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">选择配置</sys:String>
@@ -192,6 +192,7 @@
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.AlignToInteger">对齐整数</sys:String>
+	<sys:String x:Key="String/SessionControl.AlignToInteger.Value">对齐至 {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">关于 PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">应用程序选项…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重置至配置参数</sys:String>
@@ -220,7 +221,7 @@
 	<sys:String x:Key="String/SessionControl.CopyFileName">复制文件名称</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">复制完整文件路径</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU 使用率</sys:String>
-	<sys:String x:Key="String/SessionControl.DataOffset">起始数据位移 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.DataOffset">起始数据位移</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;无&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">删除配置</sys:String>
 	<sys:String x:Key="String/SessionControl.Demosaicing">去马赛克</sys:String>
@@ -236,7 +237,7 @@
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">调整至窗口大小 (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FlipX">水平翻转</sys:String>
 	<sys:String x:Key="String/SessionControl.FlipY">垂直翻转</sys:String>
-	<sys:String x:Key="String/SessionControl.FramePaddingSize">帧数据间隔 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePaddingSize">帧数据间隔</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePlaybackOptions">帧播放选项</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePlaybackRate">帧率</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePlaybackRate.Unlimited">最高 fps</sys:String>
@@ -250,7 +251,7 @@
 	<sys:String x:Key="String/SessionControl.Histogram.Markers">标记</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Red">红色</sys:String>
 	<sys:String x:Key="String/SessionControl.Histograms">色阶分布图</sys:String>
-	<sys:String x:Key="String/SessionControl.ImageDimensions">图像尺寸 (像素)</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageDimensions">图像</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">图层 #1</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">图层 #2</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">图层 #3</sys:String>
@@ -271,7 +272,7 @@
 	<sys:String x:Key="String/SessionControl.OpeningSource">正在打开图像…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">打开图像文件 (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">其他动作</sys:String>
-	<sys:String x:Key="String/SessionControl.PixelStride">像素步距 (字节)</sys:String>
+	<sys:String x:Key="String/SessionControl.PixelStride">像素步距</sys:String>
 	<sys:String x:Key="String/SessionControl.PlayFrames">播放/暂停帧序列</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">进程私有内存使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">配置</sys:String>
@@ -281,11 +282,15 @@
 	<sys:String x:Key="String/SessionControl.RenderingImage">绘制中…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">绘制失败，通常是因为使用错误的绘制参数。</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">绘制参数面板</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Color">颜色</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Dimensions">尺寸</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Format">格式</sys:String>
+	<sys:String x:Key="String/SessionControl.ResetRgbGain">重置增益</sys:String>
 	<sys:String x:Key="String/SessionControl.RgbGain">色彩预先校正</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆时针旋转</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">顺时针旋转</sys:String>
-	<sys:String x:Key="String/SessionControl.RowStride">行步距 (字节)</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">另存配置</sys:String>
+	<sys:String x:Key="String/SessionControl.RowStride">行步距</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">另存配置…</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveImage">保存图像 (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">保存配置</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在保存绘制的图像…</sys:String>
@@ -296,7 +301,7 @@
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">分别查看</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">帧序列</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Title">打开多个文件</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectRgbGain">自动调整</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectRgbGain">自动调整增益</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">打开文件所使用的配置</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在 Windows 资源管理器中显示文件</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">源数据大小</sys:String>

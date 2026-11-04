@@ -87,7 +87,13 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly StyledProperty<bool> HideImageViewerScrollBarsAutomaticallyProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(HideImageViewerScrollBarsAutomatically), true);
 	static readonly Dictionary<int, Cursor> ImageDraggingCursors = new();
 	static readonly StyledProperty<Thickness> ImageViewerShadowsMarginProperty = AvaloniaProperty.Register<SessionControl, Thickness>(nameof(ImageViewerShadowsMargin), new Thickness(-100, 0, 0, 0));
+	static readonly SettingKey<bool> IsColorParamsExpandedKey = new("SessionControl.IsColorParamsExpanded", true);
+	static readonly SettingKey<bool> IsDimensionsParamsExpandedKey = new("SessionControl.IsDimensionsParamsExpanded", true);
+	static readonly SettingKey<bool> IsFormatParamsExpandedKey = new("SessionControl.IsFormatParamsExpanded", true);
 	static readonly StyledProperty<bool> IsImageViewerScrollableProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsImageViewerScrollable));
+	static readonly SettingKey<bool> IsPlane1ParamsExpandedKey = new("SessionControl.IsPlane1ParamsExpanded", true);
+	static readonly SettingKey<bool> IsPlane2ParamsExpandedKey = new("SessionControl.IsPlane2ParamsExpanded", true);
+	static readonly SettingKey<bool> IsPlane3ParamsExpandedKey = new("SessionControl.IsPlane3ParamsExpanded", true);
 	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerOverImage));
 	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnBrightnessAdjustmentUI));
 	static readonly StyledProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnColorAdjustmentUI));
@@ -124,6 +130,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveFilteredImage = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveRenderedImage = new();
 	readonly ForwardedObservableBoolean canSaveImage;
+	readonly ForwardedObservableBoolean canSaveOrSaveAsNewProfile;
+	readonly ObservableCommandState<object?> canSaveProfile = new();
 	readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new();
 	readonly ScheduledAction checkAttachedScreenAction;
 	readonly ToggleButton colorAdjustmentButton;
@@ -212,6 +220,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			false,
 			this.canSaveFilteredImage,
 			this.canSaveRenderedImage);
+		this.canSaveOrSaveAsNewProfile = new(ForwardedObservableBoolean.CombinationMode.Or,
+			false,
+			this.canSaveAsNewProfile,
+			this.canSaveProfile);
 
 		// create commands
 		this.DecreaseSliderValueCommand = new Command<Slider>(this.DecreaseSliderValue);
@@ -221,6 +233,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAndVibranceAdjustment);
 		this.SaveAsNewProfileCommand = new Command(this.SaveAsNewProfile, this.canSaveAsNewProfile);
 		this.SaveImageCommand = new Command(this.SaveImage, this.canSaveImage);
+		this.SaveOrSaveAsNewProfileCommand = new Command(this.SaveOrSaveAsNewProfile, this.canSaveOrSaveAsNewProfile);
 		this.SetFramePlaybackRateCommand = new Command<int>(this.SetFramePlaybackRate);
 		this.ShowEvaluateImageDimensionsMenuCommand = new Command(() =>
 		{
@@ -298,6 +311,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				};
 			});
 		}
+		void SetupRenderingParamsExpander(string name, SettingKey<bool> isExpandedKey)
+		{
+			this.Get<Expander>(name).Also(it =>
+			{
+				it.IsExpanded = this.PersistentState.GetValueOrDefault(isExpandedKey);
+				it.GetObservable(Expander.IsExpandedProperty).Subscribe(isExpanded => this.PersistentState.SetValue(isExpandedKey, isExpanded), skipOnNextDuringSubscription: true);
+			});
+		}
 		SetupFilterParamsSliderAndButtons("blueColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("brightnessAdjustment", BrightnessAdjustmentGroup);
 		this.alignToIntegerMenu = ((ContextMenu)this.Resources[nameof(alignToIntegerMenu)].AsNonNull()).Also(it =>
@@ -359,8 +380,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 		});
 		this.colorAdjustmentPopupBorder = this.Get<Border>(nameof(colorAdjustmentPopupBorder));
+		SetupRenderingParamsExpander("colorParamsExpander", IsColorParamsExpandedKey);
 		this.colorSpaceComboBox = this.Get<ComboBox>(nameof(colorSpaceComboBox));
 		SetupFilterParamsSliderAndButtons("contrastAdjustment", ContrastAdjustmentGroup);
+		SetupRenderingParamsExpander("dimensionsParamsExpander", IsDimensionsParamsExpandedKey);
 		this.evaluateImageDimensionsButton = this.Get<ToggleButton>(nameof(this.evaluateImageDimensionsButton));
 		this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 		{
@@ -373,6 +396,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 		});
+		SetupRenderingParamsExpander("formatParamsExpander", IsFormatParamsExpandedKey);
 		this.framePlaybackOptionsButton = this.Get<ToggleButton>(nameof(framePlaybackOptionsButton));
 		this.framePlaybackOptionsPopup = this.Get<Popup>(nameof(framePlaybackOptionsPopup)).Also(it =>
 		{
@@ -440,6 +464,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 		});
+		SetupRenderingParamsExpander("plane1ParamsExpander", IsPlane1ParamsExpandedKey);
+		SetupRenderingParamsExpander("plane2ParamsExpander", IsPlane2ParamsExpandedKey);
+		SetupRenderingParamsExpander("plane3ParamsExpander", IsPlane3ParamsExpandedKey);
 		SetupFilterParamsSliderAndButtons("redColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSliderAndButtons("saturationAdjustment", ColorAdjustmentGroup);
 		var workingAreaColumnDefs = this.Get<Grid>("workingAreaGrid").ColumnDefinitions;
@@ -1017,6 +1044,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.canResetVibranceAdjustment.Bind(session.ResetVibranceAdjustmentCommand);
 		this.canSaveAsNewProfile.Bind(session.SaveAsNewProfileCommand, "");
 		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
+		this.canSaveProfile.Bind(session.SaveProfileCommand);
 		this.canSaveRenderedImage.Bind(session.SaveRenderedImageCommand, new Session.ImageSavingParams());
 		this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
 		this.UpdateCanShowProgressBar();
@@ -1123,6 +1151,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	    this.canResetVibranceAdjustment.Unbind();
 	    this.canSaveAsNewProfile.Unbind();
 	    this.canSaveFilteredImage.Unbind();
+	    this.canSaveProfile.Unbind();
 	    this.canSaveRenderedImage.Unbind();
 	    this.canShowEvaluateImageDimensionsMenu.Update(false);
 	    this.showProgressBarAction.Cancel(); // no pending showing of progress bar is carried to the next session
@@ -2469,6 +2498,31 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// <see cref="ICommand"/> to save image to file.
 	/// </summary>
 	public ICommand SaveImageCommand { get; }
+
+
+	// Save parameters to current profile, or save them as new profile if current profile cannot be saved.
+	async Task SaveOrSaveAsNewProfile()
+	{
+		// check state
+		if (this.DataContext is not Session session)
+		{
+			Logger.LogError("No session to save profile");
+			return;
+		}
+
+		// save to current profile
+		if (session.SaveProfileCommand.TryExecute())
+			return;
+
+		// save as new profile
+		await this.SaveAsNewProfile();
+	}
+
+
+	/// <summary>
+	/// <see cref="ICommand"/> to save parameters to current profile, or save them as new profile if current profile cannot be saved.
+	/// </summary>
+	public ICommand SaveOrSaveAsNewProfileCommand { get; }
 
 
 	// Scroll given point of image scroll viewer to specific position of viewport.

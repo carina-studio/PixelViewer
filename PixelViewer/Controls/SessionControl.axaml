@@ -31,12 +31,36 @@
 		
 		<!-- Align to bytes -->
 		<ContextMenu x:Key="alignToIntegerMenu" Placement="Bottom">
-			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="4" Tag="4"/>
-			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="8" Tag="8"/>
-			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="16" Tag="16"/>
-			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="32" Tag="32"/>
-			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="64" Tag="64"/>
-			<MenuItem Click="OnAlignToIntegerMenuItemClick" Header="128" Tag="128"/>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Tag="4">
+				<MenuItem.Header>
+					<abControls:FormattedTextBlock Arg1="4" Format="{asXaml:StringResource SessionControl.AlignToInteger.Value}"/>
+				</MenuItem.Header>
+			</MenuItem>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Tag="8">
+				<MenuItem.Header>
+					<abControls:FormattedTextBlock Arg1="8" Format="{asXaml:StringResource SessionControl.AlignToInteger.Value}"/>
+				</MenuItem.Header>
+			</MenuItem>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Tag="16">
+				<MenuItem.Header>
+					<abControls:FormattedTextBlock Arg1="16" Format="{asXaml:StringResource SessionControl.AlignToInteger.Value}"/>
+				</MenuItem.Header>
+			</MenuItem>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Tag="32">
+				<MenuItem.Header>
+					<abControls:FormattedTextBlock Arg1="32" Format="{asXaml:StringResource SessionControl.AlignToInteger.Value}"/>
+				</MenuItem.Header>
+			</MenuItem>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Tag="64">
+				<MenuItem.Header>
+					<abControls:FormattedTextBlock Arg1="64" Format="{asXaml:StringResource SessionControl.AlignToInteger.Value}"/>
+				</MenuItem.Header>
+			</MenuItem>
+			<MenuItem Click="OnAlignToIntegerMenuItemClick" Tag="128">
+				<MenuItem.Header>
+					<abControls:FormattedTextBlock Arg1="128" Format="{asXaml:StringResource SessionControl.AlignToInteger.Value}"/>
+				</MenuItem.Header>
+			</MenuItem>
 		</ContextMenu>
 
 		<!-- Evaluate image dimensions -->
@@ -119,6 +143,12 @@
 					<Image Classes="MenuItem_Icon" Source="{StaticResource Image/Icon.Information.Outline}"/>
 				</MenuItem.Icon>
 			</MenuItem>
+		</ContextMenu>
+
+		<!-- Save profile -->
+		<ContextMenu x:Key="saveProfileMenu" Placement="Bottom">
+			<MenuItem Command="{Binding SaveProfileCommand}" Header="{asXaml:StringResource SessionControl.SaveProfile}"/>
+			<MenuItem Command="{Binding #root.SaveAsNewProfileCommand}" Header="{asXaml:StringResource SessionControl.SaveAsNewProfile}"/>
 		</ContextMenu>
 
 		<!-- Slider -->
@@ -907,19 +937,23 @@
 
 			<!-- Rendering parameters panel -->
 			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="4" IsVisible="{Binding IsRenderingParametersPanelVisible}">
-				<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
-					<StackPanel IsEnabled="{Binding IsSourceOpened}" Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
+				<DockPanel IsEnabled="{Binding IsSourceOpened}">
 
-						<!-- Styles -->
-						<StackPanel.Styles>
-							<Style Selector="TextBlock">
-								<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-							</Style>
-						</StackPanel.Styles>
+					<!-- Resources -->
+					<DockPanel.Resources>
+						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.OptionsPanel.Separator.Height.Small"/>
+					</DockPanel.Resources>
 
-						<!-- Profile -->
-						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Profile}"/>
-						<ComboBox Classes="Dialog_ComboBox" ItemsSource="{Binding Profiles}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding Profile, Mode=TwoWay}">
+					<!-- Styles -->
+					<DockPanel.Styles>
+						<Style Selector="TextBlock">
+							<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+						</Style>
+					</DockPanel.Styles>
+
+					<!-- Profile -->
+					<Border Classes="SessionControl_OptionsPanel_ProfilePanel" DockPanel.Dock="Top">
+						<ComboBox Classes="Dialog_ComboBox" ItemsSource="{Binding Profiles}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding Profile, Mode=TwoWay}" ToolTip.Tip="{asXaml:StringResource SessionControl.Profile}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
 									<Grid ColumnDefinitions="*,Auto">
@@ -939,357 +973,438 @@
 								</DataTemplate>
 							</ComboBox.ItemTemplate>
 						</ComboBox>
-						<Separator asControls:DialogElement.SeparatorType="Default"/>
+					</Border>
 
-						<!-- Data offset -->
-						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.DataOffset}"/>
-						<abControls:IntegerTextBox Classes="Dialog_TextBlock" IsNullValueAllowed="False" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}"/>
-						<Separator asControls:DialogElement.SeparatorType="Default"/>
+					<!-- Profile actions -->
+					<Border Classes="SessionControl_OptionsPanel_ActionsPanel" DockPanel.Dock="Bottom">
+						<Grid ColumnDefinitions="Auto,*,Auto,Auto">
 
-						<!-- Frame padding bytes -->
-						<StackPanel IsVisible="{Binding HasMultipleFrames}">
-							<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.FramePaddingSize}"/>
-							<abControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}"/>
-							<Separator asControls:DialogElement.SeparatorType="Default"/>
-						</StackPanel>
+							<!-- Apply profile -->
+							<Button Command="{Binding ApplyProfileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ApplyProfile}">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Reset}"/>
+							</Button>
 
-						<!-- Image renderer -->
-						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ImageRenderer}"/>
-						<ComboBox Name="imageRendererComboBox" Classes="Dialog_ComboBox" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
-							<ComboBox.ItemTemplate>
-								<DataTemplate>
-									<Grid ColumnDefinitions="*,Auto">
-										<TextBlock Text="{Binding Format.DisplayName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
-										<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Background}}" 
-										        BorderBrush="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Border}}" 
-										        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
-										        CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
-										        Grid.Column="1" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
-										        Opacity="{Binding $self.IsEffectivelyEnabled, Converter={x:Static appControls:SessionControl.BooleanToImageFormatCategoryLabelOpacityConverter}}"
-										        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" 
-										        VerticalAlignment="Center">
-											<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category, Converter={x:Static appConverters:EnumConverters.ImageFormatCategory}}"/>
-										</Border>
+							<!-- Save profile -->
+							<asControls:SplitButton Command="{Binding #root.SaveOrSaveAsNewProfileCommand}" DropDownMenu="{StaticResource saveProfileMenu}" Grid.Column="2" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource Common.Save}">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
+							</asControls:SplitButton>
+
+							<!-- Delete profile -->
+							<Button Command="{Binding DeleteProfileCommand}" Grid.Column="3" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.DeleteProfile}">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Delete.Outline}"/>
+							</Button>
+
+						</Grid>
+					</Border>
+
+					<!-- Parameters -->
+					<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
+						<StackPanel Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
+
+							<!-- Format -->
+							<Expander Name="formatParamsExpander" Classes="SessionControl_OptionsPanel_Expander">
+								<Expander.Header>
+									<Grid ColumnDefinitions="Auto,*">
+										<TextBlock Text="{asXaml:StringResource SessionControl.RenderingParametersPanel.Format}" VerticalAlignment="Center"/>
+										<TextBlock Classes="SessionControl_OptionsPanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}" Text="{Binding ImageRenderer.Format.DisplayName}"/>
 									</Grid>
-								</DataTemplate>
-							</ComboBox.ItemTemplate>
-						</ComboBox>
-						<Separator asControls:DialogElement.SeparatorType="Default"/>
+								</Expander.Header>
+								<StackPanel>
+									<!-- Data offset -->
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.DataOffset}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBlock" IsNullValueAllowed="False" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}">
+										<abControls:IntegerTextBox.InnerRightContent>
+											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+										</abControls:IntegerTextBox.InnerRightContent>
+									</abControls:IntegerTextBox>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 
-						<!-- Byte ordering -->
-						<StackPanel IsVisible="{Binding HasMultipleByteOrderings}">
-							<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ByteOrdering}"/>
-							<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type app:ByteOrdering}" SelectedItem="{Binding ByteOrdering, Mode=TwoWay}"/>
-							<Separator asControls:DialogElement.SeparatorType="Default"/>
-						</StackPanel>
+									<!-- Frame padding bytes -->
+									<StackPanel IsVisible="{Binding HasMultipleFrames}">
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.FramePaddingSize}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}">
+											<abControls:IntegerTextBox.InnerRightContent>
+												<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+											</abControls:IntegerTextBox.InnerRightContent>
+										</abControls:IntegerTextBox>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+									</StackPanel>
 
-						<!-- Bayer Pattern -->
-						<StackPanel IsVisible="{Binding IsBayerPatternSupported}">
-							<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BayerPattern}"/>
-							<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:BayerPattern}" SelectedItem="{Binding BayerPattern, Mode=TwoWay}"/>
-							<Separator asControls:DialogElement.SeparatorType="Default"/>
-						</StackPanel>
-
-						<!-- YUV to RGB converter -->
-						<StackPanel IsVisible="{Binding IsYuvToBgraConverterSupported}">
-							<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.YuvToBgraConverter}"/>
-							<ComboBox Name="yuvToBgraConverterComboBox" Classes="Dialog_ComboBox" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding YuvToBgraConverter, Mode=TwoWay}">
-								<ComboBox.ItemTemplate>
-									<DataTemplate>
-										<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
-									</DataTemplate>
-								</ComboBox.ItemTemplate>
-							</ComboBox>
-							<Separator asControls:DialogElement.SeparatorType="Default"/>
-						</StackPanel>
-
-						<!-- Color space -->
-						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ColorSpace}"/>
-						<Panel>
-							<abControls:LinkTextBlock Command="{Binding #root.ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{asXaml:StringResource SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
-							<StackPanel IsVisible="{Binding IsColorSpaceManagementEnabled}">
-								<Grid ColumnDefinitions="*,Auto">
-									<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding ColorSpaces}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" VerticalAlignment="Center">
+									<!-- Image renderer -->
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ImageRenderer}"/>
+									<ComboBox Name="imageRendererComboBox" Classes="Dialog_ComboBox" ItemsSource="{x:Static appImageRenderers:ImageRenderers.All}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding ImageRenderer, Mode=TwoWay}">
 										<ComboBox.ItemTemplate>
 											<DataTemplate>
 												<Grid ColumnDefinitions="*,Auto">
-													<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
-													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}" 
-													        BorderBrush="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile}" 
+													<TextBlock Text="{Binding Format.DisplayName}" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis"/>
+													<Border Background="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Background}}" 
+													        BorderBrush="{Binding Format.Category, Converter={x:Static appConverters:ImageFormatCategoryToBrushConverter.Border}}" 
 													        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
 													        CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
-													        Grid.Column="1" 
-													        IsVisible="{Binding IsEmbedded}" 
-													        Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
-													        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}"
-													        VerticalAlignment="Center">
-														<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{asXaml:StringResource SessionControl.ColorSpace.Embedded}"/>
-													</Border>
-													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" 
-													        BorderBrush="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Border.SystemDefined}" 
-													        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
-													        CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
-													        Grid.Column="1" 
-													        IsVisible="{Binding IsSystemDefined}" 
-													        Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
+													        Grid.Column="1" Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
 													        Opacity="{Binding $self.IsEffectivelyEnabled, Converter={x:Static appControls:SessionControl.BooleanToImageFormatCategoryLabelOpacityConverter}}"
 													        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" 
 													        VerticalAlignment="Center">
-														<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{asXaml:StringResource SessionControl.ColorSpace.SystemDefined}"/>
-													</Border>
-													<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" 
-													        BorderBrush="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Border.Custom}" 
-													        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
-													        CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
-													        Grid.Column="1"
-													        IsVisible="{Binding IsUserDefined}" 
-													        Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
-													        Opacity="{Binding $self.IsEffectivelyEnabled, Converter={x:Static appControls:SessionControl.BooleanToImageFormatCategoryLabelOpacityConverter}}"
-													        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" 
-													        VerticalAlignment="Center">
-														<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{asXaml:StringResource Common.Custom}"/>
+														<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{Binding Format.Category, Converter={x:Static appConverters:EnumConverters.ImageFormatCategory}}"/>
 													</Border>
 												</Grid>
 											</DataTemplate>
 										</ComboBox.ItemTemplate>
 									</ComboBox>
-									<Button Classes="BrowseButton" Command="{Binding #root.ShowColorSpaceInfo}" Grid.Column="1" ToolTip.Tip="{asXaml:StringResource Common.Details}" VerticalAlignment="Center">
-										<Image Classes="BrowseButtonIcon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
-									</Button>
-								</Grid>
-								<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding !ColorSpace.IsLinear}"/>
-								<Grid ColumnDefinitions="*,Auto" IsVisible="{Binding !ColorSpace.IsLinear}">
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.UseLinearColorSpace}" VerticalAlignment="Center"/>
-									<ToggleSwitch Grid.Column="1" IsChecked="{Binding UseLinearColorSpace, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
-								</Grid>
-							</StackPanel>
-						</Panel>
-						<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 
-						<!-- Demosaicing -->
-						<Grid ColumnDefinitions="*,Auto" IsVisible="{Binding IsDemosaicingSupported}">
-							<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Demosaicing}" VerticalAlignment="Center"/>
-							<ToggleSwitch Grid.Column="1" IsChecked="{Binding Demosaicing, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
-						</Grid>
-						<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsDemosaicingSupported}"/>
+									<!-- Byte ordering -->
+									<StackPanel IsVisible="{Binding HasMultipleByteOrderings}">
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ByteOrdering}"/>
+										<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type app:ByteOrdering}" SelectedItem="{Binding ByteOrdering, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+									</StackPanel>
 
-						<!-- Dimensions -->
-						<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ImageDimensions}"/>
-						<Grid ColumnDefinitions="*,Auto,*">
-							<Panel>
-								<abControls:IntegerTextBox Name="imageWidthTextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}">
-									<abControls:IntegerTextBox.InnerRightContent>
-										<Panel Classes="TextBox_InPlaceActions">
-											<ToggleButton Name="alignImageWidthButton" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #imageWidthTextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
-												<Panel>
-													<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
-													<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
-												</Panel>
-											</ToggleButton>
+									<!-- Bayer Pattern -->
+									<StackPanel IsVisible="{Binding IsBayerPatternSupported}">
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BayerPattern}"/>
+										<asControls:EnumComboBox Classes="Dialog_ComboBox" EnumType="{x:Type appMedia:BayerPattern}" SelectedItem="{Binding BayerPattern, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+									</StackPanel>
+
+									<!-- YUV to RGB converter -->
+									<StackPanel IsVisible="{Binding IsYuvToBgraConverterSupported}">
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.YuvToBgraConverter}"/>
+										<ComboBox Name="yuvToBgraConverterComboBox" Classes="Dialog_ComboBox" ItemsSource="{x:Static appMedia:YuvToBgraConverter.All}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding YuvToBgraConverter, Mode=TwoWay}">
+											<ComboBox.ItemTemplate>
+												<DataTemplate>
+													<TextBlock Text="{Binding Converter={x:Static appConverters:YuvToBgraConverterToStringConverter.Default}}"/>
+												</DataTemplate>
+											</ComboBox.ItemTemplate>
+										</ComboBox>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+									</StackPanel>
+
+									<!-- Demosaicing -->
+									<Grid Classes="SessionControl_OptionsPanel_SwitchItem" ColumnDefinitions="*,Auto" IsVisible="{Binding IsDemosaicingSupported}">
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Demosaicing}" VerticalAlignment="Center"/>
+										<ToggleSwitch Grid.Column="1" IsChecked="{Binding Demosaicing, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
+									</Grid>
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsDemosaicingSupported}"/>
+								</StackPanel>
+							</Expander>
+
+							<!-- Dimensions -->
+							<Expander Name="dimensionsParamsExpander" Classes="SessionControl_OptionsPanel_Expander">
+								<Expander.Header>
+									<Grid ColumnDefinitions="Auto,*">
+										<TextBlock Text="{asXaml:StringResource SessionControl.RenderingParametersPanel.Dimensions}" VerticalAlignment="Center"/>
+										<TextBlock Classes="SessionControl_OptionsPanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}">
+											<TextBlock.Text>
+												<MultiBinding StringFormat="{}{0} × {1}">
+													<Binding Path="ImageWidth"/>
+													<Binding Path="ImageHeight"/>
+												</MultiBinding>
+											</TextBlock.Text>
+										</TextBlock>
+									</Grid>
+								</Expander.Header>
+								<StackPanel>
+									<!-- Dimensions -->
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ImageDimensions}"/>
+									<Grid ColumnDefinitions="*,Auto,*">
+										<Panel>
+											<abControls:IntegerTextBox Name="imageWidthTextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageWidth, Mode=TwoWay}">
+												<abControls:IntegerTextBox.InnerRightContent>
+													<Panel Classes="TextBox_InPlaceActions">
+														<ToggleButton Name="alignImageWidthButton" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #imageWidthTextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
+															<Panel>
+																<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+																<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+															</Panel>
+														</ToggleButton>
+													</Panel>
+												</abControls:IntegerTextBox.InnerRightContent>
+											</abControls:IntegerTextBox>
 										</Panel>
-									</abControls:IntegerTextBox.InnerRightContent>
-								</abControls:IntegerTextBox>
-							</Panel>
-							<TextBlock Grid.Column="1" Margin="3,0,3,0" Text="×" VerticalAlignment="Center"/>
-							<Panel Grid.Column="2">
-								<abControls:IntegerTextBox Name="imageHeightTextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}">
-									<abControls:IntegerTextBox.InnerRightContent>
-										<Panel Classes="TextBox_InPlaceActions">
-											<ToggleButton Name="alignImageHeightButton" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #imageHeightTextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
-												<Panel>
-													<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Vertical}"/>
-													<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Vertical.Light}"/>
-												</Panel>
-											</ToggleButton>
+										<TextBlock Grid.Column="1" Margin="3,0,3,0" Text="×" VerticalAlignment="Center"/>
+										<Panel Grid.Column="2">
+											<abControls:IntegerTextBox Name="imageHeightTextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Maximum="65535" Minimum="1" Value="{Binding ImageHeight, Mode=TwoWay}">
+												<abControls:IntegerTextBox.InnerRightContent>
+													<Panel Classes="TextBox_InPlaceActions">
+														<ToggleButton Name="alignImageHeightButton" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #imageHeightTextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
+															<Panel>
+																<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Vertical}"/>
+																<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Vertical.Light}"/>
+															</Panel>
+														</ToggleButton>
+													</Panel>
+												</abControls:IntegerTextBox.InnerRightContent>
+											</abControls:IntegerTextBox>
 										</Panel>
-									</abControls:IntegerTextBox.InnerRightContent>
-								</abControls:IntegerTextBox>
-							</Panel>
-						</Grid>
-						<Separator Classes="Dialog_Separator_Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
-						<ToggleButton Name="evaluateImageDimensionsButton" 
-						              Classes="SessionControl_OptionsPanel_ToggleButton" 
-						              Command="{Binding #root.ShowEvaluateImageDimensionsMenuCommand}" 
-						              IsVisible="{Binding !IsCompressedImageFormat}">
-							<Grid ColumnDefinitions="*,Auto">
-								<TextBlock Classes="Button_Text" Text="{asXaml:StringResource SessionControl.EvaluateImageDimensions}"/>
-								<Image Classes="Button_DropDownIcon" Grid.Column="1" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.DropDown.Down}"/>
-								<Image Classes="Button_DropDownIcon" Grid.Column="1" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.DropDown.Down.Light}"/>
-							</Grid>
-						</ToggleButton>
-						<Separator asControls:DialogElement.SeparatorType="Default"/>
+									</Grid>
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
+									<ToggleButton Name="evaluateImageDimensionsButton" 
+									              Classes="SessionControl_OptionsPanel_ToggleButton" 
+									              Command="{Binding #root.ShowEvaluateImageDimensionsMenuCommand}" 
+									              IsVisible="{Binding !IsCompressedImageFormat}">
+										<Grid ColumnDefinitions="*,Auto">
+											<TextBlock Classes="Button_Text" Text="{asXaml:StringResource SessionControl.EvaluateImageDimensions}"/>
+											<Image Classes="Button_DropDownIcon" Grid.Column="1" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.DropDown.Down}"/>
+											<Image Classes="Button_DropDownIcon" Grid.Column="1" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.DropDown.Down.Light}"/>
+										</Grid>
+									</ToggleButton>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 
-						<!-- Plane options #1 -->
-						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.1}" IsExpanded="True" IsVisible="{Binding HasImagePlane1}">
-							<StackPanel>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
-								<Panel>
-									<abControls:IntegerTextBox Name="rowStride1TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride1, Mode=TwoWay}">
-										<abControls:IntegerTextBox.InnerRightContent>
-											<Panel Classes="TextBox_InPlaceActions">
-												<ToggleButton Name="alignRowStride1Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride1TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
-													<Panel>
-														<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
-														<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+								</StackPanel>
+							</Expander>
+
+							<!-- Plane options #1 -->
+							<Expander Name="plane1ParamsExpander" Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.1}" IsVisible="{Binding HasImagePlane1}">
+								<StackPanel>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
+									<Panel>
+										<abControls:IntegerTextBox Name="rowStride1TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride1, Mode=TwoWay}">
+											<abControls:IntegerTextBox.InnerRightContent>
+												<StackPanel Orientation="Horizontal">
+													<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+													<Panel Classes="TextBox_InPlaceActions">
+														<ToggleButton Name="alignRowStride1Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride1TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
+															<Panel>
+																<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+																<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+															</Panel>
+														</ToggleButton>
 													</Panel>
-												</ToggleButton>
-											</Panel>
+												</StackPanel>
+											</abControls:IntegerTextBox.InnerRightContent>
+										</abControls:IntegerTextBox>
+									</Panel>
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride1}"/>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}">
+										<abControls:IntegerTextBox.InnerRightContent>
+											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
-								</Panel>
-								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride1}"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
-								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits1}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
-								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels1}">
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits1}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits1}" Minimum="1" Value="{Binding EffectiveBits1, Mode=TwoWay}"/>
+									<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits1}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
+									<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels1}">
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel1, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel1, Mode=TwoWay}"/>
+									</StackPanel>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel1, Mode=TwoWay}"/>
-									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel1, Mode=TwoWay}"/>
 								</StackPanel>
-							</StackPanel>
-						</Expander>
-						<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding HasImagePlane1}"/>
+							</Expander>
 
-						<!-- Plane options #2 -->
-						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.2}" IsExpanded="True" IsVisible="{Binding HasImagePlane2}">
-							<StackPanel>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
-								<Panel>
-									<abControls:IntegerTextBox Name="rowStride2TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride2, Mode=TwoWay}">
-										<abControls:IntegerTextBox.InnerRightContent>
-											<Panel Classes="TextBox_InPlaceActions">
-												<ToggleButton Name="alignRowStride2Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride2TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
-													<Panel>
-														<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
-														<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+							<!-- Plane options #2 -->
+							<Expander Name="plane2ParamsExpander" Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.2}" IsVisible="{Binding HasImagePlane2}">
+								<StackPanel>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
+									<Panel>
+										<abControls:IntegerTextBox Name="rowStride2TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride2, Mode=TwoWay}">
+											<abControls:IntegerTextBox.InnerRightContent>
+												<StackPanel Orientation="Horizontal">
+													<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+													<Panel Classes="TextBox_InPlaceActions">
+														<ToggleButton Name="alignRowStride2Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride2TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
+															<Panel>
+																<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+																<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+															</Panel>
+														</ToggleButton>
 													</Panel>
-												</ToggleButton>
-											</Panel>
+												</StackPanel>
+											</abControls:IntegerTextBox.InnerRightContent>
+										</abControls:IntegerTextBox>
+									</Panel>
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride2}"/>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}">
+										<abControls:IntegerTextBox.InnerRightContent>
+											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
-								</Panel>
-								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride2}"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
-								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits2}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
-								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels2}">
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits2}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits2}" Minimum="1" Value="{Binding EffectiveBits2, Mode=TwoWay}"/>
+									<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits2}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
+									<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels2}">
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel2, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel2, Mode=TwoWay}"/>
+									</StackPanel>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel2, Mode=TwoWay}"/>
-									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel2, Mode=TwoWay}"/>
 								</StackPanel>
-							</StackPanel>
-						</Expander>
-						<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding HasImagePlane2}"/>
+							</Expander>
 
-						<!-- Plane options #3 -->
-						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.3}" IsExpanded="True" IsVisible="{Binding HasImagePlane3}">
-							<StackPanel>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
-								<Panel>
-									<abControls:IntegerTextBox Name="rowStride3TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride3, Mode=TwoWay}">
-										<abControls:IntegerTextBox.InnerRightContent>
-											<Panel Classes="TextBox_InPlaceActions">
-												<ToggleButton Name="alignRowStride3Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride3TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
-													<Panel>
-														<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
-														<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+							<!-- Plane options #3 -->
+							<Expander Name="plane3ParamsExpander" Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.3}" IsVisible="{Binding HasImagePlane3}">
+								<StackPanel>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
+									<Panel>
+										<abControls:IntegerTextBox Name="rowStride3TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride3, Mode=TwoWay}">
+											<abControls:IntegerTextBox.InnerRightContent>
+												<StackPanel Orientation="Horizontal">
+													<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+													<Panel Classes="TextBox_InPlaceActions">
+														<ToggleButton Name="alignRowStride3Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride3TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
+															<Panel>
+																<Image Classes="Icon" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal}"/>
+																<Image Classes="Icon" IsVisible="{Binding $parent[ToggleButton].IsChecked}" Source="{StaticResource Image/Icon.Alignment.Horizontal.Light}"/>
+															</Panel>
+														</ToggleButton>
 													</Panel>
-												</ToggleButton>
-											</Panel>
+												</StackPanel>
+											</abControls:IntegerTextBox.InnerRightContent>
+										</abControls:IntegerTextBox>
+									</Panel>
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride3}"/>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}">
+										<abControls:IntegerTextBox.InnerRightContent>
+											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
-								</Panel>
-								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustablePixelStride3}"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
-								<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
-								<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits3}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
-								<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels3}">
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustableEffectiveBits3}" Text="{asXaml:StringResource SessionControl.EffectiveBits}"/>
+									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsEnabled="{Binding !HasColorTables}" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustableEffectiveBits3}" Minimum="1" Value="{Binding EffectiveBits3, Mode=TwoWay}"/>
+									<TextBlock asControls:DialogElement.TextRole="WarningDescriptionBelowInputControl" IsVisible="{asXaml:AndBindings {Binding IsAdjustableEffectiveBits3}, {Binding HasColorTables}}" Text="{asXaml:StringResource SessionControl.EffectiveBits.DisabledByColorTable}"/>
+									<StackPanel IsVisible="{Binding AreAdjustableBlackWhiteLevels3}">
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel3, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel3, Mode=TwoWay}"/>
+									</StackPanel>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlackLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="0" Value="{Binding BlackLevel3, Mode=TwoWay}"/>
-									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.WhiteLevel}"/>
-									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" Minimum="1" Value="{Binding WhiteLevel3, Mode=TwoWay}"/>
 								</StackPanel>
-							</StackPanel>
-						</Expander>
-						<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding HasImagePlane3}"/>
+							</Expander>
 
-						<!-- RGB gain -->
-						<Expander Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.RgbGain}" IsExpanded="True" IsVisible="{Binding IsRgbGainSupported}">
-							<StackPanel>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RedColorGain}"/>
-								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
-								                              DecimalPlaces="4"
-								                              DefaultValue="1" 
-								                              Increment="0.1"
-								                              IsNullValueAllowed="False" 
-								                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
-								                              MinDecimalPlaces="4"
-								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
-								                              Value="{Binding RedColorGain, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Small"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.GreenColorGain}"/>
-								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
-								                              DecimalPlaces="4"
-								                              DefaultValue="1" 
-								                              Increment="0.1"
-								                              IsNullValueAllowed="False" 
-								                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
-								                              MinDecimalPlaces="4"
-								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
-								                              Value="{Binding GreenColorGain, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Small"/>
-								<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlueColorGain}"/>
-								<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
-								                              DecimalPlaces="4"
-								                              DefaultValue="1" 
-								                              Increment="0.1"
-								                              IsNullValueAllowed="False" 
-								                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
-								                              MinDecimalPlaces="4"
-								                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
-								                              Value="{Binding BlueColorGain, Mode=TwoWay}"/>
-								<Separator asControls:DialogElement.SeparatorType="Default"/>
-								<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{asXaml:StringResource SessionControl.SelectRgbGain}"/>
-								<Separator asControls:DialogElement.SeparatorType="Small"/>
-								<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ResetRgbGainCommand}" Content="{asXaml:StringResource Common.Reset}"/>
-							</StackPanel>
-						</Expander>
-						<Separator asControls:DialogElement.SeparatorType="Default" IsVisible="{Binding IsRgbGainSupported}"/>
+							<!-- Color -->
+							<Expander Name="colorParamsExpander" Classes="SessionControl_OptionsPanel_Expander">
+								<Expander.Header>
+									<Grid ColumnDefinitions="Auto,*">
+										<TextBlock Text="{asXaml:StringResource SessionControl.RenderingParametersPanel.Color}" VerticalAlignment="Center"/>
+										<TextBlock Classes="SessionControl_OptionsPanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}" Text="{Binding ColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+									</Grid>
+								</Expander.Header>
+								<StackPanel>
+									<!-- Color space -->
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.ColorSpace}"/>
+									<Panel>
+										<abControls:LinkTextBlock Command="{Binding #root.ShowColorSpaceManagementOptions}" IsVisible="{Binding !IsColorSpaceManagementEnabled}" Text="{asXaml:StringResource SessionControl.ColorSpace.Disabled}" TextWrapping="Wrap"/>
+										<StackPanel IsVisible="{Binding IsColorSpaceManagementEnabled}">
+											<Grid ColumnDefinitions="*,Auto">
+												<ComboBox Name="colorSpaceComboBox" Classes="Dialog_ComboBox" ItemsSource="{Binding ColorSpaces}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding ColorSpace, Mode=TwoWay}" VerticalAlignment="Center">
+													<ComboBox.ItemTemplate>
+														<DataTemplate>
+															<Grid ColumnDefinitions="*,Auto">
+																<TextBlock Text="{Binding Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}" VerticalAlignment="Center"/>
+																<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.EmbeddedInFile}" 
+																        BorderBrush="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile}" 
+																        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
+																        CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
+																        Grid.Column="1" 
+																        IsVisible="{Binding IsEmbedded}" 
+																        Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
+																        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}"
+																        VerticalAlignment="Center">
+																	<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{asXaml:StringResource SessionControl.ColorSpace.Embedded}"/>
+																</Border>
+																<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.SystemDefined}" 
+																        BorderBrush="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Border.SystemDefined}" 
+																        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
+																        CornerRadius="{DynamicResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
+																        Grid.Column="1" 
+																        IsVisible="{Binding IsSystemDefined}" 
+																        Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
+																        Opacity="{Binding $self.IsEffectivelyEnabled, Converter={x:Static appControls:SessionControl.BooleanToImageFormatCategoryLabelOpacityConverter}}"
+																        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" 
+																        VerticalAlignment="Center">
+																	<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{asXaml:StringResource SessionControl.ColorSpace.SystemDefined}"/>
+																</Border>
+																<Border Background="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Background.Custom}" 
+																        BorderBrush="{DynamicResource Brush/SessionControl.ColorSpaceLabel.Border.Custom}" 
+																        BorderThickness="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Border}" 
+																        CornerRadius="{StaticResource CornerRadius/SessionControl.ImageFormatCategoryLabel}" 
+																        Grid.Column="1"
+																        IsVisible="{Binding IsUserDefined}" 
+																        Margin="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Margin}" 
+																        Opacity="{Binding $self.IsEffectivelyEnabled, Converter={x:Static appControls:SessionControl.BooleanToImageFormatCategoryLabelOpacityConverter}}"
+																        Padding="{StaticResource Thickness/SessionControl.ImageFormatCategoryLabel.Padding}" 
+																        VerticalAlignment="Center">
+																	<TextBlock FontSize="{StaticResource Double/SessionControl.ImageFormatCategoryLabel.FontSize}" FontWeight="Bold" Foreground="{DynamicResource Brush/SessionControl.ImageFormatCategoryLabel.Foreground}" Text="{asXaml:StringResource Common.Custom}"/>
+																</Border>
+															</Grid>
+														</DataTemplate>
+													</ComboBox.ItemTemplate>
+												</ComboBox>
+												<Button Classes="SessionControl_OptionsPanel_InlineButton" Command="{Binding #root.ShowColorSpaceInfo}" Grid.Column="1" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Details}">
+													<Image asControls:ToolbarElement.Role="SmallIcon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
+												</Button>
+											</Grid>
+											<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding !ColorSpace.IsLinear}"/>
+											<Grid Classes="SessionControl_OptionsPanel_SwitchItem" ColumnDefinitions="*,Auto" IsVisible="{Binding !ColorSpace.IsLinear}">
+												<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.UseLinearColorSpace}" VerticalAlignment="Center"/>
+												<ToggleSwitch Grid.Column="1" IsChecked="{Binding UseLinearColorSpace, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
+											</Grid>
+										</StackPanel>
+									</Panel>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 
-						<!-- Apply profile -->
-						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ApplyProfileCommand}" Content="{asXaml:StringResource SessionControl.ApplyProfile}"/>
-						<Separator asControls:DialogElement.SeparatorType="Small"/>
+									<!-- RGB gain -->
+									<StackPanel IsVisible="{Binding IsRgbGainSupported}">
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RedColorGain}"/>
+										<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
+										                              DecimalPlaces="4"
+										                              DefaultValue="1" 
+										                              Increment="0.1"
+										                              IsNullValueAllowed="False" 
+										                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
+										                              MinDecimalPlaces="4"
+										                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
+										                              Value="{Binding RedColorGain, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.GreenColorGain}"/>
+										<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
+										                              DecimalPlaces="4"
+										                              DefaultValue="1" 
+										                              Increment="0.1"
+										                              IsNullValueAllowed="False" 
+										                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
+										                              MinDecimalPlaces="4"
+										                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
+										                              Value="{Binding GreenColorGain, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.BlueColorGain}"/>
+										<abControls:RealNumberTextBox Classes="Dialog_TextBox" 
+										                              DecimalPlaces="4"
+										                              DefaultValue="1" 
+										                              Increment="0.1"
+										                              IsNullValueAllowed="False" 
+										                              Maximum="{x:Static appControls:SessionControl.MaxRgbGain}" 
+										                              MinDecimalPlaces="4"
+										                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
+										                              Value="{Binding BlueColorGain, Mode=TwoWay}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{asXaml:StringResource SessionControl.SelectRgbGain}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+										<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ResetRgbGainCommand}" Content="{asXaml:StringResource SessionControl.ResetRgbGain}"/>
+										<Separator asControls:DialogElement.SeparatorType="Small"/>
+									</StackPanel>
+								</StackPanel>
+							</Expander>
 
-						<!-- Save profile -->
-						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SaveProfileCommand}" Content="{asXaml:StringResource SessionControl.SaveProfile}"/>
-						<Separator asControls:DialogElement.SeparatorType="Small"/>
+						</StackPanel>
+					</ScrollViewer>
 
-						<!-- Save as new profile -->
-						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding #root.SaveAsNewProfileCommand}" Content="{asXaml:StringResource SessionControl.SaveAsNewProfile}"/>
-						<Separator asControls:DialogElement.SeparatorType="Small"/>
-
-						<!-- Delete profile -->
-						<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding DeleteProfileCommand}" Content="{asXaml:StringResource SessionControl.DeleteProfile}"/>
-
-					</StackPanel>
-				</ScrollViewer>
+				</DockPanel>
 			</Border>
 
 			<!-- Splitter -->

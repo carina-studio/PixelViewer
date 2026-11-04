@@ -201,7 +201,7 @@
 	<sys:String x:Key="String/ImageFormatCategory.YUV">YUV</sys:String>
 
 	<!-- ImageRenderingProfile -->
-	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;None&gt;</sys:String>
+	<sys:String x:Key="String/ImageRenderingProfile.Default">&lt;No Profile&gt;</sys:String>
 
 	<!-- ImageRenderingProfileSelectionDialog -->
 	<sys:String x:Key="String/ImageRenderingProfileSelectionDialog.Title">Select Profile</sys:String>
@@ -232,6 +232,7 @@
 
 	<!-- SessionControl -->
 	<sys:String x:Key="String/SessionControl.AlignToInteger">Align to Integer</sys:String>
+	<sys:String x:Key="String/SessionControl.AlignToInteger.Value">Align to {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to Profile Parameters</sys:String>
@@ -260,7 +261,7 @@
 	<sys:String x:Key="String/SessionControl.CopyFileName">Copy File Name</sys:String>
 	<sys:String x:Key="String/SessionControl.CopyFilePath">Copy Full Path</sys:String>
 	<sys:String x:Key="String/SessionControl.CpuUsage">CPU Usage</sys:String>
-	<sys:String x:Key="String/SessionControl.DataOffset">Starting Data Offset (Bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.DataOffset">Starting Data Offset</sys:String>
 	<sys:String x:Key="String/SessionControl.DefaultProfile">&lt;None&gt;</sys:String>
 	<sys:String x:Key="String/SessionControl.DeleteProfile">Delete Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.Demosaicing">Demosaicing</sys:String>
@@ -276,7 +277,7 @@
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to Viewport (Ctrl+0)</sys:String>
 	<sys:String x:Key="String/SessionControl.FlipX">Flip Horizontally</sys:String>
 	<sys:String x:Key="String/SessionControl.FlipY">Flip Vertically</sys:String>
-	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding Between Frames (Bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.FramePaddingSize">Padding Between Frames</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePlaybackOptions">Frame Playback Options</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePlaybackRate">Frame Rate</sys:String>
 	<sys:String x:Key="String/SessionControl.FramePlaybackRate.Label">{0} fps</sys:String>
@@ -291,7 +292,7 @@
 	<sys:String x:Key="String/SessionControl.Histogram.Markers">Markers</sys:String>
 	<sys:String x:Key="String/SessionControl.Histogram.Red">Red</sys:String>
 	<sys:String x:Key="String/SessionControl.Histograms">Histograms</sys:String>
-	<sys:String x:Key="String/SessionControl.ImageDimensions">Image Dimensions (px)</sys:String>
+	<sys:String x:Key="String/SessionControl.ImageDimensions">Image</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.1">Plane #1</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.2">Plane #2</sys:String>
 	<sys:String x:Key="String/SessionControl.ImagePlaneOptions.3">Plane #3</sys:String>
@@ -312,7 +313,7 @@
 	<sys:String x:Key="String/SessionControl.OpeningSource">Opening image…</sys:String>
 	<sys:String x:Key="String/SessionControl.OpenSourceFile">Open Image File (Ctrl+O)</sys:String>
 	<sys:String x:Key="String/SessionControl.OtherActions">Other Actions</sys:String>
-	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-Stride (Bytes)</sys:String>
+	<sys:String x:Key="String/SessionControl.PixelStride">Pixel-Stride</sys:String>
 	<sys:String x:Key="String/SessionControl.PlayFrames">Play/Pause Frame Sequence</sys:String>
 	<sys:String x:Key="String/SessionControl.PrivateMemoryUsage">Process Private Memory Usage</sys:String>
 	<sys:String x:Key="String/SessionControl.Profile">Profile</sys:String>
@@ -322,11 +323,15 @@
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed. This is usually caused by incorrect rendering parameters.</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">Rendering Parameters Panel</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Color">Color</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Dimensions">Dimensions</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Format">Format</sys:String>
+	<sys:String x:Key="String/SessionControl.ResetRgbGain">Reset Gains</sys:String>
 	<sys:String x:Key="String/SessionControl.RgbGain">Color Pre-Correction</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate Counter-Clockwise</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateRight">Rotate Clockwise</sys:String>
-	<sys:String x:Key="String/SessionControl.RowStride">Row-Stride (Bytes)</sys:String>
-	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as New Profile</sys:String>
+	<sys:String x:Key="String/SessionControl.RowStride">Row-Stride</sys:String>
+	<sys:String x:Key="String/SessionControl.SaveAsNewProfile">Save as New Profile…</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveImage">Save Image (Ctrl+S)</sys:String>
 	<sys:String x:Key="String/SessionControl.SaveProfile">Save Profile</sys:String>
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
@@ -337,7 +342,7 @@
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">View Separately</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">Frame Sequence</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Title">Open Multiple Files</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectRgbGain">Auto Adjust</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectRgbGain">Auto Adjust Gains</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to Open Files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Source Data Size</sys:String>

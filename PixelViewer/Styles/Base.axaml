@@ -164,6 +164,7 @@
 		<sys:Double x:Key="Double/SessionControl.ImageRenderingProfile.Icon.Size">16</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageViewer.Hint.FontSize">20</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.ImageViewer.MinSizeToHidePanels">70</sys:Double>
+		<sys:Double x:Key="Double/SessionControl.OptionsPanel.Separator.Height.Small">6</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.OptionsPanel.SeparatorSize">15</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.PixelInformation.ScaleX">0.8</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.RenderingImageIndicator.FontSize">50</sys:Double>
@@ -181,9 +182,22 @@
 		<Thickness x:Key="Thickness/SessionControl.ImageRenderingProfile.Icon.Margin">0,0,10,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Hint.Icon.Margin">8,0,8,0</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.ImageViewer.Padding">20</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Button.Margin">-1,0,-1,0</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.ActionsPanel.Border">0,1,0,0</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.ActionsPanel.Padding">11,4,16,4</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Button.Margin">-1,0,-1,1</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Expander.Header.Border">0,0,0,1</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Expander.Header.Margin.Expanded">0,0,0,10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Expander.Header.Padding">0,6,0,6</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Expander.Padding">0,0,0,8</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Expander.Summary.Margin">8,0,0,0</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.InlineButton.Margin">5,0,0,0</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.InlineButton.Padding">8</Thickness>
 		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Item.Margin">0,0,0,5</Thickness>
-		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">13,10,18,10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Padding">13,0,18,10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.ProfilePanel.Border">0,0,0,1</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.ProfilePanel.Padding">13,10,18,10</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.SwitchItem.Padding">0,4,0,4</Thickness>
+		<Thickness x:Key="Thickness/SessionControl.OptionsPanel.Unit.Margin">0,0,8,0</Thickness>
 		
 	</Styles.Resources>
 
@@ -230,14 +244,57 @@
 		<Setter Property="BorderThickness" Value="{DynamicResource ComboBoxDropdownBorderThickness}"/>
 		<Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}"/>
 	</Style>
+	<Style Selector="Border.SessionControl_OptionsPanel_ActionsPanel">
+		<Setter Property="BorderBrush" Value="{DynamicResource Brush/WorkingArea.Panel.Border}"/>
+		<Setter Property="BorderThickness" Value="{StaticResource Thickness/SessionControl.OptionsPanel.ActionsPanel.Border}"/>
+		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.OptionsPanel.ActionsPanel.Padding}"/>
+	</Style>
+	<Style Selector="Border.SessionControl_OptionsPanel_ProfilePanel">
+		<Setter Property="BorderBrush" Value="{DynamicResource Brush/WorkingArea.Panel.Border}"/>
+		<Setter Property="BorderThickness" Value="{StaticResource Thickness/SessionControl.OptionsPanel.ProfilePanel.Border}"/>
+		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.OptionsPanel.ProfilePanel.Padding}"/>
+	</Style>
 	<Style Selector="Button.SessionControl_OptionsPanel_Button">
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Center"/>
 		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.OptionsPanel.Button.Margin}"/>
 	</Style>
+	<Style Selector="Button.SessionControl_OptionsPanel_InlineButton">
+		<Setter Property="Height" Value="{DynamicResource ComboBoxMinHeight}"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.OptionsPanel.InlineButton.Margin}"/>
+		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.OptionsPanel.InlineButton.Padding}"/>
+		<Setter Property="Width" Value="{DynamicResource ComboBoxMinHeight}"/>
+	</Style>
 	<Style Selector="Expander.SessionControl_OptionsPanel_Expander">
+		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="BorderThickness" Value="0"/>
+		<Setter Property="ClipToBounds" Value="False"/>
+		<Setter Property="CornerRadius" Value="0"/>
 		<Setter Property="HorizontalAlignment" Value="Stretch"/>
 		<Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.OptionsPanel.Expander.Padding}"/>
+	</Style>
+	<Style Selector="Expander.SessionControl_OptionsPanel_Expander /template/ Border#ExpanderContent">
+		<Setter Property="ClipToBounds" Value="False"/>
+		<Setter Property="CornerRadius" Value="0"/>
+	</Style>
+	<Style Selector="Expander.SessionControl_OptionsPanel_Expander /template/ ToggleButton#ExpanderHeader">
+		<Setter Property="CornerRadius" Value="0"/>
+		<Setter Property="Cursor" Value="Hand"/>
+		<Setter Property="FontWeight" Value="Bold"/>
+		<Setter Property="Margin" Value="0"/>
+		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.OptionsPanel.Expander.Header.Padding}"/>
+	</Style>
+	<Style Selector="Expander.SessionControl_OptionsPanel_Expander:expanded /template/ ToggleButton#ExpanderHeader">
+		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.OptionsPanel.Expander.Header.Margin.Expanded}"/>
+	</Style>
+	<Style Selector="Expander.SessionControl_OptionsPanel_Expander /template/ ToggleButton#ExpanderHeader /template/ Border#ToggleButtonBackground, Expander.SessionControl_OptionsPanel_Expander /template/ ToggleButton#ExpanderHeader:disabled /template/ Border#ToggleButtonBackground, Expander.SessionControl_OptionsPanel_Expander /template/ ToggleButton#ExpanderHeader:pointerover /template/ Border#ToggleButtonBackground, Expander.SessionControl_OptionsPanel_Expander /template/ ToggleButton#ExpanderHeader:pressed /template/ Border#ToggleButtonBackground">
+		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource Brush/WorkingArea.Panel.Border}"/>
+		<Setter Property="BorderThickness" Value="{StaticResource Thickness/SessionControl.OptionsPanel.Expander.Header.Border}"/>
+	</Style>
+	<Style Selector="Grid.SessionControl_OptionsPanel_SwitchItem">
+		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.OptionsPanel.SwitchItem.Padding}"/>
 	</Style>
 	<Style Selector="Image.SessionControl_ImageViewer_Hint_Icon">
 		<Setter Property="Height" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
@@ -286,6 +343,20 @@
 	</Style>
 	<Style Selector="TextBlock.SessionControl_ImageViewer_Hint_TextBlock">
 		<Setter Property="FontSize" Value="{DynamicResource Double/SessionControl.ImageViewer.Hint.FontSize}"/>
+		<Setter Property="VerticalAlignment" Value="Center"/>
+	</Style>
+	<Style Selector="TextBlock.SessionControl_OptionsPanel_Expander_Summary">
+		<Setter Property="FontWeight" Value="Normal"/>
+		<Setter Property="Foreground" Value="{DynamicResource Brush/Dialog.TextBlock.Foreground.Description}"/>
+		<Setter Property="HorizontalAlignment" Value="Right"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.OptionsPanel.Expander.Summary.Margin}"/>
+		<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+		<Setter Property="VerticalAlignment" Value="Center"/>
+	</Style>
+	<Style Selector="TextBlock.SessionControl_OptionsPanel_Unit">
+		<Setter Property="Foreground" Value="{DynamicResource Brush/Dialog.TextBlock.Foreground.Description}"/>
+		<Setter Property="IsHitTestVisible" Value="False"/>
+		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.OptionsPanel.Unit.Margin}"/>
 		<Setter Property="VerticalAlignment" Value="Center"/>
 	</Style>
 	<Style Selector="ToggleButton.SessionControl_OptionsPanel_ToggleButton">

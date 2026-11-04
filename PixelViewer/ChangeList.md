@@ -8,6 +8,7 @@
 
 ## Improvement
 + Improved the overall performance of the user interface.
++ Redesigned the rendering parameters panel.
 + Improved the user experience of full screen mode on macOS.
 + Improved the user experience of specifying color pre-correction.
 + Improved the accuracy of color pre-correction.
