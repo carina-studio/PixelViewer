@@ -20,4 +20,5 @@
 
 ## Bug Fixing
 + Fixed small changes of color pre-correction being ignored.
++ Fixed color gamut being drawn outside of the xy chromaticity diagram.
 + Minor bug fixing.

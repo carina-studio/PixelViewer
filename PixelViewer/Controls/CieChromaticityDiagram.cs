@@ -791,6 +791,9 @@ class CieChromaticityDiagram : Control
                 this.gridPen = new Pen(brush);
         }
 
+        // clip to bounds
+        using var clip = context.PushClip(new Rect(0, 0, width, height));
+
         // draw axis
         var originPoint = XYToControlCoordinate(width, height, 0, 0);
         context.DrawLine(this.axisPen!, new Point(originPoint.X, 0), new Point(originPoint.X, height));
