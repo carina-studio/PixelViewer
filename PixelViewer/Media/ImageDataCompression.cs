@@ -10,6 +10,10 @@ enum ImageDataCompression
 	/// </summary>
 	None,
 	/// <summary>
+	/// Lossless JPEG data of CR2 by Canon, whose samples are laid out as vertical slices of image.
+	/// </summary>
+	Cr2,
+	/// <summary>
 	/// Lossless JPEG (ITU-T T.81 process 14).
 	/// </summary>
 	LosslessJpeg,
