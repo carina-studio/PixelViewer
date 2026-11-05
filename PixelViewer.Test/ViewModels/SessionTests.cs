@@ -692,5 +692,85 @@ namespace Carina.PixelViewer.Test.ViewModels
 				}
 			});
 		}
+
+
+		/// <summary>
+		/// Test for showing and analyzing only the region of source image left by its insets, without rendering the image again.
+		/// </summary>
+		[Test]
+		public void TestSourceInsets()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// open file and render it by a format of single plane
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				ImageRenderers.TryFindByFormatName("L8", out var l8Renderer);
+				session.ImageRenderer = l8Renderer.AsNonNull();
+				session.ImageWidth = 64;
+				session.ImageHeight = 48;
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 64, 48), Is.True, "Whole image should be shown without insets.");
+
+				// take in the edges, only the region left is shown and analyzed
+				session.SourceInsets = new PixelInsets(4, 3, 10, 5);
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 50, 40), Is.True, "Only the region left by insets should be shown.");
+				Assert.That(await WaitForHistogramsPixelCountAsync(session, 50 * 40), Is.True, "Only the region left by insets should be analyzed.");
+				Assert.That((session.SourceInsetsLeft, session.SourceInsetsTop, session.SourceInsetsRight, session.SourceInsetsBottom), Is.EqualTo((4, 3, 10, 5)), "Edges of insets should be reported.");
+
+				// change an edge of insets
+				session.SourceInsetsLeft = 6;
+				Assert.That(session.SourceInsets, Is.EqualTo(new PixelInsets(6, 3, 10, 5)), "Changing an edge should change the insets.");
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 48, 40), Is.True, "Region left by the changed insets should be shown.");
+
+				// insets which leave nothing or extend the image fail rendering, which recovers after the insets become valid again
+				foreach (var invalidInsets in new[] { new PixelInsets(64, 0, 0, 0), new PixelInsets(0, 0, 0, 48), new PixelInsets(-1, 0, 0, 0) })
+				{
+					session.SourceInsets = invalidInsets;
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.HasRenderingError), true, 5000), Is.True, $"Rendering should fail with insets {invalidInsets}.");
+					session.SourceInsets = PixelInsets.Empty;
+					Assert.That(await WaitForRenderedImageSizeAsync(session, 64, 48), Is.True, $"Rendering should recover after insets {invalidInsets}.");
+					Assert.That(session.HasRenderingError, Is.False);
+				}
+
+				// insets are applied to the image of multiple planes in the same way
+				ImageRenderers.TryFindByFormatName("NV12", out var nv12Renderer);
+				session.ImageRenderer = nv12Renderer.AsNonNull();
+				session.SourceInsets = new PixelInsets(4, 2, 4, 2);
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 56, 44), Is.True, "Only the region left by insets should be shown for format of multiple planes.");
+
+				// insets are reset after closing the file
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
+				Assert.That(session.SourceInsets.IsEmpty, Is.True, "Insets should be reset after closing source file.");
+				await DeleteFileAsync(filePath);
+			});
+
+			// wait for the histograms of the given number of pixels
+			static async Task<bool> WaitForHistogramsPixelCountAsync(Session session, int pixelCount)
+			{
+				for (var i = 0; i < 200; ++i)
+				{
+					if (session.Histograms?.EffectivePixelCount == pixelCount)
+						return true;
+					await Task.Delay(50);
+				}
+				return false;
+			}
+
+			// wait for the rendered image of the given size to be shown
+			static async Task<bool> WaitForRenderedImageSizeAsync(Session session, int width, int height)
+			{
+				for (var i = 0; i < 200; ++i)
+				{
+					if (session.RenderedImage is { } image && image.PixelSize.Width == width && image.PixelSize.Height == height && !session.IsRenderingImage)
+						return true;
+					await Task.Delay(50);
+				}
+				return false;
+			}
+		}
 	}
 }

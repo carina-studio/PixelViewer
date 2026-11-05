@@ -72,6 +72,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.FrameNumber = source.FrameNumber;
 			this.memoryUsageToken = memoryUsageToken;
 			this.session = session;
+			this.SourceRegion = source.SourceRegion;
 		}
 
 		public static ImageFrame Allocate(Session session, long frameNumber, BitmapFormat format, ColorSpace colorSpace, int width, int height)
@@ -125,6 +126,14 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// Rendering result.
 		public ImageRenderingResult RenderingResult { get; set; } = new();
+
+		// Share the bitmap buffer of the region of source image to be shown, the rows of which keep the row stride of the frame.
+		public IBitmapBuffer ShareSourceRegion() => this.SourceRegion is { } region
+			? this.BitmapBuffer.Clip(region)
+			: this.BitmapBuffer.Share();
+
+		// Region of source image to be shown after taking in the insets of source, or Null if the whole image is shown.
+		public PixelRect? SourceRegion { get; set; }
 
 		// Transfer resource ownership.
 		// ReSharper disable once UnusedMember.Local
@@ -834,6 +843,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="SourceImageEffectiveBits"/>.
 	/// </summary>
 	public static readonly ObservableProperty<int> SourceImageEffectiveBitsProp = ObservableProperty.Register<Session, int>(nameof(SourceImageEffectiveBits), 8);
+	/// <summary>
+	/// Property of <see cref="SourceInsets"/>.
+	/// </summary>
+	public static readonly ObservableProperty<PixelInsets> SourceInsetsProp = ObservableProperty.Register<Session, PixelInsets>(nameof(SourceInsets), PixelInsets.Empty);
 	/// <summary>
 	/// Property of <see cref="TileHeight"/>.
 	/// </summary>
@@ -1560,6 +1573,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(TileWidthProp, profile.TileWidth);
 			this.SetValue(TileHeightProp, profile.TileHeight);
 
+			// insets of source image
+			this.SetValue(SourceInsetsProp, profile.SourceInsets);
+
 			// frame padding size
 			this.SetValue(FramePaddingSizeProp, profile.FramePaddingSize);
 
@@ -2009,6 +2025,23 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 	
 	
+	// Check whether the insets of source image can be applied to the image of given size or not, and get the region of image left by them, which is the whole image if the insets are empty.
+	static bool CheckSourceInsets(PixelInsets insets, int width, int height, out PixelRect region)
+	{
+		// check empty insets
+		region = new PixelRect(0, 0, width, height);
+		if (insets.IsEmpty)
+			return true;
+
+		// check the insets, which can neither extend the image nor leave nothing of it
+		var insetsRegion = insets.GetRegion(width, height);
+		if (insets.Left < 0 || insets.Top < 0 || insets.Right < 0 || insets.Bottom < 0 || insetsRegion.Width <= 0 || insetsRegion.Height <= 0)
+			return false;
+		region = insetsRegion;
+		return true;
+	}
+
+
 	// Clear the rendered image and render it again, which is what requesting rendering explicitly does.
 	async Task ClearAndRenderImageAsync()
 	{
@@ -2093,6 +2126,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			this.SetValue(CompressionProp, ImageDataCompression.None);
 			this.SetValue(DataOffsetProp, 0L);
+			this.SetValue(SourceInsetsProp, PixelInsets.Empty);
 			this.SetValue(TileHeightProp, 0);
 			this.SetValue(TileWidthProp, 0);
 			this.SetValue(FrameCountProp, 0);
@@ -2246,6 +2280,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.canZoomTo.Update(!this.GetValue(FitImageToViewportProp));
 		this.SetValue(CompressionProp, ImageDataCompression.None);
 		this.SetValue(DataOffsetProp, 0L);
+		this.SetValue(SourceInsetsProp, PixelInsets.Empty);
 		this.SetValue(TileHeightProp, 0);
 		this.SetValue(TileWidthProp, 0);
 		this.SetValue(FrameNumberProp, 1);
@@ -2377,9 +2412,11 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.Logger.LogTrace("Convert color space from {s} to {d}", srcColorSpace, destColorSpace);
 				await src.BitmapBuffer.ConvertToColorSpaceAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.UseLinearColorSpace, false, cancellationToken);
 				colorSpaceConvertedImageFrame.RenderingResult = src.RenderingResult;
+				colorSpaceConvertedImageFrame.SourceRegion = src.SourceRegion;
 
 				// generate histogram
-				colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(colorSpaceConvertedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
+				using (var sourceRegionBitmapBuffer = colorSpaceConvertedImageFrame.ShareSourceRegion())
+					colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(sourceRegionBitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
 
 				// complete
 				this.Logger.LogTrace("Color space converted");
@@ -3035,7 +3072,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		// generate histograms
 		try
 		{
-			sourceImageFrame.AsNonNull().Histograms = await BitmapHistograms.CreateAsync(sourceImageFrame.AsNonNull().BitmapBuffer, this.SourceImageEffectiveBits, cancellationTokenSource.Token);
+			var filteredImageFrame = sourceImageFrame.AsNonNull();
+			filteredImageFrame.SourceRegion = renderedImageFrame.SourceRegion;
+			using var sourceRegionBitmapBuffer = filteredImageFrame.ShareSourceRegion();
+			filteredImageFrame.Histograms = await BitmapHistograms.CreateAsync(sourceRegionBitmapBuffer, this.SourceImageEffectiveBits, cancellationTokenSource.Token);
 		}
 		catch (Exception ex)
 		{
@@ -4304,6 +4344,17 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(HasSourceDataSizeProp, (long)newValue.AsNonNull() > 0);
 		else if (property == SourceImageEffectiveBitsProp)
 			this.Logger.LogTrace("Source image effective bits: {bits}", newValue);
+		else if (property == SourceInsetsProp)
+		{
+			// update the edges
+			this.OnPropertyChanged(nameof(SourceInsetsBottom));
+			this.OnPropertyChanged(nameof(SourceInsetsLeft));
+			this.OnPropertyChanged(nameof(SourceInsetsRight));
+			this.OnPropertyChanged(nameof(SourceInsetsTop));
+
+			// show the region, which needs no rendering if the image has been rendered
+			this.renderImageAction.Reschedule();
+		}
 		else if (property == VibranceAdjustmentProp)
 		{
 			this.SetValue(HasVibranceAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
@@ -5063,6 +5114,19 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
+		// select the region of source image to be shown, give up rendering if the insets extend the image or leave nothing of it. the error of previous rendering is reset first so that the view reports it to user again
+		var sourceInsets = this.SourceInsets;
+		if (!CheckSourceInsets(sourceInsets, this.ImageWidth, this.ImageHeight, out var region))
+		{
+			this.Logger.LogError("Unable to render image of '{sourceFileName}', invalid insets of source image: {insets}, width: {width}, height: {height}", sourceFileName, sourceInsets, this.ImageWidth, this.ImageHeight);
+			this.ResetValue(HasRenderingErrorProp);
+			this.SetValue(HasRenderingErrorProp, true);
+			this.DisposeFilteredImage();
+			this.DisposeRenderedImage();
+			return;
+		}
+		PixelRect? sourceRegion = sourceInsets.IsEmpty ? null : region;
+
 		// get source which provides data of frame to render
 		var cancellationTokenSource = new CancellationTokenSource();
 		this.imageRenderingCancellationTokenSource = cancellationTokenSource;
@@ -5430,6 +5494,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// render
 		this.Logger.LogDebug("Render image for '{sourceFileName}', dimensions: {width}x{height}", sourceFileName, this.ImageWidth, this.ImageHeight);
 		bool isColorSpaceConversionNeeded = false;
+		var isSourceRegionChanged = false;
 		var colorSpaceConvertedImageFrame = default(ImageFrame);
 		var exception = (Exception?)null;
 		try
@@ -5449,11 +5514,19 @@ class Session : ViewModel<IAppSuiteApplication>
 				renderedImageFrame.ImageRenderer = imageRenderer;
 				renderedImageFrame.RenderingOptions = renderingOptions;
 				renderedImageFrame.PlaneOptions = planeOptionsList;
+				renderedImageFrame.SourceRegion = sourceRegion;
 			}
 			else
 			{
+				// update the image rendered before, its histograms are generated again for the region of source image which has changed
 				this.Logger.LogTrace("No need to render image again with same options");
-				this.renderedImageFrame.AsNonNull().BitmapBuffer.UpdateColorSpace(renderedColorSpace);
+				var prevRenderedImageFrame = this.renderedImageFrame.AsNonNull();
+				prevRenderedImageFrame.BitmapBuffer.UpdateColorSpace(renderedColorSpace);
+				if (prevRenderedImageFrame.SourceRegion != sourceRegion)
+				{
+					prevRenderedImageFrame.SourceRegion = sourceRegion;
+					isSourceRegionChanged = true;
+				}
 			}
 			
 			// convert color space
@@ -5499,8 +5572,12 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			try
 			{
-				if (renderedImageFrame is not null)
-					renderedImageFrame.Histograms = await BitmapHistograms.CreateAsync(renderedImageFrame.BitmapBuffer, this.SourceImageEffectiveBits, cancellationTokenSource.Token);
+				var analyzedImageFrame = renderedImageFrame ?? (isSourceRegionChanged ? this.renderedImageFrame : null);
+				if (analyzedImageFrame is not null)
+				{
+					using var sourceRegionBitmapBuffer = analyzedImageFrame.ShareSourceRegion();
+					analyzedImageFrame.Histograms = await BitmapHistograms.CreateAsync(sourceRegionBitmapBuffer, this.SourceImageEffectiveBits, cancellationTokenSource.Token);
+				}
 			}
 			catch (Exception ex)
 			{
@@ -5681,12 +5758,13 @@ class Session : ViewModel<IAppSuiteApplication>
 		// report
 		if (imageFrame is not null)
 		{
-			// released cached image if it is not suitable
-			var width = imageFrame.BitmapBuffer.Width;
-			var height = imageFrame.BitmapBuffer.Height;
+			// released cached image if it is not suitable, only the region of source image to be shown is reported
+			using var sourceRegionBitmapBuffer = imageFrame.ShareSourceRegion();
+			var width = sourceRegionBitmapBuffer.Width;
+			var height = sourceRegionBitmapBuffer.Height;
 			var avaloniaPixelFormat = this.Settings.GetValueOrDefault(SettingKeys.Render32BitColorsOnly)
 				? PixelFormats.Bgra8888
-				: imageFrame.BitmapBuffer.Format switch
+				: sourceRegionBitmapBuffer.Format switch
 				{
 					BitmapFormat.Bgra32 => PixelFormats.Bgra8888,
 					BitmapFormat.Bgra64 => PixelFormats.Rgba64,
@@ -5774,7 +5852,7 @@ class Session : ViewModel<IAppSuiteApplication>
 						this.Logger.LogWarning("Allocate Avalonia bitmap, size: {width}x{height}", width, height);
 					bitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(width, height), new Vector(96, 96), avaloniaPixelFormat, AlphaFormat.Unpremul));
 				}
-				await imageFrame.BitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap, cancellationTokenSource.Token);
+				await sourceRegionBitmapBuffer.CopyToAvaloniaBitmapAsync(bitmap, cancellationTokenSource.Token);
 
 				// create quarter-size Avalonia bitmap
 				var halfWidth = width >> 1;
@@ -5821,7 +5899,7 @@ class Session : ViewModel<IAppSuiteApplication>
 								this.Logger.LogWarning("Allocate quarter-size Avalonia bitmap, size: {halfWidth}x{halfHeight}", halfWidth, halfHeight);
 							quarterSizeBitmap = await Task.Run(() => new WriteableBitmap(new PixelSize(halfWidth, halfHeight), new Vector(96, 96), avaloniaPixelFormat, AlphaFormat.Unpremul));
 						}
-						await imageFrame.BitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap, cancellationTokenSource.Token);
+						await sourceRegionBitmapBuffer.CopyToQuarterSizeAvaloniaBitmapAsync(quarterSizeBitmap, cancellationTokenSource.Token);
 					}
 					else
 						this.Logger.LogWarning("Unable to request memory usage for quarter-size Avalonia bitmap");
@@ -6084,6 +6162,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var compression = ImageDataCompression.None;
 		var tileWidth = 0;
 		var tileHeight = 0;
+		var sourceInsets = PixelInsets.Empty;
 		var framePaddingSize = 0L;
 		var byteOrdering = ByteOrdering.BigEndian;
 		var yuvToBgraConverter = this.YuvToBgraConverter;
@@ -6114,6 +6193,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			jsonProperty.TryGetInt32(out tileWidth);
 		if (savedState.TryGetProperty(nameof(TileHeight), out jsonProperty))
 			jsonProperty.TryGetInt32(out tileHeight);
+		if (savedState.TryGetProperty(nameof(SourceInsets), out jsonProperty) && !PixelInsets.TryLoadFromJson(jsonProperty, out sourceInsets))
+			this.Logger.LogWarning("Unable to restore {name}", nameof(SourceInsets));
 		if (savedState.TryGetProperty(nameof(FramePaddingSize), out jsonProperty))
 			jsonProperty.TryGetInt64(out framePaddingSize);
 		if (savedState.TryGetProperty(nameof(ByteOrdering), out jsonProperty)
@@ -6324,6 +6405,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(CompressionProp, compression);
 		this.SetValue(TileWidthProp, tileWidth);
 		this.SetValue(TileHeightProp, tileHeight);
+		this.SetValue(SourceInsetsProp, sourceInsets);
 		this.SetValue(FramePaddingSizeProp, framePaddingSize);
 		this.SetValue(ByteOrderingProp, byteOrdering);
 		this.SetValue(YuvToBgraConverterProp, yuvToBgraConverter);
@@ -6551,9 +6633,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsSavingFilteredImageProp, true);
 		try
 		{
-			using IBitmapBuffer bufferToEncode = this.filteredImageFrame.AsNonNull().BitmapBuffer.Let(it => flipX || flipY
-				? it.Flip(flipX, flipY)
-				: it.Share());
+			var filteredImageFrame = this.filteredImageFrame.AsNonNull();
+			using var sourceRegionBitmapBuffer = filteredImageFrame.ShareSourceRegion();
+			using IBitmapBuffer bufferToEncode = flipX || flipY || filteredImageFrame.SourceRegion is not null
+				? sourceRegionBitmapBuffer.Flip(flipX, flipY)
+				: sourceRegionBitmapBuffer.Share();
 			await encoder.AsNonNull().EncodeAsync(bufferToEncode, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
@@ -6648,9 +6732,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsSavingRenderedImageProp, true);
 		try
 		{
-			using IBitmapBuffer bufferToEncode = renderedImageFrame.BitmapBuffer.Let(it => flipX || flipY
-				? it.Flip(flipX, flipY)
-				: it.Share());
+			using var sourceRegionBitmapBuffer = renderedImageFrame.ShareSourceRegion();
+			using IBitmapBuffer bufferToEncode = flipX || flipY || renderedImageFrame.SourceRegion is not null
+				? sourceRegionBitmapBuffer.Flip(flipX, flipY)
+				: sourceRegionBitmapBuffer.Share();
 			await encoder.AsNonNull().EncodeAsync(bufferToEncode, new FileStreamProvider(parameters.FileName), options, new CancellationToken());
 			this.ImageSavingCompleted?.Invoke(this, new(parameters.FileName, true));
 			return true;
@@ -6706,6 +6791,11 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteString(nameof(Compression), this.Compression.ToString());
 		writer.WriteNumber(nameof(TileWidth), this.TileWidth);
 		writer.WriteNumber(nameof(TileHeight), this.TileHeight);
+		if (!this.SourceInsets.IsEmpty)
+		{
+			writer.WritePropertyName(nameof(SourceInsets));
+			this.SourceInsets.WriteToJson(writer);
+		}
 		writer.WriteNumber(nameof(FramePaddingSize), this.FramePaddingSize);
 		writer.WriteString(nameof(ByteOrdering), this.ByteOrdering.ToString());
 		writer.WriteString(nameof(YuvToBgraConverter), this.YuvToBgraConverter.Name);
@@ -7105,7 +7195,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				return this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame;
 			return this.renderedImageFrame;
 		});
-		var renderedImageBuffer = imageFrame?.BitmapBuffer;
+		using var renderedImageBuffer = imageFrame?.ShareSourceRegion();
 		if (renderedImageBuffer is null 
 			|| x < 0 || x >= renderedImageBuffer.Width
 			|| y < 0 || y >= renderedImageBuffer.Height)
@@ -7210,6 +7300,58 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Get the highest effective bits-per-channel among the source image's planes. Returns 8 when no image renderer or planes are available.
 	/// </summary>
 	public int SourceImageEffectiveBits => this.GetValue(SourceImageEffectiveBitsProp);
+
+
+	/// <summary>
+	/// Get or set number of pixels taken in from each edge of the source image, which is applied before flipping and rotating the image.
+	/// </summary>
+	/// <remarks>The image is rendered in full and only the region left is shown, analyzed and saved, so changing the insets does not render the image again.
+	/// Rendering fails when an inset is negative, which extends the image, or when the insets leave nothing of the image.</remarks>
+	public PixelInsets SourceInsets
+	{
+		get => this.GetValue(SourceInsetsProp);
+		set => this.SetValue(SourceInsetsProp, value);
+	}
+
+
+	/// <summary>
+	/// Get or set number of pixels taken in from the bottom edge of the source image, which is <see cref="PixelInsets.Bottom"/> of <see cref="SourceInsets"/>.
+	/// </summary>
+	public int SourceInsetsBottom
+	{
+		get => this.SourceInsets.Bottom;
+		set => this.SourceInsets = this.SourceInsets.Let(it => new PixelInsets(it.Left, it.Top, it.Right, value));
+	}
+
+
+	/// <summary>
+	/// Get or set number of pixels taken in from the left edge of the source image, which is <see cref="PixelInsets.Left"/> of <see cref="SourceInsets"/>.
+	/// </summary>
+	public int SourceInsetsLeft
+	{
+		get => this.SourceInsets.Left;
+		set => this.SourceInsets = this.SourceInsets.Let(it => new PixelInsets(value, it.Top, it.Right, it.Bottom));
+	}
+
+
+	/// <summary>
+	/// Get or set number of pixels taken in from the right edge of the source image, which is <see cref="PixelInsets.Right"/> of <see cref="SourceInsets"/>.
+	/// </summary>
+	public int SourceInsetsRight
+	{
+		get => this.SourceInsets.Right;
+		set => this.SourceInsets = this.SourceInsets.Let(it => new PixelInsets(it.Left, it.Top, value, it.Bottom));
+	}
+
+
+	/// <summary>
+	/// Get or set number of pixels taken in from the top edge of the source image, which is <see cref="PixelInsets.Top"/> of <see cref="SourceInsets"/>.
+	/// </summary>
+	public int SourceInsetsTop
+	{
+		get => this.SourceInsets.Top;
+		set => this.SourceInsets = this.SourceInsets.Let(it => new PixelInsets(it.Left, value, it.Right, it.Bottom));
+	}
 
 
 	// Switch profile without applying parameters.
@@ -7492,6 +7634,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		profile.Compression = this.Compression;
 		profile.TileWidth = this.TileWidth;
 		profile.TileHeight = this.TileHeight;
+		profile.SourceInsets = this.SourceInsets;
 		profile.FramePaddingSize = this.FramePaddingSize;
 		profile.ByteOrdering = this.ByteOrdering;
 		profile.BayerPattern = this.BayerPattern;

@@ -1151,6 +1151,45 @@
 									</ToggleButton>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
 
+									<!-- Insets of source image, laid out by the edges they take in -->
+									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.SourceInsets}"/>
+									<Grid ColumnDefinitions="*,*,*" ColumnSpacing="3" RowDefinitions="Auto,Auto" RowSpacing="3">
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" 
+										                           Grid.RowSpan="2"
+										                           IsNullValueAllowed="False" 
+										                           Maximum="65535" Minimum="0" 
+										                           TextAlignment="Center" 
+										                           ToolTip.Tip="{asXaml:StringResource SessionControl.SourceInsets.Left}" 
+										                           Value="{Binding SourceInsetsLeft, Mode=TwoWay}"
+										                           VerticalAlignment="Center"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" 
+										                           Grid.Column="1" 
+										                           IsNullValueAllowed="False" 
+										                           Maximum="65535" Minimum="0" 
+										                           TextAlignment="Center" 
+										                           ToolTip.Tip="{asXaml:StringResource SessionControl.SourceInsets.Top}" 
+										                           Value="{Binding SourceInsetsTop, Mode=TwoWay}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" 
+										                           Grid.Column="1" 
+										                           Grid.Row="1" 
+										                           IsNullValueAllowed="False" 
+										                           Maximum="65535" 
+										                           Minimum="0" 
+										                           TextAlignment="Center" 
+										                           ToolTip.Tip="{asXaml:StringResource SessionControl.SourceInsets.Bottom}" 
+										                           Value="{Binding SourceInsetsBottom, Mode=TwoWay}"/>
+										<abControls:IntegerTextBox Classes="Dialog_TextBox" 
+										                           Grid.Column="2" 
+										                           Grid.RowSpan="2" 
+										                           IsNullValueAllowed="False" 
+										                           Maximum="65535" 
+										                           Minimum="0" 
+										                           TextAlignment="Center" 
+										                           ToolTip.Tip="{asXaml:StringResource SessionControl.SourceInsets.Right}" 
+										                           Value="{Binding SourceInsetsRight, Mode=TwoWay}"
+										                           VerticalAlignment="Center"/>
+									</Grid>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 								</StackPanel>
 							</Expander>
 

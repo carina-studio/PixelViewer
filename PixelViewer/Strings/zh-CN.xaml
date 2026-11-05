@@ -308,6 +308,11 @@
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">打开文件所使用的配置</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在 Windows 资源管理器中显示文件</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">源数据大小</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets">向内裁剪</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Bottom">下</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Left">左</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Right">右</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Top">上</sys:String>
 	<sys:String x:Key="String/SessionControl.Tools">工具</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">图像绘制内存使用总量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">用户界面响应时间</sys:String>

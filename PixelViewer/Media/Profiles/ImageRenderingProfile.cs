@@ -65,6 +65,7 @@ namespace Carina.PixelViewer.Media.Profiles
         ColorTable? redColorTable;
         ImageRenderers.IImageRenderer? renderer;
         IList<int> rowStrides = emptyEffectiveBits;
+        PixelInsets sourceInsets = PixelInsets.Empty;
         int tileHeight;
         int tileWidth;
         bool useLinearColorSpace;
@@ -478,6 +479,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 && this.Compression == profile.Compression
                 && this.TileWidth == profile.TileWidth
                 && this.TileHeight == profile.TileHeight
+                && this.SourceInsets == profile.SourceInsets
                 && this.FramePaddingSize == profile.FramePaddingSize
                 && this.BayerPattern == profile.BayerPattern
                 && this.ByteOrdering == profile.ByteOrdering
@@ -713,6 +715,15 @@ namespace Carina.PixelViewer.Media.Profiles
                     profile.tileWidth = Math.Max(0, tileWidth);
                 if (rootElement.TryGetProperty(nameof(TileHeight), out jsonProperty) && jsonProperty.TryGetInt32(out var tileHeight))
                     profile.tileHeight = Math.Max(0, tileHeight);
+
+                // get insets of source image
+                if (rootElement.TryGetProperty(nameof(SourceInsets), out jsonProperty))
+                {
+                    if (PixelInsets.TryLoadFromJson(jsonProperty, out var sourceInsets))
+                        profile.sourceInsets = sourceInsets;
+                    else
+                        logger?.LogWarning("Unable to load {name} from profile", nameof(SourceInsets));
+                }
 
                 // get byte ordering
                 if (profile.renderer?.Format.HasMultipleByteOrderings == true
@@ -1108,6 +1119,11 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WriteNumber(nameof(TileWidth), this.tileWidth);
                 if (this.tileHeight != 0)
                     jsonWriter.WriteNumber(nameof(TileHeight), this.tileHeight);
+                if (!this.sourceInsets.IsEmpty)
+                {
+                    jsonWriter.WritePropertyName(nameof(SourceInsets));
+                    this.sourceInsets.WriteToJson(jsonWriter);
+                }
                 if (format.Category == ImageFormatCategory.Bayer)
                     jsonWriter.WriteString(nameof(BayerPattern), this.bayerPattern.ToString());
                 if (format.HasMultipleByteOrderings)
@@ -1175,6 +1191,25 @@ namespace Carina.PixelViewer.Media.Profiles
 
         // Raised when property changed.
         public event PropertyChangedEventHandler? PropertyChanged;
+
+
+        /// <summary>
+        /// Get or set number of pixels taken in from each edge of the source image, which is applied before flipping and rotating the image.
+        /// </summary>
+        public PixelInsets SourceInsets
+        {
+            get => this.sourceInsets;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (this.sourceInsets == value)
+                    return;
+                this.sourceInsets = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SourceInsets)));
+            }
+        }
 
 
         // Height of each tile in pixels, or 0 if data is not stored as tiles.

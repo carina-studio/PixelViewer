@@ -349,6 +349,11 @@
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to Open Files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Source Data Size</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets">Insets</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Bottom">Bottom</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Left">Left</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Right">Right</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Top">Top</sys:String>
 	<sys:String x:Key="String/SessionControl.Tools">Tools</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">Total Memory Usage of Rendered Images</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">User Interface Response Time</sys:String>

@@ -71,6 +71,7 @@ class ImageRenderingProfileTests : BaseTests
 		}),
 		(nameof(ImageRenderingProfile.Renderer), profile => profile.Renderer = ImageRenderers.All.First(it => it != profile.Renderer)),
 		(nameof(ImageRenderingProfile.RowStrides), profile => profile.RowStrides = IncreaseFirstElement(profile.RowStrides)),
+		(nameof(ImageRenderingProfile.SourceInsets), profile => profile.SourceInsets = new PixelInsets(profile.SourceInsets.Left + 1, 0, 0, 0)),
 		(nameof(ImageRenderingProfile.TileHeight), profile => profile.TileHeight += 1),
 		(nameof(ImageRenderingProfile.TileWidth), profile => profile.TileWidth += 1),
 		(nameof(ImageRenderingProfile.UseLinearColorSpace), profile => profile.UseLinearColorSpace = !profile.UseLinearColorSpace),
@@ -371,6 +372,65 @@ class ImageRenderingProfileTests : BaseTests
 				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
 				{
 					Assert.That(loadedProfile.LensShading, Is.Null, "Invalid lens shading should be ignored.");
+					Assert.That(loadedProfile.Width, Is.EqualTo(profile.Width), "Other parameters should still be loaded.");
+				}
+			}
+			finally
+			{
+				profile.Dispose();
+				await DeleteFileAsync(fileName);
+			}
+		});
+	}
+
+
+	/// <summary>
+	/// Test for saving and loading the insets of source image.
+	/// </summary>
+	[Test]
+	public void SourceInsetsPersistenceTest()
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// save a profile which carries insets of source image
+			await this.InitializeSubSystemsAsync();
+			ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+			var name = $"Source Insets Test {Guid.NewGuid()}";
+			var sourceInsets = new PixelInsets(144, 114, 17, 15);
+			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
+			{
+				SourceInsets = sourceInsets,
+			};
+			await profile.SaveAsync();
+			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
+			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
+			try
+			{
+				// check that insets are loaded
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
+					Assert.That(loadedProfile.SourceInsets, Is.EqualTo(sourceInsets), "Insets of source image should be loaded.");
+					Assert.That(loadedProfile.HasSameRenderingParameters(profile), Is.True, "Loaded profile should have same rendering parameters.");
+				}
+
+				// check that empty insets are not written, so the file stays the same as one written before they were supported
+				profile.SourceInsets = PixelInsets.Empty;
+				await profile.SaveAsync();
+				var json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.SourceInsets)}\":"), "Empty insets should not be written.");
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.SourceInsets.IsEmpty, Is.True, "Empty insets should be loaded.");
+
+				// check that insets of an edge which is not written are taken as 0, and invalid insets are ignored
+				var jsonWithPartialInsets = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.SourceInsets)}\": {{ \"Left\": 8, \"Bottom\": -2 }}, \"{nameof(ImageRenderingProfile.Width)}\"");
+				await File.WriteAllTextAsync(fileName, jsonWithPartialInsets);
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.SourceInsets, Is.EqualTo(new PixelInsets(8, 0, 0, -2)), "Undefined insets should be 0 and negative ones should be kept.");
+				var jsonWithInvalidInsets = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.SourceInsets)}\": 8, \"{nameof(ImageRenderingProfile.Width)}\"");
+				await File.WriteAllTextAsync(fileName, jsonWithInvalidInsets);
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
+					Assert.That(loadedProfile.SourceInsets.IsEmpty, Is.True, "Invalid insets should be ignored.");
 					Assert.That(loadedProfile.Width, Is.EqualTo(profile.Width), "Other parameters should still be loaded.");
 				}
 			}

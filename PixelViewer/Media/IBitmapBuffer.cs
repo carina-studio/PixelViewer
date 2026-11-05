@@ -72,6 +72,19 @@ namespace Carina.PixelViewer.Media
 
 
 		/// <summary>
+		/// Expose a region of the bitmap as another <see cref="IBitmapBuffer"/> without copying its data.
+		/// </summary>
+		/// <param name="bitmapBuffer">Source <see cref="IBitmapBuffer"/>.</param>
+		/// <param name="region">Region of bitmap.</param>
+		/// <returns><see cref="IBitmapBuffer"/> of the region, which keeps the row stride of source, or a shared instance of source if the region covers the whole bitmap.</returns>
+		/// <remarks>Use <see cref="Copy(IBitmapBuffer)"/> on the result to get the data of the region whose rows are packed without padding.</remarks>
+		public static IBitmapBuffer Clip(this IBitmapBuffer bitmapBuffer, PixelRect region) =>
+			region.X == 0 && region.Y == 0 && region.Width == bitmapBuffer.Width && region.Height == bitmapBuffer.Height
+				? bitmapBuffer.Share()
+				: new ClippedBitmapBuffer(bitmapBuffer, region);
+
+
+		/// <summary>
 		/// Convert format of <paramref name="bitmapBuffer"/> to <see cref="BitmapFormat.Bgra32"/>.
 		/// </summary>
 		/// <param name="bitmapBuffer">Source <see cref="IBitmapBuffer"/>.</param>

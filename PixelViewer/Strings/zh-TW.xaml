@@ -304,6 +304,11 @@
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">開啟檔案所使用的組態</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案總管中顯示檔案</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets">向內裁切</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Bottom">下</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Left">左</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Right">右</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceInsets.Top">上</sys:String>
 	<sys:String x:Key="String/SessionControl.Tools">工具</sys:String>
 	<sys:String x:Key="String/SessionControl.TotalRenderedImagesMemoryUsage">影像繪製記憶體使用總量</sys:String>
 	<sys:String x:Key="String/SessionControl.UIResponseDuration">使用者介面回應時間</sys:String>
