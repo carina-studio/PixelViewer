@@ -78,6 +78,9 @@ static partial class ImageRenderers
 			new BayerPattern12MipiImageRenderer(),
 			new BayerPattern14MipiImageRenderer(),
 			new BayerPattern16ImageRenderer(),
+			new PackedBayerPattern10ImageRenderer(),
+			new PackedBayerPattern12ImageRenderer(),
+			new PackedBayerPattern14ImageRenderer(),
 		]);
 		it.Add(Platform.IsMacOS 
 			? new MacOSHeifImageRenderer() 
