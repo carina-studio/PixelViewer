@@ -14,6 +14,7 @@ namespace Carina.PixelViewer.Media
         // Fields.
         uint currentEntryDataCount;
         long currentEntryDataSize;
+        long currentEntryValuePosition;
         readonly byte[] entryBuffer = new byte[12];
         readonly Dictionary<string, int> nextIfdIndices = new();
         bool isCompleted;
@@ -69,6 +70,15 @@ namespace Carina.PixelViewer.Media
             // prepare to read first IFD
             this.EnqueueIfdToRead(this.InitialStreamPosition + offset, IfdNames.Default);
         }
+
+
+        /// <summary>
+        /// Get position of data of current entry in stream.
+        /// </summary>
+        /// <remarks>The data of 4 bytes or less is stored in the entry itself, so its position is the one of the value field of the entry. The value is undefined if there is no current entry to read.</remarks>
+        public long CurrentEntryDataPosition => this.currentEntryDataSize <= 4
+            ? this.currentEntryValuePosition
+            : this.InitialStreamPosition + this.parseUInt32(this.entryBuffer, 8);
 
 
         /// <summary>
@@ -188,6 +198,7 @@ namespace Carina.PixelViewer.Media
                 }
                 else
                     --this.remainingEntries;
+                this.currentEntryValuePosition = this.stream.Position - 4;
                 this.CurrentEntryId = this.parseUInt16(this.entryBuffer, 0);
                 this.CurrentEntryType = (IfdEntryType)this.parseUInt16(this.entryBuffer, 2);
                 this.currentEntryDataCount = this.parseUInt32(this.entryBuffer, 4);
