@@ -10,7 +10,7 @@ enum ImageDataCompression
 	/// </summary>
 	None,
 	/// <summary>
-	/// Lossless JPEG data of ARW by Sony, whose tiles are frames of 4 components with each pixel of frame carrying a 2x2 block of tile.
+	/// Data of ARW by Sony, which is tiles of lossless JPEG whose frames have 4 components with each pixel of frame carrying a 2x2 block of tile, or the lossy data compressed by Sony when not stored as tiles.
 	/// </summary>
 	Arw,
 	/// <summary>
