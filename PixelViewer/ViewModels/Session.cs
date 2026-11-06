@@ -2981,37 +2981,35 @@ class Session : ViewModel<IAppSuiteApplication>
 		// apply luminance LUT filter
 		if (!failedToApply && isLuminanceLutFilterNeeded)
 		{
+			// get transfer functions and luminance weights of colors of the frame
+			Func<double, double>? toLinear;
+			Func<double, double>? fromLinear;
+			if (isColorSpaceConverted)
+			{
+				var colorSpace = renderedImageFrame.BitmapBuffer.ColorSpace;
+				toLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferToLinear;
+				fromLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferFromLinear;
+			}
+			else
+			{
+				toLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncToLinear;
+				fromLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncFromLinear;
+			}
+			var luminanceWeights = ToneCurveImageFilter.SelectLuminanceWeights(renderedImageFrame.BitmapBuffer.ColorSpace);
+
 			// prepare LUT
 			var lut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
 			try
 			{
 				stopwatch?.Restart();
 				if (this.canResetBrightnessAdjustment.Value)
-				{
-					// get transfer functions of colors of the frame
-					Func<double, double>? toLinear;
-					Func<double, double>? fromLinear;
-					if (isColorSpaceConverted)
-					{
-						var colorSpace = renderedImageFrame.BitmapBuffer.ColorSpace;
-						toLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferToLinear;
-						fromLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferFromLinear;
-					}
-					else
-					{
-						toLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncToLinear;
-						fromLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncFromLinear;
-					}
-
-					// transform brightness
 					await ColorLut.BrightnessTransformAsync(lut, this.BrightnessAdjustment, toLinear, fromLinear, cancellationTokenSource.Token);
-				}
 				if (this.canResetContrastAdjustment.Value)
 					await ColorLut.ContrastTransformAsync(lut, this.ContrastAdjustment, cancellationTokenSource.Token);
 				if (this.canResetHighlightAdjustment.Value)
-					await ColorLut.HighlightTransformAsync(lut, this.HighlightAdjustment, cancellationTokenSource.Token);
+					await ColorLut.HighlightTransformAsync(lut, this.HighlightAdjustment, toLinear, fromLinear, cancellationTokenSource.Token);
 				if (this.canResetShadowAdjustment.Value)
-					await ColorLut.ShadowTransformAsync(lut, this.ShadowAdjustment, cancellationTokenSource.Token);
+					await ColorLut.ShadowTransformAsync(lut, this.ShadowAdjustment, toLinear, fromLinear, cancellationTokenSource.Token);
 				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to prepare luminance LUT", stopwatch.ElapsedMilliseconds);
 			}
@@ -3024,18 +3022,18 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 
 			// apply filter
-			var parameters = new ColorLutImageFilter.Params()
+			var parameters = new ToneCurveImageFilter.Params()
 			{
-				RedLookupTable = lut,
-				GreenLookupTable = lut,
-				BlueLookupTable = lut,
-				AlphaLookupTable = ColorLut.ObtainReadOnlyIdentity(renderedImageFrame.BitmapBuffer.Format)
+				ColorTransferFuncFromLinear = fromLinear,
+				ColorTransferFuncToLinear = toLinear,
+				LookupTable = lut,
+				LuminanceWeights = luminanceWeights,
 			};
 			stopwatch?.Restart();
-			if (await this.ApplyImageFilterAsync(new ColorLutImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
+			if (await this.ApplyImageFilterAsync(new ToneCurveImageFilter(), sourceImageFrame.AsNonNull(), resultImageFrame.AsNonNull(), parameters, cancellationTokenSource.Token))
 			{
 				if (stopwatch is not null)
-					this.Logger.LogTrace("Take {ms} ms to apply luminance LUT filter", stopwatch.ElapsedMilliseconds);
+					this.Logger.LogTrace("Take {ms} ms to apply tone curve filter", stopwatch.ElapsedMilliseconds);
 				if (sourceImageFrame == renderedImageFrame)
 				{
 					sourceImageFrame = resultImageFrame;

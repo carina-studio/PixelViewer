@@ -27,7 +27,14 @@ static class ColorLut
     // Constants.
     const double ArctanTransformationSensitivity = 0.5;
     internal const double BrightnessShoulderKnee = 0.8;
+    internal const double HighlightMaxEv = 1.5;
+    internal const double HighlightPivot = 0.1;
+    internal const double HighlightRampStops = 0.5;
+    internal const double HighlightStrength = 0.75;
     const int LutCacheSize = 8;
+    internal const double ShadowMaxEv = 2.5;
+    internal const double ShadowPivot = 0.5;
+    internal const double ShadowRangeStops = 5;
 
 
     // Fields.
@@ -165,37 +172,22 @@ static class ColorLut
     }
 
 
-    // Generate Lagrange interpolation function by 4 points.
-    static Func<double, double> GenerateLagrangeInterpolation((double, double) p0, (double, double) p1, (double, double) p2, (double, double) p3)
-    {
-        var d0 = p0.Item2 / ((p0.Item1 - p1.Item1) * (p0.Item1 - p2.Item1) * (p0.Item1 - p3.Item1));
-        var d1 = p1.Item2 / ((p1.Item1 - p0.Item1) * (p1.Item1 - p2.Item1) * (p1.Item1 - p3.Item1));
-        var d2 = p2.Item2 / ((p2.Item1 - p0.Item1) * (p2.Item1 - p1.Item1) * (p2.Item1 - p3.Item1));
-        var d3 = p3.Item2 / ((p3.Item1 - p0.Item1) * (p3.Item1 - p1.Item1) * (p3.Item1 - p2.Item1));
-        return (x) =>
-        {
-            var n0 = (x - p1.Item1) * (x - p2.Item1) * (x - p3.Item1);
-            var n1 = (x - p0.Item1) * (x - p2.Item1) * (x - p3.Item1);
-            var n2 = (x - p0.Item1) * (x - p1.Item1) * (x - p3.Item1);
-            var n3 = (x - p0.Item1) * (x - p1.Item1) * (x - p2.Item1);
-            return (n0 * d0) + (n1 * d1) + (n2 * d2) + (n3 * d3);
-        };
-    }
-
-
     /// <summary>
     /// Apply highlight transformation.
     /// </summary>
     /// <param name="lut">LUT.</param>
     /// <param name="intensity">Intensity, range is [-1.0, 1.0].</param>
+    /// <param name="toLinear">Function to transfer normalized color in the LUT to linear color, or Null if color in the LUT is linear.</param>
+    /// <param name="fromLinear">Function to transfer normalized linear color back to color in the LUT, or Null if color in the LUT is linear.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task of applying transformation.</returns>
-    public static Task HighlightTransformAsync(IList<double> lut, double intensity, CancellationToken cancellationToken = default)
+    /// <remarks>The distance from linear color to white is scaled by 2^(-intensity × <see cref="HighlightStrength"/> × g(u)), where u is the number of stops by which the distance is below the distance of <see cref="HighlightPivot"/> to white, and g(u) rises quadratically over the first <see cref="HighlightRampStops"/> stops and linearly beyond, so that the slope of the curve is continuous and the local contrast in log2 space is kept at 1 - <see cref="HighlightStrength"/> at least. The exponent e = <see cref="HighlightStrength"/> × g(u) is then capped smoothly as <see cref="HighlightMaxEv"/> × (1 - exp(-e / <see cref="HighlightMaxEv"/>)), which bounds the slope of the curve next to white by 2^<see cref="HighlightMaxEv"/>. Colors at and below <see cref="HighlightPivot"/> and white are kept. The transfer functions are used only when both of them are defined, and <paramref name="fromLinear"/> should be the inverse of <paramref name="toLinear"/>.</remarks>
+    public static Task HighlightTransformAsync(IList<double> lut, double intensity, Func<double, double>? toLinear, Func<double, double>? fromLinear, CancellationToken cancellationToken = default)
     {
+        // check parameter
         if (!double.IsFinite(intensity))
             throw new ArgumentException();
-        if (cancellationToken.IsCancellationRequested)
-            throw new TaskCanceledException();
+        cancellationToken.ThrowIfCancellationRequested();
         if (lut.Count <= 2)
             return Task.CompletedTask;
         if (intensity < -1)
@@ -204,14 +196,29 @@ static class ColorLut
             intensity = 1;
         else if (Math.Abs(intensity) < 0.001)
             return Task.CompletedTask;
-        var interpFunc = GenerateLagrangeInterpolation((0.4, 0.4), (0.5, 0.5), (0.75, 0.75 + (0.2 * intensity)), (1, 1));
-        var maxColor = lut.Count - 1;
+
+        // prepare
+        if (toLinear is null || fromLinear is null)
+        {
+            toLinear = static it => it;
+            fromLinear = static it => it;
+        }
+        var evScale = -intensity;
+        var pivotDistance = 1 - HighlightPivot;
+        var maxColor = lut.Count - 1.0;
+
+        // apply
         for (var i = lut.Count - 1; i >= 0; --i)
         {
-            var color = lut[i] / maxColor;
-            if (color <= 0.5 || color > 1)
+            var distance = 1 - toLinear(lut[i] / maxColor);
+            if (distance <= 0 || distance >= pivotDistance)
                 continue;
-            lut[i] = interpFunc(color) * maxColor;
+            var stops = Math.Log2(pivotDistance / distance);
+            var ramp = stops < HighlightRampStops
+                ? stops * stops / (2 * HighlightRampStops)
+                : stops - HighlightRampStops / 2;
+            var ev = HighlightMaxEv * (1 - Math.Exp(-HighlightStrength * ramp / HighlightMaxEv));
+            lut[i] = fromLinear(1 - distance * Math.Pow(2, evScale * ev)) * maxColor;
         }
         return Task.CompletedTask;
     }
@@ -339,14 +346,17 @@ static class ColorLut
     /// </summary>
     /// <param name="lut">LUT.</param>
     /// <param name="intensity">Intensity, range is [-1.0, 1.0].</param>
+    /// <param name="toLinear">Function to transfer normalized color in the LUT to linear color, or Null if color in the LUT is linear.</param>
+    /// <param name="fromLinear">Function to transfer normalized linear color back to color in the LUT, or Null if color in the LUT is linear.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task of applying transformation.</returns>
-    public static Task ShadowTransformAsync(IList<double> lut, double intensity, CancellationToken cancellationToken = default)
+    /// <remarks>The linear color is scaled by 2^(intensity × <see cref="ShadowMaxEv"/> × weight), where the weight is 1 at and below <see cref="ShadowRangeStops"/> stops under <see cref="ShadowPivot"/>, 0 at and above <see cref="ShadowPivot"/>, and fades in between by a smoothstep in log2 space. The transfer functions are used only when both of them are defined, and <paramref name="fromLinear"/> should be the inverse of <paramref name="toLinear"/>.</remarks>
+    public static Task ShadowTransformAsync(IList<double> lut, double intensity, Func<double, double>? toLinear, Func<double, double>? fromLinear, CancellationToken cancellationToken = default)
     {
+        // check parameter
         if (!double.IsFinite(intensity))
             throw new ArgumentException();
-        if (cancellationToken.IsCancellationRequested)
-            throw new TaskCanceledException();
+        cancellationToken.ThrowIfCancellationRequested();
         if (lut.Count <= 2)
             return Task.CompletedTask;
         if (intensity < -1)
@@ -355,14 +365,26 @@ static class ColorLut
             intensity = 1;
         else if (Math.Abs(intensity) < 0.001)
             return Task.CompletedTask;
-        var interpFunc = GenerateLagrangeInterpolation((0, 0), (0.25, 0.25 + (0.2 * intensity)), (0.5, 0.5), (0.6, 0.6));
-        var maxColor = lut.Count - 1;
+
+        // prepare
+        if (toLinear is null || fromLinear is null)
+        {
+            toLinear = static it => it;
+            fromLinear = static it => it;
+        }
+        var ev = intensity * ShadowMaxEv;
+        var log2Pivot = Math.Log2(ShadowPivot);
+        var maxColor = lut.Count - 1.0;
+
+        // apply
         for (var i = lut.Count - 1; i >= 0; --i)
         {
-            var color = lut[i] / maxColor;
-            if (color >= 0.5 || color < 0)
+            var color = toLinear(lut[i] / maxColor);
+            if (color <= 0 || color >= ShadowPivot)
                 continue;
-            lut[i] = interpFunc(color) * maxColor;
+            var t = Math.Clamp((Math.Log2(color) - log2Pivot) / ShadowRangeStops + 1, 0, 1);
+            var weight = 1 - t * t * (3 - 2 * t);
+            lut[i] = fromLinear(color * Math.Pow(2, ev * weight)) * maxColor;
         }
         return Task.CompletedTask;
     }
