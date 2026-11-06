@@ -9,13 +9,11 @@
 	<sys:String x:Key="String/App.Shutdown">結束</sys:String>
 	
 	<!-- ApplicationOptionsDialog -->
-	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">亮度調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">色彩</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">色彩空間轉換時機</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">{0} 的詳細資訊</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">色彩管理可提供更準確的色彩輸出，但將會影響繪製影像的效能。</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">色彩空間「{0}」與「{1}」相同，您是否還要將其加入？</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">對比調整函數</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">建立新分頁以開啟拖放的檔案</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">自訂色彩空間</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">預設位元組順序</sys:String>
@@ -56,11 +54,6 @@
 
 	<!-- AspectRatio -->
 	<sys:String x:Key="String/AspectRatio.Unknown">&lt;不指定&gt;</sys:String>
-
-	<!-- BrightnessTransformationFunction -->
-	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">反正切 (Arctangent) 轉換</sys:String>
-	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma 轉換</sys:String>
-	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">線性轉換</sys:String>
 
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">大端序 (Big-Endian)</sys:String>
@@ -103,11 +96,6 @@
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">位元組</sys:String>
-
-	<!-- ContrastTransformationFunction -->
-	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">雙反正切 (Arctangent) 轉換</sys:String>
-	<sys:String x:Key="String/ContrastTransformationFunction.Linear">線性轉換</sys:String>
-	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange 插值法</sys:String>
 
 	<!-- DemosaicingAlgorithm -->
 	<sys:String x:Key="String/DemosaicingAlgorithm.Bilinear">雙線性</sys:String>

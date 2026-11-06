@@ -1,5 +1,4 @@
 ﻿using Carina.PixelViewer.Media;
-using Carina.PixelViewer.Media.ImageFilters;
 using Carina.PixelViewer.Media.ImageRenderers;
 using CarinaStudio;
 using CarinaStudio.AppSuite.ViewModels;
@@ -28,32 +27,12 @@ namespace Carina.PixelViewer.ViewModels
 
 
 		/// <summary>
-		/// Brightness transformation function.
-		/// </summary>
-		public BrightnessTransformationFunction BrightnessTransformationFunction
-		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction);
-			set => this.Settings.SetValue(SettingKeys.BrightnessTransformationFunction, value);
-		}
-		
-		
-		/// <summary>
 		/// Timing of color space conversion.
 		/// </summary>
 		public ColorSpaceConversionTiming ColorSpaceConversionTiming
 		{
 			get => this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming);
 			set => this.Settings.SetValue(SettingKeys.ColorSpaceConversionTiming, value);
-		}
-
-
-		/// <summary>
-		/// Contrast transformation function.
-		/// </summary>
-		public ContrastTransformationFunction ContrastTransformationFunction
-		{
-			get => this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction);
-			set => this.Settings.SetValue(SettingKeys.ContrastTransformationFunction, value);
 		}
 
 
@@ -209,12 +188,8 @@ namespace Carina.PixelViewer.ViewModels
 		{
 			base.OnSettingChanged(e);
 			var key = e.Key;
-			if (key == SettingKeys.BrightnessTransformationFunction)
-				this.OnPropertyChanged(nameof(this.BrightnessTransformationFunction));
-			else if (key == SettingKeys.ColorSpaceConversionTiming)
+			if (key == SettingKeys.ColorSpaceConversionTiming)
 				this.OnPropertyChanged(nameof(this.ColorSpaceConversionTiming));
-			else if (key == SettingKeys.ContrastTransformationFunction)
-				this.OnPropertyChanged(nameof(this.ContrastTransformationFunction));
 			else if (key == SettingKeys.CreateNewSessionForDragDropFile)
 				this.OnPropertyChanged(nameof(this.CreateNewSessionForDragDropFile));
 			else if (key == SettingKeys.DefaultByteOrdering)

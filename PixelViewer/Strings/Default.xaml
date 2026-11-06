@@ -9,13 +9,11 @@
 	<sys:String x:Key="String/App.Shutdown">Exit</sys:String>
 
 	<!-- ApplicationOptionsDialog -->
-	<sys:String x:Key="String/ApplicationOptionsDialog.BrightnessTransformationFunction">Brightness Adjustment Function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.Colors">Colors</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceConversionTiming">Color Space Conversion Timing</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceDetails">Details of {0}</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ColorSpaceManagement.Description">Color management improves the color accuracy of rendered images, but it affects rendering performance.</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.ConfirmAddingExistingColorSpace">The color space '{0}' is the same as '{1}'. Do you still want to add it?</sys:String>
-	<sys:String x:Key="String/ApplicationOptionsDialog.ContrastTransformationFunction">Contrast Adjustment Function</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CreateNewSessionForDragDropFile">Create New Tab to Open Dragged File</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.CustomColorSpaces">Custom Color Spaces</sys:String>
 	<sys:String x:Key="String/ApplicationOptionsDialog.DefaultByteOrdering">Default Byte Ordering</sys:String>
@@ -74,11 +72,6 @@
 	<sys:String x:Key="String/BayerPattern.RGGB_2x2">RGGB (2x2)</sys:String>
 	<sys:String x:Key="String/BayerPattern.RGGB_4x4">RGGB (4x4)</sys:String>
 
-	<!-- BrightnessTransformationFunction -->
-	<sys:String x:Key="String/BrightnessTransformationFunction.Arctan">Arctangent-Based Transformation</sys:String>
-	<sys:String x:Key="String/BrightnessTransformationFunction.Gamma">Gamma Transformation</sys:String>
-	<sys:String x:Key="String/BrightnessTransformationFunction.Linear">Linear Transformation</sys:String>
-
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">Big-Endian</sys:String>
 	<sys:String x:Key="String/ByteOrdering.LittleEndian">Little-Endian</sys:String>
@@ -126,11 +119,6 @@
 	
 	<!-- Common -->
 	<sys:String x:Key="String/Common.Bytes">Bytes</sys:String>
-
-	<!-- ContrastTransformationFunction -->
-	<sys:String x:Key="String/ContrastTransformationFunction.Arctan">Dual Arctangent-Based Transformation</sys:String>
-	<sys:String x:Key="String/ContrastTransformationFunction.Linear">Linear Transformation</sys:String>
-	<sys:String x:Key="String/ContrastTransformationFunction.Lagrange">Lagrange Interpolation</sys:String>
 
 	<!-- DemosaicingAlgorithm -->
 	<sys:String x:Key="String/DemosaicingAlgorithm.Bilinear">Bilinear</sys:String>

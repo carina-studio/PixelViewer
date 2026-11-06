@@ -101,6 +101,8 @@ namespace Carina.PixelViewer
 
 
 		// Static fields.
+		static readonly SettingKey<string> LegacyBrightnessTransformationFunctionKey = new("BrightnessTransformationFunction", "");
+		static readonly SettingKey<string> LegacyContrastTransformationFunctionKey = new("ContrastTransformationFunction", "");
 		static readonly SettingKey<bool> LegacySaveRenderedImageWithOrientationKey = new("SaveRenderedImageWithOrientation", true);
 		static readonly SettingKey<string> LegacyScreenColorSpaceKey = new("ScreenColorSpace", "");
 		static readonly SettingKey<string> LegacyYuvConversionModeKey = new("YuvConversionMode", "");
@@ -617,6 +619,13 @@ namespace Carina.PixelViewer
 				settings.SetValue(SettingKeys.SaveRenderedImageWithTransformation, settings.GetValueOrDefault(LegacySaveRenderedImageWithOrientationKey));
 				settings.ResetValue(LegacySaveRenderedImageWithOrientationKey);
 			}
+
+			// remove transformation functions of brightness and contrast
+			if (oldVersion <= 9)
+			{
+				settings.ResetValue(LegacyBrightnessTransformationFunctionKey);
+				settings.ResetValue(LegacyContrastTransformationFunctionKey);
+			}
 		}
 #pragma warning restore CS0612
 		
@@ -668,7 +677,7 @@ namespace Carina.PixelViewer
 		
 		
 		// Version of settings.
-		protected override int SettingsVersion => 9;
+		protected override int SettingsVersion => 10;
 
 
 		/// <inheritdoc/>

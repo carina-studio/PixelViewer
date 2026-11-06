@@ -2987,9 +2987,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				stopwatch?.Restart();
 				if (this.canResetBrightnessAdjustment.Value)
-					await ColorLut.BrightnessTransformAsync(histograms, lut, this.BrightnessAdjustment, this.Settings.GetValueOrDefault(SettingKeys.BrightnessTransformationFunction), cancellationTokenSource.Token);
+					await ColorLut.BrightnessTransformAsync(histograms, lut, this.BrightnessAdjustment, cancellationTokenSource.Token);
 				if (this.canResetContrastAdjustment.Value)
-					await ColorLut.ContrastTransformAsync(lut, this.ContrastAdjustment, this.Settings.GetValueOrDefault(SettingKeys.ContrastTransformationFunction), cancellationTokenSource.Token);
+					await ColorLut.ContrastTransformAsync(lut, this.ContrastAdjustment, cancellationTokenSource.Token);
 				if (this.canResetHighlightAdjustment.Value)
 					await ColorLut.HighlightTransformAsync(lut, this.HighlightAdjustment, cancellationTokenSource.Token);
 				if (this.canResetShadowAdjustment.Value)
@@ -4423,15 +4423,7 @@ class Session : ViewModel<IAppSuiteApplication>
     {
         base.OnSettingChanged(e);
 		var key = e.Key;
-		if (key == SettingKeys.BrightnessTransformationFunction
-			|| key == SettingKeys.ContrastTransformationFunction)
-		{
-			if (this.IsActivated)
-				this.filterImageAction.Reschedule();
-			else
-				_ = this.ClearFilteredImageAsync();
-		}
-		else if (key == SettingKeys.ColorSpaceConversionTiming
+		if (key == SettingKeys.ColorSpaceConversionTiming
 		         || key == SettingKeys.ReduceDemosaicingQualityWhenInsufficientMemory
 		         || key == SettingKeys.Render32BitColorsOnly)
 		{

@@ -10,7 +10,6 @@
         xmlns:asXaml="using:CarinaStudio.AppSuite.Xaml"
 		xmlns:app="using:Carina.PixelViewer"
 		xmlns:appConverters="using:Carina.PixelViewer.Data.Converters"
-		xmlns:appImageFilters="using:Carina.PixelViewer.Media.ImageFilters"
 		xmlns:appImageRenderers="using:Carina.PixelViewer.Media.ImageRenderers"
 		xmlns:appMedia="using:Carina.PixelViewer.Media"
         xmlns:appViewModels="using:Carina.PixelViewer.ViewModels"
@@ -445,20 +444,6 @@
 						<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.ImageFilter}" asControls:DialogElement.TextRole="ItemsGroupHeader"/>
 						<Border Classes="Dialog_ItemsGroup_Container">
 							<StackPanel>
-
-								<!-- Brightness transformation -->
-								<asControls:DialogItem>
-									<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.BrightnessTransformationFunction}" asControls:DialogElement.TextRole="Label"/>
-									<asControls:EnumComboBox EnumType="{x:Type appImageFilters:BrightnessTransformationFunction}" asControls:DialogElement.IsDialogItemInput="True" SelectedItem="{Binding BrightnessTransformationFunction, Mode=TwoWay}"/>
-								</asControls:DialogItem>
-								<Separator asControls:DialogElement.SeparatorType="Item"/>
-
-								<!-- Contrast transformation -->
-								<asControls:DialogItem>
-									<TextBlock Text="{asXaml:StringResource ApplicationOptionsDialog.ContrastTransformationFunction}" asControls:DialogElement.TextRole="Label"/>
-									<asControls:EnumComboBox EnumType="{x:Type appImageFilters:ContrastTransformationFunction}" asControls:DialogElement.IsDialogItemInput="True" SelectedItem="{Binding ContrastTransformationFunction, Mode=TwoWay}"/>
-								</asControls:DialogItem>
-								<Separator asControls:DialogElement.SeparatorType="Item"/>
 
 								<!-- Reset filter params after opening file -->
 								<asControls:DialogItem ItemSize="Small">

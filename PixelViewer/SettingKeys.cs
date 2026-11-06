@@ -15,17 +15,9 @@ static class SettingKeys
 	[Obsolete]
 	public static readonly SettingKey<bool> AutoSelectLanguage = new(nameof(AutoSelectLanguage), true);
 	/// <summary>
-	/// Brightness transformation function.
-	/// </summary>
-	public static readonly SettingKey<Media.ImageFilters.BrightnessTransformationFunction> BrightnessTransformationFunction = new(nameof(BrightnessTransformationFunction), Media.ImageFilters.BrightnessTransformationFunction.Arctan);
-	/// <summary>
 	/// Timing to perform color space conversion.
 	/// </summary>
 	public static readonly SettingKey<ColorSpaceConversionTiming> ColorSpaceConversionTiming = new(nameof(ColorSpaceConversionTiming), Media.ColorSpaceConversionTiming.BeforeRenderingToDisplay);
-	/// <summary>
-	/// Contrast transformation function.
-	/// </summary>
-	public static readonly SettingKey<Media.ImageFilters.ContrastTransformationFunction> ContrastTransformationFunction = new(nameof(ContrastTransformationFunction), Media.ImageFilters.ContrastTransformationFunction.Arctan);
 	/// <summary>
 	/// Whether new session is should be created for drag-and-drop file or not.
 	/// </summary>
