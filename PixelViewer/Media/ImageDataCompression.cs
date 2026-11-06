@@ -10,6 +10,10 @@ enum ImageDataCompression
 	/// </summary>
 	None,
 	/// <summary>
+	/// Lossless JPEG data of ARW by Sony, whose tiles are frames of 4 components with each pixel of frame carrying a 2x2 block of tile.
+	/// </summary>
+	Arw,
+	/// <summary>
 	/// Lossless JPEG data of CR2 by Canon, whose samples are laid out as vertical slices of image.
 	/// </summary>
 	Cr2,
