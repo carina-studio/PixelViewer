@@ -47,4 +47,39 @@ class IfdEntryReaderTests
 		Assert.That(reader.TryGetEntryData(out byte[]? data), Is.True);
 		Assert.That(data, Is.EqualTo("Nikon\0"u8.ToArray()));
 	}
+
+
+	/// <summary>
+	/// Test for naming the first IFD and the IFDs chained after it, which are IFD 0 unless another name is given.
+	/// </summary>
+	[Test]
+	public void FirstIfdNameTest([Values(null, IfdNames.Exif)] string? firstIfdName)
+	{
+		// write TIFF data of 2 chained IFDs of one entry each
+		using var stream = new MemoryStream();
+		using var writer = new BinaryWriter(stream);
+		writer.Write("II"u8);
+		writer.Write((ushort)42);
+		writer.Write(8u);
+		foreach (var (tag, nextIfdOffset) in new (ushort, uint)[] { (0x8827, 26), (0x9003, 0) })
+		{
+			writer.Write((ushort)1);
+			writer.Write(tag);
+			writer.Write((ushort)IfdEntryType.UInt16);
+			writer.Write(1u);
+			writer.Write(100u);
+			writer.Write(nextIfdOffset);
+		}
+
+		// read entries
+		stream.Position = 0;
+		var reader = firstIfdName is not null ? new IfdEntryReader(stream, firstIfdName) : new IfdEntryReader(stream);
+		var expectedName = firstIfdName ?? IfdNames.Default;
+		foreach (var (tag, ifdIndex) in new (ushort, int)[] { (0x8827, 0), (0x9003, 1) })
+		{
+			Assert.That(reader.Read(), Is.True);
+			Assert.That((reader.CurrentEntryId, reader.CurrentIfdName, reader.CurrentIfdIndex), Is.EqualTo((tag, expectedName, ifdIndex)), $"Entry {tag:x4} should belong to IFD {ifdIndex} of '{expectedName}'.");
+		}
+		Assert.That(reader.Read(), Is.False);
+	}
 }

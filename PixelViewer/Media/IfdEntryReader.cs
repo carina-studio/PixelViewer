@@ -30,7 +30,17 @@ namespace Carina.PixelViewer.Media
         /// Initialize new <see cref="IfdEntryReader"/> instance.
         /// </summary>
         /// <param name="stream">Seekable <see cref="Stream"/> to read IFD entries from.</param>
-        public IfdEntryReader(Stream stream)
+        public IfdEntryReader(Stream stream) : this(stream, IfdNames.Default)
+        { }
+
+
+        /// <summary>
+        /// Initialize new <see cref="IfdEntryReader"/> instance whose first IFD is of given name.
+        /// </summary>
+        /// <param name="stream">Seekable <see cref="Stream"/> to read IFD entries from.</param>
+        /// <param name="firstIfdName">Name of the first IFD, which the IFDs chained after it take too.</param>
+        /// <remarks>The name is for the TIFF-based data whose first IFD is not IFD 0, such as the Exif IFD kept as TIFF data of its own.</remarks>
+        public IfdEntryReader(Stream stream, string firstIfdName)
         {
             // check stream
             if (!stream.CanSeek)
@@ -68,7 +78,7 @@ namespace Carina.PixelViewer.Media
                 throw new ArgumentException($"Invalid offset to first IFD: {offset}.");
 
             // prepare to read first IFD
-            this.EnqueueIfdToRead(this.InitialStreamPosition + offset, IfdNames.Default);
+            this.EnqueueIfdToRead(this.InitialStreamPosition + offset, firstIfdName);
         }
 
 
