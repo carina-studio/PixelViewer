@@ -140,6 +140,7 @@
 	<sys:String x:Key="String/FileType.All">All Files</sys:String>
 	<sys:String x:Key="String/FileType.Bmp">Windows Bitmap</sys:String>
 	<sys:String x:Key="String/FileType.Cr2">Canon RAW Format v2 (CR2)</sys:String>
+	<sys:String x:Key="String/FileType.Cr3">Canon RAW Format v3 (CR3)</sys:String>
 	<sys:String x:Key="String/FileType.Dng">Digital Negative (DNG)</sys:String>
 	<sys:String x:Key="String/FileType.Heif">High Efficiency Image File Format (HEIF)</sys:String>
 	<sys:String x:Key="String/FileType.Icc">ICC Color Profile</sys:String>

@@ -14,6 +14,10 @@ enum ImageDataCompression
 	/// </summary>
 	Cr2,
 	/// <summary>
+	/// Data of CR3 by Canon compressed by CRX.
+	/// </summary>
+	Cr3,
+	/// <summary>
 	/// Lossless JPEG (ITU-T T.81 process 14).
 	/// </summary>
 	LosslessJpeg,

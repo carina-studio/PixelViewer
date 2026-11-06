@@ -16,6 +16,7 @@ static class FileFormats
     static volatile FileFormat? arw;
     static volatile FileFormat? bmp;
     static volatile FileFormat? cr2;
+    static volatile FileFormat? cr3;
     static volatile FileFormat? dng;
     static readonly ISet<FileFormat> emptyFormats = new HashSet<FileFormat>().AsReadOnly();
     static readonly Dictionary<string, ISet<FileFormat>> formatsByExtensions = new(PathEqualityComparer.Default);
@@ -46,6 +47,12 @@ static class FileFormats
     /// Canon RAW v2.
     /// </summary>
     public static FileFormat Cr2 => cr2 ?? throw new InvalidOperationException("File format is not ready yet.");
+
+
+    /// <summary>
+    /// Canon RAW v3.
+    /// </summary>
+    public static FileFormat Cr3 => cr3 ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
     /// <summary>
@@ -86,6 +93,7 @@ static class FileFormats
         arw = Register(new FileFormat(app, "Arw", [ ".arw" ]));
         bmp = Register(new FileFormat(app, "Bmp", [ ".bmp" ]));
         cr2 = Register(new FileFormat(app, "Cr2", [ ".cr2" ]));
+        cr3 = Register(new FileFormat(app, "Cr3", [ ".cr3" ]));
         dng = Register(new FileFormat(app, "Dng", [ ".dng" ]));
         heif = Register(new FileFormat(app, "Heif", [ ".heif", ".heic" ]));
         jpeg = Register(new FileFormat(app, "Jpeg", [ ".jpg", ".jpeg", ".jpe", ".jfif" ]));
