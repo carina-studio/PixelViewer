@@ -26,6 +26,7 @@ static class ColorLut
 
     // Constants.
     const double ArctanTransformationSensitivity = 0.5;
+    internal const double BrightnessShoulderKnee = 0.8;
     const int LutCacheSize = 8;
 
 
@@ -100,21 +101,41 @@ static class ColorLut
     /// <summary>
     /// Transform brightness.
     /// </summary>
-    /// <param name="histograms">Histograms of original image.</param>
     /// <param name="lut">LUT.</param>
-    /// <param name="targetEv">Target brightness in EV.</param>
+    /// <param name="ev">Brightness to apply in EV.</param>
+    /// <param name="toLinear">Function to transfer normalized color in the LUT to linear color, or Null if color in the LUT is linear.</param>
+    /// <param name="fromLinear">Function to transfer normalized linear color back to color in the LUT, or Null if color in the LUT is linear.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task of transformation.</returns>
-    public static async Task BrightnessTransformAsync(BitmapHistograms histograms, IList<double> lut, double targetEv, CancellationToken cancellationToken = default)
+    /// <remarks>The linear color is scaled by 2^EV. A positive EV compresses the linear colors above <see cref="BrightnessShoulderKnee"/> towards 1 instead of clipping them. The transfer functions are used only when both of them are defined, and <paramref name="fromLinear"/> should be the inverse of <paramref name="toLinear"/>.</remarks>
+    public static Task BrightnessTransformAsync(IList<double> lut, double ev, Func<double, double>? toLinear, Func<double, double>? fromLinear, CancellationToken cancellationToken = default)
     {
         // check parameter
-        if (Math.Abs(targetEv) < 0.01)
-            return;
+        if (!double.IsFinite(ev))
+            throw new ArgumentException();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Math.Abs(ev) < 0.01)
+            return Task.CompletedTask;
+
+        // prepare
+        if (toLinear is null || fromLinear is null)
+        {
+            toLinear = static it => it;
+            fromLinear = static it => it;
+        }
+        var gain = Math.Pow(2, ev);
+        var maxColor = lut.Count - 1.0;
+        var shoulderRange = 1 - BrightnessShoulderKnee;
 
         // apply
-        var intensity = await SelectArctanIntensityForBrightnessAsync(histograms, targetEv, cancellationToken);
-        if (double.IsFinite(intensity))
-            ArctanTransform(lut, intensity);
+        for (var i = lut.Count - 1; i >= 0; --i)
+        {
+            var color = toLinear(lut[i] / maxColor) * gain;
+            if (ev > 0 && color > BrightnessShoulderKnee)
+                color = 1 - shoulderRange * Math.Exp(-(color - BrightnessShoulderKnee) / shoulderRange);
+            lut[i] = fromLinear(color) * maxColor;
+        }
+        return Task.CompletedTask;
     }
 
 
@@ -311,73 +332,6 @@ static class ColorLut
         for (var n = lut.Count - 1; n >= 0; --n)
             lut[n] = n;
     }
-
-
-    /// <summary>
-    /// Select intensity of arctangen transformation for brightness adjustment by given EV.
-    /// </summary>
-    /// <param name="histograms">Histograms of original image.</param>
-    /// <param name="ev">EV.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>Selected intensity.</returns>
-    public static Task<double> SelectArctanIntensityForBrightnessAsync(BitmapHistograms histograms, double ev, CancellationToken cancellationToken = default) => Task.Run(() =>
-    {
-        // check parameter
-        if (Math.Abs(ev) < 0.001)
-            return 0;
-        
-        // calculate original luminance
-        var colorCount = histograms.ColorCount;
-        var pixelCount = histograms.EffectivePixelCount;
-        var maxColor = (colorCount - 1.0);
-        if (maxColor <= 0.01)
-            return double.NaN;
-        var histogram = histograms.Luminance;
-        var originalLuminance = 0.0;
-        for (var i = colorCount - 1; i >= 0; --i)
-            originalLuminance += (i / maxColor) * histogram[i] / pixelCount;
-        
-        // find target intensity
-        var targetLuminance = originalLuminance * Math.Pow(2, ev);
-        var min = 0.0;
-        var max = 0.0;
-        if (ev >= 0)
-            max = 1000;
-        else
-            min = -1000;
-        while (Math.Abs(max - min) >= 0.01)
-        {
-            var intensity = (min + max) / 2;
-            var luminance = 0.0;
-            if (intensity >= 0)
-            {
-                var expoIntensity = Math.Pow(intensity, ArctanTransformationSensitivity);
-                var coeff = 1 / Math.Atan(expoIntensity);
-                for (var i = colorCount - 1; i >= 0; --i)
-                {
-                    var color = i / maxColor;
-                    luminance += (Math.Atan(expoIntensity * color) * coeff) * histogram[i] / pixelCount;
-                }
-            }
-            else
-            {
-                var expoIntensity = Math.Pow(-intensity, ArctanTransformationSensitivity);
-                var coeff = -1 / Math.Atan(-expoIntensity);
-                for (var i = colorCount - 1; i >= 0; --i)
-                {
-                    var color = i / maxColor;
-                    luminance += (Math.Atan(expoIntensity * (color - 1)) * coeff + 1) * histogram[i] / pixelCount;
-                }
-            }
-            if (Math.Abs(luminance - targetLuminance) <= 0.01)
-                return intensity;
-            if (luminance < targetLuminance)
-                min = intensity;
-            else
-                max = intensity;
-        }
-        return min;
-    }, cancellationToken);
 
 
     /// <summary>

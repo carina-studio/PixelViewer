@@ -2768,6 +2768,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		CancellationTokenSource cancellationTokenSource = new();
 		this.imageFilteringCancellationTokenSource = cancellationTokenSource;
 		this.canSaveFilteredImage.Update(false);
+		var isColorSpaceConverted = renderedImageFrame == this.colorSpaceConvertedImageFrame;
 
 		// check filters needed
 		var filterCount = 0;
@@ -2982,12 +2983,29 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			// prepare LUT
 			var lut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
-			var histograms = renderedImageFrame.Histograms.AsNonNull();
 			try
 			{
 				stopwatch?.Restart();
 				if (this.canResetBrightnessAdjustment.Value)
-					await ColorLut.BrightnessTransformAsync(histograms, lut, this.BrightnessAdjustment, cancellationTokenSource.Token);
+				{
+					// get transfer functions of colors of the frame
+					Func<double, double>? toLinear;
+					Func<double, double>? fromLinear;
+					if (isColorSpaceConverted)
+					{
+						var colorSpace = renderedImageFrame.BitmapBuffer.ColorSpace;
+						toLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferToLinear;
+						fromLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferFromLinear;
+					}
+					else
+					{
+						toLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncToLinear;
+						fromLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncFromLinear;
+					}
+
+					// transform brightness
+					await ColorLut.BrightnessTransformAsync(lut, this.BrightnessAdjustment, toLinear, fromLinear, cancellationTokenSource.Token);
+				}
 				if (this.canResetContrastAdjustment.Value)
 					await ColorLut.ContrastTransformAsync(lut, this.ContrastAdjustment, cancellationTokenSource.Token);
 				if (this.canResetHighlightAdjustment.Value)
