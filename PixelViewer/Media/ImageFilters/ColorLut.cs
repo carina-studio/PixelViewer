@@ -27,10 +27,11 @@ static class ColorLut
     // Constants.
     const double ArctanTransformationSensitivity = 0.5;
     internal const double BrightnessShoulderKnee = 0.8;
-    internal const double HighlightMaxEv = 1.5;
-    internal const double HighlightPivot = 0.1;
+    internal const double ContrastStrength = 8;
+    internal const double HighlightMaxEv = 2;
+    internal const double HighlightPivot = 0.05;
     internal const double HighlightRampStops = 0.5;
-    internal const double HighlightStrength = 0.75;
+    internal const double HighlightStrength = 1;
     const int LutCacheSize = 8;
     internal const double ShadowMaxEv = 2.5;
     internal const double ShadowPivot = 0.5;
@@ -166,8 +167,8 @@ static class ColorLut
             intensity = 1;
 
         // apply
-        ArctanTransform(lut, 0, lut.Count / 2, intensity * -20);
-        ArctanTransform(lut, lut.Count / 2, lut.Count, intensity * 20);
+        ArctanTransform(lut, 0, lut.Count / 2, intensity * -ContrastStrength);
+        ArctanTransform(lut, lut.Count / 2, lut.Count, intensity * ContrastStrength);
         return Task.CompletedTask;
     }
 
@@ -181,7 +182,7 @@ static class ColorLut
     /// <param name="fromLinear">Function to transfer normalized linear color back to color in the LUT, or Null if color in the LUT is linear.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task of applying transformation.</returns>
-    /// <remarks>The distance from linear color to white is scaled by 2^(-intensity × <see cref="HighlightStrength"/> × g(u)), where u is the number of stops by which the distance is below the distance of <see cref="HighlightPivot"/> to white, and g(u) rises quadratically over the first <see cref="HighlightRampStops"/> stops and linearly beyond, so that the slope of the curve is continuous and the local contrast in log2 space is kept at 1 - <see cref="HighlightStrength"/> at least. The exponent e = <see cref="HighlightStrength"/> × g(u) is then capped smoothly as <see cref="HighlightMaxEv"/> × (1 - exp(-e / <see cref="HighlightMaxEv"/>)), which bounds the slope of the curve next to white by 2^<see cref="HighlightMaxEv"/>. Colors at and below <see cref="HighlightPivot"/> and white are kept. The transfer functions are used only when both of them are defined, and <paramref name="fromLinear"/> should be the inverse of <paramref name="toLinear"/>.</remarks>
+    /// <remarks>The distance from linear color to white is scaled by 2^(-intensity × <see cref="HighlightStrength"/> × g(u)), where u is the number of stops by which the distance is below the distance of <see cref="HighlightPivot"/> to white, and g(u) rises quadratically over the first <see cref="HighlightRampStops"/> stops and linearly beyond, so that the slope of the curve is continuous. The exponent e = <see cref="HighlightStrength"/> × g(u) is then capped smoothly as <see cref="HighlightMaxEv"/> × (1 - exp(-e / <see cref="HighlightMaxEv"/>)), which bounds the slope of the curve next to white by 2^<see cref="HighlightMaxEv"/> and keeps the local contrast in log2 space at 1 - <see cref="HighlightStrength"/> × exp(-<see cref="HighlightStrength"/> × <see cref="HighlightRampStops"/> / (2 × <see cref="HighlightMaxEv"/>)) at least. Colors at and below <see cref="HighlightPivot"/> and white are kept. The transfer functions are used only when both of them are defined, and <paramref name="fromLinear"/> should be the inverse of <paramref name="toLinear"/>.</remarks>
     public static Task HighlightTransformAsync(IList<double> lut, double intensity, Func<double, double>? toLinear, Func<double, double>? fromLinear, CancellationToken cancellationToken = default)
     {
         // check parameter
