@@ -626,23 +626,14 @@
 					</StackPanel>
 				</asControls:ToolBarScrollViewer>
 			</Border>
-			<Border Classes="Toolbar" BorderBrush="{DynamicResource Brush/Toolbar.Border}" BorderThickness="0,0,0,1" Grid.Column="1">
-				
+			<Border Classes="Toolbar"
+			        BorderBrush="{DynamicResource Brush/Toolbar.Border}"
+			        BorderThickness="0,0,0,1"
+			        Grid.Column="1"
+			        IsVisible="{Binding #otherActionsButton.IsVisible}">
+
 				<!-- Other actions -->
 				<StackPanel Orientation="Horizontal">
-
-					<!-- Test -->
-					<Button Name="testButton" Command="{Binding #root.OnTestButtonClick}" IsVisible="False" asControls:ToolbarElement.Role="Button">
-						<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Lab}"/>
-					</Button>
-
-					<!-- Rendering params panel -->
-					<ToggleButton IsChecked="{Binding IsRenderingParametersPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderingParametersPanel}">
-						<Panel>
-							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
-							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
-						</Panel>
-					</ToggleButton>
 
 					<!-- Other actions -->
 					<ToggleButton Name="otherActionsButton" Command="{Binding #root.ShowOtherActions}" IsVisible="{x:Static c:Platform.IsNotMacOS}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.OtherActions}">
@@ -668,6 +659,7 @@
 				<ColumnDefinition Width="*"/>
 				<ColumnDefinition Width="Auto"/>
 				<ColumnDefinition MaxWidth="{x:Static appViewModels:Session.MaxRenderingParametersPanelSize}" Width="0"/>
+				<ColumnDefinition Width="Auto"/>
 			</Grid.ColumnDefinitions>
 
 			<!-- Histograms -->
@@ -935,13 +927,15 @@
 			        IsHitTestVisible="false"
 			        Margin="{Binding #root.ImageViewerShadowsMargin}"/>
 
-			<!-- Rendering parameters panel -->
-			<Border Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="4" IsVisible="{Binding IsRenderingParametersPanelVisible}">
-				<DockPanel IsEnabled="{Binding IsSourceOpened}">
+			<!-- Side panel -->
+			<Panel Name="sidePanelContainer" Background="{DynamicResource Brush/WorkingArea.Panel.Background}" Grid.Column="4" IsVisible="{Binding IsRenderingParametersPanelVisible}">
+
+				<!-- Rendering parameters panel -->
+				<DockPanel IsEnabled="{Binding IsSourceOpened}" IsVisible="{Binding IsRenderingParametersPanelVisible}">
 
 					<!-- Resources -->
 					<DockPanel.Resources>
-						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.OptionsPanel.Separator.Height.Small"/>
+						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.SidePanel.Separator.Height.Small"/>
 					</DockPanel.Resources>
 
 					<!-- Styles -->
@@ -952,7 +946,7 @@
 					</DockPanel.Styles>
 
 					<!-- Profile -->
-					<Border Classes="SessionControl_OptionsPanel_ProfilePanel" DockPanel.Dock="Top">
+					<Border Classes="SessionControl_SidePanel_ProfilePanel" DockPanel.Dock="Top">
 						<ComboBox Classes="Dialog_ComboBox" ItemsSource="{Binding Profiles}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding Profile, Mode=TwoWay}" ToolTip.Tip="{asXaml:StringResource SessionControl.Profile}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
@@ -976,7 +970,7 @@
 					</Border>
 
 					<!-- Profile actions -->
-					<Border Classes="SessionControl_OptionsPanel_ActionsPanel" DockPanel.Dock="Bottom">
+					<Border Classes="SessionControl_SidePanel_ActionsPanel" DockPanel.Dock="Bottom">
 						<Grid ColumnDefinitions="Auto,*,Auto,Auto">
 
 							<!-- Apply profile -->
@@ -999,14 +993,14 @@
 
 					<!-- Parameters -->
 					<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
-						<StackPanel Margin="{StaticResource Thickness/SessionControl.OptionsPanel.Padding}">
+						<StackPanel Margin="{StaticResource Thickness/SessionControl.SidePanel.Padding}">
 
 							<!-- Format -->
-							<Expander Name="formatParamsExpander" Classes="SessionControl_OptionsPanel_Expander">
+							<Expander Name="formatParamsExpander" Classes="SessionControl_SidePanel_Expander">
 								<Expander.Header>
 									<Grid ColumnDefinitions="Auto,*">
 										<TextBlock Text="{asXaml:StringResource SessionControl.RenderingParametersPanel.Format}" VerticalAlignment="Center"/>
-										<TextBlock Classes="SessionControl_OptionsPanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}" Text="{Binding ImageRenderer.Format.DisplayName}"/>
+										<TextBlock Classes="SessionControl_SidePanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}" Text="{Binding ImageRenderer.Format.DisplayName}"/>
 									</Grid>
 								</Expander.Header>
 								<StackPanel>
@@ -1014,7 +1008,7 @@
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.DataOffset}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBlock" IsNullValueAllowed="False" Minimum="0" Value="{Binding DataOffset, Mode=TwoWay}">
 										<abControls:IntegerTextBox.InnerRightContent>
-											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+											<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
@@ -1024,7 +1018,7 @@
 										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.FramePaddingSize}"/>
 										<abControls:IntegerTextBox Classes="Dialog_TextBlock" Minimum="0" Value="{Binding FramePaddingSize, Mode=TwoWay}">
 											<abControls:IntegerTextBox.InnerRightContent>
-												<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+												<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 											</abControls:IntegerTextBox.InnerRightContent>
 										</abControls:IntegerTextBox>
 										<Separator asControls:DialogElement.SeparatorType="Small"/>
@@ -1081,7 +1075,7 @@
 									</StackPanel>
 
 									<!-- Demosaicing -->
-									<Grid Classes="SessionControl_OptionsPanel_SwitchItem" ColumnDefinitions="*,Auto" IsVisible="{Binding IsDemosaicingSupported}">
+									<Grid Classes="SessionControl_SidePanel_SwitchItem" ColumnDefinitions="*,Auto" IsVisible="{Binding IsDemosaicingSupported}">
 										<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.Demosaicing}" VerticalAlignment="Center"/>
 										<ToggleSwitch Grid.Column="1" IsChecked="{Binding Demosaicing, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
 									</Grid>
@@ -1090,11 +1084,11 @@
 							</Expander>
 
 							<!-- Dimensions -->
-							<Expander Name="dimensionsParamsExpander" Classes="SessionControl_OptionsPanel_Expander">
+							<Expander Name="dimensionsParamsExpander" Classes="SessionControl_SidePanel_Expander">
 								<Expander.Header>
 									<Grid ColumnDefinitions="Auto,*">
 										<TextBlock Text="{asXaml:StringResource SessionControl.RenderingParametersPanel.Dimensions}" VerticalAlignment="Center"/>
-										<TextBlock Classes="SessionControl_OptionsPanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}">
+										<TextBlock Classes="SessionControl_SidePanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}">
 											<TextBlock.Text>
 												<MultiBinding StringFormat="{}{0} × {1}">
 													<Binding Path="ImageWidth"/>
@@ -1140,7 +1134,7 @@
 									</Grid>
 									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
 									<ToggleButton Name="evaluateImageDimensionsButton" 
-									              Classes="SessionControl_OptionsPanel_ToggleButton" 
+									              Classes="SessionControl_SidePanel_ToggleButton" 
 									              Command="{Binding #root.ShowEvaluateImageDimensionsMenuCommand}" 
 									              IsVisible="{Binding !IsCompressedImageFormat}">
 										<Grid ColumnDefinitions="*,Auto">
@@ -1194,14 +1188,14 @@
 							</Expander>
 
 							<!-- Plane options #1 -->
-							<Expander Name="plane1ParamsExpander" Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.1}" IsVisible="{Binding HasImagePlane1}">
+							<Expander Name="plane1ParamsExpander" Classes="SessionControl_SidePanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.1}" IsVisible="{Binding HasImagePlane1}">
 								<StackPanel>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
 									<Panel>
 										<abControls:IntegerTextBox Name="rowStride1TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride1, Mode=TwoWay}">
 											<abControls:IntegerTextBox.InnerRightContent>
 												<StackPanel Orientation="Horizontal">
-													<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+													<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 													<Panel Classes="TextBox_InPlaceActions">
 														<ToggleButton Name="alignRowStride1Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride1TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
 															<Panel>
@@ -1218,7 +1212,7 @@
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride1}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride1}" Value="{Binding PixelStride1, Mode=TwoWay}">
 										<abControls:IntegerTextBox.InnerRightContent>
-											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+											<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits1}"/>
@@ -1238,14 +1232,14 @@
 							</Expander>
 
 							<!-- Plane options #2 -->
-							<Expander Name="plane2ParamsExpander" Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.2}" IsVisible="{Binding HasImagePlane2}">
+							<Expander Name="plane2ParamsExpander" Classes="SessionControl_SidePanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.2}" IsVisible="{Binding HasImagePlane2}">
 								<StackPanel>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
 									<Panel>
 										<abControls:IntegerTextBox Name="rowStride2TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride2, Mode=TwoWay}">
 											<abControls:IntegerTextBox.InnerRightContent>
 												<StackPanel Orientation="Horizontal">
-													<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+													<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 													<Panel Classes="TextBox_InPlaceActions">
 														<ToggleButton Name="alignRowStride2Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride2TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
 															<Panel>
@@ -1262,7 +1256,7 @@
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride2}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride2}" Value="{Binding PixelStride2, Mode=TwoWay}">
 										<abControls:IntegerTextBox.InnerRightContent>
-											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+											<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits2}"/>
@@ -1282,14 +1276,14 @@
 							</Expander>
 
 							<!-- Plane options #3 -->
-							<Expander Name="plane3ParamsExpander" Classes="SessionControl_OptionsPanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.3}" IsVisible="{Binding HasImagePlane3}">
+							<Expander Name="plane3ParamsExpander" Classes="SessionControl_SidePanel_Expander" Header="{asXaml:StringResource SessionControl.ImagePlaneOptions.3}" IsVisible="{Binding HasImagePlane3}">
 								<StackPanel>
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.RowStride}"/>
 									<Panel>
 										<abControls:IntegerTextBox Name="rowStride3TextBox" Classes="Dialog_TextBox" IsNullValueAllowed="False" Value="{Binding RowStride3, Mode=TwoWay}">
 											<abControls:IntegerTextBox.InnerRightContent>
 												<StackPanel Orientation="Horizontal">
-													<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+													<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 													<Panel Classes="TextBox_InPlaceActions">
 														<ToggleButton Name="alignRowStride3Button" Classes="TextBox_InPlaceAction" Command="{Binding #root.ShowAlignToIntegerMenu}" CommandParameter="{Binding $self}" HorizontalAlignment="Right" Tag="{Binding #rowStride3TextBox}" ToolTip.Tip="{asXaml:StringResource SessionControl.AlignToInteger}" VerticalAlignment="Center">
 															<Panel>
@@ -1306,7 +1300,7 @@
 									<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" IsVisible="{Binding IsAdjustablePixelStride3}" Text="{asXaml:StringResource SessionControl.PixelStride}"/>
 									<abControls:IntegerTextBox Classes="Dialog_TextBox" IsNullValueAllowed="False" IsVisible="{Binding IsAdjustablePixelStride3}" Value="{Binding PixelStride3, Mode=TwoWay}">
 										<abControls:IntegerTextBox.InnerRightContent>
-											<TextBlock Classes="SessionControl_OptionsPanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
+											<TextBlock Classes="SessionControl_SidePanel_Unit" Text="{asXaml:StringResource Common.Bytes}"/>
 										</abControls:IntegerTextBox.InnerRightContent>
 									</abControls:IntegerTextBox>
 									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding IsAdjustableEffectiveBits3}"/>
@@ -1326,11 +1320,11 @@
 							</Expander>
 
 							<!-- Color -->
-							<Expander Name="colorParamsExpander" Classes="SessionControl_OptionsPanel_Expander">
+							<Expander Name="colorParamsExpander" Classes="SessionControl_SidePanel_Expander">
 								<Expander.Header>
 									<Grid ColumnDefinitions="Auto,*">
 										<TextBlock Text="{asXaml:StringResource SessionControl.RenderingParametersPanel.Color}" VerticalAlignment="Center"/>
-										<TextBlock Classes="SessionControl_OptionsPanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}" Text="{Binding ColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
+										<TextBlock Classes="SessionControl_SidePanel_Expander_Summary" Grid.Column="1" IsVisible="{Binding !$parent[Expander].IsExpanded}" Text="{Binding ColorSpace, Converter={x:Static appConverters:ColorSpaceToStringConverter.Default}}"/>
 									</Grid>
 								</Expander.Header>
 								<StackPanel>
@@ -1384,12 +1378,12 @@
 														</DataTemplate>
 													</ComboBox.ItemTemplate>
 												</ComboBox>
-												<Button Classes="SessionControl_OptionsPanel_InlineButton" Command="{Binding #root.ShowColorSpaceInfo}" Grid.Column="1" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Details}">
+												<Button Classes="SessionControl_SidePanel_InlineButton" Command="{Binding #root.ShowColorSpaceInfo}" Grid.Column="1" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource Common.Details}">
 													<Image asControls:ToolbarElement.Role="SmallIcon" Source="{DynamicResource Image/Icon.Information.Outline}"/>
 												</Button>
 											</Grid>
 											<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding !ColorSpace.IsLinear}"/>
-											<Grid Classes="SessionControl_OptionsPanel_SwitchItem" ColumnDefinitions="*,Auto" IsVisible="{Binding !ColorSpace.IsLinear}">
+											<Grid Classes="SessionControl_SidePanel_SwitchItem" ColumnDefinitions="*,Auto" IsVisible="{Binding !ColorSpace.IsLinear}">
 												<TextBlock asControls:DialogElement.TextRole="LabelAboveInputControl" Text="{asXaml:StringResource SessionControl.UseLinearColorSpace}" VerticalAlignment="Center"/>
 												<ToggleSwitch Grid.Column="1" IsChecked="{Binding UseLinearColorSpace, Mode=TwoWay}" asControls:DialogElement.IsDialogItemInput="True"/>
 											</Grid>
@@ -1432,9 +1426,9 @@
 										                              Minimum="{x:Static appControls:SessionControl.MinRgbGain}" 
 										                              Value="{Binding BlueColorGain, Mode=TwoWay}"/>
 										<Separator asControls:DialogElement.SeparatorType="Small"/>
-										<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{asXaml:StringResource SessionControl.SelectRgbGain}"/>
+										<Button Classes="SessionControl_SidePanel_Button" Command="{Binding SelectRgbGainCommand}" Content="{asXaml:StringResource SessionControl.SelectRgbGain}"/>
 										<Separator asControls:DialogElement.SeparatorType="Small"/>
-										<Button Classes="SessionControl_OptionsPanel_Button" Command="{Binding ResetRgbGainCommand}" Content="{asXaml:StringResource SessionControl.ResetRgbGain}"/>
+										<Button Classes="SessionControl_SidePanel_Button" Command="{Binding ResetRgbGainCommand}" Content="{asXaml:StringResource SessionControl.ResetRgbGain}"/>
 										<Separator asControls:DialogElement.SeparatorType="Small"/>
 									</StackPanel>
 								</StackPanel>
@@ -1444,18 +1438,39 @@
 					</ScrollViewer>
 
 				</DockPanel>
-			</Border>
+
+			</Panel>
 
 			<!-- Splitter -->
-			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}" 
+			<GridSplitter Background="{DynamicResource Brush/WorkingArea.Panel.Background}"
 			              BorderBrush="{DynamicResource Brush/WorkingArea.Panel.Border}"
 			              BorderThickness="1,0,0,0"
-			              Classes="GridSplitter_Vertical" 
-			              DragCompleted="OnOptionsPanelSplitterDragCompleted" 
-			              DragStarted="OnOptionsPanelSplitterDragStarted"
+			              Classes="GridSplitter_Vertical"
+			              DragCompleted="OnSidePanelSplitterDragCompleted"
+			              DragStarted="OnSidePanelSplitterDragStarted"
 			              Grid.Column="3"
-			              IsVisible="{Binding IsRenderingParametersPanelVisible}"/>
-			
+			              IsVisible="{Binding #sidePanelContainer.IsVisible}"/>
+
+			<!-- Side panel toolbar -->
+			<Border Classes="Toolbar" Background="{DynamicResource Brush/WorkingArea.Panel.Background}" BorderBrush="{DynamicResource Brush/WorkingArea.Panel.Border}" BorderThickness="1,0,0,0" Grid.Column="5">
+				<StackPanel VerticalAlignment="Top">
+
+					<!-- Test -->
+					<Button Name="testButton" Command="{Binding #root.OnTestButtonClick}" IsVisible="False" asControls:ToolbarElement.Role="Button" ToolTip.Tip="Test">
+						<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Lab}"/>
+					</Button>
+
+					<!-- Rendering parameters panel -->
+					<ToggleButton IsChecked="{Binding IsRenderingParametersPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderingParametersPanel}">
+						<Panel>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+						</Panel>
+					</ToggleButton>
+
+				</StackPanel>
+			</Border>
+
 		</Grid>
 
 		<!-- Status bar -->

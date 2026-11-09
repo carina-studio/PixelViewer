@@ -163,7 +163,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Read by OnSessionPropertyChanged to choose the pivot source and skip its own pivot capture/clear.
 	bool isZoomingByGesture;
 	bool keepHistogramsVisible;
-	bool keepRenderingParamsPanelVisible;
+	bool keepSidePanelVisible;
 	PointerEventArgs? latestPointerEventArgsOnImage;
 	readonly double minImageViewerSizeToHidePanels;
 	readonly ToggleButton otherActionsButton;
@@ -171,12 +171,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Image scale at the start of the current pinch gesture; non-null indicates a pinch is in progress.
 	double? pinchInitialScale;
 	readonly HashSet<Key> pressedKeys = new();
-	readonly ColumnDefinition renderingParamsPanelColumn;
 	readonly ScrollViewer renderingParamsPanelScrollViewer;
 	readonly ScheduledAction resetPointerPressedOnBrightnessAdjustmentUIAction;
 	readonly ScheduledAction resetPointerPressedOnColorAdjustmentUIAction;
 	readonly ScheduledAction resetPointerPressedOnContrastAdjustmentUIAction;
 	readonly ScheduledAction showProgressBarAction;
+	readonly ColumnDefinition sidePanelColumn;
 	readonly ScheduledAction stopUsingSmallRenderedImageAction;
 	Vector? targetImageViewportCenter;
 	// Pivot expressed as a fraction of the scrollviewer's content extent — the content point
@@ -478,7 +478,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					session.HistogramsPanelSize = column.Width.Value;
 			}));
 		});
-		this.renderingParamsPanelColumn = workingAreaColumnDefs.Last().Also(column =>
+		this.sidePanelColumn = workingAreaColumnDefs[4].Also(column =>
 		{
 			column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>(_ =>
 			{
@@ -512,18 +512,18 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			if (this.imageViewerGrid.Bounds.Width > this.minImageViewerSizeToHidePanels)
 			{
 				this.keepHistogramsVisible = false;
-				this.keepRenderingParamsPanelVisible = false;
+				this.keepSidePanelVisible = false;
 				return;
 			}
 			if (this.DataContext is not Session session)
 				return;
-			if (session.IsRenderingParametersPanelVisible && !this.keepRenderingParamsPanelVisible)
+			if (session.IsRenderingParametersPanelVisible && !this.keepSidePanelVisible)
 			{
 				session.IsRenderingParametersPanelVisible = false;
 				return;
 			}
 			else
-				this.keepRenderingParamsPanelVisible = false;
+				this.keepSidePanelVisible = false;
 			if (!this.keepHistogramsVisible)
 				session.IsHistogramsVisible = false;
 			else
@@ -649,8 +649,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			var session = this.DataContext as Session;
 			var leftMargin = session?.IsHistogramsVisible == true ? 0 : -100;
-			var rightMargin = session?.IsRenderingParametersPanelVisible == true ? 0 : -100;
-			this.SetValue(ImageViewerShadowsMarginProperty, new(leftMargin, 0, rightMargin, 0));
+			this.SetValue(ImageViewerShadowsMarginProperty, new(leftMargin, 0, 0, 0));
 		});
 		this.updateIsImageViewerScrollableAction = new(() =>
 		{
@@ -1050,17 +1049,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.UpdateCanShowProgressBar();
 
 		// setup panels
-		Grid.SetColumnSpan(this.imageViewerGrid, session.IsRenderingParametersPanelVisible ? 2 : 4);
-		if (session.IsRenderingParametersPanelVisible)
-		{
-			this.renderingParamsPanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
-			this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
-		}
-		else
-		{
-			this.renderingParamsPanelColumn.MinWidth = 0;
-			this.renderingParamsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
-		}
+		this.UpdateSidePanelState(session);
 		if (session.IsHistogramsVisible)
 		{
 			this.histogramsPanelColumn.MinWidth = Session.MinHistogramsPanelSize;
@@ -1167,7 +1156,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	    
 	    // update state
 	    this.keepHistogramsVisible = false;
-	    this.keepRenderingParamsPanelVisible = false;
+	    this.keepSidePanelVisible = false;
 	    this.ReportImageViewportSize();
 	    this.ReportScreenPixelDensity();
 	    this.updateSelectedImageDisplayPixelBoundsAction.Schedule();
@@ -1589,16 +1578,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	}
 
 
-	// Called when complete dragging splitter of options panel.
-	void OnOptionsPanelSplitterDragCompleted(object? sender, VectorEventArgs e) =>
-		this.stopUsingSmallRenderedImageAction.Schedule();
-
-
-	// Called when start dragging splitter of options panel.
-	void OnOptionsPanelSplitterDragStarted(object? sender, VectorEventArgs e) =>
-		this.StartUsingSmallRenderedImage();
-	
-	
 	// Called to handle key down event.
     internal void OnPreviewKeyDown(KeyEventArgs e)
     {
@@ -1980,19 +1959,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				break;
 			case nameof(Session.IsRenderingParametersPanelVisible):
 				if (session.IsRenderingParametersPanelVisible)
-				{
-					Grid.SetColumnSpan(this.imageViewerGrid, 2);
-					this.keepRenderingParamsPanelVisible = true;
-					this.renderingParamsPanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
-					this.renderingParamsPanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
-				}
-				else
-				{
-					Grid.SetColumnSpan(this.imageViewerGrid, 4);
-					this.renderingParamsPanelColumn.MinWidth = 0;
-					this.renderingParamsPanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
-				}
-				this.updateImageViewerShadowMarginAction.Schedule();
+					this.keepSidePanelVisible = true;
+				this.UpdateSidePanelState(session);
 				break;
 			case nameof(Session.IsSourceOpened):
 				this.canShowEvaluateImageDimensionsMenu.Update(session.IsSourceOpened);
@@ -2051,6 +2019,16 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelXyzColor)
 			this.SetValue(ShowSelectedRenderedImagePixelXyzColorProperty, (bool)e.Value);
 	}
+
+
+	// Called when complete dragging splitter of side panel.
+	void OnSidePanelSplitterDragCompleted(object? sender, VectorEventArgs e) =>
+		this.stopUsingSmallRenderedImageAction.Schedule();
+
+
+	// Called when start dragging splitter of side panel.
+	void OnSidePanelSplitterDragStarted(object? sender, VectorEventArgs e) =>
+		this.StartUsingSmallRenderedImage();
 
 
 	/// <summary>
@@ -2798,6 +2776,24 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			this.showProgressBarAction.Cancel();
 			this.SetValue(CanShowProgressBarProperty, false);
+		}
+	}
+
+
+	// Update state of side panel.
+	void UpdateSidePanelState(Session session)
+	{
+		if (session.IsRenderingParametersPanelVisible)
+		{
+			Grid.SetColumnSpan(this.imageViewerGrid, 2);
+			this.sidePanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;
+			this.sidePanelColumn.Width = new GridLength(session.RenderingParametersPanelSize, GridUnitType.Pixel);
+		}
+		else
+		{
+			Grid.SetColumnSpan(this.imageViewerGrid, 4);
+			this.sidePanelColumn.MinWidth = 0;
+			this.sidePanelColumn.Width = new GridLength(0, GridUnitType.Pixel);
 		}
 	}
 
