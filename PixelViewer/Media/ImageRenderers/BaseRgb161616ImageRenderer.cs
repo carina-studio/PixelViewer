@@ -61,9 +61,23 @@ abstract class BaseRgb161616ImageRenderer : SinglePlaneImageRenderer
 		if (pixelStride <= 0 || rowStride <= 0)
 			throw new ArgumentException($"Invalid pixel/row stride: {pixelStride}/{rowStride}.");
 
-		// prepare packing function, the color tables replace the effective bits of the image so each component is read as a whole 16-bit value to index them
+		// prepare extracting components, the color tables replace the effective bits of the image so each component is read as a whole 16-bit value to index them,
+		// otherwise the levels are values of components which are scaled to the full range
 		var hasColorTables = renderingOptions.HasColorTables;
-		var extractComponentFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, hasColorTables ? 16 : planeOptions[0].EffectiveBits);
+		Func<byte, byte, ushort> extractComponentFunc;
+		if (hasColorTables)
+			extractComponentFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, 16);
+		else
+		{
+			var effectiveBits = planeOptions[0].EffectiveBits;
+			var blackLevel = planeOptions[0].BlackLevel.GetValueOrDefault();
+			var whiteLevel = planeOptions[0].WhiteLevel ?? (uint)(1 << effectiveBits) - 1;
+			if (blackLevel >= whiteLevel || whiteLevel >= (1 << effectiveBits))
+				throw new ArgumentException($"Invalid black/white level: {blackLevel}, {whiteLevel}.");
+			extractComponentFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits, blackLevel, whiteLevel);
+		}
+
+		// prepare packing function
 		var packFunc = ImageProcessing.SelectBgra64Packing();
 
 		// build the mapping of each color through its color table, the levels are colors in the color tables instead of values of components
@@ -189,7 +203,7 @@ class Bgr161616ImageRenderer : BaseRgb161616ImageRenderer
 	/// <summary>
 	/// Initialize new <see cref="Bgr161616ImageRenderer"/> instance.
 	/// </summary>
-	public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6, 9, 16), new[]{ "BGR161616", "BGR_161616", "BGR48" }))
+	public Bgr161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "BGR_161616", true, new ImagePlaneDescriptor(6, 9, 16, true), new[]{ "BGR161616", "BGR_161616", "BGR48" }))
 	{ }
 
 
@@ -211,7 +225,7 @@ class Rgb161616ImageRenderer : BaseRgb161616ImageRenderer
 	/// <summary>
 	/// Initialize new <see cref="Rgb161616ImageRenderer"/> instance.
 	/// </summary>
-	public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6, 9, 16), new[]{ "RGB161616", "RGB_161616", "RGB48" }))
+	public Rgb161616ImageRenderer() : base(new ImageFormat(ImageFormatCategory.RGB, "RGB_161616", true, new ImagePlaneDescriptor(6, 9, 16, true), new[]{ "RGB161616", "RGB_161616", "RGB48" }))
 	{ }
 
 

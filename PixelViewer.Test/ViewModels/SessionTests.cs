@@ -213,6 +213,56 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 
 		/// <summary>
+		/// Test for passing the black and white levels carried by a profile of 16-bit RGB to the renderer.
+		/// </summary>
+		[Test]
+		public void TestApplyingLevelsOfRgbProfile()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// open file, its format is unidentifiable so the default profile is kept
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+
+				// apply the profile which carries valid levels
+				ImageRenderers.TryFindByFormatName("RGB_161616", out var renderer);
+				Assert.That(renderer, Is.Not.Null);
+				ImageRenderingProfile CreateProfile(uint blackLevel, uint whiteLevel) => new ImageRenderingProfile("Levels", renderer!).Setup(it =>
+				{
+					it.Width = 8;
+					it.Height = 8;
+					it.EffectiveBits = [ 14, 0, 0, 0 ];
+					it.BlackLevels = [ blackLevel, 0, 0, 0 ];
+					it.WhiteLevels = [ whiteLevel, 0, 0, 0 ];
+					it.PixelStrides = [ 6, 0, 0, 0 ];
+					it.RowStrides = [ 8 * 6, 0, 0, 0 ];
+				});
+				using var profile = CreateProfile(1024, 15000);
+				session.Profile = profile;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering with levels.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering with valid levels failed.");
+				Assert.That(session.AreAdjustableBlackWhiteLevels1, Is.True, "Levels of 16-bit RGB should be adjustable.");
+				Assert.That((session.BlackLevel1, session.WhiteLevel1), Is.EqualTo((1024u, 15000u)), "Levels carried by the profile should be applied.");
+
+				// apply the profile which carries invalid levels, which fails only if the levels reach the renderer
+				using var invalidProfile = CreateProfile(15000, 1024);
+				session.Profile = invalidProfile;
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering with invalid levels.");
+				Assert.That(session.HasRenderingError, Is.True, "Invalid levels should be passed to the renderer and refused by it.");
+
+				// close file
+				session.Profile = ImageRenderingProfile.Default;
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
+				await DeleteFileAsync(filePath);
+			});
+		}
+
+
+		/// <summary>
 		/// Test for applying base exposure and RGB gains of current profile after selecting a renderer which does not apply them.
 		/// </summary>
 		[Test]
