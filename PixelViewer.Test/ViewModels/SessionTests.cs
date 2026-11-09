@@ -822,5 +822,79 @@ namespace Carina.PixelViewer.Test.ViewModels
 				return false;
 			}
 		}
+
+
+		/// <summary>
+		/// Test for reporting the tone curve defined by current profile, and for keeping whether it is applied or not in the saved state.
+		/// </summary>
+		[Test]
+		public void TestToneCurveOfProfile()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// save the state of session as a JSON string
+				static string SaveState(Session session)
+				{
+					using var stream = new MemoryStream();
+					using (var writer = new Utf8JsonWriter(stream))
+						session.SaveState(writer);
+					return Encoding.UTF8.GetString(stream.ToArray());
+				}
+
+				// open file, its format is unidentifiable so the default profile is kept
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// the default profile defines no tone curve
+					Assert.That(session.HasToneCurve, Is.False, "Default profile should define no tone curve.");
+
+					// the tone curve of the profile is reported only while the renderer renders a mosaic or colors of RGB
+					ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+					ImageRenderers.TryFindByFormatName("RGB_161616", out var rgbRenderer);
+					ImageRenderers.TryFindByFormatName("L8", out var luminanceRenderer);
+					Assert.That(renderer, Is.Not.Null);
+					Assert.That(rgbRenderer, Is.Not.Null);
+					Assert.That(luminanceRenderer, Is.Not.Null);
+					using var profile = new ImageRenderingProfile("Tone Curve", renderer.AsNonNull()).Setup(it =>
+					{
+						it.ToneCurve = new ToneCurve([ 0, 0.5, 1 ], [ 0, 0.75, 1 ]);
+					});
+					session.Profile = profile;
+					Assert.That(session.HasToneCurve, Is.True, "Tone curve of the profile should be reported.");
+					session.ImageRenderer = luminanceRenderer;
+					Assert.That(session.HasToneCurve, Is.False, "Tone curve should not be reported for the renderer which renders neither a mosaic nor colors of RGB.");
+					session.ImageRenderer = rgbRenderer;
+					Assert.That(session.HasToneCurve, Is.True, "Tone curve should be reported for the renderer which renders colors of RGB.");
+					session.ImageRenderer = renderer;
+					Assert.That(session.HasToneCurve, Is.True, "Tone curve should be reported again for the renderer which renders a mosaic.");
+					session.Profile = ImageRenderingProfile.Default;
+					Assert.That(session.HasToneCurve, Is.False, "Tone curve should not be reported after selecting the profile which defines none.");
+
+					// whether the tone curve is applied or not is kept in the saved state, it is written only when it is not applied
+					Assert.That(session.ApplyToneCurve, Is.True, "Tone curve should be applied by default.");
+					Assert.That(SaveState(session), Does.Not.Contain($"\"{nameof(Session.ApplyToneCurve)}\""), "Applying tone curve by default should not be written to the saved state.");
+					session.ApplyToneCurve = false;
+					var savedState = SaveState(session);
+					Assert.That(savedState, Does.Contain($"\"{nameof(Session.ApplyToneCurve)}\""), "Not applying tone curve should be written to the saved state.");
+					session.ApplyToneCurve = true;
+					using (var document = JsonDocument.Parse(savedState))
+						await session.RestoreState(document.RootElement);
+					Assert.That(session.ApplyToneCurve, Is.False, "Not applying tone curve should be restored from the saved state.");
+				}
+				finally
+				{
+					// close file
+					session.ApplyToneCurve = true;
+					session.Profile = ImageRenderingProfile.Default;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
+				}
+			});
+		}
 	}
 }

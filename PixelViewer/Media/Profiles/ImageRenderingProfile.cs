@@ -68,6 +68,7 @@ namespace Carina.PixelViewer.Media.Profiles
         PixelInsets sourceInsets = PixelInsets.Empty;
         int tileHeight;
         int tileWidth;
+        ToneCurve? toneCurve;
         bool useLinearColorSpace;
         IList<uint> whiteLevels = emptyBlackLevels;
         int width = 1;
@@ -496,6 +497,7 @@ namespace Carina.PixelViewer.Media.Profiles
                 && this.greenColorTable.IsSameAs(profile.greenColorTable)
                 && this.redColorTable.IsSameAs(profile.redColorTable)
                 && Equals(this.lensShading, profile.lensShading)
+                && Equals(this.toneCurve, profile.toneCurve)
                 && this.Orientation == profile.Orientation
                 && this.FlipX == profile.FlipX
                 && this.FlipY == profile.FlipY
@@ -767,6 +769,15 @@ namespace Carina.PixelViewer.Media.Profiles
                         profile.lensShading = lensShading;
                     else
                         logger?.LogWarning("Unable to load {name} from profile", nameof(LensShading));
+                }
+
+                // tone curve
+                if (rootElement.TryGetProperty(nameof(ToneCurve), out jsonProperty))
+                {
+                    if (ToneCurve.TryLoadFromJson(jsonProperty, out var toneCurve))
+                        profile.toneCurve = toneCurve;
+                    else
+                        logger?.LogWarning("Unable to load {name} from profile", nameof(ToneCurve));
                 }
 
                 // color space
@@ -1139,6 +1150,11 @@ namespace Carina.PixelViewer.Media.Profiles
                     jsonWriter.WritePropertyName(nameof(LensShading));
                     this.lensShading.WriteToJson(jsonWriter);
                 }
+                if (this.toneCurve is not null)
+                {
+                    jsonWriter.WritePropertyName(nameof(ToneCurve));
+                    this.toneCurve.WriteToJson(jsonWriter);
+                }
                 jsonWriter.WriteString(nameof(ColorSpace), this.colorSpace.Name);
                 if (this.useLinearColorSpace)
                     jsonWriter.WriteBoolean(nameof(UseLinearColorSpace), true);
@@ -1246,6 +1262,23 @@ namespace Carina.PixelViewer.Media.Profiles
                     throw new ArgumentOutOfRangeException();
                 this.tileWidth = value;
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TileWidth)));
+            }
+        }
+
+
+        // Tone curve which maps linear colors to linear colors after demosaicing, or Null if there is no curve.
+        public ToneCurve? ToneCurve
+        {
+            get => this.toneCurve;
+            set
+            {
+                this.VerifyAccess();
+                this.VerifyDisposed();
+                this.VerifyDefault();
+                if (Equals(this.toneCurve, value))
+                    return;
+                this.toneCurve = value;
+                this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ToneCurve)));
             }
         }
 

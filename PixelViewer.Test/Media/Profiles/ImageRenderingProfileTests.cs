@@ -74,6 +74,7 @@ class ImageRenderingProfileTests : BaseTests
 		(nameof(ImageRenderingProfile.SourceInsets), profile => profile.SourceInsets = new PixelInsets(profile.SourceInsets.Left + 1, 0, 0, 0)),
 		(nameof(ImageRenderingProfile.TileHeight), profile => profile.TileHeight += 1),
 		(nameof(ImageRenderingProfile.TileWidth), profile => profile.TileWidth += 1),
+		(nameof(ImageRenderingProfile.ToneCurve), profile => profile.ToneCurve = new ToneCurve([ 0, 0.5, 1 ], [ 0, (profile.ToneCurve?.Evaluate(0.5) ?? 0.25) / 2 + 0.25, 1 ])),
 		(nameof(ImageRenderingProfile.UseLinearColorSpace), profile => profile.UseLinearColorSpace = !profile.UseLinearColorSpace),
 		(nameof(ImageRenderingProfile.WhiteLevels), profile => profile.WhiteLevels = IncreaseFirstElement(profile.WhiteLevels)),
 		(nameof(ImageRenderingProfile.Width), profile => profile.Width += 1),
@@ -431,6 +432,63 @@ class ImageRenderingProfileTests : BaseTests
 				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
 				{
 					Assert.That(loadedProfile.SourceInsets.IsEmpty, Is.True, "Invalid insets should be ignored.");
+					Assert.That(loadedProfile.Width, Is.EqualTo(profile.Width), "Other parameters should still be loaded.");
+				}
+			}
+			finally
+			{
+				profile.Dispose();
+				await DeleteFileAsync(fileName);
+			}
+		});
+	}
+
+
+	/// <summary>
+	/// Test for saving and loading tone curve.
+	/// </summary>
+	[Test]
+	public void ToneCurvePersistenceTest()
+	{
+		this.TestOnApplicationThread(async () =>
+		{
+			// save a profile which carries tone curve
+			await this.InitializeSubSystemsAsync();
+			ImageRenderers.TryFindByFormatName("Bayer_Pattern_16", out var renderer);
+			var name = $"Tone Curve Test {Guid.NewGuid()}";
+			var toneCurve = new ToneCurve([ 0, 0.1, 0.5, 1 ], [ 0, 0.2, 0.8, 1 ]);
+			var profile = new ImageRenderingProfile(name, renderer.AsNonNull())
+			{
+				ToneCurve = toneCurve,
+			};
+			await profile.SaveAsync();
+			var fileName = Path.Combine(ImageRenderingProfile.DirectoryPath, $"{WebUtility.UrlEncode(name)}.json");
+			Assert.That(File.Exists(fileName), Is.True, "The profile for testing should have been saved.");
+			try
+			{
+				// check that tone curve is loaded and compared
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
+					Assert.That(loadedProfile.ToneCurve, Is.EqualTo(toneCurve), "Tone curve should be loaded.");
+					Assert.That(loadedProfile.HasSameRenderingParameters(profile), Is.True, "Loaded profile should have same rendering parameters.");
+					loadedProfile.ToneCurve = new ToneCurve([ 0, 0.5, 1 ], [ 0, 0.8, 1 ]);
+					Assert.That(loadedProfile.HasSameRenderingParameters(profile), Is.False, "Profiles with different tone curves should have different rendering parameters.");
+				}
+
+				// check that no tone curve is written, so the file stays the same as one written before it was supported
+				profile.ToneCurve = null;
+				await profile.SaveAsync();
+				var json = await File.ReadAllTextAsync(fileName);
+				Assert.That(json, Does.Not.Contain($"\"{nameof(ImageRenderingProfile.ToneCurve)}\":"), "No tone curve should not be written.");
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+					Assert.That(loadedProfile.ToneCurve, Is.Null, "No tone curve should be loaded.");
+
+				// check that invalid tone curve is ignored when loading
+				var jsonWithInvalidToneCurve = json.Replace($"\"{nameof(ImageRenderingProfile.Width)}\"", $"\"{nameof(ImageRenderingProfile.ToneCurve)}\": {{ \"Inputs\": [ 0, 1 ], \"Outputs\": [ 0, 0.5 ] }}, \"{nameof(ImageRenderingProfile.Width)}\"");
+				await File.WriteAllTextAsync(fileName, jsonWithInvalidToneCurve);
+				using (var loadedProfile = await ImageRenderingProfile.LoadAsync(fileName))
+				{
+					Assert.That(loadedProfile.ToneCurve, Is.Null, "Invalid tone curve should be ignored.");
 					Assert.That(loadedProfile.Width, Is.EqualTo(profile.Width), "Other parameters should still be loaded.");
 				}
 			}

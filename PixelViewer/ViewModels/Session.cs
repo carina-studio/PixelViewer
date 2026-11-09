@@ -314,6 +314,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> ApplyLensShadingProp = ObservableProperty.Register<Session, bool>(nameof(ApplyLensShading), true);
 	/// <summary>
+	/// Property of <see cref="ApplyToneCurve"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> ApplyToneCurveProp = ObservableProperty.Register<Session, bool>(nameof(ApplyToneCurve), true);
+	/// <summary>
 	/// Property of <see cref="AreAdjustableBlackWhiteLevels1"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> AreAdjustableBlackWhiteLevels1Prop = ObservableProperty.Register<Session, bool>(nameof(AreAdjustableBlackWhiteLevels1));
@@ -481,6 +485,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="HasSourceDataSize"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasSourceDataSizeProp = ObservableProperty.Register<Session, bool>(nameof(HasSourceDataSize));
+	/// <summary>
+	/// Property of <see cref="HasToneCurve"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> HasToneCurveProp = ObservableProperty.Register<Session, bool>(nameof(HasToneCurve));
 	/// <summary>
 	/// Property of <see cref="HasVibranceAdjustment"/>.
 	/// </summary>
@@ -1518,6 +1526,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsCompressedImageFormatProp, imageFormatCategory == ImageFormatCategory.Compressed);
 		this.SetValue(IsDemosaicingSupportedProp, isBayerPatternFormat);
 		this.UpdateHasLensShading();
+		this.UpdateHasToneCurve();
 		this.SetValue(IsRgbGainSupportedProp, imageRenderer.IsRgbGainSupported);
 		this.SetValue(IsYuvToBgraConverterSupportedProp, imageFormatCategory == ImageFormatCategory.YUV);
 		this.UpdateHasColorTables();
@@ -1560,6 +1569,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// update state
 		this.UpdateCanSaveDeleteProfile();
 		this.UpdateHasLensShading();
+		this.UpdateHasToneCurve();
 
 		// apply profile
 		if (profile.Type != ImageRenderingProfileType.Default)
@@ -1723,6 +1733,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Command to apply parameters defined by current <see cref="Profile"/>.
 	/// </summary>
 	public ICommand ApplyProfileCommand { get; }
+
+
+	/// <summary>
+	/// Get or set whether the tone curve defined by current <see cref="Profile"/> should be applied or not.
+	/// </summary>
+	public bool ApplyToneCurve
+	{
+		get => this.GetValue(ApplyToneCurveProp);
+		set => this.SetValue(ApplyToneCurveProp, value);
+	}
 
 
 	/// <summary>
@@ -3445,6 +3465,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Check whether <see cref="SourceDataSize"/> is non-zero or not.
 	/// </summary>
 	public bool HasSourceDataSize => this.GetValue(HasSourceDataSizeProp);
+
+
+	/// <summary>
+	/// Check whether current <see cref="Profile"/> defines a tone curve which can be applied for current <see cref="ImageRenderer"/> or not.
+	/// </summary>
+	public bool HasToneCurve => this.GetValue(HasToneCurveProp);
 
 
 	/// <summary>
@@ -6200,6 +6226,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var rowStrides = new int[this.rowStrides.Length];
 		var baseExposure = 0.0;
 		var applyLensShading = true;
+		var applyToneCurve = true;
 		var rGain = 1.0;
 		var gGain = 1.0;
 		var bGain = 1.0;
@@ -6304,6 +6331,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			baseExposure = ImageRenderingOptions.CoerceBaseExposure(baseExposure);
 		if (savedState.TryGetProperty(nameof(ApplyLensShading), out jsonProperty))
 			applyLensShading = jsonProperty.ValueKind != JsonValueKind.False;
+		if (savedState.TryGetProperty(nameof(ApplyToneCurve), out jsonProperty))
+			applyToneCurve = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(RedColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out rGain))
 			rGain = ImageRenderingOptions.GetValidRgbGain(rGain);
 		if (savedState.TryGetProperty(nameof(GreenColorGain), out jsonProperty) && jsonProperty.TryGetDouble(out gGain))
@@ -6451,6 +6480,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.ChangeRowStride(i, rowStrides[i]);
 		this.SetValue(BaseExposureProp, baseExposure);
 		this.SetValue(ApplyLensShadingProp, applyLensShading);
+		this.SetValue(ApplyToneCurveProp, applyToneCurve);
 		this.SetValue(RedColorGainProp, rGain);
 		this.SetValue(GreenColorGainProp, gGain);
 		this.SetValue(BlueColorGainProp, bGain);
@@ -6860,6 +6890,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			writer.WriteNumber(nameof(BaseExposure), this.BaseExposure);
 		if (!this.ApplyLensShading)
 			writer.WriteBoolean(nameof(ApplyLensShading), false);
+		if (!this.ApplyToneCurve)
+			writer.WriteBoolean(nameof(ApplyToneCurve), false);
 		if (this.IsRgbGainSupported)
 		{
 			writer.WriteNumber(nameof(RedColorGain), this.RedColorGain);
@@ -7516,6 +7548,16 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
+	// Update HasToneCurve according to the curve defined by current profile and whether the current renderer renders colors of RGB or a mosaic or not.
+	void UpdateHasToneCurve()
+	{
+		if (this.IsDisposed)
+			return;
+		var imageFormatCategory = this.GetValue(ImageRendererProp)?.Format.Category;
+		this.SetValue(HasToneCurveProp, imageFormatCategory is ImageFormatCategory.Bayer or ImageFormatCategory.RGB && this.Profile.ToneCurve is not null);
+	}
+
+
 	// Update IsAlphaChannelAvailable based on the current renderer's category and (for Compressed) the profile's file format.
 	void UpdateIsAlphaChannelAvailable()
 	{
@@ -7692,6 +7734,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		profile.BlueColorTable = this.blueColorTable;
 		profile.AlphaColorTable = this.alphaColorTable;
 		profile.LensShading = this.Profile.LensShading;
+		profile.ToneCurve = this.Profile.ToneCurve;
 	}
 
 
