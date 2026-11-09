@@ -75,6 +75,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	const int ContrastAdjustmentGroup = 3;
 	const int HidePanelsByImageViewerSizeDelay = 500;
 	const int ShowProgressBarDelay = 100;
+	const int ShowProgressBarDelayForFiltering = 500;
 	const int StopUsingSmallRenderedImageDelay = 800;
 	const int StopUsingSmallRenderedImageDelayFast = 500;
 
@@ -2607,9 +2608,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	{
 		if (this.DataContext is Session session && session.IsProcessingImage)
 		{
-			// delay showing so that short processing, such as rendering each frame when playing frames, doesn't make the progress bar flash
+			// delay showing so that short processing, such as rendering each frame when playing frames, doesn't make the progress bar flash. filtering
+			// waits longer because dragging a slider of adjustment filters the image many times in a row
 			if (!this.GetValue(CanShowProgressBarProperty))
-				this.showProgressBarAction.Schedule(ShowProgressBarDelay);
+				this.showProgressBarAction.Schedule(session.IsFilteringRenderedImage ? ShowProgressBarDelayForFiltering : ShowProgressBarDelay);
 		}
 		else
 		{

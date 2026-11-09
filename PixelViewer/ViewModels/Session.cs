@@ -954,6 +954,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly MutableObservableBoolean canZoomIn = new();
 	readonly MutableObservableBoolean canZoomOut = new();
 	readonly MutableObservableBoolean canZoomTo = new();
+	TaskCompletionSource? colorSpaceConversionCompletionSource;
 	ImageFrame? colorSpaceConvertedImageFrame;
 	readonly SortedObservableList<ColorSpace> colorSpaces = new((lhs, rhs) =>
 	{
@@ -1408,13 +1409,11 @@ class Session : ViewModel<IAppSuiteApplication>
 	Task<ImageFrame?> AllocateFilteredImageFrame(ImageFrame renderedImageFrame) =>
 		this.AllocateRenderingBuffer("filtered image frame", () => ImageFrame.Allocate(this, renderedImageFrame.FrameNumber, renderedImageFrame.BitmapBuffer.Format, renderedImageFrame.BitmapBuffer.ColorSpace, renderedImageFrame.BitmapBuffer.Width, renderedImageFrame.BitmapBuffer.Height), () =>
 		{
-			// dropping the filtered image makes the image flicker while filtering continuously, so it is released only when the cached images are gone
+			// the filtered image is released only when the cached images are gone. the image being displayed is a copy of it, so it is kept to prevent
+			// the image from disappearing while filtering continuously, until the filtering completes and reports the next one
 			if (this.filteredImageFrame is null)
 				return false;
-			this.Logger.LogWarning("Release current filtered images");
-			this.SetValue(HistogramsProp, null);
-			this.SetValue(QuarterSizeRenderedImageProp, null);
-			this.SetValue(RenderedImageProp, null);
+			this.Logger.LogWarning("Release current filtered image");
 			this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			return true;
 		});
@@ -2392,6 +2391,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 
 		// update state, the state is kept until the conversion completes or unwinds so that it is not reported as completed while it is still being cancelled
+		var completionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+		this.colorSpaceConversionCompletionSource = completionSource;
 		this.SetValue(IsConvertingColorSpaceProp, true);
 		try
 		{
@@ -2461,8 +2462,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		}
 		finally
 		{
+			this.colorSpaceConversionCompletionSource = null;
 			if (!this.IsDisposed)
 				this.ResetValue(IsConvertingColorSpaceProp);
+			completionSource.TrySetResult();
 		}
 	}
 
@@ -4264,12 +4267,19 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.filterImageAction.Schedule();
 			else
 			{
-				_ = this.CancelFilteringImageAsync();
+				// report the image without filtering after the filtering being cancelled completes, whose color space conversion would make the
+				// one of reporting fail and the image disappear. the filtering reports the image instead if it is needed again while waiting
+				var cancellationTask = this.CancelFilteringImageAsync();
 				this.SynchronizationContext.Post(async () =>
 				{
+					await cancellationTask;
+					if (this.IsDisposed || this.IsFilteringRenderedImageNeeded)
+						return;
 					using var cancellationTokenSource = new CancellationTokenSource();
 					await this.ReportRenderedImageAsync(cancellationTokenSource);
 				});
+
+				// release the filtered image
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
 			}
 		}
@@ -5758,7 +5768,19 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.Logger.LogTrace("Start reporting rendered image");
 		this.CancelReportingRenderedImage();
 		this.imageReportingCancellationTokenSource = cancellationTokenSource;
-		
+
+		// wait for the color space conversion which is still in progress, such as the one of the reporting being cancelled until it unwinds, which would
+		// make the conversion of this reporting fail and the image disappear. a newer reporting takes over if this one is cancelled while waiting
+		if (this.IsConvertingColorSpace)
+		{
+			await this.WaitForColorSpaceConversionCompletionAsync();
+			if (cancellationTokenSource.IsCancellationRequested)
+			{
+				this.Logger.LogWarning("Reporting rendered image has been cancelled while waiting for color space conversion");
+				return;
+			}
+		}
+
 		// get image frame to be used
 		var imageFrame = Global.Run(() =>
 		{
@@ -7653,8 +7675,13 @@ class Session : ViewModel<IAppSuiteApplication>
 		get => this.GetValue(VibranceAdjustmentProp);
 		set => this.SetValue(VibranceAdjustmentProp, value);
 	}
-	
-	
+
+
+	// Wait for the completion of the color space conversion which is in progress.
+	Task WaitForColorSpaceConversionCompletionAsync() =>
+		this.colorSpaceConversionCompletionSource?.Task ?? Task.CompletedTask;
+
+
 	// Wait for the completion of the image filtering which is in progress.
 	Task WaitForImageFilteringCompletionAsync() =>
 		this.imageFilteringCompletionSource?.Task ?? Task.CompletedTask;
