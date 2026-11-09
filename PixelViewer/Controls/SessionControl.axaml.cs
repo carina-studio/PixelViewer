@@ -74,7 +74,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	const int ColorAdjustmentGroup = 2;
 	const int ContrastAdjustmentGroup = 3;
 	const int HidePanelsByImageViewerSizeDelay = 500;
-	const int ResetPointerPressedOnFilterParamsUIDelay = 1000;
 	const int ShowProgressBarDelay = 100;
 	const int StopUsingSmallRenderedImageDelay = 800;
 	const int StopUsingSmallRenderedImageDelayFast = 500;
@@ -87,6 +86,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly StyledProperty<bool> HideImageViewerScrollBarsAutomaticallyProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(HideImageViewerScrollBarsAutomatically), true);
 	static readonly Dictionary<int, Cursor> ImageDraggingCursors = new();
 	static readonly StyledProperty<Thickness> ImageViewerShadowsMarginProperty = AvaloniaProperty.Register<SessionControl, Thickness>(nameof(ImageViewerShadowsMargin), new Thickness(-100, 0, 0, 0));
+	static readonly SettingKey<bool> IsBrightnessFilterParamsExpandedKey = new("SessionControl.IsBrightnessFilterParamsExpanded", true);
+	static readonly SettingKey<bool> IsColorFilterParamsExpandedKey = new("SessionControl.IsColorFilterParamsExpanded", true);
 	static readonly SettingKey<bool> IsColorParamsExpandedKey = new("SessionControl.IsColorParamsExpanded", true);
 	static readonly SettingKey<bool> IsDimensionsParamsExpandedKey = new("SessionControl.IsDimensionsParamsExpanded", true);
 	static readonly SettingKey<bool> IsFormatParamsExpandedKey = new("SessionControl.IsFormatParamsExpanded", true);
@@ -95,9 +96,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly SettingKey<bool> IsPlane2ParamsExpandedKey = new("SessionControl.IsPlane2ParamsExpanded", true);
 	static readonly SettingKey<bool> IsPlane3ParamsExpandedKey = new("SessionControl.IsPlane3ParamsExpanded", true);
 	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerOverImage));
-	static readonly StyledProperty<bool> IsPointerPressedOnBrightnessAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnBrightnessAdjustmentUI));
-	static readonly StyledProperty<bool> IsPointerPressedOnColorAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnColorAdjustmentUI));
-	static readonly StyledProperty<bool> IsPointerPressedOnContrastAdjustmentUIProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnContrastAdjustmentUI));
 	static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnImage));
 	static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>(nameof(PointerPositionOnImageControl));
 	static readonly StyledProperty<string> SelectedImageDisplayPixelArgbStringProperty = AvaloniaProperty.Register<SessionControl, string>(nameof(SelectedImageDisplayPixelArgbString), "");
@@ -113,9 +111,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ContextMenu alignToIntegerMenu;
 	Screen? attachedScreen;
 	Avalonia.Controls.Window? attachedWindow;
-	readonly ToggleButton brightnessAndContrastAdjustmentButton;
-	readonly Popup brightnessAndContrastAdjustmentPopup;
-	readonly Border brightnessAndContrastAdjustmentPopupBorder;
 	readonly ObservableCommandState<string> canOpenSourceFile = new();
 	readonly ObservableCommandState<object?> canResetBrightnessAdjustment = new();
 	readonly ForwardedObservableBoolean canResetBrightnessAndContrastAdjustment;
@@ -134,9 +129,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ObservableCommandState<object?> canSaveProfile = new();
 	readonly MutableObservableValue<bool> canShowEvaluateImageDimensionsMenu = new();
 	readonly ScheduledAction checkAttachedScreenAction;
-	readonly ToggleButton colorAdjustmentButton;
-	readonly Popup colorAdjustmentPopup;
-	readonly Border colorAdjustmentPopupBorder;
 	readonly ComboBox colorSpaceComboBox;
 	readonly ToggleButton evaluateImageDimensionsButton;
 	readonly ContextMenu evaluateImageDimensionsMenu;
@@ -172,9 +164,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	double? pinchInitialScale;
 	readonly HashSet<Key> pressedKeys = new();
 	readonly ScrollViewer renderingParamsPanelScrollViewer;
-	readonly ScheduledAction resetPointerPressedOnBrightnessAdjustmentUIAction;
-	readonly ScheduledAction resetPointerPressedOnColorAdjustmentUIAction;
-	readonly ScheduledAction resetPointerPressedOnContrastAdjustmentUIAction;
 	readonly ScheduledAction showProgressBarAction;
 	readonly ColumnDefinition sidePanelColumn;
 	readonly ScheduledAction stopUsingSmallRenderedImageAction;
@@ -188,7 +177,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ScheduledAction updateEffectiveRenderedImageAction;
 	readonly ScheduledAction updateEffectiveRenderedImageIntModeAction;
 	readonly ScheduledAction updateImageCursorAction;
-	readonly ScheduledAction updateImageFilterParamsPopupOpacityAction;
 	readonly ScheduledAction updateImageViewerScrollBarsAction;
 	readonly ScheduledAction updateImageViewerShadowMarginAction;
 	readonly ScheduledAction updateIsImageViewerScrollableAction;
@@ -251,7 +239,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		AvaloniaXamlLoader.Load(this);
 
 		// setup controls
-		void SetupFilterParamsSliderAndButtons(string name, int group)
+		void SetupFilterParamsSlider(string name, int group)
 		{
 			var doubleClickedHandler = group switch
 			{
@@ -260,34 +248,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				ContrastAdjustmentGroup => this.OnDoubleClickedOnContrastAdjustmentUI,
 				_ => throw new ArgumentException(),
 			};
-			var pointerPressedHandler = group switch
-			{
-				BrightnessAdjustmentGroup => (EventHandler<PointerPressedEventArgs>)this.OnPointerPressedOnBrightnessAdjustmentUI,
-				ColorAdjustmentGroup => this.OnPointerPressedOnColorAdjustmentUI,
-				ContrastAdjustmentGroup => this.OnPointerPressedOnContrastAdjustmentUI,
-				_ => throw new ArgumentException(),
-			};
-			var pointerReleasedHandler = group switch
-			{
-				BrightnessAdjustmentGroup => (EventHandler<PointerReleasedEventArgs>)this.OnPointerReleasedOnBrightnessAdjustmentUI,
-				ColorAdjustmentGroup => this.OnPointerReleasedOnColorAdjustmentUI,
-				ContrastAdjustmentGroup => this.OnPointerReleasedOnContrastAdjustmentUI,
-				_ => throw new ArgumentException(),
-			};
-			this.Get<Control>($"{name}DecreaseButton").Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
-			});
-			this.Get<Control>($"{name}IncreaseButton").Also(it =>
-			{
-				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
-			});
 			this.Get<Slider>($"{name}Slider").Also(it =>
 			{
-				it.AddHandler(PointerPressedEvent, pointerPressedHandler, RoutingStrategies.Tunnel);
-				it.AddHandler(PointerReleasedEvent, pointerReleasedHandler, RoutingStrategies.Tunnel);
 				it.TemplateApplied += (_, e) =>
 				{
 					e.NameScope.Find<Track>("PART_Track")?.Thumb?.Let(thumb =>
@@ -311,7 +273,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				};
 			});
 		}
-		void SetupRenderingParamsExpander(string name, SettingKey<bool> isExpandedKey)
+		void SetupSidePanelExpander(string name, SettingKey<bool> isExpandedKey)
 		{
 			this.Get<Expander>(name).Also(it =>
 			{
@@ -319,8 +281,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				it.GetObservable(Expander.IsExpandedProperty).Subscribe(isExpanded => this.PersistentState.SetValue(isExpandedKey, isExpanded), skipOnNextDuringSubscription: true);
 			});
 		}
-		SetupFilterParamsSliderAndButtons("blueColorAdjustment", ColorAdjustmentGroup);
-		SetupFilterParamsSliderAndButtons("brightnessAdjustment", BrightnessAdjustmentGroup);
+		SetupFilterParamsSlider("blueColorAdjustment", ColorAdjustmentGroup);
+		SetupFilterParamsSlider("brightnessAdjustment", BrightnessAdjustmentGroup);
+		SetupSidePanelExpander("brightnessFilterParamsExpander", IsBrightnessFilterParamsExpandedKey);
 		this.alignToIntegerMenu = ((ContextMenu)this.Resources[nameof(alignToIntegerMenu)].AsNonNull()).Also(it =>
 		{
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() =>
@@ -337,53 +300,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					toggleButton.IsChecked = true;
 			});
 		});
-		this.brightnessAndContrastAdjustmentButton = this.Get<ToggleButton>(nameof(brightnessAndContrastAdjustmentButton));
-		this.brightnessAndContrastAdjustmentPopup = this.Get<Popup>(nameof(brightnessAndContrastAdjustmentPopup)).Also(it =>
-		{
-			it.PlacementTarget = this.brightnessAndContrastAdjustmentButton;
-			it.Closed += (_, _) => 
-			{
-				this.resetPointerPressedOnBrightnessAdjustmentUIAction?.ExecuteIfScheduled();
-				this.resetPointerPressedOnContrastAdjustmentUIAction?.ExecuteIfScheduled();
-				this.SynchronizationContext.Post(() => this.brightnessAndContrastAdjustmentButton.IsChecked = false);
-			};
-			it.Opened += (_, _) => this.SynchronizationContext.Post(() => 
-			{
-				this.brightnessAndContrastAdjustmentButton.IsChecked = true;
-				this.SynchronizationContext.PostDelayed(() =>
-					ToolTip.SetIsOpen(this.brightnessAndContrastAdjustmentButton, false),
-					100);
-			});
-
-			// [Workaround] Prevent handling pointer event by parent button
-			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
-		});
-		this.brightnessAndContrastAdjustmentPopupBorder = this.Get<Border>(nameof(brightnessAndContrastAdjustmentPopupBorder));
-		this.colorAdjustmentButton = this.Get<ToggleButton>(nameof(colorAdjustmentButton));
-		this.colorAdjustmentPopup = this.Get<Popup>(nameof(colorAdjustmentPopup)).Also(it =>
-		{
-			it.PlacementTarget = this.colorAdjustmentButton;
-			it.Closed += (_, _) => 
-			{
-				this.resetPointerPressedOnColorAdjustmentUIAction?.ExecuteIfScheduled();
-				this.SynchronizationContext.Post(() => this.colorAdjustmentButton.IsChecked = false);
-			};
-			it.Opened += (_, _) => this.SynchronizationContext.Post(() => 
-			{
-				this.colorAdjustmentButton.IsChecked = true;
-				this.SynchronizationContext.PostDelayed(() =>
-					ToolTip.SetIsOpen(this.colorAdjustmentButton, false),
-					100);
-			});
-
-			// [Workaround] Prevent handling pointer event by parent button
-			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
-		});
-		this.colorAdjustmentPopupBorder = this.Get<Border>(nameof(colorAdjustmentPopupBorder));
-		SetupRenderingParamsExpander("colorParamsExpander", IsColorParamsExpandedKey);
+		SetupSidePanelExpander("colorFilterParamsExpander", IsColorFilterParamsExpandedKey);
+		SetupSidePanelExpander("colorParamsExpander", IsColorParamsExpandedKey);
 		this.colorSpaceComboBox = this.Get<ComboBox>(nameof(colorSpaceComboBox));
-		SetupFilterParamsSliderAndButtons("contrastAdjustment", ContrastAdjustmentGroup);
-		SetupRenderingParamsExpander("dimensionsParamsExpander", IsDimensionsParamsExpandedKey);
+		SetupFilterParamsSlider("contrastAdjustment", ContrastAdjustmentGroup);
+		SetupSidePanelExpander("dimensionsParamsExpander", IsDimensionsParamsExpandedKey);
 		this.evaluateImageDimensionsButton = this.Get<ToggleButton>(nameof(this.evaluateImageDimensionsButton));
 		this.evaluateImageDimensionsMenu = ((ContextMenu)this.Resources[nameof(evaluateImageDimensionsMenu)].AsNonNull()).Also(it =>
 		{
@@ -396,7 +317,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 		});
-		SetupRenderingParamsExpander("formatParamsExpander", IsFormatParamsExpandedKey);
+		SetupSidePanelExpander("formatParamsExpander", IsFormatParamsExpandedKey);
 		this.framePlaybackOptionsButton = this.Get<ToggleButton>(nameof(framePlaybackOptionsButton));
 		this.framePlaybackOptionsPopup = this.Get<Popup>(nameof(framePlaybackOptionsPopup)).Also(it =>
 		{
@@ -413,8 +334,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			// [Workaround] Prevent handling pointer event by parent button
 			it.AddHandler(PointerPressedEvent, (_, e) => e.Handled = true);
 		});
-		SetupFilterParamsSliderAndButtons("greenColorAdjustment", ColorAdjustmentGroup);
-		SetupFilterParamsSliderAndButtons("highlightAdjustment", BrightnessAdjustmentGroup);
+		SetupFilterParamsSlider("greenColorAdjustment", ColorAdjustmentGroup);
+		SetupFilterParamsSlider("highlightAdjustment", BrightnessAdjustmentGroup);
 		this.histogramsButton = this.Get<ToggleButton>(nameof(histogramsButton));
 		this.image = this.Get<Image>(nameof(image));
 		this.imageContainerBorder = this.Get<Panel>(nameof(imageContainerBorder)).Also(it =>
@@ -464,11 +385,11 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.otherActionsButton.IsChecked = true);
 		});
-		SetupRenderingParamsExpander("plane1ParamsExpander", IsPlane1ParamsExpandedKey);
-		SetupRenderingParamsExpander("plane2ParamsExpander", IsPlane2ParamsExpandedKey);
-		SetupRenderingParamsExpander("plane3ParamsExpander", IsPlane3ParamsExpandedKey);
-		SetupFilterParamsSliderAndButtons("redColorAdjustment", ColorAdjustmentGroup);
-		SetupFilterParamsSliderAndButtons("saturationAdjustment", ColorAdjustmentGroup);
+		SetupSidePanelExpander("plane1ParamsExpander", IsPlane1ParamsExpandedKey);
+		SetupSidePanelExpander("plane2ParamsExpander", IsPlane2ParamsExpandedKey);
+		SetupSidePanelExpander("plane3ParamsExpander", IsPlane3ParamsExpandedKey);
+		SetupFilterParamsSlider("redColorAdjustment", ColorAdjustmentGroup);
+		SetupFilterParamsSlider("saturationAdjustment", ColorAdjustmentGroup);
 		var workingAreaColumnDefs = this.Get<Grid>("workingAreaGrid").ColumnDefinitions;
 		this.histogramsPanelColumn = workingAreaColumnDefs.First().Also(column =>
 		{
@@ -482,16 +403,19 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		{
 			column.GetObservable(ColumnDefinition.WidthProperty).Subscribe(new Observer<GridLength>(_ =>
 			{
-				if (this.DataContext is Session session && session.IsRenderingParametersPanelVisible)
+				if (this.DataContext is Session session 
+				    && (session.IsFilterPanelVisible || session.IsRenderingParametersPanelVisible))
+				{
 					session.RenderingParametersPanelSize = column.Width.Value;
+				}
 			}));
 		});
 		this.renderingParamsPanelScrollViewer = this.Get<ScrollViewer>(nameof(renderingParamsPanelScrollViewer));
-		SetupFilterParamsSliderAndButtons("shadowAdjustment", BrightnessAdjustmentGroup);
+		SetupFilterParamsSlider("shadowAdjustment", BrightnessAdjustmentGroup);
 #if DEBUG
 		this.Get<Button>("testButton").IsVisible = true;
 #endif
-		SetupFilterParamsSliderAndButtons("vibranceAdjustment", ColorAdjustmentGroup);
+		SetupFilterParamsSlider("vibranceAdjustment", ColorAdjustmentGroup);
 		this.yuvToBgraConverterComboBox = this.Get<ComboBox>(nameof(yuvToBgraConverterComboBox));
 
 		// load resources
@@ -517,8 +441,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			}
 			if (this.DataContext is not Session session)
 				return;
-			if (session.IsRenderingParametersPanelVisible && !this.keepSidePanelVisible)
+			if ((session.IsFilterPanelVisible || session.IsRenderingParametersPanelVisible) && !this.keepSidePanelVisible)
 			{
+				session.IsFilterPanelVisible = false;
 				session.IsRenderingParametersPanelVisible = false;
 				return;
 			}
@@ -529,12 +454,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			else
 				this.keepHistogramsVisible = false;
 		});
-		this.resetPointerPressedOnBrightnessAdjustmentUIAction = new(() =>
-			this.SetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty, false));
-		this.resetPointerPressedOnColorAdjustmentUIAction = new(() =>
-			this.SetValue(IsPointerPressedOnColorAdjustmentUIProperty, false));
-		this.resetPointerPressedOnContrastAdjustmentUIAction = new(() =>
-			this.SetValue(IsPointerPressedOnContrastAdjustmentUIProperty, false));
 		this.showProgressBarAction = new(() =>
 			this.SetValue(CanShowProgressBarProperty, true));
 		this.stopUsingSmallRenderedImageAction = new(() =>
@@ -631,11 +550,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				this.imageCursorType = cursorType;
 				this.image.Cursor = new Cursor(cursorType);
             }
-		});
-		this.updateImageFilterParamsPopupOpacityAction = new(() =>
-		{
-			this.brightnessAndContrastAdjustmentPopupBorder.Opacity = (this.GetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty) || this.GetValue(IsPointerPressedOnContrastAdjustmentUIProperty)) ? 0.5 : 1;
-			this.colorAdjustmentPopupBorder.Opacity = this.GetValue(IsPointerPressedOnColorAdjustmentUIProperty) ? 0.5 : 1;
 		});
 		this.updateImageViewerScrollBarsAction = new(() =>
 		{
@@ -877,24 +791,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	public bool IsPointerOverImage => this.GetValue(IsPointerOverImageProperty);
 
 
-	/// <summary>
-	/// Check whether the pointer is pressing on the brightness adjustment UI or not.
-	/// </summary>
-	public bool IsPointerPressedOnBrightnessAdjustmentUI => this.GetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty);
-	
-	
-	/// <summary>
-	/// Check whether the pointer is pressing on the color adjustment UI or not.
-	/// </summary>
-	public bool IsPointerPressedOnColorAdjustmentUI => this.GetValue(IsPointerPressedOnColorAdjustmentUIProperty);
-	
-	
-	/// <summary>
-	/// Check whether the pointer is pressing on the contrast adjustment UI or not.
-	/// </summary>
-	public bool IsPointerPressedOnContrastAdjustmentUI => this.GetValue(IsPointerPressedOnContrastAdjustmentUIProperty);
-	
-	
 	/// <summary>
 	/// Check whether the pointer is pressing on the image or not.
 	/// </summary>
@@ -1719,54 +1615,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 		this.pressedKeys.Remove(e.Key);
 	}
-	
-
-	// Called when pointer pressed on brightness adjustment UI.
-	void OnPointerPressedOnBrightnessAdjustmentUI(object? sender, PointerEventArgs e)
-	{
-		if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
-		{
-			this.resetPointerPressedOnBrightnessAdjustmentUIAction.Cancel();
-			this.SetValue(IsPointerPressedOnBrightnessAdjustmentUIProperty, true);
-		}
-	}
-	
-
-	// Called when pointer pressed on color adjustment UI.
-	void OnPointerPressedOnColorAdjustmentUI(object? sender, PointerEventArgs e)
-	{
-		if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
-		{
-			this.resetPointerPressedOnColorAdjustmentUIAction.Cancel();
-			this.SetValue(IsPointerPressedOnColorAdjustmentUIProperty, true);
-		}
-	}
-
-
-	// Called when pointer pressed on contrast adjustment UI.
-	void OnPointerPressedOnContrastAdjustmentUI(object? sender, PointerEventArgs e)
-	{
-		if (sender is Control control && e.GetCurrentPoint(control).Properties.IsLeftButtonPressed)
-		{
-			this.resetPointerPressedOnContrastAdjustmentUIAction.Cancel();
-			this.SetValue(IsPointerPressedOnContrastAdjustmentUIProperty, true);
-		}
-	}
-
-
-	// Called when pointer released on brightness adjustment UI.
-	void OnPointerReleasedOnBrightnessAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
-		this.resetPointerPressedOnBrightnessAdjustmentUIAction.Reschedule(ResetPointerPressedOnFilterParamsUIDelay);
-
-
-	// Called when pointer released on color adjustment UI.
-	void OnPointerReleasedOnColorAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
-		this.resetPointerPressedOnColorAdjustmentUIAction.Reschedule(ResetPointerPressedOnFilterParamsUIDelay);
-	
-
-	// Called when pointer released on contrast adjustment UI.
-	void OnPointerReleasedOnContrastAdjustmentUI(object? sender, PointerReleasedEventArgs e) =>
-		this.resetPointerPressedOnContrastAdjustmentUIAction.Reschedule(ResetPointerPressedOnFilterParamsUIDelay);
 
 
 	// Called when changing mouse wheel.
@@ -1827,12 +1675,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
         {
 			this.updateImageCursorAction.Schedule();
         }
-		else if (property == IsPointerPressedOnBrightnessAdjustmentUIProperty
-			|| property == IsPointerPressedOnColorAdjustmentUIProperty
-			|| property == IsPointerPressedOnContrastAdjustmentUIProperty)
-		{
-			this.updateImageFilterParamsPopupOpacityAction.Schedule();
-		}
     }
 
 
@@ -1933,6 +1775,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				this.updateEffectiveRenderedImageIntModeAction.Schedule();
 				break;
 			}
+			case nameof(Session.IsFilterPanelVisible):
+				if (session.IsFilterPanelVisible)
+				{
+					this.keepSidePanelVisible = true;
+					session.IsRenderingParametersPanelVisible = false;
+				}
+				this.UpdateSidePanelState(session);
+				break;
 			case nameof(Session.IsHistogramsVisible):
 				if (session.IsHistogramsVisible)
 				{
@@ -1959,7 +1809,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				break;
 			case nameof(Session.IsRenderingParametersPanelVisible):
 				if (session.IsRenderingParametersPanelVisible)
+				{
 					this.keepSidePanelVisible = true;
+					session.IsFilterPanelVisible = false;
+				}
 				this.UpdateSidePanelState(session);
 				break;
 			case nameof(Session.IsSourceOpened):
@@ -2076,20 +1929,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			}
 		}
 	}
-
-
-	/// <summary>
-	/// Open brightness and contrast adjustment UI.
-	/// </summary>
-	public void OpenBrightnessAndContrastAdjustmentPopup() => 
-		this.brightnessAndContrastAdjustmentPopup.Open();
-
-
-	/// <summary>
-	/// Open color adjustment UI.
-	/// </summary>
-	public void OpenColorAdjustmentPopup() =>
-		this.colorAdjustmentPopup.Open();
 
 
 	/// <summary>
@@ -2783,7 +2622,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Update state of side panel.
 	void UpdateSidePanelState(Session session)
 	{
-		if (session.IsRenderingParametersPanelVisible)
+		if (session.IsFilterPanelVisible || session.IsRenderingParametersPanelVisible)
 		{
 			Grid.SetColumnSpan(this.imageViewerGrid, 2);
 			this.sidePanelColumn.MinWidth = Session.MinRenderingParametersPanelSize;

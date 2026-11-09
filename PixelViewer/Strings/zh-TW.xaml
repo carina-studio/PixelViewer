@@ -187,14 +187,12 @@
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer 排列方式</sys:String>
 	<sys:String x:Key="String/SessionControl.BlackLevel">黑色值</sys:String>
 	<sys:String x:Key="String/SessionControl.BlueColorGain">藍色增益</sys:String>
-	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">亮度及對比</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">亮度：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">對比：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight">亮部：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">暗部：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">位元組順序</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">檢查應用程式更新…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorAdjustment">色彩：在亮度不變的原則下，調整紅色/綠色/藍色的相對比例。</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">藍色：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">綠色：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">紅色：{0}</sys:String>
@@ -220,6 +218,9 @@
 	<sys:String x:Key="String/SessionControl.EffectiveBits.DisabledByColorTable">因套用色彩對照表而停用。</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">自動評估</sys:String>
 	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">套用濾鏡中…</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterPanel">濾鏡</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterPanel.Brightness">亮度</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterPanel.Color">色彩</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">遞減</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">遞增</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">調整至視窗大小 (Ctrl+0)</sys:String>
@@ -269,7 +270,7 @@
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">此分頁的影像繪製記憶體使用量</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">繪製中…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">繪製失敗，通常是因為使用錯誤的繪製參數。</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">繪製參數面板</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">繪製參數</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Color">色彩</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Dimensions">尺寸</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Format">格式</sys:String>

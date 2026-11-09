@@ -231,14 +231,12 @@
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer Pattern</sys:String>
 	<sys:String x:Key="String/SessionControl.BlackLevel">Black Level</sys:String>
 	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue Gain</sys:String>
-	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment">Brightness and Contrast</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Brightness">Brightness: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Contrast">Contrast: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Highlight">Highlight: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.BrightnessAndContrastAdjustment.Label.Shadow">Shadow: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ByteOrdering">Byte Ordering</sys:String>
 	<sys:String x:Key="String/SessionControl.CheckForApplicationUpdate">Check for Update…</sys:String>
-	<sys:String x:Key="String/SessionControl.ColorAdjustment">Color: adjust the R/G/B ratio without changing luminance.</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Blue">Blue: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red: {0}</sys:String>
@@ -264,6 +262,9 @@
 	<sys:String x:Key="String/SessionControl.EffectiveBits.DisabledByColorTable">Disabled because of applying color table.</sys:String>
 	<sys:String x:Key="String/SessionControl.EvaluateImageDimensions">Evaluate Automatically</sys:String>
 	<sys:String x:Key="String/SessionControl.FilteringRenderedImage">Applying filters…</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterPanel">Filter</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterPanel.Brightness">Brightness</sys:String>
+	<sys:String x:Key="String/SessionControl.FilterPanel.Color">Color</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Decrease">Decrease</sys:String>
 	<sys:String x:Key="String/SessionControl.FilterParamsSlider.SmallChange.Increase">Increase</sys:String>
 	<sys:String x:Key="String/SessionControl.FitRenderedImageToViewport">Fit to Viewport (Ctrl+0)</sys:String>
@@ -314,7 +315,7 @@
 	<sys:String x:Key="String/SessionControl.RenderedImagesMemoryUsage">Memory Usage of Rendered Images by This Tab</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingImage">Rendering…</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingErrorOccurred">Rendering failed. This is usually caused by incorrect rendering parameters.</sys:String>
-	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">Rendering Parameters Panel</sys:String>
+	<sys:String x:Key="String/SessionControl.RenderingParametersPanel">Rendering Parameters</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Color">Color</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Dimensions">Dimensions</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Format">Format</sys:String>

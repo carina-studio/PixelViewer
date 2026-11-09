@@ -31,6 +31,9 @@
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.Custom">#004a7f</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile">#00bfbf</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.SystemDefined">#57007f</Color>
+		<Color x:Key="Color/SessionControl.FilterParamsSlider.Thumb.Background.Disabled">#e0e0e0</Color>
+		<Color x:Key="Color/SessionControl.FilterParamsSlider.Thumb.Border.Disabled">#a0a0a0</Color>
+		<Color x:Key="Color/SessionControl.FilterParamsSlider.Track.Brightness.End">#c8c8c8</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#f7e6ff</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#e6ffe9</Color>

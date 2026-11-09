@@ -101,6 +101,42 @@
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Border.Custom" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Border.Custom}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ColorSpaceLabel.Border.SystemDefined" Color="{DynamicResource Color/SessionControl.ColorSpaceLabel.Border.SystemDefined}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.FilterParamsSlider.Thumb.Background.Disabled" Color="{DynamicResource Color/SessionControl.FilterParamsSlider.Thumb.Background.Disabled}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.FilterParamsSlider.Thumb.Border" Color="{DynamicResource SystemBaseHighColor}"/>
+		<SolidColorBrush x:Key="Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled" Color="{DynamicResource Color/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}"/>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Blue" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#7f7f7f" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.BlueHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Brightness" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#404040" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/SessionControl.FilterParamsSlider.Track.Brightness.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Green" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#7f7f7f" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.GreenHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Red" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#7f7f7f" Offset="0"/>
+				<GradientStop Color="{DynamicResource Color/BitmapHistogramsView.RedHistogram.Background.End}" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Saturation" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#8c8c8c" Offset="0"/>
+				<GradientStop Color="#9d8c7b" Offset="0.25"/>
+				<GradientStop Color="#53ac53" Offset="0.5"/>
+				<GradientStop Color="#2680d9" Offset="0.75"/>
+				<GradientStop Color="#bf00ff" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
@@ -129,6 +165,9 @@
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.Custom">#000000</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.EmbeddedInFile">#000000</Color>
 		<Color x:Key="Color/SessionControl.ColorSpaceLabel.Border.SystemDefined">#000000</Color>
+		<Color x:Key="Color/SessionControl.FilterParamsSlider.Thumb.Background.Disabled">#4d4d4d</Color>
+		<Color x:Key="Color/SessionControl.FilterParamsSlider.Thumb.Border.Disabled">#808080</Color>
+		<Color x:Key="Color/SessionControl.FilterParamsSlider.Track.Brightness.End">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB">#000000</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer">#000000</Color>
@@ -153,7 +192,6 @@
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#000000</Color>
 		<CornerRadius x:Key="CornerRadius/SessionControl.ImageFormatCategoryLabel">6</CornerRadius>
 		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width">20</sys:Double>
-		<sys:Double x:Key="Double/SessionControl.FilterParamsSlider.Width">200</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.FramePlaybackOptionsPopup.Width">400</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Hint.Opacity">0.75</sys:Double>
 		<sys:Double x:Key="Double/SessionControl.Histogram.Height">100</sys:Double>
@@ -321,6 +359,10 @@
 		<Setter Property="VerticalAlignment" Value="Center"/>
 		<Setter Property="Width" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 	</Style>
+	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Decrease:disabled /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+	</Style>
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Increase">
 		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
 		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
@@ -331,12 +373,14 @@
 		<Setter Property="VerticalAlignment" Value="Center"/>
 		<Setter Property="Width" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 	</Style>
+	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Increase:disabled /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+	</Style>
 	<Style Selector="Slider.SessionControl_FilterParamsSlider">
-		<Setter Property="Foreground" Value="{DynamicResource SliderTrackFill}"/>
 		<Setter Property="IsSnapToTickEnabled" Value="True"/>
 		<Setter Property="TickPlacement" Value="None"/>
 		<Setter Property="VerticalAlignment" Value="Center"/>
-		<Setter Property="Width" Value="{DynamicResource Double/SessionControl.FilterParamsSlider.Width}"/>
 	</Style>
 	<Style Selector="StackPanel.SessionControl_FilterParamsPopup">
 		<Setter Property="Margin" Value="{DynamicResource Thickness/SessionControl.FilterParamsPopup.Padding}"/>

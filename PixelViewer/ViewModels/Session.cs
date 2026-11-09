@@ -623,6 +623,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsFilteringRenderedImageNeededProp = ObservableProperty.Register<Session, bool>(nameof(IsFilteringRenderedImageNeeded));
 	/// <summary>
+	/// Property of <see cref="IsFilterPanelVisible"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> IsFilterPanelVisibleProp = ObservableProperty.Register<Session, bool>(nameof(IsFilterPanelVisible));
+	/// <summary>
 	/// Property of <see cref="IsGrayscaleFilterEnabled"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> IsGrayscaleFilterEnabledProp = ObservableProperty.Register<Session, bool>(nameof(IsGrayscaleFilterEnabled));
@@ -3745,6 +3749,16 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Get or set whether filter panel is visible or not.
+	/// </summary>
+	public bool IsFilterPanelVisible
+	{
+		get => this.GetValue(IsFilterPanelVisibleProp);
+		set => this.SetValue(IsFilterPanelVisibleProp, value);
+	}
+
+
+	/// <summary>
 	/// Enable or disable grayscale filter.
 	/// </summary>
 	public bool IsGrayscaleFilterEnabled
@@ -6331,6 +6345,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		var frameNumber = 1L;
 		var framePlaybackRate = this.PersistentState.GetValueOrDefault(LatestFramePlaybackRate);
 		var histogramsPanelSize = HistogramsPanelSizeProp.DefaultValue;
+		var isFilterPanelVisible = false;
 		var isFramePlaybackLooping = this.PersistentState.GetValueOrDefault(IsInitFramePlaybackLooping);
 		var isFramePlaybackRateUnlimited = this.PersistentState.GetValueOrDefault(IsInitFramePlaybackRateUnlimited);
 		var isHistogramMeanMarkerVisible = this.PersistentState.GetValueOrDefault(IsInitHistogramMeanMarkerVisible);
@@ -6349,6 +6364,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			jsonProperty.TryGetInt32(out rotation);
 		if (savedState.TryGetProperty(nameof(FramePlaybackRate), out jsonProperty))
 			jsonProperty.TryGetInt32(out framePlaybackRate);
+		if (savedState.TryGetProperty(nameof(IsFilterPanelVisible), out jsonProperty))
+			isFilterPanelVisible = jsonProperty.ValueKind == JsonValueKind.True;
 		if (savedState.TryGetProperty(nameof(IsFramePlaybackLooping), out jsonProperty))
 			isFramePlaybackLooping = jsonProperty.ValueKind != JsonValueKind.False;
 		if (savedState.TryGetProperty(nameof(IsFramePlaybackRateUnlimited), out jsonProperty))
@@ -6456,6 +6473,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsImageFlippedXProp, isImageFlippedX);
 		this.SetValue(IsImageFlippedYProp, isImageFlippedY);
 		this.SetValue(RenderingParametersPanelSizeProp, renderingParamsPanelSize);
+		this.SetValue(IsFilterPanelVisibleProp, isFilterPanelVisible);
 		this.SetValue(IsRenderingParametersPanelVisibleProp, isRenderingParamsPanelVisible);
 		this.SetValue(RequestedImageDisplayScaleProp, scale);
 
@@ -6874,6 +6892,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		writer.WriteNumber(nameof(FramePlaybackRate), this.FramePlaybackRate);
 		writer.WriteNumber(nameof(HistogramsPanelSize), this.HistogramsPanelSize);
 		writer.WriteNumber(nameof(ImageDisplayRotation), (int)(this.GetValue(ImageDisplayRotationProp) + 0.5));
+		writer.WriteBoolean(nameof(IsFilterPanelVisible), this.IsFilterPanelVisible);
 		writer.WriteBoolean(nameof(IsFramePlaybackLooping), this.IsFramePlaybackLooping);
 		writer.WriteBoolean(nameof(IsFramePlaybackRateUnlimited), this.IsFramePlaybackRateUnlimited);
 		writer.WriteBoolean(nameof(IsHistogramMeanMarkerVisible), this.IsHistogramMeanMarkerVisible);

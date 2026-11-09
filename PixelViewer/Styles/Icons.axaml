@@ -136,6 +136,9 @@
 	<DrawingImage x:Key="Image/Icon.ImageFilter">
 		<GeometryDrawing Brush="{DynamicResource Brush/Icon}" Geometry="{StaticResource Geometry/Icon.ImageFilter}"/>
 	</DrawingImage>
+	<DrawingImage x:Key="Image/Icon.ImageFilter.Active">
+		<GeometryDrawing Brush="{DynamicResource Brush/Icon.Active}" Geometry="{StaticResource Geometry/Icon.ImageFilter}"/>
+	</DrawingImage>
 	<DrawingImage x:Key="Image/Icon.ImageFilter.Light">
 		<GeometryDrawing Brush="{DynamicResource Brush/Icon.Light}" Geometry="{StaticResource Geometry/Icon.ImageFilter}"/>
 	</DrawingImage>
