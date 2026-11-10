@@ -925,6 +925,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	public const int MinFramePlaybackRate = 1;
 	const int ReleaseCachedImagesDelay = 3000;
 	const int RenderImageDelay = 500;
+	const int VibranceSelectionSampleCount = 256 * 256;
 
 
 	// Static fields.
@@ -4478,7 +4479,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		else if (property == VibranceAdjustmentProp)
 		{
 			this.SetValue(HasVibranceAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
-			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsShadowAdjustmentSupported);
+			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsVibranceAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
@@ -7091,7 +7092,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Perform auto color adjustment by selecting warmth and tint which make the means of linear R, G and B equal.
+	// Perform auto color adjustment by selecting warmth and tint which make the means of linear R, G and B equal, and vibrance by how colorful the white balanced image is.
 	void SelectColorAdjustment()
 	{
 		// check state
@@ -7105,7 +7106,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		
 		// calculate means of linear colors
-		var (toLinear, _) = SelectColorTransferFunctions(imageFrame, imageFrame == this.colorSpaceConvertedImageFrame);
+		var (toLinear, fromLinear) = SelectColorTransferFunctions(imageFrame, imageFrame == this.colorSpaceConvertedImageFrame);
 		toLinear ??= static it => it;
 		var maxColor = histograms.ColorCount - 1.0;
 		double CalculateLinearMean(IList<int> histogram)
@@ -7135,9 +7136,15 @@ class Session : ViewModel<IAppSuiteApplication>
 		warmth = Math.Round(Math.Clamp(warmth, -1, 1), 2);
 		tint = Math.Round(Math.Clamp(tint, -1, 1), 2);
 
+		// select vibrance
+		var vibrance = this.IsVibranceAdjustmentSupported
+			? this.SelectVibrance(imageFrame, warmth, tint, toLinear, fromLinear)
+			: this.VibranceAdjustment;
+
 		// apply color adjustment
 		this.ResetColorAdjustment();
 		this.SetValue(TintAdjustmentProp, tint);
+		this.SetValue(VibranceAdjustmentProp, vibrance);
 		this.SetValue(WarmthAdjustmentProp, warmth);
 		if (this.filterImageAction.IsScheduled)
 			this.filterImageAction.Reschedule();
@@ -7147,7 +7154,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Command to apply auto color adjustment.
 	/// </summary>
-	/// <remarks>It selects <see cref="WarmthAdjustment"/> and <see cref="TintAdjustment"/> which make the means of linear R, G and B of the image equal, and resets <see cref="BlueColorAdjustment"/>, <see cref="GreenColorAdjustment"/> and <see cref="RedColorAdjustment"/>.</remarks>
+	/// <remarks>It selects <see cref="WarmthAdjustment"/> and <see cref="TintAdjustment"/> which make the means of linear R, G and B of the image equal, selects <see cref="VibranceAdjustment"/> which is larger for a less colorful white balanced image and never negative, and resets <see cref="BlueColorAdjustment"/>, <see cref="GreenColorAdjustment"/> and <see cref="RedColorAdjustment"/>.</remarks>
 	public ICommand SelectColorAdjustmentCommand { get; }
 
 
@@ -7293,6 +7300,72 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Command to apply auto RGB gain selection.
 	/// </summary>
 	public ICommand SelectRgbGainCommand { get; }
+
+
+	// Select vibrance by colors sampled from the given frame after applying the given warmth and tint to them.
+	unsafe double SelectVibrance(ImageFrame imageFrame, double warmth, double tint, Func<double, double>? toLinear, Func<double, double>? fromLinear)
+	{
+		// prepare white balancing
+		var buffer = imageFrame.BitmapBuffer;
+		var (gainR, gainG, gainB) = ColorLut.SelectWhiteBalanceGains(warmth, tint, ToneCurveImageFilter.SelectLuminanceWeights(buffer.ColorSpace));
+		if (toLinear is null || fromLinear is null)
+		{
+			toLinear = static it => it;
+			fromLinear = static it => it;
+		}
+		double ApplyGain(double color, double gain) => fromLinear(Math.Min(toLinear(color) * gain, 1));
+
+		// sample colors
+		var width = buffer.Width;
+		var height = buffer.Height;
+		var step = Math.Max(1, (int)Math.Ceiling(Math.Sqrt((double)width * height / VibranceSelectionSampleCount)));
+		var colors = new List<(double, double, double)>((width / step + 1) * (height / step + 1));
+		buffer.Memory.Pin(baseAddress =>
+		{
+			var rowStride = buffer.RowBytes;
+			var r = 0.0;
+			var g = 0.0;
+			var b = 0.0;
+			var a = 0.0;
+			switch (buffer.Format)
+			{
+				case BitmapFormat.Bgra32:
+					{
+						var unpackFunc = ImageProcessing.SelectBgra32UnpackingAndNormalizing();
+						for (var y = 0; y < height; y += step)
+						{
+							var pixelPtr = (uint*)((byte*)baseAddress + rowStride * y);
+							for (var x = 0; x < width; x += step)
+							{
+								unpackFunc(pixelPtr[x], &b, &g, &r, &a);
+								colors.Add((ApplyGain(r, gainR), ApplyGain(g, gainG), ApplyGain(b, gainB)));
+							}
+						}
+					}
+					break;
+				case BitmapFormat.Bgra64:
+					{
+						var unpackFunc = ImageProcessing.SelectBgra64UnpackingAndNormalizing();
+						for (var y = 0; y < height; y += step)
+						{
+							var pixelPtr = (ulong*)((byte*)baseAddress + rowStride * y);
+							for (var x = 0; x < width; x += step)
+							{
+								unpackFunc(pixelPtr[x], &b, &g, &r, &a);
+								colors.Add((ApplyGain(r, gainR), ApplyGain(g, gainG), ApplyGain(b, gainB)));
+							}
+						}
+					}
+					break;
+			}
+		});
+
+		// select vibrance
+		var saturation = this.canResetSaturationAdjustment.Value ? this.SaturationAdjustment : 0;
+		var targetColorfulness = this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.AutoVibranceAdjustmentTargetColorfulness);
+		var maxVibrance = this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.MaxAutoVibranceAdjustment);
+		return SaturationImageFilter.SelectVibrance(colors, saturation, targetColorfulness, maxVibrance);
+	}
 
 
 	// Select default image renderer according to settings.

@@ -9,6 +9,14 @@ namespace Carina.PixelViewer;
 sealed class ConfigurationKeys
 {
     /// <summary>
+    /// Colorfulness of image, which is sum of (max - min) divided by sum of max of normalized colors, which needs no vibrance when selecting vibrance by auto color adjustment.
+    /// </summary>
+    public static readonly SettingKey<double> AutoVibranceAdjustmentTargetColorfulness = new(nameof(AutoVibranceAdjustmentTargetColorfulness), 0.4);
+    /// <summary>
+    /// Maximum vibrance to select by auto color adjustment.
+    /// </summary>
+    public static readonly SettingKey<double> MaxAutoVibranceAdjustment = new(nameof(MaxAutoVibranceAdjustment), 0.5);
+    /// <summary>
     /// Maximum ratio of processor for parallel image processing.
     /// </summary>
     public static readonly SettingKey<double> MaxProcessorRatioOfParallelImageProcessing = new(nameof(MaxProcessorRatioOfParallelImageProcessing), CarinaStudio.Platform.IsMacOS && RuntimeInformation.ProcessArchitecture == Architecture.Arm64 ? 0.8 : 0.5);

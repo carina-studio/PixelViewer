@@ -3,6 +3,7 @@ using Carina.PixelViewer.Media.ImageFilters;
 using CarinaStudio;
 using NUnit.Framework;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -90,6 +91,44 @@ class SaturationImageFilterTests : BaseTests
 	}
 
 
+	/// <summary>
+	/// Test for adjusting single color the same as the filter does.
+	/// </summary>
+	[Test]
+	public async Task AdjustColorTest()
+	{
+		// prepare colors, including skin tones, red-dominant colors and colors which will be clipped
+		var pixels = new (double, double, double, double)[256];
+		pixels[0] = SkinTone;
+		pixels[1] = (0.9, 0.7, 0.55, 1);
+		pixels[2] = (0.95, 0.1, 0.05, 1);
+		for (var i = pixels.Length - 1; i >= 3; --i)
+			pixels[i] = (this.Random.NextDouble(), this.Random.NextDouble(), this.Random.NextDouble(), 1);
+
+		// compare
+		foreach (var format in Formats)
+		{
+			foreach (var (saturation, vibrance) in new[] { (0.0, 0.5), (0.0, -0.5), (0.3, 0.4), (-0.3, 0.8), (0.5, 0.0) })
+			{
+				var resultPixels = await ApplyFilterAsync(format, saturation, vibrance, pixels);
+				var sourcePixels = await ApplyFilterAsync(format, 0, 0, pixels);
+				var effectiveSaturation = SaturationImageFilter.GetEffectiveSaturation(saturation);
+				var effectiveVibrance = SaturationImageFilter.GetEffectiveVibrance(vibrance);
+				for (var i = pixels.Length - 1; i >= 0; --i)
+				{
+					var (r, g, b, _) = sourcePixels[i];
+					var (expectedR, expectedG, expectedB) = SaturationImageFilter.AdjustColor(r, g, b, effectiveSaturation, effectiveVibrance);
+					var (actualR, actualG, actualB, _) = resultPixels[i];
+					var message = $"color {sourcePixels[i]} with saturation {saturation} and vibrance {vibrance} ({format})";
+					Assert.That(actualR, Is.EqualTo(expectedR).Within(Tolerance), $"R of {message}.");
+					Assert.That(actualG, Is.EqualTo(expectedG).Within(Tolerance), $"G of {message}.");
+					Assert.That(actualB, Is.EqualTo(expectedB).Within(Tolerance), $"B of {message}.");
+				}
+			}
+		}
+	}
+
+
 	// Get change of chroma, which is max - min, from source pixel to result pixel.
 	static double GetChromaChange((double, double, double, double) source, (double, double, double, double) result)
 	{
@@ -138,6 +177,61 @@ class SaturationImageFilterTests : BaseTests
 			Assert.That(otherChange, Is.GreaterThan(0.03), $"Saturation should increase chroma ({format}).");
 			Assert.That(skinToneChange, Is.EqualTo(otherChange).Within(Tolerance), $"Saturation should change skin tone as other colors ({format}).");
 		}
+	}
+
+
+	/// <summary>
+	/// Test for selecting vibrance by how colorful the colors are.
+	/// </summary>
+	[Test]
+	public void SelectVibranceTest()
+	{
+		// generate colors around gray of the given brightness with the given saturation, which is (max - min) / max
+		List<(double, double, double)> GenerateColors(double brightness, double saturation)
+		{
+			var colors = new List<(double, double, double)>();
+			for (var i = 0; i < 1000; ++i)
+			{
+				var max = brightness * (0.8 + this.Random.NextDouble() * 0.4);
+				var min = max * (1 - saturation);
+				colors.Add(this.Random.Next(3) switch
+				{
+					0 => (min, max, min),
+					1 => (min, min, max),
+					_ => (max, min, max),
+				});
+			}
+			return colors;
+		}
+
+		// less colorful colors get more vibrance
+		const double TargetColorfulness = 0.4;
+		const double MaxVibrance = 0.5;
+		var prevVibrance = double.MaxValue;
+		for (var saturation = 0.1; saturation <= TargetColorfulness + 0.001; saturation += 0.05)
+		{
+			var vibrance = SaturationImageFilter.SelectVibrance(GenerateColors(0.5, saturation), 0, TargetColorfulness, MaxVibrance);
+			Assert.That(vibrance, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(MaxVibrance), $"Vibrance should be in range for saturation {saturation}.");
+			Assert.That(vibrance, Is.LessThanOrEqualTo(prevVibrance), $"More colorful colors should not get more vibrance at saturation {saturation}.");
+			prevVibrance = vibrance;
+		}
+		Assert.That(SaturationImageFilter.SelectVibrance(GenerateColors(0.5, 0.15), 0, TargetColorfulness, MaxVibrance), Is.GreaterThan(0.2), "Dull colors should get vibrance.");
+
+		// colorfulness does not depend on brightness
+		var brightVibrance = SaturationImageFilter.SelectVibrance(GenerateColors(0.8, 0.2), 0, TargetColorfulness, MaxVibrance);
+		var darkVibrance = SaturationImageFilter.SelectVibrance(GenerateColors(0.15, 0.2), 0, TargetColorfulness, MaxVibrance);
+		Assert.That(darkVibrance, Is.EqualTo(brightVibrance).Within(0.02), "Dark colors should get the same vibrance as bright colors with the same saturation.");
+		Assert.That(SaturationImageFilter.SelectVibrance(GenerateColors(0.15, 0.75), 0, TargetColorfulness, MaxVibrance), Is.EqualTo(0), "Dark but rich colors should not get vibrance.");
+
+		// saturation applied together
+		var colors = GenerateColors(0.5, 0.2);
+		Assert.That(SaturationImageFilter.SelectVibrance(colors, 0.3, TargetColorfulness, MaxVibrance), Is.LessThan(SaturationImageFilter.SelectVibrance(colors, 0, TargetColorfulness, MaxVibrance)), "Less vibrance should be selected when saturation is increased.");
+
+		// nearly gray colors
+		Assert.That(SaturationImageFilter.SelectVibrance(GenerateColors(0.5, SaturationImageFilter.AutoVibranceColorfulnessStart / 2), 0, TargetColorfulness, MaxVibrance), Is.EqualTo(0), "Vibrance should not be changed for nearly gray colors.");
+
+		// no colors
+		Assert.That(SaturationImageFilter.SelectVibrance([], 0, TargetColorfulness, MaxVibrance), Is.EqualTo(0), "Vibrance should not be changed without colors.");
 	}
 
 

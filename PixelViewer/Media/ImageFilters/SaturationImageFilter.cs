@@ -1,6 +1,8 @@
 using CarinaStudio;
 using CarinaStudio.AppSuite;
+using CarinaStudio.Collections;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -64,6 +66,8 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
 
 
     // Constants.
+    internal const double AutoVibranceColorfulnessFullStart = 0.08;
+    internal const double AutoVibranceColorfulnessStart = 0.02;
     internal const double SkinToneHueEnd = 55;
     internal const double SkinToneHueFullEnd = 40;
     internal const double SkinToneHueFullStart = 10;
@@ -79,6 +83,28 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
 
     // Static fields.
     static readonly unsafe ushort* skinToneProtectionTable = BuildSkinToneProtectionTable();
+
+
+    // Adjust the normalized color by the saturation and vibrance which the sensitivities have been applied to, in the same way as the filter does.
+    internal static (double, double, double) AdjustColor(double r, double g, double b, double effectiveSaturation, double effectiveVibrance)
+    {
+        // find chroma
+        var max = Math.Max(r, Math.Max(g, b));
+        var min = Math.Min(r, Math.Min(g, b));
+        var chroma = max - min;
+        if (chroma <= 0)
+            return (r, g, b);
+
+        // select ratio of shifting colors away from gray
+        var vibranceShiftRatio = (1 - chroma) * effectiveVibrance;
+        if (r >= g && r >= b)
+            vibranceShiftRatio *= 1 - SkinToneProtection * GetSkinToneWeight((g - b) / chroma * 60, chroma / max);
+        var shiftRatio = Math.Max(-1, effectiveSaturation + vibranceShiftRatio);
+
+        // shift colors
+        var gray = (r + g + g + b) / 4;
+        return (Math.Clamp(r + (r - gray) * shiftRatio, 0, 1), Math.Clamp(g + (g - gray) * shiftRatio, 0, 1), Math.Clamp(b + (b - gray) * shiftRatio, 0, 1));
+    }
 
 
     // Build the table of protection of skin tone in Q12, indexed by ((G - B) * 255 / (R - min) + 255) * 256 + (R - min) * 255 / R for color whose R is the largest.
@@ -155,15 +181,37 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
     }
 
 
+    // Get the saturation which the sensitivity of saturation adjustment has been applied to.
+    internal static double GetEffectiveSaturation(double saturation) =>
+        Math.Max(-1, saturation * IAppSuiteApplication.Current.Configuration.GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity));
+
+
+    // Get the vibrance which the sensitivity of vibrance adjustment has been applied to.
+    internal static double GetEffectiveVibrance(double vibrance) =>
+        vibrance * IAppSuiteApplication.Current.Configuration.GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity);
+
+
+    // Get colorfulness of the normalized colors after adjusting them by the saturation which the sensitivity has been applied to, which is sum of (max - min) divided by sum of max.
+    static double GetColorfulness(IList<(double, double, double)> colors, double effectiveSaturation)
+    {
+        var chromaSum = 0.0;
+        var maxSum = 0.0;
+        for (var i = colors.Count - 1; i >= 0; --i)
+        {
+            var (r, g, b) = colors[i];
+            (r, g, b) = AdjustColor(r, g, b, effectiveSaturation, 0);
+            var max = Math.Max(r, Math.Max(g, b));
+            chromaSum += max - Math.Min(r, Math.Min(g, b));
+            maxSum += max;
+        }
+        return maxSum > 0 ? chromaSum / maxSum : 0;
+    }
+
+
     // Get the weight in [0.0, 1.0] of how close the color is to skin tone, by its hue in degrees and its saturation which is (max - min) / max.
     internal static double GetSkinToneWeight(double hue, double saturation)
     {
         // weight by hue
-        static double Smoothstep(double edge0, double edge1, double x)
-        {
-            var t = Math.Clamp((x - edge0) / (edge1 - edge0), 0, 1);
-            return t * t * (3 - 2 * t);
-        }
         var hueWeight = Smoothstep(SkinToneHueStart, SkinToneHueFullStart, hue) * (1 - Smoothstep(SkinToneHueFullEnd, SkinToneHueEnd, hue));
 
         // weight by saturation
@@ -176,9 +224,8 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
     protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
     {
         this.VerifyFormats(source, result);
-        var qSaturation = (int)(Math.Max(-1, parameters.Saturation * IAppSuiteApplication.Current.Configuration.GetValueOrDefault(ConfigurationKeys.SaturationAdjustmentSensitivity)) * 4096 + 0.5);
-        var vibrance = parameters.Vibrance * IAppSuiteApplication.Current.Configuration.GetValueOrDefault(ConfigurationKeys.VibranceAdjustmentSensitivity);
-        var qVibrance = (int)(vibrance * 4096 + 0.5);
+        var qSaturation = (int)(GetEffectiveSaturation(parameters.Saturation) * 4096 + 0.5);
+        var qVibrance = (int)(GetEffectiveVibrance(parameters.Vibrance) * 4096 + 0.5);
         if (qSaturation != 0 || qVibrance != 0)
         {
             (source.Memory, result.Memory).Pin((srcBaseAddress, destBaseAddress) =>
@@ -289,5 +336,37 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
         }
         else
             source.CopyTo(result);
+    }
+
+
+    /// <summary>
+    /// Select the vibrance for the given colors by how colorful they are.
+    /// </summary>
+    /// <param name="colors">Normalized (R, G, B) colors sampled from the image to adjust.</param>
+    /// <param name="saturation">Saturation which will be applied together with the vibrance.</param>
+    /// <param name="targetColorfulness">Colorfulness, which is sum of (max - min) divided by sum of max, which needs no vibrance.</param>
+    /// <param name="maxVibrance">Maximum vibrance to select.</param>
+    /// <returns>Vibrance in [0.0, <paramref name="maxVibrance"/>] rounded to 2 decimals.</returns>
+    /// <remarks>The vibrance falls linearly from <paramref name="maxVibrance"/> to 0 as the colorfulness rises from 0 to <paramref name="targetColorfulness"/>, so more colorful colors never get more vibrance, and it fades in for nearly gray colors so that a monochrome image is left alone.</remarks>
+    public static double SelectVibrance(IList<(double, double, double)> colors, double saturation, double targetColorfulness, double maxVibrance)
+    {
+        // check parameter
+        if (!double.IsFinite(saturation) || !double.IsFinite(targetColorfulness) || !double.IsFinite(maxVibrance))
+            throw new ArgumentException();
+        if (colors.IsEmpty() || maxVibrance <= 0 || targetColorfulness <= 0)
+            return 0;
+
+        // select vibrance
+        var colorfulness = GetColorfulness(colors, GetEffectiveSaturation(saturation));
+        var vibrance = Math.Min(maxVibrance, 1) * Math.Clamp(1 - colorfulness / targetColorfulness, 0, 1) * Smoothstep(AutoVibranceColorfulnessStart, AutoVibranceColorfulnessFullStart, colorfulness);
+        return Math.Round(vibrance, 2);
+    }
+
+
+    // Smooth Hermite interpolation of x between the 2 edges.
+    static double Smoothstep(double edge0, double edge1, double x)
+    {
+        var t = Math.Clamp((x - edge0) / (edge1 - edge0), 0, 1);
+        return t * t * (3 - 2 * t);
     }
 }

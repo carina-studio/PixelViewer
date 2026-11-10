@@ -947,20 +947,23 @@ namespace Carina.PixelViewer.Test.ViewModels
 					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file after restoring state.");
 					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.HasHistograms), true, 10000), Is.True, "Unable to complete rendering after restoring state.");
 
-					// auto color adjustment selects warmth and tint, and resets the RGB adjustment
+					// auto color adjustment selects warmth, tint and vibrance, and resets the RGB adjustment
 					session.RedColorAdjustment = 0.5;
+					session.VibranceAdjustment = -0.5;
 					Assert.That(session.SelectColorAdjustmentCommand.CanExecute(null), Is.True, "Auto color adjustment should be available after rendering.");
 					session.SelectColorAdjustmentCommand.Execute(null);
 					Assert.That(session.RedColorAdjustment, Is.EqualTo(0), "RGB adjustment should be reset by auto color adjustment.");
 					Assert.That(session.HasColorAdjustment, Is.False, "RGB adjustment should not be reported after auto color adjustment.");
 					Assert.That(Math.Abs(session.WarmthAdjustment), Is.LessThanOrEqualTo(1), "Warmth selected by auto color adjustment should be in range.");
 					Assert.That(Math.Abs(session.TintAdjustment), Is.LessThanOrEqualTo(1), "Tint selected by auto color adjustment should be in range.");
+					Assert.That(session.VibranceAdjustment, Is.GreaterThanOrEqualTo(0).And.LessThanOrEqualTo(this.Application.Configuration.GetValueOrDefault(ConfigurationKeys.MaxAutoVibranceAdjustment)), "Vibrance selected by auto color adjustment should not be reduced, and should not exceed the maximum.");
 				}
 				finally
 				{
 					// close file
 					session.WarmthAdjustment = 0;
 					session.TintAdjustment = 0;
+					session.VibranceAdjustment = 0;
 					session.RedColorAdjustment = 0;
 					session.ClearSourceCommand.Execute(null);
 					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
