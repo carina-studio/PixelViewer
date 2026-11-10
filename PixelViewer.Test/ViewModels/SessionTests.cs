@@ -5,6 +5,7 @@ using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.Windows.Input;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -848,6 +849,78 @@ namespace Carina.PixelViewer.Test.ViewModels
 					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
 					foreach (var filePath in filePaths)
 						await DeleteFileAsync(filePath);
+				}
+			});
+		}
+
+
+		/// <summary>
+		/// Test for resetting all filter parameters by <see cref="Session.ResetFiltersCommand"/>.
+		/// </summary>
+		[Test]
+		public void TestResettingFilters()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// open file
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// start from no adjustment
+					session.ResetFiltersCommand.TryExecute();
+					Assert.That(session.ResetFiltersCommand.CanExecute(null), Is.False, "Filters should not be resettable without adjustment.");
+
+					// set each parameter and reset all of them
+					var parameters = new (string Name, Action<double> Set, Func<double> Get)[]
+					{
+						(nameof(Session.BrightnessAdjustment), it => session.BrightnessAdjustment = it, () => session.BrightnessAdjustment),
+						(nameof(Session.ContrastAdjustment), it => session.ContrastAdjustment = it, () => session.ContrastAdjustment),
+						(nameof(Session.HighlightAdjustment), it => session.HighlightAdjustment = it, () => session.HighlightAdjustment),
+						(nameof(Session.ShadowAdjustment), it => session.ShadowAdjustment = it, () => session.ShadowAdjustment),
+						(nameof(Session.RedColorAdjustment), it => session.RedColorAdjustment = it, () => session.RedColorAdjustment),
+						(nameof(Session.GreenColorAdjustment), it => session.GreenColorAdjustment = it, () => session.GreenColorAdjustment),
+						(nameof(Session.BlueColorAdjustment), it => session.BlueColorAdjustment = it, () => session.BlueColorAdjustment),
+						(nameof(Session.SaturationAdjustment), it => session.SaturationAdjustment = it, () => session.SaturationAdjustment),
+						(nameof(Session.VibranceAdjustment), it => session.VibranceAdjustment = it, () => session.VibranceAdjustment),
+						(nameof(Session.TintAdjustment), it => session.TintAdjustment = it, () => session.TintAdjustment),
+						(nameof(Session.WarmthAdjustment), it => session.WarmthAdjustment = it, () => session.WarmthAdjustment),
+					};
+					foreach (var (name, set, get) in parameters)
+					{
+						set(0.3);
+						Assert.That(session.ResetFiltersCommand.CanExecute(null), Is.True, $"Filters should be resettable after adjusting {name}.");
+						session.ResetFiltersCommand.Execute(null);
+						Assert.That(get(), Is.EqualTo(0), $"{name} should be reset.");
+						Assert.That(session.ResetFiltersCommand.CanExecute(null), Is.False, $"Filters should not be resettable after resetting {name}.");
+					}
+
+					// reset all parameters at once, together with the grayscale filter
+					foreach (var (_, set, _) in parameters)
+						set(-0.2);
+					session.IsGrayscaleFilterEnabled = true;
+					session.ResetFiltersCommand.Execute(null);
+					foreach (var (name, _, get) in parameters)
+						Assert.That(get(), Is.EqualTo(0), $"{name} should be reset together with the others.");
+					Assert.That(session.IsGrayscaleFilterEnabled, Is.False, "Grayscale filter should be disabled.");
+
+					// close file with an adjustment left
+					session.BrightnessAdjustment = 0.3;
+					Assert.That(session.ResetFiltersCommand.CanExecute(null), Is.True, "Filters should be resettable after adjusting.");
+					session.ClearSourceCommand.Execute(null);
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
+					Assert.That(session.ResetFiltersCommand.CanExecute(null), Is.False, "Filters should not be resettable without source.");
+				}
+				finally
+				{
+					// close file
+					session.ClearSourceCommand.TryExecute();
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					session.BrightnessAdjustment = 0;
+					await DeleteFileAsync(filePath);
 				}
 			});
 		}

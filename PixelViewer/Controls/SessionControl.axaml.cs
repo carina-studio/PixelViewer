@@ -113,17 +113,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	Screen? attachedScreen;
 	Avalonia.Controls.Window? attachedWindow;
 	readonly ObservableCommandState<string> canOpenSourceFile = new();
-	readonly ObservableCommandState<object?> canResetBrightnessAdjustment = new();
-	readonly ForwardedObservableBoolean canResetBrightnessAndContrastAdjustment;
-	readonly ObservableCommandState<object?> canResetColorAdjustment = new();
-	readonly ForwardedObservableBoolean canResetColorAndVibranceAdjustment;
-	readonly ObservableCommandState<object?> canResetContrastAdjustment = new();
-	readonly ObservableCommandState<object?> canResetHighlightAdjustment = new();
-	readonly ObservableCommandState<object?> canResetSaturationAdjustment = new();
-	readonly ObservableCommandState<object?> canResetShadowAdjustment = new();
-	readonly ObservableCommandState<object?> canResetTintAdjustment = new();
-	readonly ObservableCommandState<object?> canResetVibranceAdjustment = new();
-	readonly ObservableCommandState<object?> canResetWarmthAdjustment = new();
 	readonly ObservableCommandState<string> canSaveAsNewProfile = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveFilteredImage = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveRenderedImage = new();
@@ -196,19 +185,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	public SessionControl()
 	{
 		// create command state observables
-		this.canResetBrightnessAndContrastAdjustment = new(ForwardedObservableBoolean.CombinationMode.Or,
-			false,
-			this.canResetBrightnessAdjustment,
-			this.canResetContrastAdjustment,
-			this.canResetHighlightAdjustment,
-			this.canResetShadowAdjustment);
-		this.canResetColorAndVibranceAdjustment = new(ForwardedObservableBoolean.CombinationMode.Or,
-			false,
-			this.canResetColorAdjustment,
-			this.canResetSaturationAdjustment,
-			this.canResetTintAdjustment,
-			this.canResetVibranceAdjustment,
-			this.canResetWarmthAdjustment);
 		this.canSaveImage = new(ForwardedObservableBoolean.CombinationMode.Or,
 			false,
 			this.canSaveFilteredImage,
@@ -222,8 +198,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.DecreaseSliderValueCommand = new Command<Slider>(this.DecreaseSliderValue);
 		this.IncreaseSliderValueCommand = new Command<Slider>(this.IncreaseSliderValue);
 		this.OpenSourceFileCommand = new Command(this.OpenSourceFile, this.canOpenSourceFile);
-		this.ResetBrightnessAndContrastAdjustmentCommand = new Command(this.ResetBrightnessAndContrastAdjustment, this.canResetBrightnessAndContrastAdjustment);
-		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAndVibranceAdjustment);
 		this.SaveAsNewProfileCommand = new Command(this.SaveAsNewProfile, this.canSaveAsNewProfile);
 		this.SaveImageCommand = new Command(this.SaveImage, this.canSaveImage);
 		this.SaveOrSaveAsNewProfileCommand = new Command(this.SaveOrSaveAsNewProfile, this.canSaveOrSaveAsNewProfile);
@@ -949,15 +923,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		session.ImageSavingCompleted += this.OnImageSavingCompleted;
 		session.PropertyChanged += this.OnSessionPropertyChanged;
 		this.canOpenSourceFile.Bind(session.OpenSourceFileCommand, "");
-		this.canResetBrightnessAdjustment.Bind(session.ResetBrightnessAdjustmentCommand);
-		this.canResetColorAdjustment.Bind(session.ResetColorAdjustmentCommand);
-		this.canResetContrastAdjustment.Bind(session.ResetContrastAdjustmentCommand);
-		this.canResetHighlightAdjustment.Bind(session.ResetHighlightAdjustmentCommand);
-		this.canResetSaturationAdjustment.Bind(session.ResetSaturationAdjustmentCommand);
-		this.canResetShadowAdjustment.Bind(session.ResetShadowAdjustmentCommand);
-		this.canResetTintAdjustment.Bind(session.ResetTintAdjustmentCommand);
-		this.canResetVibranceAdjustment.Bind(session.ResetVibranceAdjustmentCommand);
-		this.canResetWarmthAdjustment.Bind(session.ResetWarmthAdjustmentCommand);
 		this.canSaveAsNewProfile.Bind(session.SaveAsNewProfileCommand, "");
 		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
 		this.canSaveProfile.Bind(session.SaveProfileCommand);
@@ -1048,15 +1013,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	    session.ImageSavingCompleted -= this.OnImageSavingCompleted;
 	    session.PropertyChanged -= this.OnSessionPropertyChanged;
 	    this.canOpenSourceFile.Unbind();
-	    this.canResetBrightnessAdjustment.Unbind();
-	    this.canResetColorAdjustment.Unbind();
-	    this.canResetContrastAdjustment.Unbind();
-	    this.canResetHighlightAdjustment.Unbind();
-	    this.canResetSaturationAdjustment.Unbind();
-	    this.canResetShadowAdjustment.Unbind();
-	    this.canResetTintAdjustment.Unbind();
-	    this.canResetVibranceAdjustment.Unbind();
-	    this.canResetWarmthAdjustment.Unbind();
 	    this.canSaveAsNewProfile.Unbind();
 	    this.canSaveFilteredImage.Unbind();
 	    this.canSaveProfile.Unbind();
@@ -2159,40 +2115,6 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		session.ScreenPixelDensity = scaling;
 	}
-
-
-	// Reset brightness and contrast.
-	void ResetBrightnessAndContrastAdjustment()
-    {
-		if (this.DataContext is Session session)
-		{
-			session.ResetBrightnessAdjustmentCommand.TryExecute();
-			session.ResetContrastAdjustmentCommand.TryExecute();
-			session.ResetHighlightAdjustmentCommand.TryExecute();
-			session.ResetShadowAdjustmentCommand.TryExecute();
-		}
-    }
-
-
-	// Command to reset brightness and contrast.
-	public ICommand ResetBrightnessAndContrastAdjustmentCommand { get; }
-
-
-	// Reset color adjustment.
-	void ResetColorAdjustment()
-	{
-		if (this.DataContext is not Session session)
-			return;
-		session.ResetColorAdjustmentCommand.TryExecute();
-		session.ResetSaturationAdjustmentCommand.TryExecute();
-		session.ResetTintAdjustmentCommand.TryExecute();
-		session.ResetVibranceAdjustmentCommand.TryExecute();
-		session.ResetWarmthAdjustmentCommand.TryExecute();
-	}
-
-
-	// Command to reset color adjustment.
-	public ICommand ResetColorAdjustmentCommand { get; }
 
 
 	// Save as new profile.

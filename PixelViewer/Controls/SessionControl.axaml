@@ -782,17 +782,17 @@
 						<Grid ColumnDefinitions="Auto,*,Auto,Auto">
 
 							<!-- Apply profile -->
-							<Button Command="{Binding ApplyProfileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ApplyProfile}">
+							<Button Command="{Binding ApplyProfileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ApplyProfile}" ToolTip.VerticalOffset="0">
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Reset}"/>
 							</Button>
 
 							<!-- Save profile -->
-							<asControls:SplitButton Command="{Binding #root.SaveOrSaveAsNewProfileCommand}" DropDownMenu="{StaticResource saveProfileMenu}" Grid.Column="2" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource Common.Save}">
+							<asControls:SplitButton Command="{Binding #root.SaveOrSaveAsNewProfileCommand}" DropDownMenu="{StaticResource saveProfileMenu}" Grid.Column="2" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource Common.Save}" ToolTip.VerticalOffset="0">
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
 							</asControls:SplitButton>
 
 							<!-- Delete profile -->
-							<Button Command="{Binding DeleteProfileCommand}" Grid.Column="3" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.DeleteProfile}">
+							<Button Command="{Binding DeleteProfileCommand}" Grid.Column="3" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.DeleteProfile}" ToolTip.VerticalOffset="0">
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Delete.Outline}"/>
 							</Button>
 
@@ -1265,6 +1265,19 @@
 						</Style>
 					</DockPanel.Styles>
 
+					<!-- Filter actions -->
+					<Border Classes="SessionControl_SidePanel_ActionsPanel" DockPanel.Dock="Bottom" IsEnabled="{Binding IsSourceOpened}">
+						<Grid ColumnDefinitions="Auto,*,Auto,Auto">
+
+							<!-- Reset filters -->
+							<Button Command="{Binding ResetFiltersCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ResetFilters}" ToolTip.VerticalOffset="0">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Reset}"/>
+							</Button>
+
+
+						</Grid>
+					</Border>
+
 					<!-- Parameters -->
 					<ScrollViewer HorizontalScrollBarVisibility="Disabled">
 						<StackPanel Margin="{StaticResource Thickness/SessionControl.SidePanel.Padding}">
@@ -1324,8 +1337,6 @@
 									</Grid>
 									<Separator asControls:DialogElement.SeparatorType="Default"/>
 									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding SelectBrightnessAdjustmentCommand}" Content="{asXaml:StringResource SessionControl.AutoAdjust}"/>
-									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding #root.ResetBrightnessAndContrastAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}"/>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
 								</StackPanel>
 							</Expander>
@@ -1424,8 +1435,6 @@
 									</Grid>
 									<Separator asControls:DialogElement.SeparatorType="Default"/>
 									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding SelectColorAdjustmentCommand}" Content="{asXaml:StringResource SessionControl.AutoAdjust}"/>
-									<Separator asControls:DialogElement.SeparatorType="Small"/>
-									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding #root.ResetColorAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}"/>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
 								</StackPanel>
 							</Expander>

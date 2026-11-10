@@ -277,6 +277,7 @@
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Color">色彩</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Dimensions">尺寸</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Format">格式</sys:String>
+	<sys:String x:Key="String/SessionControl.ResetFilters">重設濾鏡</sys:String>
 	<sys:String x:Key="String/SessionControl.ResetRgbGain">重設增益</sys:String>
 	<sys:String x:Key="String/SessionControl.RgbGain">色彩預先校正</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">逆時針旋轉</sys:String>

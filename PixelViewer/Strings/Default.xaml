@@ -322,6 +322,7 @@
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Color">Color</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Dimensions">Dimensions</sys:String>
 	<sys:String x:Key="String/SessionControl.RenderingParametersPanel.Format">Format</sys:String>
+	<sys:String x:Key="String/SessionControl.ResetFilters">Reset Filters</sys:String>
 	<sys:String x:Key="String/SessionControl.ResetRgbGain">Reset Gains</sys:String>
 	<sys:String x:Key="String/SessionControl.RgbGain">Color Pre-Correction</sys:String>
 	<sys:String x:Key="String/SessionControl.RotateLeft">Rotate Counter-Clockwise</sys:String>

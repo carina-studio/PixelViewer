@@ -963,6 +963,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly MutableObservableBoolean canResetBrightnessAdjustment = new();
 	readonly MutableObservableBoolean canResetColorAdjustment = new();
 	readonly MutableObservableBoolean canResetContrastAdjustment = new();
+	readonly ForwardedObservableBoolean canResetFilters;
 	readonly MutableObservableBoolean canResetHighlightAdjustment = new();
 	readonly MutableObservableBoolean canResetSaturationAdjustment = new();
 	readonly MutableObservableBoolean canResetShadowAdjustment = new();
@@ -1046,6 +1047,22 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public Session(IAppSuiteApplication app, JsonElement? savedState) : base(app)
 	{
+		// create command states
+		this.canResetFilters = new(ForwardedObservableBoolean.CombinationMode.And,
+			false,
+			this.GetValueAsObservable(IsSourceOpenedProp),
+			new ForwardedObservableBoolean(ForwardedObservableBoolean.CombinationMode.Or,
+				false,
+				this.canResetBrightnessAdjustment,
+				this.canResetColorAdjustment,
+				this.canResetContrastAdjustment,
+				this.canResetHighlightAdjustment,
+				this.canResetSaturationAdjustment,
+				this.canResetShadowAdjustment,
+				this.canResetTintAdjustment,
+				this.canResetVibranceAdjustment,
+				this.canResetWarmthAdjustment));
+
 		// create commands
 		var isSrcFileOpenedObservable = this.GetValueAsObservable(IsSourceOpenedProp);
 		this.AlignImageHeightCommand = new Command<int>(this.AlignImageHeight, isSrcFileOpenedObservable);
@@ -1086,6 +1103,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
 		this.ResetColorAdjustmentCommand = new Command(this.ResetColorAdjustment, this.canResetColorAdjustment);
 		this.ResetContrastAdjustmentCommand = new Command(this.ResetContrastAdjustment, this.canResetContrastAdjustment);
+		this.ResetFiltersCommand = new Command(this.ResetFilters, this.canResetFilters);
 		this.ResetHighlightAdjustmentCommand = new Command(this.ResetHighlightAdjustment, this.canResetHighlightAdjustment);
 		this.ResetRgbGainCommand = new Command(this.ResetRgbGain, this.GetValueAsObservable(HasRgbGainProp));
 		this.ResetSaturationAdjustmentCommand = new Command(this.ResetSaturationAdjustment, this.canResetSaturationAdjustment);
@@ -6167,6 +6185,25 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.ResetWarmthAdjustment();
 		this.SetValue(IsGrayscaleFilterEnabledProp, false);
 	}
+
+
+	// Reset all filter parameters by command.
+	void ResetFilters()
+	{
+		// check state
+		this.VerifyAccess();
+		if (this.IsDisposed || !this.IsSourceOpened)
+			return;
+
+		// reset
+		this.ResetFilterParams();
+	}
+
+
+	/// <summary>
+	/// Command to reset all filter parameters. Only available when source is opened.
+	/// </summary>
+	public ICommand ResetFiltersCommand { get; }
 
 
 	// Reset highlight adjustment.

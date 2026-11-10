@@ -364,8 +364,8 @@
 		<Setter Property="Placement" Value="AnchorAndGravity"/>
 	</Style>
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Decrease">
-		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
-		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="Background" Value="{DynamicResource ButtonBackgroundTransparent}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushTransparent}"/>
 		<Setter Property="Focusable" Value="False"/>
 		<Setter Property="Height" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Decrease}"/>
@@ -375,12 +375,12 @@
 		<Setter Property="Width" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 	</Style>
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Decrease:disabled /template/ ContentPresenter#PART_ContentPresenter">
-		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
-		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="Background" Value="{DynamicResource ButtonBackgroundTransparent}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushTransparent}"/>
 	</Style>
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Increase">
-		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
-		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="Background" Value="{DynamicResource ButtonBackgroundTransparent}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushTransparent}"/>
 		<Setter Property="Focusable" Value="False"/>
 		<Setter Property="Height" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Increase}"/>
@@ -390,8 +390,8 @@
 		<Setter Property="Width" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 	</Style>
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Increase:disabled /template/ ContentPresenter#PART_ContentPresenter">
-		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
-		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="Background" Value="{DynamicResource ButtonBackgroundTransparent}"/>
+		<Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrushTransparent}"/>
 	</Style>
 	<Style Selector="Slider.SessionControl_FilterParamsSlider">
 		<Setter Property="IsSnapToTickEnabled" Value="True"/>
