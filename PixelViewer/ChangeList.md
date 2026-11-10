@@ -15,6 +15,7 @@
 + Moved brightness and color adjustments into the new filter panel.
 + Improved the user experience of adjusting filter parameters.
 + Improved the user experience of full screen mode on macOS.
++ The last directories used for opening and saving images are now remembered separately.
 + Improved the user experience of specifying color pre-correction.
 + Improved the accuracy of color pre-correction.
 + Improved the quality of applying brightness, contrast, highlight and shadow adjustments.

@@ -38,6 +38,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -98,6 +99,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	static readonly SettingKey<bool> IsPlane3ParamsExpandedKey = new("SessionControl.IsPlane3ParamsExpanded", true);
 	static readonly StyledProperty<bool> IsPointerOverImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerOverImage));
 	static readonly StyledProperty<bool> IsPointerPressedOnImageProperty = AvaloniaProperty.Register<SessionControl, bool>(nameof(IsPointerPressedOnImage));
+	static readonly SettingKey<string> LastOpenedSourceFileDirectoryKey = new("SessionControl.LastOpenedSourceFileDirectory", "");
+	static readonly SettingKey<string> LastSavedImageDirectoryKey = new("SessionControl.LastSavedImageDirectory", "");
 	static readonly StyledProperty<Point> PointerPositionOnImageControlProperty = AvaloniaProperty.Register<SessionControl, Point>(nameof(PointerPositionOnImageControl));
 	static readonly StyledProperty<string> SelectedImageDisplayPixelArgbStringProperty = AvaloniaProperty.Register<SessionControl, string>(nameof(SelectedImageDisplayPixelArgbString), "");
 	static readonly StyledProperty<Rect> SelectedImageDisplayPixelBoundsProperty = AvaloniaProperty.Register<SessionControl, Rect>(nameof(SelectedImageDisplayPixelBounds));
@@ -1932,7 +1935,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 
 		// select files
-		var files = await this.attachedWindow.StorageProvider.OpenFilePickerAsync(new() { AllowMultiple = true });
+		var storageProvider = this.attachedWindow.StorageProvider;
+		var files = await storageProvider.OpenFilePickerAsync(new()
+		{
+			AllowMultiple = true,
+			SuggestedStartLocation = await this.TryGetStartLocationAsync(storageProvider, this.PersistentState.GetValueOrDefault(LastOpenedSourceFileDirectoryKey)),
+		});
 		var fileNames = new List<string>(files.Count);
 		foreach (var file in files)
 		{
@@ -1942,6 +1950,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		}
 		if (fileNames.Count == 0)
 			return;
+
+		// keep directory for next selection
+		Path.GetDirectoryName(fileNames[0])?.Let(it => this.PersistentState.SetValue(LastOpenedSourceFileDirectoryKey, it));
 
 		// open files
 		await this.OpenFilesAsync(fileNames, preferNewSession: false);
@@ -2208,7 +2219,8 @@ class SessionControl : UserControl<IAppSuiteApplication>
 
 		// select file
 		var app = (App)this.Application;
-		var fileName = (await this.attachedWindow.StorageProvider.SaveFilePickerAsync(new()
+		var storageProvider = this.attachedWindow.StorageProvider;
+		var fileName = (await storageProvider.SaveFilePickerAsync(new()
 		{
 			FileTypeChoices =
 			[
@@ -2229,10 +2241,14 @@ class SessionControl : UserControl<IAppSuiteApplication>
 					Patterns = [ "*.tif", "*.tiff" ],
 				}
 			],
-			SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg"
+			SuggestedFileName = session.SourceFileName?.Let(it => Path.GetFileNameWithoutExtension(it) + ".jpg") ?? $"Export_{session.ImageWidth}x{session.ImageHeight}.jpg",
+			SuggestedStartLocation = await this.TryGetStartLocationAsync(storageProvider, this.PersistentState.GetValueOrDefault(LastSavedImageDirectoryKey)),
 		}))?.Let(it => it.TryGetLocalPath());
 		if (string.IsNullOrEmpty(fileName))
 			return;
+
+		// keep directory for next selection
+		Path.GetDirectoryName(fileName)?.Let(it => this.PersistentState.SetValue(LastSavedImageDirectoryKey, it));
 
 		// check format
 		FileFormat? fileFormat = null;
@@ -2551,6 +2567,33 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	/// Status bar state.
 	/// </summary>
 	public StatusBarState StatusBarState => this.GetValue(StatusBarStateProperty);
+
+
+	// Get the nearest existing directory of the given one as start location of file picker.
+	async Task<IStorageFolder?> TryGetStartLocationAsync(IStorageProvider storageProvider, string? directory)
+	{
+		try
+		{
+			// find nearest existing directory
+			directory = await Task.Run(() =>
+			{
+				var candidate = directory;
+				while (!string.IsNullOrEmpty(candidate) && !Directory.Exists(candidate))
+					candidate = Path.GetDirectoryName(candidate);
+				return candidate;
+			}, CancellationToken.None);
+			if (string.IsNullOrEmpty(directory))
+				return null;
+
+			// get folder
+			return await storageProvider.TryGetFolderFromPathAsync(directory);
+		}
+		catch (Exception ex)
+		{
+			this.Logger.LogWarning(ex, "Unable to get start location of file picker, directory: {directory}", directory);
+			return null;
+		}
+	}
 
 
 	// Update whether the progress bar of image processing can be shown or not.
