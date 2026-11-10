@@ -88,6 +88,7 @@ class DngFileFormatParser : BaseFileFormatParser
     {
         // get image info
         var byteOrdering = ByteOrdering.LittleEndian;
+        var hasDngVersion = false;
         var hasCompressedThumb = false;
         var compressedThumbWidth = 0;
         var compressedThumbHeight = 0;
@@ -289,6 +290,10 @@ class DngFileFormatParser : BaseFileFormatParser
                             case 0x8769: // ExifOffset, the entries which describe how the image was captured are kept by the Exif IFD
                                 if (entryReader.CurrentIfdName == IfdNames.Default && entryReader.CurrentIfdIndex == 0 && entryReader.TryGetEntryData(out uintData) && uintData.IsNotEmpty())
                                     entryReader.EnqueueIfdToRead(entryReader.InitialStreamPosition + uintData[0], IfdNames.Exif);
+                                break;
+                            case 0xc612: // DNGVersion, which a DNG file defines in IFD 0
+                                if (entryReader.CurrentIfdName == IfdNames.Default && entryReader.CurrentIfdIndex == 0)
+                                    hasDngVersion = true;
                                 break;
                             case 0xc614: // UniqueCameraModel, it is defined in the IFD of main image
                                 if (entryReader.TryGetEntryData(out string? stringData) && !string.IsNullOrWhiteSpace(stringData))
@@ -558,6 +563,14 @@ class DngFileFormatParser : BaseFileFormatParser
         }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
+
+        // check whether the file is a DNG file or not. other TIFF-based raw files, such as NRW of COOLPIX, define no DNGVersion and would be rendered
+        // without their own packing, levels and colors, so they are left to their own parsers or to the TIFF parser
+        if (!hasDngVersion)
+        {
+            this.Logger.LogDebug("Not a DNG file, no DNGVersion is defined");
+            return null;
+        }
 
         // combine the metadata parsed from the file
         var mediaMetadata = Tiff.CombineMediaMetadata(ifdMetadata);

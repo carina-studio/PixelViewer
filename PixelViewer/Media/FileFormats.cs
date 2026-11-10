@@ -97,7 +97,7 @@ static class FileFormats
         dng = Register(new FileFormat(app, "Dng", [ ".dng" ]));
         heif = Register(new FileFormat(app, "Heif", [ ".heif", ".heic" ]));
         jpeg = Register(new FileFormat(app, "Jpeg", [ ".jpg", ".jpeg", ".jpe", ".jfif" ]));
-        nef = Register(new FileFormat(app, "Nef", [ ".nef" ]));
+        nef = Register(new FileFormat(app, "Nef", [ ".nef", ".nrw" ]));
         png = Register(new FileFormat(app, "Png", [ ".png" ]));
         rawBgra = Register(new FileFormat(app, "RawBgra", [ ".bgra" ]));
         tiff = Register(new FileFormat(app, "Tiff", [ ".tif", ".tiff" ]));
