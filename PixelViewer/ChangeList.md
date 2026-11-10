@@ -17,6 +17,7 @@
 + Improved the user experience of specifying color pre-correction.
 + Improved the accuracy of color pre-correction.
 + Improved the quality of applying brightness, contrast, highlight and shadow adjustments.
++ Improved the strength of vibrance adjustment and its protection of skin tones.
 
 ## Behavior Changes
 + Color pre-correction defined by an image file (such as DNG) is no longer kept after opening another file.

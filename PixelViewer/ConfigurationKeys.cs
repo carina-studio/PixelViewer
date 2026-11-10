@@ -23,7 +23,7 @@ sealed class ConfigurationKeys
     /// <summary>
     /// Sensitivity of vibrance adjustment.
     /// </summary>
-    public static readonly SettingKey<double> VibranceAdjustmentSensitivity = new(nameof(VibranceAdjustmentSensitivity), 0.75);
+    public static readonly SettingKey<double> VibranceAdjustmentSensitivity = new(nameof(VibranceAdjustmentSensitivity), 1);
     /// <summary>
     /// Duration of zoom animation in milliseconds.
     /// </summary>

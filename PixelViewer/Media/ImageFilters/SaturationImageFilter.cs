@@ -2,6 +2,7 @@ using CarinaStudio;
 using CarinaStudio.AppSuite;
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Carina.PixelViewer.Media.ImageFilters;
@@ -62,6 +63,41 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
     }
 
 
+    // Constants.
+    internal const double SkinToneHueEnd = 55;
+    internal const double SkinToneHueFullEnd = 40;
+    internal const double SkinToneHueFullStart = 10;
+    internal const double SkinToneHueStart = 0;
+    internal const double SkinToneProtection = 0.8;
+    internal const double SkinToneSaturationEnd = 0.75;
+    internal const double SkinToneSaturationFullEnd = 0.6;
+    internal const double SkinToneSaturationFullStart = 0.1;
+    internal const double SkinToneSaturationStart = 0.03;
+    const int SkinToneTableHueCount = 511;
+    const int SkinToneTableSaturationCount = 256;
+
+
+    // Static fields.
+    static readonly unsafe ushort* skinToneProtectionTable = BuildSkinToneProtectionTable();
+
+
+    // Build the table of protection of skin tone in Q12, indexed by ((G - B) * 255 / (R - min) + 255) * 256 + (R - min) * 255 / R for color whose R is the largest.
+    static unsafe ushort* BuildSkinToneProtectionTable()
+    {
+        var table = (ushort*)NativeMemory.Alloc(SkinToneTableHueCount * SkinToneTableSaturationCount * sizeof(ushort));
+        for (var hueIndex = SkinToneTableHueCount - 1; hueIndex >= 0; --hueIndex)
+        {
+            var hue = (hueIndex - 255) / 255.0 * 60;
+            for (var saturationIndex = SkinToneTableSaturationCount - 1; saturationIndex >= 0; --saturationIndex)
+            {
+                var weight = GetSkinToneWeight(hue, saturationIndex / 255.0);
+                table[hueIndex * SkinToneTableSaturationCount + saturationIndex] = (ushort)Math.Round(SkinToneProtection * weight * 4096);
+            }
+        }
+        return table;
+    }
+
+
     // Find min and max color.
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     static void FindMinMax(byte x, byte y, byte z, out byte min, out byte max)
@@ -119,6 +155,23 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
     }
 
 
+    // Get the weight in [0.0, 1.0] of how close the color is to skin tone, by its hue in degrees and its saturation which is (max - min) / max.
+    internal static double GetSkinToneWeight(double hue, double saturation)
+    {
+        // weight by hue
+        static double Smoothstep(double edge0, double edge1, double x)
+        {
+            var t = Math.Clamp((x - edge0) / (edge1 - edge0), 0, 1);
+            return t * t * (3 - 2 * t);
+        }
+        var hueWeight = Smoothstep(SkinToneHueStart, SkinToneHueFullStart, hue) * (1 - Smoothstep(SkinToneHueFullEnd, SkinToneHueEnd, hue));
+
+        // weight by saturation
+        var saturationWeight = Smoothstep(SkinToneSaturationStart, SkinToneSaturationFullStart, saturation) * (1 - Smoothstep(SkinToneSaturationFullEnd, SkinToneSaturationEnd, saturation));
+        return hueWeight * saturationWeight;
+    }
+
+
     /// <inheritdoc/>
     protected override unsafe void OnApplyFilter(IBitmapBuffer source, IBitmapBuffer result, Params parameters, CancellationToken cancellationToken)
     {
@@ -140,6 +193,7 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
                             var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
                             var packFunc = ImageProcessing.SelectBgra32Packing();
                             var normTable = ImageProcessing.ColorNormalizingTableUnsafe8;
+                            var protectionTable = skinToneProtectionTable;
                             ImageProcessing.ParallelFor(0, source.Height, y =>
                             {
                                 var srcPixelPtr = (uint*)((byte*)srcBaseAddress + (srcRowStride * y));
@@ -165,7 +219,10 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
                                         var satRatio = normTable[minMaxDiff];
                                         var vibrationShiftRatio = (int)((1 - satRatio) * qVibrance + 0.5);
                                         if (max == r)
-                                            vibrationShiftRatio = vibrationShiftRatio * (minMaxDiff + Math.Abs(g - b)) / (minMaxDiff << 1);
+                                        {
+                                            var protectionIndex = ((g - b) * 255 / minMaxDiff + 255) * SkinToneTableSaturationCount + minMaxDiff * 255 / max;
+                                            vibrationShiftRatio = (vibrationShiftRatio * (4096 - protectionTable[protectionIndex])) >> 12;
+                                        }
                                         shiftRatio += vibrationShiftRatio;
                                         if (shiftRatio < -4096)
                                             shiftRatio = -4096;
@@ -183,6 +240,7 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
                             var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
                             var packFunc = ImageProcessing.SelectBgra64Packing();
                             var normTable = ImageProcessing.ColorNormalizingTableUnsafe16;
+                            var protectionTable = skinToneProtectionTable;
                             ImageProcessing.ParallelFor(0, source.Height, y =>
                             {
                                 var srcPixelPtr = (ulong*)((byte*)srcBaseAddress + (srcRowStride * y));
@@ -208,7 +266,10 @@ class SaturationImageFilter : BaseImageFilter<SaturationImageFilter.Params>
                                         var satRatio = normTable[minMaxDiff];
                                         var vibrationShiftRatio = (int)((1 - satRatio) * qVibrance + 0.5);
                                         if (max == r)
-                                            vibrationShiftRatio = vibrationShiftRatio * (minMaxDiff + Math.Abs(g - b)) / (minMaxDiff << 1);
+                                        {
+                                            var protectionIndex = ((g - b) * 255 / minMaxDiff + 255) * SkinToneTableSaturationCount + minMaxDiff * 255 / max;
+                                            vibrationShiftRatio = (vibrationShiftRatio * (4096 - protectionTable[protectionIndex])) >> 12;
+                                        }
                                         shiftRatio += vibrationShiftRatio;
                                         if (shiftRatio < -4096)
                                             shiftRatio = -4096;
