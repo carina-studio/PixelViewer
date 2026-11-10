@@ -2,8 +2,8 @@
     <PropertyGroup>
 
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <AppSuiteVersion>4.0.0.1101-dev</AppSuiteVersion>
-        <AvaloniaVersion>12.1.3</AvaloniaVersion>
+        <AppSuiteVersion>4.0.0.1110-dev</AppSuiteVersion>
+        <AvaloniaVersion>12.1.6</AvaloniaVersion>
         <AvaloniaXamlBehaviorsVersion>12.0.7</AvaloniaXamlBehaviorsVersion>
         <DotNetLibVersion>11.0.0-rc.3.26522.148</DotNetLibVersion>
         <Nullable>enable</Nullable>

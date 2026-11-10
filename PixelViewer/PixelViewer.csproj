@@ -41,11 +41,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" /> <!-- Override AppSuite's base version -->
+		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" /> <!-- Override AppSuite's base version -->
+		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" /> <!-- Override AppSuite's base version -->
 		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="$(AppSuiteVersion)" />
 		<PackageReference Include="CarinaStudio.AppSuite.Fonts" Version="$(AppSuiteVersion)" />
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />
 		<PackageReference Include="ExifLibNet" Version="2.1.4" />
-		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="14.17.1" />
+		<PackageReference Include="Magick.NET-Q16-AnyCPU" Version="15.1.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="$(DotNetLibVersion)" /> <!-- Override AppSuite's base version -->
 		<PackageReference Include="Microsoft.Extensions.ObjectPool" Version="$(DotNetLibVersion)" /> <!-- Override AppSuite's base version -->
 		<PackageReference Include="Microsoft.Win32.SystemEvents" Version="$(DotNetLibVersion)" /> <!-- Override AppSuite's base version -->

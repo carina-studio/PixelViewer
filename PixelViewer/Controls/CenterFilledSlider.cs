@@ -15,21 +15,9 @@ namespace Carina.PixelViewer.Controls;
 class CenterFilledSlider : Slider
 {
 	/// <summary>
-	/// Property of <see cref="DisabledThumbBorderBrush"/>.
-	/// </summary>
-	public static readonly StyledProperty<IBrush?> DisabledThumbBorderBrushProperty = AvaloniaProperty.Register<CenterFilledSlider, IBrush?>(nameof(DisabledThumbBorderBrush));
-	/// <summary>
 	/// Property of <see cref="FillOrigin"/>.
 	/// </summary>
 	public static readonly StyledProperty<double> FillOriginProperty = AvaloniaProperty.Register<CenterFilledSlider, double>(nameof(FillOrigin));
-	/// <summary>
-	/// Property of <see cref="ThumbBorderBrush"/>.
-	/// </summary>
-	public static readonly StyledProperty<IBrush?> ThumbBorderBrushProperty = AvaloniaProperty.Register<CenterFilledSlider, IBrush?>(nameof(ThumbBorderBrush));
-	/// <summary>
-	/// Property of <see cref="ThumbBorderThickness"/>.
-	/// </summary>
-	public static readonly StyledProperty<Thickness> ThumbBorderThicknessProperty = AvaloniaProperty.Register<CenterFilledSlider, Thickness>(nameof(ThumbBorderThickness), new Thickness(1));
 	/// <summary>
 	/// Property of <see cref="TrackBrush"/>.
 	/// </summary>
@@ -67,16 +55,6 @@ class CenterFilledSlider : Slider
 			TrackFillBrushProperty,
 			TrackThicknessProperty,
 			ValueProperty);
-	}
-
-
-	/// <summary>
-	/// Get or set brush of the border of thumb while the slider is disabled. Set to <c>Null</c> to use <see cref="ThumbBorderBrush"/>.
-	/// </summary>
-	public IBrush? DisabledThumbBorderBrush
-	{
-		get => this.GetValue(DisabledThumbBorderBrushProperty);
-		set => this.SetValue(DisabledThumbBorderBrushProperty, value);
 	}
 
 
@@ -124,7 +102,6 @@ class CenterFilledSlider : Slider
 		this.trackBackground = e.NameScope.Find<Control>("TrackBackground");
 		this.trackBoundsObserverToken = this.track?.GetObservable(BoundsProperty).Subscribe(_ => this.InvalidateVisual());
 		this.UpdateTemplateTrackOpacity();
-		this.UpdateThumbBorder();
 	}
 
 
@@ -133,21 +110,10 @@ class CenterFilledSlider : Slider
 	{
 		base.OnPropertyChanged(change);
 		var property = change.Property;
-		if (property == ThemeVariantScope.ActualThemeVariantProperty)
+		if (property == ThemeVariantScope.ActualThemeVariantProperty || property == IsEffectivelyEnabledProperty)
 			this.InvalidateVisual();
-		else if (property == IsEffectivelyEnabledProperty)
-		{
-			this.InvalidateVisual();
-			this.UpdateThumbBorder();
-		}
 		else if (property == OrientationProperty)
 			this.UpdateTemplateTrackOpacity();
-		else if (property == DisabledThumbBorderBrushProperty
-		         || property == ThumbBorderBrushProperty
-		         || property == ThumbBorderThicknessProperty)
-		{
-			this.UpdateThumbBorder();
-		}
 	}
 
 
@@ -208,26 +174,6 @@ class CenterFilledSlider : Slider
 
 
 	/// <summary>
-	/// Get or set brush of the border of thumb. Set to <c>Null</c> to use the border of the theme.
-	/// </summary>
-	public IBrush? ThumbBorderBrush
-	{
-		get => this.GetValue(ThumbBorderBrushProperty);
-		set => this.SetValue(ThumbBorderBrushProperty, value);
-	}
-
-
-	/// <summary>
-	/// Get or set thickness of the border of thumb. It takes effect only when <see cref="ThumbBorderBrush"/> is set.
-	/// </summary>
-	public Thickness ThumbBorderThickness
-	{
-		get => this.GetValue(ThumbBorderThicknessProperty);
-		set => this.SetValue(ThumbBorderThicknessProperty, value);
-	}
-
-
-	/// <summary>
 	/// Get or set brush of the track while the slider is enabled. Set to <c>Null</c> to use the brush of the theme.
 	/// </summary>
 	public IBrush? TrackBrush
@@ -264,27 +210,5 @@ class CenterFilledSlider : Slider
 		this.trackBackground?.SetValue(OpacityProperty, opacity);
 		this.track?.DecreaseButton?.SetValue(OpacityProperty, opacity);
 		this.track?.IncreaseButton?.SetValue(OpacityProperty, opacity);
-	}
-
-
-	// Apply border to thumb, which overrides the border set by template.
-	void UpdateThumbBorder()
-	{
-		var thumb = this.track?.Thumb;
-		if (thumb is null)
-			return;
-		var brush = this.IsEffectivelyEnabled
-			? this.ThumbBorderBrush
-			: this.DisabledThumbBorderBrush ?? this.ThumbBorderBrush;
-		if (brush is not null)
-		{
-			thumb.BorderBrush = brush;
-			thumb.BorderThickness = this.ThumbBorderThickness;
-		}
-		else
-		{
-			thumb.ClearValue(BorderBrushProperty);
-			thumb.ClearValue(BorderThicknessProperty);
-		}
 	}
 }

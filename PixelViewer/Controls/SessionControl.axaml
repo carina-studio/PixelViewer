@@ -1253,7 +1253,6 @@
 					<!-- Resources -->
 					<DockPanel.Resources>
 						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.SidePanel.Separator.Height.Small"/>
-						<StaticResourceExtension x:Key="SliderThumbBackgroundDisabled" ResourceKey="Brush/SessionControl.FilterParamsSlider.Thumb.Background.Disabled"/>
 						<SolidColorBrush x:Key="SliderTrackValueFill" Color="Transparent"/>
 						<SolidColorBrush x:Key="SliderTrackValueFillDisabled" Color="Transparent"/>
 					</DockPanel.Resources>
@@ -1291,7 +1290,7 @@
 										<RepeatButton Name="brightnessAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #brightnessAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="brightnessAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="brightnessAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="2" Minimum="-2" TickFrequency="0.05" Value="{Binding BrightnessAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="brightnessAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #brightnessAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1304,7 +1303,7 @@
 										<RepeatButton Name="contrastAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #contrastAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="contrastAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ContrastAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="contrastAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #contrastAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1317,7 +1316,7 @@
 										<RepeatButton Name="highlightAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #highlightAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="highlightAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="highlightAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding HighlightAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="highlightAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #highlightAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1330,7 +1329,7 @@
 										<RepeatButton Name="shadowAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #shadowAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="shadowAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="shadowAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Brightness}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding ShadowAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="shadowAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #shadowAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1350,7 +1349,7 @@
 										<RepeatButton Name="warmthAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #warmthAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="warmthAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Warmth}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding WarmthAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="warmthAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Warmth}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding WarmthAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="warmthAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #warmthAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1363,7 +1362,7 @@
 										<RepeatButton Name="tintAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #tintAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="tintAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Tint}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding TintAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="tintAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Tint}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding TintAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="tintAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #tintAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1376,7 +1375,7 @@
 										<RepeatButton Name="redColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Red}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="redColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Red}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding RedColorAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="redColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #redColorAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1389,7 +1388,7 @@
 										<RepeatButton Name="greenColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Green}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="greenColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Green}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding GreenColorAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="greenColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #greenColorAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1402,7 +1401,7 @@
 										<RepeatButton Name="blueColorAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Blue}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="blueColorAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Blue}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding BlueColorAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="blueColorAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #blueColorAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1415,7 +1414,7 @@
 										<RepeatButton Name="saturationAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Saturation}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="saturationAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Saturation}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding SaturationAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="saturationAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #saturationAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
@@ -1428,7 +1427,7 @@
 										<RepeatButton Name="vibranceAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
 										</RepeatButton>
-										<appControls:CenterFilledSlider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Saturation}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
+										<appControls:CenterFilledSlider Name="vibranceAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" Grid.Column="1" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Saturation}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding VibranceAdjustment, Mode=TwoWay}"/>
 										<RepeatButton Name="vibranceAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #vibranceAdjustmentSlider}" Grid.Column="2">
 											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
 										</RepeatButton>
