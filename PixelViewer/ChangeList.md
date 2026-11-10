@@ -6,6 +6,7 @@
 + Added support for specifying insets of each edge of image.
 + Added support for color pre-correction of RGB and ARGB formats.
 + Added warmth and tint adjustments.
++ Added auto brightness adjustment.
 + Added `ProPhoto RGB` color space.
 
 ## Improvement

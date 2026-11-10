@@ -188,6 +188,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">关于 PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">应用程序选项…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">重置至配置参数</sys:String>
+	<sys:String x:Key="String/SessionControl.AutoAdjust">自动调整</sys:String>
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer 排列方式</sys:String>
 	<sys:String x:Key="String/SessionControl.BlackLevel">黑色值</sys:String>
 	<sys:String x:Key="String/SessionControl.BlueColorGain">蓝色增益</sys:String>
@@ -291,7 +292,6 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在保存绘制的图像…</sys:String>
 	<sys:String x:Key="String/SessionControl.ScreenColorSpace">屏幕色彩空间</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">在图片上移动鼠标以查看像素信息。</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">自动调整</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode">您选择了 {0} 个文件，想要如何打开？</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">分别查看</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">帧序列</sys:String>

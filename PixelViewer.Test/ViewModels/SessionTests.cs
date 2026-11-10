@@ -1,5 +1,6 @@
 using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageEncoders;
+using Carina.PixelViewer.Media.ImageFilters;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using Carina.PixelViewer.ViewModels;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace Carina.PixelViewer.Test.ViewModels
 {
@@ -329,6 +331,113 @@ namespace Carina.PixelViewer.Test.ViewModels
 				{
 					// close file
 					session.Profile = ImageRenderingProfile.Default;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
+				}
+			});
+		}
+
+
+		/// <summary>
+		/// Test for selecting brightness, contrast, highlight and shadow by auto brightness adjustment.
+		/// </summary>
+		[Test]
+		public void TestAutoBrightnessAdjustment()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// open file
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// select adjustments
+					Assert.That(session.SelectBrightnessAdjustmentCommand.CanExecute(null), Is.True, "Auto brightness adjustment should be available after rendering.");
+					session.SelectBrightnessAdjustmentCommand.Execute(null);
+					Assert.That(Math.Abs(session.BrightnessAdjustment), Is.LessThanOrEqualTo(ColorLut.AutoBrightnessMaxEv), "Selected brightness should be in range.");
+					Assert.That(session.ContrastAdjustment, Is.InRange(0, ColorLut.AutoContrastMax), "Selected contrast should be in range.");
+					Assert.That(session.HighlightAdjustment, Is.InRange(-ColorLut.AutoHighlightMax, 0), "Selected highlight should be in range.");
+					Assert.That(session.ShadowAdjustment, Is.InRange(0, ColorLut.AutoShadowMax), "Selected shadow should be in range.");
+				}
+				finally
+				{
+					// close file
+					session.BrightnessAdjustment = 0;
+					session.ContrastAdjustment = 0;
+					session.HighlightAdjustment = 0;
+					session.ShadowAdjustment = 0;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
+				}
+			});
+		}
+
+
+		/// <summary>
+		/// Test for selecting adjustments by auto brightness adjustment only from the region of source image left by its insets.
+		/// </summary>
+		[Test]
+		public void TestAutoBrightnessAdjustmentInSourceRegion()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// generate L8 image of dark midtones surrounded by a bright border which insets take away, the border is kept away from white so that it is not taken as clipped whatever the color space
+				const int Width = 64;
+				const int Height = 48;
+				var insets = new PixelInsets(4, 3, 10, 5);
+				var data = new byte[Width * Height];
+				for (var y = Height - 1; y >= 0; --y)
+				{
+					for (var x = Width - 1; x >= 0; --x)
+					{
+						var isInside = x >= insets.Left && x < Width - insets.Right && y >= insets.Top && y < Height - insets.Bottom;
+						data[y * Width + x] = (byte)(isInside ? 60 : 200);
+					}
+				}
+				string filePath;
+				using (var stream = this.CreateCacheFile())
+				{
+					stream.Write(data);
+					filePath = stream.Name;
+				}
+
+				// open file and render it as L8
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// the bright border is taken as highlights without insets
+					ImageRenderers.TryFindByFormatName("L8", out var l8Renderer);
+					session.ImageRenderer = l8Renderer.AsNonNull();
+					session.ImageWidth = Width;
+					session.ImageHeight = Height;
+					Assert.That(await WaitForConditionAsync(() => session.RenderedImage is { } image && image.PixelSize.Width == Width && image.PixelSize.Height == Height && !session.IsRenderingImage && session.Histograms?.EffectivePixelCount == Width * Height && session.SelectBrightnessAdjustmentCommand.CanExecute(null), 10000), Is.True, "Whole image should be rendered and analyzed.");
+					session.SelectBrightnessAdjustmentCommand.Execute(null);
+					Assert.That(session.HighlightAdjustment, Is.LessThan(0), "Bright border should be taken as highlights without insets.");
+					session.HighlightAdjustment = 0;
+
+					// only the region left by insets is sampled
+					session.SourceInsets = insets;
+					var regionWidth = Width - insets.Left - insets.Right;
+					var regionHeight = Height - insets.Top - insets.Bottom;
+					Assert.That(await WaitForConditionAsync(() => session.RenderedImage is { } image && image.PixelSize.Width == regionWidth && image.PixelSize.Height == regionHeight && !session.IsRenderingImage && session.Histograms?.EffectivePixelCount == regionWidth * regionHeight && session.SelectBrightnessAdjustmentCommand.CanExecute(null), 10000), Is.True, "Region left by insets should be shown and analyzed.");
+					session.SelectBrightnessAdjustmentCommand.Execute(null);
+					Assert.That(session.HighlightAdjustment, Is.EqualTo(0), "Border taken away by insets should not be sampled.");
+				}
+				finally
+				{
+					// close file
+					session.BrightnessAdjustment = 0;
+					session.ContrastAdjustment = 0;
+					session.HighlightAdjustment = 0;
+					session.ShadowAdjustment = 0;
 					session.ClearSourceCommand.Execute(null);
 					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
 					await DeleteFileAsync(filePath);
@@ -739,6 +848,72 @@ namespace Carina.PixelViewer.Test.ViewModels
 					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
 					foreach (var filePath in filePaths)
 						await DeleteFileAsync(filePath);
+				}
+			});
+		}
+
+
+		/// <summary>
+		/// Test for taking the smallest step of each filter parameter as an adjustment which can be reset and is kept in the saved state.
+		/// </summary>
+		[Test]
+		public void TestSmallestFilterParamValues()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// save the state of session as a JSON string
+				static string SaveState(Session session)
+				{
+					using var stream = new MemoryStream();
+					using (var writer = new Utf8JsonWriter(stream))
+						session.SaveState(writer);
+					return Encoding.UTF8.GetString(stream.ToArray());
+				}
+
+				// open file
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// set each parameter to its smallest step and reset it
+					var parameters = new (string Name, Action<double> Set, Func<double> Get, Func<bool> Has, ICommand Reset, bool IsSaved)[]
+					{
+						(nameof(Session.BrightnessAdjustment), it => session.BrightnessAdjustment = it, () => session.BrightnessAdjustment, () => session.HasBrightnessAdjustment, session.ResetBrightnessAdjustmentCommand, true),
+						(nameof(Session.ContrastAdjustment), it => session.ContrastAdjustment = it, () => session.ContrastAdjustment, () => session.HasContrastAdjustment, session.ResetContrastAdjustmentCommand, true),
+						(nameof(Session.HighlightAdjustment), it => session.HighlightAdjustment = it, () => session.HighlightAdjustment, () => session.HasHighlightAdjustment, session.ResetHighlightAdjustmentCommand, true),
+						(nameof(Session.ShadowAdjustment), it => session.ShadowAdjustment = it, () => session.ShadowAdjustment, () => session.HasShadowAdjustment, session.ResetShadowAdjustmentCommand, true),
+						(nameof(Session.RedColorAdjustment), it => session.RedColorAdjustment = it, () => session.RedColorAdjustment, () => session.HasColorAdjustment, session.ResetColorAdjustmentCommand, true),
+						(nameof(Session.GreenColorAdjustment), it => session.GreenColorAdjustment = it, () => session.GreenColorAdjustment, () => session.HasColorAdjustment, session.ResetColorAdjustmentCommand, true),
+						(nameof(Session.BlueColorAdjustment), it => session.BlueColorAdjustment = it, () => session.BlueColorAdjustment, () => session.HasColorAdjustment, session.ResetColorAdjustmentCommand, true),
+						(nameof(Session.SaturationAdjustment), it => session.SaturationAdjustment = it, () => session.SaturationAdjustment, () => session.HasSaturationAdjustment, session.ResetSaturationAdjustmentCommand, false),
+						(nameof(Session.VibranceAdjustment), it => session.VibranceAdjustment = it, () => session.VibranceAdjustment, () => session.HasVibranceAdjustment, session.ResetVibranceAdjustmentCommand, true),
+						(nameof(Session.TintAdjustment), it => session.TintAdjustment = it, () => session.TintAdjustment, () => session.HasTintAdjustment, session.ResetTintAdjustmentCommand, true),
+						(nameof(Session.WarmthAdjustment), it => session.WarmthAdjustment = it, () => session.WarmthAdjustment, () => session.HasWarmthAdjustment, session.ResetWarmthAdjustmentCommand, true),
+					};
+					foreach (var (name, set, get, has, reset, isSaved) in parameters)
+					{
+						foreach (var value in new[] { 0.01, -0.01 })
+						{
+							set(value);
+							Assert.That(has(), Is.True, $"{name} of {value} should be reported as adjusted.");
+							Assert.That(reset.CanExecute(null), Is.True, $"{name} of {value} should be resettable.");
+							if (isSaved)
+								Assert.That(SaveState(session), Does.Contain($"\"{name}\""), $"{name} of {value} should be written to the saved state.");
+							reset.Execute(null);
+							Assert.That(get(), Is.EqualTo(0), $"{name} of {value} should be reset.");
+							Assert.That(has(), Is.False, $"{name} should not be reported as adjusted after resetting.");
+						}
+					}
+				}
+				finally
+				{
+					// close file
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
 				}
 			});
 		}

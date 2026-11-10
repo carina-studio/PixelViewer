@@ -228,6 +228,7 @@
 	<sys:String x:Key="String/SessionControl.ApplicationInfo">About PixelViewer…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplicationOptions">Options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ApplyProfile">Reset to Profile Parameters</sys:String>
+	<sys:String x:Key="String/SessionControl.AutoAdjust">Auto Adjust</sys:String>
 	<sys:String x:Key="String/SessionControl.BayerPattern">Bayer Pattern</sys:String>
 	<sys:String x:Key="String/SessionControl.BlackLevel">Black Level</sys:String>
 	<sys:String x:Key="String/SessionControl.BlueColorGain">Blue Gain</sys:String>
@@ -332,7 +333,6 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
 	<sys:String x:Key="String/SessionControl.ScreenColorSpace">Screen Color Space</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">Move the cursor over the image to view pixel information.</sys:String>
-	<sys:String x:Key="String/SessionControl.SelectColorAdjustment">Auto Adjust</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode">You selected {0} files. How do you want to open them?</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">View Separately</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">Frame Sequence</sys:String>

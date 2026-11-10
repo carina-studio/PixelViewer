@@ -1323,6 +1323,8 @@
 										</RepeatButton>
 									</Grid>
 									<Separator asControls:DialogElement.SeparatorType="Default"/>
+									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding SelectBrightnessAdjustmentCommand}" Content="{asXaml:StringResource SessionControl.AutoAdjust}"/>
+									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding #root.ResetBrightnessAndContrastAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}"/>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
 								</StackPanel>
@@ -1421,7 +1423,7 @@
 										</RepeatButton>
 									</Grid>
 									<Separator asControls:DialogElement.SeparatorType="Default"/>
-									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding SelectColorAdjustmentCommand}" Content="{asXaml:StringResource SessionControl.SelectColorAdjustment}"/>
+									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding SelectColorAdjustmentCommand}" Content="{asXaml:StringResource SessionControl.AutoAdjust}"/>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>
 									<Button Classes="SessionControl_SidePanel_Button" Command="{Binding #root.ResetColorAdjustmentCommand}" Content="{asXaml:StringResource Common.Reset}"/>
 									<Separator asControls:DialogElement.SeparatorType="Small"/>

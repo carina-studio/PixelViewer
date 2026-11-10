@@ -168,7 +168,7 @@ class ToneCurveImageFilterTests : BaseTests
 			foreach (var format in Formats)
 			{
 				// apply
-				var lut = await CreateLutAsync(format, it => ColorLut.ContrastTransformAsync(it, 0.5, CancellationToken.None));
+				var lut = await CreateLutAsync(format, it => ColorLut.ContrastTransformAsync(it, 0.5, null, null, CancellationToken.None));
 				var maxColor = lut.Length - 1.0;
 				var pixels = new (double, double, double, double)[11];
 				for (var i = pixels.Length - 1; i >= 0; --i)
