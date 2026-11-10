@@ -896,5 +896,77 @@ namespace Carina.PixelViewer.Test.ViewModels
 				}
 			});
 		}
+
+
+		/// <summary>
+		/// Test for adjusting warmth and tint, keeping them in the saved state, and selecting them by auto color adjustment.
+		/// </summary>
+		[Test]
+		public void TestWarmthAndTintAdjustment()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// save the state of session as a JSON string
+				static string SaveState(Session session)
+				{
+					using var stream = new MemoryStream();
+					using (var writer = new Utf8JsonWriter(stream))
+						session.SaveState(writer);
+					return Encoding.UTF8.GetString(stream.ToArray());
+				}
+
+				// open file
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
+				try
+				{
+					// adjust warmth and tint, which are coerced to [-1.0, 1.0]
+					Assert.That(session.HasWarmthAdjustment || session.HasTintAdjustment, Is.False, "Warmth and tint should not be adjusted by default.");
+					Assert.That(SaveState(session), Does.Not.Contain($"\"{nameof(Session.WarmthAdjustment)}\"").And.Not.Contain($"\"{nameof(Session.TintAdjustment)}\""), "Warmth and tint which are not adjusted should not be written to the saved state.");
+					session.WarmthAdjustment = 2;
+					session.TintAdjustment = -0.4;
+					Assert.That(session.WarmthAdjustment, Is.EqualTo(1), "Warmth should be coerced to the range.");
+					Assert.That(session.HasWarmthAdjustment, Is.True, "Warmth should be reported as adjusted.");
+					Assert.That(session.HasTintAdjustment, Is.True, "Tint should be reported as adjusted.");
+					Assert.That(session.ResetWarmthAdjustmentCommand.CanExecute(null), Is.True, "Warmth should be resettable.");
+					Assert.That(session.ResetTintAdjustmentCommand.CanExecute(null), Is.True, "Tint should be resettable.");
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsFilteringRenderedImageNeeded), true, 1000), Is.True, "Filtering should be needed after adjusting warmth and tint.");
+
+					// keep warmth and tint in the saved state
+					var savedState = SaveState(session);
+					session.ResetWarmthAdjustmentCommand.Execute(null);
+					session.ResetTintAdjustmentCommand.Execute(null);
+					Assert.That(session.HasWarmthAdjustment || session.HasTintAdjustment, Is.False, "Warmth and tint should be reset.");
+					using (var document = JsonDocument.Parse(savedState))
+						await session.RestoreState(document.RootElement);
+					Assert.That(session.WarmthAdjustment, Is.EqualTo(1), "Warmth should be restored from the saved state.");
+					Assert.That(session.TintAdjustment, Is.EqualTo(-0.4), "Tint should be restored from the saved state.");
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file after restoring state.");
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.HasHistograms), true, 10000), Is.True, "Unable to complete rendering after restoring state.");
+
+					// auto color adjustment selects warmth and tint, and resets the RGB adjustment
+					session.RedColorAdjustment = 0.5;
+					Assert.That(session.SelectColorAdjustmentCommand.CanExecute(null), Is.True, "Auto color adjustment should be available after rendering.");
+					session.SelectColorAdjustmentCommand.Execute(null);
+					Assert.That(session.RedColorAdjustment, Is.EqualTo(0), "RGB adjustment should be reset by auto color adjustment.");
+					Assert.That(session.HasColorAdjustment, Is.False, "RGB adjustment should not be reported after auto color adjustment.");
+					Assert.That(Math.Abs(session.WarmthAdjustment), Is.LessThanOrEqualTo(1), "Warmth selected by auto color adjustment should be in range.");
+					Assert.That(Math.Abs(session.TintAdjustment), Is.LessThanOrEqualTo(1), "Tint selected by auto color adjustment should be in range.");
+				}
+				finally
+				{
+					// close file
+					session.WarmthAdjustment = 0;
+					session.TintAdjustment = 0;
+					session.RedColorAdjustment = 0;
+					session.ClearSourceCommand.Execute(null);
+					await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000);
+					await DeleteFileAsync(filePath);
+				}
+			});
+		}
 	}
 }

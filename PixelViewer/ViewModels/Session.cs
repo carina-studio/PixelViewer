@@ -486,6 +486,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasSourceDataSizeProp = ObservableProperty.Register<Session, bool>(nameof(HasSourceDataSize));
 	/// <summary>
+	/// Property of <see cref="HasTintAdjustment"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> HasTintAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasTintAdjustment));
+	/// <summary>
 	/// Property of <see cref="HasToneCurve"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasToneCurveProp = ObservableProperty.Register<Session, bool>(nameof(HasToneCurve));
@@ -493,6 +497,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Property of <see cref="HasVibranceAdjustment"/>.
 	/// </summary>
 	public static readonly ObservableProperty<bool> HasVibranceAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasVibranceAdjustment));
+	/// <summary>
+	/// Property of <see cref="HasWarmthAdjustment"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> HasWarmthAdjustmentProp = ObservableProperty.Register<Session, bool>(nameof(HasWarmthAdjustment));
 	/// <summary>
 	/// Property of <see cref="HighlightAdjustment"/>.
 	/// </summary>
@@ -868,6 +876,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<int> TileWidthProp = ObservableProperty.Register<Session, int>(nameof(TileWidth), 0, coerce: (_, it) => Math.Max(0, it));
 	/// <summary>
+	/// Property of <see cref="TintAdjustment"/>.
+	/// </summary>
+	public static readonly ObservableProperty<double> TintAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(TintAdjustment), 0,
+		coerce: (_, it) => Math.Clamp(it, -1, 1),
+		validate: double.IsFinite);
+	/// <summary>
 	/// Property of <see cref="TotalRenderedImagesMemoryUsage"/>.
 	/// </summary>
 	public static readonly ObservableProperty<long> TotalRenderedImagesMemoryUsageProp = ObservableProperty.Register<Session, long>(nameof(TotalRenderedImagesMemoryUsage));
@@ -887,6 +901,12 @@ class Session : ViewModel<IAppSuiteApplication>
 				return 1;
 			return it;
 		},
+		validate: double.IsFinite);
+	/// <summary>
+	/// Property of <see cref="WarmthAdjustment"/>.
+	/// </summary>
+	public static readonly ObservableProperty<double> WarmthAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(WarmthAdjustment), 0,
+		coerce: (_, it) => Math.Clamp(it, -1, 1),
 		validate: double.IsFinite);
 	/// <summary>
 	/// Property of <see cref="YuvToBgraConverter"/>.
@@ -944,7 +964,9 @@ class Session : ViewModel<IAppSuiteApplication>
 	readonly MutableObservableBoolean canResetHighlightAdjustment = new();
 	readonly MutableObservableBoolean canResetSaturationAdjustment = new();
 	readonly MutableObservableBoolean canResetShadowAdjustment = new();
+	readonly MutableObservableBoolean canResetTintAdjustment = new();
 	readonly MutableObservableBoolean canResetVibranceAdjustment = new();
+	readonly MutableObservableBoolean canResetWarmthAdjustment = new();
 	readonly MutableObservableBoolean canSaveAsNewProfile = new();
 	readonly MutableObservableBoolean canSaveOrDeleteProfile = new();
 	readonly MutableObservableBoolean canSaveFilteredImage = new();
@@ -1066,7 +1088,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.ResetRgbGainCommand = new Command(this.ResetRgbGain, this.GetValueAsObservable(HasRgbGainProp));
 		this.ResetSaturationAdjustmentCommand = new Command(this.ResetSaturationAdjustment, this.canResetSaturationAdjustment);
 		this.ResetShadowAdjustmentCommand = new Command(this.ResetShadowAdjustment, this.canResetShadowAdjustment);
+		this.ResetTintAdjustmentCommand = new Command(this.ResetTintAdjustment, this.canResetTintAdjustment);
 		this.ResetVibranceAdjustmentCommand = new Command(this.ResetVibranceAdjustment, this.canResetVibranceAdjustment);
+		this.ResetWarmthAdjustmentCommand = new Command(this.ResetWarmthAdjustment, this.canResetWarmthAdjustment);
 		this.RotateLeftCommand = new Command(this.RotateLeft, isSrcFileOpenedObservable);
 		this.RotateRightCommand = new Command(this.RotateRight, isSrcFileOpenedObservable);
 		this.SaveAsNewProfileCommand = new Command<string>(this.SaveAsNewProfile, this.canSaveAsNewProfile);
@@ -1199,7 +1223,9 @@ class Session : ViewModel<IAppSuiteApplication>
 				|| this.canResetHighlightAdjustment.Value
 				|| this.canResetSaturationAdjustment.Value
 				|| this.canResetShadowAdjustment.Value
+				|| this.canResetTintAdjustment.Value
 				|| this.canResetVibranceAdjustment.Value
+				|| this.canResetWarmthAdjustment.Value
 				|| (this.IsGrayscaleFilterEnabled && this.IsGrayscaleFilterSupported));
 		});
 		
@@ -2817,7 +2843,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			isSaturationFilterNeeded = true;
 			++filterCount;
 		}
-		if (this.canResetColorAdjustment.Value)
+		if (this.canResetColorAdjustment.Value
+			|| this.canResetTintAdjustment.Value
+			|| this.canResetWarmthAdjustment.Value)
 		{
 			isColorLutFilterNeeded = true;
 			++filterCount;
@@ -2918,6 +2946,10 @@ class Session : ViewModel<IAppSuiteApplication>
 		// prepare for performance check
 		var stopwatch = this.Application.IsDebugMode ? new Stopwatch() : null;
 
+		// get transfer functions and luminance weights of colors of the frame
+		var (toLinear, fromLinear) = SelectColorTransferFunctions(renderedImageFrame, isColorSpaceConverted);
+		var luminanceWeights = ToneCurveImageFilter.SelectLuminanceWeights(renderedImageFrame.BitmapBuffer.ColorSpace);
+
 		// apply color LUT filter
 		if (!failedToApply && isColorLutFilterNeeded)
 		{
@@ -2927,20 +2959,37 @@ class Session : ViewModel<IAppSuiteApplication>
 			var bLut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
 			try
 			{
+				// apply warmth and tint to linear color
 				stopwatch?.Restart();
-				unsafe
+				if (this.canResetTintAdjustment.Value || this.canResetWarmthAdjustment.Value)
 				{
-					var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-					var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-					var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
-					var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
-					rFactor *= correction;
-					gFactor *= correction;
-					bFactor *= correction;
-					ColorLut.Multiply(rLut, rFactor);
-					ColorLut.Multiply(gLut, gFactor);
-					ColorLut.Multiply(bLut, bFactor);
+					var warmth = this.canResetWarmthAdjustment.Value ? this.WarmthAdjustment : 0;
+					var tint = this.canResetTintAdjustment.Value ? this.TintAdjustment : 0;
+					var (rGain, gGain, bGain) = ColorLut.SelectWhiteBalanceGains(warmth, tint, luminanceWeights);
+					await ColorLut.GainTransformAsync(rLut, rGain, toLinear, fromLinear, cancellationTokenSource.Token);
+					await ColorLut.GainTransformAsync(gLut, gGain, toLinear, fromLinear, cancellationTokenSource.Token);
+					await ColorLut.GainTransformAsync(bLut, bGain, toLinear, fromLinear, cancellationTokenSource.Token);
 				}
+
+				// apply RGB adjustment
+				if (this.canResetColorAdjustment.Value)
+				{
+					unsafe
+					{
+						var rFactor = this.RedColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var gFactor = this.GreenColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var bFactor = this.BlueColorAdjustment.Let(it => it > 0.001 ? it + 1 : -1 / (it - 1));
+						var correction = 1 / ImageProcessing.SelectRgbToLuminanceConversion()(rFactor, gFactor, bFactor);
+						rFactor *= correction;
+						gFactor *= correction;
+						bFactor *= correction;
+						ColorLut.Multiply(rLut, rFactor);
+						ColorLut.Multiply(gLut, gFactor);
+						ColorLut.Multiply(bLut, bFactor);
+					}
+				}
+
+				// report time
 				if (stopwatch is not null)
 					this.Logger.LogTrace("Take {ms} ms to prepare color LUT", stopwatch.ElapsedMilliseconds);
 			}
@@ -3008,22 +3057,6 @@ class Session : ViewModel<IAppSuiteApplication>
 		// apply luminance LUT filter
 		if (!failedToApply && isLuminanceLutFilterNeeded)
 		{
-			// get transfer functions and luminance weights of colors of the frame
-			Func<double, double>? toLinear;
-			Func<double, double>? fromLinear;
-			if (isColorSpaceConverted)
-			{
-				var colorSpace = renderedImageFrame.BitmapBuffer.ColorSpace;
-				toLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferToLinear;
-				fromLinear = colorSpace.IsLinear ? null : colorSpace.NumericalTransferFromLinear;
-			}
-			else
-			{
-				toLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncToLinear;
-				fromLinear = renderedImageFrame.RenderingOptions.ColorTransferFuncFromLinear;
-			}
-			var luminanceWeights = ToneCurveImageFilter.SelectLuminanceWeights(renderedImageFrame.BitmapBuffer.ColorSpace);
-
 			// prepare LUT
 			var lut = ColorLut.ObtainIdentity(renderedImageFrame.BitmapBuffer.Format);
 			try
@@ -3471,6 +3504,12 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Check whether <see cref="TintAdjustment"/> is non-zero or not.
+	/// </summary>
+	public bool HasTintAdjustment => this.GetValue(HasTintAdjustmentProp);
+
+
+	/// <summary>
 	/// Check whether current <see cref="Profile"/> defines a tone curve which can be applied for current <see cref="ImageRenderer"/> or not.
 	/// </summary>
 	public bool HasToneCurve => this.GetValue(HasToneCurveProp);
@@ -3480,6 +3519,12 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Check whether <see cref="VibranceAdjustment"/> is non-zero or not.
 	/// </summary>
 	public bool HasVibranceAdjustment => this.GetValue(HasVibranceAdjustmentProp);
+
+
+	/// <summary>
+	/// Check whether <see cref="WarmthAdjustment"/> is non-zero or not.
+	/// </summary>
+	public bool HasWarmthAdjustment => this.GetValue(HasWarmthAdjustmentProp);
 
 
 	// Hibernate another session.
@@ -4245,6 +4290,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		else if (property == IsColorAdjustmentSupportedProp)
 		{
 			this.canResetColorAdjustment.Update(this.HasColorAdjustment && (bool)newValue.AsNonNull());
+			this.canResetTintAdjustment.Update(this.HasTintAdjustment && (bool)newValue.AsNonNull());
+			this.canResetWarmthAdjustment.Update(this.HasWarmthAdjustment && (bool)newValue.AsNonNull());
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Reschedule();
 		}
@@ -4421,10 +4468,24 @@ class Session : ViewModel<IAppSuiteApplication>
 			// show the region, which needs no rendering if the image has been rendered
 			this.renderImageAction.Reschedule();
 		}
+		else if (property == TintAdjustmentProp)
+		{
+			this.SetValue(HasTintAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.canResetTintAdjustment.Update(this.HasTintAdjustment && this.IsColorAdjustmentSupported);
+			this.updateIsFilteringImageNeededAction.Schedule();
+			this.filterImageAction.Schedule(RenderImageDelay);
+		}
 		else if (property == VibranceAdjustmentProp)
 		{
 			this.SetValue(HasVibranceAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
 			this.canResetVibranceAdjustment.Update(this.HasVibranceAdjustment && this.IsShadowAdjustmentSupported);
+			this.updateIsFilteringImageNeededAction.Schedule();
+			this.filterImageAction.Schedule(RenderImageDelay);
+		}
+		else if (property == WarmthAdjustmentProp)
+		{
+			this.SetValue(HasWarmthAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) > 0.01);
+			this.canResetWarmthAdjustment.Update(this.HasWarmthAdjustment && this.IsColorAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
 		}
@@ -6098,7 +6159,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.ResetHighlightAdjustment();
 		this.ResetSaturationAdjustment();
 		this.ResetShadowAdjustment();
+		this.ResetTintAdjustment();
 		this.ResetVibranceAdjustment();
+		this.ResetWarmthAdjustment();
 		this.SetValue(IsGrayscaleFilterEnabledProp, false);
 	}
 
@@ -6169,6 +6232,22 @@ class Session : ViewModel<IAppSuiteApplication>
 	public ICommand ResetShadowAdjustmentCommand { get; }
 
 
+	// Reset tint adjustment.
+	void ResetTintAdjustment()
+	{
+		this.VerifyAccess();
+		if (this.IsDisposed)
+			return;
+		this.SetValue(TintAdjustmentProp, 0);
+	}
+
+
+	/// <summary>
+	/// Command to reset <see cref="TintAdjustment"/>.
+	/// </summary>
+	public ICommand ResetTintAdjustmentCommand { get; }
+
+
 	// Reset vibrance adjustment.
 	void ResetVibranceAdjustment()
 	{
@@ -6183,6 +6262,22 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Command to reset <see cref="VibranceAdjustment"/>.
 	/// </summary>
 	public ICommand ResetVibranceAdjustmentCommand { get; }
+
+
+	// Reset warmth adjustment.
+	void ResetWarmthAdjustment()
+	{
+		this.VerifyAccess();
+		if (this.IsDisposed)
+			return;
+		this.SetValue(WarmthAdjustmentProp, 0);
+	}
+
+
+	/// <summary>
+	/// Command to reset <see cref="WarmthAdjustment"/>.
+	/// </summary>
+	public ICommand ResetWarmthAdjustmentCommand { get; }
 
 
 	/// <summary>
@@ -6371,7 +6466,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		var isGrayscaleFilterEnabled = false;
 		var redColorAdjustment = 0.0;
 		var shadowAdjustment = 0.0;
+		var tintAdjustment = 0.0;
 		var vibranceAdjustment = 0.0;
+		var warmthAdjustment = 0.0;
 		if (savedState.TryGetProperty(nameof(BlueColorAdjustment), out jsonProperty))
 			jsonProperty.TryGetDouble(out blueColorAdjustment);
 		if (savedState.TryGetProperty(nameof(BrightnessAdjustment), out jsonProperty))
@@ -6388,8 +6485,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			jsonProperty.TryGetDouble(out redColorAdjustment);
 		if (savedState.TryGetProperty(nameof(ShadowAdjustment), out jsonProperty))
 			jsonProperty.TryGetDouble(out shadowAdjustment);
+		if (savedState.TryGetProperty(nameof(TintAdjustment), out jsonProperty))
+			jsonProperty.TryGetDouble(out tintAdjustment);
 		if (savedState.TryGetProperty(nameof(VibranceAdjustment), out jsonProperty))
 			jsonProperty.TryGetDouble(out vibranceAdjustment);
+		if (savedState.TryGetProperty(nameof(WarmthAdjustment), out jsonProperty))
+			jsonProperty.TryGetDouble(out warmthAdjustment);
 
 		// load displaying parameters
 		var fitToViewport = true;
@@ -6516,7 +6617,9 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.SetValue(IsGrayscaleFilterEnabledProp, isGrayscaleFilterEnabled);
 		this.SetValue(RedColorAdjustmentProp, redColorAdjustment);
 		this.SetValue(ShadowAdjustmentProp, shadowAdjustment);
+		this.SetValue(TintAdjustmentProp, tintAdjustment);
 		this.SetValue(VibranceAdjustmentProp, vibranceAdjustment);
+		this.SetValue(WarmthAdjustmentProp, warmthAdjustment);
 
 		// apply displaying parameters
 		this.SetValue(FitImageToViewportProp, fitToViewport);
@@ -6936,8 +7039,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			writer.WriteNumber(nameof(HighlightAdjustment), this.HighlightAdjustment);
 		if (this.HasShadowAdjustment)
 			writer.WriteNumber(nameof(ShadowAdjustment), this.ShadowAdjustment);
+		if (this.HasTintAdjustment)
+			writer.WriteNumber(nameof(TintAdjustment), this.TintAdjustment);
 		if (this.HasVibranceAdjustment)
 			writer.WriteNumber(nameof(VibranceAdjustment), this.VibranceAdjustment);
+		if (this.HasWarmthAdjustment)
+			writer.WriteNumber(nameof(WarmthAdjustment), this.WarmthAdjustment);
 		writer.WriteBoolean(nameof(IsGrayscaleFilterEnabled), this.IsGrayscaleFilterEnabled);
 
 		// displaying parameters
@@ -6984,7 +7091,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Perform auto color adjustment.
+	// Perform auto color adjustment by selecting warmth and tint which make the means of linear R, G and B equal.
 	void SelectColorAdjustment()
 	{
 		// check state
@@ -6992,96 +7099,46 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.VerifyDisposed();
 		
 		// get histogram
-		var imageFrame = Global.Run(() =>
-		{
-			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
-				return this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame;
-			return this.renderedImageFrame;
-		});
+		var imageFrame = this.SelectImageFrameToFilter();
 		var histograms = imageFrame?.Histograms;
-		if (histograms is null)
+		if (imageFrame is null || histograms is null)
 			return;
 		
-		// calculate ratio of RGB
-		double rRatio;
-		double gRatio;
-		double bRatio;
-		var refR = histograms.MeanOfRed;
-		var refG = histograms.MeanOfGreen;
-		var refB = histograms.MeanOfBlue;
-		if (refR > refG)
+		// calculate means of linear colors
+		var (toLinear, _) = SelectColorTransferFunctions(imageFrame, imageFrame == this.colorSpaceConvertedImageFrame);
+		toLinear ??= static it => it;
+		var maxColor = histograms.ColorCount - 1.0;
+		double CalculateLinearMean(IList<int> histogram)
 		{
-			if (refR > refB)
+			var pixelCount = 0L;
+			var sum = 0.0;
+			for (var i = histogram.Count - 1; i >= 0; --i)
 			{
-				if (refG > refB) // R > G > B
-				{
-					rRatio = refG / refR;
-					gRatio = 1.0;
-					bRatio = refG / refB;
-				}
-				else // R > B >= G
-				{
-					rRatio = refB / refR;
-					gRatio = refB / refG;
-					bRatio = 1.0;
-				}
+				var count = histogram[i];
+				if (count == 0)
+					continue;
+				pixelCount += count;
+				sum += toLinear(i / maxColor) * count;
 			}
-			else // B >= R > G
-			{
-				rRatio = 1.0;
-				gRatio = refR / refG;
-				bRatio = refR / refB;
-			}
+			return pixelCount > 0 ? sum / pixelCount : 0;
 		}
-		else if (refG > refB)
-		{
-			if (refR > refB) // G > R > B
-			{
-				rRatio = 1.0;
-				gRatio = refR / refG;
-				bRatio = refR / refB;
-			}
-			else // G > B >= R
-			{
-				rRatio = refB / refR;
-				gRatio = refB / refG;
-				bRatio = 1.0;
-			}
-		}
-		else // B >= G >= R
-		{
-			rRatio = refG / refR;
-			gRatio = 1.0;
-			bRatio = refG / refB;
-		}
-		if (!double.IsFinite(rRatio) || !double.IsFinite(gRatio) || !double.IsFinite(bRatio))
+		var meanR = CalculateLinearMean(histograms.Red);
+		var meanG = CalculateLinearMean(histograms.Green);
+		var meanB = CalculateLinearMean(histograms.Blue);
+		if (!double.IsFinite(meanR) || !double.IsFinite(meanG) || !double.IsFinite(meanB))
 			return;
-		if (rRatio == 0 || gRatio == 0 || bRatio == 0)
+		if (meanR <= 0 || meanG <= 0 || meanB <= 0)
 			return;
 
+		// select warmth and tint
+		var (warmth, tint) = ColorLut.SelectWarmthAndTint(1 / meanR, 1 / meanG, 1 / meanB);
+		warmth = Math.Round(Math.Clamp(warmth, -1, 1), 2);
+		tint = Math.Round(Math.Clamp(tint, -1, 1), 2);
+
 		// apply color adjustment
-		static double Quantize(double value) => (int)(value * 100 + 0.5) / 100.0;
-		this.SetValue(RedColorAdjustmentProp, rRatio < 0.5
-			? -1
-			: rRatio > 2
-				? 1
-				: rRatio >= 1
-					? Quantize(rRatio - 1)
-					: Quantize(1 - 1 / rRatio));
-		this.SetValue(GreenColorAdjustmentProp, gRatio < 0.5
-			? -1
-			: gRatio > 2
-				? 1
-				: gRatio >= 1
-					? Quantize(gRatio - 1)
-					: Quantize(1 - 1 / gRatio));
-		this.SetValue(BlueColorAdjustmentProp, bRatio < 0.5
-			? -1
-			: bRatio > 2
-				? 1
-				: bRatio >= 1
-					? Quantize(bRatio - 1)
-					: Quantize(1 - 1 / bRatio));
+		this.ResetColorAdjustment();
+		this.SetValue(TintAdjustmentProp, tint);
+		this.SetValue(WarmthAdjustmentProp, warmth);
 		if (this.filterImageAction.IsScheduled)
 			this.filterImageAction.Reschedule();
 	}
@@ -7090,7 +7147,25 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Command to apply auto color adjustment.
 	/// </summary>
+	/// <remarks>It selects <see cref="WarmthAdjustment"/> and <see cref="TintAdjustment"/> which make the means of linear R, G and B of the image equal, and resets <see cref="BlueColorAdjustment"/>, <see cref="GreenColorAdjustment"/> and <see cref="RedColorAdjustment"/>.</remarks>
 	public ICommand SelectColorAdjustmentCommand { get; }
+
+
+	// Select the functions to transfer colors of given frame to linear colors and back, or Null if colors of the frame are linear.
+	static (Func<double, double>?, Func<double, double>?) SelectColorTransferFunctions(ImageFrame frame, bool isColorSpaceConverted)
+	{
+		// colors converted to the color space of screen
+		if (isColorSpaceConverted)
+		{
+			var colorSpace = frame.BitmapBuffer.ColorSpace;
+			if (colorSpace.IsLinear)
+				return (null, null);
+			return (colorSpace.NumericalTransferToLinear, colorSpace.NumericalTransferFromLinear);
+		}
+
+		// rendered colors
+		return (frame.RenderingOptions.ColorTransferFuncToLinear, frame.RenderingOptions.ColorTransferFuncFromLinear);
+	}
 
 
 	// Select the default algorithm to replace the one which cannot be used for the given bayer pattern. The algorithm named by the settings comes first, then the one preferred for a new session, and Bypass is the last resort because it supports every pattern by definition.
@@ -7466,6 +7541,17 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
+	/// Get or set tint adjustment. Range is [-1.0, 1.0].
+	/// </summary>
+	/// <remarks>Positive value moves colors towards magenta and negative value towards green. It is applied to linear colors before the RGB adjustment.</remarks>
+	public double TintAdjustment
+	{
+		get => this.GetValue(TintAdjustmentProp);
+		set => this.SetValue(TintAdjustmentProp, value);
+	}
+
+
+	/// <summary>
 	/// Get title of session.
 	/// </summary>
 	public string? Title { get; private set; }
@@ -7690,6 +7776,17 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Wait for the completion of the image rendering which is in progress.
 	Task WaitForImageRenderingCompletionAsync() =>
 		this.imageRenderingCompletionSource?.Task ?? Task.CompletedTask;
+
+
+	/// <summary>
+	/// Get or set warmth adjustment. Range is [-1.0, 1.0].
+	/// </summary>
+	/// <remarks>Positive value makes colors warmer and negative value makes them cooler. It is applied to linear colors before the RGB adjustment.</remarks>
+	public double WarmthAdjustment
+	{
+		get => this.GetValue(WarmthAdjustmentProp);
+		set => this.SetValue(WarmthAdjustmentProp, value);
+	}
 
 
 	/// <summary>

@@ -36,6 +36,8 @@ static class ColorLut
     internal const double ShadowMaxEv = 2.5;
     internal const double ShadowPivot = 0.5;
     internal const double ShadowRangeStops = 5;
+    internal const double TintMaxEv = 0.75;
+    internal const double WarmthMaxEv = 0.75;
 
 
     // Fields.
@@ -169,6 +171,43 @@ static class ColorLut
         // apply
         ArctanTransform(lut, 0, lut.Count / 2, intensity * -ContrastStrength);
         ArctanTransform(lut, lut.Count / 2, lut.Count, intensity * ContrastStrength);
+        return Task.CompletedTask;
+    }
+
+
+    /// <summary>
+    /// Transform by a gain applied to linear color.
+    /// </summary>
+    /// <param name="lut">LUT.</param>
+    /// <param name="gain">Gain to apply to linear color.</param>
+    /// <param name="toLinear">Function to transfer normalized color in the LUT to linear color, or Null if color in the LUT is linear.</param>
+    /// <param name="fromLinear">Function to transfer normalized linear color back to color in the LUT, or Null if color in the LUT is linear.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Task of transformation.</returns>
+    /// <remarks>The linear color is multiplied by <paramref name="gain"/> and clipped to 1. The transfer functions are used only when both of them are defined, and <paramref name="fromLinear"/> should be the inverse of <paramref name="toLinear"/>.</remarks>
+    public static Task GainTransformAsync(IList<double> lut, double gain, Func<double, double>? toLinear, Func<double, double>? fromLinear, CancellationToken cancellationToken = default)
+    {
+        // check parameter
+        if (!double.IsFinite(gain) || gain < 0)
+            throw new ArgumentException();
+        cancellationToken.ThrowIfCancellationRequested();
+        if (Math.Abs(gain - 1) < 0.0001)
+            return Task.CompletedTask;
+
+        // prepare
+        if (toLinear is null || fromLinear is null)
+        {
+            toLinear = static it => it;
+            fromLinear = static it => it;
+        }
+        var maxColor = lut.Count - 1.0;
+
+        // apply
+        for (var i = lut.Count - 1; i >= 0; --i)
+        {
+            var color = toLinear(lut[i] / maxColor) * gain;
+            lut[i] = fromLinear(Math.Min(color, 1)) * maxColor;
+        }
         return Task.CompletedTask;
     }
 
@@ -339,6 +378,60 @@ static class ColorLut
     {
         for (var n = lut.Count - 1; n >= 0; --n)
             lut[n] = n;
+    }
+
+
+    /// <summary>
+    /// Select warmth and tint which give the same ratios of R, G and B as given linear gains.
+    /// </summary>
+    /// <param name="gainR">Linear gain of R.</param>
+    /// <param name="gainG">Linear gain of G.</param>
+    /// <param name="gainB">Linear gain of B.</param>
+    /// <returns>Warmth and tint, which may be out of the range [-1.0, 1.0].</returns>
+    /// <remarks>This is the inverse of <see cref="SelectWhiteBalanceGains"/> up to the scale of the gains.</remarks>
+    public static (double, double) SelectWarmthAndTint(double gainR, double gainG, double gainB)
+    {
+        // check parameter
+        if (!double.IsFinite(gainR) || !double.IsFinite(gainG) || !double.IsFinite(gainB) || gainR <= 0 || gainG <= 0 || gainB <= 0)
+            throw new ArgumentException();
+
+        // select
+        var log2R = Math.Log2(gainR);
+        var log2G = Math.Log2(gainG);
+        var log2B = Math.Log2(gainB);
+        var warmth = (log2R - log2B) / (2 * WarmthMaxEv);
+        var tint = ((log2R + log2B) / 2 - log2G) / TintMaxEv;
+        return (warmth, tint);
+    }
+
+
+    /// <summary>
+    /// Select linear gains of R, G and B for given warmth and tint.
+    /// </summary>
+    /// <param name="warmth">Warmth, range is [-1.0, 1.0]. Positive value makes the color warmer.</param>
+    /// <param name="tint">Tint, range is [-1.0, 1.0]. Positive value moves the color towards magenta, negative value towards green.</param>
+    /// <param name="luminanceWeights">Weights of R, G and B to get luminance of linear color.</param>
+    /// <returns>Linear gains of R, G and B.</returns>
+    /// <remarks>R is scaled by 2^(warmth × <see cref="WarmthMaxEv"/>), B by 2^(-warmth × <see cref="WarmthMaxEv"/>) and G by 2^(-tint × <see cref="TintMaxEv"/>), then all of them are divided by the luminance they give to white, so that a gray keeps its luminance.</remarks>
+    public static (double, double, double) SelectWhiteBalanceGains(double warmth, double tint, (double, double, double) luminanceWeights)
+    {
+        // check parameter
+        if (!double.IsFinite(warmth) || !double.IsFinite(tint))
+            throw new ArgumentException();
+        warmth = Math.Clamp(warmth, -1, 1);
+        tint = Math.Clamp(tint, -1, 1);
+
+        // select gains
+        var gainR = Math.Pow(2, warmth * WarmthMaxEv);
+        var gainG = Math.Pow(2, -tint * TintMaxEv);
+        var gainB = Math.Pow(2, -warmth * WarmthMaxEv);
+
+        // keep luminance of gray
+        var (weightR, weightG, weightB) = luminanceWeights;
+        var luminance = (weightR * gainR + weightG * gainG + weightB * gainB) / (weightR + weightG + weightB);
+        if (!double.IsFinite(luminance) || luminance <= 0)
+            return (gainR, gainG, gainB);
+        return (gainR / luminance, gainG / luminance, gainB / luminance);
     }
 
 

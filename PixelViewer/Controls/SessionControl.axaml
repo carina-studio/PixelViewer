@@ -1331,6 +1331,32 @@
 							<!-- Color -->
 							<Expander Name="colorFilterParamsExpander" Classes="SessionControl_SidePanel_Expander" Header="{asXaml:StringResource SessionControl.FilterPanel.Color}">
 								<StackPanel IsEnabled="{Binding IsColorAdjustmentSupported}">
+									<!-- Warmth -->
+									<abControls:FormattedTextBlock Arg1="{Binding WarmthAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Warmth}" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
+									<Grid ColumnDefinitions="Auto,*,Auto">
+										<RepeatButton Name="warmthAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #warmthAdjustmentSlider}">
+											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+										</RepeatButton>
+										<appControls:CenterFilledSlider Name="warmthAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Warmth}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding WarmthAdjustment, Mode=TwoWay}"/>
+										<RepeatButton Name="warmthAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #warmthAdjustmentSlider}" Grid.Column="2">
+											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+										</RepeatButton>
+									</Grid>
+									<Separator asControls:DialogElement.SeparatorType="Default"/>
+
+									<!-- Tint -->
+									<abControls:FormattedTextBlock Arg1="{Binding TintAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Tint}" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
+									<Grid ColumnDefinitions="Auto,*,Auto">
+										<RepeatButton Name="tintAdjustmentDecreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Decrease" Command="{Binding #root.DecreaseSliderValueCommand}" CommandParameter="{Binding #tintAdjustmentSlider}">
+											<Image Classes="Icon" Source="{StaticResource Image/Icon.Backward}"/>
+										</RepeatButton>
+										<appControls:CenterFilledSlider Name="tintAdjustmentSlider" Classes="SessionControl_FilterParamsSlider" DisabledThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border.Disabled}" Grid.Column="1" ThumbBorderBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Thumb.Border}" TrackBrush="{DynamicResource Brush/SessionControl.FilterParamsSlider.Track.Tint}" Maximum="1" Minimum="-1" TickFrequency="0.01" Value="{Binding TintAdjustment, Mode=TwoWay}"/>
+										<RepeatButton Name="tintAdjustmentIncreaseButton" Classes="SessionControl_FilterParamsSlider_SmallChangeButton_Increase" Command="{Binding #root.IncreaseSliderValueCommand}" CommandParameter="{Binding #tintAdjustmentSlider}" Grid.Column="2">
+											<Image Classes="Icon" Source="{StaticResource Image/Icon.Forward}"/>
+										</RepeatButton>
+									</Grid>
+									<Separator asControls:DialogElement.SeparatorType="Default"/>
+
 									<!-- Red -->
 									<abControls:FormattedTextBlock Arg1="{Binding RedColorAdjustment, StringFormat={}{0:+0.00;-0.00}}" Format="{asXaml:StringResource SessionControl.ColorAdjustment.Label.Red}" asControls:DialogElement.TextRole="LabelAboveInputControl"/>
 									<Grid ColumnDefinitions="Auto,*,Auto">
@@ -1448,6 +1474,8 @@
 											<Binding Path="HasContrastAdjustment"/>
 											<Binding Path="HasHighlightAdjustment"/>
 											<Binding Path="HasShadowAdjustment"/>
+											<Binding Path="HasWarmthAdjustment"/>
+											<Binding Path="HasTintAdjustment"/>
 											<Binding Path="HasColorAdjustment"/>
 											<Binding Path="HasSaturationAdjustment"/>
 											<Binding Path="HasVibranceAdjustment"/>

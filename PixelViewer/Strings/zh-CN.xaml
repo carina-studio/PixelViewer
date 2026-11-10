@@ -201,7 +201,9 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">绿色：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">红色：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Saturation">饱和度：{0}</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Tint">色调：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">自然饱和度：{0}</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Warmth">色温：{0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">色彩空间</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">色彩管理已停用，点击以打开选项…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">文件内嵌</sys:String>

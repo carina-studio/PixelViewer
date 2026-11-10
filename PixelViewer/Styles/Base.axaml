@@ -137,6 +137,20 @@
 				<GradientStop Color="#bf00ff" Offset="1"/>
 			</LinearGradientBrush.GradientStops>
 		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Tint" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#40a040" Offset="0"/>
+				<GradientStop Color="#8c8c8c" Offset="0.5"/>
+				<GradientStop Color="#c040c0" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="Brush/SessionControl.FilterParamsSlider.Track.Warmth" EndPoint="100%,50%" StartPoint="0%,50%">
+			<LinearGradientBrush.GradientStops>
+				<GradientStop Color="#4080d9" Offset="0"/>
+				<GradientStop Color="#8c8c8c" Offset="0.5"/>
+				<GradientStop Color="#e0a040" Offset="1"/>
+			</LinearGradientBrush.GradientStops>
+		</LinearGradientBrush>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.ARGB" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.ARGB}"/>
 		<SolidColorBrush x:Key="Brush/SessionControl.ImageFormatCategoryLabel.Background.Bayer" Color="{DynamicResource Color/SessionControl.ImageFormatCategoryLabel.Background.Bayer}"/>
@@ -352,6 +366,7 @@
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Decrease">
 		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
 		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="Focusable" Value="False"/>
 		<Setter Property="Height" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Decrease}"/>
 		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Padding}"/>
@@ -366,6 +381,7 @@
 	<Style Selector="RepeatButton.SessionControl_FilterParamsSlider_SmallChangeButton_Increase">
 		<Setter Property="Background" Value="{x:Static Brushes.Transparent}"/>
 		<Setter Property="BorderBrush" Value="{x:Static Brushes.Transparent}"/>
+		<Setter Property="Focusable" Value="False"/>
 		<Setter Property="Height" Value="{StaticResource Double/SessionControl.FilterParamsSlider.SmallChangeButton.Width}"/>
 		<Setter Property="Margin" Value="{StaticResource Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Margin.Increase}"/>
 		<Setter Property="Padding" Value="{StaticResource Thickness/SessionControl.FilterParamsSlider.SmallChangeButton.Padding}"/>

@@ -241,7 +241,9 @@
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Green">Green: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Red">Red: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Saturation">Saturation: {0}</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Tint">Tint: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Vibrance">Vibrance: {0}</sys:String>
+	<sys:String x:Key="String/SessionControl.ColorAdjustment.Label.Warmth">Warmth: {0}</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace">Color Space</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Disabled">Color management is disabled. Click to open options…</sys:String>
 	<sys:String x:Key="String/SessionControl.ColorSpace.Embedded">In File</sys:String>

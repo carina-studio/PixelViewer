@@ -170,6 +170,66 @@ class ColorLutTests : BaseTests
 
 
 	/// <summary>
+	/// Test for rejecting invalid parameters of gain transformation.
+	/// </summary>
+	[Test]
+	public void GainArgumentCheckingTest()
+	{
+		// invalid gain
+		var lut = new double[256];
+		ColorLut.ResetToIdentity(lut);
+		Assert.That(() => ColorLut.GainTransformAsync(lut, double.NaN, null, null, CancellationToken.None), Throws.InstanceOf<ArgumentException>(), "Gain which is not finite should be rejected.");
+		Assert.That(() => ColorLut.GainTransformAsync(lut, -1, null, null, CancellationToken.None), Throws.InstanceOf<ArgumentException>(), "Negative gain should be rejected.");
+
+		// cancelled
+		using var cancellationTokenSource = new CancellationTokenSource();
+		cancellationTokenSource.Cancel();
+		Assert.That(() => ColorLut.GainTransformAsync(lut, 2, null, null, cancellationTokenSource.Token), Throws.InstanceOf<OperationCanceledException>(), "Cancelled transformation should throw.");
+	}
+
+
+	/// <summary>
+	/// Test for scaling linear colors by gain and clipping them to white.
+	/// </summary>
+	[Test]
+	public async Task GainCurveTest()
+	{
+		foreach (var colorSpace in new[] { null, ColorSpace.Srgb })
+		{
+			foreach (var size in LutSizes)
+			{
+				foreach (var gain in new[] { 0.5, 1.5, 2 })
+				{
+					var lut = await TransformGainAsync(size, gain, colorSpace);
+					var maxColor = size - 1.0;
+					for (var i = 0; i < size; ++i)
+					{
+						var expectedColor = Math.Min(ToLinear(colorSpace, i / maxColor) * gain, 1);
+						var color = ToLinear(colorSpace, lut[i] / maxColor);
+						Assert.That(color, Is.EqualTo(expectedColor).Within(Tolerance), $"Linear color of entry {i} of {size} entries should be scaled by {gain} ({colorSpace?.Name ?? "linear"}).");
+					}
+				}
+			}
+		}
+	}
+
+
+	/// <summary>
+	/// Test for keeping LUT unchanged when gain is 1.
+	/// </summary>
+	[Test]
+	public async Task GainIdentityTest()
+	{
+		foreach (var size in LutSizes)
+		{
+			var lut = await TransformGainAsync(size, 1, ColorSpace.Srgb);
+			for (var i = size - 1; i >= 0; --i)
+				Assert.That(lut[i], Is.EqualTo(i), $"Entry {i} of {size} entries should be kept.");
+		}
+	}
+
+
+	/// <summary>
 	/// Test for rejecting invalid parameters of highlight transformation.
 	/// </summary>
 	[Test]
@@ -405,6 +465,16 @@ class ColorLutTests : BaseTests
 	}
 
 
+	// Transform identity LUT by gain applied to linear color.
+	static async Task<double[]> TransformGainAsync(int size, double gain, ColorSpace? colorSpace)
+	{
+		var lut = new double[size];
+		ColorLut.ResetToIdentity(lut);
+		await ColorLut.GainTransformAsync(lut, gain, colorSpace is not null ? colorSpace.NumericalTransferToLinear : null, colorSpace is not null ? colorSpace.NumericalTransferFromLinear : null, CancellationToken.None);
+		return lut;
+	}
+
+
 	// Transform highlight of identity LUT.
 	static async Task<double[]> TransformHighlightAsync(int size, double intensity, ColorSpace? colorSpace)
 	{
@@ -422,5 +492,60 @@ class ColorLutTests : BaseTests
 		ColorLut.ResetToIdentity(lut);
 		await ColorLut.ShadowTransformAsync(lut, intensity, colorSpace is not null ? colorSpace.NumericalTransferToLinear : null, colorSpace is not null ? colorSpace.NumericalTransferFromLinear : null, CancellationToken.None);
 		return lut;
+	}
+
+
+	/// <summary>
+	/// Test for selecting warmth and tint which give back the ratios of the gains they were selected from.
+	/// </summary>
+	[Test]
+	public void WarmthAndTintRoundTripTest()
+	{
+		var weights = ToneCurveImageFilter.Bt709LuminanceWeights;
+		foreach (var warmth in new[] { -1, -0.4, 0, 0.25, 1 })
+		{
+			foreach (var tint in new[] { -1, -0.3, 0, 0.6, 1 })
+			{
+				// select gains and scale them arbitrarily
+				var (gainR, gainG, gainB) = ColorLut.SelectWhiteBalanceGains(warmth, tint, weights);
+				const double scale = 3.7;
+
+				// select warmth and tint back
+				var (selectedWarmth, selectedTint) = ColorLut.SelectWarmthAndTint(gainR * scale, gainG * scale, gainB * scale);
+				Assert.That(selectedWarmth, Is.EqualTo(warmth).Within(1e-9), $"Warmth should be selected back from warmth {warmth} and tint {tint}.");
+				Assert.That(selectedTint, Is.EqualTo(tint).Within(1e-9), $"Tint should be selected back from warmth {warmth} and tint {tint}.");
+			}
+		}
+		Assert.That(() => ColorLut.SelectWarmthAndTint(0, 1, 1), Throws.InstanceOf<ArgumentException>(), "Gain which is not positive should be rejected.");
+	}
+
+
+	/// <summary>
+	/// Test for direction of gains selected for warmth and tint, and for keeping the luminance of gray.
+	/// </summary>
+	[Test]
+	public void WhiteBalanceGainsTest()
+	{
+		// neutral
+		var weights = ToneCurveImageFilter.Bt709LuminanceWeights;
+		var (gainR, gainG, gainB) = ColorLut.SelectWhiteBalanceGains(0, 0, weights);
+		Assert.That(gainR, Is.EqualTo(1).Within(1e-9), "R should be kept without warmth and tint.");
+		Assert.That(gainG, Is.EqualTo(1).Within(1e-9), "G should be kept without warmth and tint.");
+		Assert.That(gainB, Is.EqualTo(1).Within(1e-9), "B should be kept without warmth and tint.");
+
+		// warmth and tint
+		foreach (var (warmth, tint) in new[] { (1.0, 0.0), (-1.0, 0.0), (0.0, 1.0), (0.0, -1.0), (0.5, -0.5) })
+		{
+			(gainR, gainG, gainB) = ColorLut.SelectWhiteBalanceGains(warmth, tint, weights);
+			var (weightR, weightG, weightB) = weights;
+			var message = $"warmth {warmth} and tint {tint}";
+			Assert.That(weightR * gainR + weightG * gainG + weightB * gainB, Is.EqualTo(1).Within(1e-9), $"Luminance of gray should be kept with {message}.");
+			Assert.That(Math.Log2(gainR / gainB), Is.EqualTo(2 * warmth * ColorLut.WarmthMaxEv).Within(1e-9), $"Ratio of R to B should follow the warmth with {message}.");
+			Assert.That(Math.Log2(Math.Sqrt(gainR * gainB) / gainG), Is.EqualTo(tint * ColorLut.TintMaxEv).Within(1e-9), $"Ratio of R and B to G should follow the tint with {message}.");
+		}
+
+		// clamped
+		var clampedGains = ColorLut.SelectWhiteBalanceGains(3, -3, weights);
+		Assert.That(clampedGains, Is.EqualTo(ColorLut.SelectWhiteBalanceGains(1, -1, weights)), "Warmth and tint should be clamped to [-1.0, 1.0].");
 	}
 }

@@ -121,7 +121,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ObservableCommandState<object?> canResetHighlightAdjustment = new();
 	readonly ObservableCommandState<object?> canResetSaturationAdjustment = new();
 	readonly ObservableCommandState<object?> canResetShadowAdjustment = new();
+	readonly ObservableCommandState<object?> canResetTintAdjustment = new();
 	readonly ObservableCommandState<object?> canResetVibranceAdjustment = new();
+	readonly ObservableCommandState<object?> canResetWarmthAdjustment = new();
 	readonly ObservableCommandState<string> canSaveAsNewProfile = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveFilteredImage = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveRenderedImage = new();
@@ -204,7 +206,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			false,
 			this.canResetColorAdjustment,
 			this.canResetSaturationAdjustment,
-			this.canResetVibranceAdjustment);
+			this.canResetTintAdjustment,
+			this.canResetVibranceAdjustment,
+			this.canResetWarmthAdjustment);
 		this.canSaveImage = new(ForwardedObservableBoolean.CombinationMode.Or,
 			false,
 			this.canSaveFilteredImage,
@@ -251,6 +255,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			};
 			this.Get<Slider>($"{name}Slider").Also(it =>
 			{
+				// move by the same step as the buttons beside the slider when pressing arrow keys
+				it.SmallChange = it.TickFrequency;
+
+				// reset value when double clicking on thumb
 				it.TemplateApplied += (_, e) =>
 				{
 					e.NameScope.Find<Track>("PART_Track")?.Thumb?.Let(thumb =>
@@ -416,7 +424,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 #if DEBUG
 		this.Get<Button>("testButton").IsVisible = true;
 #endif
+		SetupFilterParamsSlider("tintAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSlider("vibranceAdjustment", ColorAdjustmentGroup);
+		SetupFilterParamsSlider("warmthAdjustment", ColorAdjustmentGroup);
 		this.yuvToBgraConverterComboBox = this.Get<ComboBox>(nameof(yuvToBgraConverterComboBox));
 
 		// load resources
@@ -700,8 +710,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Decrease value of given slider.
 	void DecreaseSliderValue(Slider slider)
 	{
+		// change value
 		var value = Math.Max(slider.Minimum, slider.Value - slider.TickFrequency);
 		slider.Value = Math.Abs(value) <= 0.001 ? 0 : value;
+
+		// keep focus on slider so that arrow keys keep changing value
+		slider.Focus();
 	}
 
 
@@ -769,8 +783,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Increase value of given slider.
 	void IncreaseSliderValue(Slider slider)
 	{
+		// change value
 		var value = Math.Min(slider.Maximum, slider.Value + slider.TickFrequency);
 		slider.Value = Math.Abs(value) <= 0.001 ? 0 : value;
+
+		// keep focus on slider so that arrow keys keep changing value
+		slider.Focus();
 	}
 
 
@@ -937,7 +955,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		this.canResetHighlightAdjustment.Bind(session.ResetHighlightAdjustmentCommand);
 		this.canResetSaturationAdjustment.Bind(session.ResetSaturationAdjustmentCommand);
 		this.canResetShadowAdjustment.Bind(session.ResetShadowAdjustmentCommand);
+		this.canResetTintAdjustment.Bind(session.ResetTintAdjustmentCommand);
 		this.canResetVibranceAdjustment.Bind(session.ResetVibranceAdjustmentCommand);
+		this.canResetWarmthAdjustment.Bind(session.ResetWarmthAdjustmentCommand);
 		this.canSaveAsNewProfile.Bind(session.SaveAsNewProfileCommand, "");
 		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
 		this.canSaveProfile.Bind(session.SaveProfileCommand);
@@ -1034,7 +1054,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	    this.canResetHighlightAdjustment.Unbind();
 	    this.canResetSaturationAdjustment.Unbind();
 	    this.canResetShadowAdjustment.Unbind();
+	    this.canResetTintAdjustment.Unbind();
 	    this.canResetVibranceAdjustment.Unbind();
+	    this.canResetWarmthAdjustment.Unbind();
 	    this.canSaveAsNewProfile.Unbind();
 	    this.canSaveFilteredImage.Unbind();
 	    this.canSaveProfile.Unbind();
@@ -1090,8 +1112,12 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		    session.BlueColorAdjustment = 0;
 	    else if (controlName.StartsWith("saturation"))
 		    session.SaturationAdjustment = 0;
+	    else if (controlName.StartsWith("tint"))
+		    session.TintAdjustment = 0;
 	    else if (controlName.StartsWith("vibrance"))
 		    session.VibranceAdjustment = 0;
+	    else if (controlName.StartsWith("warmth"))
+		    session.WarmthAdjustment = 0;
     }
     
     
@@ -2159,7 +2185,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		session.ResetColorAdjustmentCommand.TryExecute();
 		session.ResetSaturationAdjustmentCommand.TryExecute();
+		session.ResetTintAdjustmentCommand.TryExecute();
 		session.ResetVibranceAdjustmentCommand.TryExecute();
+		session.ResetWarmthAdjustmentCommand.TryExecute();
 	}
 
 
