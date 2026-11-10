@@ -66,18 +66,12 @@ namespace Carina.PixelViewer.Test
 				}
 			}
 
-			// generate file
+			// generate file with name of digits only, because letters may form a keyword of image format such as 'l8', which makes session select image renderer by file name
 			while (true)
 			{
 				var fileName = new char[16];
 				for (var i = fileName.Length - 1; i >= 0; --i)
-				{
-					var n = this.Random.Next(0, 35);
-					if (n <= 9)
-						fileName[i] = (char)('0' + n);
-					else
-						fileName[i] = (char)('a' + (n - 10));
-				}
+					fileName[i] = (char)('0' + this.Random.Next(0, 10));
 				var filePath = Path.Combine(this.cacheDirectory, new string(fileName));
 				if (File.Exists(filePath))
 					continue;
