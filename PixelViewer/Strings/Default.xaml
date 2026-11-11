@@ -334,6 +334,7 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">Saving rendered image…</sys:String>
 	<sys:String x:Key="String/SessionControl.ScreenColorSpace">Screen Color Space</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">Move the cursor over the image to view pixel information.</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedPixel.NoRenderedImage">Pixel information can be viewed here after the image is rendered.</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode">You selected {0} files. How do you want to open them?</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">View Separately</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">Frame Sequence</sys:String>

@@ -289,6 +289,7 @@
 	<sys:String x:Key="String/SessionControl.SavingRenderedImage">正在儲存繪製的影像…</sys:String>
 	<sys:String x:Key="String/SessionControl.ScreenColorSpace">螢幕色彩空間</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectedPixel.None">在圖片上移動游標以檢視像素資訊。</sys:String>
+	<sys:String x:Key="String/SessionControl.SelectedPixel.NoRenderedImage">影像繪製完成後即可在此檢視像素資訊。</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode">您選擇了 {0} 個檔案，想要如何開啟？</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.Default">分別檢視</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectMultiFileOpenMode.FrameSequence">畫格序列</sys:String>
