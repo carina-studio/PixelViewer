@@ -41,9 +41,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" /> <!-- Override AppSuite's base version -->
-		<PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" /> <!-- Override AppSuite's base version -->
-		<PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" /> <!-- Override AppSuite's base version -->
 		<PackageReference Include="CarinaStudio.AppSuite.Core" Version="$(AppSuiteVersion)" />
 		<PackageReference Include="CarinaStudio.AppSuite.Fonts" Version="$(AppSuiteVersion)" />
 		<PackageReference Include="Dotnet.Bundle" Version="0.9.13" />

@@ -4,8 +4,8 @@
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <AppSuiteVersion>4.0.0.1110-dev</AppSuiteVersion>
         <AvaloniaVersion>12.1.6</AvaloniaVersion>
-        <AvaloniaXamlBehaviorsVersion>12.0.7</AvaloniaXamlBehaviorsVersion>
-        <DotNetLibVersion>11.0.0-rc.3.26522.148</DotNetLibVersion>
+        <AvaloniaXamlBehaviorsVersion>12.1.5</AvaloniaXamlBehaviorsVersion>
+        <DotNetLibVersion>11.0.0</DotNetLibVersion>
         <Nullable>enable</Nullable>
         <RuntimeIdentifiers>win-x64;win-arm64;linux-x64;linux-arm64;osx-x64;osx-arm64</RuntimeIdentifiers>
         <SkiaSharpVersion>3.119.4</SkiaSharpVersion>
