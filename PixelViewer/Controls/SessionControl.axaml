@@ -568,7 +568,7 @@
 							</Border>
 							<LayoutTransformControl ClipToBounds="False">
 								<Panel ClipToBounds="False">
-									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding #root.EffectiveRenderedImage}" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
+									<Image x:Name="image" DoubleTapped="OnImageDoubleTapped" Height="{Binding ImageDisplaySize.Height}" HorizontalAlignment="Center" PointerExited="OnImagePointerLeave" PointerMoved="OnImagePointerMoved" PointerPressed="OnImagePointerPressed" PointerReleased="OnImagePointerReleased" Source="{Binding #root.EffectiveRenderedImage}" Stretch="Fill" VerticalAlignment="Center" Width="{Binding ImageDisplaySize.Width}"/>
 									<Border BorderBrush="{DynamicResource Brush/WorkingArea.Background}" 
 									        BorderThickness="1" 
 									        CornerRadius="2" 
@@ -609,7 +609,7 @@
 				</ScrollViewer>
 
 				<!-- Hint -->
-				<Viewbox IsHitTestVisible="False" Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
+				<Viewbox IsHitTestVisible="False" Margin="{StaticResource Thickness/SessionControl.ImageViewer.Hint.Margin}" Stretch="Uniform" StretchDirection="DownOnly">
 					<Panel Opacity="{StaticResource Double/SessionControl.Hint.Opacity}">
 
 						<!-- Drag-drop hint -->
