@@ -51,6 +51,7 @@
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.UserDefined">#7f4a00</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Border.YUV">#00bfbf</Color>
 		<Color x:Key="Color/SessionControl.ImageFormatCategoryLabel.Foreground">#222222</Color>
+		<Color x:Key="Color/SessionControl.ImageViewer.Placeholder.Mask">#ccffffff</Color>
 		<Color x:Key="Color/SessionControl.ProfileTypeLabel.Background.FileFormat">#ffffff</Color>
 		<Color x:Key="Color/SessionControl.StatusBar.Background.Inactive">#aaaaaa</Color>
 		

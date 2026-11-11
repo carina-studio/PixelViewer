@@ -1169,16 +1169,29 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.IsDisposed)
 				return;
 			
-			// get original image size
+			// get original image size, which is the size of region of source image to be shown by the placeholder before rendering any image
 			var image = this.GetValue(RenderedImageProp);
-			if (image is null)
+			double imageWidth;
+			double imageHeight;
+			if (image is not null)
+			{
+				imageWidth = image.Size.Width;
+				imageHeight = image.Size.Height;
+			}
+			else if (this.GetValue(IsSourceOpenedProp) && !this.GetValue(IsOpeningSourceProp))
+			{
+				CheckSourceInsets(this.GetValue(SourceInsetsProp), this.GetValue(ImageWidthProp), this.GetValue(ImageHeightProp), out var region);
+				imageWidth = region.Width;
+				imageHeight = region.Height;
+			}
+			else
 			{
 				this.ResetValue(ImageDisplaySizeProp);
 				return;
 			}
 			var screenPixelDensity = this.GetValue(ScreenPixelDensityProp);
-			var imageWidth = image.Size.Width / screenPixelDensity;
-			var imageHeight = image.Size.Height / screenPixelDensity;
+			imageWidth /= screenPixelDensity;
+			imageHeight /= screenPixelDensity;
 
 			// calculate display size
 			double scale;
@@ -4219,6 +4232,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			|| property == TileHeightProp
 			|| property == TileWidthProp)
 		{
+			if (property == ImageHeightProp)
+				this.UpdatePlaceholderImageDisplaySize();
 			this.renderImageAction.Reschedule();
 		}
 		else if (property == DemosaicingAlgorithmProp)
@@ -4300,6 +4315,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions))
 				this.isImagePlaneOptionsResetNeeded = true;
+			this.UpdatePlaceholderImageDisplaySize();
 			this.renderImageAction.Reschedule();
 		}
 		else if (property == IsBrightnessAdjustmentSupportedProp)
@@ -4356,7 +4372,9 @@ class Session : ViewModel<IAppSuiteApplication>
 			|| property == IsRenderingImageProp)
 		{
 			this.updateIsProcessingImageAction.Schedule();
-			if (property == IsRenderingImageProp && !(bool)newValue.AsNonNull())
+			if (property == IsOpeningSourceProp)
+				this.UpdatePlaceholderImageDisplaySize();
+			else if (property == IsRenderingImageProp && !(bool)newValue.AsNonNull())
 				this.ScheduleNextFrameForPlayback(); // rendering of current frame completed, playback moves to next frame
 		}
 		else if (property == IsGrayscaleFilterEnabledProp
@@ -4400,6 +4418,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			else
 				this.updateFilterSupportingAction.Execute();
 			this.UpdateCanZoomInOut();
+			this.UpdatePlaceholderImageDisplaySize();
 			this.UpdateCanPlayFrames();
 		}
 		else if (property == IsVibranceAdjustmentSupportedProp)
@@ -4487,6 +4506,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.OnPropertyChanged(nameof(SourceInsetsTop));
 
 			// show the region, which needs no rendering if the image has been rendered
+			this.UpdatePlaceholderImageDisplaySize();
 			this.renderImageAction.Reschedule();
 		}
 		else if (property == TintAdjustmentProp)
@@ -7844,6 +7864,16 @@ class Session : ViewModel<IAppSuiteApplication>
 			_ => false,
 		};
 		this.SetValue(IsAlphaChannelAvailableProp, available);
+	}
+
+
+	// Update the display size of the placeholder which is shown before rendering any image, the size of a rendered image is kept until the next one is reported.
+	void UpdatePlaceholderImageDisplaySize()
+	{
+		if (this.GetValue(RenderedImageProp) is not null)
+			return;
+		this.fitRenderedImageToViewportScale = double.NaN;
+		this.updateImageDisplaySizeAction.Schedule();
 	}
 
 

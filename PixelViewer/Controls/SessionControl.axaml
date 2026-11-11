@@ -544,45 +544,6 @@
 			      Grid.Column="1"
 			      RowDefinitions="*,Auto">
 
-				<!-- Hint -->
-				<Viewbox Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
-					<Panel Opacity="{StaticResource Double/SessionControl.Hint.Opacity}">
-
-						<!-- Drag-drop hint -->
-						<Border IsVisible="{Binding !IsOpeningSource}">
-							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceOpened}" Orientation="Horizontal" VerticalAlignment="Center">
-								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.DragDropHint.Section1}"/>
-								<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
-								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.DragDropHint.Section2}"/>
-							</StackPanel>
-						</Border>
-
-						<!-- Opening file hint -->
-						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSource}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
-							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.OpeningSource}"/>
-						</StackPanel>
-
-						<!-- Rendering error -->
-						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding HasRenderingError}" Orientation="Horizontal" VerticalAlignment="Center">
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Error.Outline}"/>
-							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.RenderingErrorOccurred}"/>
-						</StackPanel>
-						
-						<!-- Other error -->
-						<StackPanel HorizontalAlignment="Center" Orientation="Horizontal" VerticalAlignment="Center">
-							<StackPanel.IsVisible>
-								<MultiBinding Converter="{x:Static BoolConverters.Or}">
-									<Binding Path="InsufficientMemoryForRenderedImage"/>
-								</MultiBinding>
-							</StackPanel.IsVisible>
-							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Warning.Outline}"/>
-							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.NoImageRendered}"/>
-						</StackPanel>
-
-					</Panel>
-				</Viewbox>
-
 				<!-- Image -->
 				<ScrollViewer x:Name="imageScrollViewer" 
 				              AllowAutoHide="{Binding #root.HideImageViewerScrollBarsAutomatically}"
@@ -603,6 +564,7 @@
 								<Border.Background>
 									<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 								</Border.Background>
+								<Border Background="{DynamicResource Brush/SessionControl.ImageViewer.Placeholder.Mask}" IsVisible="{Binding !HasRenderedImage}"/>
 							</Border>
 							<LayoutTransformControl ClipToBounds="False">
 								<Panel ClipToBounds="False">
@@ -618,6 +580,7 @@
 									        Width="{Binding #root.SelectedImageDisplayPixelBounds.Width}">
 										<Border.IsVisible>
 											<MultiBinding Converter="{x:Static BoolConverters.And}">
+												<Binding Path="HasRenderedImage"/>
 												<Binding Path="IsPointerOverImage" ElementName="root"/>
 												<MultiBinding Converter="{x:Static BoolConverters.Or}">
 													<Binding Path="!IsImageViewerScrollable" ElementName="root"/>
@@ -645,13 +608,47 @@
 					</Panel>
 				</ScrollViewer>
 
+				<!-- Hint -->
+				<Viewbox IsHitTestVisible="False" Margin="{StaticResource Thickness/SessionControl.ImageViewer.Padding}" Stretch="Uniform" StretchDirection="DownOnly">
+					<Panel Opacity="{StaticResource Double/SessionControl.Hint.Opacity}">
+
+						<!-- Drag-drop hint -->
+						<Border IsVisible="{Binding !IsOpeningSource}">
+							<StackPanel HorizontalAlignment="Center" IsVisible="{Binding !IsSourceOpened}" Orientation="Horizontal" VerticalAlignment="Center">
+								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.DragDropHint.Section1}"/>
+								<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
+								<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.DragDropHint.Section2}"/>
+							</StackPanel>
+						</Border>
+
+						<!-- Opening file hint -->
+						<StackPanel HorizontalAlignment="Center" IsVisible="{Binding IsOpeningSource}" Orientation="Horizontal" VerticalAlignment="Center">
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.OpenFile.Outline}"/>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.OpeningSource}"/>
+						</StackPanel>
+
+						<!-- Rendering error -->
+						<StackPanel HorizontalAlignment="Center" IsVisible="{asXaml:AndBindings {Binding HasRenderingError}, {Binding !HasRenderedImage}}" Orientation="Horizontal" VerticalAlignment="Center">
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Error.Outline}"/>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.RenderingErrorOccurred}"/>
+						</StackPanel>
+						
+						<!-- Other error -->
+						<StackPanel HorizontalAlignment="Center" IsVisible="{asXaml:AndBindings {Binding InsufficientMemoryForRenderedImage}, {Binding !HasRenderedImage}}" Orientation="Horizontal" VerticalAlignment="Center">
+							<Image Classes="SessionControl_ImageViewer_Hint_Icon" Source="{StaticResource Image/Icon.Warning.Outline}"/>
+							<TextBlock Classes="SessionControl_ImageViewer_Hint_TextBlock" Text="{asXaml:StringResource SessionControl.NoImageRendered}"/>
+						</StackPanel>
+
+					</Panel>
+				</Viewbox>
+
 				<!-- Pixel information -->
 				<Border Classes="StatusBar" 
 				        Background="{DynamicResource Brush/WorkingArea.Panel.Background}" 
 				        BorderBrush="{DynamicResource Brush/WorkingArea.Panel.Border}"
 				        BorderThickness="0,1,0,0"
 				        Grid.Row="1" 
-				        IsVisible="{Binding HasRenderedImage}">
+				        IsVisible="{asXaml:AndBindings {Binding IsSourceOpened}, {Binding !IsOpeningSource}}">
 					<Border.Styles>
 						<Style Selector="TextBlock">
 							<Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseHighBrush}"/>
@@ -661,8 +658,8 @@
 					</Border.Styles>
 					<Panel>
 						<TextBlock Opacity="0" Text="{asXaml:StringResource SessionControl.SelectedPixel.None}"/>
-						<TextBlock IsVisible="{Binding !HasSelectedRenderedImagePixel}" Text="{asXaml:StringResource SessionControl.SelectedPixel.None}" TextWrapping="Wrap"/>
-						<WrapPanel Opacity="{Binding HasSelectedRenderedImagePixel, Converter={x:Static abConverters:BooleanToValueConverters.BooleanToOpacity}}" Orientation="Horizontal" TextElement.FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}">
+						<TextBlock IsVisible="{asXaml:AndBindings {Binding HasRenderedImage}, {Binding !HasSelectedRenderedImagePixel}}" Text="{asXaml:StringResource SessionControl.SelectedPixel.None}" TextWrapping="Wrap"/>
+						<WrapPanel IsVisible="{Binding HasRenderedImage}" Opacity="{Binding HasSelectedRenderedImagePixel, Converter={x:Static abConverters:BooleanToValueConverters.BooleanToOpacity}}" Orientation="Horizontal" TextElement.FontFamily="{x:Static asMedia:BuiltInFonts.RobotoMono}">
 							
 							<!-- Position -->
 							<StackPanel Orientation="Horizontal">
