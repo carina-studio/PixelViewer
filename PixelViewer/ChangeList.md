@@ -8,6 +8,7 @@
 + Added warmth and tint adjustments.
 + Added auto brightness adjustment.
 + Added `ProPhoto RGB` color space.
++ Added support for showing color depth of image on the status bar.
 
 ## Improvement
 + Improved the overall performance of the user interface.

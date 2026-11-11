@@ -7877,7 +7877,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Update SourceImageEffectiveBits to the maximum effective bits across the current image's planes.
+	// Update SourceImageEffectiveBits to the maximum effective bits across the current image's planes, capped at the 16 bits which rendered colors can carry.
 	void UpdateSourceImageEffectiveBits()
 	{
 		if (this.IsDisposed)
@@ -7898,6 +7898,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			}
 			if (maxBits <= 0)
 				maxBits = 8;
+			else if (maxBits > 16)
+				maxBits = 16;
 		}
 		this.SetValue(SourceImageEffectiveBitsProp, maxBits);
 	}

@@ -343,6 +343,7 @@
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">Profile to Open Files</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">Show File in Windows File Explorer</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">Source Data Size</sys:String>
+	<sys:String x:Key="String/SessionControl.SourceImageBitDepth.Format">{0}-Bit Color</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceInsets">Insets</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceInsets.Bottom">Bottom</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceInsets.Left">Left</sys:String>

@@ -1535,6 +1535,12 @@
 					<!-- Left part -->
 					<StackPanel ClipToBounds="True" Orientation="Horizontal">
 
+						<!-- Source image bit depth -->
+						<StackPanel IsVisible="{asXaml:AndBindings {Binding IsSourceOpened}, {Binding !IsOpeningSource}}" Orientation="Horizontal">
+							<abControls:FormattedTextBlock Arg1="{Binding SourceImageEffectiveBits}" Format="{asXaml:StringResource SessionControl.SourceImageBitDepth.Format}" asControls:StatusBarElement.Role="Label"/>
+							<Separator asControls:StatusBarElement.Role="Separator"/>
+						</StackPanel>
+
 						<!-- File actions -->
 						<StackPanel Orientation="Horizontal">
 							<TextBlock IsVisible="{Binding !IsSourceOpened}" asControls:StatusBarElement.Role="Label" Text="{asXaml:StringResource SessionControl.NoSourceFileOpened}"/>
