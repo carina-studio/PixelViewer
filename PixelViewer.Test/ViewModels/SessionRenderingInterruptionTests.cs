@@ -2,6 +2,7 @@ using Carina.PixelViewer.Media;
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.ViewModels;
 using CarinaStudio;
+using CarinaStudio.Threading;
 using NUnit.Framework;
 using System;
 using System.Collections.Generic;
@@ -150,6 +151,8 @@ class SessionRenderingInterruptionTests : BaseTests
 	const int FilteringParameterChangeInterval = 100;
 	// Size of the generated source file, it is large enough for the dimensions evaluated for the gate renderer to be changeable by tests.
 	const int SourceFileSize = 1 << 16;
+	// Time to let the image without filtering be reported after the filtering is no longer needed.
+	const int UnfilteredImageReportingTime = 1000;
 
 
 	// Fields.
@@ -200,6 +203,76 @@ class SessionRenderingInterruptionTests : BaseTests
 			Assert.That(session.RenderedImage, Is.Not.Null, "Rendered image should be reported after the session has been activated.");
 			Assert.That(session.HasRenderingError, Is.False, "Rendering should not fail.");
 			Assert.That(renderer.MaxConcurrentRenderingCount, Is.EqualTo(1), "Renderings should never be performed at the same time.");
+		});
+	}
+
+
+	/// <summary>
+	/// Test for closing the source while the image without filtering is being reported after the filtering is no longer needed.
+	/// </summary>
+	/// <remarks>Closing the source releases the frame converted to the color space of screen, which the reporting reuses while converting. The conversion must not
+	/// hand the released frame over to the reporting, and the reporting, which runs in a callback posted by the session, must not end the process.</remarks>
+	[Test]
+	public void ClosingSourceWhileReportingUnfilteredImageTest()
+	{
+		var session = this.session ?? throw new AssertionException("No session for testing.");
+		this.TestOnApplicationThread(async () =>
+		{
+			// convert the color space before rendering to display, which is when the reporting reuses the converted frame
+			var settings = this.Application.Settings;
+			var restoredEnableColorSpaceManagement = settings.GetValueOrDefault(SettingKeys.EnableColorSpaceManagement);
+			var restoredColorSpaceConversionTiming = settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming);
+			settings.SetValue(SettingKeys.EnableColorSpaceManagement, true);
+			settings.SetValue(SettingKeys.ColorSpaceConversionTiming, ColorSpaceConversionTiming.BeforeRenderingToDisplay);
+			try
+			{
+				// open source file and render an RGB image, which the grayscale filter supports
+				var filePath = this.GenerateSourceFile();
+				session.OpenSourceFileCommand.Execute(filePath);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file.");
+				Assert.That(ImageRenderers.TryFindByFormatName("RGB_161616", out var renderer), Is.True, "Cannot find RGB renderer.");
+				session.ImageRenderer = renderer.AsNonNull();
+				Assert.That(await WaitForConditionAsync(() => session.RenderedImage is not null && !session.IsRenderingImage, 10000), Is.True, "Image should be rendered.");
+
+				// filter the image
+				session.IsGrayscaleFilterEnabled = true;
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsFilteringRenderedImageNeeded), true, 5000), Is.True, "Filtering should be needed.");
+				Assert.That(await WaitForConditionAsync(() => session.RenderedImage is not null && !session.IsFilteringRenderedImage, 10000), Is.True, "Filtered image should be reported.");
+
+				// stop filtering, and close the source once the reporting of the image without filtering has started converting the color space, the closing is posted so that it
+				// happens while the conversion is awaited rather than before it starts
+				var isClosingPosted = false;
+				var handler = new PropertyChangedEventHandler((_, e) =>
+				{
+					if (e.PropertyName != nameof(Session.IsConvertingColorSpace) || !session.IsConvertingColorSpace || isClosingPosted)
+						return;
+					isClosingPosted = true;
+					session.SynchronizationContext.Post(() => session.ClearSourceCommand.Execute(null));
+				});
+				session.PropertyChanged += handler;
+				try
+				{
+					session.IsGrayscaleFilterEnabled = false;
+					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 5000), Is.True, "Source should be closed while reporting the image without filtering.");
+					await Task.Delay(UnfilteredImageReportingTime, CancellationToken.None);
+				}
+				finally
+				{
+					session.PropertyChanged -= handler;
+				}
+				Assert.That(isClosingPosted, Is.True, "Color space should be converted for reporting the image without filtering.");
+
+				// the session should still render after the reporting
+				session.OpenSourceFileCommand.Execute(this.GenerateSourceFile());
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file again.");
+				Assert.That(await WaitForConditionAsync(() => session.RenderedImage is not null && !session.IsRenderingImage, 10000), Is.True, "Image should be rendered after closing the source while reporting.");
+				Assert.That(session.HasRenderingError, Is.False, "Rendering should not fail.");
+			}
+			finally
+			{
+				settings.SetValue(SettingKeys.ColorSpaceConversionTiming, restoredColorSpaceConversionTiming);
+				settings.SetValue(SettingKeys.EnableColorSpaceManagement, restoredEnableColorSpaceManagement);
+			}
 		});
 	}
 

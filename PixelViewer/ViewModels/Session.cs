@@ -2503,6 +2503,9 @@ class Session : ViewModel<IAppSuiteApplication>
 				using (var sourceRegionBitmapBuffer = colorSpaceConvertedImageFrame.ShareSourceRegion())
 					colorSpaceConvertedImageFrame.Histograms = await BitmapHistograms.CreateAsync(sourceRegionBitmapBuffer, this.SourceImageEffectiveBits, cancellationToken);
 
+				// give up if the conversion has been cancelled while converting, such as by closing the source, which may have released the frame reused from the session
+				cancellationToken.ThrowIfCancellationRequested();
+
 				// complete
 				this.Logger.LogTrace("Color space converted");
 				isImageFrameHandedOver = true;
@@ -4356,11 +4359,19 @@ class Session : ViewModel<IAppSuiteApplication>
 				var cancellationTask = this.CancelFilteringImageAsync();
 				this.SynchronizationContext.Post(async () =>
 				{
-					await cancellationTask;
-					if (this.IsDisposed || this.IsFilteringRenderedImageNeeded)
-						return;
-					using var cancellationTokenSource = new CancellationTokenSource();
-					await this.ReportRenderedImageAsync(cancellationTokenSource);
+					try
+					{
+						await cancellationTask;
+						if (this.IsDisposed || this.IsFilteringRenderedImageNeeded)
+							return;
+						using var cancellationTokenSource = new CancellationTokenSource();
+						await this.ReportRenderedImageAsync(cancellationTokenSource);
+					}
+					catch (Exception ex)
+					{
+						// an exception thrown out of the posted callback would end the process
+						this.Logger.LogError(ex, "Error occurred while reporting the image without filtering");
+					}
 				});
 
 				// release the filtered image
@@ -5923,6 +5934,13 @@ class Session : ViewModel<IAppSuiteApplication>
 						return;
 					}
 					this.Logger.LogError(ex, "Error occurred while converting color space before reporting rendered image");
+				}
+
+				// give up if the reporting has been cancelled while converting, such as by closing the source, which releases the frame to be reported
+				if (cancellationTokenSource.IsCancellationRequested)
+				{
+					this.Logger.LogWarning("Reporting rendered image has been cancelled while converting color space");
+					return;
 				}
 			}
 		}
