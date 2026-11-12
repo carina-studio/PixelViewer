@@ -17,6 +17,7 @@
 		<NativeMenu>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="AppOptions" Header="{DynamicResource String/SessionControl.ApplicationOptions}"/>
 			<NativeMenuItemSeparator/>
+			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="Feedback" Header="{DynamicResource String/Common.Feedback}"/>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="AppInfo" Header="{DynamicResource String/SessionControl.ApplicationInfo}"/>
 			<NativeMenuItemSeparator/>
 			<NativeMenuItem Click="OnNativeMenuItemClick" CommandParameter="Shutdown" Header="{DynamicResource String/App.Shutdown}" Gesture="{x:Static asInput:KeyGestures.QuitApplication}"/>

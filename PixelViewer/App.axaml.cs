@@ -163,7 +163,7 @@ namespace Carina.PixelViewer
 		public static void Main(string[] args) =>
 			BuildApplicationAndStart<App>(args, argsParser: ParseArguments);
 
-
+		
 		// Create main window.
 		protected override CarinaStudio.AppSuite.Controls.MainWindow OnCreateMainWindow() => new MainWindow();
 
@@ -326,6 +326,9 @@ namespace Carina.PixelViewer
 				case "AppOptions":
 					this.ShowApplicationOptionsDialog();
 					break;
+				case "Feedback":
+					this.OpenFeedbackPage();
+					break;
 				case "Shutdown":
 					this.Shutdown();
 					break;
@@ -421,6 +424,9 @@ namespace Carina.PixelViewer
 						{
 							case "AppInfo":
 								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Information.Outline")?.ToNativeMenuItemIcon();
+								break;
+							case "Feedback":
+								menuItem.Icon = app.FindResourceOrDefault<IImage?>("Image/Icon.Chat.Outline")?.ToNativeMenuItemIcon();
 								break;
 							default:
 								break;
@@ -645,6 +651,13 @@ namespace Carina.PixelViewer
 			}
 			return await Task.Run(() => File.Exists(Path.Combine(directory, "PixelViewer.dll")), cancellationToken);
 		}
+
+
+		/// <summary>
+		/// Open feedback page.
+		/// </summary>
+		public void OpenFeedbackPage() =>
+		    Platform.OpenLink("https://github.com/carina-studio/PixelViewer/issues");
 
 
         // Parse argument.
