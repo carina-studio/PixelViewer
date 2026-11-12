@@ -140,7 +140,7 @@
 						<NativeMenuItem Command="{Binding #window.CreateMainTabItem}" Header="{DynamicResource String/Common.CreateTab}" Gesture="Cmd+T"/>
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding #window.SetCurrentCustomSessionTitle}" Header="{DynamicResource String/MainWindow.SetCustomSessionTitle}"/>
-						<NativeMenuItem Command="{Binding #window.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}, FallbackValue={x:Null}}"/>
+						<NativeMenuItem Command="{Binding #window.ResetCurrentSessionTitle}" Header="{DynamicResource String/MainWindow.ResetSessionTitle}" IsEnabled="{Binding ActivatedSession.CustomTitle, Converter={x:Static aConverters:ObjectConverters.IsNotNull}, FallbackValue=False}"/>
 						<NativeMenuItemSeparator/>
 						<NativeMenuItem Command="{Binding #window.MoveCurrentSessionToNewWorkspace}" Header="{DynamicResource String/Common.OpenInNewWindow}" IsEnabled="{Binding #window.HasMultipleSessions}"/>
 						<NativeMenuItemSeparator/>
