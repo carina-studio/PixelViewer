@@ -37,6 +37,7 @@ namespace Carina.PixelViewer
 	class MainWindow : MainWindow<Workspace>, INotificationPresenter
 	{
 		// Constants.
+		const int RefreshNativeMenuItemHeadersDelay = 500;
 		const int ShowTaskbarIconProgressDelay = 100;
 
 
@@ -53,6 +54,7 @@ namespace Carina.PixelViewer
 
 
 		// Fields.
+		bool areNativeMenuItemHeadersRefreshNeeded;
 		Session? attachedActivatedSession;
 		bool canShowTaskbarIconProgress;
 		bool isPerformingContentRelayout;
@@ -175,6 +177,9 @@ namespace Carina.PixelViewer
 			// intercept key events
 			this.AddHandler(KeyDownEvent, this.OnPreviewKeyDown, RoutingStrategies.Tunnel);
 			this.AddHandler(KeyUpEvent, this.OnPreviewKeyUp, RoutingStrategies.Tunnel);
+
+			// attach to application
+			this.Application.StringsUpdated += this.OnApplicationStringsUpdated;
 		}
 		
 		
@@ -390,6 +395,14 @@ namespace Carina.PixelViewer
 		}
 
 
+		// Called when strings of application updated.
+		void OnApplicationStringsUpdated(object? sender, EventArgs e)
+		{
+			if (Platform.IsMacOS)
+				this.areNativeMenuItemHeadersRefreshNeeded = !this.IsActive;
+		}
+
+
 		// Attach to view-model.
 		protected override void OnAttachToViewModel(Workspace workspace)
 		{
@@ -439,6 +452,9 @@ namespace Carina.PixelViewer
 				});
 			}
 			
+			// detach from application
+			this.Application.StringsUpdated -= this.OnApplicationStringsUpdated;
+
 			// call base
 			base.OnClosed(e);
 		}
@@ -765,6 +781,15 @@ namespace Carina.PixelViewer
 					this.relayoutContentAction?.Cancel();
 				// ReSharper restore ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 			}
+			else if (property == IsActiveProperty)
+			{
+				// refresh headers of native menu items which were not refreshed while the window was inactive
+				if (this.IsActive && this.areNativeMenuItemHeadersRefreshNeeded)
+				{
+					this.areNativeMenuItemHeadersRefreshNeeded = false;
+					this.RefreshNativeMenuItemHeaders();
+				}
+			}
 		}
 
 
@@ -879,6 +904,20 @@ namespace Carina.PixelViewer
 					this.DetachFromActivatedSession();
 			}
         }
+
+
+		// Refresh headers of native menu items.
+		// [Workaround] Headers of first level menu items won't be refreshed while window is inactive
+		void RefreshNativeMenuItemHeaders()
+		{
+			if (NativeMenu.GetMenu(this) is not { } nativeMenu)
+				return;
+			var menuItems = nativeMenu.Items.ToArray();
+			if (menuItems.IsEmpty())
+				return;
+			nativeMenu.Items.Clear();
+			this.SynchronizationContext.PostDelayed(() => nativeMenu.Items.AddAll(menuItems), RefreshNativeMenuItemHeadersDelay);
+		}
 
 
 		/// <summary>

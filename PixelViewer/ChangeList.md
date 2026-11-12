@@ -31,4 +31,5 @@
 ## Bug Fixing
 + Fixed small changes of color pre-correction being ignored.
 + Fixed color gamut being drawn outside of the xy chromaticity diagram.
++ Fixed menu bar not being updated after changing language on macOS.
 + Minor bug fixing.
