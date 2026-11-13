@@ -960,11 +960,11 @@
 											</abControls:IntegerTextBox>
 										</Panel>
 									</Grid>
-									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{Binding !IsCompressedImageFormat}"/>
+									<Separator asControls:DialogElement.SeparatorType="Small" IsVisible="{asXaml:AndBindings {Binding !IsCompressedImageFormat}, {Binding !Profile.IsFileFormat}}"/>
 									<ToggleButton Name="evaluateImageDimensionsButton" 
 									              Classes="SessionControl_SidePanel_ToggleButton" 
 									              Command="{Binding #root.ShowEvaluateImageDimensionsMenuCommand}" 
-									              IsVisible="{Binding !IsCompressedImageFormat}">
+									              IsVisible="{asXaml:AndBindings {Binding !IsCompressedImageFormat}, {Binding !Profile.IsFileFormat}}">
 										<Grid ColumnDefinitions="*,Auto">
 											<TextBlock Classes="Button_Text" Text="{asXaml:StringResource SessionControl.EvaluateImageDimensions}"/>
 											<Image Classes="Button_DropDownIcon" Grid.Column="1" IsVisible="{Binding !$parent[ToggleButton].IsChecked}" Source="{DynamicResource Image/Icon.DropDown.Down}"/>

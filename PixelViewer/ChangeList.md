@@ -26,6 +26,7 @@
 ## Behavior Changes
 + Color pre-correction defined by an image file (such as DNG) is no longer kept after opening another file.
 + Color pre-correction of the current profile is applied again when opening a file, or when selecting a format which does not support it.
++ Automatic evaluation of image dimensions is no longer available when using the profile from the image file.
 + Removed the options of brightness and contrast adjustment functions.
 
 ## Bug Fixing
