@@ -1,4 +1,5 @@
-﻿using Carina.PixelViewer.Media.Demosaicing;
+﻿using Avalonia.Media.Imaging;
+using Carina.PixelViewer.Media.Demosaicing;
 using CarinaStudio;
 using CarinaStudio.AppSuite;
 using CarinaStudio.Collections;
@@ -1226,6 +1227,13 @@ namespace Carina.PixelViewer.Media.Profiles
                 this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SourceInsets)));
             }
         }
+
+
+        /// <summary>
+        /// Thumbnail of at most <see cref="EmbeddedThumbnailDecoder.MaxSize"/> decoded from the thumbnail embedded in the source, or Null if there is no thumbnail.
+        /// </summary>
+        /// <remarks>The thumbnail is shown as placeholder before rendering the image. It is not persisted, not compared as a rendering parameter, and not disposed with the profile because it may still be shown.</remarks>
+        public Bitmap? Thumbnail { get; set; }
 
 
         // Height of each tile in pixels, or 0 if data is not stored as tiles.

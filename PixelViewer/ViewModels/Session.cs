@@ -928,6 +928,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public const int MinFramePlaybackRate = 1;
 	const int FilterParamsSelectionSampleCount = 256 * 256;
+	const double MaxEmbeddedThumbnailAspectRatioDifference = 0.02;
 	const double MinFilterParamValueDifference = 0.001;
 	const int ReleaseCachedImagesDelay = 3000;
 	const int RenderImageDelay = 500;
@@ -2396,6 +2397,24 @@ class Session : ViewModel<IAppSuiteApplication>
 
 		// apply profile
 		applyProfile();
+
+		// show the thumbnail embedded in the source as placeholder until the image is rendered, only the profile of file format describes the image of the source
+		// the thumbnail is skipped unless it has the shape of the region to be shown, which drops the thumbnails letterboxed into another shape rather than stretching them
+		var thumbnail = this.Profile.Let(it => it.Type == ImageRenderingProfileType.FileFormat ? it.Thumbnail : null);
+		if (thumbnail is not null && this.RenderedImageThumbnail is null)
+		{
+			CheckSourceInsets(this.SourceInsets, this.ImageWidth, this.ImageHeight, out var region);
+			var thumbnailSize = thumbnail.PixelSize;
+			if (region.Width > 0 && region.Height > 0 && thumbnailSize.Width > 0 && thumbnailSize.Height > 0)
+			{
+				var aspectRatio = (double)region.Width / region.Height;
+				var thumbnailAspectRatio = (double)thumbnailSize.Width / thumbnailSize.Height;
+				if (Math.Abs(thumbnailAspectRatio - aspectRatio) <= aspectRatio * MaxEmbeddedThumbnailAspectRatioDifference)
+					this.SetValue(RenderedImageThumbnailProp, thumbnail);
+				else
+					this.Logger.LogDebug("Skip embedded thumbnail of different shape, size: {thumbnailWidth}x{thumbnailHeight}, region: {width}x{height}", thumbnailSize.Width, thumbnailSize.Height, region.Width, region.Height);
+			}
+		}
 
 		// render image
 		if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.Type == ImageRenderingProfileType.Default)

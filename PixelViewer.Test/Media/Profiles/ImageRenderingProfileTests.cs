@@ -24,6 +24,7 @@ class ImageRenderingProfileTests : BaseTests
 	{
 		nameof(ImageRenderingProfile.MediaMetadata),
 		nameof(ImageRenderingProfile.Name),
+		nameof(ImageRenderingProfile.Thumbnail),
 	};
 
 

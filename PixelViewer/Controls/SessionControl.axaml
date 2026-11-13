@@ -607,8 +607,13 @@
 									</TransformGroup>
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
-							<!-- Placeholder mask, drawn over the thumbnail shown as placeholder. Unlike the background it has no margin, so that it covers the whole image -->
-							<Border Background="{DynamicResource Brush/SessionControl.ImageViewer.Placeholder.Mask}" IsHitTestVisible="False" IsVisible="{Binding !HasRenderedImage}"/>
+							<!-- Placeholder mask, drawn over the thumbnail shown as placeholder and lighter while one is shown. Unlike the background it has no margin, so that it covers the whole image -->
+							<Border Background="{DynamicResource Brush/SessionControl.ImageViewer.Placeholder.Mask}" 
+							        IsHitTestVisible="False" 
+							        IsVisible="{asXaml:AndBindings {Binding !HasRenderedImage}, {Binding RenderedImageThumbnail, Converter={x:Static aConverters:ObjectConverters.IsNull}}}"/>
+							<Border Background="{DynamicResource Brush/SessionControl.ImageViewer.Placeholder.Mask.WithThumbnail}" 
+							        IsHitTestVisible="False" 
+							        IsVisible="{asXaml:AndBindings {Binding !HasRenderedImage}, {Binding RenderedImageThumbnail, Converter={x:Static aConverters:ObjectConverters.IsNotNull}}}"/>
 						</Panel>
 						<Canvas ClipToBounds="False" Height="{Binding #imageContainerBorder.Bounds.Height}" HorizontalAlignment="Center" IsVisible="{Binding HasRenderedImage}" VerticalAlignment="Center" Width="{Binding #imageContainerBorder.Bounds.Width}"/>
 					</Panel>

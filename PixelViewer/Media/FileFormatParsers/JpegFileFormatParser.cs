@@ -1,9 +1,11 @@
 using Carina.PixelViewer.Media.ImageRenderers;
 using Carina.PixelViewer.Media.Profiles;
 using CarinaStudio;
+using Microsoft.Extensions.Logging;
 using SkiaSharp;
 using System;
 using System.Buffers.Binary;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -53,6 +55,10 @@ class JpegFileFormatParser : SkiaFileFormatParser
     {
         // parse EXIF and XMP
         var orientation = 0;
+        byte[]? exifData = null;
+        var thumbnailCompression = 0u;
+        var thumbnailOffset = 0u;
+        var thumbnailLength = 0u;
         TiffMediaMetadata? exifMetadata = null;
         XmpMediaMetadata? xmpMetadata = null;
         await Task.Run(() =>
@@ -93,6 +99,7 @@ class JpegFileFormatParser : SkiaFileFormatParser
                 {
                     if (exifMetadata is not null)
                         continue;
+                    exifData = segmentDataBuffer;
                     var metadata = new TiffMediaMetadata();
                     var entryReader = new IfdEntryReader(new MemoryStream(segmentDataBuffer).Also(it => it.Position = 6));
                     while (entryReader.Read())
@@ -101,6 +108,27 @@ class JpegFileFormatParser : SkiaFileFormatParser
                         uint[]? uintData;
                         switch (entryReader.CurrentIfdName)
                         {
+                            case IfdNames.Default when entryReader.CurrentIfdIndex == 1: // IFD1, which describes the thumbnail
+                                switch (entryReader.CurrentEntryId)
+                                {
+                                    case 0x0103: // Compression
+                                        if (entryReader.TryGetUInt32EntryData(out uintData) && uintData.Length > 0)
+                                            thumbnailCompression = uintData[0];
+                                        break;
+                                    case 0x0112: // Orientation, taken from every IFD as before IFD1 was told apart
+                                        if (entryReader.TryGetEntryData(out ushortData) && ushortData is not null && ushortData.Length > 0)
+                                            orientation = ushortData[0];
+                                        break;
+                                    case 0x0201: // JPEGInterchangeFormat
+                                        if (entryReader.TryGetUInt32EntryData(out uintData) && uintData.Length > 0)
+                                            thumbnailOffset = uintData[0];
+                                        break;
+                                    case 0x0202: // JPEGInterchangeFormatLength
+                                        if (entryReader.TryGetUInt32EntryData(out uintData) && uintData.Length > 0)
+                                            thumbnailLength = uintData[0];
+                                        break;
+                                }
+                                break;
                             case IfdNames.Default:
                                 switch (entryReader.CurrentEntryId)
                                 {
@@ -143,6 +171,21 @@ class JpegFileFormatParser : SkiaFileFormatParser
         }, cancellationToken);
         if (cancellationToken.IsCancellationRequested)
             throw new TaskCanceledException();
+
+        // decode the JPEG thumbnail of EXIF, which is stored in the orientation of the image. its offset is relative to the TIFF header after the identifier of EXIF
+        if (exifData is not null && thumbnailCompression == 6 && thumbnailOffset > 0 && thumbnailLength > 0 && 6L + thumbnailOffset + thumbnailLength <= exifData.Length)
+        {
+            try
+            {
+                var stopwatch = Stopwatch.StartNew();
+                profile.Thumbnail = await EmbeddedThumbnailDecoder.DecodeJpegAsync(exifData, 6 + (int)thumbnailOffset, (int)thumbnailLength, cancellationToken);
+                this.Logger.LogDebug("Thumbnail of EXIF decoded, size: {width}x{height}, duration: {duration} ms", profile.Thumbnail.PixelSize.Width, profile.Thumbnail.PixelSize.Height, stopwatch.ElapsedMilliseconds);
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                this.Logger.LogWarning(ex, "Unable to decode thumbnail of EXIF");
+            }
+        }
 
         // setup profile
         Tiff.FromTiffOrientation(orientation, out var rotation, out var flipX, out var flipY);
