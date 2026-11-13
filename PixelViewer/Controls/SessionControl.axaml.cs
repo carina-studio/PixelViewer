@@ -476,14 +476,22 @@ class SessionControl : UserControl<IAppSuiteApplication>
 						this.SetValue(EffectiveRenderedImageProperty, session.RenderedImage);
 				}
 				else
-					this.SetValue(EffectiveRenderedImageProperty, null);
+				{
+					// show thumbnail of the image reported latest as placeholder under the mask until the image is rendered
+					this.SetValue(EffectiveRenderedImageProperty, session.RenderedImageThumbnail);
+				}
 			}
 		});
 		this.updateEffectiveRenderedImageIntModeAction = new(() =>
 		{
 			if (this.DataContext is not Session session)
 				return;
-			if (this.useSmallRenderedImage)
+			if (!session.HasRenderedImage)
+			{
+				// the thumbnail shown as placeholder is always scaled up, interpolating keeps it from being blocky
+				this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.HighQuality);
+			}
+			else if (this.useSmallRenderedImage)
 				this.SetValue(EffectiveRenderedImageInterpolationModeProperty, BitmapInterpolationMode.None);
 			else
 			{
@@ -1828,6 +1836,9 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				this.updateEffectiveRenderedImageAction.Execute();
 				if (this.latestPointerEventArgsOnImage is not null) // select pixel of new image which is pointed by pointer
 					this.SelectImageDisplayPixel(this.latestPointerEventArgsOnImage);
+				break;
+			case nameof(Session.RenderedImageThumbnail):
+				this.updateEffectiveRenderedImageAction.Execute();
 				break;
 			case nameof(Session.IsAlphaChannelAvailable):
 			case nameof(Session.SelectedRenderedImagePixelColor):

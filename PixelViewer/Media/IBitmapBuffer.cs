@@ -67,6 +67,10 @@ namespace Carina.PixelViewer.Media
 	/// </summary>
 	static class BitmapBufferExtensions
 	{
+		// Constants.
+		const int ThumbnailSampleCount = 4;
+
+
 		// Fields.
 		static readonly ILogger? Logger = Application.CurrentOrNull?.LoggerFactory.CreateLogger(nameof(BitmapBufferExtensions));
 
@@ -1002,7 +1006,97 @@ namespace Carina.PixelViewer.Media
 					throw new NotSupportedException();
 			}
 		}
-		
+
+
+		// Copy bitmap data to BGRA32 thumbnail, each pixel of thumbnail is the average of the pixels sampled evenly from the region of source it covers.
+		static unsafe void CopyToThumbnailBgra32(IntPtr srcBaseAddress, BitmapFormat srcFormat, int width, int height, int srcRowStride, IntPtr destBaseAddress, int destWidth, int destHeight, int destRowStride, CancellationToken cancellationToken)
+		{
+			// select positions of samples, which are the centers of sub-regions of each region covered by a pixel of thumbnail
+			var sampleXs = new int[destWidth * ThumbnailSampleCount];
+			for (var i = sampleXs.Length - 1; i >= 0; --i)
+				sampleXs[i] = (int)(((i << 1) + 1L) * width / (sampleXs.Length << 1));
+			var sampleYs = new int[destHeight * ThumbnailSampleCount];
+			for (var i = sampleYs.Length - 1; i >= 0; --i)
+				sampleYs[i] = (int)(((i << 1) + 1L) * height / (sampleYs.Length << 1));
+
+			// copy
+			const int sampleCountPerPixel = ThumbnailSampleCount * ThumbnailSampleCount;
+			var packFunc = ImageProcessing.SelectBgra32Packing();
+			switch (srcFormat)
+			{
+				case BitmapFormat.Bgra32:
+				{
+					var unpackFunc = ImageProcessing.SelectBgra32Unpacking();
+					ImageProcessing.ParallelFor(0, destHeight, (y) =>
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+						var b = (byte)0;
+						var g = (byte)0;
+						var r = (byte)0;
+						var a = (byte)0;
+						var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
+						for (var x = 0; x < destWidth; ++x, ++destPixelPtr)
+						{
+							var sumB = 0;
+							var sumG = 0;
+							var sumR = 0;
+							var sumA = 0;
+							for (var sy = 0; sy < ThumbnailSampleCount; ++sy)
+							{
+								var srcRowPtr = (uint*)((byte*)srcBaseAddress + ((long)sampleYs[y * ThumbnailSampleCount + sy] * srcRowStride));
+								for (var sx = 0; sx < ThumbnailSampleCount; ++sx)
+								{
+									unpackFunc(srcRowPtr[sampleXs[x * ThumbnailSampleCount + sx]], &b, &g, &r, &a);
+									sumB += b;
+									sumG += g;
+									sumR += r;
+									sumA += a;
+								}
+							}
+							*destPixelPtr = packFunc((byte)(sumB / sampleCountPerPixel), (byte)(sumG / sampleCountPerPixel), (byte)(sumR / sampleCountPerPixel), (byte)(sumA / sampleCountPerPixel));
+						}
+					});
+					break;
+				}
+				case BitmapFormat.Bgra64:
+				{
+					var unpackFunc = ImageProcessing.SelectBgra64Unpacking();
+					ImageProcessing.ParallelFor(0, destHeight, (y) =>
+					{
+						cancellationToken.ThrowIfCancellationRequested();
+						var b = (ushort)0;
+						var g = (ushort)0;
+						var r = (ushort)0;
+						var a = (ushort)0;
+						var destPixelPtr = (uint*)((byte*)destBaseAddress + (y * destRowStride));
+						for (var x = 0; x < destWidth; ++x, ++destPixelPtr)
+						{
+							var sumB = 0;
+							var sumG = 0;
+							var sumR = 0;
+							var sumA = 0;
+							for (var sy = 0; sy < ThumbnailSampleCount; ++sy)
+							{
+								var srcRowPtr = (ulong*)((byte*)srcBaseAddress + ((long)sampleYs[y * ThumbnailSampleCount + sy] * srcRowStride));
+								for (var sx = 0; sx < ThumbnailSampleCount; ++sx)
+								{
+									unpackFunc(srcRowPtr[sampleXs[x * ThumbnailSampleCount + sx]], &b, &g, &r, &a);
+									sumB += b;
+									sumG += g;
+									sumR += r;
+									sumA += a;
+								}
+							}
+							*destPixelPtr = packFunc((byte)((sumB / sampleCountPerPixel) >> 8), (byte)((sumG / sampleCountPerPixel) >> 8), (byte)((sumR / sampleCountPerPixel) >> 8), (byte)((sumA / sampleCountPerPixel) >> 8));
+						}
+					});
+					break;
+				}
+				default:
+					throw new NotSupportedException();
+			}
+		}
+
 
 		/// <summary>
 		/// Create <see cref="IBitmap"/> which copied data from this <see cref="IBitmapBuffer"/>.
@@ -1261,6 +1355,60 @@ namespace Carina.PixelViewer.Media
 					Logger?.LogTrace("Take {duration} ms to convert from {width}x{height} {format} bitmap buffer to Skia bitmap", stopWatch.ElapsedMilliseconds, bitmapBuffer.Width, bitmapBuffer.Height, bitmapBuffer.Format);
 				}
 			});
+		}
+
+
+		/// <summary>
+		/// Create thumbnail in BGRA32 which copied data from this <see cref="IBitmapBuffer"/> asynchronously.
+		/// </summary>
+		/// <param name="bitmapBuffer"><see cref="IBitmapBuffer"/>.</param>
+		/// <param name="maxSize">Maximum width and height of thumbnail in pixels.</param>
+		/// <param name="cancellationToken">Cancellation token.</param>
+		/// <returns>Task of creating thumbnail.</returns>
+		/// <remarks>Each pixel of thumbnail is the average of 4x4 pixels sampled evenly from the region of this bitmap it covers, so the cost does not depend on the size of this bitmap.</remarks>
+		public static async Task<WriteableBitmap> CreateThumbnailAvaloniaBitmapAsync(this IBitmapBuffer bitmapBuffer, int maxSize, CancellationToken cancellationToken)
+		{
+			// check parameters
+			if (maxSize <= 0)
+				throw new ArgumentOutOfRangeException(nameof(maxSize));
+			var width = bitmapBuffer.Width;
+			var height = bitmapBuffer.Height;
+			if (width <= 0 || height <= 0)
+				throw new ArgumentException("Invalid bitmap size.");
+
+			// select size of thumbnail, the aspect ratio is kept
+			var scale = Math.Min(1.0, (double)maxSize / Math.Max(width, height));
+			var thumbnailWidth = Math.Max(1, (int)(width * scale + 0.5));
+			var thumbnailHeight = Math.Max(1, (int)(height * scale + 0.5));
+
+			// create thumbnail
+			using var srcBitmapBuffer = bitmapBuffer.Share();
+			var thumbnail = await Task.Run(() =>
+			{
+				var bitmap = new WriteableBitmap(new PixelSize(thumbnailWidth, thumbnailHeight), new Vector(96, 96), PixelFormats.Bgra8888, AlphaFormat.Unpremul);
+				try
+				{
+					using var destBitmapBuffer = bitmap.Lock();
+					srcBitmapBuffer.Memory.Pin(srcBaseAddress =>
+					{
+						CopyToThumbnailBgra32(srcBaseAddress, srcBitmapBuffer.Format, width, height, srcBitmapBuffer.RowBytes, destBitmapBuffer.Address, thumbnailWidth, thumbnailHeight, destBitmapBuffer.RowBytes, cancellationToken);
+					});
+				}
+				catch
+				{
+					bitmap.Dispose();
+					throw;
+				}
+				return bitmap;
+			}, cancellationToken);
+
+			// complete
+			if (cancellationToken.IsCancellationRequested)
+			{
+				thumbnail.Dispose();
+				cancellationToken.ThrowIfCancellationRequested();
+			}
+			return thumbnail;
 		}
 
 

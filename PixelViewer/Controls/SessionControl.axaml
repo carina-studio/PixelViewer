@@ -569,7 +569,6 @@
 								<Border.Background>
 									<ImageBrush DestinationRect="0,0,20,20" Source="/Resources/RenderedImageBackground.png" TileMode="Tile"/>
 								</Border.Background>
-								<Border Background="{DynamicResource Brush/SessionControl.ImageViewer.Placeholder.Mask}" IsVisible="{Binding !HasRenderedImage}"/>
 							</Border>
 							<LayoutTransformControl ClipToBounds="False">
 								<Panel ClipToBounds="False">
@@ -608,6 +607,8 @@
 									</TransformGroup>
 								</LayoutTransformControl.LayoutTransform>
 							</LayoutTransformControl>
+							<!-- Placeholder mask, drawn over the thumbnail shown as placeholder. Unlike the background it has no margin, so that it covers the whole image -->
+							<Border Background="{DynamicResource Brush/SessionControl.ImageViewer.Placeholder.Mask}" IsHitTestVisible="False" IsVisible="{Binding !HasRenderedImage}"/>
 						</Panel>
 						<Canvas ClipToBounds="False" Height="{Binding #imageContainerBorder.Bounds.Height}" HorizontalAlignment="Center" IsVisible="{Binding HasRenderedImage}" VerticalAlignment="Center" Width="{Binding #imageContainerBorder.Bounds.Width}"/>
 					</Panel>

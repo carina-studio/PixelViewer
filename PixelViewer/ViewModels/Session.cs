@@ -779,6 +779,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<long> RenderedImagesMemoryUsageProp = ObservableProperty.Register<Session, long>(nameof(RenderedImagesMemoryUsage));
 	/// <summary>
+	/// Property of <see cref="RenderedImageThumbnail"/>.
+	/// </summary>
+	public static readonly ObservableProperty<Bitmap?> RenderedImageThumbnailProp = ObservableProperty.Register<Session, Bitmap?>(nameof(RenderedImageThumbnail));
+	/// <summary>
 	/// Property of <see cref="RenderingParametersPanelSize"/>.
 	/// </summary>
 	public static readonly ObservableProperty<double> RenderingParametersPanelSizeProp = ObservableProperty.Register<Session, double>(nameof(RenderingParametersPanelSize), (MinRenderingParametersPanelSize + MaxRenderingParametersPanelSize) / 2, 
@@ -927,6 +931,7 @@ class Session : ViewModel<IAppSuiteApplication>
 	const double MinFilterParamValueDifference = 0.001;
 	const int ReleaseCachedImagesDelay = 3000;
 	const int RenderImageDelay = 500;
+	const int RenderedImageThumbnailSize = 256;
 
 
 	// Static fields.
@@ -2218,6 +2223,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(HistogramsProp, null);
 			this.SetValue(QuarterSizeRenderedImageProp, null);
 			this.SetValue(RenderedImageProp, null);
+			this.SetValue(RenderedImageThumbnailProp, null);
 			this.SetValue(IsSourceOpenedProp, false);
 			this.SetValue(LuminanceHistogramGeometryProp, null);
 			this.canMoveToNextFrame.Update(false);
@@ -4236,7 +4242,10 @@ class Session : ViewModel<IAppSuiteApplication>
 			|| property == TileWidthProp)
 		{
 			if (property == ImageHeightProp)
+			{
+				this.SetValue(RenderedImageThumbnailProp, null);
 				this.UpdatePlaceholderImageDisplaySize();
+			}
 			this.renderImageAction.Reschedule();
 		}
 		else if (property == DemosaicingAlgorithmProp)
@@ -4282,6 +4291,11 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.PersistentState.SetValue(IsInitFramePlaybackRateUnlimited, (bool)newValue.AsNonNull());
 			this.RestartFramePlaybackTimeline();
 		}
+		else if (property == HasRenderingErrorProp)
+		{
+			if ((bool)newValue.AsNonNull())
+				this.SetValue(RenderedImageThumbnailProp, null);
+		}
 		else if (property == HighlightAdjustmentProp)
 		{
 			this.SetValue(HasHighlightAdjustmentProp, Math.Abs((double)newValue.AsNonNull()) >= MinFilterParamValueDifference);
@@ -4318,8 +4332,14 @@ class Session : ViewModel<IAppSuiteApplication>
 		{
 			if (this.Settings.GetValueOrDefault(SettingKeys.ResetImagePlaneOptionsAfterChangingImageDimensions))
 				this.isImagePlaneOptionsResetNeeded = true;
+			this.SetValue(RenderedImageThumbnailProp, null);
 			this.UpdatePlaceholderImageDisplaySize();
 			this.renderImageAction.Reschedule();
+		}
+		else if (property == InsufficientMemoryForRenderedImageProp)
+		{
+			if ((bool)newValue.AsNonNull())
+				this.SetValue(RenderedImageThumbnailProp, null);
 		}
 		else if (property == IsBrightnessAdjustmentSupportedProp)
 		{
@@ -4516,7 +4536,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.OnPropertyChanged(nameof(SourceInsetsRight));
 			this.OnPropertyChanged(nameof(SourceInsetsTop));
 
-			// show the region, which needs no rendering if the image has been rendered
+			// show the region, which needs no rendering if the image has been rendered. the thumbnail of another region cannot be its placeholder
+			this.SetValue(RenderedImageThumbnailProp, null);
 			this.UpdatePlaceholderImageDisplaySize();
 			this.renderImageAction.Reschedule();
 		}
@@ -5205,6 +5226,13 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// Get memory usage of rendered images by this session in bytes.
 	/// </summary>
 	public long RenderedImagesMemoryUsage => this.GetValue(RenderedImagesMemoryUsageProp);
+
+
+	/// <summary>
+	/// Get low-resolution thumbnail of the image reported latest, which is shown as placeholder until the image is rendered again.
+	/// </summary>
+	/// <remarks>The thumbnail is kept after releasing the rendered image, and cleared only when it no longer matches the image to be rendered: closing the source, changing the dimensions or the insets of the image, or failing to render or show the image.</remarks>
+	public Bitmap? RenderedImageThumbnail => this.GetValue(RenderedImageThumbnailProp);
 
 
 	// Render image according to current state.
@@ -6028,6 +6056,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			// convert to Avalonia bitmap
 			var bitmap = (WriteableBitmap?)null;
 			var quarterSizeBitmap = (WriteableBitmap?)null;
+			WriteableBitmap? thumbnail = null;
 			try
 			{
 				// create full-size Avalonia bitmap
@@ -6094,6 +6123,19 @@ class Session : ViewModel<IAppSuiteApplication>
 					else
 						this.Logger.LogWarning("Unable to request memory usage for quarter-size Avalonia bitmap");
 				}
+
+				// create thumbnail to be shown as placeholder after releasing the image, the image is still reported without it
+				if (!cancellationTokenSource.IsCancellationRequested)
+				{
+					try
+					{
+						thumbnail = await sourceRegionBitmapBuffer.CreateThumbnailAvaloniaBitmapAsync(RenderedImageThumbnailSize, cancellationTokenSource.Token);
+					}
+					catch (Exception ex) when (ex is not OperationCanceledException)
+					{
+						this.Logger.LogError(ex, "Failed to create thumbnail of rendered image");
+					}
+				}
 			}
 			catch (Exception ex)
 			{
@@ -6104,7 +6146,7 @@ class Session : ViewModel<IAppSuiteApplication>
 				quarterSizeMemoryUsageToken?.Dispose();
 				if (bitmap is null)
 					memoryUsageToken.Dispose();
-				if (ex is TaskCanceledException)
+				if (ex is OperationCanceledException)
 				{
 					if (this.Application.IsDebugMode)
 						this.Logger.LogWarning("Reporting rendered image has been cancelled");
@@ -6117,6 +6159,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			{
 				if (this.Application.IsDebugMode)
 					this.Logger.LogWarning("Reporting rendered image has been cancelled");
+				thumbnail?.Dispose();
 				throw new TaskCanceledException();
 			}
 
@@ -6139,6 +6182,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.SetValue(HistogramsProp, imageFrame.Histograms);
 			this.SetValue(QuarterSizeRenderedImageProp, quarterSizeBitmap);
 			this.SetValue(RenderedImageProp, bitmap);
+			this.SetValue(RenderedImageThumbnailProp, thumbnail);
 		}
 		else if (!this.IsFilteringRenderedImageNeeded || this.RenderedImage is null)
 		{
