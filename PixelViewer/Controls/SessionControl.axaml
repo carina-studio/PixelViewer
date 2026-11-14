@@ -759,22 +759,22 @@
 			                  }">
 
 				<!-- Rendering parameters panel -->
-				<DockPanel IsEnabled="{Binding IsSourceOpened}" IsVisible="{Binding IsRenderingParametersPanelVisible}">
+				<Grid Name="renderingParamsPanel" IsEnabled="{Binding IsSourceOpened}" IsVisible="{Binding IsRenderingParametersPanelVisible}" RowDefinitions="Auto,*,Auto">
 
 					<!-- Resources -->
-					<DockPanel.Resources>
+					<Grid.Resources>
 						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.SidePanel.Separator.Height.Small"/>
-					</DockPanel.Resources>
+					</Grid.Resources>
 
 					<!-- Styles -->
-					<DockPanel.Styles>
+					<Grid.Styles>
 						<Style Selector="TextBlock">
 							<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
 						</Style>
-					</DockPanel.Styles>
+					</Grid.Styles>
 
 					<!-- Profile -->
-					<Border Classes="SessionControl_SidePanel_ProfilePanel" DockPanel.Dock="Top">
+					<Border Classes="SessionControl_SidePanel_ProfilePanel">
 						<ComboBox Classes="Dialog_ComboBox" ItemsSource="{Binding Profiles}" ItemsPanel="{StaticResource ItemsPanelTemplate/StackPanel}" SelectedItem="{Binding Profile, Mode=TwoWay}" ToolTip.Tip="{asXaml:StringResource SessionControl.Profile}">
 							<ComboBox.ItemTemplate>
 								<DataTemplate>
@@ -797,30 +797,8 @@
 						</ComboBox>
 					</Border>
 
-					<!-- Profile actions -->
-					<Border Classes="SessionControl_SidePanel_ActionsPanel" DockPanel.Dock="Bottom">
-						<Grid ColumnDefinitions="Auto,*,Auto,Auto">
-
-							<!-- Apply profile -->
-							<Button Command="{Binding ApplyProfileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ApplyProfile}" ToolTip.VerticalOffset="0">
-								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Reset}"/>
-							</Button>
-
-							<!-- Save profile -->
-							<asControls:SplitButton Command="{Binding #root.SaveOrSaveAsNewProfileCommand}" DropDownMenu="{StaticResource saveProfileMenu}" Grid.Column="2" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource Common.Save}" ToolTip.VerticalOffset="0">
-								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
-							</asControls:SplitButton>
-
-							<!-- Delete profile -->
-							<Button Command="{Binding DeleteProfileCommand}" Grid.Column="3" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.DeleteProfile}" ToolTip.VerticalOffset="0">
-								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Delete.Outline}"/>
-							</Button>
-
-						</Grid>
-					</Border>
-
 					<!-- Parameters -->
-					<ScrollViewer Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
+					<ScrollViewer Grid.Row="1" Name="renderingParamsPanelScrollViewer" HorizontalScrollBarVisibility="Disabled">
 						<StackPanel Margin="{StaticResource Thickness/SessionControl.SidePanel.Padding}">
 
 							<!-- Format -->
@@ -1265,37 +1243,46 @@
 						</StackPanel>
 					</ScrollViewer>
 
-				</DockPanel>
-
-				<!-- Filter panel -->
-				<DockPanel IsVisible="{Binding IsFilterPanelVisible}">
-
-					<!-- Resources -->
-					<DockPanel.Resources>
-						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.SidePanel.Separator.Height.Small"/>
-						<SolidColorBrush x:Key="SliderTrackValueFill" Color="Transparent"/>
-						<SolidColorBrush x:Key="SliderTrackValueFillDisabled" Color="Transparent"/>
-					</DockPanel.Resources>
-
-					<!-- Styles -->
-					<DockPanel.Styles>
-						<Style Selector="TextBlock">
-							<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
-						</Style>
-					</DockPanel.Styles>
-
-					<!-- Filter actions -->
-					<Border Classes="SessionControl_SidePanel_ActionsPanel" DockPanel.Dock="Bottom" IsEnabled="{Binding IsSourceOpened}">
+					<!-- Profile actions -->
+					<Border Classes="SessionControl_SidePanel_ActionsPanel" Grid.Row="2">
 						<Grid ColumnDefinitions="Auto,*,Auto,Auto">
 
-							<!-- Reset filters -->
-							<Button Command="{Binding ResetFiltersCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ResetFilters}" ToolTip.VerticalOffset="0">
+							<!-- Apply profile -->
+							<Button Command="{Binding ApplyProfileCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ApplyProfile}" ToolTip.VerticalOffset="0">
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Reset}"/>
 							</Button>
 
+							<!-- Save profile -->
+							<asControls:SplitButton Command="{Binding #root.SaveOrSaveAsNewProfileCommand}" DropDownMenu="{StaticResource saveProfileMenu}" Grid.Column="2" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource Common.Save}" ToolTip.VerticalOffset="0">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Save.Outline}"/>
+							</asControls:SplitButton>
+
+							<!-- Delete profile -->
+							<Button Command="{Binding DeleteProfileCommand}" Grid.Column="3" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.DeleteProfile}" ToolTip.VerticalOffset="0">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Delete.Outline}"/>
+							</Button>
 
 						</Grid>
 					</Border>
+
+				</Grid>
+
+				<!-- Filter panel -->
+				<Grid Name="filterPanel" IsVisible="{Binding IsFilterPanelVisible}" RowDefinitions="*,Auto">
+
+					<!-- Resources -->
+					<Grid.Resources>
+						<StaticResourceExtension x:Key="Double/Dialog.Separator.Height.Small" ResourceKey="Double/SessionControl.SidePanel.Separator.Height.Small"/>
+						<SolidColorBrush x:Key="SliderTrackValueFill" Color="Transparent"/>
+						<SolidColorBrush x:Key="SliderTrackValueFillDisabled" Color="Transparent"/>
+					</Grid.Resources>
+
+					<!-- Styles -->
+					<Grid.Styles>
+						<Style Selector="TextBlock">
+							<Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+						</Style>
+					</Grid.Styles>
 
 					<!-- Parameters -->
 					<ScrollViewer HorizontalScrollBarVisibility="Disabled">
@@ -1461,7 +1448,28 @@
 						</StackPanel>
 					</ScrollViewer>
 
-				</DockPanel>
+					<!-- Filter actions -->
+					<Border Classes="SessionControl_SidePanel_ActionsPanel" Grid.Row="1" IsEnabled="{Binding IsSourceOpened}">
+						<Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+
+							<!-- Reset filters -->
+							<Button Command="{Binding ResetFiltersCommand}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ResetFilters}" ToolTip.VerticalOffset="0">
+								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Reset}"/>
+							</Button>
+
+							<!-- Show unfiltered image -->
+							<ToggleButton Name="showUnfilteredImageButton" Grid.Column="1" IsChecked="{Binding ShowUnfilteredImage, Mode=OneWay}" IsEnabled="{Binding IsFilteringRenderedImageNeeded}" asControls:ToolbarElement.Role="Button" ToolTip.Placement="Top" ToolTip.Tip="{asXaml:StringResource SessionControl.ShowUnfilteredImage}" ToolTip.VerticalOffset="0">
+								<Panel>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.CompareImages}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
+									<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.CompareImages.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
+								</Panel>
+							</ToggleButton>
+
+
+						</Grid>
+					</Border>
+
+				</Grid>
 
 			</Panel>
 
@@ -1485,7 +1493,7 @@
 					</Button>
 
 					<!-- Rendering parameters panel -->
-					<ToggleButton IsChecked="{Binding IsRenderingParametersPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderingParametersPanel}">
+					<ToggleButton Click="OnSidePanelButtonClick" IsChecked="{Binding IsRenderingParametersPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.RenderingParametersPanel}">
 						<Panel>
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders}" IsVisible="{Binding !$parent[ToggleButton].IsChecked}"/>
 							<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.Sliders.Light}" IsVisible="{Binding $parent[ToggleButton].IsChecked}"/>
@@ -1493,7 +1501,7 @@
 					</ToggleButton>
 
 					<!-- Filter panel -->
-					<ToggleButton IsChecked="{Binding IsFilterPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FilterPanel}">
+					<ToggleButton Click="OnSidePanelButtonClick" IsChecked="{Binding IsFilterPanelVisible}" asControls:ToolbarElement.Role="Button" ToolTip.Tip="{asXaml:StringResource SessionControl.FilterPanel}">
 						<Panel>
 							<Panel IsVisible="{Binding !$parent[ToggleButton].IsChecked}">
 								<Image asControls:ToolbarElement.Role="Icon" Source="{StaticResource Image/Icon.ImageFilter}" IsVisible="{Binding !#activeFilterPanelButtonIcon.IsVisible}"/>

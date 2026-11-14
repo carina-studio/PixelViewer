@@ -129,6 +129,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ContextMenu evaluateImageDimensionsMenu;
 	readonly ToggleButton fileActionsButton;
 	readonly ContextMenu fileActionsMenu;
+	readonly Control filterPanel;
 	readonly ToggleButton framePlaybackOptionsButton;
 	readonly Popup framePlaybackOptionsPopup;
 	// Pivot point in scrollviewer coords supplied by the active gesture handler (cursor for trackpad, focal point for pinch).
@@ -158,6 +159,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Image scale at the start of the current pinch gesture; non-null indicates a pinch is in progress.
 	double? pinchInitialScale;
 	readonly HashSet<Key> pressedKeys = new();
+	readonly Control renderingParamsPanel;
 	readonly ScrollViewer renderingParamsPanelScrollViewer;
 	readonly ScheduledAction showProgressBarAction;
 	readonly ColumnDefinition sidePanelColumn;
@@ -303,6 +305,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			it.Closed += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = false);
 			it.Opened += (_, _) => this.SynchronizationContext.Post(() => this.fileActionsButton.IsChecked = true);
 		});
+		this.filterPanel = this.Get<Control>(nameof(filterPanel));
 		SetupSidePanelExpander("formatParamsExpander", IsFormatParamsExpandedKey);
 		this.framePlaybackOptionsButton = this.Get<ToggleButton>(nameof(framePlaybackOptionsButton));
 		this.framePlaybackOptionsPopup = this.Get<Popup>(nameof(framePlaybackOptionsPopup)).Also(it =>
@@ -376,6 +379,44 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		SetupSidePanelExpander("plane3ParamsExpander", IsPlane3ParamsExpandedKey);
 		SetupFilterParamsSlider("redColorAdjustment", ColorAdjustmentGroup);
 		SetupFilterParamsSlider("saturationAdjustment", ColorAdjustmentGroup);
+		this.Get<ToggleButton>("showUnfilteredImageButton").Also(it =>
+		{
+			// show the image without filters only while the button is being pressed
+			it.AddHandler(PointerPressedEvent, (_, e) =>
+			{
+				if (e.GetCurrentPoint(it).Properties.IsLeftButtonPressed && this.DataContext is Session session)
+					session.ShowUnfilteredImage = true;
+			}, RoutingStrategies.Tunnel);
+
+			// stop showing the image without filters after the toggling by clicking, or when the pointer is released elsewhere
+			it.AddHandler(PointerReleasedEvent, (_, _) => StopShowingUnfilteredImage(), RoutingStrategies.Bubble, true);
+			it.PointerCaptureLost += (_, _) => StopShowingUnfilteredImage();
+
+			// show the image without filters only while Enter or Space is being pressed, instead of toggling the button
+			it.AddHandler(KeyDownEvent, (_, e) =>
+			{
+				if (e.Key is not (Key.Enter or Key.Space))
+					return;
+				e.Handled = true;
+				if (this.DataContext is Session session)
+					session.ShowUnfilteredImage = true;
+			}, RoutingStrategies.Tunnel);
+			it.AddHandler(KeyUpEvent, (_, e) =>
+			{
+				if (e.Key is not (Key.Enter or Key.Space))
+					return;
+				e.Handled = true;
+				StopShowingUnfilteredImage();
+			}, RoutingStrategies.Tunnel);
+			it.LostFocus += (_, _) => StopShowingUnfilteredImage();
+
+			// stop showing the image without filters
+			void StopShowingUnfilteredImage()
+			{
+				if (this.DataContext is Session session)
+					session.ShowUnfilteredImage = false;
+			}
+		});
 		var workingAreaColumnDefs = this.Get<Grid>("workingAreaGrid").ColumnDefinitions;
 		this.histogramsPanelColumn = workingAreaColumnDefs.First().Also(column =>
 		{
@@ -396,6 +437,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				}
 			}));
 		});
+		this.renderingParamsPanel = this.Get<Control>(nameof(renderingParamsPanel));
 		this.renderingParamsPanelScrollViewer = this.Get<ScrollViewer>(nameof(renderingParamsPanelScrollViewer));
 		SetupFilterParamsSlider("shadowAdjustment", BrightnessAdjustmentGroup);
 #if DEBUG
@@ -1868,6 +1910,33 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			this.SetValue(ShowSelectedRenderedImagePixelLabColorProperty, (bool)e.Value);
 		else if (e.Key == SettingKeys.ShowSelectedRenderedImagePixelXyzColor)
 			this.SetValue(ShowSelectedRenderedImagePixelXyzColorProperty, (bool)e.Value);
+	}
+
+
+	// Called when a button of side panel toolbar is clicked.
+	void OnSidePanelButtonClick(object? sender, RoutedEventArgs e)
+	{
+		// check state
+		if (sender is not ToggleButton { IsChecked: true })
+			return;
+
+		// move focus to the first control of the side panel which has been opened, after its controls have been templated by layout
+		this.SynchronizationContext.Post(() =>
+		{
+			var panel = this.DataContext switch
+			{
+				Session { IsFilterPanelVisible: true } => this.filterPanel,
+				Session { IsRenderingParametersPanelVisible: true } => this.renderingParamsPanel,
+				_ => null,
+			};
+			if (panel is null)
+				return;
+			panel.UpdateLayout();
+			panel.GetVisualDescendants().OfType<InputElement>().FirstOrDefault(it => it.Focusable
+				&& KeyboardNavigation.GetIsTabStop(it)
+				&& it.IsEffectivelyEnabled
+				&& it.IsEffectivelyVisible)?.Focus();
+		});
 	}
 
 

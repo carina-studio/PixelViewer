@@ -297,6 +297,7 @@
 	<sys:String x:Key="String/SessionControl.SelectRgbGain">自動調整增益</sys:String>
 	<sys:String x:Key="String/SessionControl.SelectProfileToOpenFiles">開啟檔案所使用的組態</sys:String>
 	<sys:String x:Key="String/SessionControl.ShowFileInExplorer">在檔案總管中顯示檔案</sys:String>
+	<sys:String x:Key="String/SessionControl.ShowUnfilteredImage">按住以顯示未套用濾鏡的影像</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceDataSize">來源資料大小</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceImageBitDepth.Format">{0} 位元色彩</sys:String>
 	<sys:String x:Key="String/SessionControl.SourceInsets">向內裁切</sys:String>

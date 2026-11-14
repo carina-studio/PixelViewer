@@ -7,6 +7,7 @@
 + Added support for color pre-correction of RGB and ARGB formats.
 + Added warmth and tint adjustments.
 + Added auto brightness adjustment.
++ Added support for temporarily showing the image without filters.
 + Added `ProPhoto RGB` color space.
 + Added support for showing color depth of image on the status bar.
 

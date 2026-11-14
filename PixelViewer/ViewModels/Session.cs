@@ -852,6 +852,10 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// </summary>
 	public static readonly ObservableProperty<double> ShadowAdjustmentProp = ObservableProperty.Register<Session, double>(nameof(ShadowAdjustment), 0, validate: double.IsFinite);
 	/// <summary>
+	/// Property of <see cref="ShowUnfilteredImage"/>.
+	/// </summary>
+	public static readonly ObservableProperty<bool> ShowUnfilteredImageProp = ObservableProperty.Register<Session, bool>(nameof(ShowUnfilteredImage));
+	/// <summary>
 	/// Property of <see cref="SourceDataSize"/>.
 	/// </summary>
 	public static readonly ObservableProperty<long> SourceDataSizeProp = ObservableProperty.Register<Session, long>(nameof(SourceDataSize));
@@ -4415,6 +4419,9 @@ class Session : ViewModel<IAppSuiteApplication>
 
 				// release the filtered image
 				this.filteredImageFrame = this.filteredImageFrame.DisposeAndReturnNull();
+
+				// stop showing the image without filters, which would hide the filters applied later otherwise
+				this.SetValue(ShowUnfilteredImageProp, false);
 			}
 		}
 		else if (property == IsFilteringRenderedImageProp
@@ -4542,6 +4549,16 @@ class Session : ViewModel<IAppSuiteApplication>
 			this.canResetShadowAdjustment.Update(this.HasShadowAdjustment && this.IsShadowAdjustmentSupported);
 			this.updateIsFilteringImageNeededAction.Schedule();
 			this.filterImageAction.Schedule(RenderImageDelay);
+		}
+		else if (property == ShowUnfilteredImageProp)
+		{
+			// report the image with or without filters. the rendering or filtering in progress reports it instead, whose cancellation token
+			// would be cancelled by another reporting and stop it
+			if (this.IsFilteringRenderedImageNeeded && !this.IsRenderingImage && !this.IsFilteringRenderedImage)
+			{
+				var cancellationTokenSource = new CancellationTokenSource();
+				Global.RunWithoutError(() => _ = this.ReportRenderedImageAsync(cancellationTokenSource));
+			}
 		}
 		else if (property == SourceDataSizeProp)
 			this.SetValue(HasSourceDataSizeProp, (long)newValue.AsNonNull() > 0);
@@ -5944,7 +5961,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// get image frame to be used
 		var imageFrame = Global.Run(() =>
 		{
-			if (this.IsFilteringRenderedImageNeeded)
+			if (this.IsFilteringRenderedImageNeeded && !this.ShowUnfilteredImage)
 				return this.filteredImageFrame;
 			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
 				return this.colorSpaceConvertedImageFrame;
@@ -7604,7 +7621,7 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		var imageFrame = Global.Run(() =>
 		{
-			if (this.IsFilteringRenderedImageNeeded)
+			if (this.IsFilteringRenderedImageNeeded && !this.ShowUnfilteredImage)
 				return this.filteredImageFrame;
 			if (this.Settings.GetValueOrDefault(SettingKeys.ColorSpaceConversionTiming) == ColorSpaceConversionTiming.BeforeApplyingFilters)
 				return this.colorSpaceConvertedImageFrame ?? this.renderedImageFrame;
@@ -7690,6 +7707,17 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		get => this.GetValue(ShadowAdjustmentProp);
 		set => this.SetValue(ShadowAdjustmentProp, value);
+	}
+
+
+	/// <summary>
+	/// Get or set whether the image without filters should be shown instead of the filtered one temporarily.
+	/// </summary>
+	/// <remarks>The value is not persisted, and it is reset once filtering is no longer needed.</remarks>
+	public bool ShowUnfilteredImage
+	{
+		get => this.GetValue(ShowUnfilteredImageProp);
+		set => this.SetValue(ShowUnfilteredImageProp, value);
 	}
 
 
