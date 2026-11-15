@@ -1,5 +1,6 @@
 using Carina.PixelViewer.Media;
 using NUnit.Framework;
+using System;
 using System.IO;
 
 namespace Carina.PixelViewer.Test.Media;
@@ -81,5 +82,38 @@ class IfdEntryReaderTests
 			Assert.That((reader.CurrentEntryId, reader.CurrentIfdName, reader.CurrentIfdIndex), Is.EqualTo((tag, expectedName, ifdIndex)), $"Entry {tag:x4} should belong to IFD {ifdIndex} of '{expectedName}'.");
 		}
 		Assert.That(reader.Read(), Is.False);
+	}
+
+
+	/// <summary>
+	/// Test for accepting the magic number of TIFF and the one of RW2 of Panasonic in header, and refusing the others.
+	/// </summary>
+	[Test]
+	public void MagicTest([Values(IfdEntryReader.TiffMagic, IfdEntryReader.Rw2Magic, (ushort)0x2b, (ushort)0x4f52)] ushort magic)
+	{
+		// write header and IFD of one entry
+		using var stream = new MemoryStream();
+		using var writer = new BinaryWriter(stream);
+		writer.Write("II"u8);
+		writer.Write(magic);
+		writer.Write(8u);
+		writer.Write((ushort)1);
+		writer.Write((ushort)0x0100);
+		writer.Write((ushort)IfdEntryType.UInt16);
+		writer.Write(1u);
+		writer.Write(640u);
+		writer.Write(0u);
+
+		// read entry
+		stream.Position = 0;
+		if (magic is not (IfdEntryReader.TiffMagic or IfdEntryReader.Rw2Magic))
+		{
+			Assert.Throws<ArgumentException>(() => _ = new IfdEntryReader(stream), $"Magic number {magic:x4} should be refused.");
+			return;
+		}
+		var reader = new IfdEntryReader(stream);
+		Assert.That(reader.Magic, Is.EqualTo(magic));
+		Assert.That(reader.Read(), Is.True);
+		Assert.That(reader.CurrentEntryId, Is.EqualTo(0x0100));
 	}
 }

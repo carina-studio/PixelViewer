@@ -4,587 +4,603 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
 
-namespace Carina.PixelViewer.Media
+namespace Carina.PixelViewer.Media;
+
+/// <summary>
+/// Reader to read entries of IFDs in TIFF-based data.
+/// </summary>
+class IfdEntryReader
 {
     /// <summary>
-    /// Reader to read entries of IFDs in TIFF-based data.
+    /// Magic number in the header of RW2 file of Panasonic, which is TIFF-based data with Panasonic-specific entries in IFD 0.
     /// </summary>
-    class IfdEntryReader
+    public const ushort Rw2Magic = 0x55;
+    /// <summary>
+    /// Magic number in the header of TIFF data.
+    /// </summary>
+    public const ushort TiffMagic = 0x2a;
+
+
+    // Fields.
+    uint currentEntryDataCount;
+    long currentEntryDataSize;
+    long currentEntryValuePosition;
+    readonly byte[] entryBuffer = new byte[12];
+    readonly Dictionary<string, int> nextIfdIndices = new();
+    bool isCompleted;
+    readonly Func<byte[], int, ushort> parseUInt16;
+    readonly Func<byte[], int, uint> parseUInt32;
+    readonly Func<byte[], int, ulong> parseUInt64;
+    int remainingEntries;
+    readonly Queue<Tuple<long, string>> pendingIfdsToRead = new();
+    readonly Stream stream;
+
+
+    /// <summary>
+    /// Initialize new <see cref="IfdEntryReader"/> instance.
+    /// </summary>
+    /// <param name="stream">Seekable <see cref="Stream"/> to read IFD entries from.</param>
+    public IfdEntryReader(Stream stream) : this(stream, IfdNames.Default)
+    { }
+
+
+    /// <summary>
+    /// Initialize new <see cref="IfdEntryReader"/> instance whose first IFD is of given name.
+    /// </summary>
+    /// <param name="stream">Seekable <see cref="Stream"/> to read IFD entries from.</param>
+    /// <param name="firstIfdName">Name of the first IFD, which the IFDs chained after it take too.</param>
+    /// <remarks>The name is for the TIFF-based data whose first IFD is not IFD 0, such as the Exif IFD kept as TIFF data of its own.</remarks>
+    public IfdEntryReader(Stream stream, string firstIfdName)
     {
-        // Fields.
-        uint currentEntryDataCount;
-        long currentEntryDataSize;
-        long currentEntryValuePosition;
-        readonly byte[] entryBuffer = new byte[12];
-        readonly Dictionary<string, int> nextIfdIndices = new();
-        bool isCompleted;
-        readonly Func<byte[], int, ushort> parseUInt16;
-        readonly Func<byte[], int, uint> parseUInt32;
-        readonly Func<byte[], int, ulong> parseUInt64;
-        int remainingEntries;
-        readonly Queue<Tuple<long, string>> pendingIfdsToRead = new();
-        readonly Stream stream;
+        // check stream
+        if (!stream.CanSeek)
+            throw new ArgumentException();
+        this.stream = stream;
+        this.InitialStreamPosition = stream.Position;
 
-
-        /// <summary>
-        /// Initialize new <see cref="IfdEntryReader"/> instance.
-        /// </summary>
-        /// <param name="stream">Seekable <see cref="Stream"/> to read IFD entries from.</param>
-        public IfdEntryReader(Stream stream) : this(stream, IfdNames.Default)
-        { }
-
-
-        /// <summary>
-        /// Initialize new <see cref="IfdEntryReader"/> instance whose first IFD is of given name.
-        /// </summary>
-        /// <param name="stream">Seekable <see cref="Stream"/> to read IFD entries from.</param>
-        /// <param name="firstIfdName">Name of the first IFD, which the IFDs chained after it take too.</param>
-        /// <remarks>The name is for the TIFF-based data whose first IFD is not IFD 0, such as the Exif IFD kept as TIFF data of its own.</remarks>
-        public IfdEntryReader(Stream stream, string firstIfdName)
+        // read header
+        var buffer = new byte[8];
+        if (stream.Read(buffer, 0, 8) < 8)
+            throw new ArgumentException("Invalid TIFF header.");
+        if (buffer[0] == 'I' && buffer[1] == 'I')
         {
-            // check stream
-            if (!stream.CanSeek)
-                throw new ArgumentException();
-            this.stream = stream;
-            this.InitialStreamPosition = stream.Position;
-
-            // read header
-            var buffer = new byte[8];
-            if (stream.Read(buffer, 0, 8) < 8)
-                throw new ArgumentException("Invalid TIFF header.");
-            if (buffer[0] == 'I' && buffer[1] == 'I')
-            {
-                this.IsLittleEndian = true;
-                this.parseUInt16 = (buffer, offset) => (ushort)((buffer[offset + 1] << 8) | buffer[offset]);
-                this.parseUInt32 = (buffer, offset) => (uint)((buffer[offset + 3] << 24) | (buffer[offset + 2] << 16) | (buffer[offset + 1] << 8) | buffer[offset]);
-                this.parseUInt64 = (buffer, offset) => (((ulong)buffer[offset + 7] << 56) | ((ulong)buffer[offset + 6] << 48) | ((ulong)buffer[offset + 5] << 40) | ((ulong)buffer[offset + 4] << 32)
-                        | ((ulong)buffer[offset + 3] << 24) | ((ulong)buffer[offset + 2] << 16) | ((ulong)buffer[offset + 1] << 8) | buffer[offset]);
-            }
-            else if (buffer[0] == 'M' && buffer[1] == 'M')
-            {
-                this.parseUInt16 = (buffer, offset) => (ushort)((buffer[offset] << 8) | buffer[offset + 1]);
-                this.parseUInt32 = (buffer, offset) => (uint)((buffer[offset] << 24) | (buffer[offset + 1] << 16) | (buffer[offset + 2] << 8) | buffer[offset + 3]);
-                this.parseUInt64 = (buffer, offset) => (((ulong)buffer[offset] << 56) | ((ulong)buffer[offset + 1] << 48) | ((ulong)buffer[offset + 2] << 40) | ((ulong)buffer[offset + 3] << 32)
-                        | ((ulong)buffer[offset + 4] << 24) | ((ulong)buffer[offset + 5] << 16) | ((ulong)buffer[offset + 6] << 8) | buffer[offset + 7]);
-            }
-            else
-                throw new ArgumentException("Invalid TIFF header.");
-            if (this.parseUInt16(buffer, 2) != 0x2a)
-                throw new ArgumentException("Invalid TIFF header.");
-
-            // get offset to first IFD
-            var offset = this.parseUInt32(buffer, 4);
-            if (this.InitialStreamPosition + offset >= stream.Length)
-                throw new ArgumentException($"Invalid offset to first IFD: {offset}.");
-
-            // prepare to read first IFD
-            this.EnqueueIfdToRead(this.InitialStreamPosition + offset, firstIfdName);
+            this.IsLittleEndian = true;
+            this.parseUInt16 = (buffer, offset) => (ushort)((buffer[offset + 1] << 8) | buffer[offset]);
+            this.parseUInt32 = (buffer, offset) => (uint)((buffer[offset + 3] << 24) | (buffer[offset + 2] << 16) | (buffer[offset + 1] << 8) | buffer[offset]);
+            this.parseUInt64 = (buffer, offset) => (((ulong)buffer[offset + 7] << 56) | ((ulong)buffer[offset + 6] << 48) | ((ulong)buffer[offset + 5] << 40) | ((ulong)buffer[offset + 4] << 32)
+                    | ((ulong)buffer[offset + 3] << 24) | ((ulong)buffer[offset + 2] << 16) | ((ulong)buffer[offset + 1] << 8) | buffer[offset]);
         }
-
-
-        /// <summary>
-        /// Get position of data of current entry in stream.
-        /// </summary>
-        /// <remarks>The data of 4 bytes or less is stored in the entry itself, so its position is the one of the value field of the entry. The value is undefined if there is no current entry to read.</remarks>
-        public long CurrentEntryDataPosition => this.currentEntryDataSize <= 4
-            ? this.currentEntryValuePosition
-            : this.InitialStreamPosition + this.parseUInt32(this.entryBuffer, 8);
-
-
-        /// <summary>
-        /// Get size of data of current entry in bytes.
-        /// </summary>
-        /// <remarks>The value is undefined if there is no current entry to read.</remarks>
-        public long CurrentEntryDataSize => this.currentEntryDataSize;
-
-
-        /// <summary>
-        /// Get ID of current entry.
-        /// </summary>
-        public ushort CurrentEntryId { get; private set; }
-
-
-        /// <summary>
-        /// Get type of data of current entry.
-        /// </summary>
-        public IfdEntryType CurrentEntryType { get; private set; }
-
-
-        /// <summary>
-        /// Get index of IFD relative to other IFDs with same name.
-        /// </summary>
-        public int CurrentIfdIndex { get; private set; }
-
-
-        /// <summary>
-        /// Get current name of IFD.
-        /// </summary>
-        public string? CurrentIfdName { get; private set; }
-
-
-        /// <summary>
-        /// Enqueue IFD to be read later.
-        /// </summary>
-        /// <param name="position">Position of IFD in stream.</param>
-        /// <param name="ifdName">Name of IFD.</param>
-        public void EnqueueIfdToRead(long position, string ifdName)
+        else if (buffer[0] == 'M' && buffer[1] == 'M')
         {
-            if (this.isCompleted)
-                throw new InvalidOperationException();
-            this.pendingIfdsToRead.Enqueue(new Tuple<long, string>(position, ifdName));
+            this.parseUInt16 = (buffer, offset) => (ushort)((buffer[offset] << 8) | buffer[offset + 1]);
+            this.parseUInt32 = (buffer, offset) => (uint)((buffer[offset] << 24) | (buffer[offset + 1] << 16) | (buffer[offset + 2] << 8) | buffer[offset + 3]);
+            this.parseUInt64 = (buffer, offset) => (((ulong)buffer[offset] << 56) | ((ulong)buffer[offset + 1] << 48) | ((ulong)buffer[offset + 2] << 40) | ((ulong)buffer[offset + 3] << 32)
+                    | ((ulong)buffer[offset + 4] << 24) | ((ulong)buffer[offset + 5] << 16) | ((ulong)buffer[offset + 6] << 8) | buffer[offset + 7]);
         }
+        else
+            throw new ArgumentException("Invalid TIFF header.");
+        this.Magic = this.parseUInt16(buffer, 2);
+        if (this.Magic is not (TiffMagic or Rw2Magic))
+            throw new ArgumentException("Invalid TIFF header.");
+
+        // get offset to first IFD
+        var offset = this.parseUInt32(buffer, 4);
+        if (this.InitialStreamPosition + offset >= stream.Length)
+            throw new ArgumentException($"Invalid offset to first IFD: {offset}.");
+
+        // prepare to read first IFD
+        this.EnqueueIfdToRead(this.InitialStreamPosition + offset, firstIfdName);
+    }
 
 
-        /// <summary>
-        /// Get initial position of stream.
-        /// </summary>
-        public long InitialStreamPosition { get; }
+    /// <summary>
+    /// Get position of data of current entry in stream.
+    /// </summary>
+    /// <remarks>The data of 4 bytes or less is stored in the entry itself, so its position is the one of the value field of the entry. The value is undefined if there is no current entry to read.</remarks>
+    public long CurrentEntryDataPosition => this.currentEntryDataSize <= 4
+        ? this.currentEntryValuePosition
+        : this.InitialStreamPosition + this.parseUInt32(this.entryBuffer, 8);
 
 
-        /// <summary>
-        /// Check whether byte ordering used in IFDs is little-endian or not.
-        /// </summary>
-        public bool IsLittleEndian { get; }
+    /// <summary>
+    /// Get size of data of current entry in bytes.
+    /// </summary>
+    /// <remarks>The value is undefined if there is no current entry to read.</remarks>
+    public long CurrentEntryDataSize => this.currentEntryDataSize;
 
 
-        /// <summary>
-        /// Move to next entry.
-        /// </summary>
-        /// <returns>True if successfully moved to next entry.</returns>
-        public bool Read()
-        {
-            while (true)
-            {
-                // check state
-                if (isCompleted)
-                    return false;
-
-                // move to next IFD
-                if (this.remainingEntries <= 0)
-                {
-                    if (this.pendingIfdsToRead.Count == 0)
-                    {
-                        this.CurrentEntryId = 0;
-                        this.CurrentEntryType = IfdEntryType.Undefined;
-                        this.CurrentIfdIndex = 0;
-                        this.CurrentIfdName = null;
-                        this.isCompleted = true;
-                        return false;
-                    }
-                    var (position, ifdName) = this.pendingIfdsToRead.Dequeue();
-                    this.stream.Position = position;
-                    if (this.stream.Read(this.entryBuffer, 0, 2) == 2)
-                    {
-                        try
-                        {
-                            this.remainingEntries = this.parseUInt16(this.entryBuffer, 0);
-                            this.CurrentIfdName = ifdName;
-                            if (this.nextIfdIndices.TryGetValue(ifdName, out var index))
-                            {
-                                this.CurrentIfdIndex = index;
-                                this.nextIfdIndices[ifdName] = (index + 1);
-                            }
-                            else
-                            {
-                                this.CurrentIfdIndex = 0;
-                                this.nextIfdIndices[ifdName] = 1;
-                            }
-                        }
-                        catch (EndOfStreamException)
-                        { }
-                    }
-                    continue;
-                }
-
-                // clear current entry
-                this.CurrentEntryId = 0;
-                this.CurrentEntryType = IfdEntryType.Undefined;
-
-                // read entry
-                if (this.stream.Read(this.entryBuffer, 0, 12) < 12)
-                {
-                    this.remainingEntries = 0;
-                    continue;
-                }
-                else
-                    --this.remainingEntries;
-                this.currentEntryValuePosition = this.stream.Position - 4;
-                this.CurrentEntryId = this.parseUInt16(this.entryBuffer, 0);
-                this.CurrentEntryType = (IfdEntryType)this.parseUInt16(this.entryBuffer, 2);
-                this.currentEntryDataCount = this.parseUInt32(this.entryBuffer, 4);
-                this.currentEntryDataSize = this.CurrentEntryType switch
-                {
-                    IfdEntryType.Int16 or IfdEntryType.UInt16 => 2,
-                    IfdEntryType.Int32 or IfdEntryType.UInt32 or IfdEntryType.Single => 4,
-                    IfdEntryType.Rational or IfdEntryType.URational or IfdEntryType.Double => 8,
-                    _ => 1,
-                } * this.currentEntryDataCount;
-
-                // get offset to next IFD
-                if (this.remainingEntries <= 0)
-                {
-                    var buffer = new byte[4];
-                    if (this.stream.Read(buffer, 0, 4) == 4)
-                    {
-                        var offset = this.parseUInt32(buffer, 0);
-                        if (offset > 0)
-                            this.EnqueueIfdToRead(this.InitialStreamPosition + offset, this.CurrentIfdName ?? "");
-                    }
-                }
-
-                // complete
-                return true;
-            }
-        }
+    /// <summary>
+    /// Get ID of current entry.
+    /// </summary>
+    public ushort CurrentEntryId { get; private set; }
 
 
-        /// <summary>
-        /// Read each entry and perform action.
-        /// </summary>
-        /// <param name="entryAction">Action to perform for each entry. Returning True to continue reading next entry, False to abort reading.</param>
-        public void ReadEntries(Func<bool> entryAction)
-        {
-            while (this.Read())
-            {
-                if (!entryAction())
-                    break;
-            }
-        }
+    /// <summary>
+    /// Get type of data of current entry.
+    /// </summary>
+    public IfdEntryType CurrentEntryType { get; private set; }
 
 
-        /// <summary>
-        /// Try reading raw data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData([NotNullWhen(true)] out byte[]? data)
+    /// <summary>
+    /// Get index of IFD relative to other IFDs with same name.
+    /// </summary>
+    public int CurrentIfdIndex { get; private set; }
+
+
+    /// <summary>
+    /// Get current name of IFD.
+    /// </summary>
+    public string? CurrentIfdName { get; private set; }
+
+
+    /// <summary>
+    /// Enqueue IFD to be read later.
+    /// </summary>
+    /// <param name="position">Position of IFD in stream.</param>
+    /// <param name="ifdName">Name of IFD.</param>
+    public void EnqueueIfdToRead(long position, string ifdName)
+    {
+        if (this.isCompleted)
+            throw new InvalidOperationException();
+        this.pendingIfdsToRead.Enqueue(new Tuple<long, string>(position, ifdName));
+    }
+
+
+    /// <summary>
+    /// Get initial position of stream.
+    /// </summary>
+    public long InitialStreamPosition { get; }
+
+
+    /// <summary>
+    /// Check whether byte ordering used in IFDs is little-endian or not.
+    /// </summary>
+    public bool IsLittleEndian { get; }
+
+
+    /// <summary>
+    /// Get magic number in header, which is <see cref="TiffMagic"/> or <see cref="Rw2Magic"/>.
+    /// </summary>
+    public ushort Magic { get; }
+
+
+    /// <summary>
+    /// Move to next entry.
+    /// </summary>
+    /// <returns>True if successfully moved to next entry.</returns>
+    public bool Read()
+    {
+        while (true)
         {
             // check state
-            if (this.CurrentEntryId == 0)
-            {
-                data = null;
+            if (isCompleted)
                 return false;
+
+            // move to next IFD
+            if (this.remainingEntries <= 0)
+            {
+                if (this.pendingIfdsToRead.Count == 0)
+                {
+                    this.CurrentEntryId = 0;
+                    this.CurrentEntryType = IfdEntryType.Undefined;
+                    this.CurrentIfdIndex = 0;
+                    this.CurrentIfdName = null;
+                    this.isCompleted = true;
+                    return false;
+                }
+                var (position, ifdName) = this.pendingIfdsToRead.Dequeue();
+                this.stream.Position = position;
+                if (this.stream.Read(this.entryBuffer, 0, 2) == 2)
+                {
+                    try
+                    {
+                        this.remainingEntries = this.parseUInt16(this.entryBuffer, 0);
+                        this.CurrentIfdName = ifdName;
+                        if (this.nextIfdIndices.TryGetValue(ifdName, out var index))
+                        {
+                            this.CurrentIfdIndex = index;
+                            this.nextIfdIndices[ifdName] = (index + 1);
+                        }
+                        else
+                        {
+                            this.CurrentIfdIndex = 0;
+                            this.nextIfdIndices[ifdName] = 1;
+                        }
+                    }
+                    catch (EndOfStreamException)
+                    { }
+                }
+                continue;
             }
 
-            // read data
-            data = new byte[this.currentEntryDataSize];
-            if (this.currentEntryDataSize <= 4)
+            // clear current entry
+            this.CurrentEntryId = 0;
+            this.CurrentEntryType = IfdEntryType.Undefined;
+
+            // read entry
+            if (this.stream.Read(this.entryBuffer, 0, 12) < 12)
             {
-                Array.Copy(this.entryBuffer, 8, data, 0, (int)this.currentEntryDataSize);
-                return true;
+                this.remainingEntries = 0;
+                continue;
             }
             else
+                --this.remainingEntries;
+            this.currentEntryValuePosition = this.stream.Position - 4;
+            this.CurrentEntryId = this.parseUInt16(this.entryBuffer, 0);
+            this.CurrentEntryType = (IfdEntryType)this.parseUInt16(this.entryBuffer, 2);
+            this.currentEntryDataCount = this.parseUInt32(this.entryBuffer, 4);
+            this.currentEntryDataSize = this.CurrentEntryType switch
             {
-                var position = this.stream.Position;
-                this.stream.Position = this.InitialStreamPosition + this.parseUInt32(this.entryBuffer, 8);
-                try
+                IfdEntryType.Int16 or IfdEntryType.UInt16 => 2,
+                IfdEntryType.Int32 or IfdEntryType.UInt32 or IfdEntryType.Single => 4,
+                IfdEntryType.Rational or IfdEntryType.URational or IfdEntryType.Double => 8,
+                _ => 1,
+            } * this.currentEntryDataCount;
+
+            // get offset to next IFD
+            if (this.remainingEntries <= 0)
+            {
+                var buffer = new byte[4];
+                if (this.stream.Read(buffer, 0, 4) == 4)
                 {
-                    if (this.stream.Read(data.AsSpan()) < data.Length)
-                    {
-                        data = null;
-                        return false;
-                    }
-                    return true;
+                    var offset = this.parseUInt32(buffer, 0);
+                    if (offset > 0)
+                        this.EnqueueIfdToRead(this.InitialStreamPosition + offset, this.CurrentIfdName ?? "");
                 }
-                catch
+            }
+
+            // complete
+            return true;
+        }
+    }
+
+
+    /// <summary>
+    /// Read each entry and perform action.
+    /// </summary>
+    /// <param name="entryAction">Action to perform for each entry. Returning True to continue reading next entry, False to abort reading.</param>
+    public void ReadEntries(Func<bool> entryAction)
+    {
+        while (this.Read())
+        {
+            if (!entryAction())
+                break;
+        }
+    }
+
+
+    /// <summary>
+    /// Try reading raw data of entry.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public bool TryGetEntryData([NotNullWhen(true)] out byte[]? data)
+    {
+        // check state
+        if (this.CurrentEntryId == 0)
+        {
+            data = null;
+            return false;
+        }
+
+        // read data
+        data = new byte[this.currentEntryDataSize];
+        if (this.currentEntryDataSize <= 4)
+        {
+            Array.Copy(this.entryBuffer, 8, data, 0, (int)this.currentEntryDataSize);
+            return true;
+        }
+        else
+        {
+            var position = this.stream.Position;
+            this.stream.Position = this.InitialStreamPosition + this.parseUInt32(this.entryBuffer, 8);
+            try
+            {
+                if (this.stream.Read(data.AsSpan()) < data.Length)
                 {
                     data = null;
                     return false;
                 }
-                finally
-                {
-                    this.stream.Position = position;
-                }
+                return true;
             }
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public unsafe bool TryGetEntryData([NotNullWhen(true)] out sbyte[]? data)
-        {
-            if (!this.TryGetEntryData(out byte[]? bytes))
+            catch
             {
                 data = null;
                 return false;
             }
-            data = new sbyte[bytes.Length];
-            fixed (byte* bytesPtr = bytes)
+            finally
             {
-                fixed (sbyte* dataPtr = data)
-                    Runtime.InteropServices.Marshal.Copy(bytesPtr, dataPtr, bytes.Length);
+                this.stream.Position = position;
             }
-            return true;
         }
+    }
 
 
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData([NotNullWhen(true)] out string? data)
+    /// <summary>
+    /// Try reading data of entry.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public unsafe bool TryGetEntryData([NotNullWhen(true)] out sbyte[]? data)
+    {
+        if (!this.TryGetEntryData(out byte[]? bytes))
         {
-            if (!this.TryGetEntryData(out byte[]? bytes))
-            {
-                data = null;
-                return false;
-            }
-            if (bytes.Length > 0 && bytes[^1] == 0)
-                data = Encoding.ASCII.GetString(bytes, 0, bytes.Length - 1);
-            else
-                data = Encoding.ASCII.GetString(bytes);
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData([NotNullWhen(true)] out short[]? data)
-        {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(short))
-            {
-                data = null;
-                return false;
-            }
-            data = new short[bytes.Length >> 1];
-            for (int i = data.Length - 1, offset = i << 1; i >= 0; --i, offset -= sizeof(short))
-                data[i] = (short)this.parseUInt16(bytes, offset);
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData([NotNullWhen(true)] out ushort[]? data)
-        {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(ushort))
-            {
-                data = null;
-                return false;
-            }
-            data = new ushort[bytes.Length >> 1];
-            for (int i = data.Length - 1, offset = i << 1; i >= 0; --i, offset -= sizeof(ushort))
-                data[i] = this.parseUInt16(bytes, offset);
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData([NotNullWhen(true)] out int[]? data)
-        {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(int))
-            {
-                data = null;
-                return false;
-            }
-            data = new int[bytes.Length >> 2];
-            for (int i = data.Length - 1, offset = i << 2; i >= 0; --i, offset -= sizeof(int))
-                data[i] = (int)this.parseUInt32(bytes, offset);
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public bool TryGetEntryData([NotNullWhen(true)] out uint[]? data)
-        {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(uint))
-            {
-                data = null;
-                return false;
-            }
-            data = new uint[bytes.Length >> 2];
-            for (int i = data.Length - 1, offset = i << 2; i >= 0; --i, offset -= sizeof(uint))
-                data[i] = this.parseUInt32(bytes, offset);
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        public unsafe bool TryGetEntryData([NotNullWhen(true)] out float[]? data)
-        {
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(float))
-            {
-                data = null;
-                return false;
-            }
-            data = new float[bytes.Length >> 2];
-            for (int i = data.Length - 1, offset = i << 2; i >= 0; --i, offset -= sizeof(float))
-            {
-                var uintValue = this.parseUInt32(bytes, offset);
-                data[i] = *(float*)&uintValue;
-            }
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry.
-        /// </summary>
-        /// <param name="data">Read data. The value is <see cref="double.NaN"/> if the denominator of a rational number is zero.</param>
-        /// <returns>True if data read successfully.</returns>
-        /// <remarks>Only <see cref="IfdEntryType.Double"/>, <see cref="IfdEntryType.Rational"/> and <see cref="IfdEntryType.URational"/> entries can be read by this method.</remarks>
-        public unsafe bool TryGetEntryData([NotNullWhen(true)] out double[]? data)
-        {
-            // check type of entry
-            var entryType = this.CurrentEntryType;
-            if (entryType != IfdEntryType.Double && entryType != IfdEntryType.Rational && entryType != IfdEntryType.URational)
-            {
-                data = null;
-                return false;
-            }
-
-            // read raw data
-            if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(double))
-            {
-                data = null;
-                return false;
-            }
-
-            // convert each element, a rational number is represented by a pair of numerator and denominator
-            data = new double[bytes.Length >> 3];
-            for (int i = data.Length - 1, offset = i << 3; i >= 0; --i, offset -= sizeof(double))
-            {
-                if (entryType == IfdEntryType.Double)
-                {
-                    var ulongValue = this.parseUInt64(bytes, offset);
-                    data[i] = *(double*)&ulongValue;
-                }
-                else
-                {
-                    var numerator = this.parseUInt32(bytes, offset);
-                    var denominator = this.parseUInt32(bytes, offset + sizeof(uint));
-                    if (denominator == 0)
-                        data[i] = double.NaN;
-                    else if (entryType == IfdEntryType.Rational)
-                        data[i] = (int)numerator / (double)(int)denominator;
-                    else
-                        data[i] = numerator / (double)denominator;
-                }
-            }
-            return true;
-        }
-
-
-        /// <summary>
-        /// Try reading data of entry whose type is either 16-bit or 32-bit unsigned integer.
-        /// </summary>
-        /// <param name="data">Read data.</param>
-        /// <returns>True if data read successfully.</returns>
-        /// <remarks>Only <see cref="IfdEntryType.UInt16"/> and <see cref="IfdEntryType.UInt32"/> entries can be read by this method.</remarks>
-        public bool TryGetUInt32EntryData([NotNullWhen(true)] out uint[]? data)
-        {
-            switch (this.CurrentEntryType)
-            {
-                case IfdEntryType.UInt16:
-                    if (this.TryGetEntryData(out ushort[]? ushortData))
-                    {
-                        data = new uint[ushortData.Length];
-                        for (var i = ushortData.Length - 1; i >= 0; --i)
-                            data[i] = ushortData[i];
-                        return true;
-                    }
-                    break;
-                case IfdEntryType.UInt32:
-                    if (this.TryGetEntryData(out data))
-                        return true;
-                    break;
-            }
             data = null;
             return false;
         }
+        data = new sbyte[bytes.Length];
+        fixed (byte* bytesPtr = bytes)
+        {
+            fixed (sbyte* dataPtr = data)
+                Runtime.InteropServices.Marshal.Copy(bytesPtr, dataPtr, bytes.Length);
+        }
+        return true;
     }
 
 
     /// <summary>
-    /// Type of IFD entry.
+    /// Try reading data of entry.
     /// </summary>
-    public enum IfdEntryType : ushort
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public bool TryGetEntryData([NotNullWhen(true)] out string? data)
     {
-        /// <summary>
-        /// <see cref="byte"/>.
-        /// </summary>
-        Byte = 1,
-        /// <summary>
-        /// String in ASCII ending with '\0'.
-        /// </summary>
-        AsciiString = 2,
-        /// <summary>
-        /// <see cref="ushort"/>.
-        /// </summary>
-        UInt16 = 3,
-        /// <summary>
-        /// <see cref="uint"/>.
-        /// </summary>
-        UInt32 = 4,
-        /// <summary>
-        /// Unsigned rational represented by two <see cref="uint"/>.
-        /// </summary>
-        URational = 5,
-        /// <summary>
-        /// <see cref="sbyte"/>.
-        /// </summary>
-        SByte = 6,
-        /// <summary>
-        /// Undefined.
-        /// </summary>
-        Undefined = 7,
-        /// <summary>
-        /// <see cref="short"/>.
-        /// </summary>
-        Int16 = 8,
-        /// <summary>
-        /// <see cref="int"/>.
-        /// </summary>
-        Int32 = 9,
-        /// <summary>
-        /// Rational represented by two <see cref="uint"/>.
-        /// </summary>
-        Rational = 10,
-        /// <summary>
-        /// <see cref="float"/>.
-        /// </summary>
-        Single = 11,
-        /// <summary>
-        /// <see cref="double"/>.
-        /// </summary>
-        Double = 12,
+        if (!this.TryGetEntryData(out byte[]? bytes))
+        {
+            data = null;
+            return false;
+        }
+        if (bytes.Length > 0 && bytes[^1] == 0)
+            data = Encoding.ASCII.GetString(bytes, 0, bytes.Length - 1);
+        else
+            data = Encoding.ASCII.GetString(bytes);
+        return true;
     }
 
 
     /// <summary>
-    /// Predefined names of IFD.
+    /// Try reading data of entry.
     /// </summary>
-    public static class IfdNames
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public bool TryGetEntryData([NotNullWhen(true)] out short[]? data)
     {
-        /// <summary>
-        /// Default IFD.
-        /// </summary>
-        public const string Default = "IFD";
-        /// <summary>
-        /// Exif IFD.
-        /// </summary>
-        public const string Exif = "Exif";
+        if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(short))
+        {
+            data = null;
+            return false;
+        }
+        data = new short[bytes.Length >> 1];
+        for (int i = data.Length - 1, offset = i << 1; i >= 0; --i, offset -= sizeof(short))
+            data[i] = (short)this.parseUInt16(bytes, offset);
+        return true;
     }
+
+
+    /// <summary>
+    /// Try reading data of entry.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public bool TryGetEntryData([NotNullWhen(true)] out ushort[]? data)
+    {
+        if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(ushort))
+        {
+            data = null;
+            return false;
+        }
+        data = new ushort[bytes.Length >> 1];
+        for (int i = data.Length - 1, offset = i << 1; i >= 0; --i, offset -= sizeof(ushort))
+            data[i] = this.parseUInt16(bytes, offset);
+        return true;
+    }
+
+
+    /// <summary>
+    /// Try reading data of entry.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public bool TryGetEntryData([NotNullWhen(true)] out int[]? data)
+    {
+        if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(int))
+        {
+            data = null;
+            return false;
+        }
+        data = new int[bytes.Length >> 2];
+        for (int i = data.Length - 1, offset = i << 2; i >= 0; --i, offset -= sizeof(int))
+            data[i] = (int)this.parseUInt32(bytes, offset);
+        return true;
+    }
+
+
+    /// <summary>
+    /// Try reading data of entry.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public bool TryGetEntryData([NotNullWhen(true)] out uint[]? data)
+    {
+        if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(uint))
+        {
+            data = null;
+            return false;
+        }
+        data = new uint[bytes.Length >> 2];
+        for (int i = data.Length - 1, offset = i << 2; i >= 0; --i, offset -= sizeof(uint))
+            data[i] = this.parseUInt32(bytes, offset);
+        return true;
+    }
+
+
+    /// <summary>
+    /// Try reading data of entry.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    public unsafe bool TryGetEntryData([NotNullWhen(true)] out float[]? data)
+    {
+        if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(float))
+        {
+            data = null;
+            return false;
+        }
+        data = new float[bytes.Length >> 2];
+        for (int i = data.Length - 1, offset = i << 2; i >= 0; --i, offset -= sizeof(float))
+        {
+            var uintValue = this.parseUInt32(bytes, offset);
+            data[i] = *(float*)&uintValue;
+        }
+        return true;
+    }
+
+
+    /// <summary>
+    /// Try reading data of entry.
+    /// </summary>
+    /// <param name="data">Read data. The value is <see cref="double.NaN"/> if the denominator of a rational number is zero.</param>
+    /// <returns>True if data read successfully.</returns>
+    /// <remarks>Only <see cref="IfdEntryType.Double"/>, <see cref="IfdEntryType.Rational"/> and <see cref="IfdEntryType.URational"/> entries can be read by this method.</remarks>
+    public unsafe bool TryGetEntryData([NotNullWhen(true)] out double[]? data)
+    {
+        // check type of entry
+        var entryType = this.CurrentEntryType;
+        if (entryType != IfdEntryType.Double && entryType != IfdEntryType.Rational && entryType != IfdEntryType.URational)
+        {
+            data = null;
+            return false;
+        }
+
+        // read raw data
+        if (!this.TryGetEntryData(out byte[]? bytes) || bytes.Length < sizeof(double))
+        {
+            data = null;
+            return false;
+        }
+
+        // convert each element, a rational number is represented by a pair of numerator and denominator
+        data = new double[bytes.Length >> 3];
+        for (int i = data.Length - 1, offset = i << 3; i >= 0; --i, offset -= sizeof(double))
+        {
+            if (entryType == IfdEntryType.Double)
+            {
+                var ulongValue = this.parseUInt64(bytes, offset);
+                data[i] = *(double*)&ulongValue;
+            }
+            else
+            {
+                var numerator = this.parseUInt32(bytes, offset);
+                var denominator = this.parseUInt32(bytes, offset + sizeof(uint));
+                if (denominator == 0)
+                    data[i] = double.NaN;
+                else if (entryType == IfdEntryType.Rational)
+                    data[i] = (int)numerator / (double)(int)denominator;
+                else
+                    data[i] = numerator / (double)denominator;
+            }
+        }
+        return true;
+    }
+
+
+    /// <summary>
+    /// Try reading data of entry whose type is either 16-bit or 32-bit unsigned integer.
+    /// </summary>
+    /// <param name="data">Read data.</param>
+    /// <returns>True if data read successfully.</returns>
+    /// <remarks>Only <see cref="IfdEntryType.UInt16"/> and <see cref="IfdEntryType.UInt32"/> entries can be read by this method.</remarks>
+    public bool TryGetUInt32EntryData([NotNullWhen(true)] out uint[]? data)
+    {
+        switch (this.CurrentEntryType)
+        {
+            case IfdEntryType.UInt16:
+                if (this.TryGetEntryData(out ushort[]? ushortData))
+                {
+                    data = new uint[ushortData.Length];
+                    for (var i = ushortData.Length - 1; i >= 0; --i)
+                        data[i] = ushortData[i];
+                    return true;
+                }
+                break;
+            case IfdEntryType.UInt32:
+                if (this.TryGetEntryData(out data))
+                    return true;
+                break;
+        }
+        data = null;
+        return false;
+    }
+}
+
+
+/// <summary>
+/// Type of IFD entry.
+/// </summary>
+public enum IfdEntryType : ushort
+{
+    /// <summary>
+    /// <see cref="byte"/>.
+    /// </summary>
+    Byte = 1,
+    /// <summary>
+    /// String in ASCII ending with '\0'.
+    /// </summary>
+    AsciiString = 2,
+    /// <summary>
+    /// <see cref="ushort"/>.
+    /// </summary>
+    UInt16 = 3,
+    /// <summary>
+    /// <see cref="uint"/>.
+    /// </summary>
+    UInt32 = 4,
+    /// <summary>
+    /// Unsigned rational represented by two <see cref="uint"/>.
+    /// </summary>
+    URational = 5,
+    /// <summary>
+    /// <see cref="sbyte"/>.
+    /// </summary>
+    SByte = 6,
+    /// <summary>
+    /// Undefined.
+    /// </summary>
+    Undefined = 7,
+    /// <summary>
+    /// <see cref="short"/>.
+    /// </summary>
+    Int16 = 8,
+    /// <summary>
+    /// <see cref="int"/>.
+    /// </summary>
+    Int32 = 9,
+    /// <summary>
+    /// Rational represented by two <see cref="uint"/>.
+    /// </summary>
+    Rational = 10,
+    /// <summary>
+    /// <see cref="float"/>.
+    /// </summary>
+    Single = 11,
+    /// <summary>
+    /// <see cref="double"/>.
+    /// </summary>
+    Double = 12,
+}
+
+
+/// <summary>
+/// Predefined names of IFD.
+/// </summary>
+public static class IfdNames
+{
+    /// <summary>
+    /// Default IFD.
+    /// </summary>
+    public const string Default = "IFD";
+    /// <summary>
+    /// Exif IFD.
+    /// </summary>
+    public const string Exif = "Exif";
 }

@@ -26,6 +26,7 @@ static class FileFormats
     static volatile FileFormat? nef;
     static volatile FileFormat? png;
     static volatile FileFormat? rawBgra;
+    static volatile FileFormat? rw2;
     static volatile FileFormat? tiff;
     static volatile FileFormat? yuv4mpeg2;
     static volatile FileFormat? webP;
@@ -100,6 +101,7 @@ static class FileFormats
         nef = Register(new FileFormat(app, "Nef", [ ".nef", ".nrw" ]));
         png = Register(new FileFormat(app, "Png", [ ".png" ]));
         rawBgra = Register(new FileFormat(app, "RawBgra", [ ".bgra" ]));
+        rw2 = Register(new FileFormat(app, "Rw2", [ ".rw2", ".rwl" ]));
         tiff = Register(new FileFormat(app, "Tiff", [ ".tif", ".tiff" ]));
         yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", [ ".y4m" ]));
         webP = Register(new FileFormat(app, "WebP", [ ".webp" ]));
@@ -128,6 +130,12 @@ static class FileFormats
     /// Raw BGRA data.
     /// </summary>
     public static FileFormat RawBgra => rawBgra ?? throw new InvalidOperationException("File format is not ready yet.");
+
+
+    /// <summary>
+    /// Panasonic RAW, which Leica names RWL for the cameras made by Panasonic.
+    /// </summary>
+    public static FileFormat Rw2 => rw2 ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
     /// <summary>
