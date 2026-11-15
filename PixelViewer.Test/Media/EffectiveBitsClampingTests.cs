@@ -29,6 +29,7 @@ class EffectiveBitsClampingTests : BaseTests
 	/// <param name="blackLevel">Black level, or 0 with white level of 0 to render without black and white levels.</param>
 	/// <param name="whiteLevel">White level, or 0 to render without black and white levels.</param>
 	[TestCase("L16", 10, 0u, 0u)]
+	[TestCase("L16", 12, 256u, 3750u)]
 	[TestCase("Bayer_Pattern_16", 12, 0u, 0u)]
 	[TestCase("Bayer_Pattern_16", 14, 1024u, 16368u)]
 	[TestCase("Bayer_Pattern_8", 6, 0u, 0u)]

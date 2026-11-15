@@ -15,7 +15,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		/// <summary>
 		/// Initialize new <see cref="L16ImageRenderer"/> instance.
 		/// </summary>
-		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16), new[]{ "L16", "Y16" }))
+		public L16ImageRenderer() : base(new ImageFormat(ImageFormatCategory.Luminance, "L16", true, new ImagePlaneDescriptor(2, 9, 16, true), new[]{ "L16", "Y16" }))
 		{ }
 
 
@@ -42,8 +42,12 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 			if (effectiveBits <= 8 || effectiveBits > 16)
 				throw new ArgumentException($"Invalid effective bits: {effectiveBits}.");
 
-			// prepare conversions
-			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits);
+			// prepare conversions, the levels are values of samples which are scaled to the full range
+			var blackLevel = planeOptions[0].BlackLevel.GetValueOrDefault();
+			var whiteLevel = planeOptions[0].WhiteLevel ?? (uint)(1 << effectiveBits) - 1;
+			if (blackLevel >= whiteLevel || whiteLevel >= (1 << effectiveBits))
+				throw new ArgumentException($"Invalid black/white level: {blackLevel}, {whiteLevel}.");
+			var extractFunc = this.Create16BitColorExtraction(renderingOptions.ByteOrdering, effectiveBits, blackLevel, whiteLevel);
 			var packFunc = ImageProcessing.SelectBgra64Packing();
 
 			// render
