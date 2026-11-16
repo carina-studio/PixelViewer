@@ -29,4 +29,8 @@ enum ImageDataCompression
 	/// Compression of NEF data by Nikon, either lossless or lossy.
 	/// </summary>
 	Nef,
+	/// <summary>
+	/// Data of RW2 by Panasonic, which is packed or compressed as selected by the format of raw data in the file.
+	/// </summary>
+	Rw2,
 }
