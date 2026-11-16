@@ -24,6 +24,7 @@ static class FileFormats
     static volatile FileFormat? heif;
     static volatile FileFormat? jpeg;
     static volatile FileFormat? nef;
+    static volatile FileFormat? orf;
     static volatile FileFormat? png;
     static volatile FileFormat? rawBgra;
     static volatile FileFormat? rw2;
@@ -99,6 +100,7 @@ static class FileFormats
         heif = Register(new FileFormat(app, "Heif", [ ".heif", ".heic" ]));
         jpeg = Register(new FileFormat(app, "Jpeg", [ ".jpg", ".jpeg", ".jpe", ".jfif" ]));
         nef = Register(new FileFormat(app, "Nef", [ ".nef", ".nrw" ]));
+        orf = Register(new FileFormat(app, "Orf", [ ".orf", ".ori" ]));
         png = Register(new FileFormat(app, "Png", [ ".png" ]));
         rawBgra = Register(new FileFormat(app, "RawBgra", [ ".bgra" ]));
         rw2 = Register(new FileFormat(app, "Rw2", [ ".rw2", ".rwl" ]));
@@ -118,6 +120,12 @@ static class FileFormats
     /// NEF.
     /// </summary>
     public static FileFormat Nef => nef ?? throw new InvalidOperationException("File format is not ready yet.");
+
+
+    /// <summary>
+    /// Olympus RAW of the cameras of Olympus and OM System, which names the frame of the high resolution shot ORI.
+    /// </summary>
+    public static FileFormat Orf => orf ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
     /// <summary>

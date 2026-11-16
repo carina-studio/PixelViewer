@@ -12,6 +12,14 @@ namespace Carina.PixelViewer.Media;
 class IfdEntryReader
 {
     /// <summary>
+    /// Magic number in the header of ORF file of the earlier compact cameras of Olympus, which starts with <c>IIRS</c>.
+    /// </summary>
+    public const ushort OrfCompactMagic = 0x5352;
+    /// <summary>
+    /// Magic number in the header of ORF file of Olympus and OM System, which starts with <c>IIRO</c>, or <c>MMOR</c> for the earliest cameras.
+    /// </summary>
+    public const ushort OrfMagic = 0x4f52;
+    /// <summary>
     /// Magic number in the header of RW2 file of Panasonic, which is TIFF-based data with Panasonic-specific entries in IFD 0.
     /// </summary>
     public const ushort Rw2Magic = 0x55;
@@ -80,7 +88,7 @@ class IfdEntryReader
         else
             throw new ArgumentException("Invalid TIFF header.");
         this.Magic = this.parseUInt16(buffer, 2);
-        if (this.Magic is not (TiffMagic or Rw2Magic))
+        if (this.Magic is not (TiffMagic or OrfMagic or OrfCompactMagic or Rw2Magic))
             throw new ArgumentException("Invalid TIFF header.");
 
         // get offset to first IFD
@@ -159,7 +167,7 @@ class IfdEntryReader
 
 
     /// <summary>
-    /// Get magic number in header, which is <see cref="TiffMagic"/> or <see cref="Rw2Magic"/>.
+    /// Get magic number in header, which is <see cref="TiffMagic"/>, <see cref="OrfMagic"/>, <see cref="OrfCompactMagic"/> or <see cref="Rw2Magic"/>.
     /// </summary>
     public ushort Magic { get; }
 

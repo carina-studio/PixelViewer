@@ -86,10 +86,10 @@ class IfdEntryReaderTests
 
 
 	/// <summary>
-	/// Test for accepting the magic number of TIFF and the one of RW2 of Panasonic in header, and refusing the others.
+	/// Test for accepting the magic number of TIFF, the ones of ORF of Olympus and the one of RW2 of Panasonic in header, and refusing the others.
 	/// </summary>
 	[Test]
-	public void MagicTest([Values(IfdEntryReader.TiffMagic, IfdEntryReader.Rw2Magic, (ushort)0x2b, (ushort)0x4f52)] ushort magic)
+	public void MagicTest([Values(IfdEntryReader.TiffMagic, IfdEntryReader.OrfMagic, IfdEntryReader.OrfCompactMagic, IfdEntryReader.Rw2Magic, (ushort)0x2b, (ushort)0x5353)] ushort magic)
 	{
 		// write header and IFD of one entry
 		using var stream = new MemoryStream();
@@ -106,7 +106,7 @@ class IfdEntryReaderTests
 
 		// read entry
 		stream.Position = 0;
-		if (magic is not (IfdEntryReader.TiffMagic or IfdEntryReader.Rw2Magic))
+		if (magic is not (IfdEntryReader.TiffMagic or IfdEntryReader.OrfMagic or IfdEntryReader.OrfCompactMagic or IfdEntryReader.Rw2Magic))
 		{
 			Assert.Throws<ArgumentException>(() => _ = new IfdEntryReader(stream), $"Magic number {magic:x4} should be refused.");
 			return;
