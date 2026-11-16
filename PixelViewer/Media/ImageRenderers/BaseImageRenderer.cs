@@ -211,7 +211,7 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <param name="baseExposure">Base exposure in EV.</param>
 	/// <param name="colorTransferFuncToLinear">Function to transfer normalized color to normalized linear color, or Null if the color is linear.</param>
 	/// <param name="colorTransferFuncFromLinear">Function to transfer normalized linear color back to normalized color, or Null if the color is linear.</param>
-	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them. Both of them are applied to the linear color when both functions are given.</remarks>
+	/// <remarks>The gain is applied before the base exposure, and the color is clipped after each of them, so a color clipped in every channel stays neutral after a negative base exposure. Both of them are applied to the linear color when both functions are given.</remarks>
 	protected static unsafe void BuildColorTransformationTableUnsafe(byte* table, double gain = 1.0, double baseExposure = 0.0, Func<double, double>? colorTransferFuncToLinear = null, Func<double, double>? colorTransferFuncFromLinear = null)
 	{
 		// build identical table if the color is not transformed
@@ -229,8 +229,8 @@ abstract class BaseImageRenderer : IImageRenderer
 		{
 			for (var i = 255; i >= 0; --i, --table)
 			{
-				var color = Math.Min(1, colorTransferFuncToLinear(i / 255.0) * baseExposureScale);
-				color = Math.Min(1, color * gain);
+				var color = Math.Min(1, colorTransferFuncToLinear(i / 255.0) * gain);
+				color = Math.Min(1, color * baseExposureScale);
 				*table = ImageProcessing.ClipToByte(colorTransferFuncFromLinear(color) * 255);
 			}
 			return;
@@ -238,7 +238,7 @@ abstract class BaseImageRenderer : IImageRenderer
 
 		// build table
 		for (var i = 255; i >= 0; --i, --table)
-			*table = ImageProcessing.ClipToByte(ImageProcessing.ClipToByte(i * baseExposureScale) * gain);
+			*table = ImageProcessing.ClipToByte(ImageProcessing.ClipToByte(i * gain) * baseExposureScale);
 	}
 
 
@@ -250,7 +250,7 @@ abstract class BaseImageRenderer : IImageRenderer
 	/// <param name="baseExposure">Base exposure in EV.</param>
 	/// <param name="colorTransferFuncToLinear">Function to transfer normalized color to normalized linear color, or Null if the color is linear.</param>
 	/// <param name="colorTransferFuncFromLinear">Function to transfer normalized linear color back to normalized color, or Null if the color is linear.</param>
-	/// <remarks>The base exposure is applied before the gain, and the color is clipped after each of them. Both of them are applied to the linear color when both functions are given.</remarks>
+	/// <remarks>The gain is applied before the base exposure, and the color is clipped after each of them, so a color clipped in every channel stays neutral after a negative base exposure. Both of them are applied to the linear color when both functions are given.</remarks>
 	protected static unsafe void BuildColorTransformationTableUnsafe(ushort* table, double gain = 1.0, double baseExposure = 0.0, Func<double, double>? colorTransferFuncToLinear = null, Func<double, double>? colorTransferFuncFromLinear = null)
 	{
 		// build identical table if the color is not transformed
@@ -268,8 +268,8 @@ abstract class BaseImageRenderer : IImageRenderer
 		{
 			for (var i = 65535; i >= 0; --i, --table)
 			{
-				var color = Math.Min(1, colorTransferFuncToLinear(i / 65535.0) * baseExposureScale);
-				color = Math.Min(1, color * gain);
+				var color = Math.Min(1, colorTransferFuncToLinear(i / 65535.0) * gain);
+				color = Math.Min(1, color * baseExposureScale);
 				*table = ImageProcessing.ClipToUInt16(colorTransferFuncFromLinear(color) * 65535 + 0.5);
 			}
 			return;
@@ -277,7 +277,7 @@ abstract class BaseImageRenderer : IImageRenderer
 
 		// build table
 		for (var i = 65535; i >= 0; --i, --table)
-			*table = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16(i * baseExposureScale) * gain);
+			*table = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16(i * gain) * baseExposureScale);
 	}
 
 

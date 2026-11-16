@@ -21,7 +21,7 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 		{ }
 
 
-		// Build the table which maps the bits of half-precision color to 16-bit color with the base exposure and the gain applied.
+		// Build the table which maps the bits of half-precision color to 16-bit color with the gain and the base exposure applied.
 		static unsafe void BuildHalfColorTransformationTableUnsafe(ushort* table, in ImageRenderingOptions renderingOptions, double gain)
 		{
 			// get parameters
@@ -39,17 +39,17 @@ namespace Carina.PixelViewer.Media.ImageRenderers
 						color = 0;
 					else if (color > 1)
 						color = 1;
-					color = Math.Min(1, colorTransferFuncToLinear(color) * baseExposureScale);
-					color = Math.Min(1, color * gain);
+					color = Math.Min(1, colorTransferFuncToLinear(color) * gain);
+					color = Math.Min(1, color * baseExposureScale);
 					table[i] = ImageProcessing.ClipToUInt16(colorTransferFuncFromLinear(color) * 65535 + 0.5);
 				}
 				return;
 			}
 
-			// build the table
-			var colorScale = 65535 * baseExposureScale;
+			// build the table, the gain is applied before the base exposure so that a color clipped in every channel stays neutral
+			var colorScale = 65535 * gain;
 			for (var i = 65535; i >= 0; --i)
-				table[i] = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16((double)BitConverter.UInt16BitsToHalf((ushort)i) * colorScale) * gain);
+				table[i] = ImageProcessing.ClipToUInt16(ImageProcessing.ClipToUInt16((double)BitConverter.UInt16BitsToHalf((ushort)i) * colorScale) * baseExposureScale);
 		}
 
 
