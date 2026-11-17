@@ -30,6 +30,10 @@ enum ImageDataCompression
 	/// </summary>
 	Nef,
 	/// <summary>
+	/// Data of ORF by Olympus and OM System, which is compressed or packed in one of several layouts as selected by the size of raw data and the camera.
+	/// </summary>
+	Orf,
+	/// <summary>
 	/// Data of RW2 by Panasonic, which is packed or compressed as selected by the format of raw data in the file.
 	/// </summary>
 	Rw2,
