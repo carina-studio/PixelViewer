@@ -150,7 +150,8 @@ namespace Carina.PixelViewer.Media.FileFormatParsers
             profile.Width = codec.Info.Width;
             profile.Height = codec.Info.Height;
 
-            // parse extra info
+            // parse extra info from the start of image, the stream has been moved by searching for ICC profile which may not be found
+            stream.Position = position;
             await this.OnParseExtraInformationAsync(stream, profile, cancellationToken);
 
             // complete

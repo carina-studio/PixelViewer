@@ -8,8 +8,11 @@ using CarinaStudio;
 using CarinaStudio.Windows.Input;
 using NUnit.Framework;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -104,6 +107,75 @@ namespace Carina.PixelViewer.Test.ViewModels
 			var filePath = Path.Combine(directoryPath, fileName);
 			await encoder.AsNonNull().EncodeAsync(bitmapBuffer, new CarinaStudio.IO.FileStreamProvider(filePath), new ImageEncodingOptions { QualityLevel = 90 }, CancellationToken.None);
 			return filePath;
+		}
+
+
+		// Generate JPEG file with the given name and dimensions in cache directory, with a thumbnail of the given dimensions embedded in its EXIF.
+		async Task<string> GenerateJpegFileWithThumbnailAsync(string fileName, int width, int height, int thumbnailWidth, int thumbnailHeight)
+		{
+			// encode image and thumbnail
+			var filePath = await this.GenerateImageFileAsync(fileName, FileFormats.Jpeg, width, height);
+			var thumbnailFilePath = await this.GenerateImageFileAsync($"{fileName}.thumbnail.jpg", FileFormats.Jpeg, thumbnailWidth, thumbnailHeight);
+			var thumbnail = await File.ReadAllBytesAsync(thumbnailFilePath, CancellationToken.None);
+			File.Delete(thumbnailFilePath);
+
+			// build EXIF in little-endian TIFF: IFD0 with orientation only, then IFD1 with compression, offset and length of the JPEG thumbnail placed after it
+			const int Ifd0Offset = 8;
+			const int Ifd1Offset = Ifd0Offset + 2 + 12 + 4;
+			const int ThumbnailOffset = Ifd1Offset + 2 + 12 * 3 + 4;
+			var tiff = new byte[ThumbnailOffset + thumbnail.Length];
+			var span = tiff.AsSpan();
+			span[0] = (byte)'I';
+			span[1] = (byte)'I';
+			BinaryPrimitives.WriteUInt16LittleEndian(span[2..], 42);
+			BinaryPrimitives.WriteUInt32LittleEndian(span[4..], Ifd0Offset);
+			BinaryPrimitives.WriteUInt16LittleEndian(span[Ifd0Offset..], 1);
+			WriteEntry(span[(Ifd0Offset + 2)..], 0x0112, 3, 1);
+			BinaryPrimitives.WriteUInt32LittleEndian(span[(Ifd0Offset + 14)..], Ifd1Offset);
+			BinaryPrimitives.WriteUInt16LittleEndian(span[Ifd1Offset..], 3);
+			WriteEntry(span[(Ifd1Offset + 2)..], 0x0103, 3, 6);
+			WriteEntry(span[(Ifd1Offset + 14)..], 0x0201, 4, ThumbnailOffset);
+			WriteEntry(span[(Ifd1Offset + 26)..], 0x0202, 4, (uint)thumbnail.Length);
+			thumbnail.CopyTo(span[ThumbnailOffset..]);
+
+			// find the segments before the start of scan, except the EXIF written by encoder which is replaced
+			var jpeg = await File.ReadAllBytesAsync(filePath, CancellationToken.None);
+			var keptSegments = new List<(int, int)>();
+			var position = 2;
+			while (position + 4 <= jpeg.Length && jpeg[position] == 0xff && jpeg[position + 1] != 0xda)
+			{
+				var size = 2 + BinaryPrimitives.ReadUInt16BigEndian(jpeg.AsSpan(position + 2));
+				var isExif = jpeg[position + 1] == 0xe1 && jpeg.AsSpan(position + 4).StartsWith("Exif\0\0"u8);
+				if (!isExif)
+					keptSegments.Add((position, size));
+				position += size;
+			}
+
+			// write EXIF as APP1 segment right after the start of image
+			var segmentSize = 2 + 6 + tiff.Length;
+			using (var stream = File.Create(filePath))
+			{
+				stream.Write(jpeg, 0, 2);
+				stream.Write([ 0xff, 0xe1, (byte)(segmentSize >> 8), (byte)segmentSize ]);
+				stream.Write("Exif\0\0"u8);
+				stream.Write(tiff);
+				foreach (var (segmentPosition, size) in keptSegments)
+					stream.Write(jpeg, segmentPosition, size);
+				stream.Write(jpeg, position, jpeg.Length - position);
+			}
+			return filePath;
+
+			// write an IFD entry with single value
+			static void WriteEntry(Span<byte> buffer, ushort tag, ushort type, uint value)
+			{
+				BinaryPrimitives.WriteUInt16LittleEndian(buffer, tag);
+				BinaryPrimitives.WriteUInt16LittleEndian(buffer[2..], type);
+				BinaryPrimitives.WriteUInt32LittleEndian(buffer[4..], 1);
+				if (type == 3)
+					BinaryPrimitives.WriteUInt16LittleEndian(buffer[8..], (ushort)value);
+				else
+					BinaryPrimitives.WriteUInt32LittleEndian(buffer[8..], value);
+			}
 		}
 
 
@@ -489,6 +561,96 @@ namespace Carina.PixelViewer.Test.ViewModels
 				Assert.That(session.RenderedImage, Is.Null, "Rendered image is still there after closing source file.");
 				await DeleteFileAsync(filePath);
 			});
+		}
+
+
+		/// <summary>
+		/// Test for dropping the image of previous frame while rendering the frame of frame sequence which has another size, and for showing the thumbnail embedded in the frame instead.
+		/// </summary>
+		[Test]
+		public void TestDisplayedImageOfFrameSequence()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// image of previous frame is dropped before showing the frame with another size
+				var changes = await MoveToNextFrameAsync(
+				[
+					await this.GenerateImageFileAsync("displayed_1.png", FileFormats.Png, 64, 48),
+					await this.GenerateImageFileAsync("displayed_2.jpg", FileFormats.Jpeg, 32, 24),
+				], 32, 24);
+				var imageSizes = changes.Where(it => it.PropertyName == nameof(Session.RenderedImage)).Select(it => it.Size).ToList();
+				Assert.That(imageSizes, Is.Not.Empty);
+				Assert.That(imageSizes[0], Is.Null, "Image of the 1st frame should be dropped before showing the 2nd frame with another size.");
+
+				// image of previous frame is kept until showing the frame with the same size
+				changes = await MoveToNextFrameAsync(
+				[
+					await this.GenerateImageFileAsync("displayed_3.png", FileFormats.Png, 64, 48),
+					await this.GenerateImageFileAsync("displayed_4.png", FileFormats.Png, 64, 48),
+				], 64, 48);
+				imageSizes = changes.Where(it => it.PropertyName == nameof(Session.RenderedImage)).Select(it => it.Size).ToList();
+				Assert.That(imageSizes, Does.Not.Contain(null), "Image of the 1st frame should be kept until showing the 2nd frame with the same size.");
+
+				// thumbnail embedded in the frame is shown after dropping image of previous frame, until the image of frame is shown
+				changes = await MoveToNextFrameAsync(
+				[
+					await this.GenerateImageFileAsync("displayed_5.png", FileFormats.Png, 64, 48),
+					await this.GenerateJpegFileWithThumbnailAsync("displayed_6.jpg", 32, 24, 16, 12),
+				], 32, 24);
+				var thumbnailIndex = changes.FindIndex(it => it.PropertyName == nameof(Session.RenderedImageThumbnail) && it.Size == (16, 12));
+				var imageIndex = changes.FindIndex(it => it.PropertyName == nameof(Session.RenderedImage) && it.Size == (32, 24));
+				Assert.That(thumbnailIndex, Is.GreaterThanOrEqualTo(0), "Thumbnail embedded in the 2nd frame should be shown after dropping image of the 1st frame.");
+				Assert.That(thumbnailIndex, Is.LessThan(imageIndex), "Thumbnail embedded in the 2nd frame should be shown before showing image of the 2nd frame.");
+			});
+
+			// open the files as frame sequence, move to the 2nd frame and get the changes of image and thumbnail displayed until the image of the given size is shown
+			async Task<List<(string PropertyName, (int, int)? Size)>> MoveToNextFrameAsync(string[] frameFilePaths, int width, int height)
+			{
+				// open files as frame sequence
+				session.OpenSourceFilesCommand.Execute(new Session.SourceFilesParam { FileNames = frameFilePaths });
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open files as frame sequence.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 1st frame.");
+				Assert.That(session.RenderedImage, Is.Not.Null, "Image of the 1st frame should be shown.");
+
+				// move to the 2nd frame and record the image and thumbnail displayed
+				var changes = new List<(string, (int, int)?)>();
+				PropertyChangedEventHandler handler = (_, e) =>
+				{
+					if (e.PropertyName == nameof(Session.RenderedImage))
+						changes.Add((e.PropertyName, session.RenderedImage?.Let(it => ((int, int)?)(it.PixelSize.Width, it.PixelSize.Height))));
+					else if (e.PropertyName == nameof(Session.RenderedImageThumbnail))
+						changes.Add((e.PropertyName, session.RenderedImageThumbnail?.Let(it => ((int, int)?)(it.PixelSize.Width, it.PixelSize.Height))));
+				};
+				session.PropertyChanged += handler;
+				try
+				{
+					session.FrameNumber = 2;
+					Assert.That(await WaitForRenderedImageSizeAsync(session, width, height), Is.True, "Image of the 2nd frame should be shown.");
+					Assert.That(session.HasRenderingError, Is.False, "Unable to render the 2nd frame.");
+				}
+				finally
+				{
+					session.PropertyChanged -= handler;
+				}
+
+				// close files
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close frame sequence.");
+				return changes;
+			}
+
+			// wait for the rendered image of the given size to be shown
+			static async Task<bool> WaitForRenderedImageSizeAsync(Session session, int width, int height)
+			{
+				for (var i = 0; i < 200; ++i)
+				{
+					if (session.RenderedImage is { } image && image.PixelSize.Width == width && image.PixelSize.Height == height && !session.IsRenderingImage)
+						return true;
+					await Task.Delay(50);
+				}
+				return false;
+			}
 		}
 
 
@@ -1059,6 +1221,68 @@ namespace Carina.PixelViewer.Test.ViewModels
 				}
 				return false;
 			}
+
+			// wait for the rendered image of the given size to be shown
+			static async Task<bool> WaitForRenderedImageSizeAsync(Session session, int width, int height)
+			{
+				for (var i = 0; i < 200; ++i)
+				{
+					if (session.RenderedImage is { } image && image.PixelSize.Width == width && image.PixelSize.Height == height && !session.IsRenderingImage)
+						return true;
+					await Task.Delay(50);
+				}
+				return false;
+			}
+		}
+
+
+		/// <summary>
+		/// Test for showing the region of each frame of frame sequence according to the insets and dimensions of the frame itself.
+		/// </summary>
+		[Test]
+		public void TestSourceInsetsOfFrameSequence()
+		{
+			var session = this.session ?? throw new AssertionException("No instance for testing.");
+			this.TestOnApplicationThread(async () =>
+			{
+				// generate frames with different file formats and dimensions
+				var frameFilePaths = new string[]
+				{
+					await this.GenerateImageFileAsync("insets_1.png", FileFormats.Png, 64, 48),
+					await this.GenerateImageFileAsync("insets_2.jpg", FileFormats.Jpeg, 32, 24),
+				};
+
+				// open files as frame sequence
+				session.OpenSourceFilesCommand.Execute(new Session.SourceFilesParam { FileNames = frameFilePaths });
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open files as frame sequence.");
+				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 1st frame.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the 1st frame.");
+
+				// take in the edges of the 1st frame, which leave a region larger than the 2nd frame
+				session.SourceInsets = new PixelInsets(4, 3, 10, 5);
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 50, 40), Is.True, "Only the region left by insets should be shown for the 1st frame.");
+
+				// move to the frame with another file format, its own profile decides the insets and dimensions
+				session.FrameNumber = 2;
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 32, 24), Is.True, "Whole image of the 2nd frame should be shown.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the 2nd frame.");
+				Assert.That(session.SourceInsets.IsEmpty, Is.True, "Insets should be selected by file format of the 2nd frame.");
+				session.SelectRenderedImagePixel(31, 23);
+				Assert.That(session.HasSelectedRenderedImagePixel, Is.True, "Pixel of the 2nd frame should be selectable.");
+				session.SelectRenderedImagePixel(-1, -1);
+
+				// move back to the 1st frame
+				session.FrameNumber = 1;
+				Assert.That(await WaitForRenderedImageSizeAsync(session, 64, 48), Is.True, "Whole image of the 1st frame should be shown again.");
+				Assert.That(session.HasRenderingError, Is.False, "Unable to render the 1st frame again.");
+				session.SelectRenderedImagePixel(63, 47);
+				Assert.That(session.HasSelectedRenderedImagePixel, Is.True, "Pixel of the 1st frame should be selectable.");
+				session.SelectRenderedImagePixel(-1, -1);
+
+				// close files
+				session.ClearSourceCommand.Execute(null);
+				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close frame sequence.");
+			});
 
 			// wait for the rendered image of the given size to be shown
 			static async Task<bool> WaitForRenderedImageSizeAsync(Session session, int width, int height)

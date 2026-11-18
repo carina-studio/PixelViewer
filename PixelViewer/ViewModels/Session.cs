@@ -2426,23 +2426,8 @@ class Session : ViewModel<IAppSuiteApplication>
 		// apply profile
 		applyProfile();
 
-		// show the thumbnail embedded in the source as placeholder until the image is rendered, only the profile of file format describes the image of the source
-		// the thumbnail is skipped unless it has the shape of the region to be shown, which drops the thumbnails letterboxed into another shape rather than stretching them
-		var thumbnail = this.Profile.Let(it => it.Type == ImageRenderingProfileType.FileFormat ? it.Thumbnail : null);
-		if (thumbnail is not null && this.RenderedImageThumbnail is null)
-		{
-			CheckSourceInsets(this.SourceInsets, this.ImageWidth, this.ImageHeight, out var region);
-			var thumbnailSize = thumbnail.PixelSize;
-			if (region.Width > 0 && region.Height > 0 && thumbnailSize.Width > 0 && thumbnailSize.Height > 0)
-			{
-				var aspectRatio = (double)region.Width / region.Height;
-				var thumbnailAspectRatio = (double)thumbnailSize.Width / thumbnailSize.Height;
-				if (Math.Abs(thumbnailAspectRatio - aspectRatio) <= aspectRatio * MaxEmbeddedThumbnailAspectRatioDifference)
-					this.SetValue(RenderedImageThumbnailProp, thumbnail);
-				else
-					this.Logger.LogDebug("Skip embedded thumbnail of different shape, size: {thumbnailWidth}x{thumbnailHeight}, region: {width}x{height}", thumbnailSize.Width, thumbnailSize.Height, region.Width, region.Height);
-			}
-		}
+		// show the thumbnail embedded in the source as placeholder until the image is rendered
+		this.ShowEmbeddedThumbnail();
 
 		// render image
 		if (this.Settings.GetValueOrDefault(SettingKeys.EvaluateImageDimensionsAfterOpeningSourceFile) && this.Profile.Type == ImageRenderingProfileType.Default)
@@ -5128,6 +5113,12 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
+		// keep the shape of the image being displayed, which is the image of previous frame until the frame is reported
+		CheckSourceInsets(this.SourceInsets, this.ImageWidth, this.ImageHeight, out var prevRegion);
+		var prevRotation = this.GetValue(ImageDisplayRotationProp);
+		var prevFlipX = this.GetValue(IsImageFlippedXProp);
+		var prevFlipY = this.GetValue(IsImageFlippedYProp);
+
 		// replace the profile generated for file format and apply it to the rendering which is in progress
 		this.Logger.LogDebug("Render frame {frameNumber} by profile of {format} instead of {currentFormat}", frameNumber, frameProfile.Renderer.Format.Name, currentProfile.Renderer.Format.Name);
 		this.fileFormatProfile = frameProfile;
@@ -5136,6 +5127,24 @@ class Session : ViewModel<IAppSuiteApplication>
 		this.profiles.Remove(currentProfile);
 		currentProfile.Dispose();
 		this.renderImageAction.Cancel(); // prevent re-rendering caused by change of parameters
+
+		// stop displaying the image of previous frame if the frame has another size or orientation, otherwise the image would be shown in the size or orientation of the frame until the frame is reported
+		CheckSourceInsets(this.SourceInsets, this.ImageWidth, this.ImageHeight, out var region);
+		if (region.Width != prevRegion.Width
+		    || region.Height != prevRegion.Height
+		    || Math.Abs(this.GetValue(ImageDisplayRotationProp) - prevRotation) > 0.001
+		    || this.GetValue(IsImageFlippedXProp) != prevFlipX
+		    || this.GetValue(IsImageFlippedYProp) != prevFlipY)
+		{
+			// drop the image
+			this.Logger.LogDebug("Drop the image being displayed, frame {frameNumber} has another size or orientation", frameNumber);
+			this.SetValue(QuarterSizeRenderedImageProp, null);
+			this.SetValue(RenderedImageProp, null);
+			this.SetValue(RenderedImageThumbnailProp, null);
+
+			// show the thumbnail embedded in the frame as placeholder until the frame is reported
+			this.ShowEmbeddedThumbnail();
+		}
 	}
 
 
@@ -5375,19 +5384,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			return;
 		}
 
-		// select the region of source image to be shown, give up rendering if the insets extend the image or leave nothing of it. the error of previous rendering is reset first so that the view reports it to user again
-		var sourceInsets = this.SourceInsets;
-		if (!CheckSourceInsets(sourceInsets, this.ImageWidth, this.ImageHeight, out var region))
-		{
-			this.Logger.LogError("Unable to render image of '{sourceFileName}', invalid insets of source image: {insets}, width: {width}, height: {height}", sourceFileName, sourceInsets, this.ImageWidth, this.ImageHeight);
-			this.ResetValue(HasRenderingErrorProp);
-			this.SetValue(HasRenderingErrorProp, true);
-			this.DisposeFilteredImage();
-			this.DisposeRenderedImage();
-			return;
-		}
-		PixelRect? sourceRegion = sourceInsets.IsEmpty ? null : region;
-
 		// get source which provides data of frame to render
 		var cancellationTokenSource = new CancellationTokenSource();
 		this.imageRenderingCancellationTokenSource = cancellationTokenSource;
@@ -5448,6 +5444,20 @@ class Session : ViewModel<IAppSuiteApplication>
 				this.renderImageAction.Cancel(); // prevent re-rendering caused by change of dimensions
 			});
 		}
+
+		// select the region of source image to be shown after the profile of frame and the dimensions have been settled, give up rendering if the insets extend the image or leave nothing of it. the error of previous rendering is reset first so that the view reports it to user again
+		var sourceInsets = this.SourceInsets;
+		if (!CheckSourceInsets(sourceInsets, this.ImageWidth, this.ImageHeight, out var region))
+		{
+			this.Logger.LogError("Unable to render image of '{sourceFileName}', invalid insets of source image: {insets}, width: {width}, height: {height}", sourceFileName, sourceInsets, this.ImageWidth, this.ImageHeight);
+			this.imageRenderingCancellationTokenSource = null;
+			this.ResetValue(HasRenderingErrorProp);
+			this.SetValue(HasRenderingErrorProp, true);
+			this.DisposeFilteredImage();
+			this.DisposeRenderedImage();
+			return;
+		}
+		PixelRect? sourceRegion = sourceInsets.IsEmpty ? null : region;
 
 		// sync format information
 		var planeDescriptors = imageRenderer.Format.PlaneDescriptors;
@@ -7733,6 +7743,32 @@ class Session : ViewModel<IAppSuiteApplication>
 	{
 		get => this.GetValue(ShadowAdjustmentProp);
 		set => this.SetValue(ShadowAdjustmentProp, value);
+	}
+
+
+	// Show the thumbnail embedded in the source as placeholder until the image is rendered, if no thumbnail is shown. Only the profile of file format describes the image of the source, and the thumbnail is skipped unless it has the shape of the region to be shown, which drops the thumbnails letterboxed into another shape rather than stretching them.
+	void ShowEmbeddedThumbnail()
+	{
+		// get thumbnail
+		var thumbnail = this.Profile.Let(it => it.Type == ImageRenderingProfileType.FileFormat ? it.Thumbnail : null);
+		if (thumbnail is null || this.RenderedImageThumbnail is not null)
+			return;
+
+		// check shape of thumbnail
+		CheckSourceInsets(this.SourceInsets, this.ImageWidth, this.ImageHeight, out var region);
+		var thumbnailSize = thumbnail.PixelSize;
+		if (region.Width <= 0 || region.Height <= 0 || thumbnailSize.Width <= 0 || thumbnailSize.Height <= 0)
+			return;
+		var aspectRatio = (double)region.Width / region.Height;
+		var thumbnailAspectRatio = (double)thumbnailSize.Width / thumbnailSize.Height;
+		if (Math.Abs(thumbnailAspectRatio - aspectRatio) > aspectRatio * MaxEmbeddedThumbnailAspectRatioDifference)
+		{
+			this.Logger.LogDebug("Skip embedded thumbnail of different shape, size: {thumbnailWidth}x{thumbnailHeight}, region: {width}x{height}", thumbnailSize.Width, thumbnailSize.Height, region.Width, region.Height);
+			return;
+		}
+
+		// show thumbnail
+		this.SetValue(RenderedImageThumbnailProp, thumbnail);
 	}
 
 
