@@ -92,18 +92,18 @@ static class FileFormats
             }
             FileFormats.app = app;
         }
-        arw = Register(new FileFormat(app, "Arw", [ ".arw" ]));
+        arw = Register(new FileFormat(app, "Arw", [ ".arw" ], isRawPhoto: true));
         bmp = Register(new FileFormat(app, "Bmp", [ ".bmp" ]));
-        cr2 = Register(new FileFormat(app, "Cr2", [ ".cr2" ]));
-        cr3 = Register(new FileFormat(app, "Cr3", [ ".cr3" ]));
-        dng = Register(new FileFormat(app, "Dng", [ ".dng" ]));
+        cr2 = Register(new FileFormat(app, "Cr2", [ ".cr2" ], isRawPhoto: true));
+        cr3 = Register(new FileFormat(app, "Cr3", [ ".cr3" ], isRawPhoto: true));
+        dng = Register(new FileFormat(app, "Dng", [ ".dng" ], isRawPhoto: true));
         heif = Register(new FileFormat(app, "Heif", [ ".heif", ".heic" ]));
         jpeg = Register(new FileFormat(app, "Jpeg", [ ".jpg", ".jpeg", ".jpe", ".jfif" ]));
-        nef = Register(new FileFormat(app, "Nef", [ ".nef", ".nrw" ]));
-        orf = Register(new FileFormat(app, "Orf", [ ".orf", ".ori" ]));
+        nef = Register(new FileFormat(app, "Nef", [ ".nef", ".nrw" ], isRawPhoto: true));
+        orf = Register(new FileFormat(app, "Orf", [ ".orf", ".ori" ], isRawPhoto: true));
         png = Register(new FileFormat(app, "Png", [ ".png" ]));
         rawBgra = Register(new FileFormat(app, "RawBgra", [ ".bgra" ]));
-        rw2 = Register(new FileFormat(app, "Rw2", [ ".rw2", ".rwl" ]));
+        rw2 = Register(new FileFormat(app, "Rw2", [ ".rw2", ".rwl" ], isRawPhoto: true));
         tiff = Register(new FileFormat(app, "Tiff", [ ".tif", ".tiff" ]));
         yuv4mpeg2 = Register(new FileFormat(app, "Yuv4Mpeg2", [ ".y4m" ]));
         webP = Register(new FileFormat(app, "WebP", [ ".webp" ]));

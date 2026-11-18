@@ -206,19 +206,19 @@ namespace Carina.PixelViewer.ViewModels
 		/// <summary>
 		/// Create new session.
 		/// </summary>
-		/// <param name="fileName">Name of source image file.</param>
+		/// <param name="param">Parameters of opening source image file, or null to create an empty session.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateAndAttachSession(string? fileName = null) =>
-			this.CreateAndAttachSession(this.Sessions.Count, fileName);
+		public Session CreateAndAttachSession(Session.SourceFileParam? param = null) =>
+			this.CreateAndAttachSession(this.Sessions.Count, param);
 
 
 		/// <summary>
 		/// Create new session.
 		/// </summary>
 		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
-		/// <param name="fileName">Name of source image file.</param>
+		/// <param name="param">Parameters of opening source image file, or null to create an empty session.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateAndAttachSession(int index, string? fileName)
+		public Session CreateAndAttachSession(int index, Session.SourceFileParam? param)
 		{
 			// check state
 			this.VerifyAccess();
@@ -228,11 +228,11 @@ namespace Carina.PixelViewer.ViewModels
 			var session = this.CreateAndAttachSession(index);
 
 			// open file
-			if (fileName != null)
+			if (param is not null)
 			{
-				this.Logger.LogDebug("Open '{fileName}' after creating {session}", fileName, session);
-				if (!session.OpenSourceFileCommand.TryExecute(new Session.SourceFileParam { FileName = fileName }))
-					this.Logger.LogError("Unable to open '{fileName}' after creating {session}", fileName, session);
+				this.Logger.LogDebug("Open '{fileName}' after creating {session}", param.FileName, session);
+				if (!session.OpenSourceFileCommand.TryExecute(param))
+					this.Logger.LogError("Unable to open '{fileName}' after creating {session}", param.FileName, session);
 			}
 
 			// complete
@@ -244,10 +244,10 @@ namespace Carina.PixelViewer.ViewModels
 		/// Create new session.
 		/// </summary>
 		/// <param name="index">Index of created session to be put in <see cref="Sessions"/>.</param>
-		/// <param name="fileName">Name of source image file.</param>
+		/// <param name="param">Parameters of opening source image file.</param>
 		/// <param name="profile">Initial profile.</param>
 		/// <returns>Created <see cref="Session"/>.</returns>
-		public Session CreateAndAttachSession(int index, string fileName, ImageRenderingProfile profile) => this.CreateAndAttachSession(index, fileName).Also(it =>
+		public Session CreateAndAttachSession(int index, Session.SourceFileParam param, ImageRenderingProfile profile) => this.CreateAndAttachSession(index, param).Also(it =>
 		{
 			it.Profile = profile;
 		});

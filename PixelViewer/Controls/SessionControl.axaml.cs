@@ -2061,7 +2061,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				&& session.IsSourceOpened
 				&& session.Owner is Workspace singleFileWorkspace)
 			{
-				singleFileWorkspace.CreateAndAttachSession(fileNames[0]);
+				singleFileWorkspace.CreateAndAttachSession(new Session.SourceFileParam { FileName = fileNames[0] });
 			}
 			else
 				this.OpenSourceFile(fileNames[0]);
@@ -2131,7 +2131,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		foreach (var fileName in fileNames)
 		{
 			if (isCurrentSessionUsed)
-				workspace.CreateAndAttachSession(independentIndex++, fileName, profile);
+				workspace.CreateAndAttachSession(independentIndex++, new Session.SourceFileParam { FileName = fileName }, profile);
 			else
 			{
 				session.OpenSourceFileCommand.TryExecute(new Session.SourceFileParam { FileName = fileName });
