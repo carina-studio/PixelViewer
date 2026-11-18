@@ -355,7 +355,7 @@ namespace Carina.PixelViewer
 				if (this.MainWindows[0].DataContext is Workspace workspace)
 				{
 					var emptySession = workspace.Sessions.FirstOrDefault(it => string.IsNullOrEmpty(it.SourceFileName));
-					if (emptySession == null || !emptySession.OpenSourceFileCommand.TryExecute(filePath))
+					if (emptySession == null || !emptySession.OpenSourceFileCommand.TryExecute(new Session.SourceFileParam { FileName = filePath }))
 						workspace.CreateAndAttachSession(filePath);
 					this.MainWindows[0].ActivateAndBringToFront();
 				}

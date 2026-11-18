@@ -231,7 +231,7 @@ namespace Carina.PixelViewer.ViewModels
 			if (fileName != null)
 			{
 				this.Logger.LogDebug("Open '{fileName}' after creating {session}", fileName, session);
-				if (!session.OpenSourceFileCommand.TryExecute(fileName))
+				if (!session.OpenSourceFileCommand.TryExecute(new Session.SourceFileParam { FileName = fileName }))
 					this.Logger.LogError("Unable to open '{fileName}' after creating {session}", fileName, session);
 			}
 

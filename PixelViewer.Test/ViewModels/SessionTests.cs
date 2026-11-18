@@ -157,7 +157,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file, its format is unidentifiable so the default profile is kept
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				Assert.That(session.HasColorTables, Is.False, "No color table should be applied before applying the profile.");
@@ -226,7 +226,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file, its format is unidentifiable so the default profile is kept
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 
@@ -296,7 +296,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// open file, its format is unidentifiable so the default profile is kept
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -351,7 +351,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -409,7 +409,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				}
 
 				// open file and render it as L8
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -459,7 +459,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session,nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 
 				// wait for first rendering
@@ -512,7 +512,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// open file, its format is unidentifiable so the default profile is kept
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -582,7 +582,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				};
 
 				// open files as frame sequence
-				session.OpenSourceFilesCommand.Execute(frameFilePaths);
+				session.OpenSourceFilesCommand.Execute(new Session.SourceFilesParam { FileNames = frameFilePaths });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open files as frame sequence.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 1st frame.");
 				Assert.That(session.FrameCount, Is.EqualTo(3L), "Number of frames should be number of files.");
@@ -621,10 +621,11 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file 1
 				var filePath1 = this.GenerateSourceFile();
-				Assert.That(openCommand.CanExecute(filePath1), Is.True, "Source file opening should be able to be executed.");
+				var param1 = new Session.SourceFileParam { FileName = filePath1 };
+				Assert.That(openCommand.CanExecute(param1), Is.True, "Source file opening should be able to be executed.");
 				Assert.That(session.IsSourceOpened, Is.False, $"{nameof(Session.IsSourceOpened)} should false.");
-				openCommand.Execute(filePath1);
-				Assert.That(openCommand.CanExecute(filePath1), Is.False, "Source file opening should not be able to be executed.");
+				openCommand.Execute(param1);
+				Assert.That(openCommand.CanExecute(param1), Is.False, "Source file opening should not be able to be executed.");
 				Assert.That(session.IsSourceOpened, Is.False, $"{nameof(Session.IsSourceOpened)} should false.");
 
 				// wait for opening
@@ -636,9 +637,10 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// open file 2
 				var filePath2 = this.GenerateSourceFile();
-				Assert.That(openCommand.CanExecute(filePath2), Is.True, "Source file opening should be able to be executed.");
-				openCommand.Execute(filePath2);
-				Assert.That(openCommand.CanExecute(filePath2), Is.False, "Source file opening should not be able to be executed.");
+				var param2 = new Session.SourceFileParam { FileName = filePath2 };
+				Assert.That(openCommand.CanExecute(param2), Is.True, "Source file opening should be able to be executed.");
+				openCommand.Execute(param2);
+				Assert.That(openCommand.CanExecute(param2), Is.False, "Source file opening should not be able to be executed.");
 				Assert.That(session.IsSourceOpened, Is.False, $"{nameof(Session.IsSourceOpened)} should false.");
 
 				// wait for opening
@@ -678,7 +680,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 
@@ -743,7 +745,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 				};
 
 				// open files as frame sequence, renderer and dimensions are selected by file format of the 1st frame
-				session.OpenSourceFilesCommand.Execute(frameFilePaths);
+				session.OpenSourceFilesCommand.Execute(new Session.SourceFilesParam { FileNames = frameFilePaths });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open files as frame sequence.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete rendering of the 1st frame.");
 				Assert.That(session.FrameCount, Is.EqualTo(2L), "Number of frames should be number of files.");
@@ -794,7 +796,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 						session.ClearSourceCommand.Execute(null);
 						Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), false, 1000), Is.True, "Cannot close source file.");
 					}
-					session.OpenSourceFileCommand.Execute(filePath);
+					session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 					Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 					Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				}
@@ -865,7 +867,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -946,7 +948,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// open file
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -1003,7 +1005,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 			{
 				// open file and render it by a format of single plane
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				ImageRenderers.TryFindByFormatName("L8", out var l8Renderer);
@@ -1092,7 +1094,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// open file, its format is unidentifiable so the default profile is kept
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try
@@ -1166,7 +1168,7 @@ namespace Carina.PixelViewer.Test.ViewModels
 
 				// open file
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 1000), Is.True, "Cannot open source file.");
 				Assert.That(await this.WaitForRenderingAsync(session), Is.True, "Unable to complete first rendering.");
 				try

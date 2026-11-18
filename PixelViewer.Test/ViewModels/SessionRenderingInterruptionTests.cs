@@ -181,7 +181,7 @@ class SessionRenderingInterruptionTests : BaseTests
 			// select the gate renderer before opening the source so that the first rendering of the source parks and no image is ever rendered
 			session.ImageRenderer = renderer;
 			var filePath = this.GenerateSourceFile();
-			session.OpenSourceFileCommand.Execute(filePath);
+			session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 			Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file.");
 			Assert.That(session.ImageRenderer, Is.SameAs(renderer), "Opening the source file should keep the selected renderer.");
 			Assert.That(await WaitForTaskAsync(renderer.RenderingStartedTask, 5000), Is.True, "Rendering by the gate renderer should have started.");
@@ -228,7 +228,7 @@ class SessionRenderingInterruptionTests : BaseTests
 			{
 				// open source file and render an RGB image, which the grayscale filter supports
 				var filePath = this.GenerateSourceFile();
-				session.OpenSourceFileCommand.Execute(filePath);
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file.");
 				Assert.That(ImageRenderers.TryFindByFormatName("RGB_161616", out var renderer), Is.True, "Cannot find RGB renderer.");
 				session.ImageRenderer = renderer.AsNonNull();
@@ -263,7 +263,7 @@ class SessionRenderingInterruptionTests : BaseTests
 				Assert.That(isClosingPosted, Is.True, "Color space should be converted for reporting the image without filtering.");
 
 				// the session should still render after the reporting
-				session.OpenSourceFileCommand.Execute(this.GenerateSourceFile());
+				session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = this.GenerateSourceFile() });
 				Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file again.");
 				Assert.That(await WaitForConditionAsync(() => session.RenderedImage is not null && !session.IsRenderingImage, 10000), Is.True, "Image should be rendered after closing the source while reporting.");
 				Assert.That(session.HasRenderingError, Is.False, "Rendering should not fail.");
@@ -291,7 +291,7 @@ class SessionRenderingInterruptionTests : BaseTests
 			// open source file and render an image with the gate renderer, the gate is opened so that every rendering completes
 			renderer.OpenGate();
 			var filePath = this.GenerateSourceFile(FilteringImageSize * FilteringImageSize);
-			session.OpenSourceFileCommand.Execute(filePath);
+			session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 			Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file.");
 			Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsRenderingImage), false, 10000), Is.True, "Rendering for the opened source file should complete.");
 			session.ImageRenderer = renderer;
@@ -534,7 +534,7 @@ class SessionRenderingInterruptionTests : BaseTests
 	{
 		// open source file
 		var filePath = this.GenerateSourceFile();
-		session.OpenSourceFileCommand.Execute(filePath);
+		session.OpenSourceFileCommand.Execute(new Session.SourceFileParam { FileName = filePath });
 		Assert.That(await this.WaitForPropertyAsync(session, nameof(Session.IsSourceOpened), true, 5000), Is.True, "Cannot open source file.");
 
 		// wait for the rendering requested by opening the file to complete before selecting the gate renderer, so that selecting it is not an interruption itself

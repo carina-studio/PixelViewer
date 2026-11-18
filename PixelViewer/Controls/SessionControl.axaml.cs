@@ -115,7 +115,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	readonly ContextMenu alignToIntegerMenu;
 	Screen? attachedScreen;
 	Avalonia.Controls.Window? attachedWindow;
-	readonly ObservableCommandState<string> canOpenSourceFile = new();
+	readonly ObservableCommandState<Session.SourceFileParam> canOpenSourceFile = new();
 	readonly ObservableCommandState<string> canSaveAsNewProfile = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveFilteredImage = new();
 	readonly ObservableCommandState<Session.ImageSavingParams> canSaveRenderedImage = new();
@@ -975,7 +975,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 		// attach
 		session.ImageSavingCompleted += this.OnImageSavingCompleted;
 		session.PropertyChanged += this.OnSessionPropertyChanged;
-		this.canOpenSourceFile.Bind(session.OpenSourceFileCommand, "");
+		this.canOpenSourceFile.Bind(session.OpenSourceFileCommand, new Session.SourceFileParam { FileName = "" });
 		this.canSaveAsNewProfile.Bind(session.SaveAsNewProfileCommand, "");
 		this.canSaveFilteredImage.Bind(session.SaveFilteredImageCommand, new Session.ImageSavingParams());
 		this.canSaveProfile.Bind(session.SaveProfileCommand);
@@ -2096,10 +2096,10 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			{
 				var index = sequenceWorkspace.Sessions.IndexOf(session);
 				var newSession = sequenceWorkspace.CreateAndAttachSession(index >= 0 ? index + 1 : sequenceWorkspace.Sessions.Count);
-				newSession.OpenSourceFilesCommand.TryExecute(fileNames);
+				newSession.OpenSourceFilesCommand.TryExecute(new Session.SourceFilesParam { FileNames = fileNames });
 			}
 			else
-				session.OpenSourceFilesCommand.TryExecute(fileNames);
+				session.OpenSourceFilesCommand.TryExecute(new Session.SourceFilesParam { FileNames = fileNames });
 			return;
 		}
 
@@ -2134,7 +2134,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 				workspace.CreateAndAttachSession(independentIndex++, fileName, profile);
 			else
 			{
-				session.OpenSourceFileCommand.TryExecute(fileName);
+				session.OpenSourceFileCommand.TryExecute(new Session.SourceFileParam { FileName = fileName });
 				session.Profile = profile;
 				isCurrentSessionUsed = true;
 			}
@@ -2149,14 +2149,15 @@ class SessionControl : UserControl<IAppSuiteApplication>
 			return;
 		}
 		var command = session.OpenSourceFileCommand;
-		if (!command.CanExecute(fileName))
+		var param = new Session.SourceFileParam { FileName = fileName };
+		if (!command.CanExecute(param))
 		{
 			Logger.LogError("Cannot change source file in current state");
 			return;
 		}
 
 		// open file
-		command.Execute(fileName);
+		command.Execute(param);
 	}
 
 

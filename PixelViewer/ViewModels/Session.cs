@@ -232,7 +232,31 @@ class Session : ViewModel<IAppSuiteApplication>
 			session.ReleaseRenderedImageMemoryUsage(this);
 		}
 	}
-	
+
+
+	/// <summary>
+	/// Parameters of opening a source file.
+	/// </summary>
+	public class SourceFileParam
+	{
+		/// <summary>
+		/// Name of the file.
+		/// </summary>
+		public required string FileName { get; init; }
+	}
+
+
+	/// <summary>
+	/// Parameters of opening multiple source files as a single frame sequence.
+	/// </summary>
+	public class SourceFilesParam
+	{
+		/// <summary>
+		/// Names of the files, one per frame.
+		/// </summary>
+		public required IList<string> FileNames { get; init; }
+	}
+
 
 	// Buffer for a demosaicing algorithm to keep its own intermediate result. The content is meaningless outside a single demosaicing, only the allocation is kept so that a burst of renderings reuses it instead of allocating a large array again and again.
 	class WorkingBuffer : BaseDisposable
@@ -1106,8 +1130,8 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (this.canMoveToPreviousFrame.Value)
 				--this.FrameNumber;
 		}, this.canMoveToPreviousFrame);
-		this.OpenSourceFileCommand = new Command<string>(filePath => _ = this.OpenSourceFile(filePath), this.canOpenSource);
-		this.OpenSourceFilesCommand = new Command<IList<string>>(fileNames => _ = this.OpenSourceFiles(fileNames), this.canOpenSource);
+		this.OpenSourceFileCommand = new Command<SourceFileParam>(param => _ = this.OpenSourceFile(param), this.canOpenSource);
+		this.OpenSourceFilesCommand = new Command<SourceFilesParam>(param => _ = this.OpenSourceFiles(param), this.canOpenSource);
 		this.PlayFramesCommand = new Command(this.TogglePlayingFrames, this.canPlayFrames);
 		this.RenderImageCommand = new Command(() => _ = this.ClearAndRenderImageAsync(), this.GetValueAsObservable(IsSourceOpenedProp));
 		this.ResetBrightnessAdjustmentCommand = new Command(this.ResetBrightnessAdjustment, this.canResetBrightnessAdjustment);
@@ -4714,10 +4738,11 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
     // Open given file as image data source.
-    async Task OpenSourceFile(string? fileName)
+    async Task OpenSourceFile(SourceFileParam? param)
 	{
-		if (fileName is null)
+		if (param is null)
 			return;
+		var fileName = param.FileName;
 		await this.OpenSourceCore(fileName, () => Task.Run<IImageDataSource?>(() =>
 		{
 			try
@@ -4737,14 +4762,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	/// <summary>
 	/// Open multiple files as a single frame sequence which can be viewed frame-by-frame or played like a video.
 	/// </summary>
-	/// <param name="fileNames">Names of files, one per frame.</param>
-	public async Task OpenSourceFiles(IList<string>? fileNames)
+	/// <param name="param">Parameters of opening the files.</param>
+	public async Task OpenSourceFiles(SourceFilesParam? param)
 	{
+		var fileNames = param?.FileNames;
 		if (fileNames is null || fileNames.Count == 0)
 			return;
 		if (fileNames.Count == 1)
 		{
-			await this.OpenSourceFile(fileNames[0]);
+			await this.OpenSourceFile(new SourceFileParam { FileName = fileNames[0] });
 			return;
 		}
 		var sortedFiles = FileSequenceImageDataSource.SortFiles(fileNames);
@@ -4883,13 +4909,13 @@ class Session : ViewModel<IAppSuiteApplication>
 
 
 	/// <summary>
-	/// Command for opening source file.
+	/// Command for opening source file. The parameter is <see cref="SourceFileParam"/>.
 	/// </summary>
 	public ICommand OpenSourceFileCommand { get; }
 
 
 	/// <summary>
-	/// Command for opening multiple files as a single frame sequence. The parameter is <see cref="IList{String}"/>.
+	/// Command for opening multiple files as a single frame sequence. The parameter is <see cref="SourceFilesParam"/>.
 	/// </summary>
 	public ICommand OpenSourceFilesCommand { get; }
 
@@ -6724,7 +6750,7 @@ class Session : ViewModel<IAppSuiteApplication>
 		// open source file
 		if (fileName is not null)
 		{
-			await this.OpenSourceFile(fileName);
+			await this.OpenSourceFile(new SourceFileParam { FileName = fileName });
 			if (!this.IsSourceOpened)
 				this.Logger.LogError("Unable to restore source file '{fileName}'", fileName);
 		}
