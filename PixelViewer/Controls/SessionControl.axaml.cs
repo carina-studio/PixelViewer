@@ -2042,7 +2042,7 @@ class SessionControl : UserControl<IAppSuiteApplication>
 	// Open the given files. When multiple files are selected the user is asked whether to view them
 	// independently (one session per file) or play them as a single frame sequence. The files replace the
 	// source of the current session unless a new session is preferred, such as opening files by dragging and dropping.
-	async Task OpenFilesAsync(IList<string> fileNames, bool preferNewSession)
+	internal async Task OpenFilesAsync(IList<string> fileNames, bool preferNewSession)
 	{
 		// check state
 		if (fileNames.Count == 0 || this.attachedWindow == null)

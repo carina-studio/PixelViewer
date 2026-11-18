@@ -108,6 +108,10 @@ namespace Carina.PixelViewer
 		static readonly SettingKey<string> LegacyYuvConversionModeKey = new("YuvConversionMode", "");
 
 
+		// Fields.
+		bool isLaunchFilePathTaken;
+
+
 		// Constructor.
 		public App()
         {
@@ -168,12 +172,11 @@ namespace Carina.PixelViewer
 		protected override CarinaStudio.AppSuite.Controls.MainWindow OnCreateMainWindow() => new MainWindow();
 
 
-		// Create view-model for main window.
+		// Create view-model for main window, the file given when launching is opened by the main window after closing its initial dialogs.
 		protected override ViewModel OnCreateMainWindowViewModel(JsonElement? savedState) => new Workspace(savedState).Also(it =>
 		{
-			this.LaunchOptions.TryGetValue(FilePathKey, out var filePath);
-			if (filePath != null || it.Sessions.IsEmpty())
-				it.ActivatedSession = it.CreateAndAttachSession((filePath as string)?.Let(path => new Session.SourceFileParam { FileName = path }));
+			if (it.Sessions.IsEmpty())
+				it.ActivatedSession = it.CreateAndAttachSession();
 		});
 
 
@@ -349,18 +352,16 @@ namespace Carina.PixelViewer
 			if (filePath == null || this.MainWindows.IsEmpty())
 				this.ShowMainWindowAsync();
 
-			// open file
+			// open file through the same flow as opening files by user
 			if (filePath != null)
 			{
-				if (this.MainWindows[0].DataContext is Workspace workspace)
+				if (this.MainWindows[0] is MainWindow mainWindow)
 				{
-					var emptySession = workspace.Sessions.FirstOrDefault(it => string.IsNullOrEmpty(it.SourceFileName));
-					if (emptySession == null || !emptySession.OpenSourceFileCommand.TryExecute(new Session.SourceFileParam { FileName = filePath }))
-						workspace.CreateAndAttachSession(new Session.SourceFileParam { FileName = filePath });
-					this.MainWindows[0].ActivateAndBringToFront();
+					_ = mainWindow.OpenFilesAsync([ filePath ]);
+					mainWindow.ActivateAndBringToFront();
 				}
 				else
-					this.Logger.LogError("No main window or workspace to handle new instance");
+					this.Logger.LogError("No main window to handle new instance");
 			}
 		}
 
@@ -730,6 +731,16 @@ namespace Carina.PixelViewer
 				SettingKeys = keys,
 				Settings = this.Configuration,
 			}.ShowDialog(this.LatestActiveMainWindow);
+		}
+
+
+		// Take the file given when launching, which is returned only once so that it is opened by one main window.
+		internal string? TakeLaunchFilePath()
+		{
+			if (this.isLaunchFilePathTaken)
+				return null;
+			this.isLaunchFilePathTaken = true;
+			return this.LaunchOptions.TryGetValue(FilePathKey, out var filePath) ? filePath as string : null;
 		}
 
 

@@ -4,6 +4,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.LogicalTree;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Carina.PixelViewer.Controls;
@@ -20,10 +21,12 @@ using Key = Avalonia.Input.Key;
 using KeyEventArgs = Avalonia.Input.KeyEventArgs;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using AsTabControl = CarinaStudio.AppSuite.Controls.TabControl;
@@ -61,6 +64,7 @@ namespace Carina.PixelViewer
 		readonly AsTabControl mainTabControl;
 		readonly ObservableList<TabItem> mainTabItems = new();
 		readonly NotificationPresenter notificationPresenter;
+		readonly List<string> pendingFilesToOpen = [];
 		readonly ScheduledAction relayoutContentAction;
 		readonly ScheduledAction showTaskbarIconProgressAction;
 		readonly ScheduledAction updateTitleBarAction;
@@ -255,6 +259,25 @@ namespace Carina.PixelViewer
 				}
 				_ = workspace.DetachAndCloseSession(session);
 			});
+		}
+
+
+		// Show the initial dialogs of PixelViewer, then open the files requested before closing the initial dialogs and the file given when launching.
+		async Task CompleteInitialDialogsAsync()
+		{
+			// show dialogs
+			await this.ShowPixelViewerInitialDialogs();
+			if (this.IsClosed || this.Application.IsShutdownStarted)
+				return;
+
+			// collect files to open
+			var fileNames = new List<string>(this.pendingFilesToOpen);
+			this.pendingFilesToOpen.Clear();
+			(this.Application as App)?.TakeLaunchFilePath()?.Let(fileNames.Add);
+
+			// open files
+			if (fileNames.IsNotEmpty())
+				await this.OpenFilesAsync(fileNames);
 		}
 
 
@@ -655,7 +678,7 @@ namespace Carina.PixelViewer
 		protected override void OnInitialDialogsClosed()
 		{
 			base.OnInitialDialogsClosed();
-			_ = this.ShowPixelViewerInitialDialogs();
+			_ = this.CompleteInitialDialogsAsync();
 		}
 
 
@@ -904,6 +927,62 @@ namespace Carina.PixelViewer
 					this.DetachFromActivatedSession();
 			}
         }
+
+
+		/// <summary>
+		/// Open files in an empty tab through the same flow as opening files by user. The files are opened after closing the initial dialogs.
+		/// </summary>
+		/// <param name="fileNames">Names of files to open.</param>
+		/// <returns>Task of opening files.</returns>
+		public async Task OpenFilesAsync(IList<string> fileNames)
+		{
+			// check state
+			if (fileNames.IsEmpty() || this.IsClosed || this.DataContext is not Workspace workspace)
+				return;
+
+			// open files after closing the initial dialogs
+			if (!this.AreInitialDialogsClosed)
+			{
+				this.pendingFilesToOpen.AddRange(fileNames);
+				return;
+			}
+
+			// select an empty session, or create one
+			var session = workspace.Sessions.FirstOrDefault(it => string.IsNullOrEmpty(it.SourceFileName)) ?? workspace.CreateAndAttachSession();
+			workspace.ActivatedSession = session;
+
+			// find the control of the session
+			var tabIndex = this.FindMainTabItemIndex(session);
+			if (tabIndex < 0 || this.mainTabItems[tabIndex].Content is not SessionControl sessionControl)
+			{
+				this.Logger.LogError("No control of session to open {count} file(s)", fileNames.Count);
+				return;
+			}
+
+			// wait for attaching the control to the window, which is needed to show dialogs
+			if (!((ILogical)sessionControl).IsAttachedToLogicalTree)
+			{
+				var attachingCompletionSource = new TaskCompletionSource();
+				void OnAttachedToLogicalTree(object? sender, LogicalTreeAttachmentEventArgs e) => attachingCompletionSource.TrySetResult();
+				sessionControl.AttachedToLogicalTree += OnAttachedToLogicalTree;
+				try
+				{
+					await attachingCompletionSource.Task.WaitAsync(TimeSpan.FromSeconds(5), CancellationToken.None);
+				}
+				catch (TimeoutException)
+				{
+					this.Logger.LogError("Timeout waiting for attaching control of session to open {count} file(s)", fileNames.Count);
+					return;
+				}
+				finally
+				{
+					sessionControl.AttachedToLogicalTree -= OnAttachedToLogicalTree;
+				}
+			}
+
+			// open files
+			await sessionControl.OpenFilesAsync(fileNames, preferNewSession: false);
+		}
 
 
 		// Refresh headers of native menu items.
