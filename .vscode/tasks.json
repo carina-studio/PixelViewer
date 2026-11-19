@@ -8,20 +8,8 @@
             "args": [
                 "build",
                 "${workspaceFolder}/PixelViewer/PixelViewer.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "label": "publish",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "publish",
-                "${workspaceFolder}/PixelViewer/PixelViewer.csproj",
-                "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "-c",
+                "Debug"
             ],
             "problemMatcher": "$msCompile"
         },
