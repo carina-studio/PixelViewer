@@ -34,6 +34,10 @@ enum ImageDataCompression
 	/// </summary>
 	Orf,
 	/// <summary>
+	/// Data of RAF by Fujifilm, which is uncompressed, packed or compressed in one of several layouts as described by the IFD of raw data in the file.
+	/// </summary>
+	Raf,
+	/// <summary>
 	/// Data of RW2 by Panasonic, which is packed or compressed as selected by the format of raw data in the file.
 	/// </summary>
 	Rw2,
