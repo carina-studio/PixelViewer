@@ -2,7 +2,14 @@
  ---
 
 ## New Features
-+ Added support for `YUV420 (8-bit, MIPI)`, `YUV420 (Legacy 8-bit, MIPI)`, `YUV420 (10-bit, MIPI)`, `YUV422 (10-bit, MIPI)`, `Bayer Pattern (10-bit, Packed)`, `Bayer Pattern (12-bit, Packed)` and `Bayer Pattern (14-bit, Packed)` formats.
++ Added image formats:
+    + `Bayer Pattern (10-bit, Packed)`
+    + `Bayer Pattern (12-bit, Packed)`
+    + `Bayer Pattern (14-bit, Packed)`
+    + `YUV420 (8-bit, MIPI)`
+    + `YUV420 (10-bit, MIPI)`
+    + `YUV420 (Legacy 8-bit, MIPI)`
+    + `YUV422 (10-bit, MIPI)`
 + Added support for specifying black and white levels of `L16` format.
 + Added support for specifying insets of each edge of image.
 + Added support for color pre-correction of RGB and ARGB formats.
