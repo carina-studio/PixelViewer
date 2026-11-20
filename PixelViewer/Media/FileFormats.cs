@@ -26,6 +26,7 @@ static class FileFormats
     static volatile FileFormat? nef;
     static volatile FileFormat? orf;
     static volatile FileFormat? png;
+    static volatile FileFormat? raf;
     static volatile FileFormat? rawBgra;
     static volatile FileFormat? rw2;
     static volatile FileFormat? tiff;
@@ -102,6 +103,7 @@ static class FileFormats
         nef = Register(new FileFormat(app, "Nef", [ ".nef", ".nrw" ], isRawPhoto: true));
         orf = Register(new FileFormat(app, "Orf", [ ".orf", ".ori" ], isRawPhoto: true));
         png = Register(new FileFormat(app, "Png", [ ".png" ]));
+        raf = Register(new FileFormat(app, "Raf", [ ".raf" ], isRawPhoto: true));
         rawBgra = Register(new FileFormat(app, "RawBgra", [ ".bgra" ]));
         rw2 = Register(new FileFormat(app, "Rw2", [ ".rw2", ".rwl" ], isRawPhoto: true));
         tiff = Register(new FileFormat(app, "Tiff", [ ".tif", ".tiff" ]));
@@ -132,6 +134,12 @@ static class FileFormats
     /// Portable Network Graphic (PNG).
     /// </summary>
     public static FileFormat Png => png ?? throw new InvalidOperationException("File format is not ready yet.");
+
+
+    /// <summary>
+    /// Fujifilm RAW (RAF).
+    /// </summary>
+    public static FileFormat Raf => raf ?? throw new InvalidOperationException("File format is not ready yet.");
 
 
     /// <summary>
