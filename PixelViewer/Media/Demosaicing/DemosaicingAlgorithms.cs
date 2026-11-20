@@ -98,6 +98,15 @@ static partial class DemosaicingAlgorithms
 
 
 	/// <summary>
+	/// Select the <see cref="DemosaicingAlgorithm"/> which a session prefers for an image rendered with the given pattern of Bayer Filter, when the algorithm named by the settings cannot be used for it.
+	/// </summary>
+	/// <param name="bayerPattern">Pattern of Bayer Filter which the image is rendered with.</param>
+	/// <returns>Preferred algorithm for the pattern.</returns>
+	/// <remarks>The algorithm is allowed to be one which the current build or the current state of the application cannot run, in which case the session falls back to <see cref="Default"/> instead. It is <see cref="Preferred"/> for every pattern.</remarks>
+	public static DemosaicingAlgorithm SelectPreferred(BayerPattern bayerPattern) => Preferred;
+
+
+	/// <summary>
 	/// Try getting <see cref="DemosaicingAlgorithm"/> with given identifier.
 	/// </summary>
 	/// <param name="id">Identifier of algorithm.</param>

@@ -7466,12 +7466,15 @@ class Session : ViewModel<IAppSuiteApplication>
 	}
 
 
-	// Select the default algorithm to replace the one which cannot be used for the given bayer pattern. The algorithm named by the settings comes first, then the one preferred for a new session, and Bypass is the last resort because it supports every pattern by definition.
+	// Select the default algorithm to replace the one which cannot be used for the given bayer pattern. The algorithm named by the settings comes first, then the one preferred for the pattern, then the default one, and Bypass is the last resort because it supports every pattern by definition.
 	DemosaicingAlgorithm SelectDefaultDemosaicingAlgorithm(BayerPattern bayerPattern)
 	{
 		Media.Demosaicing.DemosaicingAlgorithms.TryGetById(this.Settings.GetValueOrDefault(SettingKeys.DefaultDemosaicingAlgorithm), out var algorithm);
 		if (this.CanUseDemosaicingAlgorithmAsDefault(algorithm, bayerPattern))
 			return algorithm;
+		var preferredAlgorithm = Media.Demosaicing.DemosaicingAlgorithms.SelectPreferred(bayerPattern);
+		if (this.CanUseDemosaicingAlgorithmAsDefault(preferredAlgorithm, bayerPattern))
+			return preferredAlgorithm;
 		var defaultAlgorithm = Media.Demosaicing.DemosaicingAlgorithms.Default;
 		if (this.CanUseDemosaicingAlgorithmAsDefault(defaultAlgorithm, bayerPattern))
 			return defaultAlgorithm;
