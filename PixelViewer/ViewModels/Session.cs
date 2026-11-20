@@ -7982,6 +7982,23 @@ class Session : ViewModel<IAppSuiteApplication>
 			if (!algorithm.IsBayerPatternSupported(bayerPattern) || !allAlgorithms.Contains(algorithm))
 				this.demosaicingAlgorithms.RemoveAt(i);
 		}
+
+		// follow the order of the registry, which renaming a user-defined algorithm changes, without moving the selected algorithm because the combo box loses the selection of an item being moved, the algorithms in front of it are moved behind it instead
+		var selectedAlgorithm = this.DemosaicingAlgorithm;
+		var index = 0;
+		foreach (var algorithm in allAlgorithms)
+		{
+			if (!algorithm.IsBayerPatternSupported(bayerPattern))
+				continue;
+			while (this.demosaicingAlgorithms[index] != algorithm)
+			{
+				if (algorithm != selectedAlgorithm)
+					this.demosaicingAlgorithms.Move(this.demosaicingAlgorithms.IndexOf(algorithm), index);
+				else
+					this.demosaicingAlgorithms.Move(index, this.demosaicingAlgorithms.IndexOf(algorithm));
+			}
+			++index;
+		}
 	}
 
 
