@@ -49,18 +49,22 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Constants. Each minimum ratio is placed slightly below the lowest ratio measured from the built-in algorithms over both buffer arrangements, so that an algorithm interpolating even worse is reported instead of being accepted silently. Which algorithm reaches that lowest ratio is not the same one for every content, so it cannot be assumed to be bilinear, and none of the 6 ratios can be derived from another:
+	// Constants. Each minimum ratio is placed slightly below the lowest ratio measured from the built-in algorithms over both buffer arrangements, so that an algorithm interpolating even worse is reported instead of being accepted silently. Which algorithm reaches that lowest ratio is not the same one for every content, so it cannot be assumed to be bilinear, and none of the 9 ratios can be derived from another:
 	//   correlated 2x2 - bilinear, 38.58 dB          saturated 2x2 - GBTF, 37.47 dB          edges 2x2 - bilinear, 22.72 dB
 	//   correlated 4x4 - MalvarHeCutler in place, 26.88 dB    saturated 4x4 - GBTF in place, 29.22 dB    edges 4x4 - MalvarHeCutler in place, 17.89 dB
+	//   correlated X-Trans - bilinear, 34.32 dB      saturated X-Trans - bilinear, 38.87 dB    edges X-Trans - bilinear, 21.71 dB
 	// The saturated content is where an algorithm interpolating the difference between 2 channels loses more than a plain average does, because that difference stops being smooth: GBTF falls to 37.47 dB there against bilinear's 44.02. The edge content is the opposite case and the one which pays the directional decision back, GBTF reaching 35.62 dB against MalvarHeCutler's 27.43. On a 4x4 pattern the lowest ratio comes from working in place, where the mosaic is rearranged without interpolating across the blocks. The ratios of one algorithm spread by no more than 0.7 dB over the patterns of one format and size, which is what makes the patterns comparable to each other, while the 3 sizes differ by up to 1.6 dB because the ones which are not a multiple of the color block give the border a larger share of the image. One of the sizes is taller than the band which an algorithm processing the image band by band covers at once, so the rows where 2 bands meet are covered as well. Measure them again after changing the content of the ground truth.
 	const int EdgeRingPeriod = 9;
 	const double EdgeWidth = 2.0;
 	const double MinCorrelated2x2PeakSignalNoiseRatio = 37;
 	const double MinCorrelated4x4PeakSignalNoiseRatio = 26;
+	const double MinCorrelatedXTransPeakSignalNoiseRatio = 33;
 	const double MinEdges2x2PeakSignalNoiseRatio = 21;
 	const double MinEdges4x4PeakSignalNoiseRatio = 17;
+	const double MinEdgesXTransPeakSignalNoiseRatio = 21;
 	const double MinSaturated2x2PeakSignalNoiseRatio = 36;
 	const double MinSaturated4x4PeakSignalNoiseRatio = 28;
+	const double MinSaturatedXTransPeakSignalNoiseRatio = 38;
 	const int PeakSignalNoiseRatioBorderSize = 4;
 
 
@@ -406,12 +410,18 @@ class DemosaicingAlgorithmTests : BaseTests
 	}
 
 
-	// Select the ratio which an algorithm must reach on the given content and pattern. None of the 4 ratios can be derived from another: the saturated content is not uniformly harder than the correlated one, it is harder for an algorithm which interpolates the difference between 2 channels and easier for one which simply averages, so each ratio is measured on its own.
-	static double SelectMinPeakSignalNoiseRatio(GroundTruthContent content, BayerPattern bayerPattern) => content switch
+	// Select the ratio which an algorithm must reach on the given content and pattern. None of the ratios can be derived from another: the saturated content is not uniformly harder than the correlated one, it is harder for an algorithm which interpolates the difference between 2 channels and easier for one which simply averages, so each ratio is measured on its own. X-Trans has ratios of its own because it interpolates far better than a 4x4 pattern does, so the ratios of 4x4 would let an algorithm get much worse on it unnoticed.
+	static double SelectMinPeakSignalNoiseRatio(GroundTruthContent content, BayerPattern bayerPattern) => (content, bayerPattern.BlockWidth) switch
 	{
-		GroundTruthContent.SaturatedColors => bayerPattern.BlockWidth > 2 ? MinSaturated4x4PeakSignalNoiseRatio : MinSaturated2x2PeakSignalNoiseRatio,
-		GroundTruthContent.SharpEdges => bayerPattern.BlockWidth > 2 ? MinEdges4x4PeakSignalNoiseRatio : MinEdges2x2PeakSignalNoiseRatio,
-		_ => bayerPattern.BlockWidth > 2 ? MinCorrelated4x4PeakSignalNoiseRatio : MinCorrelated2x2PeakSignalNoiseRatio,
+		(GroundTruthContent.SaturatedColors, 2) => MinSaturated2x2PeakSignalNoiseRatio,
+		(GroundTruthContent.SaturatedColors, 4) => MinSaturated4x4PeakSignalNoiseRatio,
+		(GroundTruthContent.SaturatedColors, _) => MinSaturatedXTransPeakSignalNoiseRatio,
+		(GroundTruthContent.SharpEdges, 2) => MinEdges2x2PeakSignalNoiseRatio,
+		(GroundTruthContent.SharpEdges, 4) => MinEdges4x4PeakSignalNoiseRatio,
+		(GroundTruthContent.SharpEdges, _) => MinEdgesXTransPeakSignalNoiseRatio,
+		(_, 2) => MinCorrelated2x2PeakSignalNoiseRatio,
+		(_, 4) => MinCorrelated4x4PeakSignalNoiseRatio,
+		_ => MinCorrelatedXTransPeakSignalNoiseRatio,
 	};
 
 

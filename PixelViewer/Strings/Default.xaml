@@ -71,6 +71,7 @@
 	<sys:String x:Key="String/BayerPattern.GRBG_4x4">GRBG (4x4)</sys:String>
 	<sys:String x:Key="String/BayerPattern.RGGB_2x2">RGGB (2x2)</sys:String>
 	<sys:String x:Key="String/BayerPattern.RGGB_4x4">RGGB (4x4)</sys:String>
+	<sys:String x:Key="String/BayerPattern.XTrans_6x6">X-Trans (6x6)</sys:String>
 
 	<!-- ByteOrdering -->
 	<sys:String x:Key="String/ByteOrdering.BigEndian">Big-Endian</sys:String>

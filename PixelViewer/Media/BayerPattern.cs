@@ -37,4 +37,9 @@ public enum BayerPattern
     /// 4x4 RGGB.
     /// </summary>
     RGGB_4x4,
+    /// <summary>
+    /// 6x6 X-Trans.
+    /// </summary>
+    /// <remarks>Only the phase which starts with a 2x2 green block is defined, so the data of an image in any other of the 18 phases of X-Trans has to be shifted to it.</remarks>
+    XTrans_6x6,
 }

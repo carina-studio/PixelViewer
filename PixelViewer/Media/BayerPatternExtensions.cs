@@ -141,5 +141,16 @@ static class BayerPatternExtensions
 				[ GreenColorComponent, GreenColorComponent, BlueColorComponent, BlueColorComponent ],
 			]
 		},
+		{
+			BayerPattern.XTrans_6x6,
+			[
+				[ GreenColorComponent, GreenColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent, BlueColorComponent ],
+				[ GreenColorComponent, GreenColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent, RedColorComponent ],
+				[ BlueColorComponent, RedColorComponent, GreenColorComponent, RedColorComponent, BlueColorComponent, GreenColorComponent ],
+				[ GreenColorComponent, GreenColorComponent, BlueColorComponent, GreenColorComponent, GreenColorComponent, RedColorComponent ],
+				[ GreenColorComponent, GreenColorComponent, RedColorComponent, GreenColorComponent, GreenColorComponent, BlueColorComponent ],
+				[ RedColorComponent, BlueColorComponent, GreenColorComponent, BlueColorComponent, RedColorComponent, GreenColorComponent ],
+			]
+		},
 	};
 }
