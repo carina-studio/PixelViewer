@@ -7955,9 +7955,22 @@ class Session : ViewModel<IAppSuiteApplication>
 	// Update the list of demosaicing algorithms which support the current bayer pattern.
 	void UpdateDemosaicingAlgorithms()
 	{
-		// select another algorithm before the selected one is removed from the list, otherwise the selection of the combo box is reset to null
+		// insert the algorithms which are supported but not listed yet, each right after the listed algorithm preceding it in the registry so that Bypass is still the first algorithm
 		var bayerPattern = this.BayerPattern;
 		var allAlgorithms = Media.Demosaicing.DemosaicingAlgorithms.All;
+		DemosaicingAlgorithm? previousAlgorithm = null;
+		foreach (var algorithm in allAlgorithms)
+		{
+			if (!this.demosaicingAlgorithms.Contains(algorithm))
+			{
+				if (!algorithm.IsBayerPatternSupported(bayerPattern))
+					continue;
+				this.demosaicingAlgorithms.Insert(previousAlgorithm is null ? 0 : this.demosaicingAlgorithms.IndexOf(previousAlgorithm) + 1, algorithm);
+			}
+			previousAlgorithm = algorithm;
+		}
+
+		// select another algorithm after the new one is listed and before the selected one is removed from the list, otherwise the selection of the combo box is reset to null
 		var demosaicingAlgorithm = this.DemosaicingAlgorithm;
 		if (!demosaicingAlgorithm.IsBayerPatternSupported(bayerPattern) || !allAlgorithms.Contains(demosaicingAlgorithm))
 			this.SetValue(DemosaicingAlgorithmProp, this.SelectDefaultDemosaicingAlgorithm(bayerPattern));
@@ -7968,19 +7981,6 @@ class Session : ViewModel<IAppSuiteApplication>
 			var algorithm = this.demosaicingAlgorithms[i];
 			if (!algorithm.IsBayerPatternSupported(bayerPattern) || !allAlgorithms.Contains(algorithm))
 				this.demosaicingAlgorithms.RemoveAt(i);
-		}
-
-		// insert the algorithms which are supported, the order of the registry is kept so that Bypass is still the first algorithm
-		var index = 0;
-		foreach (var algorithm in allAlgorithms)
-		{
-			if (!algorithm.IsBayerPatternSupported(bayerPattern))
-				continue;
-			if (index >= this.demosaicingAlgorithms.Count)
-				this.demosaicingAlgorithms.Add(algorithm);
-			else if (this.demosaicingAlgorithms[index] != algorithm)
-				this.demosaicingAlgorithms.Insert(index, algorithm);
-			++index;
 		}
 	}
 
